@@ -761,15 +761,15 @@ export default function HomePage() {
             <div className="max-w-6xl mx-auto mb-20">
               <div className="space-y-8">
 
-                {/* Row 1: AI Training Data */}
+                {/* Row 1: AI */}
                 <div className="grid md:grid-cols-2 gap-8">
                   <div className="backdrop-blur-sm bg-white/5 border-2 border-red-500/30 rounded-2xl p-8">
-                    <div className="text-red-400 font-bold text-sm uppercase tracking-wider mb-3">Their AI Training Data</div>
-                    <p className="text-2xl text-gray-400 font-medium">Generic multi-sport content</p>
+                    <div className="text-red-400 font-bold text-sm uppercase tracking-wider mb-3">Their AI</div>
+                    <p className="text-2xl text-gray-400 font-medium">No AI capabilities</p>
                   </div>
                   <div className="backdrop-blur-sm bg-white/5 border-2 border-neon-cortex-blue/50 rounded-2xl p-8">
-                    <div className="text-neon-cortex-blue font-bold text-sm uppercase tracking-wider mb-3">Our AI Training Data</div>
-                    <p className="text-2xl text-white font-black">100% baseball-specific content</p>
+                    <div className="text-neon-cortex-blue font-bold text-sm uppercase tracking-wider mb-3">Our AI</div>
+                    <p className="text-2xl text-white font-black">Learns from every swing, journal entry, and workout—continuously improving with countless baseball-specific data points</p>
                   </div>
                 </div>
 
