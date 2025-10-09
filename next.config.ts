@@ -2,8 +2,15 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  outputFileTracingRoot: __dirname,
   images: {
-    domains: ['kuswlvbjplkgrqlmqtok.supabase.co'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'kuswlvbjplkgrqlmqtok.supabase.co',
+      },
+    ],
+    qualities: [75, 90, 100],
   },
 };
 
