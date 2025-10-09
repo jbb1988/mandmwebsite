@@ -88,37 +88,28 @@ export function AppScreenshotCarousel() {
               key={index}
               className="flex-[0_0_100%] sm:flex-[0_0_50%] lg:flex-[0_0_33.333%] min-w-0 px-2"
             >
-              {/* iPhone Frame */}
               <motion.div
                 className="relative mx-auto"
-                style={{ maxWidth: '320px' }}
+                style={{ maxWidth: '400px' }}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
               >
-                {/* Phone Bezel */}
-                <div className="relative rounded-[2.5rem] overflow-hidden shadow-2xl border-[12px] border-gray-900 bg-gray-900">
-                  {/* Notch */}
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 w-40 h-6 bg-gray-900 rounded-b-3xl z-10" />
-
-                  {/* Screenshot */}
-                  <div className="relative aspect-[9/19.5] bg-black">
-                    <Image
-                      src={screenshot.src}
-                      alt={screenshot.alt}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                    />
-                  </div>
-
-                  {/* Home Indicator */}
-                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/30 rounded-full" />
+                {/* Screenshot with transparent background support */}
+                <div className="relative w-full" style={{ minHeight: '500px' }}>
+                  <Image
+                    src={screenshot.src}
+                    alt={screenshot.alt}
+                    width={400}
+                    height={600}
+                    className="object-contain w-full h-auto"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  />
                 </div>
 
                 {/* Glow Effect */}
-                <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-br from-neon-cortex-blue/20 to-solar-surge-orange/20 blur-2xl -z-10" />
+                <div className="absolute inset-0 bg-gradient-to-br from-neon-cortex-blue/10 to-solar-surge-orange/10 blur-3xl -z-10" />
               </motion.div>
             </div>
           ))}
