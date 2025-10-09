@@ -71,7 +71,7 @@ export default function HomePage() {
       icon: Zap,
       iconImage: '/assets/images/game_lab_icon copy.png',
       color: 'blue',
-      image: '/assets/images/gameflow.png',
+      image: '/assets/images/game-lab.png',
       audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/gamelab_ob.mp3',
       tagline: 'Play Smarter. Not Harder.',
       description: 'Train Your Baseball IQ. Master Every Situation.',
