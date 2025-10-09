@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { LiquidGlass } from '@/components/LiquidGlass';
@@ -11,6 +11,27 @@ export default function HomePage() {
   const [activeFeature, setActiveFeature] = useState<any>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (activeFeature) {
+      // Save current scroll position
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+
+      return () => {
+        // Restore scroll position when modal closes
+        document.body.style.position = '';
+        document.body.style.top = '';
+        document.body.style.width = '';
+        document.body.style.overflow = '';
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [activeFeature]);
 
   const handleCloseModal = () => {
     if (audioElement) {
@@ -564,12 +585,14 @@ export default function HomePage() {
             onClick={handleCloseModal}
           >
             <div
-              className="relative max-w-7xl w-full max-h-[95vh] overflow-y-auto backdrop-blur-xl bg-gradient-to-br from-white/10 via-white/5 to-transparent p-10 rounded-3xl border-2 shadow-[0_8px_60px_rgba(14,165,233,0.3)]"
+              className="relative max-w-7xl w-full max-h-[95vh] overflow-y-auto backdrop-blur-xl bg-gradient-to-br from-white/10 via-white/5 to-transparent p-10 rounded-3xl border-2 shadow-[0_8px_60px_rgba(14,165,233,0.3)] overscroll-contain"
               style={{
                 borderImage: activeFeature.color === 'blue'
                   ? 'linear-gradient(135deg, #0EA5E9, #06B6D4) 1'
                   : 'linear-gradient(135deg, #F97316, #EA580C) 1',
                 animation: 'scaleIn 0.15s ease-out',
+                touchAction: 'pan-y',
+                WebkitOverflowScrolling: 'touch',
               }}
               onClick={(e) => e.stopPropagation()}
             >
