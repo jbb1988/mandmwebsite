@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import Link from 'next/link';
 import { Check, X, Users, TrendingUp, Award, Sparkles, Calculator, AlertCircle, ChevronDown, Heart, CreditCard, HelpCircle, ArrowRight, Shield } from 'lucide-react';
 
-export default function TeamLicensingPage() {
+function TeamLicensingContent() {
   const searchParams = useSearchParams();
   const [seatCount, setSeatCount] = useState(12);
   const [isLoading, setIsLoading] = useState(false);
@@ -886,5 +886,13 @@ export default function TeamLicensingPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function TeamLicensingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="text-2xl text-text-secondary">Loading...</div></div>}>
+      <TeamLicensingContent />
+    </Suspense>
   );
 }

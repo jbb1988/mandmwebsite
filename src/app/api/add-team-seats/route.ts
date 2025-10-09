@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia',
+  apiVersion: '2024-09-30.acacia',
 });
 
 export async function POST(request: NextRequest) {
@@ -48,23 +48,29 @@ export async function POST(request: NextRequest) {
     // Get customer ID from the subscription
     const customerId = subscription.customer as string;
 
+    // Create a product for the additional seats
+    const product = await stripe.products.create({
+      name: `Mind and Muscle Team License - Additional Seats`,
+      description: `Additional ${additionalSeats} seats at locked-in rate of $${lockedInRate.toFixed(2)}/seat`,
+    });
+
+    // Create a price for the product
+    const price = await stripe.prices.create({
+      product: product.id,
+      currency: 'usd',
+      unit_amount: Math.round(lockedInRate * 100), // Price per seat in cents
+      recurring: {
+        interval: 'year',
+      },
+    });
+
     // Create a NEW separate subscription for the additional seats
     // This way each seat addition has its own 12-month billing cycle
     const newSubscription = await stripe.subscriptions.create({
       customer: customerId,
       items: [
         {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: `Mind and Muscle Team License - Additional Seats`,
-              description: `Additional ${additionalSeats} seats at locked-in rate of $${lockedInRate.toFixed(2)}/seat`,
-            },
-            unit_amount: Math.round(lockedInRate * 100), // Price per seat in cents
-            recurring: {
-              interval: 'year',
-            },
-          },
+          price: price.id,
           quantity: additionalSeats,
         },
       ],

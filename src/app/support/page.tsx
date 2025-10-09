@@ -64,7 +64,7 @@ export default function SupportPage() {
 
       {/* Content */}
       <div className="max-w-4xl mx-auto">
-        <LiquidGlass variant="blue" rounded="3xl" className="p-8 md:p-12">
+        <LiquidGlass variant="blue" rounded="2xl" className="p-8 md:p-12">
           {activeTab === 'contact' && <ContactContent />}
           {activeTab === 'terms' && <TermsContent />}
           {activeTab === 'privacy' && <PrivacyContent />}
