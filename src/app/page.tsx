@@ -320,7 +320,7 @@ export default function HomePage() {
               Every tool an athlete needs — mental toughness, physical mastery, precision coaching, and intelligent recovery — all connected in one seamless system.
             </p>
             <p className="text-base sm:text-lg text-text-secondary max-w-3xl mx-auto">
-              <span className="text-neon-cortex-blue font-semibold">Premium features shown below.</span> Free tier also includes Chatter (team communication), Events (scheduling), Daily Hit (motivation), Dugout Talk (journal), and Game Lab Level 1.
+              <span className="text-neon-cortex-blue font-semibold">Pro features shown below.</span> Free tier also includes Chatter (team communication), Events (scheduling), Daily Hit (motivation), Dugout Talk (journal), and Game Lab Level 1.
             </p>
           </div>
 
@@ -1358,7 +1358,7 @@ export default function HomePage() {
                     {/* App Store Price */}
                     <div className="bg-gradient-to-r from-neon-cortex-blue/20 to-solar-surge-orange/20 border-2 border-neon-cortex-blue/40 rounded-xl px-6 py-3 mb-3 inline-block">
                       <div className="flex items-center gap-3 mb-1">
-                        <span className="text-white font-bold">Individual Premium:</span>
+                        <span className="text-white font-bold">Individual Pro:</span>
                         <span className="text-3xl font-black bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">$119/year</span>
                       </div>
                     </div>
@@ -1455,7 +1455,7 @@ export default function HomePage() {
               </div>
               <LiquidGlass variant="orange" glow={true} className="p-10">
                 <div className="flex items-center justify-between mb-6">
-                <h3 className="text-4xl md:text-5xl font-black">Premium</h3>
+                <h3 className="text-4xl md:text-5xl font-black">Pro</h3>
                 <div className="flex flex-col items-end">
                   <div className="flex items-baseline gap-2">
                     <div className="text-5xl md:text-6xl font-black text-solar-surge-orange drop-shadow-[0_0_24px_rgba(249,115,22,0.6)]">$119</div>
@@ -1507,7 +1507,7 @@ export default function HomePage() {
                 href="/team-licensing"
                 className="block w-full px-12 py-5 text-lg font-semibold font-poppins text-center rounded-xl bg-gradient-to-br from-solar-surge-orange/20 to-solar-surge-orange/10 border border-solar-surge-orange/30 backdrop-blur-liquid transition-all duration-300 hover:from-solar-surge-orange/30 hover:to-solar-surge-orange/15 hover:shadow-liquid-glow-orange hover:border-solar-surge-orange/50 hover:scale-105 active:scale-95"
               >
-                Upgrade to Premium
+                Upgrade to Pro
               </a>
               <p className="text-sm text-center text-text-secondary mt-4">
                 Cancel anytime. 30-day money-back guarantee.
