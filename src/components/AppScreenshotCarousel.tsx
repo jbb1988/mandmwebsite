@@ -8,27 +8,27 @@ import { motion } from 'framer-motion';
 
 const screenshots = [
   {
-    src: '/assets/screenshots/Screenshot 2025-10-09 at 5.21.19 PM-portrait.png',
+    src: '/assets/screenshots/screenshot-1.png',
     alt: 'Mind & Muscle App Screenshot 1',
   },
   {
-    src: '/assets/screenshots/Screenshot 2025-10-09 at 5.21.44 PM-left.png',
+    src: '/assets/screenshots/screenshot-2.png',
     alt: 'Mind & Muscle App Screenshot 2',
   },
   {
-    src: '/assets/screenshots/Screenshot 2025-10-09 at 5.21.44 PM-portrait.png',
+    src: '/assets/screenshots/screenshot-3.png',
     alt: 'Mind & Muscle App Screenshot 3',
   },
   {
-    src: '/assets/screenshots/Screenshot 2025-10-09 at 5.22.06 PM-left.png',
+    src: '/assets/screenshots/screenshot-4.png',
     alt: 'Mind & Muscle App Screenshot 4',
   },
   {
-    src: '/assets/screenshots/Screenshot 2025-10-09 at 5.22.32 PM-portrait.png',
+    src: '/assets/screenshots/screenshot-5.png',
     alt: 'Mind & Muscle App Screenshot 5',
   },
   {
-    src: '/assets/screenshots/Screenshot 2025-10-09 at 5.26.40 PM-right.png',
+    src: '/assets/screenshots/screenshot-6.png',
     alt: 'Mind & Muscle App Screenshot 6',
   },
 ];
