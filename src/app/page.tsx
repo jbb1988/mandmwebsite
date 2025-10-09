@@ -33,6 +33,12 @@ export default function HomePage() {
     }
   }, [activeFeature]);
 
+  // Hide browser chrome (URL bar and navigation) on tap
+  const handleModalTap = () => {
+    // Scroll to trigger browser chrome to hide on mobile
+    window.scrollTo(0, 1);
+  };
+
   const handleCloseModal = () => {
     if (audioElement) {
       audioElement.pause();
@@ -594,7 +600,10 @@ export default function HomePage() {
                 touchAction: 'pan-y',
                 WebkitOverflowScrolling: 'touch',
               }}
-              onClick={(e) => e.stopPropagation()}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleModalTap();
+              }}
             >
               {/* Close Button */}
               <button
