@@ -7,6 +7,21 @@ export const metadata: Metadata = {
   title: 'Mind & Muscle | Elite Sports Training Platform',
   description: 'Transform your athletes with comprehensive mental and physical training. Team licensing, partner programs, and cutting-edge sports performance technology.',
   keywords: ['sports training', 'mental training', 'strength training', 'team licensing', 'athlete development'],
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 5,
+    userScalable: true,
+  },
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#0EA5E9' },
+    { media: '(prefers-color-scheme: dark)', color: '#02124A' },
+  ],
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Mind & Muscle',
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',

@@ -224,8 +224,8 @@ export default function HomePage() {
               </h2>
             </div>
 
-            {/* Main Heading - 64-72px, Tight Leading */}
-            <h1 className="text-[64px] sm:text-[68px] lg:text-[72px] font-black mb-6 leading-[1.1] text-white animate-fadeUp" style={{textShadow: '0 4px 24px rgba(0,0,0,0.9)', animationDelay: '100ms'}}>
+            {/* Main Heading - Mobile-optimized Typography */}
+            <h1 className="text-[40px] sm:text-[56px] md:text-[64px] lg:text-[72px] font-black mb-6 leading-[1.1] text-white animate-fadeUp" style={{textShadow: '0 4px 24px rgba(0,0,0,0.9)', animationDelay: '100ms'}}>
               The only app built exclusively for baseball players. Every feature. Every drill. Every mental toughness tool.
             </h1>
 
@@ -285,7 +285,7 @@ export default function HomePage() {
       </section>
 
       {/* The Complete Performance Ecosystem - Cinematic Section */}
-      <section className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Deep Navy to Black Gradient Background */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#1A1F3A] via-[#0F1123] to-[#1A1F3A]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.6)_100%)]" />
@@ -293,7 +293,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto relative z-10">
           {/* Header */}
           <div className="text-center mb-24">
-            <h2 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight">
+            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight">
               <span className="bg-gradient-to-r from-neon-cortex-blue via-mind-primary to-solar-surge-orange bg-clip-text text-transparent" style={{textShadow: '0 0 60px rgba(14,165,233,0.4)'}}>
                 The Complete Performance Ecosystem.
               </span>
@@ -390,15 +390,16 @@ export default function HomePage() {
                     </p>
 
                     {/* Click Icon */}
-                    <div
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleOpenModal(feature);
                       }}
-                      className="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-white/10 border border-white/30 flex items-center justify-center transition-all cursor-pointer hover:bg-white/20 hover:border-white/50"
+                      className="absolute bottom-4 right-4 w-11 h-11 rounded-full bg-white/10 border border-white/30 flex items-center justify-center transition-all cursor-pointer hover:bg-white/20 hover:border-white/50 active:scale-95"
+                      aria-label={`View details for ${feature.title}`}
                     >
-                      <MousePointerClick className="w-4 h-4 text-white" />
-                    </div>
+                      <MousePointerClick className="w-5 h-5 text-white" />
+                    </button>
                   </div>
                 </div>
               );
@@ -474,15 +475,16 @@ export default function HomePage() {
                     </p>
 
                     {/* Click Icon */}
-                    <div
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleOpenModal(feature);
                       }}
-                      className="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-white/10 border border-white/30 flex items-center justify-center transition-all cursor-pointer hover:bg-white/20 hover:border-white/50"
+                      className="absolute bottom-4 right-4 w-11 h-11 rounded-full bg-white/10 border border-white/30 flex items-center justify-center transition-all cursor-pointer hover:bg-white/20 hover:border-white/50 active:scale-95"
+                      aria-label={`View details for ${feature.title}`}
                     >
-                      <MousePointerClick className="w-4 h-4 text-white" />
-                    </div>
+                      <MousePointerClick className="w-5 h-5 text-white" />
+                    </button>
                   </div>
                 </div>
               );
@@ -568,15 +570,16 @@ export default function HomePage() {
                     </p>
 
                     {/* Click Icon */}
-                    <div
+                    <button
                       onClick={(e) => {
                         e.stopPropagation();
                         handleOpenModal(feature);
                       }}
-                      className="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-white/10 border border-white/30 flex items-center justify-center transition-all cursor-pointer hover:bg-white/20 hover:border-white/50"
+                      className="absolute bottom-4 right-4 w-11 h-11 rounded-full bg-white/10 border border-white/30 flex items-center justify-center transition-all cursor-pointer hover:bg-white/20 hover:border-white/50 active:scale-95"
+                      aria-label={`View details for ${feature.title}`}
                     >
-                      <MousePointerClick className="w-4 h-4 text-white" />
-                    </div>
+                      <MousePointerClick className="w-5 h-5 text-white" />
+                    </button>
                   </div>
                 </div>
               );
@@ -591,7 +594,7 @@ export default function HomePage() {
             onClick={handleCloseModal}
           >
             <div
-              className="relative max-w-7xl w-full max-h-[95vh] overflow-y-auto backdrop-blur-xl bg-gradient-to-br from-white/10 via-white/5 to-transparent p-10 rounded-3xl border-2 shadow-[0_8px_60px_rgba(14,165,233,0.3)] overscroll-contain"
+              className="relative max-w-7xl w-full max-h-[100vh] sm:max-h-[95vh] overflow-y-auto backdrop-blur-xl bg-gradient-to-br from-white/10 via-white/5 to-transparent p-4 sm:p-6 md:p-10 rounded-3xl border-2 shadow-[0_8px_60px_rgba(14,165,233,0.3)] overscroll-contain"
               style={{
                 borderImage: activeFeature.color === 'blue'
                   ? 'linear-gradient(135deg, #0EA5E9, #06B6D4) 1'
@@ -608,9 +611,10 @@ export default function HomePage() {
               {/* Close Button */}
               <button
                 onClick={handleCloseModal}
-                className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center transition-colors"
+                className="absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center transition-colors z-10"
+                aria-label="Close modal"
               >
-                <X className="w-5 h-5" />
+                <X className="w-6 h-6" />
               </button>
 
               {/* Hero Image */}
@@ -645,12 +649,12 @@ export default function HomePage() {
               </div>
 
               {/* Title */}
-              <h2 className="text-4xl md:text-5xl font-black mb-4" style={{textShadow: '0 2px 20px rgba(0,0,0,0.5)'}}>
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4" style={{textShadow: '0 2px 20px rgba(0,0,0,0.5)'}}>
                 {activeFeature.title}
               </h2>
 
               {/* Tagline */}
-              <p className={`text-2xl md:text-3xl font-bold mb-6 ${
+              <p className={`text-xl sm:text-2xl md:text-3xl font-bold mb-6 ${
                 activeFeature.color === 'blue' ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'
               }`} style={{textShadow: '0 0 20px rgba(14,165,233,0.4)'}}>
                 {activeFeature.tagline}
@@ -699,7 +703,7 @@ export default function HomePage() {
               )}
 
               {/* Description */}
-              <div className="text-xl text-gray-300 leading-relaxed whitespace-pre-line">
+              <div className="text-base sm:text-lg md:text-xl text-gray-300 leading-relaxed whitespace-pre-line">
                 {(activeFeature.modalDescription || activeFeature.description).split('\n').map((line: string, i: number) => {
                   // Check if line starts with ** and ends with **
                   if (line.startsWith('**') && line.endsWith('**')) {
@@ -1003,7 +1007,7 @@ export default function HomePage() {
       </section>
 
       {/* Value Comparison - Baseball Lineup Card Design */}
-      <section className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Deep Navy Background */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e1a] via-[#0F1123] to-[#0a0e1a]" />
         {/* Subtle field texture */}
@@ -1359,7 +1363,7 @@ export default function HomePage() {
       </section>
 
       {/* Free Tier Section */}
-      <section className="py-32 px-4 sm:px-6 lg:px-8">
+      <section className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
             <div className="inline-block mb-8">
