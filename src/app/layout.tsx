@@ -10,13 +10,13 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://mandmwebsite.vercel.app',
+    url: 'https://mindandmuscle.ai',
     siteName: 'Mind & Muscle',
     title: 'Mind & Muscle | Elite Sports Training Platform',
     description: 'Transform your athletes with comprehensive mental and physical training. Team licensing, partner programs, and cutting-edge sports performance technology.',
     images: [
       {
-        url: 'https://mandmwebsite.vercel.app/assets/images/logo.png',
+        url: 'https://mindandmuscle.ai/assets/images/logo.png',
         width: 1200,
         height: 630,
         alt: 'Mind & Muscle Logo',
@@ -27,7 +27,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Mind & Muscle | Elite Sports Training Platform',
     description: 'Transform your athletes with comprehensive mental and physical training. Team licensing, partner programs, and cutting-edge sports performance technology.',
-    images: ['https://mandmwebsite.vercel.app/assets/images/logo.png'],
+    images: ['https://mindandmuscle.ai/assets/images/logo.png'],
   },
 };
 
