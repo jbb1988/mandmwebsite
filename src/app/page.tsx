@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
 import { Brain, Dumbbell, Users, TrendingUp, Award, Zap, X, Play, Pause, MousePointerClick, Check, Video, Apple, MessageCircle, Music } from 'lucide-react';
-import { FadeInWhenVisible, StaggerChildren, TextReveal, GradientTextReveal } from '@/components/animations';
+import { FadeInWhenVisible, StaggerChildren, TextReveal, GradientTextReveal, ScaleInWhenVisible, staggerItemVariants } from '@/components/animations';
 import { motion } from 'framer-motion';
 
 export default function HomePage() {
@@ -302,7 +302,7 @@ export default function HomePage() {
                   </div>
                 </div>
               </Link>
-            </div>
+            </FadeInWhenVisible>
           </div>
 
           {/* Logo - Right Side */}
