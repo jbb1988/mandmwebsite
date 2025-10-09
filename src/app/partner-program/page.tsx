@@ -45,13 +45,13 @@ export default function PartnerProgramPage() {
     {
       icon: Star,
       title: 'Lifetime Commission',
-      description: 'Earn 10% commission on every subscription you refer, paid annually for as long as they subscribe',
+      description: 'Earn 10% commission each time your referral pays - initial signup plus every renewal they make',
       variant: 'orange' as const,
     },
     {
       icon: TrendingUp,
-      title: 'Lifetime Recurring Revenue',
-      description: 'Earn 10% every year, forever - as long as your referrals stay subscribed. Build true passive income.',
+      title: 'Unlimited Earning Potential',
+      description: 'Earn commission every time your referrals pay - as long as they keep subscribing, you keep earning.',
       variant: 'blue' as const,
     },
     {
@@ -74,8 +74,8 @@ export default function PartnerProgramPage() {
     },
     {
       icon: Users,
-      title: 'Automatic Monthly Payouts',
-      description: 'Set it and forget it - automatic PayPal payouts every month after 60-day hold',
+      title: 'Automatic Payouts',
+      description: 'Earn commission on every referral payment - automatically paid via PayPal 60 days after payment clears',
       variant: 'blue' as const,
     },
     {
@@ -154,7 +154,7 @@ export default function PartnerProgramPage() {
     },
     {
       question: 'How do payouts work?',
-      answer: 'Commissions are held for 60 days after payment clears (standard industry practice to protect against chargebacks), then paid automatically each month via PayPal. There\'s a $50 minimum threshold. Example: Sale on January 1st = commission paid March 1st. Your dashboard shows real-time earnings and tracks every referral.'
+      answer: 'You earn 10% commission each time a referral pays for a subscription. Commissions are held for 60 days after payment clears (standard industry practice to protect against chargebacks), then paid automatically via PayPal. There\'s a $50 minimum threshold. Example: Referral subscribes January 1st = commission paid March 1st. If they renew next year, you earn another commission. Your dashboard shows real-time earnings and tracks every referral.'
     },
   ];
 
@@ -177,7 +177,7 @@ export default function PartnerProgramPage() {
     {
       number: '4',
       title: 'Start Earning',
-      description: 'Share your link and earn 10% recurring on every referral',
+      description: 'Share your link and earn 10% commission on every referral payment',
     },
   ];
 
@@ -201,7 +201,7 @@ export default function PartnerProgramPage() {
         </h1>
 
         <p className="text-xl text-text-secondary max-w-3xl mx-auto mb-12">
-          Join our partner program and earn 10% lifetime commission. Get paid every month for sharing what works.
+          Join our partner program and earn 10% commission on every subscription payment. Lifetime earning potential as referrals renew.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
@@ -271,7 +271,7 @@ export default function PartnerProgramPage() {
           Why Partner With Us?
         </h2>
         <p className="text-text-secondary text-center max-w-2xl mx-auto mb-12">
-          Lifetime commission. Recurring income. Everything you need to succeed.
+          Lifetime commission opportunity. Earn on every payment. Everything you need to succeed.
         </p>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -358,7 +358,7 @@ export default function PartnerProgramPage() {
               </li>
               <li className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0" />
-                Automatic monthly PayPal payouts
+                Automatic PayPal payouts (60 days after sale)
               </li>
             </ul>
           </LiquidGlass>
