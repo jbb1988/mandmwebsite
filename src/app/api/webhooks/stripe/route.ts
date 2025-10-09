@@ -86,7 +86,7 @@ async function sendTeamCodeEmail(email: string, teamCode: string, seatCount: num
             </div>
 
             <div style="text-align: center; padding: 20px; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">
-              <p>Questions? Contact us at <a href="mailto:support@mindandmuscle.com" style="color: #667eea; text-decoration: none;">support@mindandmuscle.com</a></p>
+              <p>Questions? Contact us at <a href="mailto:support@mindandmuscle.ai" style="color: #667eea; text-decoration: none;">support@mindandmuscle.ai</a></p>
               <p style="margin-top: 15px;">© ${new Date().getFullYear()} Mind and Muscle. All rights reserved.</p>
             </div>
           </body>

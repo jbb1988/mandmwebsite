@@ -92,10 +92,10 @@ function ContactContent() {
           <h3 className="text-xl font-bold mb-2">Email Support</h3>
           <p className="text-text-secondary mb-3">Get help via email</p>
           <a
-            href="mailto:support@mindandmuscle.com"
+            href="mailto:support@mindandmuscle.ai"
             className="text-solar-surge-orange hover:underline font-semibold"
           >
-            support@mindandmuscle.com
+            support@mindandmuscle.ai
           </a>
         </div>
 
@@ -104,10 +104,10 @@ function ContactContent() {
           <h3 className="text-xl font-bold mb-2">Privacy Inquiries</h3>
           <p className="text-text-secondary mb-3">Questions about your data</p>
           <a
-            href="mailto:privacy@mindandmuscle.com"
+            href="mailto:privacy@mindandmuscle.ai"
             className="text-solar-surge-orange hover:underline font-semibold"
           >
-            privacy@mindandmuscle.com
+            privacy@mindandmuscle.ai
           </a>
         </div>
       </div>
@@ -124,7 +124,7 @@ function ContactContent() {
           <div>
             <h4 className="font-semibold mb-1">What if my team code isn't working?</h4>
             <p className="text-sm text-text-secondary">
-              Check that you've entered the code exactly as received. Codes are case-sensitive. If issues persist, contact support@mindandmuscle.com.
+              Check that you've entered the code exactly as received. Codes are case-sensitive. If issues persist, contact support@mindandmuscle.ai.
             </p>
           </div>
           <div>
@@ -194,7 +194,7 @@ function TermsContent() {
 
       <h3 className="text-2xl font-bold mt-8 mb-4">8. Contact</h3>
       <p className="text-text-secondary">
-        For questions about these Terms, contact us at <a href="mailto:support@mindandmuscle.com" className="text-solar-surge-orange hover:underline">support@mindandmuscle.com</a>
+        For questions about these Terms, contact us at <a href="mailto:support@mindandmuscle.ai" className="text-solar-surge-orange hover:underline">support@mindandmuscle.ai</a>
       </p>
     </div>
   );
@@ -280,8 +280,8 @@ function PrivacyContent() {
 
       <h3 className="text-2xl font-bold mt-8 mb-4">7. Contact</h3>
       <p className="text-text-secondary">
-        For privacy questions: <a href="mailto:privacy@mindandmuscle.com" className="text-solar-surge-orange hover:underline">privacy@mindandmuscle.com</a><br />
-        For COPPA requests: <a href="mailto:privacy@mindandmuscle.com" className="text-solar-surge-orange hover:underline">privacy@mindandmuscle.com</a> (subject: "COPPA Request")
+        For privacy questions: <a href="mailto:privacy@mindandmuscle.ai" className="text-solar-surge-orange hover:underline">privacy@mindandmuscle.ai</a><br />
+        For COPPA requests: <a href="mailto:privacy@mindandmuscle.ai" className="text-solar-surge-orange hover:underline">privacy@mindandmuscle.ai</a> (subject: "COPPA Request")
       </p>
     </div>
   );
@@ -354,14 +354,14 @@ function CoppaContent() {
         To review, modify, or delete your child's information, or to revoke consent:
       </p>
       <div className="p-6 rounded-xl bg-white/5 border border-white/10">
-        <p className="mb-2"><strong>Email:</strong> <a href="mailto:privacy@mindandmuscle.com?subject=COPPA%20Request" className="text-solar-surge-orange hover:underline">privacy@mindandmuscle.com</a></p>
+        <p className="mb-2"><strong>Email:</strong> <a href="mailto:privacy@mindandmuscle.ai?subject=COPPA%20Request" className="text-solar-surge-orange hover:underline">privacy@mindandmuscle.ai</a></p>
         <p className="mb-2"><strong>Subject Line:</strong> "COPPA Request"</p>
         <p className="text-sm text-text-secondary">Include your child's name and your relationship to the child.</p>
       </div>
 
       <h3 className="text-2xl font-bold mt-8 mb-4">Questions?</h3>
       <p className="text-text-secondary">
-        For questions about COPPA compliance or children's privacy, contact us at <a href="mailto:privacy@mindandmuscle.com" className="text-solar-surge-orange hover:underline">privacy@mindandmuscle.com</a>
+        For questions about COPPA compliance or children's privacy, contact us at <a href="mailto:privacy@mindandmuscle.ai" className="text-solar-surge-orange hover:underline">privacy@mindandmuscle.ai</a>
       </p>
     </div>
   );

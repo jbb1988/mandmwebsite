@@ -459,7 +459,7 @@ function TeamLicensingContent() {
                       </li>
                     </ul>
                     <a
-                      href="mailto:leagues@mindandmuscle.com"
+                      href="mailto:leagues@mindandmuscle.ai"
                       className="inline-block px-6 py-2 bg-neon-cortex-blue/20 hover:bg-neon-cortex-blue/30 border border-neon-cortex-blue/40 rounded-lg font-semibold text-sm transition-all duration-300 hover:scale-105"
                     >
                       Contact League Sales
