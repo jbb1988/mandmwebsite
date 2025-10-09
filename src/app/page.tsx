@@ -742,105 +742,87 @@ export default function HomePage() {
               </span>
             </h2>
             {/* Opening Statement */}
-            <p className="text-2xl sm:text-3xl md:text-4xl text-white max-w-5xl mx-auto font-black leading-tight mb-16">
-              While other apps give you generic "athlete training" with a baseball logo,
-              <br />
-              <span className="text-neon-cortex-blue" style={{textShadow: '0 0 20px rgba(14,165,233,0.8)'}}>
-                we built an AI-powered baseball ecosystem.
-              </span>
-            </p>
-
-            {/* Feature Showcase Cards */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto mb-12 text-left">
-
-              {/* Game Lab */}
-              <div className="backdrop-blur-sm bg-white/5 border-2 border-neon-cortex-blue/20 rounded-2xl p-8 hover:border-neon-cortex-blue/50 transition-all">
-                <div className="text-4xl mb-4">🧠</div>
-                <h3 className="text-2xl font-black text-white mb-3">Game Lab</h3>
-                <p className="text-gray-300 text-lg mb-4 leading-relaxed">
-                  186 real baseball situations. Runner on third, 1 out, infield in—what's the play?
-                  Your Baseball IQ gets measured, tracked, and improved.
-                </p>
-                <div className="text-sm text-neon-cortex-blue font-bold">
-                  Not "focus under pressure." Actual game scenarios.
-                </div>
-              </div>
-
-              {/* AI Coaches */}
-              <div className="backdrop-blur-sm bg-white/5 border-2 border-mind-primary/20 rounded-2xl p-8 hover:border-mind-primary/50 transition-all">
-                <div className="text-4xl mb-4">🤖</div>
-                <h3 className="text-2xl font-black text-white mb-3">AI Coaches That Learn</h3>
-                <p className="text-gray-300 text-lg mb-4 leading-relaxed">
-                  Your AI coach analyzes every swing, every journal entry, every workout.
-                  In 30 days, it knows you better than coaches who've trained you for years.
-                </p>
-                <div className="text-sm text-mind-primary font-bold">
-                  Not generic tips. Personalized intelligence.
-                </div>
-              </div>
-
-              {/* Position-Specific */}
-              <div className="backdrop-blur-sm bg-white/5 border-2 border-solar-surge-orange/20 rounded-2xl p-8 hover:border-solar-surge-orange/50 transition-all">
-                <div className="text-4xl mb-4">⚾</div>
-                <h3 className="text-2xl font-black text-white mb-3">Position-Specific Everything</h3>
-                <p className="text-gray-300 text-lg mb-4 leading-relaxed">
-                  Pitcher fuel plans. Catcher recovery protocols. Infielder agility drills.
-                  Every position has unique demands—your training reflects that.
-                </p>
-                <div className="text-sm text-solar-surge-orange font-bold">
-                  Not one-size-fits-all. Built for your position.
-                </div>
-              </div>
-
-              {/* Swing Lab */}
-              <div className="backdrop-blur-sm bg-white/5 border-2 border-neon-cortex-blue/20 rounded-2xl p-8 hover:border-neon-cortex-blue/50 transition-all">
-                <div className="text-4xl mb-4">📹</div>
-                <h3 className="text-2xl font-black text-white mb-3">Swing Lab</h3>
-                <p className="text-gray-300 text-lg mb-4 leading-relaxed">
-                  Upload swing videos. AI analyzes mechanics, identifies flaws, tracks improvement over time.
-                  Your swing gets dissected like you're in the Show.
-                </p>
-                <div className="text-sm text-neon-cortex-blue font-bold">
-                  Not guesswork. Computer vision analysis.
-                </div>
-              </div>
-
-              {/* Weekly AI Reports */}
-              <div className="backdrop-blur-sm bg-white/5 border-2 border-mind-primary/20 rounded-2xl p-8 hover:border-mind-primary/50 transition-all">
-                <div className="text-4xl mb-4">📊</div>
-                <h3 className="text-2xl font-black text-white mb-3">Weekly AI Reports</h3>
-                <p className="text-gray-300 text-lg mb-4 leading-relaxed">
-                  Every week: comprehensive performance analysis, trend detection, personalized recommendations.
-                  Your coach gets insights that would take hours to compile manually.
-                </p>
-                <div className="text-sm text-mind-primary font-bold">
-                  Not summaries. Strategic intelligence.
-                </div>
-              </div>
-
-              {/* Sound Lab */}
-              <div className="backdrop-blur-sm bg-white/5 border-2 border-solar-surge-orange/20 rounded-2xl p-8 hover:border-solar-surge-orange/50 transition-all">
-                <div className="text-4xl mb-4">🎵</div>
-                <h3 className="text-2xl font-black text-white mb-3">Sound Lab</h3>
-                <p className="text-gray-300 text-lg mb-4 leading-relaxed">
-                  Curated music library, breathwork sessions, visualization exercises.
-                  Everything designed for baseball's mental demands—between innings, pre-game, recovery.
-                </p>
-                <div className="text-sm text-solar-surge-orange font-bold">
-                  Not Spotify playlists. Baseball mindset engineering.
-                </div>
-              </div>
-
+            <div className="max-w-5xl mx-auto mb-20">
+              <p className="text-2xl sm:text-3xl md:text-4xl text-gray-300 font-medium leading-relaxed mb-8">
+                Other apps take generic training and slap a baseball filter on it.
+              </p>
+              <p className="text-2xl sm:text-3xl md:text-4xl text-white font-black leading-tight mb-6">
+                We started from scratch.
+              </p>
+              <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 font-medium leading-relaxed">
+                Every drill designed for baseball movements. Every AI model trained exclusively on baseball content. Every mental scenario pulled from real game situations.
+              </p>
+              <p className="text-2xl sm:text-3xl md:text-4xl text-neon-cortex-blue font-black leading-tight mt-8" style={{textShadow: '0 0 20px rgba(14,165,233,0.8)'}}>
+                This wasn't adapted. It was purpose-built.
+              </p>
             </div>
 
-            {/* Closing punch line */}
-            <div className="mt-16 pt-12 border-t border-white/10">
-              <p className="text-3xl sm:text-4xl md:text-5xl font-black leading-tight">
-                <span className="text-white">This isn't a fitness app for athletes.</span>
-                <br />
-                <span className="text-solar-surge-orange" style={{textShadow: '0 0 30px rgba(249,115,22,0.6)'}}>
-                  This is a baseball operating system.
-                </span>
+            {/* Comparison Grid */}
+            <div className="max-w-6xl mx-auto mb-20">
+              <div className="space-y-8">
+
+                {/* Row 1: AI Training Data */}
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="backdrop-blur-sm bg-white/5 border-2 border-red-500/30 rounded-2xl p-8">
+                    <div className="text-red-400 font-bold text-sm uppercase tracking-wider mb-3">Their AI Training Data</div>
+                    <p className="text-2xl text-gray-400 font-medium">Generic multi-sport content</p>
+                  </div>
+                  <div className="backdrop-blur-sm bg-white/5 border-2 border-neon-cortex-blue/50 rounded-2xl p-8">
+                    <div className="text-neon-cortex-blue font-bold text-sm uppercase tracking-wider mb-3">Our AI Training Data</div>
+                    <p className="text-2xl text-white font-black">100% baseball-specific content</p>
+                  </div>
+                </div>
+
+                {/* Row 2: Mental Training */}
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="backdrop-blur-sm bg-white/5 border-2 border-red-500/30 rounded-2xl p-8">
+                    <div className="text-red-400 font-bold text-sm uppercase tracking-wider mb-3">Their Mental Training</div>
+                    <p className="text-2xl text-gray-400 font-medium">Generic "focus and confidence"</p>
+                  </div>
+                  <div className="backdrop-blur-sm bg-white/5 border-2 border-neon-cortex-blue/50 rounded-2xl p-8">
+                    <div className="text-neon-cortex-blue font-bold text-sm uppercase tracking-wider mb-3">Our Mental Training</div>
+                    <p className="text-2xl text-white font-black">186 real baseball game scenarios</p>
+                  </div>
+                </div>
+
+                {/* Row 3: Drills */}
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="backdrop-blur-sm bg-white/5 border-2 border-red-500/30 rounded-2xl p-8">
+                    <div className="text-red-400 font-bold text-sm uppercase tracking-wider mb-3">Their Drills</div>
+                    <p className="text-2xl text-gray-400 font-medium">Adapted for general sports focus</p>
+                  </div>
+                  <div className="backdrop-blur-sm bg-white/5 border-2 border-neon-cortex-blue/50 rounded-2xl p-8">
+                    <div className="text-neon-cortex-blue font-bold text-sm uppercase tracking-wider mb-3">Our Drills</div>
+                    <p className="text-2xl text-white font-black">Custom-built for baseball movements</p>
+                  </div>
+                </div>
+
+                {/* Row 4: Approach */}
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="backdrop-blur-sm bg-white/5 border-2 border-red-500/30 rounded-2xl p-8">
+                    <div className="text-red-400 font-bold text-sm uppercase tracking-wider mb-3">Their Approach</div>
+                    <p className="text-2xl text-gray-400 font-medium">Modify existing templates</p>
+                  </div>
+                  <div className="backdrop-blur-sm bg-white/5 border-2 border-neon-cortex-blue/50 rounded-2xl p-8">
+                    <div className="text-neon-cortex-blue font-bold text-sm uppercase tracking-wider mb-3">Our Approach</div>
+                    <p className="text-2xl text-white font-black">Build from zero for baseball only</p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            {/* Closing Statement */}
+            <div className="mt-20 pt-16 border-t border-white/10 max-w-4xl mx-auto text-center">
+              <p className="text-3xl sm:text-4xl md:text-5xl font-medium text-gray-300 leading-tight mb-4">
+                Every other app tried to be everything to everyone.
+              </p>
+              <p className="text-4xl sm:text-5xl md:text-6xl font-black leading-tight mb-4">
+                <span className="text-white">We became obsessed with </span>
+                <span className="text-solar-surge-orange" style={{textShadow: '0 0 30px rgba(249,115,22,0.6)'}}>one thing.</span>
+              </p>
+              <p className="text-5xl sm:text-6xl md:text-7xl font-black text-neon-cortex-blue mt-8" style={{textShadow: '0 0 40px rgba(14,165,233,0.8)'}}>
+                Baseball.
               </p>
             </div>
           </div>
