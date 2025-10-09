@@ -741,8 +741,16 @@ export default function HomePage() {
                 A Baseball Obsession.
               </span>
             </h2>
-            <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed">
-              Every mental toughness tool is about the game. Every drill targets baseball-specific movements. Every meal plan fuels a player's position. This isn't adaptable—it's <span className="text-solar-surge-orange font-black" style={{textShadow: '0 0 20px rgba(249,115,22,0.6)'}}>purpose-built</span>.
+            <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-8">
+              Other apps give you generic workouts they slap a "baseball" label on. We <span className="text-neon-cortex-blue font-black" style={{textShadow: '0 0 20px rgba(14,165,233,0.8)'}}>custom-built every single feature</span> from the ground up for baseball.
+            </p>
+            <p className="text-lg sm:text-xl md:text-2xl text-gray-400 max-w-4xl mx-auto leading-relaxed">
+              Mental training scenarios? <span className="text-white font-bold">186 real baseball situations</span>—not "stay focused under pressure."<br className="hidden sm:block" />
+              Nutrition plans? <span className="text-white font-bold">Customized by position</span>—pitchers eat different than catchers.<br className="hidden sm:block" />
+              Recovery protocols? <span className="text-white font-bold">Built around baseball's unique demands</span>—not copy-pasted from basketball.<br className="hidden sm:block" />
+              <span className="block mt-6 text-solar-surge-orange font-black text-2xl md:text-3xl" style={{textShadow: '0 0 24px rgba(249,115,22,0.6)'}}>
+                This isn't adaptable. It's purpose-built. For baseball. Only baseball.
+              </span>
             </p>
           </div>
 
