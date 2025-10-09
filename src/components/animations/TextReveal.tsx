@@ -24,7 +24,7 @@ export function TextReveal({
   as = 'p',
 }: TextRevealProps) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-50px' });
+  const isInView = useInView(ref, { once: true, margin: '0px', amount: 0.3 });
 
   const words = text.split(' ');
   const Component = motion[as];
@@ -43,7 +43,7 @@ export function TextReveal({
   const wordVariants: Variants = {
     hidden: {
       opacity: 0,
-      y: 20,
+      y: 10,
     },
     visible: {
       opacity: 1,
@@ -167,24 +167,24 @@ export function GradientTextReveal({
   delay = 0,
 }: GradientTextRevealProps) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-50px' });
+  const isInView = useInView(ref, { once: true, margin: '0px', amount: 0.3 });
 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={
         isInView
           ? {
               opacity: 1,
               y: 0,
               transition: {
-                duration: 0.8,
+                duration: 0.6,
                 delay,
                 ease: [0.25, 0.4, 0.25, 1],
               },
             }
-          : { opacity: 0, y: 20 }
+          : { opacity: 0, y: 15 }
       }
       className={className}
       style={{

@@ -24,14 +24,14 @@ export function FadeInWhenVisible({
   className = '',
 }: FadeInWhenVisibleProps) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once, margin: '-100px' });
+  const isInView = useInView(ref, { once, margin: '0px', amount: 0.2 });
   const controls = useAnimation();
 
   const directions = {
-    up: { y: 40, x: 0 },
-    down: { y: -40, x: 0 },
-    left: { x: 40, y: 0 },
-    right: { x: -40, y: 0 },
+    up: { y: 20, x: 0 },
+    down: { y: -20, x: 0 },
+    left: { x: 20, y: 0 },
+    right: { x: -20, y: 0 },
   };
 
   useEffect(() => {
@@ -83,7 +83,7 @@ export function StaggerChildren({
   className = '',
 }: StaggerChildrenProps) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: true, margin: '0px', amount: 0.1 });
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -109,12 +109,12 @@ export function StaggerChildren({
 }
 
 export const staggerItemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 10 },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.5,
+      duration: 0.4,
       ease: [0.25, 0.4, 0.25, 1],
     },
   },
@@ -137,12 +137,12 @@ export function ScaleInWhenVisible({
   className = '',
 }: ScaleInWhenVisibleProps) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const isInView = useInView(ref, { once: true, margin: '0px', amount: 0.2 });
 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, scale: 0.8 }}
+      initial={{ opacity: 0, scale: 0.95 }}
       animate={
         isInView
           ? {
@@ -154,7 +154,7 @@ export function ScaleInWhenVisible({
                 ease: [0.25, 0.4, 0.25, 1],
               },
             }
-          : { opacity: 0, scale: 0.8 }
+          : { opacity: 0, scale: 0.95 }
       }
       className={className}
     >
