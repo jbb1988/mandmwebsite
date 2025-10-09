@@ -213,7 +213,6 @@ export async function POST(request: NextRequest) {
       await sendTeamCodeEmail(customerEmail, teamCode, seatCount);
 
       // Notify Tolt of conversion (for partner commission tracking)
-      const toltReferral = session.metadata?.tolt_referral;
       if (toltReferral) {
         try {
           const totalAmount = (session.amount_total || 0) / 100; // Convert cents to dollars
