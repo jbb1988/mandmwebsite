@@ -11,6 +11,8 @@ export default function HomePage() {
   const [activeFeature, setActiveFeature] = useState<any>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
 
   // Lock body scroll when modal is open
   useEffect(() => {
@@ -59,6 +61,22 @@ export default function HomePage() {
         setAudioElement(audio);
         audio.onended = () => setIsPlaying(false);
       }, 300);
+    }
+  };
+
+  // Swipe to close gesture handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientY);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientY);
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStart - touchEnd < -150) {
+      // Swiped down more than 150px - close modal
+      handleCloseModal();
     }
   };
 
@@ -590,11 +608,11 @@ export default function HomePage() {
         {/* Feature Modal */}
         {activeFeature && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-fadeIn"
+            className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-xl animate-fadeIn"
             onClick={handleCloseModal}
           >
             <div
-              className="relative max-w-7xl w-full max-h-[100vh] sm:max-h-[95vh] overflow-y-auto backdrop-blur-xl bg-gradient-to-br from-white/10 via-white/5 to-transparent p-4 sm:p-6 md:p-10 rounded-3xl border-2 shadow-[0_8px_60px_rgba(14,165,233,0.3)] overscroll-contain"
+              className="relative max-w-7xl w-full max-h-[90vh] sm:max-h-[95vh] overflow-y-auto backdrop-blur-xl bg-gradient-to-br from-white/10 via-white/5 to-transparent p-4 sm:p-6 md:p-10 rounded-3xl border-2 shadow-[0_8px_60px_rgba(14,165,233,0.3)] overscroll-contain"
               style={{
                 borderImage: activeFeature.color === 'blue'
                   ? 'linear-gradient(135deg, #0EA5E9, #06B6D4) 1'
@@ -607,11 +625,14 @@ export default function HomePage() {
                 e.stopPropagation();
                 handleModalTap();
               }}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
             >
               {/* Close Button */}
               <button
                 onClick={handleCloseModal}
-                className="absolute top-4 right-4 sm:top-6 sm:right-6 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center transition-colors z-10"
+                className="sticky top-0 float-right w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center transition-colors z-20 mb-4"
                 aria-label="Close modal"
               >
                 <X className="w-6 h-6" />
