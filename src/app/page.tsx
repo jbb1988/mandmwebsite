@@ -1,0 +1,1466 @@
+'use client';
+
+import React, { useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { LiquidGlass } from '@/components/LiquidGlass';
+import { LiquidButton } from '@/components/LiquidButton';
+import { Brain, Dumbbell, Users, TrendingUp, Award, Zap, X, Play, Pause, MousePointerClick, Check, Video, Apple, MessageCircle, Music } from 'lucide-react';
+
+export default function HomePage() {
+  const [activeFeature, setActiveFeature] = useState<any>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+
+  const handleCloseModal = () => {
+    if (audioElement) {
+      audioElement.pause();
+      audioElement.currentTime = 0;
+      setAudioElement(null);
+    }
+    setIsPlaying(false);
+    setActiveFeature(null);
+  };
+
+  const handleOpenModal = (feature: any, autoPlay: boolean = true) => {
+    setActiveFeature(feature);
+    if (autoPlay && feature.audioUrl) {
+      setTimeout(() => {
+        const audio = new Audio(feature.audioUrl);
+        audio.play();
+        setIsPlaying(true);
+        setAudioElement(audio);
+        audio.onended = () => setIsPlaying(false);
+      }, 300);
+    }
+  };
+
+  // Row 1: 2 cards - Mind & Muscle AI Coaches
+  const row1Features = [
+    {
+      id: 'mind-coach',
+      title: 'Mind Coach AI',
+      icon: Brain,
+      iconImage: '/assets/images/Mind AI Coach.png',
+      color: 'blue',
+      image: '/assets/mind/Mind AI Coach Hero.png',
+      audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/mindcoachai_ob.mp3',
+      tagline: 'Your Elite Mental Training Coach That Actually Knows You',
+      description: 'Where Mental Toughness Becomes Mental Dominance.',
+      modalDescription: 'Mind Coach AI doesn\'t guess your mental game. It engineers it.\n\nThat clutch player who never gets rattled? They trained their mind like you train your body.\n\nAI-Powered Mental Training - Personalized sessions in focus, pressure management, confidence, visualization, and mindfulness. Each designed for your mental profile.\n\nLearns From Every Session - Feedback after each session makes the next one smarter. Your mental training evolves with you.\n\nCreate Custom Sessions - Need something specific? Build sessions tailored to your exact mental challenges.\n\nTrack Your Progress - Complete sessions, build streaks, watch your mental game level up.\n\nWhile other athletes hope their mental game shows up, yours gets engineered for peak performance.\n\n**This is your mind. Fully trained.**',
+    },
+    {
+      id: 'muscle-training',
+      title: 'Muscle Coach AI',
+      icon: Dumbbell,
+      iconImage: '/assets/images/Muscle AI Coach Icon.png',
+      color: 'orange',
+      image: '/assets/muscle/Muscle AI Coach Hero.png',
+      audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/musclecoachai_ob.mp3',
+      tagline: 'Your Elite Strength Engineer That Builds Baseball Power',
+      description: 'Build the Strength That Gets You Noticed.',
+      modalDescription: 'Muscle Coach AI doesn\'t guess your strength needs. It engineers baseball-specific power.\n\nMLB-level strength training, personalized for your position and power profile.\n\nThree Training Zones - AI Coach (smart recommendations), Exercise Vault (hundreds of baseball-specific exercises from MLB coaches), Build Tab (custom workout plan creator).\n\nPosition-Specific Power - Explosive power for bat speed. Rotational strength for throwing velocity. Endurance for clutch moments. All engineered for your position.\n\nAI-Driven Progression - Every set logged. Every workout analyzed. Progressive overload tracked automatically.\n\nCreate Custom Plans - Build workout routines with targeted exercises, track sets/reps, monitor strength gains.\n\nWhile other players hope their strength shows up, yours gets systematically engineered for peak performance.\n\n**This is strength training. Built for baseball.**',
+    },
+  ];
+
+  // Row 2: 3 cards - Game Lab, Swing Lab, Sound Lab
+  const row2Features = [
+    {
+      id: 'game-lab',
+      title: 'Game Lab',
+      icon: Zap,
+      iconImage: '/assets/images/game_lab_icon copy.png',
+      color: 'blue',
+      image: '/assets/images/gameflow.png',
+      audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/gamelab_ob.mp3',
+      tagline: 'Play Smarter. Not Harder.',
+      description: 'Train Your Baseball IQ. Master Every Situation.',
+      modalDescription: 'Game Lab isn\'t about guessing. It\'s about knowing.\n\n186 real game scenarios that force you to think faster, decide smarter, and play like you\'ve already seen every situation.\n\nYour Baseball IQ gets measured. Your mental batting average gets tracked. Every decision earns XP, builds streaks, and unlocks badges.\n\nWhile other players freeze under pressure, you\'ll already know the play.\n\n**This is your baseball brain. Fully trained.**',
+    },
+    {
+      id: 'swing-lab',
+      title: 'Swing Lab',
+      icon: TrendingUp,
+      iconImage: '/assets/images/Swing Lab1.png',
+      color: 'orange',
+      image: '/assets/dashboard/swing_lab.png',
+      audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/swinglab_ob.mp3',
+      tagline: 'Every Frame Tells a Story.',
+      description: 'Every swing analyzed. Every weakness eliminated.',
+      modalDescription: '**Upload your swing. Get elite coaching feedback. Fix what\'s holding you back.**\n\nSwing Lab delivers AI coaching analysis that breaks down your swing like a veteran MLB hitting coach—instant, actionable, precise.\n\n**Elite AI Coaching Analysis:**\n\n- **The Good Stuff** - Specific strengths to build on\n- **Power Opportunities** - The 1-2 changes that unlock explosive contact\n- **Your Practice Plan** - 2 precision drills targeting your exact issues\n- **Mental Game Strategy** - Situational hitting advice\n- **#1 Focus** - The most important thing to work on next\n\n**Analysis Features:**\n\n- Video thumbnails for visual reference\n- Complete analysis history for progress tracking\n- Shareable reports for coaches and teammates\n- Favorite your best analyses\n\nWhile other hitters wonder what to fix, you\'ll get precise coaching that tells you exactly what to work on and exactly how to fix it.\n\n**Swing Lab. Upload. Analyze. Improve.**',
+    },
+    {
+      id: 'sound-lab',
+      title: 'Sound Lab',
+      icon: Brain,
+      iconImage: '/assets/images/Sound Lab copy.png',
+      color: 'blue',
+      image: '/assets/mind/sound_lab.png',
+      audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/soundlab_ob.mp3',
+      tagline: 'Train Your Mind Through Sound.',
+      description: 'Engineer your mental state for peak performance',
+      modalDescription: 'Sound Lab isn\'t background music. It\'s a remote control for your mental state.\n\nBinaural beats sync your brainwaves. Alpha for laser focus. Beta for superhuman concentration. Gamma for explosive reactions.\n\nAncient Solfeggio frequencies meet athletic performance mixes. Pre-built combinations that pros use before competition.\n\nStart 10 minutes before training. Feel your brain lock in.\n\nWhile other athletes hope they\'ll be ready, you\'ll engineer your mental state.\n\n**This is sound. Weaponized for performance.**',
+    },
+  ];
+
+  // Row 3: 4 cards - AI Assistant, Goals, Fuel, Chatter
+  const row3Features = [
+    {
+      id: 'ai-assistant',
+      title: 'AI Assistant Coach',
+      icon: Award,
+      iconImage: '/assets/images/Whistle.png',
+      color: 'blue',
+      image: '/assets/images/ai_coach_robot_crop.png',
+      audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/assistant.mp3',
+      tagline: 'Your 24/7 Coaching Partner.',
+      description: 'Personal Drill Designer. Turns Coaching Notes Into Professional Plans.',
+      modalDescription: 'AI Assistant Coach turns your coaching notes into professional practice plans.\n\nShare what you\'re working on. The AI creates custom drills that target exactly what your team needs.\n\nEvery session learns from your feedback. Every drill gets smarter. Every practice plan becomes more powerful.\n\nBuilt for coaches, athletes, and parents who demand training that\'s personalized, not generic.\n\nWhile other teams run cookie-cutter drills, yours will train with precision.\n\n**This is your personal drill designer. Built for champions.**',
+    },
+    {
+      id: 'goals-ai',
+      title: 'Goals AI',
+      icon: Award,
+      iconImage: '/assets/images/Goals Icon.png',
+      color: 'orange',
+      image: '/assets/images/Results Goals.png',
+      audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/goals_ob.mp3',
+      tagline: 'Turn Intent Into Progress.',
+      description: 'Stop Wishing. Start Engineering Your Excellence with AI-Powered Goal Setting That Actually Gets Results.',
+      modalDescription: 'Goals AI transforms vague ambitions into surgical precision.\n\n"I want to get stronger" becomes "Increase squat by 25lbs in 8 weeks through progressive overload."\n\nYour performance architect analyzes goals like a championship coach. Finding gaps you miss. Building bridges between where you are and where you\'re going.\n\nSeason goals. Daily habits. All tracked. All optimized.\n\nWhile other athletes hope for results, you\'ll engineer them.\n\n**This is goal setting. Weaponized for champions.**',
+    },
+    {
+      id: 'fuel-ai',
+      title: 'Fuel AI',
+      icon: Zap,
+      iconImage: '/assets/images/Fuel.png',
+      color: 'orange',
+      image: '/assets/images/fuel_ai.png',
+      audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/fuelai_ob.mp3',
+      tagline: 'Precision Nutrition, No Guesswork.',
+      description: 'AI-Powered Meal Plans That Turn Food Into Fuel.',
+      modalDescription: 'Fuel AI turns your food preferences into performance-optimized meal plans.\n\nYour body is a high-performance machine. Stop guessing what to eat.\n\nAI-Powered Planning - Tell us what you love, what you avoid, how much time you have. The AI creates 7 days of personalized meals designed for peak performance.\n\nSmart Shopping Lists - Auto-generated from your weekly plan. Walk in with a list, walk out ready to fuel greatness.\n\nPerformance-Focused - Every meal targets training fuel and recovery. Real food that fits your lifestyle, not generic meal prep.\n\nLearns Your Preferences - Dietary restrictions, allergies, favorite foods, cooking time. Each week gets smarter.\n\nWhile other athletes count calories and hope, you\'ll eat with purpose.\n\n**This is nutrition. Engineered for champions.**',
+    },
+    {
+      id: 'chatter',
+      title: 'Chatter + Events',
+      icon: Users,
+      iconImage: '/assets/images/chatter_icon_3x.png',
+      color: 'orange',
+      image: '/assets/images/Team Communications.png',
+      audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/chatter_ob.mp3',
+      tagline: 'Stay Connected. Stay Synced.',
+      description: 'Game Day Perfection Starts With Perfect Logistics.',
+      modalDescription: 'Chatter & Events: Where championship teams stay perfectly synchronized.\n\nGame day perfection starts with perfect communication and zero logistical chaos.\n\nTeam Chat - That dugout energy, 24/7. Build the brotherhood that separates great teams from good ones.\n\nEvent Management - Every tournament, every practice, every detail. Attendance tracking. Calendar sync. Everyone knows where to be, when to be there.\n\nUniform Creator - Professional team coordination with one tap. Create custom uniforms (home, away, practice) with visual presets. Cap, jersey, pants, belt, socks - all perfectly coordinated.\n\nNavigation Integration - Directions to every field, every facility. No one gets lost. No one shows up late.\n\nWhile other teams deal with communication breakdowns and logistical nightmares, yours moves like a championship machine.\n\n**This is team synchronization. Weaponized.**',
+    },
+  ];
+
+  return (
+    <div className="min-h-screen">
+      {/* Hero Section - Compact like Veroflow */}
+      <section className="relative min-h-[85vh] flex items-center overflow-hidden pt-40 pb-16">
+        {/* Full Width Background Image */}
+        <div className="absolute inset-0 z-0">
+          {/* Baseball Field Background Image */}
+          <Image
+            src="/assets/images/baseball_field_dusk.png"
+            alt="Baseball Field at Dusk"
+            fill
+            className="object-cover object-center"
+            priority
+            quality={90}
+          />
+
+          {/* Enhanced Overlay: Blur + Dark Gradient for Text Pop */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent backdrop-blur-[2px]" />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
+          <div className="max-w-full flex items-center justify-between gap-8">
+            <div className="max-w-3xl">
+            {/* Baseball Badge */}
+            <div className="mb-6 inline-block animate-fadeUp mt-4" style={{animationDelay: '0ms'}}>
+              <LiquidGlass variant="blue" rounded="full" padding="sm" glow={true} className="inline-flex items-center gap-2 px-6 py-2">
+                <span className="text-sm font-bold">⚾ 100% BASEBALL. ZERO GENERIC CONTENT.</span>
+              </LiquidGlass>
+            </div>
+
+            {/* Tagline - Blue and Orange Split */}
+            <div className="mb-6 animate-fadeUp" style={{animationDelay: '50ms'}}>
+              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
+                <span className="text-neon-cortex-blue block" style={{textShadow: '0 0 30px rgba(14, 165, 233, 0.8), 0 2px 10px rgba(0,0,0,0.9)'}}>
+                  Discipline the Mind.
+                </span>
+                <span className="text-solar-surge-orange block" style={{textShadow: '0 0 30px rgba(249, 115, 22, 0.8), 0 2px 10px rgba(0,0,0,0.9)'}}>
+                  Dominate the Game.
+                </span>
+              </h2>
+            </div>
+
+            {/* Main Heading - 64-72px, Tight Leading */}
+            <h1 className="text-[64px] sm:text-[68px] lg:text-[72px] font-black mb-6 leading-[1.1] text-white animate-fadeUp" style={{textShadow: '0 4px 24px rgba(0,0,0,0.9)', animationDelay: '100ms'}}>
+              The only app built exclusively for baseball players. Every feature. Every drill. Every mental toughness tool.
+            </h1>
+
+            {/* Subheading - 20-22px Medium Weight */}
+            <p className="text-[20px] sm:text-[22px] text-gray-200 mb-8 leading-relaxed max-w-2xl font-medium animate-fadeUp" style={{textShadow: '0 2px 12px rgba(0,0,0,0.7)', animationDelay: '200ms'}}>
+              Train smarter, recover faster, and outthink every play with the all-in-one performance app designed for baseball athletes.
+            </p>
+
+            {/* Download Links */}
+            <div className="flex flex-row gap-4 animate-fadeUp items-center" style={{animationDelay: '300ms'}}>
+              <Link
+                href="https://apps.apple.com/app/mind-muscle"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block"
+              >
+                <div className="px-8 py-3 bg-black rounded-xl border border-white/20 hover:border-white/40 transition-all hover:scale-105 flex items-center gap-3">
+                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                  </svg>
+                  <div className="text-left">
+                    <div className="text-xs text-text-secondary">Download on the</div>
+                    <div className="text-lg font-semibold -mt-1">App Store</div>
+                  </div>
+                </div>
+              </Link>
+              <Link
+                href="https://play.google.com/store/apps/details?id=com.mindandmuscle.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block"
+              >
+                <div className="px-8 py-3 bg-black rounded-xl border border-white/20 hover:border-white/40 transition-all hover:scale-105 flex items-center gap-3">
+                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.5,12.92 20.16,13.19L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
+                  </svg>
+                  <div className="text-left">
+                    <div className="text-xs text-text-secondary">GET IT ON</div>
+                    <div className="text-lg font-semibold -mt-1">Google Play</div>
+                  </div>
+                </div>
+              </Link>
+            </div>
+          </div>
+
+          {/* Logo - Right Side */}
+          <div className="hidden lg:block flex-shrink-0">
+            <Image
+              src="/assets/images/logo.png"
+              alt="Mind & Muscle Logo"
+              width={438}
+              height={438}
+            />
+          </div>
+        </div>
+        </div>
+      </section>
+
+      {/* The Complete Performance Ecosystem - Cinematic Section */}
+      <section className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Deep Navy to Black Gradient Background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1A1F3A] via-[#0F1123] to-[#1A1F3A]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.6)_100%)]" />
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          {/* Header */}
+          <div className="text-center mb-24">
+            <h2 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight">
+              <span className="bg-gradient-to-r from-neon-cortex-blue via-mind-primary to-solar-surge-orange bg-clip-text text-transparent" style={{textShadow: '0 0 60px rgba(14,165,233,0.4)'}}>
+                The Complete Performance Ecosystem.
+              </span>
+            </h2>
+            <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-6">
+              Every tool an athlete needs — mental toughness, physical mastery, precision coaching, and intelligent recovery — all connected in one seamless system.
+            </p>
+            <p className="text-base sm:text-lg text-text-secondary max-w-3xl mx-auto">
+              <span className="text-neon-cortex-blue font-semibold">Premium features shown below.</span> Free tier also includes Chatter (team communication), Events (scheduling), Daily Hit (motivation), Dugout Talk (journal), and Game Lab Level 1.
+            </p>
+          </div>
+
+          {/* Row 1 - 2 Large Hero Cards: Mind & Muscle AI */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            {row1Features.map((feature, i) => {
+              const Icon = feature.icon;
+              const isBlue = feature.color === 'blue';
+
+              return (
+                <div
+                  key={feature.id}
+                  onClick={() => setActiveFeature(feature)}
+                  className="group relative cursor-pointer"
+                  style={{
+                    animation: `fadeUp 0.6s ease-out ${i * 0.06}s both`,
+                  }}
+                >
+                  {/* Glow Effect */}
+                  <div className={`absolute -inset-2 rounded-3xl blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500 ${
+                    isBlue ? 'bg-gradient-to-b from-neon-cortex-blue/30 to-mind-primary/10' : 'bg-gradient-to-b from-solar-surge-orange/30 to-muscle-primary/10'
+                  }`} />
+
+                  {/* Card */}
+                  <div className={`relative backdrop-blur-sm bg-white/[0.02] p-6 rounded-2xl border-2 transition-all duration-500 hover:scale-105 hover:bg-white/[0.05] h-full ${
+                    isBlue ? 'border-neon-cortex-blue/40 hover:border-neon-cortex-blue shadow-[0_0_20px_rgba(14,165,233,0.3)] hover:shadow-[0_0_40px_rgba(14,165,233,0.5)]' : 'border-solar-surge-orange/40 hover:border-solar-surge-orange shadow-[0_0_20px_rgba(249,115,22,0.3)] hover:shadow-[0_0_40px_rgba(249,115,22,0.5)]'
+                  }`}>
+                    {/* Image */}
+                    <div
+                      className="relative aspect-video bg-gradient-to-br from-white/5 to-transparent rounded-xl mb-4 overflow-hidden group/image cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (feature.audioUrl) {
+                          handleOpenModal(feature, true);
+                        } else {
+                          handleOpenModal(feature, false);
+                        }
+                      }}
+                    >
+                      <img
+                        src={feature.image}
+                        alt={feature.title}
+                        className="w-full h-full object-cover opacity-95"
+                        style={feature.id === 'mind-coach' ? { transform: 'scale(1.44)' } : undefined}
+                      />
+                      {/* Play Button Overlay */}
+                      {feature.audioUrl && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
+                          <div className={`w-16 h-16 rounded-full flex items-center justify-center backdrop-blur-md ${
+                            isBlue ? 'bg-neon-cortex-blue/20 border-2 border-neon-cortex-blue' : 'bg-solar-surge-orange/20 border-2 border-solar-surge-orange'
+                          }`}>
+                            <Play className={`w-8 h-8 ${isBlue ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`} fill="currentColor" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Icon + Title */}
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`flex-shrink-0 w-16 h-16 rounded-xl flex items-center justify-center ${
+                        isBlue ? 'bg-neon-cortex-blue/10 border border-neon-cortex-blue/30' : 'bg-solar-surge-orange/10 border border-solar-surge-orange/30'
+                      }`}>
+                        {feature.iconImage ? (
+                          <img
+                            src={feature.iconImage}
+                            alt={`${feature.title} icon`}
+                            className="w-10 h-10 object-contain"
+                            style={{filter: `drop-shadow(0 0 10px ${isBlue ? 'rgba(14,165,233,0.8)' : 'rgba(249,115,22,0.8)'})`}}
+                          />
+                        ) : (
+                          <Icon className={`w-8 h-8 ${isBlue ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`}
+                                style={{filter: `drop-shadow(0 0 10px ${isBlue ? 'rgba(14,165,233,0.8)' : 'rgba(249,115,22,0.8)'})`}} />
+                        )}
+                      </div>
+
+                      {/* Title */}
+                      <h3 className={`text-2xl font-black shimmer-text ${isBlue ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`}>
+                        {feature.title}
+                      </h3>
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-base text-gray-300 leading-relaxed">
+                      {feature.description}
+                    </p>
+
+                    {/* Click Icon */}
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenModal(feature);
+                      }}
+                      className="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-white/10 border border-white/30 flex items-center justify-center transition-all cursor-pointer hover:bg-white/20 hover:border-white/50"
+                    >
+                      <MousePointerClick className="w-4 h-4 text-white" />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Row 2 - 3 Cards: Game Lab, Swing Lab, Sound Lab */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {row2Features.map((feature, i) => {
+              const Icon = feature.icon;
+              const isBlue = feature.color === 'blue';
+
+              return (
+                <div
+                  key={feature.id}
+                  onClick={() => setActiveFeature(feature)}
+                  className="group relative cursor-pointer"
+                  style={{
+                    animation: `fadeUp 0.6s ease-out ${(i + 2) * 0.06}s both`,
+                  }}
+                >
+                  {/* Glow Effect */}
+                  <div className={`absolute -inset-2 rounded-3xl blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500 ${
+                    isBlue ? 'bg-gradient-to-b from-neon-cortex-blue/30 to-mind-primary/10' : 'bg-gradient-to-b from-solar-surge-orange/30 to-muscle-primary/10'
+                  }`} />
+
+                  {/* Card */}
+                  <div className={`relative backdrop-blur-sm bg-white/[0.02] p-6 rounded-2xl border-2 transition-all duration-500 hover:scale-105 hover:bg-white/[0.05] h-full ${
+                    isBlue ? 'border-neon-cortex-blue/40 hover:border-neon-cortex-blue shadow-[0_0_20px_rgba(14,165,233,0.3)] hover:shadow-[0_0_40px_rgba(14,165,233,0.5)]' : 'border-solar-surge-orange/40 hover:border-solar-surge-orange shadow-[0_0_20px_rgba(249,115,22,0.3)] hover:shadow-[0_0_40px_rgba(249,115,22,0.5)]'
+                  }`}>
+                    {/* Image */}
+                    <div className="relative aspect-video bg-gradient-to-br from-white/5 to-transparent rounded-xl mb-4 overflow-hidden group/image">
+                      <img src={feature.image} alt={feature.title} className="w-full h-full object-cover opacity-95" />
+                      {/* Play Button Overlay */}
+                      {feature.audioUrl && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
+                          <div className={`w-16 h-16 rounded-full flex items-center justify-center backdrop-blur-md ${
+                            isBlue ? 'bg-neon-cortex-blue/20 border-2 border-neon-cortex-blue' : 'bg-solar-surge-orange/20 border-2 border-solar-surge-orange'
+                          }`}>
+                            <Play className={`w-8 h-8 ${isBlue ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`} fill="currentColor" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Icon + Title */}
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`flex-shrink-0 w-16 h-16 rounded-xl flex items-center justify-center ${
+                        isBlue ? 'bg-neon-cortex-blue/10 border border-neon-cortex-blue/30' : 'bg-solar-surge-orange/10 border border-solar-surge-orange/30'
+                      }`}>
+                        {feature.iconImage ? (
+                          <img
+                            src={feature.iconImage}
+                            alt={`${feature.title} icon`}
+                            className="w-10 h-10 object-contain"
+                            style={{filter: `drop-shadow(0 0 10px ${isBlue ? 'rgba(14,165,233,0.8)' : 'rgba(249,115,22,0.8)'})`}}
+                          />
+                        ) : (
+                          <Icon className={`w-8 h-8 ${isBlue ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`}
+                                style={{filter: `drop-shadow(0 0 10px ${isBlue ? 'rgba(14,165,233,0.8)' : 'rgba(249,115,22,0.8)'})`}} />
+                        )}
+                      </div>
+
+                      {/* Title */}
+                      <h3 className={`text-2xl font-black shimmer-text ${isBlue ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`}>
+                        {feature.title}
+                      </h3>
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-base text-gray-300 leading-relaxed">
+                      {feature.description}
+                    </p>
+
+                    {/* Click Icon */}
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenModal(feature);
+                      }}
+                      className="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-white/10 border border-white/30 flex items-center justify-center transition-all cursor-pointer hover:bg-white/20 hover:border-white/50"
+                    >
+                      <MousePointerClick className="w-4 h-4 text-white" />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Row 3 - 4 Cards: AI Assistant, Goals, Fuel, Chatter */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {row3Features.map((feature, i) => {
+              const Icon = feature.icon;
+              const isBlue = feature.color === 'blue';
+
+              return (
+                <div
+                  key={feature.id}
+                  onClick={() => setActiveFeature(feature)}
+                  className="group relative cursor-pointer"
+                  style={{
+                    animation: `fadeUp 0.6s ease-out ${(i + 5) * 0.06}s both`,
+                  }}
+                >
+                  {/* Glow Effect */}
+                  <div className={`absolute -inset-2 rounded-3xl blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500 ${
+                    isBlue ? 'bg-gradient-to-b from-neon-cortex-blue/30 to-mind-primary/10' : 'bg-gradient-to-b from-solar-surge-orange/30 to-muscle-primary/10'
+                  }`} />
+
+                  {/* Card */}
+                  <div className={`relative backdrop-blur-sm bg-white/[0.02] p-6 rounded-2xl border-2 transition-all duration-500 hover:scale-105 hover:bg-white/[0.05] h-full ${
+                    isBlue ? 'border-neon-cortex-blue/40 hover:border-neon-cortex-blue shadow-[0_0_20px_rgba(14,165,233,0.3)] hover:shadow-[0_0_40px_rgba(14,165,233,0.5)]' : 'border-solar-surge-orange/40 hover:border-solar-surge-orange shadow-[0_0_20px_rgba(249,115,22,0.3)] hover:shadow-[0_0_40px_rgba(249,115,22,0.5)]'
+                  }`}>
+                    {/* Image */}
+                    <div
+                      className="relative aspect-video bg-gradient-to-br from-white/5 to-transparent rounded-xl mb-4 overflow-hidden group/image cursor-pointer"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (feature.audioUrl) {
+                          handleOpenModal(feature, true);
+                        } else {
+                          handleOpenModal(feature, false);
+                        }
+                      }}
+                    >
+                      <img src={feature.image} alt={feature.title} className="w-full h-full object-cover opacity-95" />
+                      {/* Play Button Overlay */}
+                      {feature.audioUrl && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
+                          <div className={`w-16 h-16 rounded-full flex items-center justify-center backdrop-blur-md ${
+                            isBlue ? 'bg-neon-cortex-blue/20 border-2 border-neon-cortex-blue' : 'bg-solar-surge-orange/20 border-2 border-solar-surge-orange'
+                          }`}>
+                            <Play className={`w-8 h-8 ${isBlue ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`} fill="currentColor" />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Icon + Title */}
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`flex-shrink-0 w-16 h-16 rounded-xl flex items-center justify-center ${
+                        isBlue ? 'bg-neon-cortex-blue/10 border border-neon-cortex-blue/30' : 'bg-solar-surge-orange/10 border border-solar-surge-orange/30'
+                      }`}>
+                        {feature.iconImage ? (
+                          <img
+                            src={feature.iconImage}
+                            alt={`${feature.title} icon`}
+                            className="w-10 h-10 object-contain"
+                            style={{filter: `drop-shadow(0 0 10px ${isBlue ? 'rgba(14,165,233,0.8)' : 'rgba(249,115,22,0.8)'})`}}
+                          />
+                        ) : (
+                          <Icon className={`w-8 h-8 ${isBlue ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`}
+                                style={{filter: `drop-shadow(0 0 10px ${isBlue ? 'rgba(14,165,233,0.8)' : 'rgba(249,115,22,0.8)'})`}} />
+                        )}
+                      </div>
+
+                      {/* Title */}
+                      <h3 className={`text-2xl font-black shimmer-text ${isBlue ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`}>
+                        {feature.title}
+                      </h3>
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-base text-gray-300 leading-relaxed">
+                      {feature.description}
+                    </p>
+
+                    {/* Click Icon */}
+                    <div
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenModal(feature);
+                      }}
+                      className="absolute bottom-4 right-4 w-8 h-8 rounded-full bg-white/10 border border-white/30 flex items-center justify-center transition-all cursor-pointer hover:bg-white/20 hover:border-white/50"
+                    >
+                      <MousePointerClick className="w-4 h-4 text-white" />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Feature Modal */}
+        {activeFeature && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-fadeIn"
+            onClick={handleCloseModal}
+          >
+            <div
+              className="relative max-w-7xl w-full max-h-[95vh] overflow-y-auto backdrop-blur-xl bg-gradient-to-br from-white/10 via-white/5 to-transparent p-10 rounded-3xl border-2 shadow-[0_8px_60px_rgba(14,165,233,0.3)]"
+              style={{
+                borderImage: activeFeature.color === 'blue'
+                  ? 'linear-gradient(135deg, #0EA5E9, #06B6D4) 1'
+                  : 'linear-gradient(135deg, #F97316, #EA580C) 1',
+                animation: 'scaleIn 0.15s ease-out',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                onClick={handleCloseModal}
+                className="absolute top-6 right-6 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              {/* Hero Image */}
+              <div className="w-full max-w-2xl mx-auto aspect-video rounded-2xl overflow-hidden mb-6">
+                <img
+                  src={activeFeature.image}
+                  alt={activeFeature.title}
+                  className="w-full h-full object-cover"
+                  style={activeFeature.id === 'mind-coach' ? { transform: 'scale(1.44)' } : undefined}
+                />
+              </div>
+
+              {/* Icon */}
+              <div className="mb-6">
+                <div className={`inline-flex w-20 h-20 rounded-2xl items-center justify-center ${
+                  activeFeature.color === 'blue' ? 'bg-neon-cortex-blue/20 border-2 border-neon-cortex-blue/40' : 'bg-solar-surge-orange/20 border-2 border-solar-surge-orange/40'
+                }`}>
+                  {activeFeature.iconImage ? (
+                    <img
+                      src={activeFeature.iconImage}
+                      alt={`${activeFeature.title} icon`}
+                      className="w-14 h-14 object-contain"
+                      style={{filter: `drop-shadow(0 0 12px ${activeFeature.color === 'blue' ? 'rgba(14,165,233,0.8)' : 'rgba(249,115,22,0.8)'})`}}
+                    />
+                  ) : (
+                    React.createElement(activeFeature.icon, {
+                      className: `w-10 h-10 ${activeFeature.color === 'blue' ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`,
+                      style: {filter: `drop-shadow(0 0 12px ${activeFeature.color === 'blue' ? 'rgba(14,165,233,0.8)' : 'rgba(249,115,22,0.8)'})`}
+                    })
+                  )}
+                </div>
+              </div>
+
+              {/* Title */}
+              <h2 className="text-4xl md:text-5xl font-black mb-4" style={{textShadow: '0 2px 20px rgba(0,0,0,0.5)'}}>
+                {activeFeature.title}
+              </h2>
+
+              {/* Tagline */}
+              <p className={`text-2xl md:text-3xl font-bold mb-6 ${
+                activeFeature.color === 'blue' ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'
+              }`} style={{textShadow: '0 0 20px rgba(14,165,233,0.4)'}}>
+                {activeFeature.tagline}
+              </p>
+
+              {/* Audio Player */}
+              {activeFeature.audioUrl && (
+                <div className="mb-8">
+                  <button
+                    onClick={() => {
+                      if (audioElement) {
+                        if (isPlaying) {
+                          audioElement.pause();
+                          setIsPlaying(false);
+                        } else {
+                          audioElement.play();
+                          setIsPlaying(true);
+                        }
+                      } else {
+                        const audio = new Audio(activeFeature.audioUrl);
+                        audio.play();
+                        setIsPlaying(true);
+                        setAudioElement(audio);
+                        audio.onended = () => setIsPlaying(false);
+                      }
+                    }}
+                    className={`w-full px-8 py-4 rounded-xl font-semibold text-lg flex items-center justify-center gap-3 transition-all duration-300 hover:scale-105 ${
+                      activeFeature.color === 'blue'
+                        ? 'bg-neon-cortex-blue/10 border-2 border-neon-cortex-blue hover:bg-neon-cortex-blue/20 text-neon-cortex-blue'
+                        : 'bg-solar-surge-orange/10 border-2 border-solar-surge-orange hover:bg-solar-surge-orange/20 text-solar-surge-orange'
+                    }`}
+                  >
+                    {isPlaying ? (
+                      <>
+                        <Pause className="w-6 h-6" fill="currentColor" />
+                        Pause Audio Guide
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-6 h-6" fill="currentColor" />
+                        Play Audio Guide
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
+
+              {/* Description */}
+              <div className="text-xl text-gray-300 leading-relaxed whitespace-pre-line">
+                {(activeFeature.modalDescription || activeFeature.description).split('\n').map((line: string, i: number) => {
+                  // Check if line starts with ** and ends with **
+                  if (line.startsWith('**') && line.endsWith('**')) {
+                    const boldText = line.slice(2, -2);
+                    return (
+                      <p key={i} className="text-white font-black">
+                        {boldText}
+                      </p>
+                    );
+                  }
+
+                  // Handle inline bold text with **text**
+                  if (line.includes('**')) {
+                    const parts = line.split('**');
+                    return (
+                      <p key={i}>
+                        {parts.map((part, j) =>
+                          j % 2 === 1 ? <strong key={j} className="text-white font-black">{part}</strong> : part
+                        )}
+                      </p>
+                    );
+                  }
+
+                  return line ? <p key={i}>{line}</p> : <br key={i} />;
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* Baseball Obsession - Conviction-Driven Section */}
+      <section id="features" className="relative py-48 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Dark Gradient Background with Deep Navy */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0A0E1F] via-[#14182E] to-[#0A0E1F]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.9)_100%)]" />
+
+        {/* Subtle Baseball Stitching Pattern Overlay */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 100px, rgba(255,255,255,0.1) 100px, rgba(255,255,255,0.1) 102px)',
+        }} />
+
+        {/* Logo Watermark - Larger and More Prominent */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-[0.06] pointer-events-none">
+          <Image
+            src="/assets/images/logo.png"
+            alt=""
+            width={1200}
+            height={1200}
+            className="object-contain"
+          />
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          {/* Top Tagline Badge */}
+          <div className="flex justify-center mb-8">
+            <div className="inline-flex items-center gap-3 px-6 py-3 backdrop-blur-sm bg-white/5 border border-neon-cortex-blue/30 rounded-full">
+              <div className="w-2 h-2 bg-neon-cortex-blue rounded-full animate-pulse" style={{boxShadow: '0 0 12px rgba(14,165,233,0.8)'}} />
+              <span className="text-sm md:text-base font-bold text-gray-200 tracking-wide">100% BASEBALL. ZERO GENERIC CONTENT.</span>
+            </div>
+          </div>
+
+          {/* Main Headline */}
+          <div className="text-center mb-16">
+            <h2 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black mb-6 leading-[1.1]">
+              <span className="text-white" style={{textShadow: '0 4px 30px rgba(0,0,0,0.9)'}}>
+                Not a Multi-Sport App.
+              </span>
+              <br />
+              <span className="bg-gradient-to-r from-neon-cortex-blue via-mind-primary to-solar-surge-orange bg-clip-text text-transparent" style={{textShadow: '0 0 40px rgba(14,165,233,0.5)'}}>
+                A Baseball Obsession.
+              </span>
+            </h2>
+            <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed">
+              Every mental toughness tool is about the game. Every drill targets baseball-specific movements. Every meal plan fuels a player's position. This isn't adaptable—it's <span className="text-solar-surge-orange font-black" style={{textShadow: '0 0 20px rgba(249,115,22,0.6)'}}>purpose-built</span>.
+            </p>
+          </div>
+
+          {/* Three Pillars Layout */}
+          <div className="grid md:grid-cols-3 gap-8 mb-20">
+            {/* Pillar 1: Mental Edge */}
+            <div className="group relative">
+              {/* Mind Blue Glow */}
+              <div className="absolute -inset-4 bg-gradient-to-b from-neon-cortex-blue/20 to-mind-primary/10 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              <div className="relative backdrop-blur-sm bg-white/[0.02] p-8 rounded-3xl border border-white/10 hover:border-neon-cortex-blue/30 transition-all duration-500 hover:bg-white/[0.05] h-full">
+                {/* Icon */}
+                <div className="mb-6">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-neon-cortex-blue/20 to-mind-primary/10 flex items-center justify-center border border-neon-cortex-blue/30">
+                    <Brain className="w-8 h-8 text-neon-cortex-blue" style={{filter: 'drop-shadow(0 0 12px rgba(14,165,233,0.8))'}} />
+                  </div>
+                </div>
+
+                {/* Title */}
+                <h3 className="text-3xl md:text-4xl font-black mb-4 text-neon-cortex-blue" style={{textShadow: '0 0 20px rgba(14,165,233,0.4)'}}>
+                  Mental Edge
+                </h3>
+
+                {/* Description */}
+                <p className="text-lg text-gray-300 mb-6 leading-relaxed">
+                  Pressure simulation, focus under fire, resilience training. Built for the moments that define games.
+                </p>
+
+                {/* Features */}
+                <ul className="space-y-3">
+                  {[
+                    'Pre-at-bat focus meditation',
+                    'Pressure moment training',
+                    'Mental armor for slumps',
+                    'Game-day visualization',
+                  ].map((feature, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-gray-400">
+                      <div className="w-1.5 h-1.5 bg-neon-cortex-blue rounded-full mt-2" style={{boxShadow: '0 0 8px rgba(14,165,233,0.8)'}} />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Pillar 2: Physical Precision */}
+            <div className="group relative">
+              {/* Muscle Orange Glow */}
+              <div className="absolute -inset-4 bg-gradient-to-b from-solar-surge-orange/20 to-muscle-primary/10 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              <div className="relative backdrop-blur-sm bg-white/[0.02] p-8 rounded-3xl border border-white/10 hover:border-solar-surge-orange/30 transition-all duration-500 hover:bg-white/[0.05] h-full">
+                {/* Icon */}
+                <div className="mb-6">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-solar-surge-orange/20 to-muscle-primary/10 flex items-center justify-center border border-solar-surge-orange/30">
+                    <Dumbbell className="w-8 h-8 text-solar-surge-orange" style={{filter: 'drop-shadow(0 0 12px rgba(249,115,22,0.8))'}} />
+                  </div>
+                </div>
+
+                {/* Title */}
+                <h3 className="text-3xl md:text-4xl font-black mb-4 text-solar-surge-orange" style={{textShadow: '0 0 20px rgba(249,115,22,0.4)'}}>
+                  Physical Precision
+                </h3>
+
+                {/* Description */}
+                <p className="text-lg text-gray-300 mb-6 leading-relaxed">
+                  AI workouts built by position and workload. Swing mechanics analysis. Recovery protocols.
+                </p>
+
+                {/* Features */}
+                <ul className="space-y-3">
+                  {[
+                    'Pitcher vs. catcher workouts',
+                    'Position-specific training',
+                    'Swing Lab analysis',
+                    'Baseball movement patterns',
+                  ].map((feature, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-gray-400">
+                      <div className="w-1.5 h-1.5 bg-solar-surge-orange rounded-full mt-2" style={{boxShadow: '0 0 8px rgba(249,115,22,0.8)'}} />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            {/* Pillar 3: Game IQ */}
+            <div className="group relative">
+              {/* Neutral White Glow */}
+              <div className="absolute -inset-4 bg-gradient-to-b from-white/10 to-white/5 rounded-3xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+              <div className="relative backdrop-blur-sm bg-white/[0.02] p-8 rounded-3xl border border-white/10 hover:border-white/20 transition-all duration-500 hover:bg-white/[0.05] h-full">
+                {/* Icon */}
+                <div className="mb-6">
+                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center border border-white/20">
+                    <Zap className="w-8 h-8 text-white" style={{filter: 'drop-shadow(0 0 12px rgba(255,255,255,0.6))'}} />
+                  </div>
+                </div>
+
+                {/* Title */}
+                <h3 className="text-3xl md:text-4xl font-black mb-4 text-white" style={{textShadow: '0 0 20px rgba(255,255,255,0.3)'}}>
+                  Game IQ
+                </h3>
+
+                {/* Description */}
+                <p className="text-lg text-gray-300 mb-6 leading-relaxed">
+                  Situational intelligence and real-time decision drills. Baseball IQ that wins championships.
+                </p>
+
+                {/* Features */}
+                <ul className="space-y-3">
+                  {[
+                    'Situational training scenarios',
+                    'Real-time decision making',
+                    'Baseball-specific IQ tests',
+                    'Championship mindset drills',
+                  ].map((feature, i) => (
+                    <li key={i} className="flex items-start gap-3 text-sm text-gray-400">
+                      <div className="w-1.5 h-1.5 bg-white rounded-full mt-2" style={{boxShadow: '0 0 8px rgba(255,255,255,0.6)'}} />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Statement - Premium Pill */}
+          <div className="text-center">
+            <div className="inline-block relative group">
+              {/* Animated Glow */}
+              <div className="absolute -inset-6 bg-gradient-to-r from-neon-cortex-blue via-solar-surge-orange to-neon-cortex-blue opacity-30 blur-3xl group-hover:opacity-50 transition-opacity animate-pulse" />
+
+              <div className="relative px-12 py-6 bg-gradient-to-r from-neon-cortex-blue/10 via-solar-surge-orange/10 to-neon-cortex-blue/10 rounded-2xl border-2 border-white/20 backdrop-blur-sm">
+                <p className="text-2xl sm:text-3xl md:text-4xl font-black">
+                  <span className="text-white">This isn't motivation. It's </span>
+                  <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent" style={{textShadow: '0 0 30px rgba(14,165,233,0.5)'}}>
+                    mental and physical armor
+                  </span>
+                  <span className="text-white">.</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Value Comparison - Baseball Lineup Card Design */}
+      <section className="relative py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Deep Navy Background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0e1a] via-[#0F1123] to-[#0a0e1a]" />
+        {/* Subtle field texture */}
+        <div className="absolute inset-0 opacity-[0.02] bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:30px_30px]" />
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          {/* Header */}
+          <div className="text-center mb-24">
+            <div className="inline-block mb-6">
+              <div className="px-6 py-2 backdrop-blur-sm bg-neon-cortex-blue/10 border-2 border-neon-cortex-blue/40 rounded-lg">
+                <span className="text-neon-cortex-blue font-black text-sm tracking-widest drop-shadow-[0_0_8px_rgba(14,165,233,0.8)]">⚾ LINEUP COMPARISON</span>
+              </div>
+            </div>
+            <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black mb-6 leading-tight text-white" style={{textShadow: '0 0 40px rgba(14,165,233,0.3)'}}>
+              Who You Taking to the Championship?
+            </h2>
+            <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto font-medium leading-relaxed">
+              Their roster vs. ours. Same game. Different level.
+            </p>
+          </div>
+
+          {/* Lineup Card */}
+          <div className="max-w-6xl mx-auto">
+            <div className="backdrop-blur-md bg-[#0F1123]/60 rounded-3xl border-2 border-white/10 overflow-hidden shadow-[0_20px_100px_rgba(0,0,0,0.9)]">
+              <div className="grid md:grid-cols-2 gap-0 relative">
+                {/* VS Divider */}
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20 hidden md:block">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange blur-2xl opacity-60" />
+                    <div className="relative bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange text-white font-black text-2xl px-8 py-4 rounded-xl border-3 border-[#0F1123] shadow-[0_0_30px_rgba(14,165,233,0.6)]">
+                      VS
+                    </div>
+                  </div>
+                </div>
+
+                {/* Their Roster Column */}
+                <div className="p-10 md:p-14 border-r-2 border-red-500/30 bg-gradient-to-br from-red-500/5 to-transparent relative">
+                  {/* Subtle red warning glow */}
+                  <div className="absolute inset-0 bg-red-500/5 opacity-30" />
+
+                  <div className="relative">
+                    {/* Header */}
+                    <div className="mb-8 pb-4 border-b-2 border-dashed border-red-500/30">
+                      <h3 className="text-xl font-black text-white tracking-wider drop-shadow-[0_0_8px_rgba(239,68,68,0.4)]">GENERIC APPS</h3>
+                      <p className="text-sm text-gray-400 mt-1">Separate subscriptions</p>
+                    </div>
+
+                    {/* Starting Lineup */}
+                    <div className="mb-8">
+                      <h4 className="text-sm font-bold text-red-400 mb-4 tracking-wide drop-shadow-[0_0_6px_rgba(239,68,68,0.3)]">STARTERS</h4>
+                      <div className="space-y-4">
+                        {[
+                          { num: '1', name: 'Mental Training', price: '$80/yr', icon: Brain },
+                          { num: '2', name: 'Workout Planner', price: '$120/yr', icon: Dumbbell },
+                          { num: '3', name: 'Video Analysis', price: '$180/yr', icon: Video },
+                          { num: '4', name: 'Nutrition Tracker', price: '$50/yr', icon: Apple },
+                          { num: '5', name: 'Baseball IQ', price: '$40/yr', icon: Award },
+                          { num: '6', name: 'Focus & Sound', price: '$80/yr', icon: Music },
+                          { num: '7', name: '5 Hitting Lessons', price: '$550/yr', icon: Users, highlight: true },
+                        ].map((item, i) => {
+                          const Icon = item.icon;
+                          return (
+                            <div key={i} className={`flex items-center justify-between py-2 border-b border-dotted border-white/10 ${item.highlight ? 'bg-red-500/10 -mx-3 px-3 py-3 rounded-lg' : ''}`}>
+                              <div className="flex items-center gap-3">
+                                <div className="w-6 h-6 rounded-full bg-red-500/20 border-2 border-red-500/40 flex items-center justify-center flex-shrink-0 shadow-[0_0_8px_rgba(239,68,68,0.3)]">
+                                  <span className="text-xs font-black text-red-400">{item.num}</span>
+                                </div>
+                                <Icon className="w-4 h-4 text-gray-400" />
+                                <span className={`text-base font-medium ${item.highlight ? 'text-white font-bold' : 'text-white'}`}>
+                                  {item.name}
+                                  {item.highlight && <span className="text-xs text-gray-400 ml-2">($110/hr)</span>}
+                                </span>
+                              </div>
+                              <span className={`text-lg font-bold ${item.highlight ? 'text-white' : 'text-gray-300'}`}>{item.price}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Bench */}
+                    <div className="mb-8 p-4 bg-red-500/10 rounded-lg border border-red-500/30">
+                      <h4 className="text-sm font-bold text-red-400 mb-3 tracking-wide">BENCH</h4>
+                      <p className="text-sm text-gray-400 italic flex items-center gap-2">
+                        <X className="w-4 h-4 text-red-500" /> No free features
+                      </p>
+                    </div>
+
+                    {/* Coaching */}
+                    <div className="mb-10 p-4 bg-red-500/10 rounded-lg border border-red-500/30">
+                      <h4 className="text-sm font-bold text-red-400 mb-3 tracking-wide">COACHING</h4>
+                      <p className="text-sm text-gray-400 italic flex items-center gap-2">
+                        <X className="w-4 h-4 text-red-500" /> Generic content
+                      </p>
+                    </div>
+
+                    {/* Total */}
+                    <div className="pt-6 border-t-2 border-red-500/40">
+                      <div className="flex items-baseline justify-between">
+                        <span className="text-lg text-white font-bold">TOTAL</span>
+                        <div className="text-right">
+                          <div className="text-4xl sm:text-5xl font-black text-white line-through decoration-red-500 decoration-4 drop-shadow-[0_0_12px_rgba(239,68,68,0.4)]">
+                            $1,100
+                          </div>
+                          <div className="text-xs text-gray-400 mt-1">per year</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Mind & Muscle Full Roster Column */}
+                <div className="p-10 md:p-14 bg-gradient-to-br from-neon-cortex-blue/8 via-transparent to-solar-surge-orange/8 relative">
+                  {/* Vibrant glow effect */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-neon-cortex-blue/15 to-solar-surge-orange/15 opacity-50" />
+
+                  <div className="relative">
+                    {/* Header with Logo */}
+                    <div className="mb-8 pb-4 border-b-2 border-dashed border-neon-cortex-blue/40 flex items-center justify-between">
+                      <div>
+                        <h3 className="text-xl font-black text-white tracking-wider drop-shadow-[0_0_12px_rgba(14,165,233,0.6)]">MIND & MUSCLE</h3>
+                        <p className="text-sm text-neon-cortex-blue mt-1 font-semibold">All-in-one system</p>
+                      </div>
+                      <img
+                        src="/assets/images/logo.png"
+                        alt="Mind & Muscle"
+                        className="w-16 h-16 drop-shadow-[0_0_20px_rgba(14,165,233,0.6)]"
+                      />
+                    </div>
+
+                    {/* Starting Lineup */}
+                    <div className="mb-8">
+                      <h4 className="text-sm font-bold text-neon-cortex-blue mb-4 tracking-wide drop-shadow-[0_0_8px_rgba(14,165,233,0.4)]">STARTERS</h4>
+                      <div className="space-y-4">
+                        {[
+                          { num: '1', name: 'Mind AI Coach + Library', icon: Brain, desc: 'Baseball mental training' },
+                          { num: '2', name: 'Muscle AI Coach', icon: Dumbbell, desc: 'Position-specific workouts' },
+                          { num: '3', name: 'Swing Lab', icon: Video, desc: 'AI video analysis' },
+                          { num: '4', name: 'Fuel AI', icon: Apple, desc: 'Position-based nutrition' },
+                          { num: '5', name: 'Game Lab', icon: Award, desc: 'All levels unlocked' },
+                          { num: '6', name: 'Sound Lab', icon: Music, desc: 'Full music library' },
+                          { num: '7', name: 'AI Assistant Coach', icon: Users, desc: 'Custom drill builder' },
+                          { num: '8', name: 'Stats & Swag', icon: TrendingUp, desc: 'AI scouting reports' },
+                          { num: '9', name: 'Goals AI', icon: Award, desc: 'Enhanced, shareable goals' },
+                        ].map((item, i) => {
+                          const Icon = item.icon;
+                          return (
+                            <div key={i} className="flex items-center justify-between py-2 border-b border-dotted border-white/10">
+                              <div className="flex items-center gap-3">
+                                <div className="w-6 h-6 rounded-full bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange flex items-center justify-center flex-shrink-0 shadow-[0_0_12px_rgba(14,165,233,0.5)]">
+                                  <span className="text-xs font-black text-white">{item.num}</span>
+                                </div>
+                                <Icon className="w-4 h-4 text-neon-cortex-blue drop-shadow-[0_0_6px_rgba(14,165,233,0.4)]" />
+                                <div className="flex flex-col">
+                                  <span className="text-base text-white font-medium">{item.name}</span>
+                                  <span className="text-xs text-gray-400">{item.desc}</span>
+                                </div>
+                              </div>
+                              <Check className="w-5 h-5 text-neon-cortex-blue drop-shadow-[0_0_8px_rgba(14,165,233,0.6)] flex-shrink-0" strokeWidth={3} />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Bench - FREE */}
+                    <div className="mb-8 p-4 bg-neon-cortex-blue/15 rounded-lg border-2 border-neon-cortex-blue/40 shadow-[0_0_20px_rgba(14,165,233,0.3)]">
+                      <h4 className="text-sm font-bold text-neon-cortex-blue mb-3 tracking-wide flex items-center gap-2 drop-shadow-[0_0_8px_rgba(14,165,233,0.5)]">
+                        BENCH <span className="text-xs bg-gradient-to-r from-solar-surge-orange to-orange-600 text-white px-3 py-1 rounded-full font-black shadow-[0_0_12px_rgba(249,115,22,0.6)]">FREE</span>
+                      </h4>
+                      <ul className="space-y-2 text-sm text-white">
+                        <li className="flex items-center gap-2">
+                          <span className="text-neon-cortex-blue font-black">•</span> Daily Hit (audio motivation)
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="text-neon-cortex-blue font-black">•</span> Field Notes (performance log)
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="text-neon-cortex-blue font-black">•</span> Breathwork & Visualizations
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="text-neon-cortex-blue font-black">•</span> Chatter & Events
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="text-neon-cortex-blue font-black">•</span> Coach's Corner
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <span className="text-neon-cortex-blue font-black">•</span> Parent Dashboard
+                        </li>
+                      </ul>
+                    </div>
+
+                    {/* Coaching Staff - AI */}
+                    <div className="mb-10 p-4 bg-solar-surge-orange/15 rounded-lg border-2 border-solar-surge-orange/40 shadow-[0_0_20px_rgba(249,115,22,0.3)]">
+                      <h4 className="text-sm font-bold text-solar-surge-orange mb-3 tracking-wide drop-shadow-[0_0_8px_rgba(249,115,22,0.6)]">COACHING STAFF</h4>
+                      <ul className="space-y-2 text-sm text-white">
+                        <li className="flex items-center gap-2">
+                          <Zap className="w-3 h-3 text-solar-surge-orange drop-shadow-[0_0_6px_rgba(249,115,22,0.5)]" /> 10+ AI coaches learn YOUR game
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Zap className="w-3 h-3 text-solar-surge-orange drop-shadow-[0_0_6px_rgba(249,115,22,0.5)]" /> Position-specific training plans
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Zap className="w-3 h-3 text-solar-surge-orange drop-shadow-[0_0_6px_rgba(249,115,22,0.5)]" /> 100% baseball-focused content
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <Zap className="w-3 h-3 text-solar-surge-orange drop-shadow-[0_0_6px_rgba(249,115,22,0.5)]" /> Everything syncs together
+                        </li>
+                      </ul>
+                    </div>
+
+                    {/* Total */}
+                    <div className="pt-6 border-t-2 border-neon-cortex-blue/50">
+                      <div className="flex items-baseline justify-between mb-4">
+                        <span className="text-lg text-white font-bold">TOTAL</span>
+                        <div className="text-right">
+                          <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange blur-3xl opacity-80 animate-pulse" />
+                            <div className="relative flex items-center gap-3">
+                              <div className="text-5xl sm:text-6xl font-black bg-gradient-to-r from-neon-cortex-blue via-mind-primary to-solar-surge-orange bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(14,165,233,0.8)]">
+                                $119
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-xs text-text-secondary mt-1 font-semibold">per year</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Championship Difference Callout - BOLD & DRAMATIC */}
+            <div className="text-center mt-20">
+              <div className="max-w-5xl mx-auto relative">
+                <div className="relative">
+                  {/* Trophy Badge - Large & Bold */}
+                  <div className="inline-block mb-8">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange blur-2xl opacity-60" />
+                      <div className="relative px-8 py-3 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange rounded-full border-2 border-white/20 shadow-[0_0_40px_rgba(14,165,233,0.6)]">
+                        <span className="text-white font-black text-lg tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)]">🏆 THE CHAMPIONSHIP DIFFERENCE</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Main Content - High Contrast Cards */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {/* Their Side - Red Warning */}
+                    <div className="relative group">
+                      <div className="absolute inset-0 bg-red-500 blur-2xl opacity-10 group-hover:opacity-15 transition-opacity -z-10" />
+                      <div className="relative backdrop-blur-xl bg-gradient-to-br from-red-500/15 to-red-900/10 border-2 border-red-500/40 rounded-2xl p-8 hover:border-red-500/60 transition-all shadow-[0_8px_32px_rgba(239,68,68,0.3)]">
+                        <div className="flex items-center gap-3 mb-6">
+                          <X className="w-8 h-8 text-red-500 drop-shadow-[0_0_12px_rgba(239,68,68,0.6)]" />
+                          <h5 className="text-2xl font-black text-white">Generic Apps</h5>
+                        </div>
+                        <ul className="space-y-3 text-base text-gray-300">
+                          <li className="flex items-start gap-2">
+                            <span className="text-red-500 mt-1">✗</span> Generic content for all sports
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-red-500 mt-1">✗</span> No coordination between apps
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-red-500 mt-1">✗</span> No family/coach features
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-red-500 mt-1">✗</span> Still need hitting lessons
+                          </li>
+                          <li className="flex items-start gap-2 pt-3 border-t border-red-500/30">
+                            <span className="text-red-500 mt-1">✗</span> <span className="font-black text-white text-xl">$1,100/year</span>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+
+                    {/* Our Side - Blue/Orange Win */}
+                    <div className="relative group">
+                      <div className="absolute inset-0 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange blur-2xl opacity-15 group-hover:opacity-25 transition-opacity -z-10" />
+                      <div className="relative backdrop-blur-xl bg-gradient-to-br from-neon-cortex-blue/15 via-transparent to-solar-surge-orange/15 border-2 border-neon-cortex-blue/40 rounded-2xl p-8 hover:border-neon-cortex-blue/60 transition-all shadow-[0_8px_32px_rgba(14,165,233,0.4)]">
+                        <div className="flex items-center gap-3 mb-6">
+                          <Check className="w-8 h-8 text-neon-cortex-blue drop-shadow-[0_0_12px_rgba(14,165,233,0.8)]" strokeWidth={3} />
+                          <h5 className="text-2xl font-black text-white">Mind & Muscle</h5>
+                        </div>
+                        <ul className="space-y-3 text-base text-white">
+                          <li className="flex items-start gap-2">
+                            <span className="text-neon-cortex-blue mt-1 font-black">✓</span> 10+ AI coaches learn YOUR game
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-neon-cortex-blue mt-1 font-black">✓</span> Everything syncs together
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-neon-cortex-blue mt-1 font-black">✓</span> PLUS 6 free team/family features
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <span className="text-neon-cortex-blue mt-1 font-black">✓</span> Baseball-only training library
+                          </li>
+                          <li className="flex items-start gap-2 pt-3 border-t border-neon-cortex-blue/40">
+                            <span className="text-neon-cortex-blue mt-1 font-black">✓</span>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-black text-white text-xl">$119/year</span>
+                              </div>
+                              <div className="text-xs text-text-secondary">Individual License</div>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bottom CTA */}
+                  <div className="mt-10">
+                    <p className="text-2xl font-black text-white mb-3 drop-shadow-[0_0_16px_rgba(14,165,233,0.4)]">
+                      <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">10× The Value.</span> 1/10th The Cost.
+                    </p>
+                    <p className="text-gray-400 text-base mb-6">Less than ONE hitting lesson for an entire year of elite training.</p>
+
+                    {/* AI Learning Callout */}
+                    <div className="mb-6 p-6 bg-gradient-to-r from-neon-cortex-blue/10 to-solar-surge-orange/10 border border-neon-cortex-blue/30 rounded-xl">
+                      <p className="text-white text-lg leading-relaxed">
+                        Our AI doesn't just respond—it <span className="text-neon-cortex-blue font-black drop-shadow-[0_0_12px_rgba(14,165,233,0.6)]">learns</span>. Every workout, every journal entry, every swing analysis feeds the engine. In 30 days, you'll get recommendations that feel like they're from a coach who's known you for years.
+                      </p>
+                    </div>
+
+                    {/* App Store Price */}
+                    <div className="bg-gradient-to-r from-neon-cortex-blue/20 to-solar-surge-orange/20 border-2 border-neon-cortex-blue/40 rounded-xl px-6 py-3 mb-3 inline-block">
+                      <div className="flex items-center gap-3 mb-1">
+                        <span className="text-white font-bold">Individual Premium:</span>
+                        <span className="text-3xl font-black bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">$119/year</span>
+                      </div>
+                    </div>
+
+                    {/* Team Licensing Link */}
+                    <div className="text-center">
+                      <a
+                        href="/team-licensing"
+                        className="inline-flex items-center gap-2 text-neon-cortex-blue hover:text-solar-surge-orange transition-colors font-semibold text-sm group"
+                      >
+                        <Users className="w-4 h-4" />
+                        <span>Teams: Get 10-20% off bulk licenses</span>
+                        <span className="group-hover:translate-x-1 transition-transform">→</span>
+                      </a>
+                      <p className="text-xs text-gray-500 mt-1">12 users minimum</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Free Tier Section */}
+      <section className="py-32 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-20">
+            <div className="inline-block mb-8">
+              <LiquidGlass variant="blue" rounded="full" padding="none" glow={true} className="px-6 py-3">
+                <div className="flex items-center gap-2">
+                  <Award className="w-6 h-6 text-neon-cortex-blue drop-shadow-[0_0_12px_rgba(14,165,233,0.8)]" />
+                  <span className="text-base md:text-lg font-bold">TRY BEFORE YOU BUY</span>
+                </div>
+              </LiquidGlass>
+            </div>
+            <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black mb-8 leading-tight">
+              Start Free. Stay Free.
+              <br />
+              <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent drop-shadow-[0_0_32px_rgba(14,165,233,0.4)]">
+                Or Unlock Everything.
+              </span>
+            </h2>
+            <p className="text-xl sm:text-2xl md:text-3xl text-text-secondary max-w-4xl mx-auto leading-relaxed font-medium">
+              The free tier isn't a trial—it's fully functional. Team communication, daily motivation, journal tracking, and Game Lab Level 1. Forever free. No credit card required.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Free Tier */}
+            <LiquidGlass variant="blue" glow={true} className="p-10">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-4xl md:text-5xl font-black">Free Forever</h3>
+                <div className="text-5xl md:text-6xl font-black text-neon-cortex-blue drop-shadow-[0_0_24px_rgba(14,165,233,0.6)]">$0</div>
+              </div>
+              <p className="text-text-secondary mb-8 text-lg md:text-xl">Perfect for trying the app and staying connected with your team</p>
+              <ul className="space-y-4 mb-10">
+                {[
+                  'Chatter: Full team communication',
+                  'Events: Team scheduling & calendar',
+                  'Daily Hit: Motivational content',
+                  'Dugout Talk: Personal journal tracker',
+                  'Game Lab Level 1: Baseball IQ basics',
+                  'Limited AI interactions',
+                ].map((feature, i) => (
+                  <li key={i} className="flex items-center gap-3 text-base md:text-lg text-gray-300">
+                    <div className="w-2 h-2 bg-neon-cortex-blue rounded-full flex-shrink-0" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <a
+                href="#"
+                className="block w-full px-12 py-5 text-lg font-semibold font-poppins text-center rounded-2xl border border-neon-cortex-blue/30 backdrop-blur-md transition-all duration-300 hover:scale-105 active:scale-95 relative overflow-hidden"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(15,17,35,0.8) 0%, rgba(27,31,57,0.6) 60%, rgba(14,165,233,0.1) 100%)',
+                  boxShadow: '0 4px 12px rgba(14,165,233,0.2), 0 2px 6px rgba(0,0,0,0.3), 0 2px 6px -2px rgba(14,165,233,0.1) inset'
+                }}
+              >
+                Download Free
+              </a>
+            </LiquidGlass>
+
+            {/* Premium */}
+            <div className="relative">
+              <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 z-20">
+                <LiquidGlass variant="orange" rounded="full" padding="none" glow={true} className="px-6 py-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm md:text-base font-bold bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">
+                      🔥 BEST VALUE
+                    </span>
+                  </div>
+                </LiquidGlass>
+              </div>
+              <LiquidGlass variant="orange" glow={true} className="p-10">
+                <div className="flex items-center justify-between mb-6">
+                <h3 className="text-4xl md:text-5xl font-black">Premium</h3>
+                <div className="flex flex-col items-end">
+                  <div className="flex items-baseline gap-2">
+                    <div className="text-5xl md:text-6xl font-black text-solar-surge-orange drop-shadow-[0_0_24px_rgba(249,115,22,0.6)]">$119</div>
+                    <div className="text-xl md:text-2xl text-text-secondary font-semibold">/year</div>
+                  </div>
+                  <div className="text-sm text-text-secondary mt-1">Individual License</div>
+                </div>
+              </div>
+
+              {/* Team Licensing Callout */}
+              <div className="mb-6 p-4 rounded-xl bg-gradient-to-br from-neon-cortex-blue/20 via-solar-surge-orange/10 to-transparent border-2 border-neon-cortex-blue/40">
+                <div className="flex items-center gap-2 mb-1">
+                  <Users className="w-5 h-5 text-neon-cortex-blue" />
+                  <span className="font-bold text-neon-cortex-blue">Team of 12+?</span>
+                </div>
+                <p className="text-sm text-text-secondary mb-2">
+                  Save up to 20% with team licensing — as low as $95.20/seat/year
+                </p>
+                <Link
+                  href="/team-licensing"
+                  className="inline-flex items-center gap-1 text-sm font-semibold text-solar-surge-orange hover:text-solar-surge-orange/80 transition-colors"
+                >
+                  View team pricing <span className="text-lg">→</span>
+                </Link>
+              </div>
+
+              <p className="text-text-secondary mb-8 text-lg md:text-xl">Everything free has, plus 10+ AI coaches and unlimited access</p>
+              <ul className="space-y-4 mb-10">
+                {[
+                  'Everything in Free',
+                  'Mind AI Coach: Mental toughness training',
+                  'Muscle AI Coach: All workouts',
+                  'Fuel AI: Position-specific nutrition',
+                  'Goals AI: Personalized roadmaps',
+                  'Swing Lab: AI video analysis',
+                  'Game Lab: All levels unlocked',
+                  'Sound Lab: Customize frequencies for peak mental state',
+                  'Weekly AI Reports',
+                  'AI Assistant Coach: Custom drill builder for coaches, parents & athletes',
+                  'Parent Dashboard (for parents)',
+                ].map((feature, i) => (
+                  <li key={i} className="flex items-start gap-3 text-base md:text-lg text-gray-300">
+                    <Check className="w-5 h-5 text-solar-surge-orange flex-shrink-0 mt-0.5" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <a
+                href="/team-licensing"
+                className="block w-full px-12 py-5 text-lg font-semibold font-poppins text-center rounded-xl bg-gradient-to-br from-solar-surge-orange/20 to-solar-surge-orange/10 border border-solar-surge-orange/30 backdrop-blur-liquid transition-all duration-300 hover:from-solar-surge-orange/30 hover:to-solar-surge-orange/15 hover:shadow-liquid-glow-orange hover:border-solar-surge-orange/50 hover:scale-105 active:scale-95"
+              >
+                Upgrade to Premium
+              </a>
+              <p className="text-sm text-center text-text-secondary mt-4">
+                Cancel anytime. 30-day money-back guarantee.
+              </p>
+              </LiquidGlass>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <LiquidGlass variant="blue" glow={true} className="p-12 text-center">
+            <h2 className="text-3xl sm:text-4xl font-black mb-4">
+              Ready to Dominate?
+            </h2>
+            <p className="text-xl text-text-secondary mb-8 max-w-2xl mx-auto">
+              Join thousands of baseball players, coaches, and teams using Mind & Muscle to elevate their game
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a
+                href="#features"
+                className="relative overflow-hidden px-12 py-5 text-lg font-semibold font-poppins text-center rounded-2xl border border-neon-cortex-blue/30 backdrop-blur-md transition-all duration-300 hover:scale-105 active:scale-95"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(15,17,35,0.8) 0%, rgba(27,31,57,0.6) 60%, rgba(14,165,233,0.1) 100%)',
+                  boxShadow: '0 4px 12px rgba(14,165,233,0.2), 0 2px 6px rgba(0,0,0,0.3), 0 2px 6px -2px rgba(14,165,233,0.1) inset'
+                }}
+              >
+                Download Free
+              </a>
+              <a
+                href="/team-licensing"
+                className="relative overflow-hidden px-12 py-5 text-lg font-semibold font-poppins text-center rounded-2xl border border-solar-surge-orange/30 backdrop-blur-md transition-all duration-300 hover:scale-105 active:scale-95"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(15,17,35,0.8) 0%, rgba(27,31,57,0.6) 60%, rgba(249,115,22,0.1) 100%)',
+                  boxShadow: '0 4px 12px rgba(249,115,22,0.2), 0 2px 6px rgba(0,0,0,0.3), 0 2px 6px -2px rgba(249,115,22,0.1) inset'
+                }}
+              >
+                Start for $119/year (Special Offer)
+              </a>
+            </div>
+            <p className="text-sm text-text-secondary mt-6">
+              Team licensing available • Partner program open • 30-day money-back guarantee
+            </p>
+          </LiquidGlass>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-white/10">
+        <div className="max-w-7xl mx-auto text-center">
+          {/* App Store Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
+            <Link
+              href="https://apps.apple.com/app/mind-muscle"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block"
+            >
+              <div className="px-8 py-3 bg-black rounded-xl border border-white/20 hover:border-white/40 transition-all hover:scale-105 flex items-center gap-3">
+                <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                </svg>
+                <div className="text-left">
+                  <div className="text-xs text-text-secondary">Download on the</div>
+                  <div className="text-lg font-semibold -mt-1">App Store</div>
+                </div>
+              </div>
+            </Link>
+            <Link
+              href="https://play.google.com/store/apps/details?id=com.mindandmuscle.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block"
+            >
+              <div className="px-8 py-3 bg-black rounded-xl border border-white/20 hover:border-white/40 transition-all hover:scale-105 flex items-center gap-3">
+                <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.5,12.92 20.16,13.19L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
+                </svg>
+                <div className="text-left">
+                  <div className="text-xs text-text-secondary">GET IT ON</div>
+                  <div className="text-lg font-semibold -mt-1">Google Play</div>
+                </div>
+              </div>
+            </Link>
+          </div>
+
+          <p className="text-text-secondary">&copy; 2025 Mind & Muscle Performance. All rights reserved.</p>
+        </div>
+      </footer>
+    </div>
+  );
+}

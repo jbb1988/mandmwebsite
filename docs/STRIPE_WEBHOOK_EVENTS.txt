@@ -1,0 +1,23 @@
+Required Stripe Webhook Events:
+
+Search for and select these 4 events:
+
+1. checkout.session.completed
+   - Fires when a customer completes the checkout
+   - This is where we create the team and send the email
+
+2. invoice.payment_succeeded
+   - Fires when a subscription payment succeeds
+   - Used for annual renewals to keep license active
+
+3. invoice.payment_failed
+   - Fires when a subscription payment fails
+   - We mark the license as inactive
+
+4. customer.subscription.deleted
+   - Fires when a subscription is cancelled
+   - We mark the license as cancelled
+
+---
+
+After selecting these events, you'll configure the endpoint URL on the next screen.
