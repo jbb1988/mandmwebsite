@@ -7,6 +7,7 @@ import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
 import { Brain, Dumbbell, Users, TrendingUp, Award, Zap, X, Play, Pause, MousePointerClick, Check, Video, Apple, MessageCircle, Music } from 'lucide-react';
 import { FadeInWhenVisible, StaggerChildren, TextReveal, GradientTextReveal, ScaleInWhenVisible, staggerItemVariants } from '@/components/animations';
+import { AppScreenshotCarousel } from '@/components/AppScreenshotCarousel';
 import { motion } from 'framer-motion';
 
 export default function HomePage() {
@@ -766,6 +767,44 @@ export default function HomePage() {
             </div>
           </div>
         )}
+      </section>
+
+      {/* App Screenshots Carousel Section */}
+      <section className="relative py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Deep Navy to Black Gradient Background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0A0E1F] via-[#0F1123] to-[#0A0E1F]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.9)_100%)]" />
+
+        {/* Subtle Baseball Stitching Pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 100px, rgba(255,255,255,0.1) 100px, rgba(255,255,255,0.1) 102px)',
+        }} />
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          {/* Header */}
+          <FadeInWhenVisible delay={0} direction="up" className="text-center mb-16">
+            <div className="inline-block mb-6">
+              <div className="px-6 py-2 backdrop-blur-sm bg-neon-cortex-blue/10 border-2 border-neon-cortex-blue/40 rounded-lg">
+                <span className="text-neon-cortex-blue font-black text-sm tracking-widest drop-shadow-[0_0_8px_rgba(14,165,233,0.8)]">⚾ SEE IT IN ACTION</span>
+              </div>
+            </div>
+            <GradientTextReveal
+              text="Inside The App"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight"
+              gradientFrom="#0EA5E9"
+              gradientTo="#F97316"
+              delay={0.2}
+            />
+            <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto font-medium leading-relaxed">
+              Real screenshots. Real features. Real baseball training.
+            </p>
+          </FadeInWhenVisible>
+
+          {/* Carousel */}
+          <FadeInWhenVisible delay={0.4} direction="up">
+            <AppScreenshotCarousel />
+          </FadeInWhenVisible>
+        </div>
       </section>
 
       {/* Baseball Obsession - Conviction-Driven Section */}
