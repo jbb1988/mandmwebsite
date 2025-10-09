@@ -6,6 +6,8 @@ import Image from 'next/image';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
 import { Brain, Dumbbell, Users, TrendingUp, Award, Zap, X, Play, Pause, MousePointerClick, Check, Video, Apple, MessageCircle, Music } from 'lucide-react';
+import { FadeInWhenVisible, StaggerChildren, TextReveal, GradientTextReveal } from '@/components/animations';
+import { motion } from 'framer-motion';
 
 export default function HomePage() {
   const [activeFeature, setActiveFeature] = useState<any>(null);
@@ -224,36 +226,50 @@ export default function HomePage() {
           <div className="max-w-full flex items-center justify-between gap-8">
             <div className="max-w-3xl">
             {/* Baseball Badge */}
-            <div className="mb-6 inline-block animate-fadeUp mt-4" style={{animationDelay: '0ms'}}>
-              <LiquidGlass variant="blue" rounded="full" padding="sm" glow={true} className="inline-flex items-center gap-2 px-6 py-2">
-                <span className="text-sm font-bold">⚾ 100% BASEBALL. ZERO GENERIC CONTENT.</span>
-              </LiquidGlass>
+            <FadeInWhenVisible delay={0} direction="down">
+              <div className="mb-6 inline-block mt-4">
+                <LiquidGlass variant="blue" rounded="full" padding="sm" glow={true} className="inline-flex items-center gap-2 px-6 py-2">
+                  <span className="text-sm font-bold">⚾ 100% BASEBALL. ZERO GENERIC CONTENT.</span>
+                </LiquidGlass>
+              </div>
+            </FadeInWhenVisible>
+
+            {/* Tagline - Blue and Orange Split with Text Reveal */}
+            <div className="mb-6">
+              <TextReveal
+                text="Discipline the Mind."
+                as="h2"
+                className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-neon-cortex-blue block"
+                delay={0.1}
+                staggerDelay={0.05}
+              />
+              <TextReveal
+                text="Dominate the Game."
+                as="h2"
+                className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-solar-surge-orange block"
+                delay={0.4}
+                staggerDelay={0.05}
+              />
             </div>
 
-            {/* Tagline - Blue and Orange Split */}
-            <div className="mb-6 animate-fadeUp" style={{animationDelay: '50ms'}}>
-              <h2 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight leading-tight">
-                <span className="text-neon-cortex-blue block" style={{textShadow: '0 0 30px rgba(14, 165, 233, 0.8), 0 2px 10px rgba(0,0,0,0.9)'}}>
-                  Discipline the Mind.
-                </span>
-                <span className="text-solar-surge-orange block" style={{textShadow: '0 0 30px rgba(249, 115, 22, 0.8), 0 2px 10px rgba(0,0,0,0.9)'}}>
-                  Dominate the Game.
-                </span>
-              </h2>
-            </div>
-
-            {/* Main Heading - Mobile-optimized Typography */}
-            <h1 className="text-[40px] sm:text-[56px] md:text-[64px] lg:text-[72px] font-black mb-6 leading-[1.1] text-white animate-fadeUp" style={{textShadow: '0 4px 24px rgba(0,0,0,0.9)', animationDelay: '100ms'}}>
-              The only app built exclusively for baseball players. Every feature. Every drill. Every mental toughness tool.
-            </h1>
+            {/* Main Heading - Mobile-optimized Typography with Text Reveal */}
+            <TextReveal
+              text="The only app built exclusively for baseball players. Every feature. Every drill. Every mental toughness tool."
+              as="h1"
+              className="text-[40px] sm:text-[56px] md:text-[64px] lg:text-[72px] font-black mb-6 leading-[1.1] text-white"
+              delay={0.7}
+              staggerDelay={0.03}
+            />
 
             {/* Subheading - 20-22px Medium Weight */}
-            <p className="text-[20px] sm:text-[22px] text-gray-200 mb-8 leading-relaxed max-w-2xl font-medium animate-fadeUp" style={{textShadow: '0 2px 12px rgba(0,0,0,0.7)', animationDelay: '200ms'}}>
-              Train smarter, recover faster, and outthink every play with the all-in-one performance app designed for baseball athletes.
-            </p>
+            <FadeInWhenVisible delay={1.2} direction="up">
+              <p className="text-[20px] sm:text-[22px] text-gray-200 mb-8 leading-relaxed max-w-2xl font-medium" style={{textShadow: '0 2px 12px rgba(0,0,0,0.7)'}}>
+                Train smarter, recover faster, and outthink every play with the all-in-one performance app designed for baseball athletes.
+              </p>
+            </FadeInWhenVisible>
 
             {/* Download Links */}
-            <div className="flex flex-col sm:flex-row gap-4 animate-fadeUp items-stretch sm:items-center w-full sm:w-auto" style={{animationDelay: '300ms'}}>
+            <FadeInWhenVisible delay={1.4} direction="up" className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center w-full sm:w-auto">
               <Link
                 href="https://apps.apple.com/app/mind-muscle"
                 target="_blank"
@@ -310,34 +326,34 @@ export default function HomePage() {
 
         <div className="max-w-7xl mx-auto relative z-10">
           {/* Header */}
-          <div className="text-center mb-24">
-            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight">
-              <span className="bg-gradient-to-r from-neon-cortex-blue via-mind-primary to-solar-surge-orange bg-clip-text text-transparent" style={{textShadow: '0 0 60px rgba(14,165,233,0.4)'}}>
-                The Complete Performance Ecosystem.
-              </span>
-            </h2>
+          <FadeInWhenVisible delay={0} direction="up" className="text-center mb-24">
+            <GradientTextReveal
+              text="The Complete Performance Ecosystem."
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight"
+              gradientFrom="#0EA5E9"
+              gradientTo="#F97316"
+              delay={0.2}
+            />
             <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-6">
               Every tool an athlete needs — mental toughness, physical mastery, precision coaching, and intelligent recovery — all connected in one seamless system.
             </p>
             <p className="text-base sm:text-lg text-text-secondary max-w-3xl mx-auto">
               <span className="text-neon-cortex-blue font-semibold">Pro features shown below.</span> Free tier also includes Chatter (team communication), Events (scheduling), Daily Hit (motivation), Dugout Talk (journal), and Game Lab Level 1.
             </p>
-          </div>
+          </FadeInWhenVisible>
 
           {/* Row 1 - 2 Large Hero Cards: Mind & Muscle AI */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <StaggerChildren staggerDelay={0.15} className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             {row1Features.map((feature, i) => {
               const Icon = feature.icon;
               const isBlue = feature.color === 'blue';
 
               return (
-                <div
+                <motion.div
                   key={feature.id}
                   onClick={() => setActiveFeature(feature)}
                   className="group relative cursor-pointer"
-                  style={{
-                    animation: `fadeUp 0.6s ease-out ${i * 0.06}s both`,
-                  }}
+                  variants={staggerItemVariants}
                 >
                   {/* Glow Effect */}
                   <div className={`absolute -inset-2 rounded-3xl blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500 ${
@@ -419,25 +435,23 @@ export default function HomePage() {
                       <MousePointerClick className="w-5 h-5 text-white" />
                     </button>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
-          </div>
+          </StaggerChildren>
 
           {/* Row 2 - 3 Cards: Game Lab, Swing Lab, Sound Lab */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <StaggerChildren staggerDelay={0.12} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {row2Features.map((feature, i) => {
               const Icon = feature.icon;
               const isBlue = feature.color === 'blue';
 
               return (
-                <div
+                <motion.div
                   key={feature.id}
                   onClick={() => setActiveFeature(feature)}
                   className="group relative cursor-pointer"
-                  style={{
-                    animation: `fadeUp 0.6s ease-out ${(i + 2) * 0.06}s both`,
-                  }}
+                  variants={staggerItemVariants}
                 >
                   {/* Glow Effect */}
                   <div className={`absolute -inset-2 rounded-3xl blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500 ${
@@ -504,25 +518,23 @@ export default function HomePage() {
                       <MousePointerClick className="w-5 h-5 text-white" />
                     </button>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
-          </div>
+          </StaggerChildren>
 
           {/* Row 3 - 4 Cards: AI Assistant, Goals, Fuel, Chatter */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <StaggerChildren staggerDelay={0.1} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {row3Features.map((feature, i) => {
               const Icon = feature.icon;
               const isBlue = feature.color === 'blue';
 
               return (
-                <div
+                <motion.div
                   key={feature.id}
                   onClick={() => setActiveFeature(feature)}
                   className="group relative cursor-pointer"
-                  style={{
-                    animation: `fadeUp 0.6s ease-out ${(i + 5) * 0.06}s both`,
-                  }}
+                  variants={staggerItemVariants}
                 >
                   {/* Glow Effect */}
                   <div className={`absolute -inset-2 rounded-3xl blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500 ${
@@ -599,10 +611,10 @@ export default function HomePage() {
                       <MousePointerClick className="w-5 h-5 text-white" />
                     </button>
                   </div>
-                </div>
+                </motion.div>
               );
             })}
-          </div>
+          </StaggerChildren>
         </div>
 
         {/* Feature Modal */}
@@ -1036,7 +1048,7 @@ export default function HomePage() {
 
         <div className="max-w-7xl mx-auto relative z-10">
           {/* Header */}
-          <div className="text-center mb-24">
+          <FadeInWhenVisible delay={0} direction="up" className="text-center mb-24">
             <div className="inline-block mb-6">
               <div className="px-6 py-2 backdrop-blur-sm bg-neon-cortex-blue/10 border-2 border-neon-cortex-blue/40 rounded-lg">
                 <span className="text-neon-cortex-blue font-black text-sm tracking-widest drop-shadow-[0_0_8px_rgba(14,165,233,0.8)]">⚾ LINEUP COMPARISON</span>
@@ -1048,10 +1060,10 @@ export default function HomePage() {
             <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto font-medium leading-relaxed">
               Their roster vs. ours. Same game. Different level.
             </p>
-          </div>
+          </FadeInWhenVisible>
 
           {/* Lineup Card */}
-          <div className="max-w-6xl mx-auto">
+          <ScaleInWhenVisible delay={0.3} className="max-w-6xl mx-auto">
             <div className="backdrop-blur-md bg-[#0F1123]/60 rounded-3xl border-2 border-white/10 overflow-hidden shadow-[0_20px_100px_rgba(0,0,0,0.9)]">
               <div className="grid md:grid-cols-2 gap-0 relative">
                 {/* VS Divider */}
@@ -1261,9 +1273,10 @@ export default function HomePage() {
                 </div>
               </div>
             </div>
+          </ScaleInWhenVisible>
 
-            {/* Championship Difference Callout - BOLD & DRAMATIC */}
-            <div className="text-center mt-20">
+          {/* Championship Difference Callout - BOLD & DRAMATIC */}
+          <FadeInWhenVisible delay={0.5} direction="up" className="text-center mt-20">
               <div className="max-w-5xl mx-auto relative">
                 <div className="relative">
                   {/* Trophy Badge - Large & Bold */}
@@ -1378,15 +1391,14 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
+          </FadeInWhenVisible>
         </div>
       </section>
 
       {/* Free Tier Section */}
       <section className="py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-20">
+          <FadeInWhenVisible delay={0} direction="up" className="text-center mb-20">
             <div className="inline-block mb-8">
               <LiquidGlass variant="blue" rounded="full" padding="none" glow={true} className="px-6 py-3">
                 <div className="flex items-center gap-2">
@@ -1405,11 +1417,12 @@ export default function HomePage() {
             <p className="text-xl sm:text-2xl md:text-3xl text-text-secondary max-w-4xl mx-auto leading-relaxed font-medium">
               The free tier isn't a trial—it's fully functional. Team communication, daily motivation, journal tracking, and Game Lab Level 1. Forever free. No credit card required.
             </p>
-          </div>
+          </FadeInWhenVisible>
 
-          <div className="grid md:grid-cols-2 gap-8">
+          <StaggerChildren staggerDelay={0.15} className="grid md:grid-cols-2 gap-8">
             {/* Free Tier */}
-            <LiquidGlass variant="blue" glow={true} className="p-10">
+            <motion.div variants={staggerItemVariants}>
+              <LiquidGlass variant="blue" glow={true} className="p-10">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-4xl md:text-5xl font-black">Free Forever</h3>
                 <div className="text-5xl md:text-6xl font-black text-neon-cortex-blue drop-shadow-[0_0_24px_rgba(14,165,233,0.6)]">$0</div>
@@ -1441,9 +1454,10 @@ export default function HomePage() {
                 Download Free
               </a>
             </LiquidGlass>
+            </motion.div>
 
             {/* Premium */}
-            <div className="relative">
+            <motion.div variants={staggerItemVariants} className="relative">
               <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 z-20">
                 <LiquidGlass variant="orange" rounded="full" padding="none" glow={true} className="px-6 py-2">
                   <div className="flex items-center gap-2">
@@ -1513,15 +1527,16 @@ export default function HomePage() {
                 Cancel anytime. 30-day money-back guarantee.
               </p>
               </LiquidGlass>
-            </div>
-          </div>
+            </motion.div>
+          </StaggerChildren>
         </div>
       </section>
 
       {/* CTA Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          <LiquidGlass variant="blue" glow={true} className="p-12 text-center">
+          <FadeInWhenVisible delay={0} direction="up">
+            <LiquidGlass variant="blue" glow={true} className="p-12 text-center">
             <h2 className="text-3xl sm:text-4xl font-black mb-4">
               Ready to Dominate?
             </h2>
@@ -1532,6 +1547,7 @@ export default function HomePage() {
               Team licensing available • Partner program open • 30-day money-back guarantee
             </p>
           </LiquidGlass>
+          </FadeInWhenVisible>
         </div>
       </section>
 
