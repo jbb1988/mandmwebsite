@@ -1468,32 +1468,10 @@ export default function HomePage() {
             <h2 className="text-3xl sm:text-4xl font-black mb-4">
               Ready to Dominate?
             </h2>
-            <p className="text-xl text-text-secondary mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-text-secondary mb-6 max-w-2xl mx-auto">
               Join thousands of baseball players, coaches, and teams using Mind & Muscle to elevate their game
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="#features"
-                className="relative overflow-hidden px-12 py-5 text-lg font-semibold font-poppins text-center rounded-2xl border border-neon-cortex-blue/30 backdrop-blur-md transition-all duration-300 hover:scale-105 active:scale-95"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(15,17,35,0.8) 0%, rgba(27,31,57,0.6) 60%, rgba(14,165,233,0.1) 100%)',
-                  boxShadow: '0 4px 12px rgba(14,165,233,0.2), 0 2px 6px rgba(0,0,0,0.3), 0 2px 6px -2px rgba(14,165,233,0.1) inset'
-                }}
-              >
-                Download Free
-              </a>
-              <a
-                href="/team-licensing"
-                className="relative overflow-hidden px-12 py-5 text-lg font-semibold font-poppins text-center rounded-2xl border border-solar-surge-orange/30 backdrop-blur-md transition-all duration-300 hover:scale-105 active:scale-95"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(15,17,35,0.8) 0%, rgba(27,31,57,0.6) 60%, rgba(249,115,22,0.1) 100%)',
-                  boxShadow: '0 4px 12px rgba(249,115,22,0.2), 0 2px 6px rgba(0,0,0,0.3), 0 2px 6px -2px rgba(249,115,22,0.1) inset'
-                }}
-              >
-                Start for $119/year (Special Offer)
-              </a>
-            </div>
-            <p className="text-sm text-text-secondary mt-6">
+            <p className="text-sm text-text-secondary">
               Team licensing available • Partner program open • 30-day money-back guarantee
             </p>
           </LiquidGlass>
