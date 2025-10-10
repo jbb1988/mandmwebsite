@@ -171,7 +171,7 @@ export async function POST(request: NextRequest) {
           <div style="text-align: center; padding: 20px; color: #999; font-size: 14px;">
             <p style="margin: 0;">Mind & Muscle | Developing the Complete Athlete</p>
             <p style="margin: 10px 0 0 0;">
-              <a href="https://mindandmuscle.com" style="color: #fb923c; text-decoration: none;">mindandmuscle.com</a>
+              <a href="https://mindandmuscle.ai" style="color: #fb923c; text-decoration: none;">mindandmuscle.ai</a>
             </p>
           </div>
         </div>

@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
                 <li>📊 Commission details and tracking info</li>
               </ul>
               <div style="text-align: center; margin-top: 20px;">
-                <a href="https://mindandmuscle.com/partner-resources" style="display: inline-block; background: linear-gradient(135deg, #fb923c 0%, #f97316 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px; box-shadow: 0 4px 6px rgba(251, 146, 60, 0.3);">
+                <a href="https://mindandmuscle.ai/partner-resources" style="display: inline-block; background: linear-gradient(135deg, #fb923c 0%, #f97316 100%); color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 16px; box-shadow: 0 4px 6px rgba(251, 146, 60, 0.3);">
                   Access Your Resources →
                 </a>
               </div>
@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
               <h2 style="margin: 0 0 15px 0; font-size: 20px; color: #22c55e;">🎯 Next Steps</h2>
               <ol style="font-size: 15px; line-height: 1.8; color: #555; margin: 10px 0; padding-left: 20px;">
                 <li>Check your email for Tolt onboarding (contains your unique partner link)</li>
-                <li>Visit the <a href="https://mindandmuscle.com/partner-resources" style="color: #fb923c; text-decoration: none; font-weight: 600;">marketing resources page</a></li>
+                <li>Visit the <a href="https://mindandmuscle.ai/partner-resources" style="color: #fb923c; text-decoration: none; font-weight: 600;">marketing resources page</a></li>
                 <li>Copy email templates or social media copy</li>
                 <li>Share with your network and start earning!</li>
               </ol>
@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
           <div style="text-align: center; padding: 20px; color: #999; font-size: 14px;">
             <p style="margin: 0;">Mind & Muscle | Developing the Complete Athlete</p>
             <p style="margin: 10px 0 0 0;">
-              <a href="https://mindandmuscle.com" style="color: #fb923c; text-decoration: none;">mindandmuscle.com</a>
+              <a href="https://mindandmuscle.ai" style="color: #fb923c; text-decoration: none;">mindandmuscle.ai</a>
             </p>
           </div>
         </div>
