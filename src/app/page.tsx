@@ -120,6 +120,7 @@ export default function HomePage() {
       iconImage: '/assets/images/game_lab_icon copy.png',
       color: 'blue',
       image: '/assets/images/game-lab.png',
+      videoUrl: '/assets/videos/game_lab.mp4',
       audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/gamelab_ob.mp3',
       tagline: 'Play Smarter. Not Harder.',
       description: 'Train Your Baseball IQ. Master Every Situation.',
@@ -132,7 +133,8 @@ export default function HomePage() {
       iconImage: '/assets/images/Swing Lab1.png',
       color: 'orange',
       image: '/assets/dashboard/swing_lab.png',
-      audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/swinglab_ob.mp3',
+      videoUrl: '/assets/videos/swing_lab.mp4',
+      audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/swinglab_ob.mp4',
       tagline: 'Every Frame Tells a Story.',
       description: 'Every swing analyzed. Every weakness eliminated.',
       modalDescription: '**Upload your swing. Get elite coaching feedback. Fix what\'s holding you back.**\n\nSwing Lab delivers AI coaching analysis that breaks down your swing like a veteran MLB hitting coach—instant, actionable, precise.\n\n**Elite AI Coaching Analysis:**\n\n- **The Good Stuff** - Specific strengths to build on\n- **Power Opportunities** - The 1-2 changes that unlock explosive contact\n- **Your Practice Plan** - 2 precision drills targeting your exact issues\n- **Mental Game Strategy** - Situational hitting advice\n- **#1 Focus** - The most important thing to work on next\n\n**Analysis Features:**\n\n- Video thumbnails for visual reference\n- Complete analysis history for progress tracking\n- Shareable reports for coaches and teammates\n- Favorite your best analyses\n\nWhile other hitters wonder what to fix, you\'ll get precise coaching that tells you exactly what to work on and exactly how to fix it.\n\n**Swing Lab. Upload. Analyze. Improve.**',
@@ -144,6 +146,7 @@ export default function HomePage() {
       iconImage: '/assets/images/Sound Lab copy.png',
       color: 'blue',
       image: '/assets/mind/sound_lab.png',
+      videoUrl: '/assets/videos/sound_lab.mp4',
       audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/soundlab_ob.mp3',
       tagline: 'Train Your Mind Through Sound.',
       description: 'Engineer your mental state for peak performance',
@@ -463,9 +466,38 @@ export default function HomePage() {
                   <div className={`relative backdrop-blur-sm bg-white/[0.02] p-6 rounded-2xl border-2 transition-all duration-500 hover:scale-105 hover:bg-white/[0.05] h-full ${
                     isBlue ? 'border-neon-cortex-blue/40 hover:border-neon-cortex-blue shadow-[0_0_20px_rgba(14,165,233,0.3)] hover:shadow-[0_0_40px_rgba(14,165,233,0.5)]' : 'border-solar-surge-orange/40 hover:border-solar-surge-orange shadow-[0_0_20px_rgba(249,115,22,0.3)] hover:shadow-[0_0_40px_rgba(249,115,22,0.5)]'
                   }`}>
-                    {/* Image */}
-                    <div className="relative aspect-video bg-gradient-to-br from-white/5 to-transparent rounded-xl mb-4 overflow-hidden group/image">
-                      <img src={feature.image} alt={feature.title} className="w-full h-full object-cover opacity-95" />
+                    {/* Video/Image */}
+                    <div
+                      className="relative aspect-video bg-gradient-to-br from-white/5 to-transparent rounded-xl mb-4 overflow-hidden group/image"
+                      onMouseEnter={(e) => {
+                        const video = e.currentTarget.querySelector('video');
+                        if (video) {
+                          video.currentTime = 0;
+                          video.play().catch(() => {/* Ignore autoplay errors */});
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        const video = e.currentTarget.querySelector('video');
+                        if (video) {
+                          video.pause();
+                          video.currentTime = 0;
+                        }
+                      }}
+                    >
+                      {feature.videoUrl ? (
+                        <video
+                          src={feature.videoUrl}
+                          poster={feature.image}
+                          className="w-full h-full object-cover opacity-95"
+                          muted
+                          loop
+                          playsInline
+                          preload="metadata"
+                        />
+                      ) : (
+                        <img src={feature.image} alt={feature.title} className="w-full h-full object-cover opacity-95" />
+                      )}
+
                       {/* Play Button Overlay */}
                       {feature.audioUrl && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
