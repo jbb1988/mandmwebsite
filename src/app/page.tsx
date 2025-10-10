@@ -148,7 +148,7 @@ export default function HomePage() {
       iconImage: '/assets/images/Sound Lab copy.png',
       color: 'blue',
       image: '/assets/mind/sound_lab.png',
-      videoUrl: '/assets/videos/sound_lab.mp4',
+      videoUrl: '/assets/videos/sound_lab.1mp4.mp4',
       audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/soundlab_ob.mp3',
       tagline: 'Train Your Mind Through Sound.',
       description: 'Engineer your mental state for peak performance',
@@ -374,33 +374,42 @@ export default function HomePage() {
                   <div className={`relative backdrop-blur-sm bg-white/[0.02] p-6 rounded-2xl border-2 transition-all duration-500 hover:scale-105 hover:bg-white/[0.05] h-full ${
                     isBlue ? 'border-neon-cortex-blue/40 hover:border-neon-cortex-blue shadow-[0_0_20px_rgba(14,165,233,0.3)] hover:shadow-[0_0_40px_rgba(14,165,233,0.5)]' : 'border-solar-surge-orange/40 hover:border-solar-surge-orange shadow-[0_0_20px_rgba(249,115,22,0.3)] hover:shadow-[0_0_40px_rgba(249,115,22,0.5)]'
                   }`}>
-                    {/* Image */}
+                    {/* Video/Image */}
                     <div
-                      className="relative aspect-video bg-gradient-to-br from-white/5 to-transparent rounded-xl mb-4 overflow-hidden group/image cursor-pointer"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (feature.audioUrl) {
-                          handleOpenModal(feature, true);
-                        } else {
-                          handleOpenModal(feature, false);
+                      className="relative aspect-video bg-gradient-to-br from-white/5 to-transparent rounded-xl mb-4 overflow-hidden group/image"
+                      onMouseEnter={(e) => {
+                        const video = e.currentTarget.querySelector('video');
+                        if (video) {
+                          video.currentTime = 0;
+                          video.play().catch(() => {/* Ignore autoplay errors */});
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        const video = e.currentTarget.querySelector('video');
+                        if (video) {
+                          video.pause();
+                          video.currentTime = 0;
                         }
                       }}
                     >
-                      <img
-                        src={feature.image}
-                        alt={feature.title}
-                        className="w-full h-full object-cover opacity-95"
-                        style={feature.id === 'mind-coach' ? { transform: 'scale(1.44)' } : undefined}
-                      />
-                      {/* Play Button Overlay */}
-                      {feature.audioUrl && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
-                          <div className={`w-16 h-16 rounded-full flex items-center justify-center backdrop-blur-md ${
-                            isBlue ? 'bg-neon-cortex-blue/20 border-2 border-neon-cortex-blue' : 'bg-solar-surge-orange/20 border-2 border-solar-surge-orange'
-                          }`}>
-                            <Play className={`w-8 h-8 ${isBlue ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`} fill="currentColor" />
-                          </div>
-                        </div>
+                      {feature.videoUrl ? (
+                        <video
+                          src={feature.videoUrl}
+                          poster={feature.image}
+                          className="w-full h-full object-cover opacity-95"
+                          muted
+                          loop
+                          playsInline
+                          preload="metadata"
+                          style={feature.id === 'mind-coach' ? { transform: 'scale(1.44)' } : undefined}
+                        />
+                      ) : (
+                        <img
+                          src={feature.image}
+                          alt={feature.title}
+                          className="w-full h-full object-cover opacity-95"
+                          style={feature.id === 'mind-coach' ? { transform: 'scale(1.44)' } : undefined}
+                        />
                       )}
                     </div>
 
@@ -573,28 +582,36 @@ export default function HomePage() {
                   <div className={`relative backdrop-blur-sm bg-white/[0.02] p-6 rounded-2xl border-2 transition-all duration-500 hover:scale-105 hover:bg-white/[0.05] h-full ${
                     isBlue ? 'border-neon-cortex-blue/40 hover:border-neon-cortex-blue shadow-[0_0_20px_rgba(14,165,233,0.3)] hover:shadow-[0_0_40px_rgba(14,165,233,0.5)]' : 'border-solar-surge-orange/40 hover:border-solar-surge-orange shadow-[0_0_20px_rgba(249,115,22,0.3)] hover:shadow-[0_0_40px_rgba(249,115,22,0.5)]'
                   }`}>
-                    {/* Image */}
+                    {/* Video/Image */}
                     <div
-                      className="relative aspect-video bg-gradient-to-br from-white/5 to-transparent rounded-xl mb-4 overflow-hidden group/image cursor-pointer"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (feature.audioUrl) {
-                          handleOpenModal(feature, true);
-                        } else {
-                          handleOpenModal(feature, false);
+                      className="relative aspect-video bg-gradient-to-br from-white/5 to-transparent rounded-xl mb-4 overflow-hidden group/image"
+                      onMouseEnter={(e) => {
+                        const video = e.currentTarget.querySelector('video');
+                        if (video) {
+                          video.currentTime = 0;
+                          video.play().catch(() => {/* Ignore autoplay errors */});
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        const video = e.currentTarget.querySelector('video');
+                        if (video) {
+                          video.pause();
+                          video.currentTime = 0;
                         }
                       }}
                     >
-                      <img src={feature.image} alt={feature.title} className="w-full h-full object-cover opacity-95" />
-                      {/* Play Button Overlay */}
-                      {feature.audioUrl && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
-                          <div className={`w-16 h-16 rounded-full flex items-center justify-center backdrop-blur-md ${
-                            isBlue ? 'bg-neon-cortex-blue/20 border-2 border-neon-cortex-blue' : 'bg-solar-surge-orange/20 border-2 border-solar-surge-orange'
-                          }`}>
-                            <Play className={`w-8 h-8 ${isBlue ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`} fill="currentColor" />
-                          </div>
-                        </div>
+                      {feature.videoUrl ? (
+                        <video
+                          src={feature.videoUrl}
+                          poster={feature.image}
+                          className="w-full h-full object-cover opacity-95"
+                          muted
+                          loop
+                          playsInline
+                          preload="metadata"
+                        />
+                      ) : (
+                        <img src={feature.image} alt={feature.title} className="w-full h-full object-cover opacity-95" />
                       )}
                     </div>
 
