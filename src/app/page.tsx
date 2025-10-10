@@ -283,10 +283,18 @@ export default function HomePage() {
 
             {/* Primary CTA */}
             <FadeInWhenVisible delay={1.3} direction="up" className="mb-6">
-              <Link href="#pricing" className="inline-block">
-                <button className="px-8 py-4 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange rounded-xl font-bold text-lg hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(14,165,233,0.5)] hover:shadow-[0_0_50px_rgba(14,165,233,0.8)] flex items-center gap-2">
-                  Try Free →
-                </button>
+              <Link href="#pricing" className="inline-block group">
+                <div className="relative px-10 py-5 bg-white/10 backdrop-blur-md border-2 border-white/30 rounded-2xl hover:border-neon-cortex-blue hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(14,165,233,0.6)]">
+                  <div className="flex items-center gap-3">
+                    <span className="font-black text-xl text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
+                      Try Free
+                    </span>
+                    <span className="text-neon-cortex-blue text-2xl font-bold group-hover:translate-x-1 transition-transform duration-300">
+                      →
+                    </span>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-neon-cortex-blue/20 to-solar-surge-orange/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
+                </div>
               </Link>
             </FadeInWhenVisible>
 
@@ -1755,12 +1763,20 @@ export default function HomePage() {
       </section>
 
       {/* Mobile Sticky CTA - Only visible on mobile */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.4)]">
+      <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-gradient-to-b from-transparent via-[#0A0D1E]/95 to-[#0A0D1E] backdrop-blur-lg border-t border-white/10 p-4 pb-6 shadow-[0_-8px_32px_rgba(0,0,0,0.6)]">
         <div className="max-w-md mx-auto">
-          <Link href="#pricing">
-            <button className="w-full py-4 bg-white text-black font-bold text-lg rounded-xl hover:scale-105 transition-all duration-300 shadow-lg">
-              Try Free →
-            </button>
+          <Link href="#pricing" className="block group">
+            <div className="relative w-full py-4 px-6 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange rounded-xl overflow-hidden">
+              <div className="relative z-10 flex items-center justify-center gap-2">
+                <span className="font-black text-lg text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
+                  Try Free
+                </span>
+                <span className="text-xl font-bold group-active:translate-x-1 transition-transform duration-200">
+                  →
+                </span>
+              </div>
+              <div className="absolute inset-0 bg-white/20 opacity-0 group-active:opacity-100 transition-opacity duration-200"></div>
+            </div>
           </Link>
         </div>
       </div>
