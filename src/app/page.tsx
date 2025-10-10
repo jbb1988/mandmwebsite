@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { LiquidGlass } from '@/components/LiquidGlass';
@@ -377,6 +377,29 @@ export default function HomePage() {
                     {/* Video/Image */}
                     <div
                       className="relative aspect-video bg-gradient-to-br from-white/5 to-transparent rounded-xl mb-4 overflow-hidden group/image"
+                      ref={(node) => {
+                        if (node) {
+                          const video = node.querySelector('video');
+                          if (video) {
+                            // Intersection Observer for mobile auto-play on scroll
+                            const observer = new IntersectionObserver(
+                              (entries) => {
+                                entries.forEach((entry) => {
+                                  if (entry.isIntersecting) {
+                                    video.currentTime = 0;
+                                    video.play().catch(() => {});
+                                  } else {
+                                    video.pause();
+                                    video.currentTime = 0;
+                                  }
+                                });
+                              },
+                              { threshold: 0.5 }
+                            );
+                            observer.observe(node);
+                          }
+                        }
+                      }}
                       onMouseEnter={(e) => {
                         const video = e.currentTarget.querySelector('video');
                         if (video) {
@@ -484,6 +507,29 @@ export default function HomePage() {
                     {/* Video/Image */}
                     <div
                       className="relative aspect-video bg-gradient-to-br from-white/5 to-transparent rounded-xl mb-4 overflow-hidden group/image"
+                      ref={(node) => {
+                        if (node) {
+                          const video = node.querySelector('video');
+                          if (video) {
+                            // Intersection Observer for mobile auto-play on scroll
+                            const observer = new IntersectionObserver(
+                              (entries) => {
+                                entries.forEach((entry) => {
+                                  if (entry.isIntersecting) {
+                                    video.currentTime = 0;
+                                    video.play().catch(() => {});
+                                  } else {
+                                    video.pause();
+                                    video.currentTime = 0;
+                                  }
+                                });
+                              },
+                              { threshold: 0.5 }
+                            );
+                            observer.observe(node);
+                          }
+                        }
+                      }}
                       onMouseEnter={(e) => {
                         const video = e.currentTarget.querySelector('video');
                         if (video) {
@@ -585,6 +631,29 @@ export default function HomePage() {
                     {/* Video/Image */}
                     <div
                       className="relative aspect-video bg-gradient-to-br from-white/5 to-transparent rounded-xl mb-4 overflow-hidden group/image"
+                      ref={(node) => {
+                        if (node) {
+                          const video = node.querySelector('video');
+                          if (video) {
+                            // Intersection Observer for mobile auto-play on scroll
+                            const observer = new IntersectionObserver(
+                              (entries) => {
+                                entries.forEach((entry) => {
+                                  if (entry.isIntersecting) {
+                                    video.currentTime = 0;
+                                    video.play().catch(() => {});
+                                  } else {
+                                    video.pause();
+                                    video.currentTime = 0;
+                                  }
+                                });
+                              },
+                              { threshold: 0.5 }
+                            );
+                            observer.observe(node);
+                          }
+                        }
+                      }}
                       onMouseEnter={(e) => {
                         const video = e.currentTarget.querySelector('video');
                         if (video) {
