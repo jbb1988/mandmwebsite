@@ -218,15 +218,18 @@ export default function HomePage() {
       <section className="relative min-h-[85vh] flex items-center overflow-hidden pt-40 pb-16">
         {/* Full Width Background Image */}
         <div className="absolute inset-0 z-0">
-          {/* Baseball Field Background Image */}
-          <Image
-            src="/assets/images/baseball_field_dusk.png"
-            alt="Baseball Field at Dusk"
-            fill
-            className="object-cover object-center"
-            priority
-            quality={90}
-          />
+          {/* Baseball Field Background Image - WebP optimized */}
+          <picture>
+            <source srcSet="/assets/images/baseball_field_dusk.webp" type="image/webp" />
+            <Image
+              src="/assets/images/baseball_field_dusk.png"
+              alt="Baseball Field at Dusk"
+              fill
+              className="object-cover object-center"
+              priority
+              quality={90}
+            />
+          </picture>
 
           {/* Enhanced Overlay: Blur + Dark Gradient for Text Pop */}
           <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent backdrop-blur-[2px]" />
@@ -278,8 +281,17 @@ export default function HomePage() {
               </p>
             </FadeInWhenVisible>
 
+            {/* Primary CTA */}
+            <FadeInWhenVisible delay={1.3} direction="up" className="mb-6">
+              <Link href="#pricing" className="inline-block">
+                <button className="px-8 py-4 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange rounded-xl font-bold text-lg hover:scale-105 transition-all duration-300 shadow-[0_0_30px_rgba(14,165,233,0.5)] hover:shadow-[0_0_50px_rgba(14,165,233,0.8)] flex items-center gap-2">
+                  Try Free →
+                </button>
+              </Link>
+            </FadeInWhenVisible>
+
             {/* Download Links */}
-            <FadeInWhenVisible delay={1.4} direction="up" className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center w-full sm:w-auto">
+            <FadeInWhenVisible delay={1.5} direction="up" className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center w-full sm:w-auto">
               <Link
                 href="https://apps.apple.com/app/mind-muscle"
                 target="_blank"
@@ -325,6 +337,45 @@ export default function HomePage() {
             />
           </div>
         </div>
+        </div>
+      </section>
+
+      {/* Social Proof Section */}
+      <section className="relative py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#0F1123] to-[#1A1F3A]">
+        <div className="max-w-5xl mx-auto">
+          <FadeInWhenVisible delay={0.2} direction="up">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {/* Stat 1 */}
+              <div className="text-center">
+                <div className="text-4xl md:text-5xl font-black bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent mb-2">
+                  186
+                </div>
+                <div className="text-gray-300 font-medium">
+                  Real Game Scenarios
+                </div>
+              </div>
+
+              {/* Stat 2 */}
+              <div className="text-center">
+                <div className="text-4xl md:text-5xl font-black bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent mb-2">
+                  10+
+                </div>
+                <div className="text-gray-300 font-medium">
+                  AI Coaches & Tools
+                </div>
+              </div>
+
+              {/* Stat 3 */}
+              <div className="text-center">
+                <div className="text-4xl md:text-5xl font-black bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent mb-2">
+                  100%
+                </div>
+                <div className="text-gray-300 font-medium">
+                  Baseball-Specific Content
+                </div>
+              </div>
+            </div>
+          </FadeInWhenVisible>
         </div>
       </section>
 
@@ -1702,6 +1753,17 @@ export default function HomePage() {
           </FadeInWhenVisible>
         </div>
       </section>
+
+      {/* Mobile Sticky CTA - Only visible on mobile */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange p-4 shadow-[0_-4px_20px_rgba(0,0,0,0.4)]">
+        <div className="max-w-md mx-auto">
+          <Link href="#pricing">
+            <button className="w-full py-4 bg-white text-black font-bold text-lg rounded-xl hover:scale-105 transition-all duration-300 shadow-lg">
+              Try Free →
+            </button>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

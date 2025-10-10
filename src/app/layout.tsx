@@ -28,22 +28,22 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://mindandmuscle.ai',
     siteName: 'Mind & Muscle',
-    title: 'Mind & Muscle | Elite Sports Training Platform',
-    description: 'Transform your athletes with comprehensive mental and physical training. Team licensing, partner programs, and cutting-edge sports performance technology.',
+    title: 'Mind & Muscle | 100% Baseball Training',
+    description: 'The only app built exclusively for baseball players. AI coaches for mind, muscle, and game IQ. Train smarter, recover faster, outthink every play.',
     images: [
       {
-        url: 'https://mindandmuscle.ai/assets/images/logo.png',
+        url: 'https://mindandmuscle.ai/assets/images/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'Mind & Muscle Logo',
+        alt: 'Mind & Muscle - 100% Baseball Training',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Mind & Muscle | Elite Sports Training Platform',
-    description: 'Transform your athletes with comprehensive mental and physical training. Team licensing, partner programs, and cutting-edge sports performance technology.',
-    images: ['https://mindandmuscle.ai/assets/images/logo.png'],
+    title: 'Mind & Muscle | 100% Baseball Training',
+    description: 'The only app built exclusively for baseball players. AI coaches for mind, muscle, and game IQ. Train smarter, recover faster, outthink every play.',
+    images: ['https://mindandmuscle.ai/assets/images/og-image.png'],
   },
 };
 
