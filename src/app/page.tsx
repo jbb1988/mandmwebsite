@@ -793,39 +793,30 @@ export default function HomePage() {
         {/* Feature Modal */}
         {activeFeature && (
           <div
-            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-xl animate-fadeIn"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-xl animate-fadeIn"
             onClick={handleCloseModal}
           >
             <div
-              className="relative w-full sm:max-w-3xl md:max-w-4xl lg:max-w-5xl h-[92vh] sm:h-auto sm:max-h-[90vh] overflow-y-auto backdrop-blur-xl bg-gradient-to-br from-white/10 via-white/5 to-transparent p-6 sm:p-8 md:p-10 rounded-t-3xl sm:rounded-3xl border-2 sm:border-2 border-b-0 sm:border-b-2 shadow-[0_8px_60px_rgba(14,165,233,0.3)] overscroll-contain"
+              className="relative w-full sm:max-w-3xl md:max-w-4xl lg:max-w-5xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto backdrop-blur-xl bg-gradient-to-br from-white/10 via-white/5 to-transparent p-6 sm:p-8 md:p-10 rounded-2xl sm:rounded-3xl border-2 shadow-[0_8px_60px_rgba(14,165,233,0.3)]"
               style={{
                 borderImage: activeFeature.color === 'blue'
                   ? 'linear-gradient(135deg, #0EA5E9, #06B6D4) 1'
                   : 'linear-gradient(135deg, #F97316, #EA580C) 1',
-                animation: 'slideUp 0.25s ease-out',
-                touchAction: 'pan-y',
+                animation: 'scaleIn 0.2s ease-out',
                 WebkitOverflowScrolling: 'touch',
               }}
               onClick={(e) => {
                 e.stopPropagation();
                 handleModalTap();
               }}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
             >
-              {/* Swipe Indicator - Mobile Only */}
-              <div className="sm:hidden flex justify-center mb-3">
-                <div className="w-12 h-1.5 bg-white/30 rounded-full"></div>
-              </div>
-
               {/* Close Button */}
               <button
                 onClick={handleCloseModal}
-                className="absolute top-4 right-4 sm:top-6 sm:right-6 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 border border-white/20 flex items-center justify-center transition-all z-20"
+                className="absolute top-3 right-3 sm:top-4 sm:right-4 w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 border-2 border-white/30 flex items-center justify-center transition-all z-20 shadow-lg"
                 aria-label="Close modal"
               >
-                <X className="w-5 h-5 sm:w-6 sm:h-6" />
+                <X className="w-6 h-6 sm:w-7 sm:h-7" />
               </button>
 
               {/* Hero Image */}
