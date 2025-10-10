@@ -366,7 +366,7 @@ export default function HomePage() {
               {/* Stat 2 */}
               <div className="text-center">
                 <div className="text-4xl md:text-5xl font-black bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent mb-2">
-                  10+
+                  7
                 </div>
                 <div className="text-gray-300 font-medium">
                   AI Coaches & Tools
@@ -1445,7 +1445,7 @@ export default function HomePage() {
                       <h4 className="text-sm font-bold text-solar-surge-orange mb-3 tracking-wide drop-shadow-[0_0_8px_rgba(249,115,22,0.6)]">COACHING STAFF</h4>
                       <ul className="space-y-2 text-sm text-white">
                         <li className="flex items-center gap-2">
-                          <Zap className="w-3 h-3 text-solar-surge-orange drop-shadow-[0_0_6px_rgba(249,115,22,0.5)]" /> 10+ AI coaches learn YOUR game
+                          <Zap className="w-3 h-3 text-solar-surge-orange drop-shadow-[0_0_6px_rgba(249,115,22,0.5)]" /> 7 AI coaches learn YOUR game
                         </li>
                         <li className="flex items-center gap-2">
                           <Zap className="w-3 h-3 text-solar-surge-orange drop-shadow-[0_0_6px_rgba(249,115,22,0.5)]" /> Position-specific training plans
@@ -1536,7 +1536,7 @@ export default function HomePage() {
                         </div>
                         <ul className="space-y-3 text-base text-white">
                           <li className="flex items-start gap-2">
-                            <span className="text-neon-cortex-blue mt-1 font-black">✓</span> 10+ AI coaches learn YOUR game
+                            <span className="text-neon-cortex-blue mt-1 font-black">✓</span> 7 AI coaches learn YOUR game
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-neon-cortex-blue mt-1 font-black">✓</span> Everything syncs together
@@ -1703,7 +1703,7 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              <p className="text-text-secondary mb-8 text-lg md:text-xl">Everything free has, plus 10+ AI coaches and unlimited access</p>
+              <p className="text-text-secondary mb-8 text-lg md:text-xl">Everything free has, plus 7 AI coaches and unlimited access</p>
               <ul className="space-y-4 mb-10">
                 {[
                   'Everything in Free',
