@@ -793,16 +793,16 @@ export default function HomePage() {
         {/* Feature Modal */}
         {activeFeature && (
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-black/80 backdrop-blur-xl animate-fadeIn"
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-xl animate-fadeIn"
             onClick={handleCloseModal}
           >
             <div
-              className="relative max-w-7xl w-full max-h-[90vh] sm:max-h-[95vh] overflow-y-auto backdrop-blur-xl bg-gradient-to-br from-white/10 via-white/5 to-transparent p-4 sm:p-6 md:p-10 rounded-3xl border-2 shadow-[0_8px_60px_rgba(14,165,233,0.3)] overscroll-contain"
+              className="relative w-full sm:max-w-3xl md:max-w-4xl lg:max-w-5xl h-[92vh] sm:h-auto sm:max-h-[90vh] overflow-y-auto backdrop-blur-xl bg-gradient-to-br from-white/10 via-white/5 to-transparent p-6 sm:p-8 md:p-10 rounded-t-3xl sm:rounded-3xl border-2 sm:border-2 border-b-0 sm:border-b-2 shadow-[0_8px_60px_rgba(14,165,233,0.3)] overscroll-contain"
               style={{
                 borderImage: activeFeature.color === 'blue'
                   ? 'linear-gradient(135deg, #0EA5E9, #06B6D4) 1'
                   : 'linear-gradient(135deg, #F97316, #EA580C) 1',
-                animation: 'scaleIn 0.15s ease-out',
+                animation: 'slideUp 0.25s ease-out',
                 touchAction: 'pan-y',
                 WebkitOverflowScrolling: 'touch',
               }}
@@ -814,17 +814,22 @@ export default function HomePage() {
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
             >
+              {/* Swipe Indicator - Mobile Only */}
+              <div className="sm:hidden flex justify-center mb-3">
+                <div className="w-12 h-1.5 bg-white/30 rounded-full"></div>
+              </div>
+
               {/* Close Button */}
               <button
                 onClick={handleCloseModal}
-                className="sticky top-0 float-right w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center transition-colors z-20 mb-4"
+                className="absolute top-4 right-4 sm:top-6 sm:right-6 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 border border-white/20 flex items-center justify-center transition-all z-20"
                 aria-label="Close modal"
               >
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
 
               {/* Hero Image */}
-              <div className="w-full max-w-2xl mx-auto aspect-video rounded-2xl overflow-hidden mb-6">
+              <div className="w-full max-w-2xl mx-auto aspect-video rounded-xl sm:rounded-2xl overflow-hidden mb-4 sm:mb-6">
                 <img
                   src={activeFeature.image}
                   alt={activeFeature.title}
@@ -834,20 +839,20 @@ export default function HomePage() {
               </div>
 
               {/* Icon */}
-              <div className="mb-6">
-                <div className={`inline-flex w-20 h-20 rounded-2xl items-center justify-center ${
+              <div className="mb-4 sm:mb-6">
+                <div className={`inline-flex w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl items-center justify-center ${
                   activeFeature.color === 'blue' ? 'bg-neon-cortex-blue/20 border-2 border-neon-cortex-blue/40' : 'bg-solar-surge-orange/20 border-2 border-solar-surge-orange/40'
                 }`}>
                   {activeFeature.iconImage ? (
                     <img
                       src={activeFeature.iconImage}
                       alt={`${activeFeature.title} icon`}
-                      className="w-14 h-14 object-contain"
+                      className="w-10 h-10 sm:w-14 sm:h-14 object-contain"
                       style={{filter: `drop-shadow(0 0 12px ${activeFeature.color === 'blue' ? 'rgba(14,165,233,0.8)' : 'rgba(249,115,22,0.8)'})`}}
                     />
                   ) : (
                     React.createElement(activeFeature.icon, {
-                      className: `w-10 h-10 ${activeFeature.color === 'blue' ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`,
+                      className: `w-8 h-8 sm:w-10 sm:h-10 ${activeFeature.color === 'blue' ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`,
                       style: {filter: `drop-shadow(0 0 12px ${activeFeature.color === 'blue' ? 'rgba(14,165,233,0.8)' : 'rgba(249,115,22,0.8)'})`}
                     })
                   )}
@@ -855,12 +860,12 @@ export default function HomePage() {
               </div>
 
               {/* Title */}
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4" style={{textShadow: '0 2px 20px rgba(0,0,0,0.5)'}}>
+              <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black mb-3 sm:mb-4 pr-12 sm:pr-0" style={{textShadow: '0 2px 20px rgba(0,0,0,0.5)'}}>
                 {activeFeature.title}
               </h2>
 
               {/* Tagline */}
-              <p className={`text-xl sm:text-2xl md:text-3xl font-bold mb-6 ${
+              <p className={`text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold mb-5 sm:mb-6 ${
                 activeFeature.color === 'blue' ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'
               }`} style={{textShadow: '0 0 20px rgba(14,165,233,0.4)'}}>
                 {activeFeature.tagline}
@@ -868,7 +873,7 @@ export default function HomePage() {
 
               {/* Audio Player */}
               {activeFeature.audioUrl && (
-                <div className="mb-8">
+                <div className="mb-6 sm:mb-8">
                   <button
                     onClick={() => {
                       if (audioElement) {
@@ -887,7 +892,7 @@ export default function HomePage() {
                         audio.onended = () => setIsPlaying(false);
                       }
                     }}
-                    className={`w-full px-8 py-4 rounded-xl font-semibold text-lg flex items-center justify-center gap-3 transition-all duration-300 hover:scale-105 ${
+                    className={`w-full px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold text-base sm:text-lg flex items-center justify-center gap-2 sm:gap-3 transition-all duration-300 active:scale-95 sm:hover:scale-105 ${
                       activeFeature.color === 'blue'
                         ? 'bg-neon-cortex-blue/10 border-2 border-neon-cortex-blue hover:bg-neon-cortex-blue/20 text-neon-cortex-blue'
                         : 'bg-solar-surge-orange/10 border-2 border-solar-surge-orange hover:bg-solar-surge-orange/20 text-solar-surge-orange'
@@ -895,13 +900,13 @@ export default function HomePage() {
                   >
                     {isPlaying ? (
                       <>
-                        <Pause className="w-6 h-6" fill="currentColor" />
-                        Pause Audio Guide
+                        <Pause className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" />
+                        <span>Pause Audio Guide</span>
                       </>
                     ) : (
                       <>
-                        <Play className="w-6 h-6" fill="currentColor" />
-                        Play Audio Guide
+                        <Play className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" />
+                        <span>Play Audio Guide</span>
                       </>
                     )}
                   </button>
@@ -909,7 +914,7 @@ export default function HomePage() {
               )}
 
               {/* Description */}
-              <div className="text-base sm:text-lg md:text-xl text-gray-300 leading-relaxed whitespace-pre-line">
+              <div className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 leading-relaxed whitespace-pre-line pb-6 sm:pb-0">
                 {(activeFeature.modalDescription || activeFeature.description).split('\n').map((line: string, i: number) => {
                   // Check if line starts with ** and ends with **
                   if (line.startsWith('**') && line.endsWith('**')) {
