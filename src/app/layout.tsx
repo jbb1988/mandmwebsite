@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import Navigation from '@/components/Navigation';
+import { Footer } from '@/components/Footer';
 import { ToltScript } from '@/components/ToltScript';
 
 export const metadata: Metadata = {
@@ -55,9 +56,10 @@ export default function RootLayout({
     <html lang="en">
       <body className="antialiased">
         <ToltScript />
-        <div className="animated-bg min-h-screen">
+        <div className="animated-bg min-h-screen flex flex-col">
           <Navigation />
-          <main>{children}</main>
+          <main className="flex-grow">{children}</main>
+          <Footer />
         </div>
       </body>
     </html>

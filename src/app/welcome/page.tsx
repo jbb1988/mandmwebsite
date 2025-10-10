@@ -155,17 +155,6 @@ export default function WelcomePage() {
             </div>
           </div>
         </LiquidGlass>
-
-        {/* Taglines Footer */}
-        <div className="text-center space-y-3">
-          <p className="text-lg font-bold">
-            <span className="text-neon-cortex-blue">Discipline the Mind.</span>{' '}
-            <span className="text-solar-surge-orange">Dominate the Game.</span>
-          </p>
-          <p className="text-text-secondary">
-            100% Baseball. Zero Generic Content.
-          </p>
-        </div>
       </div>
     </div>
   );
