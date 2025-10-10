@@ -497,17 +497,6 @@ export default function HomePage() {
                       ) : (
                         <img src={feature.image} alt={feature.title} className="w-full h-full object-cover opacity-95" />
                       )}
-
-                      {/* Play Button Overlay */}
-                      {feature.audioUrl && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover/image:opacity-100 transition-opacity duration-300">
-                          <div className={`w-16 h-16 rounded-full flex items-center justify-center backdrop-blur-md ${
-                            isBlue ? 'bg-neon-cortex-blue/20 border-2 border-neon-cortex-blue' : 'bg-solar-surge-orange/20 border-2 border-solar-surge-orange'
-                          }`}>
-                            <Play className={`w-8 h-8 ${isBlue ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`} fill="currentColor" />
-                          </div>
-                        </div>
-                      )}
                     </div>
 
                     {/* Icon + Title */}
