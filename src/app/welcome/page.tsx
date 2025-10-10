@@ -1,31 +1,95 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, SkipForward } from 'lucide-react';
 import { LiquidGlass } from '@/components/LiquidGlass';
 
 export default function WelcomePage() {
+  const [showSplash, setShowSplash] = useState(true);
+  const [videoEnded, setVideoEnded] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
   useEffect(() => {
-    // Try to deep link to the app if installed
-    const tryDeepLink = () => {
-      // iOS deep link
-      window.location.href = 'mindmuscle://welcome';
+    // Check for reduced motion preference
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-      // Android deep link fallback
-      setTimeout(() => {
-        window.location.href = 'intent://welcome#Intent;scheme=mindmuscle;package=com.mindmuscle;end';
-      }, 100);
-    };
+    if (prefersReducedMotion) {
+      // Skip video for users who prefer reduced motion
+      setShowSplash(false);
+      setVideoEnded(true);
+    }
 
-    // Give the page a moment to render before trying deep link
-    const timer = setTimeout(tryDeepLink, 500);
+    // Try to deep link to the app if installed (after splash finishes)
+    if (videoEnded) {
+      const tryDeepLink = () => {
+        // iOS deep link
+        window.location.href = 'mindmuscle://welcome';
 
-    return () => clearTimeout(timer);
-  }, []);
+        // Android deep link fallback
+        setTimeout(() => {
+          window.location.href = 'intent://welcome#Intent;scheme=mindmuscle;package=com.mindmuscle;end';
+        }, 100);
+      };
+
+      // Give the page a moment to render before trying deep link
+      const timer = setTimeout(tryDeepLink, 500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [videoEnded]);
+
+  const handleVideoEnd = () => {
+    setVideoEnded(true);
+    // Fade out splash screen
+    setTimeout(() => {
+      setShowSplash(false);
+    }, 300);
+  };
+
+  const handleSkip = () => {
+    if (videoRef.current) {
+      videoRef.current.pause();
+    }
+    setVideoEnded(true);
+    setShowSplash(false);
+  };
 
   return (
+    <>
+      {/* Video Splash Screen */}
+      {showSplash && !videoEnded && (
+        <div
+          className={`fixed inset-0 z-50 bg-background-primary flex items-center justify-center transition-opacity duration-300 ${
+            videoEnded ? 'opacity-0 pointer-events-none' : 'opacity-100'
+          }`}
+        >
+          <video
+            ref={videoRef}
+            className="w-full h-full object-contain"
+            autoPlay
+            muted
+            playsInline
+            onEnded={handleVideoEnd}
+          >
+            <source src="/assets/videos/splash.mp4" type="video/mp4" />
+          </video>
+
+          {/* Skip Button */}
+          <button
+            onClick={handleSkip}
+            className="absolute bottom-8 right-8 px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-xl transition-all duration-300 hover:scale-105 flex items-center gap-2 group"
+            aria-label="Skip splash screen"
+          >
+            <SkipForward className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            <span className="font-semibold">Skip</span>
+          </button>
+        </div>
+      )}
+
+      {/* Main Content */}
+      <div className={`transition-opacity duration-500 ${videoEnded ? 'opacity-100' : 'opacity-0'}`}>
     <div className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
         {/* Success Header */}
@@ -157,5 +221,7 @@ export default function WelcomePage() {
         </LiquidGlass>
       </div>
     </div>
+      </div>
+    </>
   );
 }
