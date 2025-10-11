@@ -953,18 +953,18 @@ export default function HomePage() {
           <FadeInWhenVisible delay={0} direction="up" className="text-center mb-16">
             <div className="inline-block mb-6">
               <div className="px-6 py-2 backdrop-blur-sm bg-neon-cortex-blue/10 border-2 border-neon-cortex-blue/40 rounded-lg">
-                <span className="text-neon-cortex-blue font-black text-sm tracking-widest drop-shadow-[0_0_8px_rgba(14,165,233,0.8)]">⚾ SEE IT IN ACTION</span>
+                <span className="text-neon-cortex-blue font-black text-sm tracking-widest drop-shadow-[0_0_8px_rgba(14,165,233,0.8)]">⚾ PREVIEW THE PLATFORM</span>
               </div>
             </div>
             <GradientTextReveal
-              text="Inside The App"
+              text="Where Champions Train"
               className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight"
               gradientFrom="#0EA5E9"
               gradientTo="#F97316"
               delay={0.2}
             />
             <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto font-medium leading-relaxed">
-              Real screenshots. Real features. Real baseball training.
+              Everything you need to level up your game, now in your pocket.
             </p>
           </FadeInWhenVisible>
 
