@@ -133,6 +133,8 @@ export function AppScreenshotCarousel() {
                     height={600}
                     className="object-contain w-full h-auto"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    loading="eager"
+                    priority={index < 3}
                   />
                 </div>
 
