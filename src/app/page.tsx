@@ -1668,7 +1668,7 @@ export default function HomePage() {
                     {/* AI Learning Callout */}
                     <div className="mb-6 p-6 bg-gradient-to-r from-neon-cortex-blue/10 to-solar-surge-orange/10 border border-neon-cortex-blue/30 rounded-xl">
                       <p className="text-white text-lg leading-relaxed">
-                        Our AI doesn't just respond—it <span className="text-neon-cortex-blue font-black drop-shadow-[0_0_12px_rgba(14,165,233,0.6)]">learns</span>. Every workout, every journal entry, every swing analysis feeds the engine. In 30 days, you'll get recommendations that feel like they're from a coach who's known you for years.
+                        Our AI doesn't just respond—it <span className="text-neon-cortex-blue font-black drop-shadow-[0_0_12px_rgba(14,165,233,0.6)]">learns</span>. Every workout, every field note, every swing analysis feeds the engine. In 30 days, you'll get recommendations that feel like they're from a coach who's known you for years.
                       </p>
                     </div>
 
