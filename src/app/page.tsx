@@ -1011,7 +1011,7 @@ export default function HomePage() {
                   <div className="text-5xl font-black bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent mb-4">Week 12</div>
                   <div className="text-2xl font-bold mb-4">🚀 UNSTOPPABLE</div>
                   <p className="text-lg text-gray-300 leading-relaxed">
-                    Predicts your breakthrough moments. Prevents your slumps. Knows you better than your summer ball coach.
+                    Recognizes when you're ready for the next level. Adjusts training intensity based on your performance patterns. Personalized to how you actually play.
                   </p>
                 </div>
               </LiquidGlass>
