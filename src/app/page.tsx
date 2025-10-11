@@ -1640,7 +1640,7 @@ export default function HomePage() {
                   'Chatter: Full team communication',
                   'Events: Team scheduling & calendar',
                   'Daily Hit: Motivational content',
-                  'Dugout Talk: Personal journal tracker',
+                  'Dugout Talk: Field notes (performance log)',
                   'Game Lab Level 1: Baseball IQ basics',
                 ].map((feature, i) => (
                   <li key={i} className="flex items-center gap-3 text-base md:text-lg text-gray-300">
