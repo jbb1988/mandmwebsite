@@ -263,9 +263,35 @@ function TeamLicensingContent() {
                 </p>
 
                 {pricing.discountLabel && (
-                  <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-neon-cortex-blue/20 border border-neon-cortex-blue/40 rounded-full">
-                    <TrendingUp className="w-4 h-4 text-neon-cortex-blue" />
-                    <span className="text-sm font-bold text-neon-cortex-blue">{pricing.discountLabel} Applied!</span>
+                  <div
+                    className={`mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full shadow-lg ${
+                      pricing.discountPercent === 20
+                        ? 'bg-gradient-to-r from-solar-surge-orange/30 to-solar-surge-orange/20 border-2 border-solar-surge-orange shadow-[0_0_20px_rgba(249,115,22,0.4)]'
+                        : pricing.discountPercent === 15
+                        ? 'bg-gradient-to-r from-purple-500/30 to-neon-cortex-blue/30 border-2 border-purple-400 shadow-[0_0_20px_rgba(168,85,247,0.4)]'
+                        : 'bg-neon-cortex-blue/30 border-2 border-neon-cortex-blue shadow-[0_0_20px_rgba(14,165,233,0.4)]'
+                    }`}
+                  >
+                    <TrendingUp
+                      className={`w-5 h-5 ${
+                        pricing.discountPercent === 20
+                          ? 'text-solar-surge-orange drop-shadow-[0_0_8px_rgba(249,115,22,0.8)]'
+                          : pricing.discountPercent === 15
+                          ? 'text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]'
+                          : 'text-neon-cortex-blue drop-shadow-[0_0_8px_rgba(14,165,233,0.8)]'
+                      }`}
+                    />
+                    <span
+                      className={`text-sm font-black ${
+                        pricing.discountPercent === 20
+                          ? 'text-solar-surge-orange drop-shadow-[0_0_8px_rgba(249,115,22,0.8)]'
+                          : pricing.discountPercent === 15
+                          ? 'text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]'
+                          : 'text-neon-cortex-blue drop-shadow-[0_0_8px_rgba(14,165,233,0.8)]'
+                      }`}
+                    >
+                      {pricing.discountLabel} Applied!
+                    </span>
                   </div>
                 )}
               </div>
