@@ -56,12 +56,8 @@ const screenshots = [
     alt: 'Mind & Muscle App Screenshot 12',
   },
   {
-    src: '/assets/screenshots/13.png',
-    alt: 'Mind & Muscle App Screenshot 13',
-  },
-  {
     src: '/assets/screenshots/14a.png',
-    alt: 'Mind & Muscle App Screenshot 14',
+    alt: 'Mind & Muscle App Screenshot 13',
   },
 ];
 
