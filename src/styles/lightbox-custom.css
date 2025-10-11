@@ -1,0 +1,86 @@
+/* Custom Lightbox Styles to match Mind & Muscle brand */
+
+/* Navigation buttons with brand gradient */
+.yarl__button {
+  filter: none !important;
+}
+
+.yarl__button:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Navigation arrow buttons with gradient background */
+.yarl__navigation_prev,
+.yarl__navigation_next {
+  padding: 12px !important;
+  background: linear-gradient(135deg, #00D9FF 0%, #0099FF 100%) !important;
+  border-radius: 50% !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  transition: all 0.2s ease !important;
+}
+
+.yarl__navigation_next {
+  background: linear-gradient(135deg, #FF6B35 0%, #FF8C42 100%) !important;
+}
+
+.yarl__navigation_prev:hover,
+.yarl__navigation_next:hover {
+  transform: scale(1.1) !important;
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.5) !important;
+}
+
+.yarl__navigation_next:hover {
+  box-shadow: 0 0 20px rgba(255, 107, 53, 0.5) !important;
+}
+
+/* Close button */
+.yarl__button_close {
+  background: linear-gradient(135deg, #00D9FF 0%, #FF6B35 100%) !important;
+  border-radius: 50% !important;
+  padding: 8px !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.yarl__button_close:hover {
+  transform: scale(1.1) !important;
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.5) !important;
+}
+
+/* Counter styling */
+.yarl__counter {
+  color: white !important;
+  font-weight: 600 !important;
+  font-size: 16px !important;
+  background: linear-gradient(135deg, rgba(0, 217, 255, 0.2) 0%, rgba(255, 107, 53, 0.2) 100%) !important;
+  padding: 8px 16px !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Slide container */
+.yarl__slide {
+  padding: 20px !important;
+}
+
+/* Image styling */
+.yarl__slide_image {
+  max-height: 90vh !important;
+  object-fit: contain !important;
+}
+
+/* Portal for better z-index handling */
+.yarl__portal {
+  z-index: 9999 !important;
+}
+
+/* Toolbar */
+.yarl__toolbar {
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 100%) !important;
+  padding: 20px !important;
+}
+
+/* Icons color */
+.yarl__icon {
+  color: white !important;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5)) !important;
+}

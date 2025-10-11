@@ -5,6 +5,9 @@ import useEmblaCarousel from 'embla-carousel-react';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Lightbox from 'yet-another-react-lightbox';
+import 'yet-another-react-lightbox/styles.css';
+import '../styles/lightbox-custom.css';
 
 const screenshots = [
   {
@@ -73,6 +76,10 @@ export function AppScreenshotCarousel() {
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
 
+  // Lightbox state
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+
   const scrollPrev = useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev();
   }, [emblaApi]);
@@ -95,16 +102,16 @@ export function AppScreenshotCarousel() {
     emblaApi.on('reInit', onSelect);
   }, [emblaApi, onSelect]);
 
-  // Auto-play functionality
+  // Auto-play functionality (pause when lightbox is open)
   useEffect(() => {
-    if (!emblaApi) return;
+    if (!emblaApi || lightboxOpen) return;
 
     const interval = setInterval(() => {
       emblaApi.scrollNext();
     }, 4000); // Change slide every 4 seconds
 
     return () => clearInterval(interval);
-  }, [emblaApi]);
+  }, [emblaApi, lightboxOpen]);
 
   return (
     <div className="relative w-full max-w-7xl mx-auto">
@@ -117,12 +124,27 @@ export function AppScreenshotCarousel() {
               className="flex-[0_0_100%] sm:flex-[0_0_50%] lg:flex-[0_0_33.333%] min-w-0 px-2"
             >
               <motion.div
-                className="relative mx-auto"
+                className="relative mx-auto cursor-pointer"
                 style={{ maxWidth: '400px' }}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 viewport={{ once: true }}
+                onClick={() => {
+                  setLightboxIndex(index);
+                  setLightboxOpen(true);
+                }}
+                whileHover={{ scale: 1.02 }}
+                role="button"
+                tabIndex={0}
+                aria-label={`View ${screenshot.alt} in fullscreen`}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setLightboxIndex(index);
+                    setLightboxOpen(true);
+                  }
+                }}
               >
                 {/* Screenshot with transparent background support */}
                 <div className="relative w-full" style={{ minHeight: '500px' }}>
@@ -188,6 +210,34 @@ export function AppScreenshotCarousel() {
           />
         ))}
       </div>
+
+      {/* Lightbox Modal */}
+      <Lightbox
+        open={lightboxOpen}
+        close={() => setLightboxOpen(false)}
+        index={lightboxIndex}
+        slides={screenshots.map((screenshot) => ({
+          src: screenshot.src,
+          alt: screenshot.alt,
+          width: 400,
+          height: 600,
+        }))}
+        carousel={{
+          finite: false,
+        }}
+        controller={{
+          closeOnBackdropClick: true,
+        }}
+        styles={{
+          container: {
+            backgroundColor: 'rgba(0, 0, 0, 0.95)',
+          },
+        }}
+        render={{
+          buttonPrev: screenshots.length <= 1 ? () => null : undefined,
+          buttonNext: screenshots.length <= 1 ? () => null : undefined,
+        }}
+      />
     </div>
   );
 }
