@@ -298,6 +298,22 @@ export default function HomePage() {
               </Link>
             </FadeInWhenVisible>
 
+            {/* AI Learning Pulse Badge */}
+            <FadeInWhenVisible delay={1.4} direction="up" className="mb-6">
+              <div className="inline-block">
+                <div className="relative px-6 py-3 bg-gradient-to-r from-neon-cortex-blue/20 to-solar-surge-orange/20 backdrop-blur-md border-2 border-neon-cortex-blue/40 rounded-xl animate-pulse">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-neon-cortex-blue drop-shadow-[0_0_8px_rgba(14,165,233,0.8)]">
+                      ⚡ BUILDS YOUR PERFECT TRAINING PLAN AS YOU GO—GETS SMARTER WITH EVERY SESSION
+                    </span>
+                  </div>
+                </div>
+                <p className="text-xs text-gray-300 mt-2 text-center font-medium" style={{textShadow: '0 1px 4px rgba(0,0,0,0.8)'}}>
+                  Start today. By next month, you'll have a coach that knows your swing better than you do.
+                </p>
+              </div>
+            </FadeInWhenVisible>
+
             {/* Download Links */}
             <FadeInWhenVisible delay={1.5} direction="up" className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center w-full sm:w-auto">
               <Link
@@ -935,6 +951,87 @@ export default function HomePage() {
             </div>
           </div>
         )}
+      </section>
+
+      {/* The Secret Weapon - AI Learning Section */}
+      <section className="relative py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Deep Navy Background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0F1123] via-[#0A0E1F] to-[#0F1123]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(14,165,233,0.15)_0%,transparent_50%,rgba(249,115,22,0.1)_100%)]" />
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          {/* Header */}
+          <FadeInWhenVisible delay={0} direction="up" className="text-center mb-16">
+            <div className="inline-block mb-6">
+              <div className="px-6 py-2 backdrop-blur-sm bg-solar-surge-orange/10 border-2 border-solar-surge-orange/40 rounded-lg">
+                <span className="text-solar-surge-orange font-black text-sm tracking-widest drop-shadow-[0_0_8px_rgba(249,115,22,0.8)]">⚡ THE UNFAIR ADVANTAGE</span>
+              </div>
+            </div>
+            <GradientTextReveal
+              text="The More You Grind, The Smarter It Gets"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight"
+              gradientFrom="#0EA5E9"
+              gradientTo="#F97316"
+              delay={0.2}
+            />
+          </FadeInWhenVisible>
+
+          {/* Three Column Progression */}
+          <StaggerChildren className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            {/* Week 1 */}
+            <motion.div variants={staggerItemVariants}>
+              <LiquidGlass variant="blue" glow={true} className="p-8 h-full">
+                <div className="text-center">
+                  <div className="text-5xl font-black text-neon-cortex-blue mb-4">Week 1</div>
+                  <div className="text-2xl font-bold mb-4">🎯 Smart Coaching</div>
+                  <p className="text-lg text-gray-300 leading-relaxed">
+                    Solid training plans based on your goals
+                  </p>
+                </div>
+              </LiquidGlass>
+            </motion.div>
+
+            {/* Week 4 */}
+            <motion.div variants={staggerItemVariants}>
+              <LiquidGlass variant="orange" glow={true} className="p-8 h-full">
+                <div className="text-center">
+                  <div className="text-5xl font-black text-solar-surge-orange mb-4">Week 4</div>
+                  <div className="text-2xl font-bold mb-4">🧠 Learning Your Patterns</div>
+                  <p className="text-lg text-gray-300 leading-relaxed">
+                    Recognizes what works for YOUR swing, YOUR mentality, YOUR recovery
+                  </p>
+                </div>
+              </LiquidGlass>
+            </motion.div>
+
+            {/* Week 12 */}
+            <motion.div variants={staggerItemVariants}>
+              <LiquidGlass variant="blue" glow={true} className="p-8 h-full">
+                <div className="text-center">
+                  <div className="text-5xl font-black bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent mb-4">Week 12</div>
+                  <div className="text-2xl font-bold mb-4">🚀 UNSTOPPABLE</div>
+                  <p className="text-lg text-gray-300 leading-relaxed">
+                    Predicts your breakthrough moments. Prevents your slumps. Knows you better than your summer ball coach.
+                  </p>
+                </div>
+              </LiquidGlass>
+            </motion.div>
+          </StaggerChildren>
+
+          {/* Bottom Callout */}
+          <FadeInWhenVisible delay={0.6} direction="up" className="text-center">
+            <div className="inline-block">
+              <div className="px-8 py-6 bg-gradient-to-r from-neon-cortex-blue/20 via-solar-surge-orange/20 to-neon-cortex-blue/20 backdrop-blur-md border-2 border-neon-cortex-blue/40 rounded-2xl">
+                <p className="text-xl sm:text-2xl md:text-3xl font-black text-white leading-tight">
+                  This is why the best players never miss a session.<br />
+                  <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">
+                    Their AI coach gets scary good.
+                  </span>
+                </p>
+              </div>
+            </div>
+          </FadeInWhenVisible>
+        </div>
       </section>
 
       {/* App Screenshots Carousel Section */}
@@ -1703,7 +1800,7 @@ export default function HomePage() {
               </div>
 
               <p className="text-text-secondary mb-8 text-lg md:text-xl">Everything free has, plus 7 AI coaches and unlimited access</p>
-              <ul className="space-y-4 mb-10">
+              <ul className="space-y-4 mb-8">
                 {[
                   'Everything in Free',
                   'Mind AI Coach: Mental toughness training',
@@ -1723,6 +1820,29 @@ export default function HomePage() {
                   </li>
                 ))}
               </ul>
+
+              {/* Highlighted AI Learning Feature */}
+              <div className="mb-8 p-6 rounded-2xl bg-gradient-to-br from-solar-surge-orange/20 via-neon-cortex-blue/10 to-solar-surge-orange/20 border-2 border-solar-surge-orange/40">
+                <div className="flex items-start gap-4">
+                  <div className="text-3xl flex-shrink-0">⚡</div>
+                  <div>
+                    <h4 className="text-xl font-black text-solar-surge-orange mb-2">Adaptive AI Learning</h4>
+                    <p className="text-base text-gray-300 leading-relaxed">
+                      Your coach doesn't just train you—it LEARNS you. Every swing logged makes it 1% smarter. That's 30% smarter after a month. 365% in a year. Do the math on what that does to your game.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Testimonial Pull Quote */}
+              <div className="mb-10 p-6 rounded-xl bg-gradient-to-r from-neon-cortex-blue/10 to-transparent border-l-4 border-neon-cortex-blue">
+                <p className="text-lg italic text-gray-300 mb-2">
+                  "I swear this app knows when I need a rest day before I do. It's freaky."
+                </p>
+                <p className="text-sm font-semibold text-neon-cortex-blue">
+                  — Jake M., Travel Ball
+                </p>
+              </div>
               <a
                 href="/team-licensing"
                 className="block w-full px-12 py-5 text-lg font-semibold font-poppins text-center rounded-xl bg-gradient-to-br from-solar-surge-orange/20 to-solar-surge-orange/10 border border-solar-surge-orange/30 backdrop-blur-liquid transition-all duration-300 hover:from-solar-surge-orange/30 hover:to-solar-surge-orange/15 hover:shadow-liquid-glow-orange hover:border-solar-surge-orange/50 hover:scale-105 active:scale-95"
