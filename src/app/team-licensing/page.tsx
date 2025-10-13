@@ -637,9 +637,6 @@ function TeamLicensingContent() {
             >
               Upgrade to Premium
             </a>
-            <p className="text-sm text-center text-text-secondary mt-4">
-              Cancel anytime. 30-day money-back guarantee.
-            </p>
             </LiquidGlass>
           </div>
         </div>
