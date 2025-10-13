@@ -253,7 +253,7 @@ export default function PartnerProgramPage() {
       <div className="max-w-7xl mx-auto mb-20">
         <GradientTextReveal
           text="The Opportunity is Massive"
-          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight text-center"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-tight text-center"
           gradientFrom="#0EA5E9"
           gradientTo="#F97316"
           delay={0.2}
@@ -284,7 +284,7 @@ export default function PartnerProgramPage() {
       <div className="max-w-7xl mx-auto mb-20">
         <GradientTextReveal
           text="What Partners Like You Can Earn"
-          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight text-center"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-tight text-center"
           gradientFrom="#0EA5E9"
           gradientTo="#F97316"
           delay={0.2}
@@ -304,7 +304,7 @@ export default function PartnerProgramPage() {
       <div className="max-w-7xl mx-auto mb-20">
         <GradientTextReveal
           text="Why Partner With Us?"
-          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight text-center"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-tight text-center"
           gradientFrom="#0EA5E9"
           gradientTo="#F97316"
           delay={0.2}
@@ -346,7 +346,7 @@ export default function PartnerProgramPage() {
       <div className="max-w-6xl mx-auto mb-20">
         <GradientTextReveal
           text="Everything You Need to Succeed"
-          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight text-center"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-tight text-center"
           gradientFrom="#0EA5E9"
           gradientTo="#F97316"
           delay={0.2}
@@ -412,7 +412,7 @@ export default function PartnerProgramPage() {
       <div className="max-w-6xl mx-auto mb-20">
         <GradientTextReveal
           text="How It Works"
-          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-12 leading-tight text-center"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-12 leading-tight text-center"
           gradientFrom="#0EA5E9"
           gradientTo="#F97316"
           delay={0.2}
@@ -435,7 +435,7 @@ export default function PartnerProgramPage() {
       <div className="max-w-4xl mx-auto mb-20">
         <GradientTextReveal
           text="Questions? We've Got Answers"
-          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight text-center"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-tight text-center"
           gradientFrom="#0EA5E9"
           gradientTo="#F97316"
           delay={0.2}
@@ -473,7 +473,7 @@ export default function PartnerProgramPage() {
         <LiquidGlass variant="blue" glow={true} className="p-8">
           <GradientTextReveal
             text="Ready to Start Earning?"
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight text-center"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-tight text-center"
             gradientFrom="#0EA5E9"
             gradientTo="#F97316"
             delay={0.2}
