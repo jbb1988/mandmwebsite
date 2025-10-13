@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { GradientTextReveal } from '@/components/animations';
 import { ChevronDown, Search, Brain, Dumbbell, Zap, TrendingUp, Award, Users, Utensils, HelpCircle, Lock, X, AlertCircle } from 'lucide-react';
@@ -549,7 +550,18 @@ export default function FAQPage() {
   })).filter(section => section.faqs.length > 0);
 
   return (
-    <div className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative">
+      {/* Logo Watermark */}
+      <div className="fixed inset-0 flex items-center justify-center opacity-[0.04] pointer-events-none z-0">
+        <Image
+          src="/assets/images/logo.png"
+          alt=""
+          width={1200}
+          height={1200}
+          className="object-contain"
+        />
+      </div>
+
       {/* Header */}
       <div className="max-w-7xl mx-auto text-center mb-12">
         <GradientTextReveal
@@ -581,7 +593,7 @@ export default function FAQPage() {
       {/* FAQ Sections */}
       <div className="max-w-5xl mx-auto space-y-6">
         {filteredSections.length === 0 ? (
-          <LiquidGlass variant="neutral" rounded="2xl" className="p-12 text-center">
+          <LiquidGlass variant="neutral" rounded="2xl" className="p-12 text-center [&>div:first-child]:bg-gradient-to-br [&>div:first-child]:from-white/[0.02] [&>div:first-child]:via-transparent [&>div:first-child]:to-transparent">
             <p className="text-text-secondary">No results found for "{searchQuery}". Try different keywords or browse all categories below.</p>
           </LiquidGlass>
         ) : (
@@ -594,7 +606,7 @@ export default function FAQPage() {
                 key={section.id}
                 variant={section.color}
                 rounded="2xl"
-                className="overflow-hidden"
+                className="overflow-hidden [&>div:first-child]:bg-gradient-to-br [&>div:first-child]:from-white/[0.02] [&>div:first-child]:via-transparent [&>div:first-child]:to-transparent"
               >
                 {/* Section Header */}
                 <button
@@ -709,7 +721,7 @@ export default function FAQPage() {
 
       {/* Still Need Help Section */}
       <div className="max-w-5xl mx-auto mt-12">
-        <LiquidGlass variant="neutral" rounded="2xl" className="p-8 text-center">
+        <LiquidGlass variant="neutral" rounded="2xl" className="p-8 text-center [&>div:first-child]:bg-gradient-to-br [&>div:first-child]:from-white/[0.02] [&>div:first-child]:via-transparent [&>div:first-child]:to-transparent">
           <h3 className="text-2xl font-black mb-4">Still need help?</h3>
           <p className="text-text-secondary mb-6">
             Can't find what you're looking for? Our support team is here to help.
@@ -748,7 +760,7 @@ export default function FAQPage() {
               onClick={(e) => e.stopPropagation()}
               className="max-w-md w-full"
             >
-              <LiquidGlass variant="neutral" rounded="2xl" className="relative">
+              <LiquidGlass variant="neutral" rounded="2xl" className="relative [&>div:first-child]:bg-gradient-to-br [&>div:first-child]:from-white/[0.02] [&>div:first-child]:via-transparent [&>div:first-child]:to-transparent">
                 <div className="p-8">
                   <button
                     onClick={() => setShowUnlockModal(false)}

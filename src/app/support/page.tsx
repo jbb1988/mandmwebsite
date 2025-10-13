@@ -37,12 +37,12 @@ export default function SupportPage() {
       {/* Content */}
       <div className="max-w-4xl mx-auto space-y-8">
         {/* Contact & Help Section */}
-        <LiquidGlass variant="blue" rounded="2xl" className="p-8 md:p-12">
+        <LiquidGlass variant="blue" rounded="2xl" className="p-8 md:p-12 [&>div:first-child]:bg-gradient-to-br [&>div:first-child]:from-white/[0.02] [&>div:first-child]:via-transparent [&>div:first-child]:to-transparent">
           <ContactContent />
         </LiquidGlass>
 
         {/* Onboarding Videos Section - Placeholder for future content */}
-        <LiquidGlass variant="orange" rounded="2xl" className="p-8 md:p-12">
+        <LiquidGlass variant="orange" rounded="2xl" className="p-8 md:p-12 [&>div:first-child]:bg-gradient-to-br [&>div:first-child]:from-white/[0.02] [&>div:first-child]:via-transparent [&>div:first-child]:to-transparent">
           <OnboardingVideosContent />
         </LiquidGlass>
       </div>
