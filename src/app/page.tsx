@@ -5,7 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
-import { SocialProofBar } from '@/components/SocialProofBar';
 import { Brain, Dumbbell, Users, TrendingUp, Award, Zap, X, Play, Pause, MousePointerClick, Check, Video, Apple, MessageCircle, Music } from 'lucide-react';
 import { FadeInWhenVisible, StaggerChildren, TextReveal, GradientTextReveal, ScaleInWhenVisible, staggerItemVariants } from '@/components/animations';
 import { AppScreenshotCarousel } from '@/components/AppScreenshotCarousel';
@@ -359,28 +358,6 @@ export default function HomePage() {
             />
           </div>
         </div>
-        </div>
-      </section>
-
-      {/* Social Proof Section */}
-      <section className="relative py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#0F1123] to-[#1A1F3A]">
-        <div className="max-w-7xl mx-auto">
-          <FadeInWhenVisible delay={0.1} direction="up">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-black mb-3">
-                <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">
-                  Join Teams Nationwide
-                </span>
-              </h2>
-              <p className="text-text-secondary text-lg">
-                Trusted by athletes and coaches nationwide
-              </p>
-            </div>
-          </FadeInWhenVisible>
-
-          <FadeInWhenVisible delay={0.2} direction="up">
-            <SocialProofBar />
-          </FadeInWhenVisible>
         </div>
       </section>
 
