@@ -3,10 +3,6 @@ import Stripe from 'stripe';
 import { addTeamSeatsSchema } from '@/lib/validation';
 import { handleCorsOptions, validateCors, withCors } from '@/lib/cors';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-09-30.acacia',
-});
-
 export async function OPTIONS(request: NextRequest) {
   return handleCorsOptions(request) || new NextResponse(null, { status: 204 });
 }
@@ -17,6 +13,9 @@ export async function POST(request: NextRequest) {
   if (corsError) return corsError;
 
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: '2024-09-30.acacia',
+    });
     const body = await request.json();
 
     // Validate input
@@ -24,7 +23,7 @@ export async function POST(request: NextRequest) {
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Invalid input', details: validationResult.error.errors },
+        { error: 'Invalid input', details: validationResult.error.issues },
         { status: 400 }
       );
     }
@@ -81,9 +80,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    // Get customer ID from the subscription
-    const customerId = subscription.customer as string;
 
     // Create a product for the additional seats
     const product = await stripe.products.create({

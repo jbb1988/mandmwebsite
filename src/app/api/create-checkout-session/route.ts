@@ -3,10 +3,6 @@ import Stripe from 'stripe';
 import { checkoutSessionSchema } from '@/lib/validation';
 import { handleCorsOptions, validateCors, withCors } from '@/lib/cors';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-09-30.acacia',
-});
-
 // Generate unique team code
 function generateTeamCode(): string {
   const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Exclude similar looking chars
@@ -36,6 +32,10 @@ export async function POST(request: NextRequest) {
   if (corsError) return corsError;
 
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: '2024-09-30.acacia',
+    });
+
     const body = await request.json();
 
     // Validate input
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Invalid input', details: validationResult.error.errors },
+        { error: 'Invalid input', details: validationResult.error.issues },
         { status: 400 }
       );
     }

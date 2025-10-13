@@ -3,16 +3,9 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-09-30.acacia',
-});
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
-const resend = new Resend(process.env.RESEND_API_KEY!);
+// Force dynamic rendering - don't try to statically generate this route
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // Generate a unique team join code
 function generateTeamCode(): string {
@@ -27,6 +20,7 @@ function generateTeamCode(): string {
 // Send team code email
 async function sendTeamCodeEmail(email: string, teamCode: string, seatCount: number) {
   try {
+    const resend = new Resend(process.env.RESEND_API_KEY!);
     await resend.emails.send({
       from: 'Mind and Muscle <noreply@send.updates.gg>',
       to: email,
@@ -111,6 +105,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Initialize Stripe client
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: '2024-09-30.acacia',
+  });
+
   let event: Stripe.Event;
 
   try {
@@ -126,6 +125,12 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     );
   }
+
+  // Initialize Supabase client
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
 
   // Handle the event
   switch (event.type) {

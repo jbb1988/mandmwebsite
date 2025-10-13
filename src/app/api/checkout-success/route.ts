@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-09-30.acacia',
-});
-
 export async function GET(request: NextRequest) {
   try {
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: '2024-09-30.acacia',
+    });
     const searchParams = request.nextUrl.searchParams;
     const sessionId = searchParams.get('session_id');
 
