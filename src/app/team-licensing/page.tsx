@@ -862,19 +862,26 @@ function TeamLicensingContent() {
         </div>
 
         {/* Still Have Questions CTA */}
-        <div className="mt-12 text-center">
-          <LiquidGlass variant="blue" glow={true} className="inline-block px-8 py-6">
-            <p className="text-lg mb-4">
-              <span className="font-bold text-white">Still have questions?</span>
-              <br />
-              <span className="text-text-secondary">We're here to help!</span>
+        <div className="max-w-4xl mx-auto mt-12">
+          <LiquidGlass variant="neutral" rounded="2xl" className="p-8 text-center [&>div:first-child]:bg-gradient-to-br [&>div:first-child]:from-white/[0.02] [&>div:first-child]:via-transparent [&>div:first-child]:to-transparent">
+            <h3 className="text-2xl font-black mb-4">Still have questions?</h3>
+            <p className="text-text-secondary mb-6">
+              Need help deciding on the right team size or have billing questions? Our support team is here to help.
             </p>
-            <a
-              href="/support"
-              className="inline-block px-8 py-3 rounded-xl font-bold backdrop-blur-md transition-all duration-300 hover:scale-105 border border-neon-cortex-blue/30 bg-gradient-to-br from-background-primary/80 via-background-secondary/60 to-neon-cortex-blue/10 hover:shadow-liquid-glow-blue hover:border-neon-cortex-blue/50"
-            >
-              Contact Support
-            </a>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a
+                href="mailto:support@mindandmuscle.ai"
+                className="px-6 py-3 rounded-lg font-semibold bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange hover:opacity-90 transition-all"
+              >
+                Email Support
+              </a>
+              <a
+                href="/support"
+                className="px-6 py-3 rounded-lg font-semibold border border-white/20 hover:bg-white/5 transition-all"
+              >
+                View Support Page
+              </a>
+            </div>
           </LiquidGlass>
         </div>
       </div>
