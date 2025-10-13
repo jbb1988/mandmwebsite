@@ -7,16 +7,6 @@ import { Resend } from 'resend';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// Generate a unique team join code
-function generateTeamCode(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Exclude ambiguous characters
-  let code = '';
-  for (let i = 0; i < 8; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code;
-}
-
 // Send team code email
 async function sendTeamCodeEmail(email: string, teamCode: string, seatCount: number) {
   try {
@@ -146,36 +136,26 @@ export async function POST(request: NextRequest) {
       const toltReferral = session.metadata?.tolt_referral; // Partner referral code
       const customerEmail = session.customer_email;
 
-      if (!seatCount || !customerEmail) {
+      // Get the team code that was generated during checkout
+      // This ensures the code shown on success page matches the code emailed
+      const teamCode = session.metadata?.team_code;
+
+      if (!seatCount || !customerEmail || !teamCode) {
         console.error('Missing required metadata in session:', session.id);
         return NextResponse.json({ error: 'Missing metadata' }, { status: 400 });
       }
 
-      // Generate unique team code
-      let teamCode = generateTeamCode();
-      let isUnique = false;
-      let attempts = 0;
+      // Verify the team code doesn't already exist (shouldn't happen with checkout generation)
+      const { data: existing } = await supabase
+        .from('teams')
+        .select('id')
+        .eq('join_code', teamCode)
+        .single();
 
-      // Ensure the code is unique
-      while (!isUnique && attempts < 10) {
-        const { data: existing } = await supabase
-          .from('teams')
-          .select('id')
-          .eq('join_code', teamCode)
-          .single();
-
-        if (!existing) {
-          isUnique = true;
-        } else {
-          teamCode = generateTeamCode();
-          attempts++;
-        }
-      }
-
-      if (!isUnique) {
-        console.error('Failed to generate unique team code after 10 attempts');
+      if (existing) {
+        console.error('Team code collision detected:', teamCode);
         return NextResponse.json(
-          { error: 'Failed to generate unique code' },
+          { error: 'Team code already exists' },
           { status: 500 }
         );
       }
