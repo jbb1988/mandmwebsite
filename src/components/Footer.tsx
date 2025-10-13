@@ -54,6 +54,39 @@ export function Footer() {
           </Link>
         </div>
 
+        {/* Legal Links */}
+        <div className="mb-8">
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
+            <Link
+              href="/legal#terms"
+              className="text-text-secondary hover:text-starlight-white transition-colors"
+            >
+              Terms of Service
+            </Link>
+            <span className="text-text-secondary/30">•</span>
+            <Link
+              href="/legal#privacy"
+              className="text-text-secondary hover:text-starlight-white transition-colors"
+            >
+              Privacy Policy
+            </Link>
+            <span className="text-text-secondary/30">•</span>
+            <Link
+              href="/legal#coppa"
+              className="text-text-secondary hover:text-starlight-white transition-colors"
+            >
+              Parental Consent
+            </Link>
+            <span className="text-text-secondary/30">•</span>
+            <Link
+              href="/legal#partner-terms"
+              className="text-text-secondary hover:text-starlight-white transition-colors"
+            >
+              Partner Terms
+            </Link>
+          </div>
+        </div>
+
         {/* Copyright */}
         <p className="text-text-secondary">&copy; 2025 Mind and Muscle Performance. All Rights reserved.</p>
       </div>
