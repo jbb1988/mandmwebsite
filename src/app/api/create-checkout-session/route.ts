@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { checkoutSessionSchema } from '@/lib/validation';
 import { handleCorsOptions, validateCors, withCors } from '@/lib/cors';
+import { checkoutRateLimit, getClientIp, checkRateLimit } from '@/lib/rate-limit';
 
 // Generate unique team code
 function generateTeamCode(): string {
@@ -30,6 +31,28 @@ export async function POST(request: NextRequest) {
   // Validate CORS
   const corsError = validateCors(request);
   if (corsError) return corsError;
+
+  // Apply rate limiting
+  const ip = getClientIp(request);
+  const rateLimitResult = await checkRateLimit(checkoutRateLimit, ip);
+
+  if (rateLimitResult && !rateLimitResult.success) {
+    const response = NextResponse.json(
+      {
+        error: 'Too many requests. Please try again later.',
+        retryAfter: rateLimitResult.reset ? Math.ceil((rateLimitResult.reset - Date.now()) / 1000) : 60
+      },
+      {
+        status: 429,
+        headers: {
+          'Retry-After': rateLimitResult.reset ? Math.ceil((rateLimitResult.reset - Date.now()) / 1000).toString() : '60',
+          'X-RateLimit-Limit': rateLimitResult.limit?.toString() || '3',
+          'X-RateLimit-Remaining': '0',
+        }
+      }
+    );
+    return withCors(response, request);
+  }
 
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {

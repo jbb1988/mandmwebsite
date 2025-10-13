@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { TrustBadges } from './TrustBadges';
 
 export function Footer() {
   return (
@@ -52,6 +53,11 @@ export function Footer() {
               </div>
             </div>
           </Link>
+        </div>
+
+        {/* Trust Badges */}
+        <div className="mb-12 max-w-4xl mx-auto">
+          <TrustBadges variant="inline" showDescription={false} />
         </div>
 
         {/* Legal Links */}

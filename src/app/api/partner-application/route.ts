@@ -1,9 +1,61 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { partnerApplicationSchema, escapeHtml } from '@/lib/validation';
+import { partnerApplicationRateLimit, getClientIp, checkRateLimit } from '@/lib/rate-limit';
+
+// Verify Cloudflare Turnstile token
+async function verifyTurnstileToken(token: string, ip: string): Promise<boolean> {
+  const secret = process.env.TURNSTILE_SECRET_KEY;
+
+  if (!secret) {
+    console.error('TURNSTILE_SECRET_KEY not configured');
+    return false;
+  }
+
+  try {
+    const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        secret,
+        response: token,
+        remoteip: ip,
+      }),
+    });
+
+    const data = await response.json();
+    return data.success === true;
+  } catch (error) {
+    console.error('Turnstile verification error:', error);
+    return false;
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
+    // Apply rate limiting
+    const ip = getClientIp(request);
+    const rateLimitResult = await checkRateLimit(partnerApplicationRateLimit, ip);
+
+    if (rateLimitResult && !rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          error: 'Too many requests. Please try again later.',
+          retryAfter: rateLimitResult.reset ? Math.ceil((rateLimitResult.reset - Date.now()) / 1000) : 300
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': rateLimitResult.reset ? Math.ceil((rateLimitResult.reset - Date.now()) / 1000).toString() : '300',
+            'X-RateLimit-Limit': rateLimitResult.limit?.toString() || '2',
+            'X-RateLimit-Remaining': '0',
+          }
+        }
+      );
+    }
+
     const resend = new Resend(process.env.RESEND_API_KEY);
     const body = await request.json();
 
@@ -17,7 +69,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { name, email, organization, audience, networkSize, promotionChannel, whyExcited } = validationResult.data;
+    const { name, email, organization, audience, networkSize, promotionChannel, whyExcited, turnstileToken } = validationResult.data;
+
+    // Verify Turnstile CAPTCHA token
+    const isCaptchaValid = await verifyTurnstileToken(turnstileToken, ip);
+
+    if (!isCaptchaValid) {
+      return NextResponse.json(
+        { error: 'CAPTCHA verification failed. Please try again.' },
+        { status: 400 }
+      );
+    }
 
     // Escape HTML in user inputs for email display
     const safeName = escapeHtml(name);

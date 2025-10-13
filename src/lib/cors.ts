@@ -13,7 +13,19 @@ const ALLOWED_ORIGINS = [
  */
 export function isAllowedOrigin(origin: string | null): boolean {
   if (!origin) return false;
-  return ALLOWED_ORIGINS.includes(origin);
+
+  // Check exact match first
+  if (ALLOWED_ORIGINS.includes(origin)) {
+    return true;
+  }
+
+  // Allow all Vercel preview and production deployments
+  // This includes: *.vercel.app domains
+  if (origin.endsWith('.vercel.app')) {
+    return true;
+  }
+
+  return false;
 }
 
 /**

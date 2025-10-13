@@ -64,6 +64,7 @@ export const partnerApplicationSchema = z.object({
   networkSize: z.string().max(50).trim().optional(),
   promotionChannel: z.string().max(200).trim().optional(),
   whyExcited: textFieldSchema,
+  turnstileToken: z.string().min(1, 'CAPTCHA verification required'),
 });
 
 // Checkout session schema

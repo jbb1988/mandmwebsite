@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { Turnstile } from '@marsidev/react-turnstile';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
 import { EarningsCalculator } from '@/components/partner/EarningsCalculator';
@@ -18,23 +19,34 @@ export default function PartnerProgramPage() {
     whyExcited: '',
   });
 
+  const [captchaToken, setCaptchaToken] = useState<string>('');
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!captchaToken) {
+      alert('Please complete the security verification.');
+      return;
+    }
+
     try {
       const response = await fetch('/api/partner-application', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          turnstileToken: captchaToken,
+        }),
       });
 
       if (response.ok) {
         alert('Application submitted! We\'ll review and get back to you within 24 hours. Check your email for next steps.');
         setFormData({ name: '', email: '', organization: '', audience: '', networkSize: '', promotionChannel: '', whyExcited: '' });
+        setCaptchaToken('');
       } else {
-        alert('There was an error submitting your application. Please try again.');
+        const data = await response.json();
+        alert(data.error || 'There was an error submitting your application. Please try again.');
       }
     } catch (error) {
       alert('There was an error submitting your application. Please try again.');
@@ -555,7 +567,22 @@ export default function PartnerProgramPage() {
               </div>
             </div>
 
-            <LiquidButton type="submit" variant="orange" size="lg" fullWidth={true}>
+            <div className="flex justify-center">
+              <Turnstile
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'}
+                onSuccess={(token) => setCaptchaToken(token)}
+                onError={() => setCaptchaToken('')}
+                onExpire={() => setCaptchaToken('')}
+              />
+            </div>
+
+            <LiquidButton
+              type="submit"
+              variant="orange"
+              size="lg"
+              fullWidth={true}
+              disabled={!captchaToken}
+            >
               Apply Now - Start Earning
             </LiquidButton>
 

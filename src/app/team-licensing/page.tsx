@@ -3,6 +3,8 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { LiquidGlass } from '@/components/LiquidGlass';
+import { SocialProofBar } from '@/components/SocialProofBar';
+import { MoneyBackGuarantee } from '@/components/TrustBadges';
 import Link from 'next/link';
 import { Check, X, Users, TrendingUp, Award, Sparkles, Calculator, AlertCircle, ChevronDown, Heart, CreditCard, HelpCircle, ArrowRight, Shield } from 'lucide-react';
 
@@ -170,6 +172,16 @@ function TeamLicensingContent() {
         <p className="text-xl sm:text-2xl text-text-secondary max-w-4xl mx-auto leading-relaxed">
           One Premium team license unlocks all 7 AI-powered apps, personalized training, and advanced analytics for your entire team.
         </p>
+      </div>
+
+      {/* Social Proof Section */}
+      <div className="max-w-7xl mx-auto mb-16 px-4">
+        <div className="text-center mb-8">
+          <p className="text-text-secondary text-lg">
+            Trusted by 500+ Teams Nationwide
+          </p>
+        </div>
+        <SocialProofBar variant="compact" />
       </div>
 
       {/* Already Have a License? */}
@@ -399,9 +411,9 @@ function TeamLicensingContent() {
                 )}
               </button>
 
-              <p className="text-xs text-center text-text-secondary mt-4">
-                Instant delivery of Premium team code via email • 30-day money-back guarantee
-              </p>
+              <div className="mt-6 flex justify-center">
+                <MoneyBackGuarantee />
+              </div>
             </div>
 
             {/* Right: What You Get */}

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
+import { SocialProofBar } from '@/components/SocialProofBar';
 import { Brain, Dumbbell, Users, TrendingUp, Award, Zap, X, Play, Pause, MousePointerClick, Check, Video, Apple, MessageCircle, Music } from 'lucide-react';
 import { FadeInWhenVisible, StaggerChildren, TextReveal, GradientTextReveal, ScaleInWhenVisible, staggerItemVariants } from '@/components/animations';
 import { AppScreenshotCarousel } from '@/components/AppScreenshotCarousel';
@@ -308,9 +309,6 @@ export default function HomePage() {
                     </span>
                   </div>
                 </div>
-                <p className="text-xs text-gray-300 mt-2 text-center font-medium" style={{textShadow: '0 1px 4px rgba(0,0,0,0.8)'}}>
-                  Start today. By next month, you'll have a coach that knows your swing better than you do.
-                </p>
               </div>
             </FadeInWhenVisible>
 
@@ -365,40 +363,23 @@ export default function HomePage() {
       </section>
 
       {/* Social Proof Section */}
-      <section className="relative py-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#0F1123] to-[#1A1F3A]">
-        <div className="max-w-5xl mx-auto">
-          <FadeInWhenVisible delay={0.2} direction="up">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* Stat 1 */}
-              <div className="text-center">
-                <div className="text-4xl md:text-5xl font-black bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent mb-2">
-                  186
-                </div>
-                <div className="text-gray-300 font-medium">
-                  Real Game Scenarios
-                </div>
-              </div>
-
-              {/* Stat 2 */}
-              <div className="text-center">
-                <div className="text-4xl md:text-5xl font-black bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent mb-2">
-                  7
-                </div>
-                <div className="text-gray-300 font-medium">
-                  AI Coaches & Tools
-                </div>
-              </div>
-
-              {/* Stat 3 */}
-              <div className="text-center">
-                <div className="text-4xl md:text-5xl font-black bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent mb-2">
-                  100%
-                </div>
-                <div className="text-gray-300 font-medium">
-                  Baseball-Specific Content
-                </div>
-              </div>
+      <section className="relative py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#0F1123] to-[#1A1F3A]">
+        <div className="max-w-7xl mx-auto">
+          <FadeInWhenVisible delay={0.1} direction="up">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-black mb-3">
+                <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">
+                  Join 500+ Teams
+                </span>
+              </h2>
+              <p className="text-text-secondary text-lg">
+                Trusted by athletes and coaches nationwide
+              </p>
             </div>
+          </FadeInWhenVisible>
+
+          <FadeInWhenVisible delay={0.2} direction="up">
+            <SocialProofBar />
           </FadeInWhenVisible>
         </div>
       </section>

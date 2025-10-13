@@ -1,9 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { lookupTeamSchema } from '@/lib/validation';
+import { lookupTeamRateLimit, getClientIp, checkRateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
+    // Apply rate limiting
+    const ip = getClientIp(request);
+    const rateLimitResult = await checkRateLimit(lookupTeamRateLimit, ip);
+
+    if (rateLimitResult && !rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          error: 'Too many requests. Please try again later.',
+          retryAfter: rateLimitResult.reset ? Math.ceil((rateLimitResult.reset - Date.now()) / 1000) : 60
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': rateLimitResult.reset ? Math.ceil((rateLimitResult.reset - Date.now()) / 1000).toString() : '60',
+            'X-RateLimit-Limit': rateLimitResult.limit?.toString() || '5',
+            'X-RateLimit-Remaining': '0',
+          }
+        }
+      );
+    }
+
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
       apiVersion: '2024-09-30.acacia',
     });
