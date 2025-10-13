@@ -155,7 +155,7 @@ export default function ManageTeamLicense() {
                     value={teamCode}
                     onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
                     placeholder="TEAM-XXXX-XXXX"
-                    className="w-full px-4 py-3 bg-space-black/50 border border-white/20 rounded-lg focus:outline-none focus:border-neon-cortex-blue transition-colors text-center text-lg font-mono"
+                    className="w-full px-4 py-3 bg-space-black/50 border border-white/20 rounded-lg focus:outline-none focus:border-neon-cortex-blue transition-colors text-center text-lg font-mono text-starlight-white placeholder:text-text-secondary/50"
                     onKeyDown={(e) => e.key === 'Enter' && lookupTeamCode()}
                   />
                 </div>
@@ -253,7 +253,7 @@ export default function ManageTeamLicense() {
                         max={maxAllowedSeats - teamData.currentSeats}
                         value={additionalSeats}
                         onChange={(e) => setAdditionalSeats(Math.max(1, parseInt(e.target.value) || 1))}
-                        className="flex-1 px-4 py-3 bg-space-black/50 border border-white/20 rounded-lg focus:outline-none focus:border-neon-cortex-blue transition-colors text-center text-2xl font-bold"
+                        className="flex-1 px-4 py-3 bg-space-black/50 border border-white/20 rounded-lg focus:outline-none focus:border-neon-cortex-blue transition-colors text-center text-2xl font-bold text-starlight-white"
                       />
                       <button
                         onClick={() => setAdditionalSeats(Math.min(maxAllowedSeats - teamData.currentSeats, additionalSeats + 1))}
