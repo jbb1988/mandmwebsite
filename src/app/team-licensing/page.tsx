@@ -4,6 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { SocialProofBar } from '@/components/SocialProofBar';
+import { GradientTextReveal } from '@/components/animations';
 import Link from 'next/link';
 import { Check, X, Users, TrendingUp, Award, Sparkles, Calculator, AlertCircle, ChevronDown, Heart, CreditCard, HelpCircle, ArrowRight, Shield } from 'lucide-react';
 
@@ -160,25 +161,29 @@ function TeamLicensingContent() {
           </LiquidGlass>
         </div>
 
-        <h1 className="text-5xl sm:text-7xl font-black mb-6">
-          <span className="shimmer-text bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">
-            Unlock Premium for
-            <br />
-            Your Entire Team
-          </span>
-        </h1>
+        <GradientTextReveal
+          text="Unlock Premium for Your Entire Team"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight"
+          gradientFrom="#0EA5E9"
+          gradientTo="#F97316"
+          delay={0.2}
+        />
 
-        <p className="text-xl sm:text-2xl text-text-secondary max-w-4xl mx-auto leading-relaxed">
+        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed">
           One Premium team license unlocks all 7 AI-powered apps, personalized training, and advanced analytics for your entire team.
         </p>
       </div>
 
       {/* Social Proof Section */}
       <div className="max-w-7xl mx-auto mb-16 px-4">
-        <div className="text-center mb-8">
-          <p className="text-text-secondary text-lg">
-            Join Teams Nationwide
-          </p>
+        <div className="text-center mb-10">
+          <GradientTextReveal
+            text="Join Teams Nationwide"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black mb-4"
+            gradientFrom="#0EA5E9"
+            gradientTo="#F97316"
+            delay={0.3}
+          />
         </div>
         <SocialProofBar variant="compact" />
       </div>

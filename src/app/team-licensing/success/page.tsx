@@ -5,6 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, Copy, Mail, ArrowRight, Shield, Users } from 'lucide-react';
 import { LiquidGlass } from '@/components/LiquidGlass';
+import { GradientTextReveal } from '@/components/animations';
 
 function SuccessContent() {
   const searchParams = useSearchParams();
@@ -87,12 +88,16 @@ function SuccessContent() {
               </div>
             </LiquidGlass>
           </div>
-          <h1 className="text-4xl md:text-6xl font-black mb-4">
-            <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">
-              Welcome to Mind & Muscle Premium!
-            </span>
-          </h1>
-          <p className="text-lg text-text-secondary">Your team license is now active</p>
+          <GradientTextReveal
+            text="Welcome to Mind & Muscle Premium!"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight"
+            gradientFrom="#0EA5E9"
+            gradientTo="#F97316"
+            delay={0.2}
+          />
+          <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed">
+            Your team license is now active
+          </p>
         </div>
 
         {/* Team Code Card */}

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { Users, Plus, AlertCircle, CreditCard, Check, ArrowLeft, Shield } from 'lucide-react';
 import { LiquidGlass } from '@/components/LiquidGlass';
+import { GradientTextReveal } from '@/components/animations';
 
 interface TeamData {
   teamCode: string;
@@ -127,12 +128,16 @@ export default function ManageTeamLicense() {
               </div>
             </LiquidGlass>
           </div>
-          <h1 className="text-4xl md:text-5xl font-black mb-4">
-            <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">
-              Manage Your Team License
-            </span>
-          </h1>
-          <p className="text-lg text-text-secondary">Add seats at your locked-in discount rate</p>
+          <GradientTextReveal
+            text="Manage Your Team License"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight"
+            gradientFrom="#0EA5E9"
+            gradientTo="#F97316"
+            delay={0.2}
+          />
+          <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed">
+            Add seats at your locked-in discount rate
+          </p>
         </div>
 
         {!teamData ? (

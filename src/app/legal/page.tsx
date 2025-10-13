@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { LiquidGlass } from '@/components/LiquidGlass';
+import { GradientTextReveal } from '@/components/animations';
 import { FileText, Shield, UserCircle, Users } from 'lucide-react';
 
 export default function LegalPage() {
@@ -25,12 +26,14 @@ export default function LegalPage() {
     <div className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8">
       {/* Header */}
       <div className="max-w-7xl mx-auto text-center mb-12">
-        <h1 className="text-5xl sm:text-7xl font-black mb-6">
-          <span className="shimmer-text bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">
-            Legal & Policies
-          </span>
-        </h1>
-        <p className="text-xl text-text-secondary max-w-3xl mx-auto">
+        <GradientTextReveal
+          text="Legal & Policies"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight"
+          gradientFrom="#0EA5E9"
+          gradientTo="#F97316"
+          delay={0.2}
+        />
+        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed">
           Transparency, trust, and compliance at every level
         </p>
       </div>

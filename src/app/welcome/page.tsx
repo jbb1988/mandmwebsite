@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { CheckCircle, SkipForward } from 'lucide-react';
 import { LiquidGlass } from '@/components/LiquidGlass';
+import { GradientTextReveal } from '@/components/animations';
 
 export default function WelcomePage() {
   const [showSplash, setShowSplash] = useState(true);
@@ -103,13 +104,15 @@ export default function WelcomePage() {
             </LiquidGlass>
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-black mb-4">
-            <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">
-              Welcome to Mind & Muscle!
-            </span>
-          </h1>
+          <GradientTextReveal
+            text="Welcome to Mind & Muscle!"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight"
+            gradientFrom="#0EA5E9"
+            gradientTo="#F97316"
+            delay={0.2}
+          />
 
-          <p className="text-lg text-text-secondary mb-2">
+          <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-2">
             Your account is ready. Let's get started.
           </p>
         </div>

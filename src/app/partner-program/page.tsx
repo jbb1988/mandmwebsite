@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
+import { GradientTextReveal } from '@/components/animations';
 import { EarningsCalculator } from '@/components/partner/EarningsCalculator';
 import { ScenarioCard } from '@/components/partner/ScenarioCard';
 import { DollarSign, TrendingUp, Users, Gift, BarChart, Rocket, Check, Link2, Star, Zap, Target, Award, BookOpen, Sparkles, Clock, Trophy, ChevronDown, GraduationCap, Briefcase, UserPlus } from 'lucide-react';
@@ -206,13 +207,15 @@ export default function PartnerProgramPage() {
           </LiquidGlass>
         </div>
 
-        <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black mb-6 leading-tight">
-          <span className="bg-gradient-to-r from-solar-surge-orange to-neon-cortex-blue bg-clip-text text-transparent">
-            Build Passive Income<br />Helping Coaches Win
-          </span>
-        </h1>
+        <GradientTextReveal
+          text="Build Passive Income Helping Coaches Win"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight"
+          gradientFrom="#F97316"
+          gradientTo="#0EA5E9"
+          delay={0.2}
+        />
 
-        <p className="text-xl text-text-secondary max-w-3xl mx-auto mb-12">
+        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12">
           Join our partner program and earn 10% commission on every subscription payment. Lifetime earning potential as referrals renew.
         </p>
 
