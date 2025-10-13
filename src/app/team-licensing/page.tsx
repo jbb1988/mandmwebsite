@@ -4,7 +4,6 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { SocialProofBar } from '@/components/SocialProofBar';
-import { MoneyBackGuarantee } from '@/components/TrustBadges';
 import Link from 'next/link';
 import { Check, X, Users, TrendingUp, Award, Sparkles, Calculator, AlertCircle, ChevronDown, Heart, CreditCard, HelpCircle, ArrowRight, Shield } from 'lucide-react';
 
@@ -410,10 +409,6 @@ function TeamLicensingContent() {
                   `Purchase Team License - $${pricing.totalPrice}/year`
                 )}
               </button>
-
-              <div className="mt-6 flex justify-center">
-                <MoneyBackGuarantee />
-              </div>
             </div>
 
             {/* Right: What You Get */}
