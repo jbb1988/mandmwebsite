@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { lookupTeamSchema } from '@/lib/validation';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-09-30.acacia',
@@ -7,14 +8,19 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export async function POST(request: NextRequest) {
   try {
-    const { teamCode } = await request.json();
+    const body = await request.json();
 
-    if (!teamCode) {
+    // Validate input
+    const validationResult = lookupTeamSchema.safeParse(body);
+
+    if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Team code is required' },
+        { error: 'Invalid team code format' },
         { status: 400 }
       );
     }
+
+    const { teamCode } = validationResult.data;
 
     // Search for subscription by team code in metadata
     const subscriptions = await stripe.subscriptions.search({
@@ -24,7 +30,7 @@ export async function POST(request: NextRequest) {
 
     if (subscriptions.data.length === 0) {
       return NextResponse.json(
-        { error: 'Team code not found or subscription is not active' },
+        { error: 'Invalid team code' },
         { status: 404 }
       );
     }

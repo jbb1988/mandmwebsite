@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { checkoutSessionSchema } from '@/lib/validation';
+import { handleCorsOptions, validateCors, withCors } from '@/lib/cors';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-09-30.acacia',
@@ -24,16 +26,29 @@ function generateTeamCode(): string {
   return `TEAM-${code}`;
 }
 
-export async function POST(request: NextRequest) {
-  try {
-    const { seatCount, email, testMode, toltReferral } = await request.json();
+export async function OPTIONS(request: NextRequest) {
+  return handleCorsOptions(request) || new NextResponse(null, { status: 204 });
+}
 
-    if (!seatCount || seatCount < 12) {
+export async function POST(request: NextRequest) {
+  // Validate CORS
+  const corsError = validateCors(request);
+  if (corsError) return corsError;
+
+  try {
+    const body = await request.json();
+
+    // Validate input
+    const validationResult = checkoutSessionSchema.safeParse(body);
+
+    if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Seat count must be at least 12' },
+        { error: 'Invalid input', details: validationResult.error.errors },
         { status: 400 }
       );
     }
+
+    const { seatCount, email, testMode, toltReferral } = validationResult.data;
 
     // TEST MODE: Use $1.00 per seat for testing
     let pricePerSeat: number;
@@ -129,7 +144,8 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ sessionId: session.id, url: session.url });
+    const response = NextResponse.json({ sessionId: session.id, url: session.url });
+    return withCors(response, request);
   } catch (error: any) {
     console.error('Error creating checkout session:', error);
     return NextResponse.json(

@@ -1,35 +1,72 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { addTeamSeatsSchema } from '@/lib/validation';
+import { handleCorsOptions, validateCors, withCors } from '@/lib/cors';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-09-30.acacia',
 });
 
+export async function OPTIONS(request: NextRequest) {
+  return handleCorsOptions(request) || new NextResponse(null, { status: 204 });
+}
+
 export async function POST(request: NextRequest) {
+  // Validate CORS
+  const corsError = validateCors(request);
+  if (corsError) return corsError;
+
   try {
-    const { teamCode, subscriptionId, additionalSeats, lockedInRate } = await request.json();
+    const body = await request.json();
 
-    if (!teamCode || !subscriptionId || !additionalSeats || !lockedInRate) {
+    // Validate input
+    const validationResult = addTeamSeatsSchema.safeParse(body);
+
+    if (!validationResult.success) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Invalid input', details: validationResult.error.errors },
         { status: 400 }
       );
     }
 
-    if (additionalSeats < 1) {
-      return NextResponse.json(
-        { error: 'Additional seats must be at least 1' },
-        { status: 400 }
-      );
-    }
+    const { teamCode, subscriptionId, additionalSeats, lockedInRate, customerEmail } = validationResult.data;
 
     // Retrieve the subscription to validate and get current data
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 
     if (!subscription || subscription.status !== 'active') {
       return NextResponse.json(
-        { error: 'Subscription not found or not active' },
+        { error: 'Invalid request' },
         { status: 404 }
+      );
+    }
+
+    // SECURITY: Verify the request is from the subscription owner
+    const customerId = subscription.customer as string;
+    const customer = await stripe.customers.retrieve(customerId);
+
+    if ('deleted' in customer && customer.deleted) {
+      return NextResponse.json(
+        { error: 'Invalid request' },
+        { status: 403 }
+      );
+    }
+
+    const subscriptionEmail = (customer as Stripe.Customer).email?.toLowerCase().trim();
+    const requestEmail = customerEmail.toLowerCase().trim();
+
+    if (subscriptionEmail !== requestEmail) {
+      return NextResponse.json(
+        { error: 'Unauthorized: Email does not match subscription owner' },
+        { status: 403 }
+      );
+    }
+
+    // SECURITY: Verify team code matches subscription metadata
+    if (subscription.metadata.team_code !== teamCode) {
+      return NextResponse.json(
+        { error: 'Invalid request' },
+        { status: 403 }
       );
     }
 
@@ -104,19 +141,21 @@ export async function POST(request: NextRequest) {
       const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
       // Return the hosted invoice URL for payment
-      return NextResponse.json({
+      const response = NextResponse.json({
         success: true,
         url: invoice.hosted_invoice_url,
         amountDue: invoice.amount_due / 100,
         newTotalSeats,
       });
+      return withCors(response, request);
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       message: 'Seats added successfully',
       newTotalSeats,
     });
+    return withCors(response, request);
 
   } catch (error: any) {
     console.error('Error adding team seats:', error);

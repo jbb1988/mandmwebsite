@@ -1,15 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { partnerApplicationSchema, escapeHtml } from '@/lib/validation';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, organization, audience, networkSize, promotionChannel, whyExcited } = await request.json();
+    const body = await request.json();
 
-    if (!name || !email) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    // Validate and sanitize input
+    const validationResult = partnerApplicationSchema.safeParse(body);
+
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { error: 'Invalid input', details: validationResult.error.errors },
+        { status: 400 }
+      );
     }
+
+    const { name, email, organization, audience, networkSize, promotionChannel, whyExcited } = validationResult.data;
+
+    // Escape HTML in user inputs for email display
+    const safeName = escapeHtml(name);
+    const safeEmail = escapeHtml(email);
+    const safeOrganization = organization ? escapeHtml(organization) : 'Not provided';
+    const safeNetworkSize = networkSize ? escapeHtml(networkSize) : 'Not provided';
+    const safePromotionChannel = promotionChannel ? escapeHtml(promotionChannel) : 'Not provided';
+    const safeWhyExcited = whyExcited ? escapeHtml(whyExcited) : 'Not provided';
+    const safeAudience = audience ? escapeHtml(audience) : 'Not provided';
 
     // Automatically create partner in Tolt
     const toltApiKey = process.env.TOLT_API_KEY;
@@ -65,22 +83,22 @@ export async function POST(request: NextRequest) {
       from: 'Mind & Muscle Partners <partners@mindandmuscle.ai>',
       to: 'support@mindandmuscle.ai',
       replyTo: email,
-      subject: `New Partner Application: ${name}`,
+      subject: `New Partner Application: ${safeName}`,
       html: `
         <h2>New Partner Program Application</h2>
 
         <h3>Applicant Details:</h3>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Organization:</strong> ${organization || 'Not provided'}</p>
-        <p><strong>Network Size:</strong> ${networkSize || 'Not provided'}</p>
-        <p><strong>Promotion Channel:</strong> ${promotionChannel || 'Not provided'}</p>
+        <p><strong>Name:</strong> ${safeName}</p>
+        <p><strong>Email:</strong> ${safeEmail}</p>
+        <p><strong>Organization:</strong> ${safeOrganization}</p>
+        <p><strong>Network Size:</strong> ${safeNetworkSize}</p>
+        <p><strong>Promotion Channel:</strong> ${safePromotionChannel}</p>
 
         <h3>Why They're Excited:</h3>
-        <p>${whyExcited || 'Not provided'}</p>
+        <p>${safeWhyExcited}</p>
 
         <h3>Audience Information:</h3>
-        <p>${audience || 'Not provided'}</p>
+        <p>${safeAudience}</p>
 
         <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;" />
 
@@ -109,7 +127,7 @@ export async function POST(request: NextRequest) {
           </div>
 
           <div style="background: #ffffff; padding: 40px 30px; border-radius: 0 0 12px 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-            <p style="font-size: 18px; color: #111; margin-bottom: 20px;">Hi ${name},</p>
+            <p style="font-size: 18px; color: #111; margin-bottom: 20px;">Hi ${safeName},</p>
 
             <p style="font-size: 16px; line-height: 1.6; color: #555; margin-bottom: 20px;">
               Thanks for joining the Mind & Muscle Partner Program! You've been automatically set up in our system and your partner dashboard is ready to go.
