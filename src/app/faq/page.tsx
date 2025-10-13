@@ -120,11 +120,11 @@ export default function FAQPage() {
         },
         {
           question: 'Can I change my role after signing up?',
-          answer: 'Contact support@mindandmuscle.ai to change your role. Your data will be preserved, but your dashboard and available features will adjust to match your new role.'
+          answer: 'Contact <a href="mailto:support@mindandmuscle.ai" class="text-solar-surge-orange hover:underline">support@mindandmuscle.ai</a> to change your role. Your data will be preserved, but your dashboard and available features will adjust to match your new role.'
         },
         {
           question: 'How do I reset my password?',
-          answer: 'On the login screen, tap "Forgot Password?" and enter your email. You\'ll receive a password reset link. If you don\'t receive it, check your spam folder or contact support@mindandmuscle.ai.'
+          answer: 'On the login screen, tap "Forgot Password?" and enter your email. You\'ll receive a password reset link. If you don\'t receive it, check your spam folder or contact <a href="mailto:support@mindandmuscle.ai" class="text-solar-surge-orange hover:underline">support@mindandmuscle.ai</a>.'
         }
       ]
     },
@@ -429,7 +429,7 @@ export default function FAQPage() {
         },
         {
           question: 'I lost my team code email - how do I get it?',
-          answer: 'Contact support@mindandmuscle.ai with the email address used for purchase. Support can look up your team code within minutes using the admin lookup tool. You\'ll receive your code via email. Check your spam folder for the original email first!'
+          answer: 'Contact <a href="mailto:support@mindandmuscle.ai" class="text-solar-surge-orange hover:underline">support@mindandmuscle.ai</a> with the email address used for purchase. Support can look up your team code within minutes using the admin lookup tool. You\'ll receive your code via email. Check your spam folder for the original email first!'
         },
         {
           question: 'Do parents consume license seats?',
@@ -441,7 +441,7 @@ export default function FAQPage() {
         },
         {
           question: 'How many seats do I have left?',
-          answer: 'Coaches and team admins: Go to More → Teams → Manage License. You\'ll see "X / Y Seats Used" showing exactly how many seats are consumed and how many remain. You can also email support@mindandmuscle.ai with your team code, and they\'ll tell you your seat count.'
+          answer: 'Coaches and team admins: Go to More → Teams → Manage License. You\'ll see "X / Y Seats Used" showing exactly how many seats are consumed and how many remain. You can also email <a href="mailto:support@mindandmuscle.ai" class="text-solar-surge-orange hover:underline">support@mindandmuscle.ai</a> with your team code, and they\'ll tell you your seat count.'
         },
         {
           question: 'Can I add more seats mid-season?',
@@ -461,11 +461,11 @@ export default function FAQPage() {
         },
         {
           question: 'What\'s your refund policy?',
-          answer: 'We offer a 30-day money-back guarantee. If Mind & Muscle isn\'t right for your team within the first 30 days, contact support@mindandmuscle.ai for a full refund. No questions asked. After 30 days, subscriptions are non-refundable but you can cancel anytime to prevent future renewals.'
+          answer: 'We offer a 30-day money-back guarantee. If Mind & Muscle isn\'t right for your team within the first 30 days, contact <a href="mailto:support@mindandmuscle.ai" class="text-solar-surge-orange hover:underline">support@mindandmuscle.ai</a> for a full refund. No questions asked. After 30 days, subscriptions are non-refundable but you can cancel anytime to prevent future renewals.'
         },
         {
           question: 'How do I cancel my subscription?',
-          answer: 'We don\'t want to see you go, but you can cancel anytime:\n\n1. Email support@mindandmuscle.ai with your team code\n2. We\'ll process the cancellation\n3. Your team keeps Premium access until the end of your paid period\n4. No future charges will occur\n\nYou can also manage your subscription through your Stripe customer portal (link in your purchase email).'
+          answer: 'We don\'t want to see you go, but you can cancel anytime:\n\n1. Email <a href="mailto:support@mindandmuscle.ai" class="text-solar-surge-orange hover:underline">support@mindandmuscle.ai</a> with your team code\n2. We\'ll process the cancellation\n3. Your team keeps Premium access until the end of your paid period\n4. No future charges will occur\n\nYou can also manage your subscription through your Stripe customer portal (link in your purchase email).'
         }
       ]
     },
@@ -513,7 +513,7 @@ export default function FAQPage() {
         },
         {
           question: 'The app won\'t load - what should I do?',
-          answer: 'Try these steps in order:\n\n1. Force close the app and reopen it\n2. Check your internet connection (wifi or cellular)\n3. Update to the latest version in App Store/Google Play\n4. Restart your device\n5. Delete and reinstall the app (your account data is saved in the cloud)\n\nStill having issues? Email support@mindandmuscle.ai with your device model and iOS/Android version.'
+          answer: 'Try these steps in order:\n\n1. Force close the app and reopen it\n2. Check your internet connection (wifi or cellular)\n3. Update to the latest version in App Store/Google Play\n4. Restart your device\n5. Delete and reinstall the app (your account data is saved in the cloud)\n\nStill having issues? Email <a href="mailto:support@mindandmuscle.ai" class="text-solar-surge-orange hover:underline">support@mindandmuscle.ai</a> with your device model and iOS/Android version.'
         },
         {
           question: 'My videos won\'t upload - help!',
@@ -525,7 +525,7 @@ export default function FAQPage() {
         },
         {
           question: 'How do I delete my account?',
-          answer: 'To delete your account and all associated data:\n\n1. Go to More → Settings → Account Settings\n2. Scroll to bottom and tap "Delete Account"\n3. Confirm deletion (this is permanent!)\n\nOr email support@mindandmuscle.ai requesting account deletion. Your data will be permanently removed within 30 days per our privacy policy. If you have an active team license, you may need to remove yourself from the team first.'
+          answer: 'To delete your account and all associated data:\n\n1. Go to More → Settings → Account Settings\n2. Scroll to bottom and tap "Delete Account"\n3. Confirm deletion (this is permanent!)\n\nOr email <a href="mailto:support@mindandmuscle.ai" class="text-solar-surge-orange hover:underline">support@mindandmuscle.ai</a> requesting account deletion. Your data will be permanently removed within 30 days per our privacy policy. If you have an active team license, you may need to remove yourself from the team first.'
         },
         {
           question: 'Where is my data stored?',
@@ -687,9 +687,10 @@ export default function FAQPage() {
                                     transition={{ duration: 0.2 }}
                                     className="border-t border-white/10"
                                   >
-                                    <div className="p-4 text-text-secondary whitespace-pre-line">
-                                      {faq.answer}
-                                    </div>
+                                    <div
+                                      className="p-4 text-text-secondary whitespace-pre-line"
+                                      dangerouslySetInnerHTML={{ __html: faq.answer }}
+                                    />
                                   </motion.div>
                                 )}
                               </AnimatePresence>
