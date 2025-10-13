@@ -66,14 +66,14 @@ function PasswordGateContent() {
           <div className="p-8">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-sm font-semibold mb-2">Password</label>
+                <label className="block text-sm font-semibold mb-2 text-starlight-white">Password</label>
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter preview password"
                   autoFocus
-                  className="w-full px-4 py-3 bg-space-black/50 border border-white/20 rounded-lg focus:outline-none focus:border-neon-cortex-blue transition-colors text-starlight-white placeholder:text-text-secondary/50"
+                  className="w-full px-4 py-3 bg-slate-900 border-2 border-neon-cortex-blue/40 rounded-lg focus:outline-none focus:border-neon-cortex-blue focus:ring-2 focus:ring-neon-cortex-blue/20 transition-all text-white placeholder:text-gray-400 font-medium"
                   disabled={loading}
                 />
               </div>
