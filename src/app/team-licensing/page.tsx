@@ -178,7 +178,7 @@ function TeamLicensingContent() {
       <div className="max-w-7xl mx-auto mb-16 px-4">
         <div className="text-center mb-8">
           <p className="text-text-secondary text-lg">
-            Trusted by 500+ Teams Nationwide
+            Join Teams Nationwide
           </p>
         </div>
         <SocialProofBar variant="compact" />
