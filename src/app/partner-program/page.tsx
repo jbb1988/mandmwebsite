@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
@@ -195,7 +196,18 @@ export default function PartnerProgramPage() {
   ];
 
   return (
-    <div className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative">
+      {/* Logo Watermark */}
+      <div className="fixed inset-0 flex items-center justify-center opacity-[0.04] pointer-events-none z-0">
+        <Image
+          src="/assets/images/logo.png"
+          alt=""
+          width={1200}
+          height={1200}
+          className="object-contain"
+        />
+      </div>
+
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto text-center mb-20">
         <div className="inline-block mb-8">

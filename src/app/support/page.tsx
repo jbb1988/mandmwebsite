@@ -1,13 +1,25 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { GradientTextReveal } from '@/components/animations';
 import { Mail, Shield, Video } from 'lucide-react';
 
 export default function SupportPage() {
   return (
-    <div className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative">
+      {/* Logo Watermark */}
+      <div className="fixed inset-0 flex items-center justify-center opacity-[0.04] pointer-events-none z-0">
+        <Image
+          src="/assets/images/logo.png"
+          alt=""
+          width={1200}
+          height={1200}
+          className="object-contain"
+        />
+      </div>
+
       {/* Header */}
       <div className="max-w-7xl mx-auto text-center mb-12">
         <GradientTextReveal

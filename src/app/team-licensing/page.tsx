@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { SocialProofBar } from '@/components/SocialProofBar';
 import { GradientTextReveal } from '@/components/animations';
@@ -126,7 +127,18 @@ function TeamLicensingContent() {
   };
 
   return (
-    <div className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative">
+      {/* Logo Watermark */}
+      <div className="fixed inset-0 flex items-center justify-center opacity-[0.04] pointer-events-none z-0">
+        <Image
+          src="/assets/images/logo.png"
+          alt=""
+          width={1200}
+          height={1200}
+          className="object-contain"
+        />
+      </div>
+
       {/* Canceled Message */}
       {showCanceledMessage && (
         <div className="max-w-5xl mx-auto mb-8">

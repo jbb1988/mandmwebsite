@@ -17,6 +17,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Check for master code first
+    const MASTER_FAQ_CODE = 'FAQ-MASTER-ACCESS-2025';
+    if (teamCode.toUpperCase() === MASTER_FAQ_CODE) {
+      const response = NextResponse.json({
+        success: true,
+        message: 'Master access verified successfully'
+      });
+
+      response.cookies.set('faq_premium_access', 'true', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 60 * 60 * 24 * 30, // 30 days
+        path: '/'
+      });
+
+      return response;
+    }
+
     // Query the team_join_codes table to verify the code exists and is active
     const { data, error } = await supabase
       .from('team_join_codes')
