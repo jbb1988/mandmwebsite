@@ -494,7 +494,7 @@ export default function HomePage() {
                     </div>
 
                     {/* Description */}
-                    <p className="text-base text-gray-300 leading-relaxed">
+                    <p className="text-base text-gray-300 leading-relaxed pr-16 pb-2">
                       {feature.description}
                     </p>
 
@@ -618,7 +618,7 @@ export default function HomePage() {
                     </div>
 
                     {/* Description */}
-                    <p className="text-base text-gray-300 leading-relaxed">
+                    <p className="text-base text-gray-300 leading-relaxed pr-16 pb-2">
                       {feature.description}
                     </p>
 
@@ -742,7 +742,7 @@ export default function HomePage() {
                     </div>
 
                     {/* Description */}
-                    <p className="text-base text-gray-300 leading-relaxed">
+                    <p className="text-base text-gray-300 leading-relaxed pr-16 pb-2">
                       {feature.description}
                     </p>
 
