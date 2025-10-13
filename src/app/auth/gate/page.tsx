@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Lock, AlertCircle } from 'lucide-react';
 import { LiquidGlass } from '@/components/LiquidGlass';
 
-export default function PasswordGate() {
+function PasswordGateContent() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -103,5 +103,17 @@ export default function PasswordGate() {
         </LiquidGlass>
       </div>
     </div>
+  );
+}
+
+export default function PasswordGate() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-background-primary via-background-secondary to-space-black">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neon-cortex-blue"></div>
+      </div>
+    }>
+      <PasswordGateContent />
+    </Suspense>
   );
 }

@@ -147,9 +147,9 @@ export async function POST(request: NextRequest) {
 
       // Verify the team code doesn't already exist (shouldn't happen with checkout generation)
       const { data: existing } = await supabase
-        .from('teams')
+        .from('team_join_codes')
         .select('id')
-        .eq('join_code', teamCode)
+        .eq('code', teamCode)
         .single();
 
       if (existing) {
@@ -160,19 +160,18 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Create team record in Supabase
+      // Create team record in Supabase (basic team info + Stripe tracking)
       const { data: team, error: teamError } = await supabase
         .from('teams')
         .insert({
           name: `Team ${teamCode}`, // Temporary name, can be changed by admin later
-          join_code: teamCode,
-          license_type: 'team',
-          license_status: 'active',
-          max_seats: seatCount,
-          seats_used: 0,
           stripe_subscription_id: session.subscription as string,
           stripe_customer_id: session.customer as string,
           admin_email: customerEmail,
+          license_seats_total: seatCount,
+          license_seats_consumed: 0,
+          is_premium: true,
+          subscription_status: 'active',
           metadata: {
             discount_percentage: discountPercentage,
             price_per_seat: pricePerSeat,
@@ -192,7 +191,34 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      console.log('Team created:', team.id, 'Code:', teamCode);
+      console.log('Team created:', team.id);
+
+      // Create join code in team_join_codes table
+      const { data: joinCode, error: joinCodeError } = await supabase
+        .from('team_join_codes')
+        .insert({
+          code: teamCode,
+          team_id: team.id,
+          max_uses: seatCount,
+          uses_count: 0,
+          is_active: true,
+          tier: 'team',
+          allow_parent_linking: true,
+        })
+        .select()
+        .single();
+
+      if (joinCodeError) {
+        console.error('Error creating join code:', joinCodeError);
+        // Rollback: delete the team we just created
+        await supabase.from('teams').delete().eq('id', team.id);
+        return NextResponse.json(
+          { error: 'Failed to create join code' },
+          { status: 500 }
+        );
+      }
+
+      console.log('Join code created:', teamCode, 'for team:', team.id);
 
       // Send email with team code
       await sendTeamCodeEmail(customerEmail, teamCode, seatCount);
@@ -233,11 +259,11 @@ export async function POST(request: NextRequest) {
       if (invoice.subscription) {
         console.log('Subscription payment succeeded:', invoice.subscription);
 
-        // Update team license status to active (in case it was inactive)
+        // Update team subscription status to active (in case it was inactive)
         const { data: teamData, error: updateError } = await supabase
           .from('teams')
           .update({
-            license_status: 'active',
+            subscription_status: 'active',
             updated_at: new Date().toISOString(),
           })
           .eq('stripe_subscription_id', invoice.subscription)
@@ -303,11 +329,11 @@ export async function POST(request: NextRequest) {
       if (invoice.subscription) {
         console.log('Subscription payment failed:', invoice.subscription);
 
-        // Update team license status to inactive
+        // Update team subscription status to inactive
         const { error: updateError } = await supabase
           .from('teams')
           .update({
-            license_status: 'inactive',
+            subscription_status: 'inactive',
             updated_at: new Date().toISOString(),
           })
           .eq('stripe_subscription_id', invoice.subscription);
@@ -330,7 +356,7 @@ export async function POST(request: NextRequest) {
       const { error: updateError } = await supabase
         .from('teams')
         .update({
-          license_status: 'cancelled',
+          subscription_status: 'cancelled',
           updated_at: new Date().toISOString(),
         })
         .eq('stripe_subscription_id', subscription.id);
