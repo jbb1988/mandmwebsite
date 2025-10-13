@@ -23,6 +23,7 @@ export const Navigation: React.FC = () => {
     { href: '/', label: 'Home' },
     { href: '/team-licensing', label: 'Team Licensing' },
     { href: '/partner-program', label: 'Partner Program' },
+    { href: '/faq', label: 'FAQ' },
     { href: '/support', label: 'Support' },
   ];
 

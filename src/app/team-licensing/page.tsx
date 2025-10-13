@@ -174,19 +174,6 @@ function TeamLicensingContent() {
         </p>
       </div>
 
-      {/* Social Proof Section */}
-      <div className="max-w-7xl mx-auto mb-16 px-4">
-        <div className="text-center mb-10">
-          <GradientTextReveal
-            text="Join Teams Nationwide"
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black mb-4"
-            gradientFrom="#0EA5E9"
-            gradientTo="#F97316"
-            delay={0.3}
-          />
-        </div>
-        <SocialProofBar variant="compact" />
-      </div>
 
       {/* Already Have a License? */}
       <div className="max-w-5xl mx-auto mb-12">
@@ -521,14 +508,14 @@ function TeamLicensingContent() {
               </div>
             </LiquidGlass>
           </div>
-          <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black mb-8 leading-tight">
-            Team Up. Level Up.
-            <br />
-            <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent drop-shadow-[0_0_32px_rgba(14,165,233,0.4)]">
-              Save Up.
-            </span>
-          </h2>
-          <p className="text-xl sm:text-2xl md:text-3xl text-text-secondary max-w-4xl mx-auto leading-relaxed font-medium">
+          <GradientTextReveal
+            text="Team Up. Level Up. Save Up."
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight"
+            gradientFrom="#0EA5E9"
+            gradientTo="#F97316"
+            delay={0.2}
+          />
+          <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed">
             Get up to 20% off Premium when your team joins together.
           </p>
           <p className="text-sm text-text-secondary/70 max-w-3xl mx-auto mt-4">
@@ -659,12 +646,16 @@ function TeamLicensingContent() {
               </div>
             </LiquidGlass>
           </div>
-          <h2 className="text-4xl md:text-5xl font-black mb-4">
-            <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">
-              Everything You Need to Know
-            </span>
-          </h2>
-          <p className="text-lg text-text-secondary">Click any question to expand</p>
+          <GradientTextReveal
+            text="Everything You Need to Know"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight"
+            gradientFrom="#0EA5E9"
+            gradientTo="#F97316"
+            delay={0.2}
+          />
+          <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed">
+            Click any question to expand
+          </p>
         </div>
 
         {/* FAQ Accordion */}

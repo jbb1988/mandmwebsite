@@ -239,10 +239,14 @@ export default function PartnerProgramPage() {
 
       {/* Market Opportunity */}
       <div className="max-w-7xl mx-auto mb-20">
-        <h2 className="text-4xl font-black text-center mb-4">
-          The Opportunity is Massive
-        </h2>
-        <p className="text-text-secondary text-center max-w-2xl mx-auto mb-12">
+        <GradientTextReveal
+          text="The Opportunity is Massive"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight text-center"
+          gradientFrom="#0EA5E9"
+          gradientTo="#F97316"
+          delay={0.2}
+        />
+        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
           Youth sports is a $19.2B market. Coaches are actively seeking better tools. You're just connecting them to what they need.
         </p>
 
@@ -266,10 +270,14 @@ export default function PartnerProgramPage() {
 
       {/* Aspirational Scenarios */}
       <div className="max-w-7xl mx-auto mb-20">
-        <h2 className="text-4xl font-black text-center mb-4">
-          What Partners Like You Can Earn
-        </h2>
-        <p className="text-text-secondary text-center max-w-2xl mx-auto mb-12">
+        <GradientTextReveal
+          text="What Partners Like You Can Earn"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight text-center"
+          gradientFrom="#0EA5E9"
+          gradientTo="#F97316"
+          delay={0.2}
+        />
+        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
           Real scenarios based on typical networks and conversion rates. Your actual earnings depend on how many coaches you know and how actively you share.
         </p>
 
@@ -282,10 +290,14 @@ export default function PartnerProgramPage() {
 
       {/* Benefits Grid */}
       <div className="max-w-7xl mx-auto mb-20">
-        <h2 className="text-4xl font-black text-center mb-4">
-          Why Partner With Us?
-        </h2>
-        <p className="text-text-secondary text-center max-w-2xl mx-auto mb-12">
+        <GradientTextReveal
+          text="Why Partner With Us?"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight text-center"
+          gradientFrom="#0EA5E9"
+          gradientTo="#F97316"
+          delay={0.2}
+        />
+        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
           Lifetime commission opportunity. Earn on every payment. Everything you need to succeed.
         </p>
 
@@ -320,10 +332,14 @@ export default function PartnerProgramPage() {
 
       {/* Partner Resources Preview */}
       <div className="max-w-6xl mx-auto mb-20">
-        <h2 className="text-4xl font-black text-center mb-4">
-          Everything You Need to Succeed
-        </h2>
-        <p className="text-text-secondary text-center max-w-2xl mx-auto mb-12">
+        <GradientTextReveal
+          text="Everything You Need to Succeed"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight text-center"
+          gradientFrom="#0EA5E9"
+          gradientTo="#F97316"
+          delay={0.2}
+        />
+        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
           We do the heavy lifting. You just share. Here's what you get when approved:
         </p>
 
@@ -382,9 +398,13 @@ export default function PartnerProgramPage() {
 
       {/* How It Works */}
       <div className="max-w-6xl mx-auto mb-20">
-        <h2 className="text-4xl font-black text-center mb-12">
-          How It Works
-        </h2>
+        <GradientTextReveal
+          text="How It Works"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-12 leading-tight text-center"
+          gradientFrom="#0EA5E9"
+          gradientTo="#F97316"
+          delay={0.2}
+        />
 
         <div className="grid md:grid-cols-4 gap-6">
           {steps.map((step, index) => (
@@ -401,10 +421,14 @@ export default function PartnerProgramPage() {
 
       {/* FAQ Section */}
       <div className="max-w-4xl mx-auto mb-20">
-        <h2 className="text-4xl font-black text-center mb-4">
-          Questions? We've Got Answers
-        </h2>
-        <p className="text-text-secondary text-center max-w-2xl mx-auto mb-12">
+        <GradientTextReveal
+          text="Questions? We've Got Answers"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight text-center"
+          gradientFrom="#0EA5E9"
+          gradientTo="#F97316"
+          delay={0.2}
+        />
+        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
           Everything you need to know about becoming a partner.
         </p>
 
@@ -435,10 +459,14 @@ export default function PartnerProgramPage() {
       {/* Application Form */}
       <div className="max-w-3xl mx-auto">
         <LiquidGlass variant="blue" glow={true} className="p-8">
-          <h2 className="text-3xl font-black text-center mb-2">
-            Ready to Start Earning?
-          </h2>
-          <p className="text-text-secondary text-center mb-8">
+          <GradientTextReveal
+            text="Ready to Start Earning?"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight text-center"
+            gradientFrom="#0EA5E9"
+            gradientTo="#F97316"
+            delay={0.2}
+          />
+          <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
             Apply below. Most applications are approved within 24 hours.
           </p>
 

@@ -26,11 +26,6 @@ const badges: Badge[] = [
     description: '256-bit encryption',
   },
   {
-    icon: RefreshCw,
-    label: '30-Day Guarantee',
-    description: 'Money-back guarantee',
-  },
-  {
     icon: CheckCircle2,
     label: 'COPPA Compliant',
     description: 'Privacy certified',
