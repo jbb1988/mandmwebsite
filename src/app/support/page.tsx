@@ -73,32 +73,15 @@ function ContactContent() {
 
       <div className="p-6 rounded-xl bg-solar-surge-orange/10 border border-solar-surge-orange/20">
         <h3 className="text-xl font-bold mb-3">Frequently Asked Questions</h3>
-        <div className="space-y-4">
-          <div>
-            <h4 className="font-semibold mb-1">How do I set up my account?</h4>
-            <p className="text-sm text-text-secondary">
-              Download the app, create an account, and follow the onboarding prompts. If you have a team code, you can redeem it in Settings.
-            </p>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-1">How do I log my training sessions?</h4>
-            <p className="text-sm text-text-secondary">
-              Navigate to the Muscle tab and select your training type. Follow the guided prompts to log your workout details.
-            </p>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-1">Where can I view my progress?</h4>
-            <p className="text-sm text-text-secondary">
-              Your progress is tracked in multiple places: Dashboard for daily summaries, Goals section for goal tracking, and Reports for weekly insights.
-            </p>
-          </div>
-          <div>
-            <h4 className="font-semibold mb-1">How does AI coaching work?</h4>
-            <p className="text-sm text-text-secondary">
-              Our AI coach analyzes your training data and provides personalized feedback and recommendations to help you improve your performance.
-            </p>
-          </div>
-        </div>
+        <p className="text-text-secondary mb-4">
+          Find answers to common questions about using Mind & Muscle features, team licensing, progress tracking, and more.
+        </p>
+        <a
+          href="/faq"
+          className="inline-block px-6 py-3 rounded-lg font-semibold bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange hover:opacity-90 transition-all"
+        >
+          View Complete FAQ
+        </a>
       </div>
     </div>
   );
