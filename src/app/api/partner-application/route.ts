@@ -252,10 +252,10 @@ export async function POST(request: NextRequest) {
             <div style="background: #f8fafc; border-left: 4px solid #fb923c; padding: 20px; margin: 30px 0; border-radius: 4px;">
               <h2 style="margin: 0 0 15px 0; font-size: 20px; color: #fb923c;">📚 What You'll Find in Your Dashboard</h2>
               <ul style="font-size: 15px; line-height: 1.8; color: #555; margin: 10px 0;">
-                <li>🔗 Your unique referral link (starts earning immediately)</li>
+                <li>🔗 Create custom referral links (track performance per link)</li>
                 <li>✉️ Email templates and social media copy</li>
                 <li>🎨 Logos, screenshots, and brand assets</li>
-                <li>📊 Real-time commission tracking</li>
+                <li>📊 Real-time click and commission tracking</li>
                 <li>💰 Earnings and payout history</li>
               </ul>
             </div>
@@ -276,7 +276,7 @@ export async function POST(request: NextRequest) {
                 <li><strong>Log in to your portal</strong> - Click the button above or go to mind-and-muscle.tolt.io</li>
                 <li><strong>Request magic link</strong> - Enter ${safeEmail} and click "Send magic link"</li>
                 <li><strong>Check your email</strong> - Click the login link from Tolt (check spam if needed)</li>
-                <li><strong>Get your referral link</strong> - Copy it from the dashboard homepage</li>
+                <li><strong>Create your referral link</strong> - Click "Create link" in the dashboard and customize it</li>
                 <li><strong>Download marketing assets</strong> - Find templates, graphics, and copy in the Resources tab</li>
                 <li><strong>Start sharing</strong> - Promote your link and earn 10% lifetime commission!</li>
               </ol>
