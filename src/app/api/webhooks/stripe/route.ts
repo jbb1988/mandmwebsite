@@ -12,7 +12,7 @@ async function sendTeamCodeEmail(email: string, teamCode: string, seatCount: num
   try {
     const resend = new Resend(process.env.RESEND_API_KEY!);
     await resend.emails.send({
-      from: 'Mind and Muscle <noreply@send.updates.gg>',
+      from: 'Mind and Muscle <noreply@mindandmuscle.ai>',
       to: email,
       subject: 'Your Team License is Active! 🎉',
       html: `
