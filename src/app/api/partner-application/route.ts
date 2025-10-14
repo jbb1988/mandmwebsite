@@ -106,6 +106,20 @@ export async function POST(request: NextRequest) {
     let toltCreationSucceeded = false;
 
     try {
+      // Prepare the request body
+      const toltRequestBody = {
+        first_name: firstName,
+        last_name: lastName,
+        email: email,
+        company: organization || undefined,
+        send_welcome_email: true, // Enable Tolt's welcome email with magic link
+      };
+
+      console.log('=== TOLT API REQUEST ===');
+      console.log('Endpoint:', 'https://api.tolt.com/v1/partners');
+      console.log('API Key (first 20 chars):', toltApiKey.substring(0, 20) + '...');
+      console.log('Request Body:', JSON.stringify(toltRequestBody, null, 2));
+
       // Create partner in Tolt via API
       const toltResponse = await fetch('https://api.tolt.com/v1/partners', {
         method: 'POST',
@@ -113,25 +127,26 @@ export async function POST(request: NextRequest) {
           'Authorization': `Bearer ${toltApiKey}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          first_name: firstName,
-          last_name: lastName,
-          email: email,
-          company: organization || undefined,
-          send_welcome_email: true, // Enable Tolt's welcome email with magic link
-        }),
+        body: JSON.stringify(toltRequestBody),
       });
+
+      console.log('=== TOLT API RESPONSE ===');
+      console.log('Status Code:', toltResponse.status);
+      console.log('Status Text:', toltResponse.statusText);
 
       if (!toltResponse.ok) {
         const errorData = await toltResponse.json().catch(() => ({ message: 'Unknown error' }));
-        console.error('Tolt API error:', toltResponse.status, errorData);
+        console.error('❌ Tolt API Error Response:', JSON.stringify(errorData, null, 2));
+        console.error('Full error details:', { status: toltResponse.status, statusText: toltResponse.statusText, body: errorData });
       } else {
         const toltData = await toltResponse.json();
-        console.log('Partner created in Tolt successfully:', toltData);
+        console.log('✅ Partner created in Tolt successfully!');
+        console.log('Response Data:', JSON.stringify(toltData, null, 2));
         toltCreationSucceeded = true;
       }
     } catch (toltError: any) {
-      console.error('Error creating partner in Tolt:', toltError);
+      console.error('❌ Exception calling Tolt API:', toltError.message);
+      console.error('Full error:', toltError);
       // Don't fail the whole request - still send notification email
     }
 
