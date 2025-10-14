@@ -109,7 +109,7 @@ export default function HomePage() {
       audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/musclecoachai_ob.mp3',
       tagline: 'Your Elite Strength Engineer That Builds Baseball Power',
       description: 'Build the Strength That Gets You Noticed.',
-      modalDescription: 'Muscle Coach AI doesn\'t guess your strength needs. It engineers baseball-specific power.\n\nMLB-level strength training, personalized for your position and power profile.\n\nThree Training Zones - AI Coach (smart recommendations), Exercise Vault (hundreds of baseball-specific exercises from MLB coaches), Build Tab (custom workout plan creator).\n\nPosition-Specific Power - Explosive power for bat speed. Rotational strength for throwing velocity. Endurance for clutch moments. All engineered for your position.\n\nAI-Driven Progression - Every set logged. Every workout analyzed. Progressive overload tracked automatically.\n\nCreate Custom Plans - Build workout routines with targeted exercises, track sets/reps, monitor strength gains.\n\nWhile other players hope their strength shows up, yours gets systematically engineered for peak performance.\n\n**This is strength training. Built for baseball.**',
+      modalDescription: 'Muscle Coach AI doesn\'t guess your strength needs. It engineers baseball-specific power.\n\nMLB-level strength training, personalized for your position and power profile.\n\nThree Training Zones - AI Coach (smart recommendations), Exercise Vault (hundreds of baseball-specific exercises), Build Tab (custom workout plan creator).\n\nPosition-Specific Power - Explosive power for bat speed. Rotational strength for throwing velocity. Endurance for clutch moments. All engineered for your position.\n\nAI-Driven Progression - Every set logged. Every workout analyzed. Progressive overload tracked automatically.\n\nCreate Custom Plans - Build workout routines with targeted exercises, track sets/reps, monitor strength gains.\n\nWhile other players hope their strength shows up, yours gets systematically engineered for peak performance.\n\n**This is strength training. Built for baseball.**',
     },
   ];
 
@@ -1136,7 +1136,7 @@ export default function HomePage() {
                   </div>
                   <div className="backdrop-blur-sm bg-white/5 border-2 border-neon-cortex-blue/50 rounded-2xl p-8">
                     <div className="text-neon-cortex-blue font-bold text-sm uppercase tracking-wider mb-3">Our Approach</div>
-                    <p className="text-2xl text-white font-black">Build from zero for baseball only</p>
+                    <p className="text-2xl text-white font-black">Built from zero for baseball only</p>
                   </div>
                 </div>
 
@@ -1828,7 +1828,7 @@ export default function HomePage() {
               Join thousands of baseball players, coaches, and teams using Mind & Muscle to elevate their game
             </p>
             <p className="text-sm text-text-secondary">
-              Team licensing available • Partner program open • 30-day money-back guarantee
+              Team licensing available • Partner program open
             </p>
           </LiquidGlass>
           </FadeInWhenVisible>

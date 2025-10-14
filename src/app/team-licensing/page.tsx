@@ -699,7 +699,10 @@ function TeamLicensingContent() {
                     <p><span className="font-semibold text-solar-surge-orange">Existing users:</span> Go to More → Settings → Teams in the app to enter your code.</p>
                   </div>
                   <p>
-                    <span className="font-semibold text-white">Automatic seat management:</span> During registration, users select their role (Athlete/Coach/Parent/Trainer). When they enter the team code, the system automatically handles license seats: Athletes and coaches get Premium and consume a seat. Parents get free read-only access and don't consume any seats.
+                    <span className="font-semibold text-white">Important:</span> The team code only works for the number of seats you purchased. For example, if you have 12 athletes and 2 coaches, you need to purchase 14 seats.
+                  </p>
+                  <p>
+                    <span className="font-semibold text-white">Automatic seat management:</span> During registration, users select their role (Athlete/Coach/Parent). When they enter the team code, the system automatically handles license seats: Athletes and coaches get Premium and consume a seat. Parents get free read-only access and don't consume any seats.
                   </p>
                 </div>
               ),
@@ -708,11 +711,24 @@ function TeamLicensingContent() {
               category: 'Users & Seats',
               icon: Users,
               color: 'blue',
-              question: 'What happens when we reach the user limit?',
+              question: 'What happens when we reach the user limit? Can I add more seats?',
               answer: (
-                <p className="text-text-secondary text-sm leading-relaxed">
-                  When your team reaches the license limit, new athletes and coaches will be unable to join with Premium access until you purchase additional seats. <span className="text-neon-cortex-green font-semibold">Parents can always join</span> regardless of seat availability—they don't consume license seats. You can purchase additional licenses at any time to accommodate your growing team. Existing Premium users retain their access.
-                </p>
+                <div className="text-text-secondary text-sm space-y-3 leading-relaxed">
+                  <p>
+                    When your team reaches the license limit, new athletes and coaches will be unable to join with Premium access until you purchase additional seats. <span className="text-neon-cortex-green font-semibold">Parents can always join</span> regardless of seat availability—they don't consume license seats (see parent FAQ below for details on parent access). Existing Premium users retain their access.
+                  </p>
+                  <p>
+                    <span className="text-neon-cortex-green font-semibold">Yes, you can add more seats!</span> You can add more seats to your team license at any time through our automated system.
+                  </p>
+                  <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                    <p className="mb-2"><span className="font-semibold text-neon-cortex-blue">Your rate is locked in:</span> Additional seats are charged at your original discounted rate (10%, 15%, or 20% off), even if regular pricing changes.</p>
+                    <p className="mb-2"><span className="font-semibold text-solar-surge-orange">Simple annual billing:</span> New seats start their own 12-month subscription from the date you add them.</p>
+                    <p><span className="font-semibold text-neon-cortex-green">Maximum seats:</span> You can add up to 2x your original purchase (to prevent code sharing). For larger teams, contact support.</p>
+                  </div>
+                  <Link href="/team-licensing/manage" className="inline-flex items-center gap-2 text-neon-cortex-blue hover:text-neon-cortex-blue/80 transition-colors font-semibold">
+                    Manage Your License <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
               ),
             },
             {
@@ -765,27 +781,6 @@ function TeamLicensingContent() {
                 <p className="text-text-secondary text-sm leading-relaxed">
                   <span className="text-solar-surge-orange font-semibold">Both!</span> Purchase and manage billing through the website. Day-to-day team management (viewing roster, providing feedback, tracking progress) happens in the mobile app where your users are active.
                 </p>
-              ),
-            },
-            {
-              category: 'Billing',
-              icon: CreditCard,
-              color: 'blue',
-              question: 'Can I add more seats later?',
-              answer: (
-                <div className="text-text-secondary text-sm space-y-3 leading-relaxed">
-                  <p>
-                    <span className="text-neon-cortex-green font-semibold">Yes!</span> You can add more seats to your team license at any time through our automated system.
-                  </p>
-                  <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                    <p className="mb-2"><span className="font-semibold text-neon-cortex-blue">Your rate is locked in:</span> Additional seats are charged at your original discounted rate (10%, 15%, or 20% off), even if regular pricing changes.</p>
-                    <p className="mb-2"><span className="font-semibold text-solar-surge-orange">Simple annual billing:</span> New seats start their own 12-month subscription from the date you add them.</p>
-                    <p><span className="font-semibold text-neon-cortex-green">Maximum seats:</span> You can add up to 2x your original purchase (to prevent code sharing). For larger teams, contact support.</p>
-                  </div>
-                  <Link href="/team-licensing/manage" className="inline-flex items-center gap-2 text-neon-cortex-blue hover:text-neon-cortex-blue/80 transition-colors font-semibold">
-                    Manage Your License <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
               ),
             },
             {

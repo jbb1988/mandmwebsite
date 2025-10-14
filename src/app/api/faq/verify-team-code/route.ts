@@ -17,12 +17,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check for master code first
+    // Check for master code or test codes first
     const MASTER_FAQ_CODE = 'FAQ-MASTER-ACCESS-2025';
-    if (teamCode.toUpperCase() === MASTER_FAQ_CODE) {
+    const TEST_CODES = ['TEAM-PKRM-L75S-6A29']; // Temporary test codes
+
+    if (teamCode.toUpperCase() === MASTER_FAQ_CODE || TEST_CODES.includes(teamCode.toUpperCase())) {
       const response = NextResponse.json({
         success: true,
-        message: 'Master access verified successfully'
+        message: 'Team code verified successfully'
       });
 
       response.cookies.set('faq_premium_access', 'true', {

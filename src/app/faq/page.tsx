@@ -113,11 +113,11 @@ export default function FAQPage() {
         },
         {
           question: 'How do I create an account?',
-          answer: 'Download the app and tap "Sign Up". You\'ll choose your role (Athlete, Coach, Parent, or Trainer), then create your account with email and password. Follow the onboarding prompts to set up your profile. If you have a team code, you can enter it during sign-up or later in Settings.'
+          answer: 'Download the app and tap "Sign Up". You\'ll choose your role (Athlete, Coach, or Parent), then create your account with email and password. Follow the onboarding prompts to set up your profile. If you have a team code, you can enter it during sign-up or later in Settings.'
         },
         {
           question: 'What\'s the difference between the user roles?',
-          answer: 'Athlete: Full access to training features, progress tracking, and team features.\n\nCoach: Full access plus team management tools, roster views, and coaching insights.\n\nParent: Read-only access to your linked athlete\'s Goals and Reports. Parents don\'t consume license seats!\n\nTrainer: Similar to coach with focus on individual training programs.'
+          answer: 'Athlete: Full access to training features, progress tracking, and team features.\n\nCoach: Full access plus team management tools, roster views, and coaching insights.\n\nParent: Read-only access to your linked athlete\'s Goals and Reports. Parents don\'t consume license seats!'
         },
         {
           question: 'Can I change my role after signing up?',
@@ -442,7 +442,7 @@ export default function FAQPage() {
         },
         {
           question: 'How many seats do I have left?',
-          answer: 'Coaches and team admins: Go to More → Teams → Manage License. You\'ll see "X / Y Seats Used" showing exactly how many seats are consumed and how many remain. You can also email <a href="mailto:support@mindandmuscle.ai" class="text-solar-surge-orange hover:underline">support@mindandmuscle.ai</a> with your team code, and they\'ll tell you your seat count.'
+          answer: 'Visit <a href="https://mindandmuscle.ai/team-licensing/manage" class="text-solar-surge-orange hover:underline">mindandmuscle.ai/team-licensing/manage</a> and enter your team code to see your seat count. You\'ll see "X / Y Seats Used" showing exactly how many seats are consumed and how many remain. You can also email <a href="mailto:support@mindandmuscle.ai" class="text-solar-surge-orange hover:underline">support@mindandmuscle.ai</a> with your team code for assistance.'
         },
         {
           question: 'Can I add more seats mid-season?',
