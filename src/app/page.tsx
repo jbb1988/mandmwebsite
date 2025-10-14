@@ -252,14 +252,14 @@ export default function HomePage() {
               <TextReveal
                 text="Discipline the Mind."
                 as="h2"
-                className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-neon-cortex-blue block"
+                className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight leading-relaxed text-neon-cortex-blue block"
                 delay={0.1}
                 staggerDelay={0.05}
               />
               <TextReveal
                 text="Dominate the Game."
                 as="h2"
-                className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight leading-tight text-solar-surge-orange block"
+                className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight leading-relaxed text-solar-surge-orange block"
                 delay={0.4}
                 staggerDelay={0.05}
               />
@@ -372,7 +372,7 @@ export default function HomePage() {
           <FadeInWhenVisible delay={0} direction="up" className="text-center mb-24">
             <GradientTextReveal
               text="The Complete Performance Ecosystem."
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-relaxed"
               gradientFrom="#0EA5E9"
               gradientTo="#F97316"
               delay={0.2}
@@ -927,7 +927,7 @@ export default function HomePage() {
             </div>
             <GradientTextReveal
               text="The More You Grind, The Smarter It Gets"
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-relaxed"
               gradientFrom="#0EA5E9"
               gradientTo="#F97316"
               delay={0.2}
@@ -1013,7 +1013,7 @@ export default function HomePage() {
             </div>
             <GradientTextReveal
               text="Where Champions Train"
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-relaxed"
               gradientFrom="#0EA5E9"
               gradientTo="#F97316"
               delay={0.2}
@@ -1077,13 +1077,13 @@ export default function HomePage() {
               <p className="text-2xl sm:text-3xl md:text-4xl text-gray-300 font-medium leading-relaxed mb-8">
                 Other apps take generic training and slap a baseball filter on it.
               </p>
-              <p className="text-2xl sm:text-3xl md:text-4xl text-white font-black leading-tight mb-6">
+              <p className="text-2xl sm:text-3xl md:text-4xl text-white font-black leading-relaxed mb-6">
                 We started from scratch.
               </p>
               <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 font-medium leading-relaxed">
                 Every drill designed for baseball movements. Every AI model trained exclusively on baseball content. Every mental scenario pulled from real game situations.
               </p>
-              <p className="text-2xl sm:text-3xl md:text-4xl text-neon-cortex-blue font-black leading-tight mt-8" style={{textShadow: '0 0 20px rgba(14,165,233,0.8)'}}>
+              <p className="text-2xl sm:text-3xl md:text-4xl text-neon-cortex-blue font-black leading-relaxed mt-8" style={{textShadow: '0 0 20px rgba(14,165,233,0.8)'}}>
                 This wasn't adapted. It was purpose-built.
               </p>
             </div>
@@ -1148,7 +1148,7 @@ export default function HomePage() {
               <p className="text-3xl sm:text-4xl md:text-5xl font-medium text-gray-300 leading-tight mb-4">
                 Every other app tried to be everything to everyone.
               </p>
-              <p className="text-4xl sm:text-5xl md:text-6xl font-black leading-tight mb-4">
+              <p className="text-4xl sm:text-5xl md:text-6xl font-black leading-relaxed mb-4">
                 <span className="text-white">We became obsessed with </span>
                 <span className="text-solar-surge-orange" style={{textShadow: '0 0 30px rgba(249,115,22,0.6)'}}>one thing.</span>
               </p>
@@ -1316,7 +1316,7 @@ export default function HomePage() {
                 <span className="text-neon-cortex-blue font-black text-sm tracking-widest drop-shadow-[0_0_8px_rgba(14,165,233,0.8)]">⚾ LINEUP COMPARISON</span>
               </div>
             </div>
-            <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black mb-6 leading-tight text-white" style={{textShadow: '0 0 40px rgba(14,165,233,0.3)'}}>
+            <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black mb-6 leading-relaxed text-white" style={{textShadow: '0 0 40px rgba(14,165,233,0.3)'}}>
               Who You Taking to the Championship?
             </h2>
             <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto font-medium leading-relaxed">
@@ -1669,7 +1669,7 @@ export default function HomePage() {
                 </div>
               </LiquidGlass>
             </div>
-            <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black mb-8 leading-tight">
+            <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black mb-8 leading-relaxed">
               Start Free. Stay Free.
               <br />
               <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent drop-shadow-[0_0_32px_rgba(14,165,233,0.4)]">

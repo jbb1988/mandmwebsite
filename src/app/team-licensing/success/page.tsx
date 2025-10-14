@@ -90,7 +90,7 @@ function SuccessContent() {
           </div>
           <GradientTextReveal
             text="Welcome to Mind & Muscle Premium!"
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-relaxed"
             gradientFrom="#0EA5E9"
             gradientTo="#F97316"
             delay={0.2}

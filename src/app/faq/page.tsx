@@ -566,7 +566,7 @@ export default function FAQPage() {
       <div className="max-w-7xl mx-auto text-center mb-12">
         <GradientTextReveal
           text="Frequently Asked Questions"
-          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-relaxed"
           gradientFrom="#0EA5E9"
           gradientTo="#F97316"
           delay={0.2}

@@ -192,6 +192,8 @@ export function GradientTextReveal({
         WebkitBackgroundClip: 'text',
         WebkitTextFillColor: 'transparent',
         backgroundClip: 'text',
+        paddingBottom: '0.15em',
+        overflow: 'visible',
       }}
     >
       {text}
