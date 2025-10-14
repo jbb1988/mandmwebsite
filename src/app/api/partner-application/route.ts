@@ -221,15 +221,31 @@ export async function POST(request: NextRequest) {
             </p>
 
             <div style="background: #fff3e0; border-left: 4px solid #fb923c; padding: 20px; margin: 30px 0; border-radius: 4px;">
-              <h2 style="margin: 0 0 15px 0; font-size: 20px; color: #fb923c;">⚠️ Important: Check Your Email for Tolt Dashboard Access</h2>
-              <p style="font-size: 15px; line-height: 1.6; color: #555; margin-bottom: 15px;">
-                <strong>You will receive a separate email from Tolt (noreply@tolt.io)</strong> within the next few minutes. This email contains your dashboard login link.
+              <h2 style="margin: 0 0 15px 0; font-size: 20px; color: #fb923c;">🚀 Access Your Partner Dashboard Now</h2>
+              <p style="font-size: 15px; line-height: 1.6; color: #555; margin-bottom: 20px;">
+                Your partner account has been created! Here's how to access your dashboard:
               </p>
-              <p style="font-size: 14px; line-height: 1.6; color: #d97706; margin-bottom: 15px; background: #fef3c7; padding: 12px; border-radius: 4px;">
-                ⚠️ <strong>Check your spam/junk folder!</strong> Tolt emails sometimes get filtered. If you don't see it in your inbox within 10 minutes, check spam and mark it as "Not Spam".
-              </p>
-              <p style="font-size: 15px; line-height: 1.6; color: #555; margin-bottom: 15px;">
-                The Tolt email will have the subject: <strong>"Welcome to Tolt"</strong> or similar, and will include a link to access your partner dashboard at app.tolt.io.
+
+              <div style="background: #f0fdf4; border: 2px solid #22c55e; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                <p style="font-size: 16px; line-height: 1.6; color: #555; margin: 0 0 10px 0;">
+                  <strong style="color: #22c55e;">Step 1:</strong> Go to <a href="https://app.tolt.io/sign-in" style="color: #fb923c; text-decoration: none; font-weight: 600;">app.tolt.io/sign-in</a>
+                </p>
+                <p style="font-size: 16px; line-height: 1.6; color: #555; margin: 0 0 10px 0;">
+                  <strong style="color: #22c55e;">Step 2:</strong> Enter your email: <strong>${safeEmail}</strong>
+                </p>
+                <p style="font-size: 16px; line-height: 1.6; color: #555; margin: 0;">
+                  <strong style="color: #22c55e;">Step 3:</strong> Click "Send magic link" - check your email for the login link
+                </p>
+              </div>
+
+              <div style="text-align: center; margin: 20px 0;">
+                <a href="https://app.tolt.io/sign-in" style="display: inline-block; background: linear-gradient(135deg, #fb923c 0%, #f97316 100%); color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; box-shadow: 0 4px 12px rgba(251, 146, 60, 0.4);">
+                  Access Partner Dashboard →
+                </a>
+              </div>
+
+              <p style="font-size: 14px; line-height: 1.6; color: #666; margin-top: 15px; font-style: italic; text-align: center;">
+                💡 No password needed - Tolt uses magic links for secure, easy login!
               </p>
             </div>
 
@@ -257,14 +273,15 @@ export async function POST(request: NextRequest) {
             <div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 20px; margin: 30px 0; border-radius: 4px;">
               <h2 style="margin: 0 0 15px 0; font-size: 20px; color: #22c55e;">🎯 Next Steps to Start Earning</h2>
               <ol style="font-size: 15px; line-height: 1.8; color: #555; margin: 10px 0; padding-left: 20px;">
-                <li><strong>Wait for the Tolt email</strong> - Check your inbox (and spam!) for an email from noreply@tolt.io within 10 minutes</li>
-                <li><strong>Click the dashboard link</strong> in the Tolt email to access app.tolt.io (no password needed - magic link!)</li>
-                <li><strong>Get your referral link</strong> from the dashboard homepage</li>
-                <li><strong>Download marketing assets</strong> from the Resources tab (templates, graphics, etc.)</li>
-                <li><strong>Share your link</strong> with your network and start earning 10% commission!</li>
+                <li><strong>Log in to Tolt</strong> - Click the button above or go to app.tolt.io/sign-in</li>
+                <li><strong>Request magic link</strong> - Enter ${safeEmail} and click "Send magic link"</li>
+                <li><strong>Check your email</strong> - Click the login link from Tolt (check spam if needed)</li>
+                <li><strong>Get your referral link</strong> - Copy it from the dashboard homepage</li>
+                <li><strong>Download marketing assets</strong> - Find templates, graphics, and copy in the Resources tab</li>
+                <li><strong>Start sharing</strong> - Promote your link and earn 10% lifetime commission!</li>
               </ol>
               <p style="font-size: 14px; line-height: 1.6; color: #666; margin-top: 15px; font-style: italic;">
-                💡 Tip: Your referral link works immediately - no waiting period! Share it as soon as you get dashboard access.
+                💡 Tip: Your referral link works immediately - no approval needed! Start earning as soon as you share it.
               </p>
             </div>
 
