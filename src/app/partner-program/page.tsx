@@ -23,6 +23,8 @@ export default function PartnerProgramPage() {
 
   const [captchaToken, setCaptchaToken] = useState<string>('');
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +33,8 @@ export default function PartnerProgramPage() {
       alert('Please complete the security verification.');
       return;
     }
+
+    setIsSubmitting(true);
 
     try {
       const response = await fetch('/api/partner-application', {
@@ -43,7 +47,7 @@ export default function PartnerProgramPage() {
       });
 
       if (response.ok) {
-        alert('Application submitted! We\'ll review and get back to you within 24 hours. Check your email for next steps.');
+        setShowSuccessModal(true);
         setFormData({ name: '', email: '', organization: '', audience: '', networkSize: '', promotionChannel: '', whyExcited: '' });
         setCaptchaToken('');
       } else {
@@ -52,6 +56,8 @@ export default function PartnerProgramPage() {
       }
     } catch (error) {
       alert('There was an error submitting your application. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -624,10 +630,10 @@ export default function PartnerProgramPage() {
               variant="orange"
               size="lg"
               fullWidth={true}
-              disabled={!captchaToken}
+              disabled={!captchaToken || isSubmitting}
               className="!bg-gradient-to-r !from-solar-surge-orange !to-muscle-primary !shadow-[0_0_30px_rgba(251,146,60,0.6)] hover:!shadow-[0_0_40px_rgba(251,146,60,0.8)] !border-solar-surge-orange/60 !text-white !font-black !text-xl animate-pulse-subtle"
             >
-              Apply Now - Start Earning
+              {isSubmitting ? 'Submitting...' : 'Apply Now - Start Earning'}
             </LiquidButton>
 
             <p className="text-xs text-text-secondary text-center">
@@ -636,6 +642,101 @@ export default function PartnerProgramPage() {
           </form>
         </LiquidGlass>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+          <LiquidGlass variant="orange" glow={true} className="max-w-2xl w-full p-8 relative">
+            <div className="text-center">
+              {/* Success Icon */}
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-neon-cortex-green to-muscle-primary mb-6 animate-float">
+                <Check className="w-12 h-12 text-white" />
+              </div>
+
+              {/* Title */}
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4 bg-gradient-to-r from-solar-surge-orange to-neon-cortex-blue bg-clip-text text-transparent">
+                Welcome to the Team! 🎉
+              </h2>
+
+              {/* Message */}
+              <p className="text-lg sm:text-xl text-gray-300 mb-6 leading-relaxed">
+                Your partner application has been submitted and you've been automatically approved!
+              </p>
+
+              {/* Info Cards */}
+              <div className="grid md:grid-cols-2 gap-4 mb-8 text-left">
+                <div className="bg-neon-cortex-green/10 border border-neon-cortex-green/30 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-neon-cortex-green flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h3 className="font-bold text-sm mb-1">Check Your Email</h3>
+                      <p className="text-xs text-text-secondary">
+                        We sent two emails: one from Mind & Muscle and one from Tolt with your dashboard login link.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-solar-surge-orange/10 border border-solar-surge-orange/30 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <Rocket className="w-5 h-5 text-solar-surge-orange flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h3 className="font-bold text-sm mb-1">Access Your Dashboard</h3>
+                      <p className="text-xs text-text-secondary">
+                        Click the link in your Tolt email to access your partner dashboard and get your referral link.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Next Steps */}
+              <div className="bg-neon-cortex-blue/10 border border-neon-cortex-blue/30 rounded-lg p-6 mb-8 text-left">
+                <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-neon-cortex-blue" />
+                  Next Steps to Start Earning
+                </h3>
+                <ol className="space-y-3 text-sm text-text-secondary">
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-solar-surge-orange/20 flex items-center justify-center text-xs font-bold">1</span>
+                    <span><strong>Check your email inbox</strong> (and spam folder) for two emails - one welcome email and one from Tolt</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-solar-surge-orange/20 flex items-center justify-center text-xs font-bold">2</span>
+                    <span><strong>Click the Tolt login link</strong> to access your partner dashboard at app.tolt.io</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-solar-surge-orange/20 flex items-center justify-center text-xs font-bold">3</span>
+                    <span><strong>Get your unique referral link</strong> from the dashboard</span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-solar-surge-orange/20 flex items-center justify-center text-xs font-bold">4</span>
+                    <span><strong>Share with your network</strong> and start earning 10% lifetime commission!</span>
+                  </li>
+                </ol>
+              </div>
+
+              {/* Warning about spam */}
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 mb-8">
+                <p className="text-xs text-yellow-200">
+                  ⚠️ <strong>Important:</strong> The Tolt email might land in your spam folder. Please check spam and mark it as "Not Spam" to receive future updates.
+                </p>
+              </div>
+
+              {/* CTA Button */}
+              <LiquidButton
+                onClick={() => setShowSuccessModal(false)}
+                variant="orange"
+                size="lg"
+                fullWidth={true}
+                className="!bg-gradient-to-r !from-solar-surge-orange !to-muscle-primary"
+              >
+                Got It - Check My Email
+              </LiquidButton>
+            </div>
+          </LiquidGlass>
+        </div>
+      )}
     </div>
   );
 }
