@@ -221,7 +221,7 @@ export default function PartnerProgramPage() {
 
         <GradientTextReveal
           text="Build Passive Income Helping Coaches Win"
-          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-tight"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-relaxed"
           gradientFrom="#F97316"
           gradientTo="#0EA5E9"
           delay={0.2}
@@ -253,7 +253,7 @@ export default function PartnerProgramPage() {
       <div className="max-w-7xl mx-auto mb-20">
         <GradientTextReveal
           text="The Opportunity is Massive"
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-tight text-center"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
           gradientFrom="#0EA5E9"
           gradientTo="#F97316"
           delay={0.2}
@@ -284,7 +284,7 @@ export default function PartnerProgramPage() {
       <div className="max-w-7xl mx-auto mb-20">
         <GradientTextReveal
           text="What Partners Like You Can Earn"
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-tight text-center"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
           gradientFrom="#0EA5E9"
           gradientTo="#F97316"
           delay={0.2}
@@ -304,7 +304,7 @@ export default function PartnerProgramPage() {
       <div className="max-w-7xl mx-auto mb-20">
         <GradientTextReveal
           text="Why Partner With Us?"
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-tight text-center"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
           gradientFrom="#0EA5E9"
           gradientTo="#F97316"
           delay={0.2}
@@ -346,7 +346,7 @@ export default function PartnerProgramPage() {
       <div className="max-w-6xl mx-auto mb-20">
         <GradientTextReveal
           text="Everything You Need to Succeed"
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-tight text-center"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
           gradientFrom="#0EA5E9"
           gradientTo="#F97316"
           delay={0.2}
@@ -412,7 +412,7 @@ export default function PartnerProgramPage() {
       <div className="max-w-6xl mx-auto mb-20">
         <GradientTextReveal
           text="How It Works"
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-12 leading-tight text-center"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-12 leading-relaxed text-center"
           gradientFrom="#0EA5E9"
           gradientTo="#F97316"
           delay={0.2}
@@ -435,7 +435,7 @@ export default function PartnerProgramPage() {
       <div className="max-w-4xl mx-auto mb-20">
         <GradientTextReveal
           text="Questions? We've Got Answers"
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-tight text-center"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
           gradientFrom="#0EA5E9"
           gradientTo="#F97316"
           delay={0.2}
@@ -473,7 +473,7 @@ export default function PartnerProgramPage() {
         <LiquidGlass variant="blue" glow={true} className="p-8">
           <GradientTextReveal
             text="Ready to Start Earning?"
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-tight text-center"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
             gradientFrom="#0EA5E9"
             gradientTo="#F97316"
             delay={0.2}
@@ -625,6 +625,7 @@ export default function PartnerProgramPage() {
               size="lg"
               fullWidth={true}
               disabled={!captchaToken}
+              className="!bg-gradient-to-r !from-solar-surge-orange !to-muscle-primary !shadow-[0_0_30px_rgba(251,146,60,0.6)] hover:!shadow-[0_0_40px_rgba(251,146,60,0.8)] !border-solar-surge-orange/60 !text-white !font-black !text-xl animate-pulse-subtle"
             >
               Apply Now - Start Earning
             </LiquidButton>
