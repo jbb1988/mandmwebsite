@@ -209,6 +209,7 @@ export async function POST(request: NextRequest) {
       html: `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
           <div style="background: linear-gradient(135deg, #fb923c 0%, #3b82f6 100%); padding: 40px 20px; text-align: center; border-radius: 12px 12px 0 0;">
+            <img src="https://mindandmuscle.ai/assets/images/logo.png" alt="Mind & Muscle Logo" style="max-width: 180px; height: auto; margin-bottom: 20px;" />
             <h1 style="color: white; margin: 0; font-size: 32px; font-weight: 800;">Welcome to the Team!</h1>
           </div>
 
