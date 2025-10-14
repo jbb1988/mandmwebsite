@@ -15,6 +15,7 @@ interface TeamData {
   discountPercentage: number;
   purchaseDate: string;
   subscriptionId: string;
+  customerEmail: string;
 }
 
 export default function ManageTeamLicense() {
@@ -78,6 +79,7 @@ export default function ManageTeamLicense() {
           subscriptionId: teamData.subscriptionId,
           additionalSeats,
           lockedInRate: teamData.lockedInRate,
+          customerEmail: teamData.customerEmail,
         }),
       });
 
