@@ -202,7 +202,7 @@ export async function POST(request: NextRequest) {
           max_uses: seatCount,
           uses_count: 0,
           is_active: true,
-          tier: 'team',
+          tier: 'premium',
           allow_parent_linking: true,
         })
         .select()
