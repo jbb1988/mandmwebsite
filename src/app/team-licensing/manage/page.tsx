@@ -9,6 +9,8 @@ import { GradientTextReveal } from '@/components/animations';
 interface TeamData {
   teamCode: string;
   currentSeats: number;
+  seatsUsed: number;
+  seatsRemaining: number;
   lockedInRate: number;
   discountPercentage: number;
   purchaseDate: string;
@@ -205,8 +207,10 @@ export default function ManageTeamLicense() {
                     </p>
                   </div>
                   <div className="text-right">
-                    <div className="text-3xl font-black text-neon-cortex-blue">{teamData.currentSeats}</div>
-                    <div className="text-sm text-text-secondary">Current Seats</div>
+                    <div className="text-3xl font-black text-neon-cortex-blue">
+                      {teamData.seatsUsed} / {teamData.currentSeats}
+                    </div>
+                    <div className="text-sm text-text-secondary">Seats Used</div>
                   </div>
                 </div>
 
@@ -218,20 +222,46 @@ export default function ManageTeamLicense() {
                     </div>
                   </div>
                   <div className="p-4 bg-white/5 rounded-lg border border-white/10">
+                    <div className="text-sm text-text-secondary mb-1">Seats Remaining</div>
+                    <div className={`text-2xl font-bold ${teamData.seatsRemaining <= 2 ? 'text-solar-surge-orange' : 'text-neon-cortex-green'}`}>
+                      {teamData.seatsRemaining} seats
+                    </div>
+                  </div>
+                  <div className="p-4 bg-white/5 rounded-lg border border-white/10">
                     <div className="text-sm text-text-secondary mb-1">Your Discount</div>
                     <div className="text-2xl font-bold text-solar-surge-orange">
                       {teamData.discountPercentage}% OFF
                     </div>
                   </div>
-                  <div className="p-4 bg-white/5 rounded-lg border border-white/10">
-                    <div className="text-sm text-text-secondary mb-1">Max Seats Allowed</div>
-                    <div className="text-2xl font-bold text-starlight-white">
-                      {maxAllowedSeats} seats
-                    </div>
-                  </div>
                 </div>
               </div>
             </LiquidGlass>
+
+            {/* Low Seats Warning */}
+            {teamData.seatsRemaining <= 2 && teamData.seatsRemaining > 0 && (
+              <div className="p-4 bg-solar-surge-orange/10 border border-solar-surge-orange/30 rounded-lg flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-solar-surge-orange flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <p className="text-solar-surge-orange font-semibold mb-1">Running Low on Seats</p>
+                  <p className="text-text-secondary">
+                    You only have {teamData.seatsRemaining} seat{teamData.seatsRemaining !== 1 ? 's' : ''} remaining. Consider adding more seats below to avoid hitting capacity.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* At Capacity Warning */}
+            {teamData.seatsRemaining === 0 && (
+              <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <p className="text-red-200 font-semibold mb-1">At Full Capacity</p>
+                  <p className="text-red-200/80">
+                    All {teamData.currentSeats} seats are currently in use. New users cannot redeem your team code until you purchase additional seats below.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Add Seats Section */}
             <LiquidGlass variant="neutral">
