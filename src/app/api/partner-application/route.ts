@@ -228,7 +228,7 @@ export async function POST(request: NextRequest) {
 
               <div style="background: #f0fdf4; border: 2px solid #22c55e; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
                 <p style="font-size: 16px; line-height: 1.6; color: #555; margin: 0 0 10px 0;">
-                  <strong style="color: #22c55e;">Step 1:</strong> Go to <a href="https://app.tolt.io/sign-in" style="color: #fb923c; text-decoration: none; font-weight: 600;">app.tolt.io/sign-in</a>
+                  <strong style="color: #22c55e;">Step 1:</strong> Go to <a href="https://mind-and-muscle.tolt.io" style="color: #fb923c; text-decoration: none; font-weight: 600;">mind-and-muscle.tolt.io</a>
                 </p>
                 <p style="font-size: 16px; line-height: 1.6; color: #555; margin: 0 0 10px 0;">
                   <strong style="color: #22c55e;">Step 2:</strong> Enter your email: <strong>${safeEmail}</strong>
@@ -239,7 +239,7 @@ export async function POST(request: NextRequest) {
               </div>
 
               <div style="text-align: center; margin: 20px 0;">
-                <a href="https://app.tolt.io/sign-in" style="display: inline-block; background: linear-gradient(135deg, #fb923c 0%, #f97316 100%); color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; box-shadow: 0 4px 12px rgba(251, 146, 60, 0.4);">
+                <a href="https://mind-and-muscle.tolt.io" style="display: inline-block; background: linear-gradient(135deg, #fb923c 0%, #f97316 100%); color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; box-shadow: 0 4px 12px rgba(251, 146, 60, 0.4);">
                   Access Partner Dashboard →
                 </a>
               </div>
@@ -273,7 +273,7 @@ export async function POST(request: NextRequest) {
             <div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 20px; margin: 30px 0; border-radius: 4px;">
               <h2 style="margin: 0 0 15px 0; font-size: 20px; color: #22c55e;">🎯 Next Steps to Start Earning</h2>
               <ol style="font-size: 15px; line-height: 1.8; color: #555; margin: 10px 0; padding-left: 20px;">
-                <li><strong>Log in to Tolt</strong> - Click the button above or go to app.tolt.io/sign-in</li>
+                <li><strong>Log in to your portal</strong> - Click the button above or go to mind-and-muscle.tolt.io</li>
                 <li><strong>Request magic link</strong> - Enter ${safeEmail} and click "Send magic link"</li>
                 <li><strong>Check your email</strong> - Click the login link from Tolt (check spam if needed)</li>
                 <li><strong>Get your referral link</strong> - Copy it from the dashboard homepage</li>
