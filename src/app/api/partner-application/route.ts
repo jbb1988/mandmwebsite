@@ -90,6 +90,11 @@ export async function POST(request: NextRequest) {
     const safeWhyExcited = whyExcited ? escapeHtml(whyExcited) : 'Not provided';
     const safeAudience = audience ? escapeHtml(audience) : 'Not provided';
 
+    // Split name into first and last for Tolt API
+    const nameParts = name.trim().split(' ');
+    const firstName = nameParts[0] || name;
+    const lastName = nameParts.slice(1).join(' ') || firstName;
+
     // Automatically create partner in Tolt
     const toltApiKey = process.env.TOLT_API_KEY;
 
@@ -97,6 +102,8 @@ export async function POST(request: NextRequest) {
       console.error('TOLT_API_KEY not configured');
       return NextResponse.json({ error: 'Partner system not configured' }, { status: 500 });
     }
+
+    let toltCreationSucceeded = false;
 
     try {
       // Create partner in Tolt via API
@@ -107,32 +114,21 @@ export async function POST(request: NextRequest) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          first_name: firstName,
+          last_name: lastName,
           email: email,
-          name: name,
-          metadata: {
-            organization: organization || 'Not provided',
-            network_size: networkSize || 'Not provided',
-            promotion_channel: promotionChannel || 'Not provided',
-            why_excited: whyExcited || 'Not provided',
-            audience: audience || 'Not provided',
-            applied_at: new Date().toISOString(),
-          },
+          company: organization || undefined,
+          send_welcome_email: true, // Enable Tolt's welcome email with magic link
         }),
       });
 
       if (!toltResponse.ok) {
         const errorData = await toltResponse.json().catch(() => ({ message: 'Unknown error' }));
         console.error('Tolt API error:', toltResponse.status, errorData);
-
-        // If partner already exists in Tolt, that's okay - send success anyway
-        if (toltResponse.status === 409 || toltResponse.status === 400) {
-          console.log('Partner may already exist in Tolt, continuing...');
-        } else {
-          throw new Error(`Tolt API failed: ${toltResponse.status}`);
-        }
       } else {
         const toltData = await toltResponse.json();
-        console.log('Partner created in Tolt:', toltData);
+        console.log('Partner created in Tolt successfully:', toltData);
+        toltCreationSucceeded = true;
       }
     } catch (toltError: any) {
       console.error('Error creating partner in Tolt:', toltError);
@@ -163,16 +159,20 @@ export async function POST(request: NextRequest) {
 
         <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;" />
 
-        <p style="color: #28a745; font-weight: bold;">
-          ✅ Partner automatically created in Tolt!
-        </p>
-
-        <p style="color: #666; font-size: 12px;">
-          The partner has been automatically added to Tolt and will receive their onboarding email.<br />
-          You can view them in your <a href="https://app.tolt.io">Tolt dashboard</a>.<br /><br />
-
-          If needed, you can remove or block the partner in Tolt dashboard → Partners.
-        </p>
+        ${toltCreationSucceeded
+          ? `<p style="color: #28a745; font-weight: bold;">✅ Partner automatically created in Tolt!</p>
+             <p style="color: #666; font-size: 12px;">
+               The partner has been added to Tolt and will receive their onboarding email with dashboard access.<br />
+               View them in your <a href="https://app.tolt.io">Tolt dashboard</a> → Partners.<br /><br />
+               If needed, you can remove or block the partner in the dashboard.
+             </p>`
+          : `<p style="color: #dc3545; font-weight: bold;">⚠️ Tolt partner creation failed</p>
+             <p style="color: #666; font-size: 12px;">
+               The partner was NOT created in Tolt automatically. Check Vercel logs for details.<br />
+               You'll need to manually create this partner in your <a href="https://app.tolt.io">Tolt dashboard</a>.<br /><br />
+               User details: ${safeEmail} (${safeName})
+             </p>`
+        }
       `,
     });
 
@@ -256,9 +256,14 @@ export async function POST(request: NextRequest) {
           </div>
 
           <div style="text-align: center; padding: 20px; color: #999; font-size: 14px;">
-            <p style="margin: 0;">Mind & Muscle | Developing the Complete Athlete</p>
-            <p style="margin: 10px 0 0 0;">
-              <a href="https://mindandmuscle.ai" style="color: #fb923c; text-decoration: none;">mindandmuscle.ai</a>
+            <p style="margin: 0; font-weight: 600;">Mind and Muscle</p>
+            <p style="margin: 5px 0; font-style: italic;">Discipline the Mind. Dominate the Game.</p>
+            <p style="margin: 10px 0 5px 0; font-size: 12px;">
+              <strong>Partner Program:</strong> Earn 10% lifetime commission
+            </p>
+            <p style="margin: 5px 0 0 0;">
+              <a href="https://mindandmuscle.ai/partner-program" style="color: #fb923c; text-decoration: none;">Learn More</a> |
+              <a href="https://mindandmuscle.ai" style="color: #fb923c; text-decoration: none; margin-left: 8px;">mindandmuscle.ai</a>
             </p>
           </div>
         </div>
