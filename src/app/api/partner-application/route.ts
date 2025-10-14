@@ -106,14 +106,24 @@ export async function POST(request: NextRequest) {
     let toltCreationSucceeded = false;
 
     try {
-      // Prepare the request body
-      const toltRequestBody = {
+      // Prepare the request body with required program_id
+      const toltRequestBody: any = {
         first_name: firstName,
         last_name: lastName,
         email: email,
-        company: organization || undefined,
-        send_welcome_email: true, // Enable Tolt's welcome email with magic link
+        program_id: "prg_XZjuxmy3JkyE9oTFKEFDbcLD", // Mind & Muscle's Program ID
       };
+
+      // Add optional fields if provided
+      if (organization && organization.trim()) {
+        toltRequestBody.company_name = organization;
+      }
+
+      // Add country code (default to US for now)
+      toltRequestBody.country_code = "US";
+
+      // Set payout method to none by default (partner can configure later in dashboard)
+      toltRequestBody.payout_method = "none";
 
       console.log('=== TOLT API REQUEST ===');
       console.log('Endpoint:', 'https://api.tolt.com/v1/partners');
