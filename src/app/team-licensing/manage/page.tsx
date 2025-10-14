@@ -244,7 +244,7 @@ export default function ManageTeamLicense() {
                 <div className="space-y-6">
                   {/* Seat Counter */}
                   <div>
-                    <label className="block text-sm font-semibold mb-3">Additional Seats</label>
+                    <label className="block text-sm font-semibold mb-3">How many seats would you like to add?</label>
                     <div className="flex items-center gap-4">
                       <button
                         onClick={() => setAdditionalSeats(Math.max(1, additionalSeats - 1))}
@@ -271,29 +271,21 @@ export default function ManageTeamLicense() {
 
                   {/* Calculation Summary */}
                   <div className="p-4 bg-gradient-to-br from-neon-cortex-blue/20 via-solar-surge-orange/10 to-transparent border-2 border-neon-cortex-blue/40 rounded-lg">
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between items-center">
-                        <span className="text-text-secondary">Current Seats:</span>
-                        <span className="font-bold">{teamData.currentSeats} seats</span>
-                      </div>
+                    <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <span className="text-text-secondary">Adding:</span>
-                        <span className="font-bold text-solar-surge-orange">+{additionalSeats} seats</span>
+                        <span className="font-bold text-solar-surge-orange text-lg">+{additionalSeats} seats</span>
                       </div>
-                      <div className="flex justify-between items-center pt-2 border-t border-white/10">
-                        <span className="text-text-secondary">New Total:</span>
-                        <span className="font-bold text-neon-cortex-blue text-lg">{newTotalSeats} seats</span>
-                      </div>
-                      <div className="flex justify-between items-center pt-2 border-t border-white/10">
-                        <span className="font-semibold">Annual Cost for New Seats:</span>
+                      <div className="flex justify-between items-center">
+                        <span className="font-semibold">Annual cost:</span>
                         <span className="font-black text-neon-cortex-green text-xl">
                           ${calculateProration().toFixed(2)}/year
                         </span>
                       </div>
                     </div>
                     <div className="mt-3 pt-3 border-t border-white/10">
-                      <p className="text-xs text-text-secondary">
-                        💡 New seats start their own 12-month subscription from today at your locked-in rate of ${teamData.lockedInRate.toFixed(2)}/seat
+                      <p className="text-xs text-text-secondary leading-relaxed">
+                        💡 These {additionalSeats} seat{additionalSeats !== 1 ? 's' : ''} will be charged today and auto-renew in 12 months at your locked-in rate of ${teamData.lockedInRate.toFixed(2)}/seat
                       </p>
                     </div>
                   </div>
@@ -319,7 +311,7 @@ export default function ManageTeamLicense() {
                     </div>
                   )}
 
-                  {/* Add Seats Button */}
+                  {/* Purchase Seats Button */}
                   <button
                     onClick={addSeats}
                     disabled={processingPayment || newTotalSeats > maxAllowedSeats}
@@ -330,7 +322,7 @@ export default function ManageTeamLicense() {
                     ) : (
                       <>
                         <CreditCard className="w-5 h-5" />
-                        Add {additionalSeats} Seat{additionalSeats !== 1 ? 's' : ''} - ${calculateProration().toFixed(2)}/year
+                        Purchase {additionalSeats} Seat{additionalSeats !== 1 ? 's' : ''} - ${calculateProration().toFixed(2)}/year
                       </>
                     )}
                   </button>
