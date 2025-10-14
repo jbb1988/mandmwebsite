@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
 
     try {
       // Create partner in Tolt via API
-      const toltResponse = await fetch('https://api.tolt.io/v1/affiliates', {
+      const toltResponse = await fetch('https://api.tolt.com/v1/partners', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${toltApiKey}`,
