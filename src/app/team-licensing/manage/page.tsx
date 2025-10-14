@@ -25,6 +25,7 @@ export default function ManageTeamLicense() {
   const [error, setError] = useState('');
   const [additionalSeats, setAdditionalSeats] = useState(12);
   const [processingPayment, setProcessingPayment] = useState(false);
+  const [testMode, setTestMode] = useState(false);
 
   const lookupTeamCode = async () => {
     if (!teamCode.trim()) {
@@ -80,6 +81,7 @@ export default function ManageTeamLicense() {
           additionalSeats,
           lockedInRate: teamData.lockedInRate,
           customerEmail: teamData.customerEmail,
+          testMode,
         }),
       });
 
@@ -102,6 +104,9 @@ export default function ManageTeamLicense() {
 
   const calculateProration = () => {
     if (!teamData) return 0;
+
+    // Test mode: $1.00 total regardless of seats
+    if (testMode) return 1.00;
 
     // Simple annual calculation (Stripe will handle exact proration)
     return additionalSeats * teamData.lockedInRate;
@@ -342,6 +347,29 @@ export default function ManageTeamLicense() {
                       <p className="text-sm text-red-200">{error}</p>
                     </div>
                   )}
+
+                  {/* Test Mode Toggle */}
+                  <div className="p-4 rounded-xl border border-white/10 bg-background-secondary/30">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={testMode}
+                        onChange={(e) => setTestMode(e.target.checked)}
+                        className="w-5 h-5 rounded border-white/20 bg-white/10 text-solar-surge-orange focus:ring-2 focus:ring-solar-surge-orange/50"
+                      />
+                      <div>
+                        <span className="text-sm font-medium text-text-primary">Test Mode ($1 total)</span>
+                        <p className="text-xs text-text-secondary/70">For testing the checkout flow - only $1.00 total charge</p>
+                      </div>
+                    </label>
+                    {testMode && (
+                      <div className="mt-3 p-3 rounded-lg bg-solar-surge-orange/10 border border-solar-surge-orange/20">
+                        <p className="text-xs text-solar-surge-orange font-medium">
+                          ⚠️ Test Mode Active: You'll be charged only $1.00 total instead of the full price
+                        </p>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Purchase Seats Button */}
                   <button

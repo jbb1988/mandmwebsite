@@ -82,6 +82,7 @@ export const addTeamSeatsSchema = z.object({
   additionalSeats: z.number().int().min(1).max(100),
   lockedInRate: priceSchema,
   customerEmail: emailSchema,
+  testMode: z.boolean().optional(),
 });
 
 // Lookup team schema

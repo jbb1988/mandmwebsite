@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { createClient } from '@supabase/supabase-js';
 import { addTeamSeatsSchema } from '@/lib/validation';
 import { handleCorsOptions, validateCors, withCors } from '@/lib/cors';
 import { addSeatsRateLimit, getClientIp, checkRateLimit } from '@/lib/rate-limit';
@@ -51,7 +52,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { teamCode, subscriptionId, additionalSeats, lockedInRate, customerEmail } = validationResult.data;
+    const { teamCode, subscriptionId, additionalSeats, lockedInRate, customerEmail, testMode } = validationResult.data;
 
     // Retrieve the subscription to validate and get current data
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
@@ -104,17 +105,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Calculate price per seat based on test mode
+    const pricePerSeat = testMode ? (1.00 / additionalSeats) : lockedInRate;
+
     // Create a product for the additional seats
     const product = await stripe.products.create({
-      name: `Mind and Muscle Team License - Additional Seats`,
-      description: `Additional ${additionalSeats} seats at locked-in rate of $${lockedInRate.toFixed(2)}/seat`,
+      name: `Mind and Muscle Team License - Additional Seats${testMode ? ' (TEST MODE)' : ''}`,
+      description: testMode
+        ? `TEST MODE: Additional ${additionalSeats} seats at $1.00 total`
+        : `Additional ${additionalSeats} seats at locked-in rate of $${lockedInRate.toFixed(2)}/seat`,
     });
 
     // Create a price for the product
     const price = await stripe.prices.create({
       product: product.id,
       currency: 'usd',
-      unit_amount: Math.round(lockedInRate * 100), // Price per seat in cents
+      unit_amount: Math.round(pricePerSeat * 100), // Price per seat in cents
       recurring: {
         interval: 'year',
       },
@@ -136,6 +142,7 @@ export async function POST(request: NextRequest) {
         seat_count: additionalSeats.toString(),
         price_per_seat: lockedInRate.toString(),
         is_additional_seats: 'true',
+        ...(testMode && { test_mode: 'true' }),
       },
       payment_behavior: 'default_incomplete',
       payment_settings: {
@@ -150,6 +157,27 @@ export async function POST(request: NextRequest) {
         seat_count: newTotalSeats.toString(),
       },
     });
+
+    // CRITICAL: Update team_join_codes table to increase max_uses
+    // This allows the additional users to actually redeem the code
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { error: updateError } = await supabase
+      .from('team_join_codes')
+      .update({
+        max_uses: newTotalSeats,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('code', teamCode)
+      .eq('is_active', true);
+
+    if (updateError) {
+      console.error('Error updating team join code max_uses:', updateError);
+      // Don't fail the request - seats were purchased, we can manually fix this
+    }
 
     // Get the payment intent for the new subscription
     const latestInvoiceId = newSubscription.latest_invoice as string;
