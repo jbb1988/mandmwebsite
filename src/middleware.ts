@@ -17,6 +17,7 @@ export function middleware(request: NextRequest) {
   if (
     pathname.startsWith('/auth/gate') ||
     pathname.startsWith('/api/auth/verify-gate') ||
+    pathname.startsWith('/api/webhooks') ||
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||
     pathname.startsWith('/assets') ||
