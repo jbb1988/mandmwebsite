@@ -88,7 +88,14 @@ export default function ManageTeamLicense() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to process seat addition');
+        // Log validation details for debugging
+        if (data.details) {
+          console.error('Validation errors:', data.details);
+        }
+        const errorMessage = data.details
+          ? `${data.error}: ${JSON.stringify(data.details)}`
+          : (data.error || 'Failed to process seat addition');
+        throw new Error(errorMessage);
       }
 
       // Redirect to Stripe checkout

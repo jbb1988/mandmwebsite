@@ -54,6 +54,20 @@ export async function POST(request: NextRequest) {
 
     const { teamCode, subscriptionId, additionalSeats, lockedInRate, customerEmail, testMode } = validationResult.data;
 
+    // Handle test subscriptions (bypass Stripe validation)
+    if (subscriptionId === 'sub_test_1234567890') {
+      console.log('Test subscription detected - bypassing Stripe validation');
+
+      // For testing: just return success without actually creating anything
+      const response = NextResponse.json({
+        success: true,
+        message: 'Test mode - no actual subscription created',
+        testMode: true,
+        newTotalSeats: 12 + additionalSeats,
+      });
+      return withCors(response, request);
+    }
+
     // Retrieve the subscription to validate and get current data
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
 

@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
         lockedInRate: 107.10,
         discountPercentage: 10,
         purchaseDate: new Date().toISOString(),
-        subscriptionId: 'test_subscription_id',
+        subscriptionId: 'sub_test_1234567890',
         customerEmail: 'test@mindandmuscle.ai',
       });
     }
