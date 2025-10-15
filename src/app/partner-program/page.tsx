@@ -6,7 +6,7 @@ import { Turnstile } from '@marsidev/react-turnstile';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
 import { GradientTextReveal } from '@/components/animations';
-import { EarningsCalculator } from '@/components/partner/EarningsCalculator';
+import { EnhancedEarningsCalculator } from '@/components/partner/EnhancedEarningsCalculator';
 import { ScenarioCard } from '@/components/partner/ScenarioCard';
 import { DollarSign, TrendingUp, Users, Gift, BarChart, Rocket, Check, Link2, Star, Zap, Target, Award, BookOpen, Sparkles, Clock, Trophy, ChevronDown, GraduationCap, Briefcase, UserPlus } from 'lucide-react';
 
@@ -344,8 +344,8 @@ export default function PartnerProgramPage() {
       </div>
 
       {/* Interactive Calculator */}
-      <div className="max-w-4xl mx-auto mb-20">
-        <EarningsCalculator />
+      <div className="max-w-7xl mx-auto mb-20">
+        <EnhancedEarningsCalculator />
       </div>
 
       {/* Partner Resources Preview */}
