@@ -93,16 +93,10 @@ export default function PartnerProgramPage() {
       variant: 'blue' as const,
     },
     {
-      icon: Zap,
-      title: 'Feature Preview Access',
-      description: 'Test new features before public release and provide feedback that shapes the product roadmap.',
-      variant: 'orange' as const,
-    },
-    {
       icon: Users,
       title: 'Automatic Payouts',
       description: 'Earn commission on every referral payment - automatically paid via PayPal 60 days after payment clears',
-      variant: 'blue' as const,
+      variant: 'orange' as const,
     },
     {
       icon: Target,
@@ -160,7 +154,7 @@ export default function PartnerProgramPage() {
   const faqs = [
     {
       question: 'How much can I really earn?',
-      answer: 'It depends on your network. Individual users: 10% forever ($11.90/user/year). Organizations: 10% on first 100 users, 15% on users 101+. Example: Refer a 150-user training facility = $1,668/year. Refer 3 teams of 50 users each = $536/year. Refer one 200-user travel ball organization = $2,052/year. Commission is calculated on volume-discounted prices shown in the calculator above.'
+      answer: 'It depends on your network. Individual users: 10% commission forever (with volume discounts applied). Organizations: 10% on first 100 users, 15% on users 101+. Examples: Refer a 150-user training facility = $1,860.57/year. Refer 3 teams of 50 users each = $1,860.57/year combined. Refer one 200-user travel ball organization = $2,618.31/year. Commission is calculated on volume-discounted prices: $119 (1-11), $107.10 (12-120), $101.15 (121-199), $95.20 (200+).'
     },
     {
       question: 'What if I know facility owners or league directors?',
@@ -325,7 +319,7 @@ export default function PartnerProgramPage() {
             <ul className="space-y-3 text-sm text-text-secondary">
               <li className="flex items-start gap-2">
                 <span className="text-solar-surge-orange mt-1">⚾</span>
-                <span>Travel Ball Organizations (USA Prime, Canes, Five Star, Dirtbags)</span>
+                <span>Travel Ball Organizations</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-solar-surge-orange mt-1">🏟️</span>
@@ -344,8 +338,8 @@ export default function PartnerProgramPage() {
                 <span>Multi-Sport Training Facilities</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="text-solar-surge-orange mt-1">🔬</span>
-                <span>Biomechanics & Motion Capture Labs</span>
+                <span className="text-solar-surge-orange mt-1">🏅</span>
+                <span>Sports Performance Centers</span>
               </li>
             </ul>
           </LiquidGlass>

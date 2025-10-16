@@ -17,9 +17,37 @@ export function EnhancedEarningsCalculator() {
   const TIER_121_199 = 101.15; // 15% off
   const TIER_200_PLUS = 95.20; // 20% off
 
-  // Calculate individual earnings
+  // Calculate individual earnings with volume discounts
   const calculateIndividualEarnings = (count: number) => {
-    return count * RETAIL_PRICE * 0.10;
+    let earnings = 0;
+
+    // Users 1-11 at $119
+    if (count <= 11) {
+      earnings = count * RETAIL_PRICE * 0.10;
+    }
+    // Users 12-120 at $107.10 (10% off)
+    else if (count <= 120) {
+      const tier1 = Math.min(11, count);
+      const tier2 = count - tier1;
+      earnings = (tier1 * RETAIL_PRICE * 0.10) + (tier2 * TIER_12_120 * 0.10);
+    }
+    // Users 121-199 at $101.15 (15% off)
+    else if (count <= 199) {
+      const tier1 = 11 * RETAIL_PRICE * 0.10;
+      const tier2 = 109 * TIER_12_120 * 0.10;
+      const tier3 = (count - 120) * TIER_121_199 * 0.10;
+      earnings = tier1 + tier2 + tier3;
+    }
+    // Users 200+ at $95.20 (20% off)
+    else {
+      const tier1 = 11 * RETAIL_PRICE * 0.10;
+      const tier2 = 109 * TIER_12_120 * 0.10;
+      const tier3 = 79 * TIER_121_199 * 0.10;
+      const tier4 = (count - 199) * TIER_200_PLUS * 0.10;
+      earnings = tier1 + tier2 + tier3 + tier4;
+    }
+
+    return earnings;
   };
 
   // Calculate team/organization earnings with volume discounts and tiered commission
@@ -181,7 +209,7 @@ export function EnhancedEarningsCalculator() {
               <div className="flex items-start gap-2">
                 <Info className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-text-secondary">
-                  Earn 10% commission on every individual user you refer. They pay $119/year, you earn $11.90/user/year forever.
+                  Earn 10% commission on every individual user. Volume discounts apply: $119 (1-11 users), $107.10 (12-120 users), $101.15 (121-199 users), $95.20 (200+ users).
                 </p>
               </div>
             </div>
@@ -212,11 +240,11 @@ export function EnhancedEarningsCalculator() {
                   ${individualEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
                 <p className="text-sm text-text-secondary">
-                  {individualCount} users × $119/year × 10% commission
+                  {individualCount} users × {individualCount <= 11 ? '$119' : individualCount <= 120 ? 'avg $' + ((11 * 119 + (individualCount - 11) * 107.10) / individualCount).toFixed(2) : individualCount <= 199 ? 'avg $' + ((11 * 119 + 109 * 107.10 + (individualCount - 120) * 101.15) / individualCount).toFixed(2) : 'avg $' + ((11 * 119 + 109 * 107.10 + 79 * 101.15 + (individualCount - 199) * 95.20) / individualCount).toFixed(2)}/year × 10% commission
                 </p>
                 <div className="mt-4 pt-4 border-t border-white/10">
                   <p className="text-xs text-text-secondary">
-                    💰 Per user: ${(individualEarnings / individualCount).toFixed(2)}/year
+                    💰 Per user average: ${(individualEarnings / individualCount).toFixed(2)}/year
                   </p>
                 </div>
               </div>
