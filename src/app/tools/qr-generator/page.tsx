@@ -22,9 +22,20 @@ export default function QRGeneratorPage() {
 
   const generateQRCode = async (text: string) => {
     try {
-      // Generate QR code with Mind & Muscle branding colors
-      const dataUrl = await QRCode.toDataURL(text, {
-        width: 400,
+      if (!canvasRef.current) return;
+
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      // Set canvas size
+      const size = 400;
+      canvas.width = size;
+      canvas.height = size;
+
+      // Generate QR code to canvas with Mind & Muscle branding colors
+      await QRCode.toCanvas(canvas, text, {
+        width: size,
         margin: 2,
         color: {
           dark: '#02124A', // deep-orbit-navy
@@ -32,20 +43,39 @@ export default function QRGeneratorPage() {
         },
         errorCorrectionLevel: 'H', // High error correction for logo overlay
       });
-      setQrCodeDataUrl(dataUrl);
 
-      // Also render to canvas for SVG export
-      if (canvasRef.current) {
-        await QRCode.toCanvas(canvasRef.current, text, {
-          width: 400,
-          margin: 2,
-          color: {
-            dark: '#02124A',
-            light: '#FFFFFF',
-          },
-          errorCorrectionLevel: 'H',
-        });
-      }
+      // Load and overlay logo
+      const logo = new Image();
+      logo.crossOrigin = 'anonymous';
+      logo.src = '/assets/images/logo.png';
+
+      logo.onload = () => {
+        // Calculate logo size (25% of QR code size for optimal scanning)
+        const logoSize = size * 0.25;
+        const logoX = (size - logoSize) / 2;
+        const logoY = (size - logoSize) / 2;
+
+        // Draw white circular background for logo
+        const bgRadius = logoSize * 0.6;
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(size / 2, size / 2, bgRadius, 0, 2 * Math.PI);
+        ctx.fill();
+
+        // Draw logo
+        ctx.drawImage(logo, logoX, logoY, logoSize, logoSize);
+
+        // Convert canvas to data URL
+        const dataUrl = canvas.toDataURL('image/png');
+        setQrCodeDataUrl(dataUrl);
+      };
+
+      logo.onerror = () => {
+        // If logo fails to load, just use QR code without logo
+        console.warn('Logo failed to load, using QR code without logo');
+        const dataUrl = canvas.toDataURL('image/png');
+        setQrCodeDataUrl(dataUrl);
+      };
     } catch (error) {
       console.error('Error generating QR code:', error);
     }
@@ -106,7 +136,7 @@ export default function QRGeneratorPage() {
             </h1>
 
             <p className="text-lg text-text-secondary">
-              Convert your Mind & Muscle referral link into a scannable QR code
+              Convert your referral link into a branded QR code with the Mind & Muscle logo
             </p>
           </div>
 
@@ -186,6 +216,7 @@ export default function QRGeneratorPage() {
                   💡 QR Code Usage Tips
                 </h3>
                 <ul className="space-y-2 text-sm text-text-secondary">
+                  <li>• <strong>Branded with your logo!</strong> Mind & Muscle logo is automatically added to the center</li>
                   <li>• <strong>PNG:</strong> Best for digital use (emails, social media, presentations)</li>
                   <li>• <strong>SVG:</strong> Best for print (flyers, business cards, posters) - scales perfectly</li>
                   <li>• Add to business cards for instant sign-ups</li>
