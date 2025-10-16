@@ -12,6 +12,8 @@ export function EnhancedEarningsCalculator() {
   const [teamCount, setTeamCount] = useState(150);
   const [individualInputMode, setIndividualInputMode] = useState<'teams' | 'users'>('teams');
   const [teamInputCount, setTeamInputCount] = useState(10); // Number of teams (default 10)
+  const [orgInputMode, setOrgInputMode] = useState<'teams' | 'users'>('teams');
+  const [orgTeamCount, setOrgTeamCount] = useState(15); // Number of teams for orgs (default 15)
 
   // Pricing tiers
   const RETAIL_PRICE = 119;
@@ -26,6 +28,11 @@ export function EnhancedEarningsCalculator() {
   const actualIndividualCount = individualInputMode === 'teams'
     ? teamInputCount * USERS_PER_TEAM
     : individualCount;
+
+  // Calculate actual user count for org mode
+  const actualOrgCount = orgInputMode === 'teams'
+    ? orgTeamCount * USERS_PER_TEAM
+    : teamCount;
 
   // Calculate individual earnings with volume discounts
   const calculateIndividualEarnings = (count: number) => {
@@ -132,8 +139,8 @@ export function EnhancedEarningsCalculator() {
   };
 
   const individualEarnings = calculateIndividualEarnings(actualIndividualCount);
-  const teamEarnings = calculateTeamEarnings(teamCount);
-  const teamBreakdown = getTeamEarningsBreakdown(teamCount);
+  const teamEarnings = calculateTeamEarnings(actualOrgCount);
+  const teamBreakdown = getTeamEarningsBreakdown(actualOrgCount);
 
   return (
     <div className="space-y-6">
@@ -349,6 +356,33 @@ export function EnhancedEarningsCalculator() {
         {/* Team/Organization Mode */}
         {mode === 'team' && (
           <div className="space-y-6">
+            {/* Input Mode Toggle */}
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setOrgInputMode('teams')}
+                className={`p-3 rounded-lg border transition-all ${
+                  orgInputMode === 'teams'
+                    ? 'border-solar-surge-orange bg-solar-surge-orange/20 text-white'
+                    : 'border-white/10 bg-white/5 text-text-secondary hover:border-white/20'
+                }`}
+              >
+                <div className="font-bold text-sm">By Teams</div>
+                <div className="text-xs opacity-70">{USERS_PER_TEAM} users per team</div>
+              </button>
+
+              <button
+                onClick={() => setOrgInputMode('users')}
+                className={`p-3 rounded-lg border transition-all ${
+                  orgInputMode === 'users'
+                    ? 'border-solar-surge-orange bg-solar-surge-orange/20 text-white'
+                    : 'border-white/10 bg-white/5 text-text-secondary hover:border-white/20'
+                }`}
+              >
+                <div className="font-bold text-sm">By Users</div>
+                <div className="text-xs opacity-70">Total user count</div>
+              </button>
+            </div>
+
             <div className={`p-4 border rounded-lg ${
               teamBreakdown.hasBonus
                 ? 'bg-solar-surge-orange/10 border-solar-surge-orange/30'
@@ -359,47 +393,101 @@ export function EnhancedEarningsCalculator() {
                   teamBreakdown.hasBonus ? 'text-solar-surge-orange' : 'text-neon-cortex-blue'
                 }`} />
                 <div className="text-sm text-text-secondary">
-                  {teamBreakdown.hasBonus ? (
+                  {orgInputMode === 'teams' ? (
                     <>
-                      <strong className="text-solar-surge-orange">🔥 Bonus Unlocked!</strong> You earn 10% on the first 100 users + 15% on users 101+. Volume discounts increase as the team grows.
+                      {teamBreakdown.hasBonus ? (
+                        <>
+                          <strong className="text-solar-surge-orange">🔥 Bonus Unlocked!</strong> You earn 10% on the first 100 users + 15% on users 101+. {orgTeamCount} teams = {actualOrgCount} users.
+                        </>
+                      ) : (
+                        <>
+                          <strong>Think in teams!</strong> Each team: 12 athletes + 2 coaches = {USERS_PER_TEAM} users. <strong className="text-neon-cortex-blue">Reach 8+ teams (101+ users) to unlock 15% commission</strong> on users above 100.
+                        </>
+                      )}
                     </>
                   ) : (
                     <>
-                      You earn 10% commission on team/organization users. <strong className="text-neon-cortex-blue">Reach 101+ users to unlock 15% commission</strong> on users above 100.
+                      {teamBreakdown.hasBonus ? (
+                        <>
+                          <strong className="text-solar-surge-orange">🔥 Bonus Unlocked!</strong> You earn 10% on the first 100 users + 15% on users 101+. Volume discounts increase as the team grows.
+                        </>
+                      ) : (
+                        <>
+                          You earn 10% commission on team/organization users. <strong className="text-neon-cortex-blue">Reach 101+ users to unlock 15% commission</strong> on users above 100.
+                        </>
+                      )}
                     </>
                   )}
                 </div>
               </div>
             </div>
 
-            <div>
-              <label className="block text-lg font-bold mb-3">
-                How many team/organization users?
-              </label>
-              <div className="flex items-center gap-4 mb-2">
-                <input
-                  type="range"
-                  min="12"
-                  max="500"
-                  step="5"
-                  value={teamCount}
-                  onChange={(e) => setTeamCount(parseInt(e.target.value))}
-                  className="flex-1 h-3 bg-white/10 rounded-lg appearance-none cursor-pointer accent-solar-surge-orange"
-                />
-                <div className="text-3xl font-black text-solar-surge-orange min-w-[100px] text-right">
-                  {teamCount}
+            {/* Team Input Mode */}
+            {orgInputMode === 'teams' && (
+              <div>
+                <label className="block text-lg font-bold mb-3">
+                  How many teams in your organizations?
+                </label>
+                <div className="flex items-center gap-4 mb-2">
+                  <input
+                    type="range"
+                    min="1"
+                    max="100"
+                    value={orgTeamCount}
+                    onChange={(e) => setOrgTeamCount(parseInt(e.target.value))}
+                    className="flex-1 h-3 bg-white/10 rounded-lg appearance-none cursor-pointer accent-solar-surge-orange"
+                  />
+                  <div className="text-3xl font-black text-solar-surge-orange min-w-[100px] text-right">
+                    {orgTeamCount}
+                  </div>
+                </div>
+                <div className="mt-2 text-center mb-2">
+                  <span className="text-sm text-text-secondary">
+                    {orgTeamCount} {orgTeamCount === 1 ? 'team' : 'teams'} × {USERS_PER_TEAM} users = <span className="text-solar-surge-orange font-bold">{actualOrgCount} total users</span>
+                  </span>
+                </div>
+                <div className="flex items-center justify-between text-xs text-text-secondary">
+                  <span>1 team</span>
+                  <span className={actualOrgCount >= 100 ? 'text-solar-surge-orange font-bold' : ''}>
+                    {actualOrgCount >= 100 ? '🔥 ' : ''}8 teams (bonus threshold)
+                  </span>
+                  <span>100 teams</span>
                 </div>
               </div>
-              <div className="flex items-center justify-between text-xs text-text-secondary">
-                <span>12 users</span>
-                <span className={teamCount >= 100 ? 'text-solar-surge-orange font-bold' : ''}>
-                  {teamCount >= 100 ? '🔥 ' : ''}100 users (bonus threshold)
-                </span>
-                <span>500 users</span>
+            )}
+
+            {/* User Input Mode */}
+            {orgInputMode === 'users' && (
+              <div>
+                <label className="block text-lg font-bold mb-3">
+                  How many team/organization users?
+                </label>
+                <div className="flex items-center gap-4 mb-2">
+                  <input
+                    type="range"
+                    min="12"
+                    max="500"
+                    step="5"
+                    value={teamCount}
+                    onChange={(e) => setTeamCount(parseInt(e.target.value))}
+                    className="flex-1 h-3 bg-white/10 rounded-lg appearance-none cursor-pointer accent-solar-surge-orange"
+                  />
+                  <div className="text-3xl font-black text-solar-surge-orange min-w-[100px] text-right">
+                    {teamCount}
+                  </div>
+                </div>
+                <div className="flex items-center justify-between text-xs text-text-secondary">
+                  <span>12 users</span>
+                  <span className={teamCount >= 100 ? 'text-solar-surge-orange font-bold' : ''}>
+                    {teamCount >= 100 ? '🔥 ' : ''}100 users (bonus threshold)
+                  </span>
+                  <span>500 users</span>
+                </div>
               </div>
-              <div className="mt-3 text-sm text-center">
-                <span className="text-text-secondary">{getPricingTierMessage(teamCount)}</span>
-              </div>
+            )}
+
+            <div className="mt-3 text-sm text-center">
+              <span className="text-text-secondary">{getPricingTierMessage(actualOrgCount)}</span>
             </div>
 
             <div className="p-6 bg-gradient-to-br from-solar-surge-orange/20 to-neon-cortex-blue/20 rounded-xl border-2 border-solar-surge-orange/40">
@@ -408,6 +496,12 @@ export function EnhancedEarningsCalculator() {
                 <p className="text-5xl font-black text-solar-surge-orange mb-3">
                   ${teamEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
+
+                {orgInputMode === 'teams' && (
+                  <p className="text-sm text-text-secondary mb-2">
+                    {orgTeamCount} {orgTeamCount === 1 ? 'team' : 'teams'} ({actualOrgCount} users)
+                  </p>
+                )}
 
                 {teamBreakdown.hasBonus && (
                   <div className="space-y-2 text-sm">
@@ -418,7 +512,7 @@ export function EnhancedEarningsCalculator() {
                       </span>
                     </div>
                     <div className="flex items-center justify-between text-text-secondary">
-                      <span>Bonus ({teamCount - 100} users at 15%):</span>
+                      <span>Bonus ({actualOrgCount - 100} users at 15%):</span>
                       <span className="font-bold text-solar-surge-orange">
                         +${teamBreakdown.bonus.toFixed(2)}
                       </span>
@@ -437,13 +531,13 @@ export function EnhancedEarningsCalculator() {
                 <div className="flex justify-between">
                   <span>Per user earnings:</span>
                   <span className="font-bold text-white">
-                    ${(teamEarnings / teamCount).toFixed(2)}/year
+                    ${(teamEarnings / actualOrgCount).toFixed(2)}/year
                   </span>
                 </div>
                 {teamBreakdown.hasBonus && (
                   <div className="mt-3 p-2 bg-solar-surge-orange/20 rounded text-solar-surge-orange text-center">
                     <TrendingUp className="w-4 h-4 inline mr-1" />
-                    You're earning 15% on {teamCount - 100} bonus users!
+                    You're earning 15% on {actualOrgCount - 100} bonus users!
                   </div>
                 )}
               </div>
