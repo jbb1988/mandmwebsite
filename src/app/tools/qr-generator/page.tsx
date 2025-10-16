@@ -163,6 +163,9 @@ export default function QRGeneratorPage() {
             </p>
           </div>
 
+          {/* Hidden canvas for QR code generation - MUST be outside conditional */}
+          <canvas ref={canvasRef} className="hidden" />
+
           {/* QR Code Preview */}
           {qrCodeDataUrl ? (
             <div className="mb-8">
@@ -179,9 +182,6 @@ export default function QRGeneratorPage() {
                   />
                 </div>
               </div>
-
-              {/* Hidden canvas for SVG generation */}
-              <canvas ref={canvasRef} className="hidden" />
 
               {/* Download Buttons */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
