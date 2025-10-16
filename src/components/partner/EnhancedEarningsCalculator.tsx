@@ -10,12 +10,22 @@ export function EnhancedEarningsCalculator() {
   const [mode, setMode] = useState<CalculatorMode>('team');
   const [individualCount, setIndividualCount] = useState(15);
   const [teamCount, setTeamCount] = useState(150);
+  const [individualInputMode, setIndividualInputMode] = useState<'teams' | 'users'>('teams');
+  const [teamInputCount, setTeamInputCount] = useState(10); // Number of teams (default 10)
 
   // Pricing tiers
   const RETAIL_PRICE = 119;
   const TIER_12_120 = 107.10; // 10% off
   const TIER_121_199 = 101.15; // 15% off
   const TIER_200_PLUS = 95.20; // 20% off
+
+  // Team composition
+  const USERS_PER_TEAM = 14; // 12 athletes + 2 coaches
+
+  // Calculate actual user count for individual mode
+  const actualIndividualCount = individualInputMode === 'teams'
+    ? teamInputCount * USERS_PER_TEAM
+    : individualCount;
 
   // Calculate individual earnings with volume discounts
   const calculateIndividualEarnings = (count: number) => {
@@ -121,7 +131,7 @@ export function EnhancedEarningsCalculator() {
     return '20% volume discount: $95.20/user';
   };
 
-  const individualEarnings = calculateIndividualEarnings(individualCount);
+  const individualEarnings = calculateIndividualEarnings(actualIndividualCount);
   const teamEarnings = calculateTeamEarnings(teamCount);
   const teamBreakdown = getTeamEarningsBreakdown(teamCount);
 
@@ -205,33 +215,99 @@ export function EnhancedEarningsCalculator() {
         {/* Individual Mode */}
         {mode === 'individual' && (
           <div className="space-y-6">
+            {/* Input Mode Toggle */}
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setIndividualInputMode('teams')}
+                className={`p-3 rounded-lg border transition-all ${
+                  individualInputMode === 'teams'
+                    ? 'border-neon-cortex-blue bg-neon-cortex-blue/20 text-white'
+                    : 'border-white/10 bg-white/5 text-text-secondary hover:border-white/20'
+                }`}
+              >
+                <div className="font-bold text-sm">By Teams</div>
+                <div className="text-xs opacity-70">{USERS_PER_TEAM} users per team</div>
+              </button>
+
+              <button
+                onClick={() => setIndividualInputMode('users')}
+                className={`p-3 rounded-lg border transition-all ${
+                  individualInputMode === 'users'
+                    ? 'border-neon-cortex-blue bg-neon-cortex-blue/20 text-white'
+                    : 'border-white/10 bg-white/5 text-text-secondary hover:border-white/20'
+                }`}
+              >
+                <div className="font-bold text-sm">By Users</div>
+                <div className="text-xs opacity-70">Individual signups</div>
+              </button>
+            </div>
+
             <div className="p-4 bg-neon-cortex-blue/10 border border-neon-cortex-blue/30 rounded-lg">
               <div className="flex items-start gap-2">
                 <Info className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-text-secondary">
-                  Earn 10% commission on every individual user. Volume discounts apply: $119 (1-11 users), $107.10 (12-120 users), $101.15 (121-199 users), $95.20 (200+ users).
+                  {individualInputMode === 'teams' ? (
+                    <>
+                      <strong>Think in teams!</strong> Average team: 12 athletes + 2 coaches = {USERS_PER_TEAM} users.
+                      Earn 10% commission on all users with volume discounts.
+                    </>
+                  ) : (
+                    <>
+                      Earn 10% commission on every individual user. Volume discounts apply: $119 (1-11 users), $107.10 (12-120 users), $101.15 (121-199 users), $95.20 (200+ users).
+                    </>
+                  )}
                 </p>
               </div>
             </div>
 
-            <div>
-              <label className="block text-lg font-bold mb-3">
-                How many individual users will you refer?
-              </label>
-              <div className="flex items-center gap-4">
-                <input
-                  type="range"
-                  min="1"
-                  max="100"
-                  value={individualCount}
-                  onChange={(e) => setIndividualCount(parseInt(e.target.value))}
-                  className="flex-1 h-3 bg-white/10 rounded-lg appearance-none cursor-pointer accent-neon-cortex-blue"
-                />
-                <div className="text-3xl font-black text-neon-cortex-blue min-w-[80px] text-right">
-                  {individualCount}
+            {/* Team Input Mode */}
+            {individualInputMode === 'teams' && (
+              <div>
+                <label className="block text-lg font-bold mb-3">
+                  How many teams can you reach?
+                </label>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="range"
+                    min="1"
+                    max="50"
+                    value={teamInputCount}
+                    onChange={(e) => setTeamInputCount(parseInt(e.target.value))}
+                    className="flex-1 h-3 bg-white/10 rounded-lg appearance-none cursor-pointer accent-neon-cortex-blue"
+                  />
+                  <div className="text-3xl font-black text-neon-cortex-blue min-w-[80px] text-right">
+                    {teamInputCount}
+                  </div>
+                </div>
+                <div className="mt-2 text-center">
+                  <span className="text-sm text-text-secondary">
+                    {teamInputCount} {teamInputCount === 1 ? 'team' : 'teams'} × {USERS_PER_TEAM} users = <span className="text-neon-cortex-blue font-bold">{actualIndividualCount} total users</span>
+                  </span>
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* User Input Mode */}
+            {individualInputMode === 'users' && (
+              <div>
+                <label className="block text-lg font-bold mb-3">
+                  How many individual users will you refer?
+                </label>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="range"
+                    min="1"
+                    max="100"
+                    value={individualCount}
+                    onChange={(e) => setIndividualCount(parseInt(e.target.value))}
+                    className="flex-1 h-3 bg-white/10 rounded-lg appearance-none cursor-pointer accent-neon-cortex-blue"
+                  />
+                  <div className="text-3xl font-black text-neon-cortex-blue min-w-[80px] text-right">
+                    {individualCount}
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="p-6 bg-gradient-to-br from-neon-cortex-blue/20 to-solar-surge-orange/20 rounded-xl border-2 border-neon-cortex-blue/40">
               <div className="text-center">
@@ -240,21 +316,29 @@ export function EnhancedEarningsCalculator() {
                   ${individualEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
                 <p className="text-sm text-text-secondary">
-                  {individualCount} users × 10% commission
+                  {individualInputMode === 'teams' ? (
+                    <>
+                      {teamInputCount} {teamInputCount === 1 ? 'team' : 'teams'} ({actualIndividualCount} users) × 10% commission
+                    </>
+                  ) : (
+                    <>
+                      {actualIndividualCount} users × 10% commission
+                    </>
+                  )}
                 </p>
                 <p className="text-xs text-text-secondary mt-1">
-                  {individualCount <= 11
-                    ? `${individualCount} @ $119/user`
-                    : individualCount <= 120
-                      ? `11 @ $119 + ${individualCount - 11} @ $107.10`
-                      : individualCount <= 199
-                        ? `11 @ $119 + 109 @ $107.10 + ${individualCount - 120} @ $101.15`
-                        : `11 @ $119 + 109 @ $107.10 + 79 @ $101.15 + ${individualCount - 199} @ $95.20`
+                  {actualIndividualCount <= 11
+                    ? `${actualIndividualCount} @ $119/user`
+                    : actualIndividualCount <= 120
+                      ? `11 @ $119 + ${actualIndividualCount - 11} @ $107.10`
+                      : actualIndividualCount <= 199
+                        ? `11 @ $119 + 109 @ $107.10 + ${actualIndividualCount - 120} @ $101.15`
+                        : `11 @ $119 + 109 @ $107.10 + 79 @ $101.15 + ${actualIndividualCount - 199} @ $95.20`
                   }
                 </p>
                 <div className="mt-4 pt-4 border-t border-white/10">
                   <p className="text-xs text-text-secondary">
-                    💰 Per user average: ${(individualEarnings / individualCount).toFixed(2)}/year
+                    💰 Per user average: ${(individualEarnings / actualIndividualCount).toFixed(2)}/year
                   </p>
                 </div>
               </div>
