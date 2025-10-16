@@ -240,7 +240,17 @@ export function EnhancedEarningsCalculator() {
                   ${individualEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
                 <p className="text-sm text-text-secondary">
-                  {individualCount} users × {individualCount <= 11 ? '$119' : individualCount <= 120 ? 'avg $' + ((11 * 119 + (individualCount - 11) * 107.10) / individualCount).toFixed(2) : individualCount <= 199 ? 'avg $' + ((11 * 119 + 109 * 107.10 + (individualCount - 120) * 101.15) / individualCount).toFixed(2) : 'avg $' + ((11 * 119 + 109 * 107.10 + 79 * 101.15 + (individualCount - 199) * 95.20) / individualCount).toFixed(2)}/year × 10% commission
+                  {individualCount} users × 10% commission
+                </p>
+                <p className="text-xs text-text-secondary mt-1">
+                  {individualCount <= 11
+                    ? `${individualCount} @ $119/user`
+                    : individualCount <= 120
+                      ? `11 @ $119 + ${individualCount - 11} @ $107.10`
+                      : individualCount <= 199
+                        ? `11 @ $119 + 109 @ $107.10 + ${individualCount - 120} @ $101.15`
+                        : `11 @ $119 + 109 @ $107.10 + 79 @ $101.15 + ${individualCount - 199} @ $95.20`
+                  }
                 </p>
                 <div className="mt-4 pt-4 border-t border-white/10">
                   <p className="text-xs text-text-secondary">
