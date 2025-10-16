@@ -233,7 +233,7 @@ export function EnhancedEarningsCalculator() {
                 }`}
               >
                 <div className="font-bold text-sm">By Teams</div>
-                <div className="text-xs opacity-70">{USERS_PER_TEAM} users per team</div>
+                <div className="text-xs opacity-70">Avg {USERS_PER_TEAM} users per team</div>
               </button>
 
               <button
@@ -367,7 +367,7 @@ export function EnhancedEarningsCalculator() {
                 }`}
               >
                 <div className="font-bold text-sm">By Teams</div>
-                <div className="text-xs opacity-70">{USERS_PER_TEAM} users per team</div>
+                <div className="text-xs opacity-70">Avg {USERS_PER_TEAM} users per team</div>
               </button>
 
               <button
