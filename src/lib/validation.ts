@@ -45,7 +45,7 @@ export const teamCodeSchema = z
 export const seatCountSchema = z
   .number()
   .int('Seat count must be a whole number')
-  .min(12, 'Minimum 12 seats required')
+  .min(1, 'Minimum 1 seat required')
   .max(1000, 'Maximum 1000 seats allowed');
 
 // Price validation

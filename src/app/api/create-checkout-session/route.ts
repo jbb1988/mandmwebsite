@@ -91,9 +91,13 @@ export async function POST(request: NextRequest) {
       } else if (seatCount >= 120) {
         discountPercentage = 15;
         pricePerSeat = 101.15;
-      } else {
+      } else if (seatCount >= 12) {
         discountPercentage = 10;
         pricePerSeat = 107.10;
+      } else {
+        // 1-11 users: no discount
+        discountPercentage = 0;
+        pricePerSeat = 119.00;
       }
     }
 

@@ -11,7 +11,7 @@ import { Check, X, Users, TrendingUp, Award, Sparkles, Calculator, AlertCircle, 
 
 function TeamLicensingContent() {
   const searchParams = useSearchParams();
-  const [seatCount, setSeatCount] = useState(12);
+  const [seatCount, setSeatCount] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [showCanceledMessage, setShowCanceledMessage] = useState(false);
@@ -59,6 +59,7 @@ function TeamLicensingContent() {
       discount = 0.10;
       discountLabel = '10% Team Discount';
     }
+    // 1-11 users: no discount (stays at $119)
 
     const pricePerSeat = basePrice * (1 - discount);
     const originalPricePerSeat = originalPrice * (1 - discount);
@@ -237,17 +238,17 @@ function TeamLicensingContent() {
                   <label className="text-lg font-semibold">Number of Users</label>
                   <div className="flex items-center gap-3">
                     <button
-                      onClick={() => setSeatCount(Math.max(12, seatCount - 1))}
+                      onClick={() => setSeatCount(Math.max(1, seatCount - 1))}
                       className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center font-bold"
                     >
                       -
                     </button>
                     <input
                       type="number"
-                      min="12"
+                      min="1"
                       max="200"
                       value={seatCount}
-                      onChange={(e) => setSeatCount(Math.max(12, Math.min(200, parseInt(e.target.value) || 12)))}
+                      onChange={(e) => setSeatCount(Math.max(1, Math.min(200, parseInt(e.target.value) || 1)))}
                       className="w-20 h-10 text-center text-2xl font-black bg-white/10 border border-white/20 rounded-lg focus:border-solar-surge-orange focus:outline-none"
                     />
                     <button
@@ -261,13 +262,13 @@ function TeamLicensingContent() {
 
                 <input
                   type="range"
-                  min="12"
+                  min="1"
                   max="200"
                   value={seatCount}
                   onChange={(e) => setSeatCount(parseInt(e.target.value))}
                   className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"
                   style={{
-                    background: `linear-gradient(to right, #F97316 0%, #F97316 ${((seatCount - 12) / (200 - 12)) * 100}%, rgba(255,255,255,0.2) ${((seatCount - 12) / (200 - 12)) * 100}%, rgba(255,255,255,0.2) 100%)`
+                    background: `linear-gradient(to right, #F97316 0%, #F97316 ${((seatCount - 1) / (200 - 1)) * 100}%, rgba(255,255,255,0.2) ${((seatCount - 1) / (200 - 1)) * 100}%, rgba(255,255,255,0.2) 100%)`
                   }}
                 />
 
@@ -429,7 +430,7 @@ function TeamLicensingContent() {
                     <span className="font-bold text-neon-cortex-green">Reusable Premium Code</span>
                   </div>
                   <p className="text-sm text-text-secondary pl-7 mb-2">
-                    Share one code with {seatCount} users (at minimum 12 users). Athletes and coaches get full Premium access when they join.
+                    Share one code with {seatCount} user{seatCount !== 1 ? 's' : ''}. Athletes and coaches get full Premium access when they join.
                   </p>
                   <p className="text-xs text-neon-cortex-blue pl-7 font-semibold">
                     Bonus: Parents get free read-only access to their athlete's Goals & Reports—they don't count toward your user limit!
@@ -531,7 +532,7 @@ function TeamLicensingContent() {
             Get up to 20% off Premium when your team joins together.
           </p>
           <p className="text-sm text-text-secondary/70 max-w-3xl mx-auto mt-4">
-            12-119 users: 10% off • 120-199 users: 15% off • 200+ users: 20% off
+            1-11 users: $119/seat • 12-119 users: 10% off • 120-199 users: 15% off • 200+ users: 20% off
           </p>
         </div>
 
@@ -595,6 +596,10 @@ function TeamLicensingContent() {
                 <span className="font-bold text-neon-cortex-blue">Team Discount Pricing:</span>
               </div>
               <div className="space-y-1 text-sm">
+                <div className="flex justify-between items-center">
+                  <span className="text-text-secondary">1-11 seats:</span>
+                  <span className="font-bold text-white">$119/seat</span>
+                </div>
                 <div className="flex justify-between items-center">
                   <span className="text-text-secondary">12-119 seats:</span>
                   <span className="font-bold text-neon-cortex-green">$107.10/seat (10% off)</span>
