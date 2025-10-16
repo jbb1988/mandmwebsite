@@ -8,7 +8,7 @@ import { LiquidButton } from '@/components/LiquidButton';
 import { GradientTextReveal } from '@/components/animations';
 import { EnhancedEarningsCalculator } from '@/components/partner/EnhancedEarningsCalculator';
 import { ScenarioCard } from '@/components/partner/ScenarioCard';
-import { DollarSign, TrendingUp, Users, Gift, BarChart, Rocket, Check, Link2, Star, Zap, Target, Award, BookOpen, Sparkles, Clock, Trophy, ChevronDown, GraduationCap, Briefcase, UserPlus } from 'lucide-react';
+import { DollarSign, TrendingUp, Users, Gift, BarChart, Rocket, Check, Link2, Star, Zap, Target, Award, BookOpen, Sparkles, Clock, Trophy, ChevronDown, GraduationCap, Briefcase, UserPlus, Building2 } from 'lucide-react';
 
 export default function PartnerProgramPage() {
   const [formData, setFormData] = useState({
@@ -63,16 +63,22 @@ export default function PartnerProgramPage() {
 
   const benefits = [
     {
-      icon: Star,
-      title: 'Lifetime Commission',
-      description: 'Earn 10% commission each time your referral pays - initial signup plus every renewal they make',
+      icon: TrendingUp,
+      title: 'Scale to 15% Commission',
+      description: 'Start at 10%, earn 15% when you refer teams with 101+ users. The bigger the organization, the more you earn per user.',
       variant: 'orange' as const,
     },
     {
-      icon: TrendingUp,
-      title: 'Unlimited Earning Potential',
-      description: 'Earn commission every time your referrals pay - as long as they keep subscribing, you keep earning.',
+      icon: Target,
+      title: 'Target High-Value Organizations',
+      description: 'One training facility or travel ball organization can generate more recurring income than 50 individual referrals.',
       variant: 'blue' as const,
+    },
+    {
+      icon: Star,
+      title: 'Lifetime Recurring Commission',
+      description: 'Earn commission on every payment your referrals make - initial signup plus every renewal, forever.',
+      variant: 'orange' as const,
     },
     {
       icon: Gift,
@@ -115,43 +121,51 @@ export default function PartnerProgramPage() {
   const scenarios = [
     {
       title: 'Youth Coach Sarah',
-      subtitle: 'Rec League Coach',
+      subtitle: 'Local Team Coach',
       icon: GraduationCap,
       stats: [
-        { label: 'Network', value: '150 families' },
-        { label: 'Refers', value: '3 teams' },
-        { label: 'Time invested', value: 'Just shares link' },
+        { label: 'Coaches', value: '3 local teams' },
+        { label: 'Total users', value: '45 players' },
+        { label: 'Time invested', value: 'Shares at team meetings' },
       ],
-      earnings: '$385.56/year',
+      earnings: '$482.85/year',
       variant: 'blue' as const,
     },
     {
-      title: 'Athletic Director Mike',
-      subtitle: 'High School AD',
+      title: 'Facility Owner Mike',
+      subtitle: 'Batting Cage Owner',
       icon: Briefcase,
       stats: [
-        { label: 'Oversees', value: '8 teams' },
-        { label: 'All adopt M&M', value: '8 teams' },
-        { label: 'Budget impact', value: 'Offset by commission' },
+        { label: 'Regular clients', value: '125 users' },
+        { label: 'Commission tier', value: '10% + 15% bonus' },
+        { label: 'Time invested', value: 'Promotes in facility + email' },
       ],
-      earnings: '$1,028.16/year',
+      earnings: '$1,448.06/year',
       variant: 'orange' as const,
     },
     {
-      title: 'Sports Blogger Jordan',
-      subtitle: 'Content Creator',
+      title: 'Baseball Influencer Jordan',
+      subtitle: 'YouTube Coach (50k subs)',
       icon: UserPlus,
       stats: [
-        { label: 'Monthly readers', value: '10,000' },
-        { label: '2% conversion', value: '17 teams' },
-        { label: 'Passive income', value: 'From one article' },
+        { label: 'Subscribers', value: '50,000' },
+        { label: 'Conversion', value: '8 teams (240 users)' },
+        { label: 'Time invested', value: 'One video + link' },
       ],
-      earnings: '$2,184.84/year',
+      earnings: '$3,073.20/year',
       variant: 'blue' as const,
     },
   ];
 
   const faqs = [
+    {
+      question: 'How much can I really earn?',
+      answer: 'It depends on your network. Individual users: 10% forever ($11.90/user/year). Organizations: 10% on first 100 users, 15% on users 101+. Example: Refer a 150-user training facility = $1,668/year. Refer 3 teams of 50 users each = $536/year. Refer one 200-user travel ball organization = $2,052/year. Commission is calculated on volume-discounted prices shown in the calculator above.'
+    },
+    {
+      question: 'What if I know facility owners or league directors?',
+      answer: 'Perfect! One training facility or travel ball organization can generate more recurring income than dozens of individual referrals. Focus on organizations with 100+ users to unlock 15% commission on the volume above 100. We also offer special bonuses for partners who introduce other high-value partners to our program—contact us to learn more.'
+    },
     {
       question: 'What if the platform doesn\'t succeed?',
       answer: 'There\'s zero cost to you. You only win if we win. No risk, all upside. Plus, you can stop participating at any time with no penalties.'
@@ -226,7 +240,7 @@ export default function PartnerProgramPage() {
         </div>
 
         <GradientTextReveal
-          text="Build Passive Income Helping Coaches Win"
+          text="Turn Your Baseball & Softball Connections Into Recurring Income"
           className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-relaxed"
           gradientFrom="#F97316"
           gradientTo="#0EA5E9"
@@ -234,12 +248,12 @@ export default function PartnerProgramPage() {
         />
 
         <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12">
-          Join our partner program and earn 10% commission on every subscription payment. Lifetime earning potential as referrals renew.
+          Earn up to 15% commission on every subscription payment—forever. Perfect for coaches, facility owners, league directors, and influencers with connections in youth sports.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
           <LiquidGlass variant="orange" glow={true} className="p-6 text-center min-w-[200px]">
-            <div className="text-4xl font-black text-solar-surge-orange mb-2">10%</div>
+            <div className="text-4xl font-black text-solar-surge-orange mb-2">10-15%</div>
             <div className="text-sm text-text-secondary">Lifetime Commission</div>
           </LiquidGlass>
 
@@ -249,8 +263,8 @@ export default function PartnerProgramPage() {
           </LiquidGlass>
 
           <LiquidGlass variant="orange" glow={true} className="p-6 text-center min-w-[200px]">
-            <div className="text-4xl font-black text-solar-surge-orange mb-2">90 Days</div>
-            <div className="text-sm text-text-secondary">Attribution Window</div>
+            <div className="text-4xl font-black text-solar-surge-orange mb-2">100+</div>
+            <div className="text-sm text-text-secondary">Users = 15% Bonus</div>
           </LiquidGlass>
         </div>
       </div>
@@ -286,6 +300,145 @@ export default function PartnerProgramPage() {
         </div>
       </div>
 
+      {/* Perfect For High-Impact Partners */}
+      <div className="max-w-7xl mx-auto mb-20">
+        <GradientTextReveal
+          text="Perfect For High-Impact Partners"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
+          gradientFrom="#0EA5E9"
+          gradientTo="#F97316"
+          delay={0.2}
+        />
+        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
+          Whether you're a facility owner, league director, coach, or influencer—if you have connections in youth baseball and softball, you can earn serious recurring income.
+        </p>
+
+        <div className="grid md:grid-cols-3 gap-6">
+          {/* Organizations & Facilities */}
+          <LiquidGlass variant="orange" className="p-8">
+            <div className="text-center mb-6">
+              <div className="inline-block p-4 rounded-xl bg-solar-surge-orange/20 mb-4">
+                <Building2 className="w-8 h-8 text-solar-surge-orange" />
+              </div>
+              <h3 className="text-2xl font-black mb-2">Organizations & Facilities</h3>
+            </div>
+            <ul className="space-y-3 text-sm text-text-secondary">
+              <li className="flex items-start gap-2">
+                <span className="text-solar-surge-orange mt-1">⚾</span>
+                <span>Travel Ball Organizations (USA Prime, Canes, Five Star, Dirtbags)</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-solar-surge-orange mt-1">🏟️</span>
+                <span>Batting Cages & Performance Centers</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-solar-surge-orange mt-1">🎓</span>
+                <span>High School & College Programs</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-solar-surge-orange mt-1">🥎</span>
+                <span>Local Leagues (Little League, Babe Ruth, Pony)</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-solar-surge-orange mt-1">🏋️</span>
+                <span>Multi-Sport Training Facilities</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-solar-surge-orange mt-1">🔬</span>
+                <span>Biomechanics & Motion Capture Labs</span>
+              </li>
+            </ul>
+          </LiquidGlass>
+
+          {/* Coaches & Trainers */}
+          <LiquidGlass variant="blue" className="p-8">
+            <div className="text-center mb-6">
+              <div className="inline-block p-4 rounded-xl bg-neon-cortex-blue/20 mb-4">
+                <Users className="w-8 h-8 text-neon-cortex-blue" />
+              </div>
+              <h3 className="text-2xl font-black mb-2">Coaches & Trainers</h3>
+            </div>
+            <ul className="space-y-3 text-sm text-text-secondary">
+              <li className="flex items-start gap-2">
+                <span className="text-neon-cortex-blue mt-1">⚾</span>
+                <span>Private Hitting Coaches</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-neon-cortex-blue mt-1">🥎</span>
+                <span>Pitching Instructors</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-neon-cortex-blue mt-1">🧠</span>
+                <span>Mental Performance Coaches</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-neon-cortex-blue mt-1">💪</span>
+                <span>Strength & Conditioning Trainers</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-neon-cortex-blue mt-1">👥</span>
+                <span>Team Coaches (Travel Ball, High School)</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-neon-cortex-blue mt-1">🎯</span>
+                <span>Recruiting Consultants</span>
+              </li>
+            </ul>
+          </LiquidGlass>
+
+          {/* Influencers & Creators */}
+          <LiquidGlass variant="orange" className="p-8">
+            <div className="text-center mb-6">
+              <div className="inline-block p-4 rounded-xl bg-solar-surge-orange/20 mb-4">
+                <Star className="w-8 h-8 text-solar-surge-orange" />
+              </div>
+              <h3 className="text-2xl font-black mb-2">Influencers & Creators</h3>
+            </div>
+            <ul className="space-y-3 text-sm text-text-secondary">
+              <li className="flex items-start gap-2">
+                <span className="text-solar-surge-orange mt-1">📹</span>
+                <span>YouTube Baseball/Softball Coaches (5k+ subscribers)</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-solar-surge-orange mt-1">📱</span>
+                <span>TikTok/Instagram Skill Trainers (10k+ followers)</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-solar-surge-orange mt-1">🎙️</span>
+                <span>Sports Performance Podcasters</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-solar-surge-orange mt-1">✍️</span>
+                <span>Baseball/Softball Bloggers</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-solar-surge-orange mt-1">📺</span>
+                <span>Equipment Review Channels</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-solar-surge-orange mt-1">🎓</span>
+                <span>Recruiting Advice Content Creators</span>
+              </li>
+            </ul>
+          </LiquidGlass>
+        </div>
+
+        {/* Call-out box */}
+        <div className="mt-8">
+          <LiquidGlass variant="blue" className="p-6">
+            <div className="text-center">
+              <div className="inline-block p-3 rounded-xl bg-neon-cortex-green/20 mb-3">
+                <TrendingUp className="w-6 h-6 text-neon-cortex-green" />
+              </div>
+              <h4 className="text-xl font-bold mb-2">Know High-Value Partners?</h4>
+              <p className="text-text-secondary text-sm max-w-3xl mx-auto">
+                Know facility owners, league directors, or influencers who could be great partners? One introduction to a high-value partner can generate more recurring income than dozens of individual referrals. <a href="mailto:support@mindandmuscle.ai" className="text-neon-cortex-blue hover:underline font-bold">Contact us</a> about special introducer opportunities.
+              </p>
+            </div>
+          </LiquidGlass>
+        </div>
+      </div>
+
       {/* Aspirational Scenarios */}
       <div className="max-w-7xl mx-auto mb-20">
         <GradientTextReveal
@@ -296,7 +449,7 @@ export default function PartnerProgramPage() {
           delay={0.2}
         />
         <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
-          Real scenarios based on typical networks and conversion rates. Your actual earnings depend on how many coaches you know and how actively you share.
+          Real scenarios based on typical networks and conversion rates. Your actual earnings depend on your connections and how actively you promote.
         </p>
 
         <div className="grid md:grid-cols-3 gap-6">

@@ -2,147 +2,193 @@
 
 import React, { useState } from 'react';
 import { LiquidGlass } from '@/components/LiquidGlass';
-import { Calculator, TrendingUp, Users, Briefcase, Zap, Info } from 'lucide-react';
+import { Calculator, Users, Building2, Info, TrendingUp, DollarSign } from 'lucide-react';
 
-type StrategyTab = 'individuals' | 'org-referral' | 'org-partnership' | 'combined';
+type CalculatorMode = 'individual' | 'team';
 
 export function EnhancedEarningsCalculator() {
-  const [activeTab, setActiveTab] = useState<StrategyTab>('individuals');
-  
-  // Individual referrals
+  const [mode, setMode] = useState<CalculatorMode>('team');
   const [individualCount, setIndividualCount] = useState(15);
-  
-  // Organization via referral link
-  const [orgReferralCount, setOrgReferralCount] = useState(2);
-  const [orgReferralSize, setOrgReferralSize] = useState(150);
-  
-  // Organization partnerships
-  const [orgPartnershipCount, setOrgPartnershipCount] = useState(1);
-  const [orgPartnershipSize, setOrgPartnershipSize] = useState(200);
-  
-  // Combined
-  const [combinedIndividuals, setCombinedIndividuals] = useState(10);
-  const [combinedOrgReferrals, setCombinedOrgReferrals] = useState(1);
-  const [combinedOrgReferralSize, setCombinedOrgReferralSize] = useState(150);
-  const [combinedPartnerships, setCombinedPartnerships] = useState(1);
-  const [combinedPartnershipSize, setCombinedPartnershipSize] = useState(200);
+  const [teamCount, setTeamCount] = useState(150);
 
-  const PRICE_PER_SEAT = 119; // Base price
+  // Pricing tiers
+  const RETAIL_PRICE = 119;
+  const TIER_12_120 = 107.10; // 10% off
+  const TIER_121_199 = 101.15; // 15% off
+  const TIER_200_PLUS = 95.20; // 20% off
 
-  // Calculate earnings
+  // Calculate individual earnings
   const calculateIndividualEarnings = (count: number) => {
-    return count * PRICE_PER_SEAT * 0.10;
+    return count * RETAIL_PRICE * 0.10;
   };
 
-  const calculateOrgReferralEarnings = (orgCount: number, avgSize: number) => {
-    return orgCount * avgSize * PRICE_PER_SEAT * 0.10;
+  // Calculate team/organization earnings with volume discounts and tiered commission
+  const calculateTeamEarnings = (userCount: number) => {
+    let earnings = 0;
+
+    // Users 1-11 at $119
+    if (userCount <= 11) {
+      earnings = userCount * RETAIL_PRICE * 0.10;
+    }
+    // Users 12-100 at $107.10 (10% off)
+    else if (userCount <= 100) {
+      const tier1 = Math.min(11, userCount);
+      const tier2 = userCount - tier1;
+      earnings = (tier1 * RETAIL_PRICE * 0.10) + (tier2 * TIER_12_120 * 0.10);
+    }
+    // Users 101-120 at $107.10 (but now 15% commission)
+    else if (userCount <= 120) {
+      const tier1 = 11 * RETAIL_PRICE * 0.10;
+      const tier2 = 89 * TIER_12_120 * 0.10; // users 12-100 at 10%
+      const tier3 = (userCount - 100) * TIER_12_120 * 0.15; // users 101+ at 15%
+      earnings = tier1 + tier2 + tier3;
+    }
+    // Users 121-199 at $101.15 (15% off, 15% commission)
+    else if (userCount <= 199) {
+      const tier1 = 11 * RETAIL_PRICE * 0.10;
+      const tier2 = 89 * TIER_12_120 * 0.10;
+      const tier3 = 20 * TIER_12_120 * 0.15; // users 101-120
+      const tier4 = (userCount - 120) * TIER_121_199 * 0.15; // users 121+
+      earnings = tier1 + tier2 + tier3 + tier4;
+    }
+    // Users 200+ at $95.20 (20% off, 15% commission)
+    else {
+      const tier1 = 11 * RETAIL_PRICE * 0.10;
+      const tier2 = 89 * TIER_12_120 * 0.10;
+      const tier3 = 20 * TIER_12_120 * 0.15;
+      const tier4 = 79 * TIER_121_199 * 0.15;
+      const tier5 = (userCount - 199) * TIER_200_PLUS * 0.15;
+      earnings = tier1 + tier2 + tier3 + tier4 + tier5;
+    }
+
+    return earnings;
   };
 
-  const calculateOrgPartnershipEarnings = (orgCount: number, avgSize: number) => {
-    if (avgSize <= 100) return 0;
-    const bonusUsers = avgSize - 100;
-    return orgCount * bonusUsers * PRICE_PER_SEAT * 0.05;
+  // Calculate breakdown for team earnings
+  const getTeamEarningsBreakdown = (userCount: number) => {
+    if (userCount <= 100) {
+      return {
+        base: calculateTeamEarnings(userCount),
+        bonus: 0,
+        hasBonus: false
+      };
+    } else {
+      // Calculate base (first 100 users at 10%)
+      const base = (11 * RETAIL_PRICE * 0.10) + (89 * TIER_12_120 * 0.10);
+      const total = calculateTeamEarnings(userCount);
+      const bonus = total - base;
+      return {
+        base,
+        bonus,
+        hasBonus: true
+      };
+    }
   };
 
-  const calculateOrgRevenue = (avgSize: number) => {
-    return avgSize * PRICE_PER_SEAT * 0.10;
+  // Get current pricing tier message
+  const getPricingTierMessage = (userCount: number) => {
+    if (userCount < 12) return 'Full price: $119/user';
+    if (userCount <= 120) return '10% volume discount: $107.10/user';
+    if (userCount <= 199) return '15% volume discount: $101.15/user';
+    return '20% volume discount: $95.20/user';
   };
 
-  // Tab content
   const individualEarnings = calculateIndividualEarnings(individualCount);
-  const orgReferralEarnings = calculateOrgReferralEarnings(orgReferralCount, orgReferralSize);
-  const orgPartnershipEarnings = calculateOrgPartnershipEarnings(orgPartnershipCount, orgPartnershipSize);
-  const orgPartnershipRevenue = calculateOrgRevenue(orgPartnershipSize);
-
-  const combinedTotal = 
-    calculateIndividualEarnings(combinedIndividuals) +
-    calculateOrgReferralEarnings(combinedOrgReferrals, combinedOrgReferralSize) +
-    calculateOrgPartnershipEarnings(combinedPartnerships, combinedPartnershipSize);
+  const teamEarnings = calculateTeamEarnings(teamCount);
+  const teamBreakdown = getTeamEarningsBreakdown(teamCount);
 
   return (
     <div className="space-y-6">
-      {/* Strategy Selection */}
+      {/* Volume Pricing Info Card */}
+      <LiquidGlass variant="orange" className="p-6">
+        <div className="flex items-start gap-3 mb-4">
+          <div className="inline-block p-2 rounded-lg bg-solar-surge-orange/20">
+            <DollarSign className="w-5 h-5 text-solar-surge-orange" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-lg font-bold mb-2">Volume Discounts for Organizations</h3>
+            <div className="grid sm:grid-cols-3 gap-3 text-sm">
+              <div className="bg-white/5 rounded-lg p-3">
+                <div className="text-solar-surge-orange font-bold mb-1">12-120 users</div>
+                <div className="text-text-secondary">$107.10/seat (10% off)</div>
+              </div>
+              <div className="bg-white/5 rounded-lg p-3">
+                <div className="text-solar-surge-orange font-bold mb-1">121-199 users</div>
+                <div className="text-text-secondary">$101.15/seat (15% off)</div>
+              </div>
+              <div className="bg-white/5 rounded-lg p-3">
+                <div className="text-solar-surge-orange font-bold mb-1">200+ users</div>
+                <div className="text-text-secondary">$95.20/seat (20% off)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="text-xs text-text-secondary bg-neon-cortex-green/10 border border-neon-cortex-green/30 rounded-lg p-3">
+          <Info className="w-4 h-4 text-neon-cortex-green inline mr-2" />
+          Your commission is calculated on the discounted price shown above
+        </div>
+      </LiquidGlass>
+
+      {/* Calculator */}
       <LiquidGlass variant="blue" className="p-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="inline-block p-3 rounded-xl bg-neon-cortex-blue/20">
             <Calculator className="w-6 h-6 text-mind-primary" />
           </div>
           <div>
-            <h2 className="text-3xl font-black">Calculate Your Potential</h2>
-            <p className="text-text-secondary text-sm">Choose your earning strategy</p>
+            <h2 className="text-3xl font-black">Calculate Your Earnings</h2>
+            <p className="text-text-secondary text-sm">See your potential annual income</p>
           </div>
         </div>
 
-        {/* Strategy Tabs */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+        {/* Mode Toggle */}
+        <div className="grid grid-cols-2 gap-3 mb-8">
           <button
-            onClick={() => setActiveTab('individuals')}
-            className={`p-4 rounded-lg border-2 transition-all text-left ${
-              activeTab === 'individuals'
+            onClick={() => setMode('individual')}
+            className={`p-4 rounded-lg border-2 transition-all ${
+              mode === 'individual'
                 ? 'border-neon-cortex-blue bg-neon-cortex-blue/20 text-white'
                 : 'border-white/10 bg-white/5 text-text-secondary hover:border-white/20'
             }`}
           >
-            <Users className="w-5 h-5 mb-2" />
-            <div className="font-bold text-sm">The Connector</div>
-            <div className="text-xs opacity-70">Individual referrals</div>
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Users className="w-5 h-5" />
+              <span className="font-bold">Individual Users</span>
+            </div>
+            <div className="text-xs opacity-70">Coaches, players, parents</div>
           </button>
 
           <button
-            onClick={() => setActiveTab('org-referral')}
-            className={`p-4 rounded-lg border-2 transition-all text-left ${
-              activeTab === 'org-referral'
+            onClick={() => setMode('team')}
+            className={`p-4 rounded-lg border-2 transition-all ${
+              mode === 'team'
                 ? 'border-solar-surge-orange bg-solar-surge-orange/20 text-white'
                 : 'border-white/10 bg-white/5 text-text-secondary hover:border-white/20'
             }`}
           >
-            <Briefcase className="w-5 h-5 mb-2" />
-            <div className="font-bold text-sm">The Dealmaker</div>
-            <div className="text-xs opacity-70">Org via your link</div>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('org-partnership')}
-            className={`p-4 rounded-lg border-2 transition-all text-left ${
-              activeTab === 'org-partnership'
-                ? 'border-neon-cortex-green bg-neon-cortex-green/20 text-white'
-                : 'border-white/10 bg-white/5 text-text-secondary hover:border-white/20'
-            }`}
-          >
-            <TrendingUp className="w-5 h-5 mb-2" />
-            <div className="font-bold text-sm">The Growth Partner</div>
-            <div className="text-xs opacity-70">Org partnership</div>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('combined')}
-            className={`p-4 rounded-lg border-2 transition-all text-left ${
-              activeTab === 'combined'
-                ? 'border-purple-500 bg-purple-500/20 text-white'
-                : 'border-white/10 bg-white/5 text-text-secondary hover:border-white/20'
-            }`}
-          >
-            <Zap className="w-5 h-5 mb-2" />
-            <div className="font-bold text-sm">The Strategist</div>
-            <div className="text-xs opacity-70">Mix all three</div>
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Building2 className="w-5 h-5" />
+              <span className="font-bold">Teams & Organizations</span>
+            </div>
+            <div className="text-xs opacity-70">Facilities, leagues, clubs</div>
           </button>
         </div>
 
-        {/* Tab Content */}
-        {activeTab === 'individuals' && (
+        {/* Individual Mode */}
+        {mode === 'individual' && (
           <div className="space-y-6">
             <div className="p-4 bg-neon-cortex-blue/10 border border-neon-cortex-blue/30 rounded-lg">
-              <div className="flex items-start gap-2 mb-2">
+              <div className="flex items-start gap-2">
                 <Info className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-text-secondary">
-                  Share your referral link with individual coaches. Earn 10% commission on every payment they make, forever.
+                  Earn 10% commission on every individual user you refer. They pay $119/year, you earn $11.90/user/year forever.
                 </p>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-3">
-                How many individual coaches will you refer?
+              <label className="block text-lg font-bold mb-3">
+                How many individual users will you refer?
               </label>
               <div className="flex items-center gap-4">
                 <input
@@ -151,9 +197,9 @@ export function EnhancedEarningsCalculator() {
                   max="100"
                   value={individualCount}
                   onChange={(e) => setIndividualCount(parseInt(e.target.value))}
-                  className="flex-1 h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-neon-cortex-blue"
+                  className="flex-1 h-3 bg-white/10 rounded-lg appearance-none cursor-pointer accent-neon-cortex-blue"
                 />
-                <div className="text-2xl font-black text-neon-cortex-blue min-w-[60px] text-right">
+                <div className="text-3xl font-black text-neon-cortex-blue min-w-[80px] text-right">
                   {individualCount}
                 </div>
               </div>
@@ -162,342 +208,126 @@ export function EnhancedEarningsCalculator() {
             <div className="p-6 bg-gradient-to-br from-neon-cortex-blue/20 to-solar-surge-orange/20 rounded-xl border-2 border-neon-cortex-blue/40">
               <div className="text-center">
                 <p className="text-sm text-text-secondary mb-2">Your Annual Earnings</p>
-                <p className="text-4xl font-black text-neon-cortex-blue">
-                  ${individualEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/year
+                <p className="text-5xl font-black text-neon-cortex-blue mb-3">
+                  ${individualEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
-                <p className="text-xs text-text-secondary mt-2">
-                  {individualCount} coaches × $119 × 10% commission
+                <p className="text-sm text-text-secondary">
+                  {individualCount} users × $119/year × 10% commission
                 </p>
+                <div className="mt-4 pt-4 border-t border-white/10">
+                  <p className="text-xs text-text-secondary">
+                    💰 Per user: ${(individualEarnings / individualCount).toFixed(2)}/year
+                  </p>
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        {activeTab === 'org-referral' && (
+        {/* Team/Organization Mode */}
+        {mode === 'team' && (
           <div className="space-y-6">
-            <div className="p-4 bg-solar-surge-orange/10 border border-solar-surge-orange/30 rounded-lg">
-              <div className="flex items-start gap-2 mb-2">
-                <Info className="w-4 h-4 text-solar-surge-orange flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-text-secondary">
-                  Organization purchases team license through your referral link. You earn 10% on all users. Simplest approach.
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold mb-3">
-                How many organizations will purchase via your link?
-              </label>
-              <div className="flex items-center gap-4">
-                <input
-                  type="range"
-                  min="1"
-                  max="10"
-                  value={orgReferralCount}
-                  onChange={(e) => setOrgReferralCount(parseInt(e.target.value))}
-                  className="flex-1 h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-solar-surge-orange"
-                />
-                <div className="text-2xl font-black text-solar-surge-orange min-w-[60px] text-right">
-                  {orgReferralCount}
+            <div className={`p-4 border rounded-lg ${
+              teamBreakdown.hasBonus
+                ? 'bg-solar-surge-orange/10 border-solar-surge-orange/30'
+                : 'bg-neon-cortex-blue/10 border-neon-cortex-blue/30'
+            }`}>
+              <div className="flex items-start gap-2">
+                <Info className={`w-4 h-4 flex-shrink-0 mt-0.5 ${
+                  teamBreakdown.hasBonus ? 'text-solar-surge-orange' : 'text-neon-cortex-blue'
+                }`} />
+                <div className="text-sm text-text-secondary">
+                  {teamBreakdown.hasBonus ? (
+                    <>
+                      <strong className="text-solar-surge-orange">🔥 Bonus Unlocked!</strong> You earn 10% on the first 100 users + 15% on users 101+. Volume discounts increase as the team grows.
+                    </>
+                  ) : (
+                    <>
+                      You earn 10% commission on team/organization users. <strong className="text-neon-cortex-blue">Reach 101+ users to unlock 15% commission</strong> on users above 100.
+                    </>
+                  )}
                 </div>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-semibold mb-3">
-                Average organization size (users)
+              <label className="block text-lg font-bold mb-3">
+                How many team/organization users?
               </label>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 mb-2">
                 <input
                   type="range"
                   min="12"
                   max="500"
-                  step="10"
-                  value={orgReferralSize}
-                  onChange={(e) => setOrgReferralSize(parseInt(e.target.value))}
-                  className="flex-1 h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-solar-surge-orange"
+                  step="5"
+                  value={teamCount}
+                  onChange={(e) => setTeamCount(parseInt(e.target.value))}
+                  className="flex-1 h-3 bg-white/10 rounded-lg appearance-none cursor-pointer accent-solar-surge-orange"
                 />
-                <div className="text-2xl font-black text-solar-surge-orange min-w-[80px] text-right">
-                  {orgReferralSize}
+                <div className="text-3xl font-black text-solar-surge-orange min-w-[100px] text-right">
+                  {teamCount}
                 </div>
+              </div>
+              <div className="flex items-center justify-between text-xs text-text-secondary">
+                <span>12 users</span>
+                <span className={teamCount >= 100 ? 'text-solar-surge-orange font-bold' : ''}>
+                  {teamCount >= 100 ? '🔥 ' : ''}100 users (bonus threshold)
+                </span>
+                <span>500 users</span>
+              </div>
+              <div className="mt-3 text-sm text-center">
+                <span className="text-text-secondary">{getPricingTierMessage(teamCount)}</span>
               </div>
             </div>
 
             <div className="p-6 bg-gradient-to-br from-solar-surge-orange/20 to-neon-cortex-blue/20 rounded-xl border-2 border-solar-surge-orange/40">
-              <div className="text-center">
-                <p className="text-sm text-text-secondary mb-2">Your Annual Earnings</p>
-                <p className="text-4xl font-black text-solar-surge-orange">
-                  ${orgReferralEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/year
-                </p>
-                <p className="text-xs text-text-secondary mt-2">
-                  {orgReferralCount} orgs × {orgReferralSize} users × $119 × 10%
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'org-partnership' && (
-          <div className="space-y-6">
-            <div className="p-4 bg-neon-cortex-green/10 border border-neon-cortex-green/30 rounded-lg">
-              <div className="flex items-start gap-2 mb-2">
-                <Info className="w-4 h-4 text-neon-cortex-green flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-text-secondary">
-                  Create formal partnership. Org signs up users independently and earns 10%. You earn 5% bonus on users 101+.
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold mb-3">
-                How many organization partnerships?
-              </label>
-              <div className="flex items-center gap-4">
-                <input
-                  type="range"
-                  min="1"
-                  max="10"
-                  value={orgPartnershipCount}
-                  onChange={(e) => setOrgPartnershipCount(parseInt(e.target.value))}
-                  className="flex-1 h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-neon-cortex-green"
-                />
-                <div className="text-2xl font-black text-neon-cortex-green min-w-[60px] text-right">
-                  {orgPartnershipCount}
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold mb-3">
-                Average organization size (users)
-              </label>
-              <div className="flex items-center gap-4">
-                <input
-                  type="range"
-                  min="12"
-                  max="500"
-                  step="10"
-                  value={orgPartnershipSize}
-                  onChange={(e) => setOrgPartnershipSize(parseInt(e.target.value))}
-                  className="flex-1 h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-neon-cortex-green"
-                />
-                <div className="text-2xl font-black text-neon-cortex-green min-w-[80px] text-right">
-                  {orgPartnershipSize}
-                </div>
-              </div>
-            </div>
-
-            {orgPartnershipSize <= 100 && (
-              <div className="p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                <p className="text-sm text-yellow-200">
-                  ⚠️ Organizations under 100 users don't trigger your bonus. You earn $0, but the org earns 10% (${calculateOrgRevenue(orgPartnershipSize).toFixed(2)}/year).
-                </p>
-              </div>
-            )}
-
-            <div className="p-6 bg-gradient-to-br from-neon-cortex-green/20 to-solar-surge-orange/20 rounded-xl border-2 border-neon-cortex-green/40">
               <div className="text-center mb-4">
-                <p className="text-sm text-text-secondary mb-2">Your Annual Earnings (Bonus)</p>
-                <p className="text-4xl font-black text-neon-cortex-green">
-                  ${orgPartnershipEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/year
+                <p className="text-sm text-text-secondary mb-2">Your Annual Earnings</p>
+                <p className="text-5xl font-black text-solar-surge-orange mb-3">
+                  ${teamEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
-                {orgPartnershipSize > 100 && (
-                  <p className="text-xs text-text-secondary mt-2">
-                    {orgPartnershipCount} orgs × {orgPartnershipSize - 100} bonus users × $119 × 5%
-                  </p>
+
+                {teamBreakdown.hasBonus && (
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center justify-between text-text-secondary">
+                      <span>Base (first 100 users at 10%):</span>
+                      <span className="font-bold text-neon-cortex-blue">
+                        ${teamBreakdown.base.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-text-secondary">
+                      <span>Bonus ({teamCount - 100} users at 15%):</span>
+                      <span className="font-bold text-solar-surge-orange">
+                        +${teamBreakdown.bonus.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
                 )}
               </div>
 
-              <div className="border-t border-white/10 pt-4">
-                <p className="text-sm text-text-secondary text-center mb-2">Organization's Earnings</p>
-                <p className="text-2xl font-bold text-center text-white">
-                  ${(orgPartnershipRevenue * orgPartnershipCount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/year
-                </p>
-                <p className="text-xs text-text-secondary text-center mt-1">
-                  Org earns 10% on all {orgPartnershipSize} users
-                </p>
+              <div className="border-t border-white/10 pt-4 space-y-2 text-xs text-text-secondary">
+                <div className="flex justify-between">
+                  <span>Commission rate:</span>
+                  <span className="font-bold">
+                    {teamBreakdown.hasBonus ? '10% + 15% bonus' : '10%'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Per user earnings:</span>
+                  <span className="font-bold text-white">
+                    ${(teamEarnings / teamCount).toFixed(2)}/year
+                  </span>
+                </div>
+                {teamBreakdown.hasBonus && (
+                  <div className="mt-3 p-2 bg-solar-surge-orange/20 rounded text-solar-surge-orange text-center">
+                    <TrendingUp className="w-4 h-4 inline mr-1" />
+                    You're earning 15% on {teamCount - 100} bonus users!
+                  </div>
+                )}
               </div>
             </div>
           </div>
         )}
-
-        {activeTab === 'combined' && (
-          <div className="space-y-6">
-            <div className="p-4 bg-purple-500/10 border border-purple-500/30 rounded-lg">
-              <div className="flex items-start gap-2 mb-2">
-                <Info className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
-                <p className="text-sm text-text-secondary">
-                  Maximize earnings by combining all three strategies: individual referrals + org referrals + org partnerships.
-                </p>
-              </div>
-            </div>
-
-            {/* Individual Referrals */}
-            <div className="space-y-3">
-              <h3 className="font-bold text-sm text-neon-cortex-blue">Individual Referrals</h3>
-              <div className="flex items-center gap-4">
-                <input
-                  type="range"
-                  min="0"
-                  max="50"
-                  value={combinedIndividuals}
-                  onChange={(e) => setCombinedIndividuals(parseInt(e.target.value))}
-                  className="flex-1 h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-neon-cortex-blue"
-                />
-                <div className="text-xl font-black text-neon-cortex-blue min-w-[50px] text-right">
-                  {combinedIndividuals}
-                </div>
-              </div>
-            </div>
-
-            {/* Org Referrals */}
-            <div className="space-y-3">
-              <h3 className="font-bold text-sm text-solar-surge-orange">Org Referrals (Via Your Link)</h3>
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <label className="text-xs text-text-secondary block mb-1">Organizations</label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="5"
-                    value={combinedOrgReferrals}
-                    onChange={(e) => setCombinedOrgReferrals(parseInt(e.target.value))}
-                    className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-solar-surge-orange"
-                  />
-                </div>
-                <div className="text-xl font-black text-solar-surge-orange min-w-[50px] text-right">
-                  {combinedOrgReferrals}
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <label className="text-xs text-text-secondary block mb-1">Avg Size</label>
-                  <input
-                    type="range"
-                    min="12"
-                    max="300"
-                    step="10"
-                    value={combinedOrgReferralSize}
-                    onChange={(e) => setCombinedOrgReferralSize(parseInt(e.target.value))}
-                    className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-solar-surge-orange"
-                  />
-                </div>
-                <div className="text-xl font-black text-solar-surge-orange min-w-[50px] text-right">
-                  {combinedOrgReferralSize}
-                </div>
-              </div>
-            </div>
-
-            {/* Org Partnerships */}
-            <div className="space-y-3">
-              <h3 className="font-bold text-sm text-neon-cortex-green">Org Partnerships (Growth Bonus)</h3>
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <label className="text-xs text-text-secondary block mb-1">Partnerships</label>
-                  <input
-                    type="range"
-                    min="0"
-                    max="5"
-                    value={combinedPartnerships}
-                    onChange={(e) => setCombinedPartnerships(parseInt(e.target.value))}
-                    className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-neon-cortex-green"
-                  />
-                </div>
-                <div className="text-xl font-black text-neon-cortex-green min-w-[50px] text-right">
-                  {combinedPartnerships}
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <label className="text-xs text-text-secondary block mb-1">Avg Size</label>
-                  <input
-                    type="range"
-                    min="12"
-                    max="300"
-                    step="10"
-                    value={combinedPartnershipSize}
-                    onChange={(e) => setCombinedPartnershipSize(parseInt(e.target.value))}
-                    className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-neon-cortex-green"
-                  />
-                </div>
-                <div className="text-xl font-black text-neon-cortex-green min-w-[50px] text-right">
-                  {combinedPartnershipSize}
-                </div>
-              </div>
-            </div>
-
-            <div className="p-6 bg-gradient-to-br from-purple-500/20 to-solar-surge-orange/20 rounded-xl border-2 border-purple-500/40">
-              <div className="text-center">
-                <p className="text-sm text-text-secondary mb-2">Total Annual Earnings</p>
-                <p className="text-5xl font-black text-transparent bg-gradient-to-r from-neon-cortex-blue via-solar-surge-orange to-neon-cortex-green bg-clip-text">
-                  ${combinedTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/year
-                </p>
-                <div className="mt-4 pt-4 border-t border-white/10 space-y-2 text-sm text-text-secondary">
-                  <div className="flex justify-between">
-                    <span>Individuals:</span>
-                    <span className="font-bold text-neon-cortex-blue">
-                      ${calculateIndividualEarnings(combinedIndividuals).toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Org Referrals:</span>
-                    <span className="font-bold text-solar-surge-orange">
-                      ${calculateOrgReferralEarnings(combinedOrgReferrals, combinedOrgReferralSize).toFixed(2)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Partnership Bonus:</span>
-                    <span className="font-bold text-neon-cortex-green">
-                      ${calculateOrgPartnershipEarnings(combinedPartnerships, combinedPartnershipSize).toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </LiquidGlass>
-
-      {/* Comparison Chart */}
-      <LiquidGlass variant="orange" className="p-6">
-        <h3 className="text-2xl font-black mb-4">Organization Strategy Comparison</h3>
-        <p className="text-sm text-text-secondary mb-6">
-          Two ways to work with organizations - choose based on your relationship and goals
-        </p>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-white/10">
-                <th className="text-left py-3 px-4"></th>
-                <th className="text-center py-3 px-4 text-solar-surge-orange font-bold">Via Your Link</th>
-                <th className="text-center py-3 px-4 text-neon-cortex-green font-bold">Partnership Program</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-b border-white/10">
-                <td className="py-3 px-4 text-text-secondary">Partner Commission (200 users)</td>
-                <td className="text-center py-3 px-4 font-bold">$2,380/year</td>
-                <td className="text-center py-3 px-4 font-bold">$595/year</td>
-              </tr>
-              <tr className="border-b border-white/10">
-                <td className="py-3 px-4 text-text-secondary">Organization Commission</td>
-                <td className="text-center py-3 px-4">$0</td>
-                <td className="text-center py-3 px-4 font-bold">$2,380/year</td>
-              </tr>
-              <tr className="border-b border-white/10">
-                <td className="py-3 px-4 text-text-secondary">Setup Complexity</td>
-                <td className="text-center py-3 px-4">Simple</td>
-                <td className="text-center py-3 px-4">Requires linking</td>
-              </tr>
-              <tr>
-                <td className="py-3 px-4 text-text-secondary">Best For</td>
-                <td className="text-center py-3 px-4">Quick wins</td>
-                <td className="text-center py-3 px-4">Long-term partners</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
       </LiquidGlass>
     </div>
   );
