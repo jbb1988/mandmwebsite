@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
 import { Calculator, Download, DollarSign, Users, Lock, TrendingUp } from 'lucide-react';
+import jsPDF from 'jspdf';
 
 export default function AdminPricingCalculator() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -39,33 +40,115 @@ export default function AdminPricingCalculator() {
   const profitPerUser = numUsers > 0 ? netProfit / numUsers : 0;
 
   const exportData = () => {
-    const data = {
-      inputs: {
-        pricePerSeat,
-        costPerSeat,
-        numTeams,
-        usersPerTeam,
-        totalUsers: numUsers,
-        volumeDiscount,
-        partnerCommission
-      },
-      calculated: {
-        discountedPrice: discountedPrice.toFixed(2),
-        grossRevenue: Math.round(grossRevenue),
-        partnerPayout: Math.round(partnerPayout),
-        totalCosts: Math.round(totalCosts),
-        netProfit: Math.round(netProfit),
-        profitMargin: profitMargin.toFixed(2) + '%',
-        profitPerUser: Math.round(profitPerUser)
-      }
-    };
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    let yPosition = 20;
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `profitability-${Date.now()}.json`;
-    a.click();
+    // Header
+    doc.setFontSize(22);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Mind & Muscle', pageWidth / 2, yPosition, { align: 'center' });
+
+    yPosition += 10;
+    doc.setFontSize(18);
+    doc.text('Profitability Calculator Report', pageWidth / 2, yPosition, { align: 'center' });
+
+    yPosition += 5;
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Generated: ${new Date().toLocaleString()}`, pageWidth / 2, yPosition, { align: 'center' });
+
+    yPosition += 15;
+
+    // Input Parameters Section
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Input Parameters', 20, yPosition);
+    yPosition += 8;
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Price per Seat: $${pricePerSeat}`, 25, yPosition);
+    yPosition += 7;
+    doc.text(`Cost per Seat: $${costPerSeat}`, 25, yPosition);
+    yPosition += 7;
+    doc.text(`Number of Teams: ${numTeams}`, 25, yPosition);
+    yPosition += 7;
+    doc.text(`Users per Team: ${usersPerTeam}`, 25, yPosition);
+    yPosition += 7;
+    doc.text(`Total Users: ${numUsers.toLocaleString()}`, 25, yPosition);
+    yPosition += 7;
+    doc.text(`Volume Discount: ${volumeDiscount}%`, 25, yPosition);
+    yPosition += 7;
+    doc.text(`Partner Commission: ${partnerCommission}%`, 25, yPosition);
+    yPosition += 7;
+    doc.text(`Discounted Price: $${discountedPrice.toFixed(2)}/seat`, 25, yPosition);
+
+    yPosition += 15;
+
+    // Profitability Analysis Section
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Profitability Analysis', 20, yPosition);
+    yPosition += 8;
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Gross Revenue: $${Math.round(grossRevenue).toLocaleString()}`, 25, yPosition);
+    yPosition += 5;
+    doc.setFontSize(9);
+    doc.text(`(${numTeams} teams × ${usersPerTeam} users × $${discountedPrice.toFixed(2)})`, 30, yPosition);
+    yPosition += 10;
+
+    doc.setFontSize(11);
+    doc.text(`Partner Payout: -$${Math.round(partnerPayout).toLocaleString()}`, 25, yPosition);
+    yPosition += 5;
+    doc.setFontSize(9);
+    doc.text(`(${partnerCommission}% of revenue)`, 30, yPosition);
+    yPosition += 10;
+
+    doc.setFontSize(11);
+    doc.text(`Total Costs: -$${Math.round(totalCosts).toLocaleString()}`, 25, yPosition);
+    yPosition += 5;
+    doc.setFontSize(9);
+    doc.text(`(${numUsers.toLocaleString()} users × $${costPerSeat})`, 30, yPosition);
+    yPosition += 10;
+
+    // Net Profit (highlighted)
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    const profitColor = netProfit >= 0 ? [34, 197, 94] : [239, 68, 68]; // Green or Red
+    doc.setTextColor(profitColor[0], profitColor[1], profitColor[2]);
+    doc.text(`Net Profit: $${Math.round(netProfit).toLocaleString()}`, 25, yPosition);
+    yPosition += 5;
+    doc.setFontSize(10);
+    doc.text(`(${profitMargin.toFixed(1)}% margin)`, 30, yPosition);
+    yPosition += 10;
+
+    // Reset color
+    doc.setTextColor(0, 0, 0);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(11);
+    doc.text(`Profit per User: $${Math.round(profitPerUser)}/user`, 25, yPosition);
+    yPosition += 10;
+
+    // Break-even status
+    const breakEvenText = netProfit >= 0 ? '✓ Profitable at current settings' : '⚠ Not profitable - adjust pricing';
+    doc.text(breakEvenText, 25, yPosition);
+
+    yPosition += 15;
+
+    // Formula
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'italic');
+    doc.text('Formula:', 20, yPosition);
+    yPosition += 5;
+    const formula = `Revenue (${numTeams} teams × ${usersPerTeam} users × $${discountedPrice.toFixed(2)}) - Partner Commission (${partnerCommission}%) - Costs (${numUsers.toLocaleString()} users × $${costPerSeat}) = Net Profit`;
+    const splitFormula = doc.splitTextToSize(formula, pageWidth - 40);
+    doc.text(splitFormula, 20, yPosition);
+
+    // Save PDF
+    doc.save(`profitability-report-${Date.now()}.pdf`);
   };
 
   if (!isAuthenticated) {
