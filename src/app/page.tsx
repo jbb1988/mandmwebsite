@@ -1356,13 +1356,13 @@ export default function HomePage() {
 
               <div className="space-y-4">
                 {[
-                  { name: 'Team communication app', cost: '$0-50/mo' },
-                  { name: 'Mental training subscription', cost: '$15-30/mo' },
-                  { name: 'Video analysis tool', cost: '$20-50/mo' },
-                  { name: 'Strength training app', cost: '$10-20/mo' },
-                  { name: 'Nutrition planning service', cost: '$15-30/mo' },
-                  { name: 'Baseball IQ training', cost: '$10-25/mo' },
-                  { name: 'Goal tracking system', cost: '$5-15/mo' },
+                  { name: 'Team communication & stats app', cost: '$90/year' },
+                  { name: 'Mental performance training', cost: '$120/year' },
+                  { name: 'Video analysis with coaching', cost: '$360/year' },
+                  { name: 'Strength & conditioning program', cost: '$250/year' },
+                  { name: 'Performance nutrition tracking', cost: '$80/year' },
+                  { name: 'Baseball IQ development', cost: '$100/year' },
+                  { name: 'Goal tracking & communication', cost: '$60/year' },
                 ].map((item, i) => (
                   <div key={i} className="flex items-start justify-between gap-4 p-4 rounded-xl bg-red-500/5 border border-red-500/20">
                     <div className="flex items-start gap-3">
@@ -1375,17 +1375,16 @@ export default function HomePage() {
 
                 <div className="mt-8 pt-6 border-t border-red-500/30">
                   <div className="flex items-baseline justify-between">
-                    <span className="text-xl font-bold text-gray-300">Total Monthly Cost:</span>
-                    <span className="text-4xl font-black text-red-400">$75-220</span>
+                    <span className="text-xl font-bold text-gray-300">Annual per athlete:</span>
+                    <span className="text-4xl font-black text-red-400">$1,060</span>
                   </div>
-                  <p className="text-sm text-gray-500 mt-2">Per athlete, per month</p>
-                  <p className="text-lg text-red-400 font-bold mt-4">$900-2,640/year</p>
+                  <p className="text-sm text-gray-500 mt-2">Same cost at any team size</p>
                 </div>
               </div>
 
               <div className="mt-8 p-6 rounded-xl bg-red-500/10 border border-red-500/30">
                 <p className="text-sm text-gray-400 leading-relaxed">
-                  <strong className="text-red-400">The Reality:</strong> Managing 7 different logins, learning 7 different interfaces, paying 7 different bills, and hoping the data somehow connects. <span className="text-white font-semibold">It doesn't.</span>
+                  <strong className="text-red-400">The Hidden Costs:</strong> 7 different logins, 7 learning curves, 7 monthly bills, data that never connects, and apps that can't learn from each other.
                 </p>
               </div>
             </div>
@@ -1422,11 +1421,11 @@ export default function HomePage() {
 
                   <div className="mt-8 pt-6 border-t border-neon-cortex-blue/30">
                     <div className="flex items-baseline justify-between">
-                      <span className="text-xl font-bold text-gray-200">One Platform:</span>
+                      <span className="text-xl font-bold text-gray-200">Annual per athlete:</span>
                       <span className="text-4xl font-black text-solar-surge-orange drop-shadow-[0_0_24px_rgba(249,115,22,0.6)]">$119</span>
                     </div>
-                    <p className="text-sm text-gray-400 mt-2">Per athlete, per year</p>
-                    <p className="text-2xl text-neon-cortex-green font-black mt-4">Save $780-2,520/year</p>
+                    <p className="text-sm text-gray-400 mt-2">Team discounts from $107-95/seat</p>
+                    <p className="text-2xl text-neon-cortex-green font-black mt-4">You Save: $941/year</p>
                   </div>
                 </div>
 
@@ -1437,6 +1436,53 @@ export default function HomePage() {
                   <p className="text-white font-bold text-base">
                     This is development. Fully integrated.
                   </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Volume Discount Advantage */}
+          <div className="max-w-5xl mx-auto mb-20">
+            <div className="backdrop-blur-sm bg-gradient-to-br from-neon-cortex-blue/10 via-solar-surge-orange/5 to-transparent rounded-2xl border-2 border-neon-cortex-blue/30 p-8 relative overflow-hidden">
+              {/* Animated glow */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-neon-cortex-blue via-solar-surge-orange to-neon-cortex-blue opacity-10 blur-xl" />
+
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-3 h-3 bg-solar-surge-orange rounded-full animate-pulse" style={{boxShadow: '0 0 12px rgba(249,115,22,0.8)'}} />
+                  <h3 className="text-2xl md:text-3xl font-black bg-gradient-to-r from-solar-surge-orange to-neon-cortex-blue bg-clip-text text-transparent">
+                    💡 The Volume Discount Advantage
+                  </h3>
+                </div>
+
+                <div className="space-y-4">
+                  <p className="text-lg sm:text-xl text-gray-300 leading-relaxed">
+                    Most apps charge <span className="text-red-400 font-bold">$1,060 per athlete</span> whether you buy 1 seat or 100 seats.
+                  </p>
+
+                  <p className="text-lg sm:text-xl text-white font-semibold leading-relaxed">
+                    Mind & Muscle rewards teams with volume discounts from <span className="text-neon-cortex-blue font-black">$107-95/seat</span> (12+ athletes).
+                  </p>
+
+                  <div className="grid sm:grid-cols-2 gap-4 mt-6 pt-6 border-t border-white/20">
+                    <div className="flex items-center gap-3 p-4 rounded-xl bg-neon-cortex-green/10 border border-neon-cortex-green/30">
+                      <div className="text-2xl">→</div>
+                      <div>
+                        <p className="text-sm text-gray-400">12-athlete team</p>
+                        <p className="text-xl font-black text-neon-cortex-green">Saves $11,508/year</p>
+                        <p className="text-xs text-gray-500">vs fragmented approach</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 p-4 rounded-xl bg-neon-cortex-green/10 border border-neon-cortex-green/30">
+                      <div className="text-2xl">→</div>
+                      <div>
+                        <p className="text-sm text-gray-400">50-athlete team</p>
+                        <p className="text-xl font-black text-neon-cortex-green">Saves $48,200/year</p>
+                        <p className="text-xs text-gray-500">vs fragmented approach</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

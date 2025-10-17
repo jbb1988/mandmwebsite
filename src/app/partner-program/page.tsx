@@ -520,7 +520,7 @@ export default function PartnerProgramPage() {
                 </p>
                 <div className="mt-4 p-4 bg-neon-cortex-blue/10 border border-neon-cortex-blue/30 rounded-lg">
                   <p className="text-sm text-gray-300">
-                    💡 <strong>Pitch angle:</strong> "Stop piecing together 7 apps that cost $900-2,640/year per athlete. Get everything integrated for $119/year."
+                    💡 <strong>Differentiator:</strong> "Stop piecing together 7 apps that cost $1,060/year per athlete. Get everything integrated for $119/year—or less with team discounts."
                   </p>
                 </div>
               </div>
@@ -543,7 +543,7 @@ export default function PartnerProgramPage() {
                 </p>
                 <div className="mt-4 p-4 bg-solar-surge-orange/10 border border-solar-surge-orange/30 rounded-lg">
                   <p className="text-sm text-gray-300">
-                    💡 <strong>Pitch angle:</strong> "Unlike multi-sport apps, Mind & Muscle was built exclusively for baseball players. Every feature is designed for your sport."
+                    💡 <strong>Differentiator:</strong> "Unlike multi-sport apps, Mind & Muscle was built exclusively for baseball players. Every feature is designed for your sport."
                   </p>
                 </div>
               </div>
@@ -566,7 +566,7 @@ export default function PartnerProgramPage() {
                 </p>
                 <div className="mt-4 p-4 bg-neon-cortex-blue/10 border border-neon-cortex-blue/30 rounded-lg">
                   <p className="text-sm text-gray-300">
-                    💡 <strong>Pitch angle:</strong> "Other apps deliver the same content to everyone. Mind & Muscle's AI learns each athlete's strengths and gaps, then engineers personalized development plans."
+                    💡 <strong>Differentiator:</strong> "Other apps deliver the same content to everyone. Mind & Muscle's AI learns each athlete's strengths and gaps, then engineers personalized development plans."
                   </p>
                 </div>
               </div>
@@ -589,7 +589,7 @@ export default function PartnerProgramPage() {
                 </p>
                 <div className="mt-4 p-4 bg-solar-surge-orange/10 border border-solar-surge-orange/30 rounded-lg">
                   <p className="text-sm text-gray-300">
-                    💡 <strong>Pitch angle:</strong> "Team communication apps track what happened. Mind & Muscle develops what happens next. Get logistics + athlete development in one platform."
+                    💡 <strong>Differentiator:</strong> "Team communication apps track what happened. Mind & Muscle develops what happens next. Get logistics + athlete development in one platform."
                   </p>
                 </div>
               </div>
