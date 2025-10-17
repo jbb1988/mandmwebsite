@@ -10,7 +10,7 @@ export default function LegalPage() {
 
   useEffect(() => {
     const hash = window.location.hash.replace('#', '');
-    if (hash && ['terms', 'privacy', 'coppa', 'partner-terms'].includes(hash)) {
+    if (hash && ['terms', 'privacy', 'health-disclaimer', 'coppa', 'partner-terms'].includes(hash)) {
       setActiveTab(hash);
     }
   }, []);
@@ -18,6 +18,7 @@ export default function LegalPage() {
   const tabs = [
     { id: 'terms', label: 'Terms of Service', icon: FileText },
     { id: 'privacy', label: 'Privacy Policy', icon: Shield },
+    { id: 'health-disclaimer', label: 'Health & Fitness', icon: Shield },
     { id: 'coppa', label: 'Parental Consent', icon: UserCircle },
     { id: 'partner-terms', label: 'Partner Terms', icon: Users },
   ];
@@ -69,6 +70,7 @@ export default function LegalPage() {
         <LiquidGlass variant="blue" rounded="2xl" className="p-8 md:p-12">
           {activeTab === 'terms' && <TermsContent />}
           {activeTab === 'privacy' && <PrivacyContent />}
+          {activeTab === 'health-disclaimer' && <HealthDisclaimerContent />}
           {activeTab === 'coppa' && <CoppaContent />}
           {activeTab === 'partner-terms' && <PartnerTermsContent />}
         </LiquidGlass>
@@ -125,12 +127,60 @@ function TermsContent() {
         We reserve the right to suspend or terminate accounts that violate these Terms.
       </p>
 
-      <h3 className="text-2xl font-bold mt-8 mb-4">7. Limitation of Liability</h3>
+      <h3 className="text-2xl font-bold mt-8 mb-4">7. Health & Fitness Disclaimer</h3>
+      
+      <div className="p-6 rounded-xl bg-red-500/10 border border-red-500/30 mb-6">
+        <p className="text-sm mb-0 font-semibold text-red-400">
+          ⚠️ IMPORTANT: Read our complete <a href="/legal#health-disclaimer" className="underline">Health & Fitness Disclaimer</a> before using workout features.
+        </p>
+      </div>
+
+      <div className="text-text-secondary mb-4 space-y-4">
+        <p>
+          <strong>NOT MEDICAL ADVICE:</strong> Mind and Muscle provides general fitness and mental training information. We are NOT medical professionals. Our AI-generated recommendations are NOT a substitute for professional medical advice, diagnosis, or treatment.
+        </p>
+
+        <p>
+          <strong>CONSULT YOUR DOCTOR:</strong> Always consult a qualified healthcare provider before starting any physical training program, especially if you:
+        </p>
+        <ul className="list-disc pl-6 space-y-1">
+          <li>Have any pre-existing medical conditions</li>
+          <li>Have a history of injuries</li>
+          <li>Are taking medication</li>
+          <li>Experience pain or discomfort during exercise</li>
+        </ul>
+
+        <p>
+          <strong>ASSUMPTION OF RISK:</strong> You acknowledge that physical exercise carries inherent risks including, but not limited to, muscle strain, sprains, fractures, cardiovascular stress, and in rare cases, serious injury or death. You assume full responsibility for all risks associated with using this Service.
+        </p>
+
+        <p>
+          <strong>STOP IF INJURED:</strong> If you experience pain, dizziness, shortness of breath, or discomfort during any exercise, STOP IMMEDIATELY and consult a medical professional.
+        </p>
+
+        <p>
+          <strong>PARENTAL SUPERVISION:</strong> Parents/guardians of users under 18 must supervise physical activities and ensure their child has medical clearance for athletic training.
+        </p>
+
+        <p>
+          <strong>AI LIMITATIONS:</strong> Our AI provides general recommendations based on user inputs. AI cannot assess your medical history, current physical condition, or injury risk. Follow recommendations at your own discretion.
+        </p>
+
+        <p>
+          <strong>LIABILITY WAIVER:</strong> To the fullest extent permitted by law, Mind and Muscle, its officers, employees, and affiliates SHALL NOT BE LIABLE for any injuries, damages, or losses resulting from your use of workout programs, exercise recommendations, or training content provided through this Service.
+        </p>
+
+        <p>
+          <strong>INDEMNIFICATION:</strong> You agree to indemnify and hold harmless Mind and Muscle from any claims, damages, or expenses arising from your use of fitness content or training programs.
+        </p>
+      </div>
+
+      <h3 className="text-2xl font-bold mt-8 mb-4">8. Limitation of Liability</h3>
       <p className="text-text-secondary mb-4">
-        Mind and Muscle is provided "as is" without warranties. We are not liable for any injuries resulting from training activities.
+        Mind and Muscle is provided "as is" without warranties of any kind, either express or implied. We make no representations about the accuracy, reliability, completeness, or timeliness of the content. Use of the Service is at your sole risk.
       </p>
 
-      <h3 className="text-2xl font-bold mt-8 mb-4">8. Contact</h3>
+      <h3 className="text-2xl font-bold mt-8 mb-4">9. Contact</h3>
       <p className="text-text-secondary">
         For questions about these Terms, contact us at <a href="mailto:support@mindandmuscle.ai" className="text-solar-surge-orange hover:underline">support@mindandmuscle.ai</a>
       </p>
@@ -301,6 +351,231 @@ function CoppaContent() {
       <p className="text-text-secondary">
         For questions about COPPA compliance or children's privacy, contact us at <a href="mailto:privacy@mindandmuscle.ai" className="text-solar-surge-orange hover:underline">privacy@mindandmuscle.ai</a>
       </p>
+    </div>
+  );
+}
+
+function HealthDisclaimerContent() {
+  return (
+    <div className="prose prose-invert max-w-none">
+      <h2 className="text-3xl font-black mb-6">Health & Fitness Disclaimer</h2>
+      
+      <div className="p-6 rounded-xl bg-red-500/10 border border-red-500/30 mb-8">
+        <p className="text-sm mb-0 font-semibold text-red-400">
+          ⚠️ CRITICAL: Please read this entire disclaimer before using any workout or training features in Mind & Muscle.
+        </p>
+      </div>
+
+      <p className="text-text-secondary mb-6">
+        <strong>Effective Date:</strong> January 2025<br />
+        <strong>Last Updated:</strong> January 2025
+      </p>
+
+      <h3 className="text-2xl font-bold mt-8 mb-4">This Is NOT Medical Advice</h3>
+      <div className="text-text-secondary mb-6 space-y-4">
+        <p>
+          Mind and Muscle provides <strong>general fitness and mental training information only</strong>. We are NOT licensed medical professionals, physicians, physical therapists, athletic trainers, or healthcare providers.
+        </p>
+        <p>
+          Our AI-generated workout recommendations, exercise programs, and training plans are <strong>NOT</strong> a substitute for:
+        </p>
+        <ul className="list-disc pl-6 space-y-1">
+          <li>Professional medical advice, diagnosis, or treatment</li>
+          <li>In-person evaluation by a qualified healthcare provider</li>
+          <li>Physical therapy or rehabilitation services</li>
+          <li>Sports medicine consultations</li>
+          <li>Professional coaching or athletic training</li>
+        </ul>
+      </div>
+
+      <h3 className="text-2xl font-bold mt-8 mb-4">Consult Your Doctor BEFORE Starting</h3>
+      <div className="text-text-secondary mb-6 space-y-4">
+        <p className="font-semibold text-yellow-400">
+          IMPORTANT: Always consult a qualified healthcare provider before beginning any physical training program, especially if you:
+        </p>
+        <ul className="list-disc pl-6 space-y-2">
+          <li>Have any pre-existing medical conditions (heart disease, diabetes, asthma, etc.)</li>
+          <li>Have a history of injuries (joint, muscle, bone, or ligament injuries)</li>
+          <li>Are currently injured or recovering from an injury</li>
+          <li>Are taking any medications</li>
+          <li>Have been sedentary or inactive for an extended period</li>
+          <li>Are pregnant or postpartum</li>
+          <li>Experience chest pain, dizziness, or shortness of breath</li>
+          <li>Have a family history of heart disease</li>
+          <li>Are over 40 years old and starting a new exercise program</li>
+        </ul>
+        <p>
+          <strong>For Youth Athletes (Under 18):</strong> Parents/guardians must ensure their child has medical clearance from a pediatrician before starting any training program. Young athletes may have different physical capabilities and limitations that require professional evaluation.
+        </p>
+      </div>
+
+      <h3 className="text-2xl font-bold mt-8 mb-4">Assumption of Risk</h3>
+      <div className="text-text-secondary mb-6 space-y-4">
+        <p>
+          Physical exercise and athletic training carry <strong>inherent risks</strong>, including but not limited to:
+        </p>
+        <ul className="list-disc pl-6 space-y-1">
+          <li>Muscle strains, sprains, and tears</li>
+          <li>Joint injuries</li>
+          <li>Bone fractures</li>
+          <li>Tendon and ligament damage</li>
+          <li>Cardiovascular stress or complications</li>
+          <li>Heat exhaustion or heat stroke</li>
+          <li>Dehydration</li>
+          <li>Equipment-related injuries</li>
+          <li>Falls or collisions</li>
+          <li>In rare cases, serious injury, permanent disability, or death</li>
+        </ul>
+        <p className="font-semibold">
+          By using Mind and Muscle's training features, you acknowledge these risks and assume <strong>full responsibility</strong> for all risks associated with physical exercise and training.
+        </p>
+      </div>
+
+      <h3 className="text-2xl font-bold mt-8 mb-4">Stop Exercise If You Experience:</h3>
+      <div className="p-6 rounded-xl bg-red-500/10 border border-red-500/30 mb-6">
+        <p className="font-semibold text-red-400 mb-2">STOP IMMEDIATELY and seek medical attention if you experience:</p>
+        <ul className="list-disc pl-6 space-y-1 text-text-secondary">
+          <li>Chest pain or pressure</li>
+          <li>Severe shortness of breath</li>
+          <li>Dizziness or lightheadedness</li>
+          <li>Nausea or vomiting</li>
+          <li>Sharp or shooting pain</li>
+          <li>Joint instability</li>
+          <li>Loss of coordination or balance</li>
+          <li>Numbness or tingling</li>
+          <li>Unusual fatigue or weakness</li>
+          <li>Any other concerning symptoms</li>
+        </ul>
+        <p className="mt-4 text-sm text-red-400">
+          Do NOT continue exercising if you experience any of these symptoms. Consult a medical professional immediately.
+        </p>
+      </div>
+
+      <h3 className="text-2xl font-bold mt-8 mb-4">Parental Supervision Required</h3>
+      <div className="text-text-secondary mb-6 space-y-4">
+        <p>
+          <strong>For Users Under 18:</strong> Parents or legal guardians MUST:
+        </p>
+        <ul className="list-disc pl-6 space-y-2">
+          <li>Supervise all physical training activities</li>
+          <li>Ensure their child has medical clearance for athletic training</li>
+          <li>Monitor exercise intensity and volume to prevent overtraining</li>
+          <li>Ensure proper equipment, environment, and safety measures</li>
+          <li>Stop activities immediately if any concerning symptoms appear</li>
+          <li>Modify or discontinue exercises that are inappropriate for their child's age, development, or fitness level</li>
+        </ul>
+      </div>
+
+      <h3 className="text-2xl font-bold mt-8 mb-4">AI Limitations</h3>
+      <div className="text-text-secondary mb-6 space-y-4">
+        <p>
+          Our AI system generates training recommendations based on user inputs and general fitness principles. However:
+        </p>
+        <ul className="list-disc pl-6 space-y-2">
+          <li><strong>AI cannot assess your individual medical condition</strong> - It does not have access to your medical history, current health status, or physical limitations</li>
+          <li><strong>AI cannot detect injuries</strong> - It cannot identify existing injuries, movement compensations, or biomechanical issues</li>
+          <li><strong>AI cannot evaluate proper form</strong> - It cannot watch you perform exercises or correct technique errors</li>
+          <li><strong>AI provides general recommendations only</strong> - Every individual is different, and what works for one person may not be appropriate for another</li>
+          <li><strong>AI cannot replace professional coaching</strong> - Human coaches can observe, adjust, and personalize training in ways AI cannot</li>
+        </ul>
+        <p className="font-semibold">
+          You are responsible for evaluating whether AI-generated recommendations are appropriate for your individual circumstances and physical capabilities.
+        </p>
+      </div>
+
+      <h3 className="text-2xl font-bold mt-8 mb-4">Injury History Data Usage</h3>
+      <div className="text-text-secondary mb-6 space-y-4">
+        <p>
+          We collect injury history information to help personalize training recommendations. However:
+        </p>
+        <ul className="list-disc pl-6 space-y-1">
+          <li>This data is used for <strong>general guidance only</strong></li>
+          <li>It does NOT constitute medical evaluation or treatment</li>
+          <li>It does NOT replace consultation with a healthcare provider</li>
+          <li>You should NOT rely on our AI to manage or rehabilitate injuries</li>
+        </ul>
+        <p className="font-semibold text-yellow-400">
+          If you have a history of injuries, consult a medical professional before following any workout recommendations.
+        </p>
+      </div>
+
+      <h3 className="text-2xl font-bold mt-8 mb-4">Equipment Safety</h3>
+      <div className="text-text-secondary mb-6">
+        <ul className="list-disc pl-6 space-y-1">
+          <li>Ensure all equipment is properly maintained and in good working condition</li>
+          <li>Use equipment only as intended and according to manufacturer instructions</li>
+          <li>Ensure adequate space and proper flooring for exercises</li>
+          <li>Use spotters when appropriate, especially for heavy lifting</li>
+          <li>Never attempt exercises beyond your current fitness level</li>
+        </ul>
+      </div>
+
+      <h3 className="text-2xl font-bold mt-8 mb-4">Liability Waiver</h3>
+      <div className="p-6 rounded-xl bg-white/5 border border-white/10 mb-6">
+        <p className="text-text-secondary mb-4">
+          <strong>TO THE FULLEST EXTENT PERMITTED BY LAW:</strong>
+        </p>
+        <p className="text-text-secondary mb-4">
+          Mind and Muscle, its officers, directors, employees, affiliates, contractors, and service providers <strong>SHALL NOT BE LIABLE</strong> for any injuries, damages, losses, medical expenses, or other consequences (including but not limited to death) resulting from:
+        </p>
+        <ul className="list-disc pl-6 text-text-secondary space-y-1">
+          <li>Your use of workout programs, exercise recommendations, or training content</li>
+          <li>Following AI-generated training plans</li>
+          <li>Performing exercises described in the Service</li>
+          <li>Reliance on information provided through the Service</li>
+          <li>Failure to consult with medical professionals before exercising</li>
+        </ul>
+      </div>
+
+      <h3 className="text-2xl font-bold mt-8 mb-4">Indemnification</h3>
+      <div className="text-text-secondary mb-6">
+        <p>
+          You agree to <strong>indemnify, defend, and hold harmless</strong> Mind and Muscle from any and all claims, liabilities, damages, losses, costs, expenses, or fees (including reasonable attorneys' fees) arising from:
+        </p>
+        <ul className="list-disc pl-6 space-y-1 mt-2">
+          <li>Your use of fitness or training content provided through the Service</li>
+          <li>Your failure to consult with medical professionals before exercising</li>
+          <li>Injuries sustained while following workout recommendations</li>
+          <li>Your violation of this disclaimer</li>
+        </ul>
+      </div>
+
+      <h3 className="text-2xl font-bold mt-8 mb-4">Your Responsibility</h3>
+      <div className="text-text-secondary mb-6">
+        <p className="font-semibold mb-4">
+          By using Mind and Muscle's training features, you confirm that:
+        </p>
+        <ul className="list-disc pl-6 space-y-2">
+          <li>You have read and understood this entire disclaimer</li>
+          <li>You have consulted with a healthcare provider (or will do so before starting)</li>
+          <li>You are physically capable of performing the recommended exercises</li>
+          <li>You will use proper form and technique</li>
+          <li>You will stop immediately if you experience any concerning symptoms</li>
+          <li>You accept full responsibility for your safety and well-being</li>
+          <li>You understand the inherent risks of physical exercise</li>
+        </ul>
+      </div>
+
+      <h3 className="text-2xl font-bold mt-8 mb-4">Emergency Contact</h3>
+      <div className="p-6 rounded-xl bg-red-500/10 border border-red-500/30 mb-6">
+        <p className="font-semibold text-red-400 mb-2">
+          In case of emergency:
+        </p>
+        <ul className="list-disc pl-6 text-text-secondary space-y-1">
+          <li><strong>United States:</strong> Call 911</li>
+          <li><strong>Injury reporting:</strong> <a href="mailto:safety@mindandmuscle.ai" className="text-solar-surge-orange underline">safety@mindandmuscle.ai</a></li>
+        </ul>
+      </div>
+
+      <h3 className="text-2xl font-bold mt-8 mb-4">Questions or Concerns</h3>
+      <div className="text-text-secondary">
+        <p className="mb-2">
+          For questions about this Health & Fitness Disclaimer:
+        </p>
+        <p>
+          <strong>Email:</strong> <a href="mailto:legal@mindandmuscle.ai" className="text-solar-surge-orange hover:underline">legal@mindandmuscle.ai</a>
+        </p>
+      </div>
     </div>
   );
 }

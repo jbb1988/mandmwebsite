@@ -78,6 +78,13 @@ export function Footer() {
             </Link>
             <span className="text-text-secondary/30">•</span>
             <Link
+              href="/legal#health-disclaimer"
+              className="text-text-secondary hover:text-starlight-white transition-colors"
+            >
+              Health & Fitness
+            </Link>
+            <span className="text-text-secondary/30">•</span>
+            <Link
               href="/legal#coppa"
               className="text-text-secondary hover:text-starlight-white transition-colors"
             >
