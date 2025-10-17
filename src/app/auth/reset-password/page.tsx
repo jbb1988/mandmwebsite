@@ -38,7 +38,22 @@ function ResetPasswordContent() {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       );
 
-      // Check if we have tokens in the URL hash (password recovery flow)
+      // PKCE Flow: Check if we have a code parameter (Supabase PKCE flow)
+      const code = searchParams.get('code');
+      if (code) {
+        // Exchange code for session
+        const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+
+        if (exchangeError || !data.session) {
+          setError('Failed to verify reset link. Please request a new one.');
+          return;
+        }
+
+        setSessionReady(true);
+        return;
+      }
+
+      // Legacy Flow: Check if we have tokens in the URL hash (password recovery flow)
       // Supabase redirects with tokens in hash fragment, e.g., #access_token=...&type=recovery
       const hash = window.location.hash.substring(1); // Remove # prefix
       const params = new URLSearchParams(hash);
@@ -77,7 +92,7 @@ function ResetPasswordContent() {
     };
 
     initSupabase();
-  }, [errorParam, errorDescription]);
+  }, [errorParam, errorDescription, searchParams]);
 
   // Validate password requirements
   const validatePassword = (pwd: string): string[] => {
