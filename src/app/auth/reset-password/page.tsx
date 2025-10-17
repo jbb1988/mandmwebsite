@@ -38,33 +38,16 @@ function ResetPasswordContent() {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       );
 
-      // PKCE Flow: Check if we have a code parameter (Supabase PKCE flow)
-      const code = searchParams.get('code');
-      if (code) {
-        // Exchange code for session
-        const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+      // Check if we have tokens in query parameters (from /api/auth/callback redirect)
+      const accessToken = searchParams.get('access_token');
+      const refreshToken = searchParams.get('refresh_token');
+      const type = searchParams.get('type');
 
-        if (exchangeError || !data.session) {
-          setError('Failed to verify reset link. Please request a new one.');
-          return;
-        }
-
-        setSessionReady(true);
-        return;
-      }
-
-      // Legacy Flow: Check if we have tokens in the URL hash (password recovery flow)
-      // Supabase redirects with tokens in hash fragment, e.g., #access_token=...&type=recovery
-      const hash = window.location.hash.substring(1); // Remove # prefix
-      const params = new URLSearchParams(hash);
-      const accessToken = params.get('access_token');
-      const type = params.get('type');
-
-      if (accessToken && type === 'recovery') {
-        // We have recovery tokens in the hash, set the session
+      if (accessToken && refreshToken && type === 'recovery') {
+        // We have recovery tokens from the auth callback, set the session
         const { error: sessionError } = await supabase.auth.setSession({
           access_token: accessToken,
-          refresh_token: params.get('refresh_token') || '',
+          refresh_token: refreshToken,
         });
 
         if (sessionError) {
