@@ -11,7 +11,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Allow access to auth routes and static files
+  // Allow access to auth routes, static files, and SEO routes
   const pathname = request.nextUrl.pathname;
 
   if (
@@ -24,7 +24,11 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||
     pathname.startsWith('/assets') ||
-    pathname.startsWith('/public')
+    pathname.startsWith('/public') ||
+    // SEO routes - allow public access for search engines
+    pathname === '/robots.txt' ||
+    pathname === '/sitemap.xml' ||
+    pathname === '/' // Homepage for Google to see your brand
   ) {
     return NextResponse.next();
   }

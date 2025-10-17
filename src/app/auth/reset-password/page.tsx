@@ -38,7 +38,30 @@ function ResetPasswordContent() {
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
       );
 
-      // Check if we have a session from Supabase auth
+      // Check if we have tokens in the URL hash (password recovery flow)
+      // Supabase redirects with tokens in hash fragment, e.g., #access_token=...&type=recovery
+      const hash = window.location.hash.substring(1); // Remove # prefix
+      const params = new URLSearchParams(hash);
+      const accessToken = params.get('access_token');
+      const type = params.get('type');
+
+      if (accessToken && type === 'recovery') {
+        // We have recovery tokens in the hash, set the session
+        const { error: sessionError } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: params.get('refresh_token') || '',
+        });
+
+        if (sessionError) {
+          setError('Failed to verify reset link. Please request a new one.');
+          return;
+        }
+
+        setSessionReady(true);
+        return;
+      }
+
+      // Fallback: Check if we already have a session (shouldn't happen for recovery)
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
       if (sessionError) {
@@ -131,7 +154,7 @@ function ResetPasswordContent() {
 
       // Redirect to app login after 3 seconds
       setTimeout(() => {
-        window.location.href = 'mindandmuscle://login';
+        window.location.href = 'mindmuscle://login';
       }, 3000);
     } catch (err: any) {
       setError(err.message || 'Failed to reset password. Please try again.');
@@ -188,7 +211,7 @@ function ResetPasswordContent() {
                   If the app doesn't open automatically, tap the button below
                 </p>
                 <a
-                  href="mindandmuscle://login"
+                  href="mindmuscle://login"
                   className="inline-block mt-6 px-8 py-3 bg-gradient-to-br from-neon-cortex-blue to-mind-primary rounded-xl border border-neon-cortex-blue/30 hover:border-neon-cortex-blue/50 transition-all hover:scale-105 font-semibold"
                 >
                   Open App
@@ -382,7 +405,7 @@ function ResetPasswordContent() {
 
             <div className="mt-6 pt-6 border-t border-white/10 text-center">
               <a
-                href="mindandmuscle://login"
+                href="mindmuscle://login"
                 className="text-sm text-neon-cortex-blue hover:text-neon-cortex-blue/80 transition-colors font-semibold"
               >
                 Back to App →
