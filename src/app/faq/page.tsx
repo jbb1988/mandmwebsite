@@ -132,7 +132,7 @@ export default function FAQPage() {
     {
       id: 'platform-features',
       title: 'Platform & Features',
-      icon: Sparkles,
+      icon: Zap,
       color: 'blue',
       faqs: [
         {
