@@ -3,86 +3,72 @@ import { createClient } from '@supabase/supabase-js';
 
 export async function POST(request: NextRequest) {
   try {
-    const { password, accessToken, refreshToken } = await request.json();
+    const { token, newPassword } = await request.json();
 
-    if (!password || !accessToken || !refreshToken) {
+    if (!token || !newPassword) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Token and new password are required' },
         { status: 400 }
       );
     }
 
-    // Validate password requirements
-    const passwordErrors: string[] = [];
-
-    if (password.length < 10) {
-      passwordErrors.push('Password must be at least 10 characters');
-    }
-    if (!/[A-Z]/.test(password)) {
-      passwordErrors.push('Must contain at least one uppercase letter');
-    }
-    if (!/[a-z]/.test(password)) {
-      passwordErrors.push('Must contain at least one lowercase letter');
-    }
-    if (!/[0-9]/.test(password)) {
-      passwordErrors.push('Must contain at least one number');
-    }
-    if (!/[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\\/~`]/.test(password)) {
-      passwordErrors.push('Must contain at least one special character');
-    }
-
-    if (passwordErrors.length > 0) {
-      return NextResponse.json(
-        { error: 'Password does not meet requirements', details: passwordErrors },
-        { status: 400 }
-      );
-    }
-
-    // Create a Supabase client with the access token
-    const supabase = createClient(
+    // Create Supabase admin client
+    const supabaseAdmin = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        auth: {
-          autoRefreshToken: false,
-          persistSession: false,
-        },
-      }
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // Set the session using the tokens from the reset link
-    const { data: sessionData, error: sessionError } = await supabase.auth.setSession({
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    });
+    // Validate token
+    const { data: tokenData, error: tokenError } = await supabaseAdmin
+      .from('password_reset_tokens')
+      .select('*')
+      .eq('token', token)
+      .eq('used', false)
+      .single();
 
-    if (sessionError || !sessionData.session) {
-      console.error('Session error:', sessionError);
+    if (tokenError || !tokenData) {
       return NextResponse.json(
-        { error: 'Invalid or expired reset link. Please request a new password reset.' },
-        { status: 401 }
+        { error: 'Invalid or expired reset token' },
+        { status: 400 }
       );
     }
 
-    // Update the password
-    const { data, error } = await supabase.auth.updateUser({
-      password: password,
-    });
-
-    if (error) {
-      console.error('Password update error:', error);
+    // Check if token is expired
+    const expiresAt = new Date(tokenData.expires_at);
+    if (expiresAt < new Date()) {
       return NextResponse.json(
-        { error: error.message || 'Failed to update password' },
+        { error: 'Reset token has expired. Please request a new one.' },
+        { status: 400 }
+      );
+    }
+
+    // Update user password using admin client
+    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+      tokenData.user_id,
+      { password: newPassword }
+    );
+
+    if (updateError) {
+      console.error('Password update error:', updateError);
+      return NextResponse.json(
+        { error: 'Failed to update password' },
         { status: 500 }
       );
     }
 
+    // Mark token as used
+    await supabaseAdmin
+      .from('password_reset_tokens')
+      .update({ used: true, used_at: new Date().toISOString() })
+      .eq('id', tokenData.id);
+
     return NextResponse.json({
       success: true,
-      message: 'Password updated successfully',
+      message: 'Password reset successfully'
     });
+
   } catch (error) {
-    console.error('Password reset error:', error);
+    console.error('Reset password API error:', error);
     return NextResponse.json(
       { error: 'An unexpected error occurred' },
       { status: 500 }

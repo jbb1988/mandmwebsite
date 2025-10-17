@@ -21,61 +21,18 @@ function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const errorParam = searchParams.get('error');
-  const errorDescription = searchParams.get('error_description');
+  const resetToken = searchParams.get('token');
 
   useEffect(() => {
-    // Handle auth errors from Supabase
-    if (errorParam) {
-      setError(decodeURIComponent(errorDescription || errorParam));
+    // Validate that we have a reset token
+    if (!resetToken) {
+      setError('Invalid password reset link. Please request a new one.');
       return;
     }
 
-    // Initialize Supabase client and handle the auth callback
-    const initSupabase = async () => {
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
-
-      // Check if we have tokens in query parameters (from /api/auth/callback redirect)
-      const accessToken = searchParams.get('access_token');
-      const refreshToken = searchParams.get('refresh_token');
-      const type = searchParams.get('type');
-
-      if (accessToken && refreshToken && type === 'recovery') {
-        // We have recovery tokens from the auth callback, set the session
-        const { error: sessionError } = await supabase.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
-
-        if (sessionError) {
-          setError('Failed to verify reset link. Please request a new one.');
-          return;
-        }
-
-        setSessionReady(true);
-        return;
-      }
-
-      // Fallback: Check if we already have a session (shouldn't happen for recovery)
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-
-      if (sessionError) {
-        setError('Failed to verify reset link. Please request a new one.');
-        return;
-      }
-
-      if (session) {
-        setSessionReady(true);
-      } else {
-        setError('Invalid or expired password reset link. Please request a new one.');
-      }
-    };
-
-    initSupabase();
-  }, [errorParam, errorDescription, searchParams]);
+    // Token is valid, allow user to reset password
+    setSessionReady(true);
+  }, [resetToken]);
 
   // Validate password requirements
   const validatePassword = (pwd: string): string[] => {
@@ -134,18 +91,22 @@ function ResetPasswordContent() {
     }
 
     try {
-      // Use Supabase client to update the password
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
-
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: password,
+      // Call our custom API route to reset password
+      const response = await fetch('/api/auth/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: resetToken,
+          newPassword: password,
+        }),
       });
 
-      if (updateError) {
-        throw updateError;
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to reset password');
       }
 
       setSuccess(true);
