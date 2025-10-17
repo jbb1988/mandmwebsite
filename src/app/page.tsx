@@ -17,6 +17,41 @@ export default function HomePage() {
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
 
+  // Handle auth redirects from Supabase
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const hash = window.location.hash;
+    
+    // Check if this is an auth callback (code or error from Supabase)
+    const code = params.get('code');
+    const error = params.get('error');
+    const errorDescription = params.get('error_description');
+    const errorCode = params.get('error_code');
+    
+    // Also check hash params (Supabase sometimes uses hash)
+    const hashParams = new URLSearchParams(hash.replace('#', ''));
+    const hashError = hashParams.get('error');
+    const hashErrorDescription = hashParams.get('error_description');
+    const hashErrorCode = hashParams.get('error_code');
+    
+    if (code) {
+      // We have an auth code - redirect to callback handler
+      window.location.href = `/api/auth/callback?code=${code}`;
+    } else if (error || hashError) {
+      // We have an error - redirect to reset password page with error
+      const finalError = error || hashError;
+      const finalErrorDesc = errorDescription || hashErrorDescription;
+      const finalErrorCode = errorCode || hashErrorCode;
+      
+      const resetUrl = new URL('/auth/reset-password', window.location.origin);
+      if (finalError) resetUrl.searchParams.set('error', finalError);
+      if (finalErrorDesc) resetUrl.searchParams.set('error_description', finalErrorDesc);
+      if (finalErrorCode) resetUrl.searchParams.set('error_code', finalErrorCode);
+      
+      window.location.href = resetUrl.toString();
+    }
+  }, []);
+
   // Lock body scroll when modal is open
   useEffect(() => {
     if (activeFeature) {
