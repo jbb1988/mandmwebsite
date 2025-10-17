@@ -596,20 +596,6 @@ export default function PartnerProgramPage() {
             </div>
           </LiquidGlass>
         </div>
-
-        {/* Bottom CTA Box */}
-        <div className="mt-12">
-          <LiquidGlass variant="blue" glow={true} className="p-8 text-center">
-            <h3 className="text-2xl font-black mb-4">These Talking Points Make Sales Easy</h3>
-            <p className="text-text-secondary max-w-3xl mx-auto mb-6 leading-relaxed">
-              Focus on innovation and integration, not competitor comparisons. Coaches are tired of fragmented solutions. Mind & Muscle solves real problems they're already experiencing. Your job is to connect them to what they need.
-            </p>
-            <div className="inline-flex items-center gap-2 px-6 py-3 bg-neon-cortex-green/20 border-2 border-neon-cortex-green/40 rounded-xl">
-              <Check className="w-5 h-5 text-neon-cortex-green" />
-              <span className="font-bold text-neon-cortex-green">Approved partners get detailed sales guides with these talking points</span>
-            </div>
-          </LiquidGlass>
-        </div>
       </div>
 
       {/* Interactive Calculator */}
