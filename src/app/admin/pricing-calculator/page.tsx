@@ -100,7 +100,7 @@ export default function AdminPricingCalculator() {
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-8 bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
+    <div className="min-h-screen pt-32 pb-20 px-4 md:px-8 bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
         <LiquidGlass variant="blue" className="p-6">
@@ -160,8 +160,8 @@ export default function AdminPricingCalculator() {
                 <input
                   type="range"
                   min="10"
-                  max="500"
-                  step="10"
+                  max="5000"
+                  step="50"
                   value={numUsers}
                   onChange={(e) => setNumUsers(parseInt(e.target.value))}
                   className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-neon-cortex-blue"
