@@ -66,6 +66,10 @@ const screenshots = [
     src: '/assets/screenshots/15.png',
     alt: 'Mind & Muscle App Screenshot 14',
   },
+  {
+    src: '/assets/screenshots/16.png',
+    alt: 'Mind & Muscle App Screenshot 15',
+  },
 ];
 
 export function AppScreenshotCarousel() {
