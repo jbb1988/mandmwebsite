@@ -1441,53 +1441,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Volume Discount Advantage */}
-          <div className="max-w-5xl mx-auto mb-20">
-            <div className="backdrop-blur-sm bg-gradient-to-br from-neon-cortex-blue/10 via-solar-surge-orange/5 to-transparent rounded-2xl border-2 border-neon-cortex-blue/30 p-8 relative overflow-hidden">
-              {/* Animated glow */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-neon-cortex-blue via-solar-surge-orange to-neon-cortex-blue opacity-10 blur-xl" />
-
-              <div className="relative">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-3 h-3 bg-solar-surge-orange rounded-full animate-pulse" style={{boxShadow: '0 0 12px rgba(249,115,22,0.8)'}} />
-                  <h3 className="text-2xl md:text-3xl font-black bg-gradient-to-r from-solar-surge-orange to-neon-cortex-blue bg-clip-text text-transparent">
-                    💡 The Volume Discount Advantage
-                  </h3>
-                </div>
-
-                <div className="space-y-4">
-                  <p className="text-lg sm:text-xl text-gray-300 leading-relaxed">
-                    Most apps charge <span className="text-red-400 font-bold">$1,060 per athlete</span> whether you buy 1 seat or 100 seats.
-                  </p>
-
-                  <p className="text-lg sm:text-xl text-white font-semibold leading-relaxed">
-                    Mind & Muscle rewards teams with volume discounts from <span className="text-neon-cortex-blue font-black">$107-95/seat</span> (12+ athletes).
-                  </p>
-
-                  <div className="grid sm:grid-cols-2 gap-4 mt-6 pt-6 border-t border-white/20">
-                    <div className="flex items-center gap-3 p-4 rounded-xl bg-neon-cortex-green/10 border border-neon-cortex-green/30">
-                      <div className="text-2xl">→</div>
-                      <div>
-                        <p className="text-sm text-gray-400">12-athlete team</p>
-                        <p className="text-xl font-black text-neon-cortex-green">Saves $11,508/year</p>
-                        <p className="text-xs text-gray-500">vs fragmented approach</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3 p-4 rounded-xl bg-neon-cortex-green/10 border border-neon-cortex-green/30">
-                      <div className="text-2xl">→</div>
-                      <div>
-                        <p className="text-sm text-gray-400">50-athlete team</p>
-                        <p className="text-xl font-black text-neon-cortex-green">Saves $48,200/year</p>
-                        <p className="text-xs text-gray-500">vs fragmented approach</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Bottom Statement */}
           <div className="text-center max-w-5xl mx-auto">
             <div className="inline-block relative group">
