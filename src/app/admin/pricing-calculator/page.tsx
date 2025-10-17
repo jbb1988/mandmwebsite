@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
-import { Calculator, Download, DollarSign, Users, Lock, TrendingUp } from 'lucide-react';
+import { Calculator, Download, DollarSign, Users, Lock, TrendingUp, Settings } from 'lucide-react';
 import jsPDF from 'jspdf';
 
 export default function AdminPricingCalculator() {
@@ -18,6 +18,19 @@ export default function AdminPricingCalculator() {
   const [volumeDiscount, setVolumeDiscount] = useState(10); // %
   const [partnerCommission, setPartnerCommission] = useState(10); // %
 
+  // Hard Costs (Annual basis for calculation)
+  const [oneSignalMonthly, setOneSignalMonthly] = useState(0);
+  const [stripePerTransaction, setStripePerTransaction] = useState(0.30);
+  const [revenueCatMonthly, setRevenueCatMonthly] = useState(20);
+  const [resendMonthly, setResendMonthly] = useState(0);
+  const [toltMonthly, setToltMonthly] = useState(49);
+  const [googleWorkspaceMonthly, setGoogleWorkspaceMonthly] = useState(20);
+  const [openRouterPerUserYearly, setOpenRouterPerUserYearly] = useState(2);
+  const [geminiFlashPerUserYearly, setGeminiFlashPerUserYearly] = useState(12);
+  const [vercelMonthly, setVercelMonthly] = useState(0);
+  const [supabaseYearly, setSupabaseYearly] = useState(30);
+  const [claudeCodeMonthly, setClaudeCodeMonthly] = useState(200);
+
   // Calculate total users from teams
   const numUsers = numTeams * usersPerTeam;
 
@@ -30,11 +43,18 @@ export default function AdminPricingCalculator() {
     }
   };
 
+  // Hard costs calculations (convert to annual)
+  const monthlyFixedCosts = oneSignalMonthly + revenueCatMonthly + resendMonthly + toltMonthly + googleWorkspaceMonthly + vercelMonthly + claudeCodeMonthly;
+  const annualFixedCosts = (monthlyFixedCosts * 12) + supabaseYearly;
+  const annualPerUserCosts = (openRouterPerUserYearly + geminiFlashPerUserYearly) * numUsers;
+  const annualTransactionCosts = stripePerTransaction * numUsers * 12; // Assume 12 transactions per user per year
+  const totalHardCosts = annualFixedCosts + annualPerUserCosts + annualTransactionCosts;
+
   // Simple profitability calculations
   const discountedPrice = pricePerSeat * (1 - volumeDiscount / 100);
-  const grossRevenue = discountedPrice * numUsers;
+  const grossRevenue = (discountedPrice * numUsers) * 12; // Annual revenue
   const partnerPayout = grossRevenue * (partnerCommission / 100);
-  const totalCosts = costPerSeat * numUsers;
+  const totalCosts = (costPerSeat * numUsers * 12) + totalHardCosts; // Annual costs
   const netProfit = grossRevenue - partnerPayout - totalCosts;
   const profitMargin = grossRevenue > 0 ? (netProfit / grossRevenue) * 100 : 0;
   const profitPerUser = numUsers > 0 ? netProfit / numUsers : 0;
@@ -86,18 +106,54 @@ export default function AdminPricingCalculator() {
 
     yPosition += 15;
 
+    // Hard Costs Section
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Operational Hard Costs', 20, yPosition);
+    yPosition += 8;
+
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`OneSignal: $${oneSignalMonthly.toFixed(2)}/mo ($${Math.round(oneSignalMonthly * 12)}/yr)`, 25, yPosition);
+    yPosition += 5;
+    doc.text(`RevenueCat: $${revenueCatMonthly.toFixed(2)}/mo ($${Math.round(revenueCatMonthly * 12)}/yr)`, 25, yPosition);
+    yPosition += 5;
+    doc.text(`Resend: $${resendMonthly.toFixed(2)}/mo ($${Math.round(resendMonthly * 12)}/yr)`, 25, yPosition);
+    yPosition += 5;
+    doc.text(`Tolt: $${toltMonthly.toFixed(2)}/mo ($${Math.round(toltMonthly * 12)}/yr)`, 25, yPosition);
+    yPosition += 5;
+    doc.text(`Google Workspace: $${googleWorkspaceMonthly.toFixed(2)}/mo ($${Math.round(googleWorkspaceMonthly * 12)}/yr)`, 25, yPosition);
+    yPosition += 5;
+    doc.text(`Vercel: $${vercelMonthly.toFixed(2)}/mo ($${Math.round(vercelMonthly * 12)}/yr)`, 25, yPosition);
+    yPosition += 5;
+    doc.text(`Claude Code: $${claudeCodeMonthly.toFixed(2)}/mo ($${Math.round(claudeCodeMonthly * 12)}/yr)`, 25, yPosition);
+    yPosition += 5;
+    doc.text(`Supabase: $${supabaseYearly.toFixed(2)}/yr`, 25, yPosition);
+    yPosition += 5;
+    doc.text(`Stripe: $${stripePerTransaction.toFixed(2)}/txn × ${numUsers} users × 12 = $${Math.round(annualTransactionCosts)}`, 25, yPosition);
+    yPosition += 5;
+    doc.text(`OpenRouter AI: $${openRouterPerUserYearly.toFixed(2)}/user/yr × ${numUsers} = $${Math.round((openRouterPerUserYearly * numUsers))}`, 25, yPosition);
+    yPosition += 5;
+    doc.text(`Gemini Flash AI: $${geminiFlashPerUserYearly.toFixed(2)}/user/yr × ${numUsers} = $${Math.round((geminiFlashPerUserYearly * numUsers))}`, 25, yPosition);
+    yPosition += 7;
+
+    doc.setFontSize(11);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Total Hard Costs: $${Math.round(totalHardCosts).toLocaleString()}/yr`, 25, yPosition);
+    yPosition += 15;
+
     // Profitability Analysis Section
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    doc.text('Profitability Analysis', 20, yPosition);
+    doc.text('Profitability Analysis (Annual)', 20, yPosition);
     yPosition += 8;
 
     doc.setFontSize(11);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Gross Revenue: $${Math.round(grossRevenue).toLocaleString()}`, 25, yPosition);
+    doc.text(`Annual Revenue: $${Math.round(grossRevenue).toLocaleString()}`, 25, yPosition);
     yPosition += 5;
     doc.setFontSize(9);
-    doc.text(`(${numTeams} teams × ${usersPerTeam} users × $${discountedPrice.toFixed(2)})`, 30, yPosition);
+    doc.text(`(${numUsers} users × $${discountedPrice.toFixed(2)}/mo × 12 months)`, 30, yPosition);
     yPosition += 10;
 
     doc.setFontSize(11);
@@ -108,10 +164,17 @@ export default function AdminPricingCalculator() {
     yPosition += 10;
 
     doc.setFontSize(11);
-    doc.text(`Total Costs: -$${Math.round(totalCosts).toLocaleString()}`, 25, yPosition);
+    doc.text(`Variable Costs: -$${Math.round(costPerSeat * numUsers * 12).toLocaleString()}`, 25, yPosition);
     yPosition += 5;
     doc.setFontSize(9);
-    doc.text(`(${numUsers.toLocaleString()} users × $${costPerSeat})`, 30, yPosition);
+    doc.text(`(${numUsers} users × $${costPerSeat}/mo × 12)`, 30, yPosition);
+    yPosition += 10;
+
+    doc.setFontSize(11);
+    doc.text(`Hard Costs: -$${Math.round(totalHardCosts).toLocaleString()}`, 25, yPosition);
+    yPosition += 5;
+    doc.setFontSize(9);
+    doc.text(`(Fixed + Per User + Transactions)`, 30, yPosition);
     yPosition += 10;
 
     // Net Profit (highlighted)
@@ -143,7 +206,7 @@ export default function AdminPricingCalculator() {
     doc.setFont('helvetica', 'italic');
     doc.text('Formula:', 20, yPosition);
     yPosition += 5;
-    const formula = `Revenue (${numTeams} teams × ${usersPerTeam} users × $${discountedPrice.toFixed(2)}) - Partner Commission (${partnerCommission}%) - Costs (${numUsers.toLocaleString()} users × $${costPerSeat}) = Net Profit`;
+    const formula = `Annual Revenue (${numUsers} users × $${discountedPrice.toFixed(2)}/mo × 12) - Partner Commission (${partnerCommission}%) - Variable Costs (${numUsers} users × $${costPerSeat}/mo × 12) - Hard Costs ($${Math.round(totalHardCosts)}) = Net Profit`;
     const splitFormula = doc.splitTextToSize(formula, pageWidth - 40);
     doc.text(splitFormula, 20, yPosition);
 
@@ -316,6 +379,158 @@ export default function AdminPricingCalculator() {
           </LiquidGlass>
         </div>
 
+        {/* Hard Costs */}
+        <LiquidGlass variant="neutral" className="p-6">
+          <h2 className="text-xl font-black mb-4 flex items-center gap-2">
+            <Settings className="w-5 h-5 text-text-primary" />
+            Operational Hard Costs
+          </h2>
+
+          <div className="grid md:grid-cols-3 gap-4">
+            {/* Column 1: Fixed Monthly */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold text-text-secondary mb-3">Fixed Monthly Costs</h3>
+
+              <div>
+                <label className="block text-xs font-semibold mb-1">OneSignal: ${oneSignalMonthly.toFixed(2)}/mo</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={oneSignalMonthly}
+                  onChange={(e) => setOneSignalMonthly(parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold mb-1">RevenueCat: ${revenueCatMonthly.toFixed(2)}/mo</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={revenueCatMonthly}
+                  onChange={(e) => setRevenueCatMonthly(parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold mb-1">Resend: ${resendMonthly.toFixed(2)}/mo</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={resendMonthly}
+                  onChange={(e) => setResendMonthly(parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold mb-1">Tolt: ${toltMonthly.toFixed(2)}/mo</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={toltMonthly}
+                  onChange={(e) => setToltMonthly(parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors"
+                />
+              </div>
+            </div>
+
+            {/* Column 2: More Fixed Monthly */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold text-text-secondary mb-3">&nbsp;</h3>
+
+              <div>
+                <label className="block text-xs font-semibold mb-1">Google Workspace: ${googleWorkspaceMonthly.toFixed(2)}/mo</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={googleWorkspaceMonthly}
+                  onChange={(e) => setGoogleWorkspaceMonthly(parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold mb-1">Vercel: ${vercelMonthly.toFixed(2)}/mo</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={vercelMonthly}
+                  onChange={(e) => setVercelMonthly(parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold mb-1">Claude Code: ${claudeCodeMonthly.toFixed(2)}/mo</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={claudeCodeMonthly}
+                  onChange={(e) => setClaudeCodeMonthly(parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold mb-1">Supabase: ${supabaseYearly.toFixed(2)}/yr</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={supabaseYearly}
+                  onChange={(e) => setSupabaseYearly(parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors"
+                />
+              </div>
+            </div>
+
+            {/* Column 3: Per User/Transaction */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold text-text-secondary mb-3">Variable Costs</h3>
+
+              <div>
+                <label className="block text-xs font-semibold mb-1">Stripe: ${stripePerTransaction.toFixed(2)}/txn</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={stripePerTransaction}
+                  onChange={(e) => setStripePerTransaction(parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors"
+                />
+                <p className="text-xs text-text-secondary mt-1">12 txn/user/yr</p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold mb-1">OpenRouter AI: ${openRouterPerUserYearly.toFixed(2)}/user/yr</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={openRouterPerUserYearly}
+                  onChange={(e) => setOpenRouterPerUserYearly(parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold mb-1">Gemini Flash AI: ${geminiFlashPerUserYearly.toFixed(2)}/user/yr</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={geminiFlashPerUserYearly}
+                  onChange={(e) => setGeminiFlashPerUserYearly(parseFloat(e.target.value) || 0)}
+                  className="w-full px-3 py-2 text-sm bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors"
+                />
+              </div>
+
+              <div className="pt-2 border-t border-white/10">
+                <p className="text-xs font-bold text-text-secondary">Total Hard Costs</p>
+                <p className="text-lg font-black text-solar-surge-orange">${Math.round(totalHardCosts).toLocaleString()}/yr</p>
+              </div>
+            </div>
+          </div>
+        </LiquidGlass>
+
         {/* Results */}
         <LiquidGlass variant="blue" className="p-8">
           <h2 className="text-2xl font-black mb-6 flex items-center gap-2">
@@ -325,9 +540,9 @@ export default function AdminPricingCalculator() {
 
           <div className="grid md:grid-cols-4 gap-6 mb-6">
             <div className="text-center p-4 bg-white/5 rounded-lg border border-white/10">
-              <p className="text-xs text-text-secondary mb-1">Gross Revenue</p>
+              <p className="text-xs text-text-secondary mb-1">Annual Revenue</p>
               <p className="text-2xl font-black text-neon-cortex-blue">${Math.round(grossRevenue).toLocaleString()}</p>
-              <p className="text-xs text-text-secondary mt-1">{numTeams} teams × {usersPerTeam} users × ${discountedPrice.toFixed(2)}</p>
+              <p className="text-xs text-text-secondary mt-1">{numUsers} users × ${discountedPrice.toFixed(2)}/mo × 12</p>
             </div>
 
             <div className="text-center p-4 bg-white/5 rounded-lg border border-white/10">
@@ -337,18 +552,24 @@ export default function AdminPricingCalculator() {
             </div>
 
             <div className="text-center p-4 bg-white/5 rounded-lg border border-white/10">
-              <p className="text-xs text-text-secondary mb-1">Total Costs</p>
-              <p className="text-2xl font-black text-red-400">-${Math.round(totalCosts).toLocaleString()}</p>
-              <p className="text-xs text-text-secondary mt-1">{numUsers.toLocaleString()} users × ${costPerSeat}</p>
+              <p className="text-xs text-text-secondary mb-1">Variable Costs</p>
+              <p className="text-2xl font-black text-red-400">-${Math.round(costPerSeat * numUsers * 12).toLocaleString()}</p>
+              <p className="text-xs text-text-secondary mt-1">{numUsers} users × ${costPerSeat}/mo × 12</p>
             </div>
 
-            <div className="text-center p-4 bg-gradient-to-br from-neon-cortex-green/20 to-solar-surge-orange/20 rounded-lg border border-neon-cortex-green/30">
-              <p className="text-xs text-text-secondary mb-1">Net Profit</p>
-              <p className={`text-3xl font-black ${netProfit >= 0 ? 'text-neon-cortex-green' : 'text-red-400'}`}>
-                ${Math.round(netProfit).toLocaleString()}
-              </p>
-              <p className="text-xs text-text-secondary mt-1">{profitMargin.toFixed(1)}% margin</p>
+            <div className="text-center p-4 bg-white/5 rounded-lg border border-white/10">
+              <p className="text-xs text-text-secondary mb-1">Hard Costs</p>
+              <p className="text-2xl font-black text-red-400">-${Math.round(totalHardCosts).toLocaleString()}</p>
+              <p className="text-xs text-text-secondary mt-1">Fixed + Per User + Txns</p>
             </div>
+          </div>
+
+          <div className="text-center p-4 bg-gradient-to-br from-neon-cortex-green/20 to-solar-surge-orange/20 rounded-lg border border-neon-cortex-green/30 mb-6">
+            <p className="text-xs text-text-secondary mb-1">Net Profit (Annual)</p>
+            <p className={`text-4xl font-black ${netProfit >= 0 ? 'text-neon-cortex-green' : 'text-red-400'}`}>
+              ${Math.round(netProfit).toLocaleString()}
+            </p>
+            <p className="text-xs text-text-secondary mt-1">{profitMargin.toFixed(1)}% margin</p>
           </div>
 
           <div className="grid md:grid-cols-2 gap-4 pt-4 border-t border-white/10">
@@ -373,7 +594,7 @@ export default function AdminPricingCalculator() {
 
           <div className="mt-4 p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
             <p className="text-xs text-blue-300">
-              <strong>Formula:</strong> Revenue ({numTeams} teams × {usersPerTeam} users × ${discountedPrice.toFixed(2)}) - Partner Commission ({partnerCommission}%) - Costs ({numUsers.toLocaleString()} users × ${costPerSeat}) = Net Profit
+              <strong>Formula:</strong> Annual Revenue ({numUsers} users × ${discountedPrice.toFixed(2)}/mo × 12) - Partner Commission ({partnerCommission}%) - Variable Costs ({numUsers} users × ${costPerSeat}/mo × 12) - Hard Costs (${Math.round(totalHardCosts).toLocaleString()}) = Net Profit
             </p>
           </div>
         </LiquidGlass>
