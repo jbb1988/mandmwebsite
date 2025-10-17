@@ -22,7 +22,7 @@ export const SITE_CONFIG = {
     'baseball team management',
     'athletic development',
   ],
-} as const;
+};
 
 export interface PageSEO {
   title: string;
