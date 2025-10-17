@@ -12,9 +12,13 @@ export default function AdminPricingCalculator() {
   // Simple profitability inputs
   const [pricePerSeat, setPricePerSeat] = useState(119);
   const [costPerSeat, setCostPerSeat] = useState(15);
-  const [numUsers, setNumUsers] = useState(200);
+  const [numTeams, setNumTeams] = useState(15);
+  const [usersPerTeam, setUsersPerTeam] = useState(14);
   const [volumeDiscount, setVolumeDiscount] = useState(10); // %
   const [partnerCommission, setPartnerCommission] = useState(10); // %
+
+  // Calculate total users from teams
+  const numUsers = numTeams * usersPerTeam;
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,18 +43,20 @@ export default function AdminPricingCalculator() {
       inputs: {
         pricePerSeat,
         costPerSeat,
-        numUsers,
+        numTeams,
+        usersPerTeam,
+        totalUsers: numUsers,
         volumeDiscount,
         partnerCommission
       },
       calculated: {
         discountedPrice: discountedPrice.toFixed(2),
-        grossRevenue: grossRevenue.toFixed(2),
-        partnerPayout: partnerPayout.toFixed(2),
-        totalCosts: totalCosts.toFixed(2),
-        netProfit: netProfit.toFixed(2),
+        grossRevenue: Math.round(grossRevenue),
+        partnerPayout: Math.round(partnerPayout),
+        totalCosts: Math.round(totalCosts),
+        netProfit: Math.round(netProfit),
         profitMargin: profitMargin.toFixed(2) + '%',
-        profitPerUser: profitPerUser.toFixed(2)
+        profitPerUser: Math.round(profitPerUser)
       }
     };
 
@@ -156,16 +162,32 @@ export default function AdminPricingCalculator() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold mb-2">Number of Users: {numUsers}</label>
+                <label className="block text-sm font-semibold mb-2">Number of Teams: {numTeams}</label>
                 <input
                   type="range"
-                  min="10"
-                  max="5000"
-                  step="50"
-                  value={numUsers}
-                  onChange={(e) => setNumUsers(parseInt(e.target.value))}
+                  min="1"
+                  max="500"
+                  step="1"
+                  value={numTeams}
+                  onChange={(e) => setNumTeams(parseInt(e.target.value))}
                   className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-neon-cortex-blue"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold mb-2">Users per Team: {usersPerTeam}</label>
+                <input
+                  type="range"
+                  min="1"
+                  max="50"
+                  step="1"
+                  value={usersPerTeam}
+                  onChange={(e) => setUsersPerTeam(parseInt(e.target.value))}
+                  className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-neon-cortex-blue"
+                />
+                <p className="text-xs text-text-secondary mt-1">
+                  Total Users: {numUsers.toLocaleString()}
+                </p>
               </div>
             </div>
           </LiquidGlass>
@@ -221,26 +243,26 @@ export default function AdminPricingCalculator() {
           <div className="grid md:grid-cols-4 gap-6 mb-6">
             <div className="text-center p-4 bg-white/5 rounded-lg border border-white/10">
               <p className="text-xs text-text-secondary mb-1">Gross Revenue</p>
-              <p className="text-2xl font-black text-neon-cortex-blue">${grossRevenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
-              <p className="text-xs text-text-secondary mt-1">{numUsers} × ${discountedPrice.toFixed(2)}</p>
+              <p className="text-2xl font-black text-neon-cortex-blue">${Math.round(grossRevenue).toLocaleString()}</p>
+              <p className="text-xs text-text-secondary mt-1">{numTeams} teams × {usersPerTeam} users × ${discountedPrice.toFixed(2)}</p>
             </div>
 
             <div className="text-center p-4 bg-white/5 rounded-lg border border-white/10">
               <p className="text-xs text-text-secondary mb-1">Partner Payout</p>
-              <p className="text-2xl font-black text-red-400">-${partnerPayout.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
+              <p className="text-2xl font-black text-red-400">-${Math.round(partnerPayout).toLocaleString()}</p>
               <p className="text-xs text-text-secondary mt-1">{partnerCommission}% of revenue</p>
             </div>
 
             <div className="text-center p-4 bg-white/5 rounded-lg border border-white/10">
               <p className="text-xs text-text-secondary mb-1">Total Costs</p>
-              <p className="text-2xl font-black text-red-400">-${totalCosts.toLocaleString('en-US', { minimumFractionDigits: 2 })}</p>
-              <p className="text-xs text-text-secondary mt-1">{numUsers} × ${costPerSeat}</p>
+              <p className="text-2xl font-black text-red-400">-${Math.round(totalCosts).toLocaleString()}</p>
+              <p className="text-xs text-text-secondary mt-1">{numUsers.toLocaleString()} users × ${costPerSeat}</p>
             </div>
 
             <div className="text-center p-4 bg-gradient-to-br from-neon-cortex-green/20 to-solar-surge-orange/20 rounded-lg border border-neon-cortex-green/30">
               <p className="text-xs text-text-secondary mb-1">Net Profit</p>
               <p className={`text-3xl font-black ${netProfit >= 0 ? 'text-neon-cortex-green' : 'text-red-400'}`}>
-                ${netProfit.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                ${Math.round(netProfit).toLocaleString()}
               </p>
               <p className="text-xs text-text-secondary mt-1">{profitMargin.toFixed(1)}% margin</p>
             </div>
@@ -250,7 +272,7 @@ export default function AdminPricingCalculator() {
             <div className="p-4 bg-white/5 rounded-lg">
               <p className="text-sm text-text-secondary mb-1">Profit per User</p>
               <p className={`text-xl font-black ${profitPerUser >= 0 ? 'text-neon-cortex-green' : 'text-red-400'}`}>
-                ${profitPerUser.toFixed(2)}/user
+                ${Math.round(profitPerUser)}/user
               </p>
             </div>
 
@@ -268,7 +290,7 @@ export default function AdminPricingCalculator() {
 
           <div className="mt-4 p-4 bg-blue-500/10 rounded-lg border border-blue-500/20">
             <p className="text-xs text-blue-300">
-              <strong>Formula:</strong> Revenue ({numUsers} users × ${discountedPrice.toFixed(2)}) - Partner Commission ({partnerCommission}%) - Costs ({numUsers} × ${costPerSeat}) = Net Profit
+              <strong>Formula:</strong> Revenue ({numTeams} teams × {usersPerTeam} users × ${discountedPrice.toFixed(2)}) - Partner Commission ({partnerCommission}%) - Costs ({numUsers.toLocaleString()} users × ${costPerSeat}) = Net Profit
             </p>
           </div>
         </LiquidGlass>
