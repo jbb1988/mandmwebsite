@@ -3,11 +3,12 @@ import './globals.css';
 import Navigation from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { ToltScript } from '@/components/ToltScript';
+import { OrganizationSchema, WebSiteSchema, SoftwareApplicationSchema } from '@/components/seo/StructuredData';
+import { generateMetadata } from '@/config/seo';
 
 export const metadata: Metadata = {
-  title: 'Mind & Muscle | Elite Sports Training Platform',
-  description: 'Transform your athletes with comprehensive mental and physical training. Team licensing, partner programs, and cutting-edge sports performance technology.',
-  keywords: ['sports training', 'mental training', 'strength training', 'team licensing', 'athlete development'],
+  ...generateMetadata('home'),
+  metadataBase: new URL('https://mindandmuscle.ai'),
   viewport: {
     width: 'device-width',
     initialScale: 1,
@@ -23,27 +24,8 @@ export const metadata: Metadata = {
     statusBarStyle: 'black-translucent',
     title: 'Mind & Muscle',
   },
-  openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    url: 'https://mindandmuscle.ai',
-    siteName: 'Mind & Muscle',
-    title: 'Mind & Muscle | 100% Baseball Training',
-    description: 'The only app built exclusively for baseball players. AI coaches for mind, muscle, and game IQ. Train smarter, recover faster, outthink every play.',
-    images: [
-      {
-        url: 'https://mindandmuscle.ai/assets/images/og-image.png',
-        width: 1200,
-        height: 630,
-        alt: 'Mind & Muscle - 100% Baseball Training',
-      },
-    ],
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Mind & Muscle | 100% Baseball Training',
-    description: 'The only app built exclusively for baseball players. AI coaches for mind, muscle, and game IQ. Train smarter, recover faster, outthink every play.',
-    images: ['https://mindandmuscle.ai/assets/images/og-image.png'],
+  verification: {
+    google: 'UguKt1huYwNQyN2tdO9WWTpBplOaSckrQ75P44-CEt8',
   },
 };
 
@@ -54,6 +36,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <OrganizationSchema />
+        <WebSiteSchema />
+        <SoftwareApplicationSchema />
+      </head>
       <body className="antialiased">
         <ToltScript />
         <div className="animated-bg min-h-screen flex flex-col">
