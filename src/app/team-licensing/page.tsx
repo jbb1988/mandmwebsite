@@ -510,6 +510,155 @@ function TeamLicensingContent() {
         </div>
       </div>
 
+      {/* Complete Development System - Value Story */}
+      <div className="max-w-7xl mx-auto mb-32">
+        <div className="text-center mb-16">
+          <div className="inline-block mb-8">
+            <LiquidGlass variant="blue" rounded="full" padding="none" glow={true} className="px-6 py-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-6 h-6 text-neon-cortex-blue drop-shadow-[0_0_12px_rgba(14,165,233,0.8)]" />
+                <span className="text-base md:text-lg font-bold">COMPLETE DEVELOPMENT SYSTEM</span>
+              </div>
+            </LiquidGlass>
+          </div>
+          <GradientTextReveal
+            text="One Platform. Infinite Possibilities."
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed"
+            gradientFrom="#0EA5E9"
+            gradientTo="#F97316"
+            delay={0.2}
+          />
+          <p className="text-xl sm:text-2xl text-gray-300 max-w-4xl mx-auto font-medium leading-relaxed">
+            Stop paying for fragmented solutions. Get everything your athletes need in one intelligent system.
+          </p>
+        </div>
+
+        <div className="grid lg:grid-cols-2 gap-8">
+          {/* The Traditional Approach */}
+          <LiquidGlass variant="neutral" className="p-8 border-2 border-red-500/30">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-3 h-3 bg-red-500 rounded-full" style={{boxShadow: '0 0 12px rgba(239,68,68,0.8)'}} />
+              <h3 className="text-2xl md:text-3xl font-black text-red-400">The Traditional Approach</h3>
+            </div>
+
+            <p className="text-gray-400 mb-6 text-lg">Piecing together multiple apps creates complexity, not champions:</p>
+
+            <div className="space-y-3 mb-8">
+              {[
+                { app: 'Team communication platform', cost: '$0-50/mo' },
+                { app: 'Mental performance training', cost: '$15-30/mo' },
+                { app: 'Video swing analysis', cost: '$20-50/mo' },
+                { app: 'Strength & conditioning', cost: '$10-20/mo' },
+                { app: 'Nutrition planning', cost: '$15-30/mo' },
+                { app: 'Baseball IQ development', cost: '$10-25/mo' },
+                { app: 'Goal tracking system', cost: '$5-15/mo' },
+              ].map((item, i) => (
+                <div key={i} className="flex items-start justify-between gap-4 p-3 rounded-lg bg-red-500/5 border border-red-500/20">
+                  <div className="flex items-start gap-2">
+                    <X className="w-4 h-4 text-red-400 flex-shrink-0 mt-1" />
+                    <span className="text-gray-400 text-sm">{item.app}</span>
+                  </div>
+                  <span className="text-red-400 font-semibold text-sm whitespace-nowrap">{item.cost}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="pt-6 border-t border-red-500/30 space-y-4">
+              <div className="flex items-baseline justify-between">
+                <span className="text-lg font-semibold text-gray-300">Monthly per athlete:</span>
+                <span className="text-3xl font-black text-red-400">$75-220</span>
+              </div>
+              <div className="flex items-baseline justify-between">
+                <span className="text-xl font-bold text-gray-200">Annual per athlete:</span>
+                <span className="text-4xl font-black text-red-400">$900-2,640</span>
+              </div>
+            </div>
+
+            <div className="mt-6 p-4 rounded-xl bg-red-500/10 border border-red-500/30">
+              <p className="text-xs text-gray-400 leading-relaxed">
+                <strong className="text-red-400 text-sm">The Hidden Costs:</strong> 7 different logins, 7 learning curves, 7 monthly bills, data that never connects, and athletes who give up because it's too complicated.
+              </p>
+            </div>
+          </LiquidGlass>
+
+          {/* The Mind & Muscle Way */}
+          <LiquidGlass variant="blue" glow={true} className="p-8 border-2 border-neon-cortex-blue/50 relative">
+            {/* Glow effect */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-neon-cortex-blue via-solar-surge-orange to-neon-cortex-blue opacity-20 blur-2xl rounded-3xl animate-pulse" />
+
+            <div className="relative">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-3 h-3 bg-neon-cortex-blue rounded-full animate-pulse" style={{boxShadow: '0 0 12px rgba(14,165,233,0.8)'}} />
+                <h3 className="text-2xl md:text-3xl font-black bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">The Mind & Muscle Way</h3>
+              </div>
+
+              <p className="text-gray-200 mb-6 text-lg">One intelligent platform. All development tools. Actually learns.</p>
+
+              <div className="space-y-3 mb-8">
+                {[
+                  { feature: 'Team communication & events', tag: 'Built-in' },
+                  { feature: 'AI mental training coach', tag: 'Adaptive' },
+                  { feature: 'Swing Lab video analysis', tag: 'Instant' },
+                  { feature: 'Position-specific strength', tag: 'AI-powered' },
+                  { feature: 'Performance nutrition', tag: 'Personalized' },
+                  { feature: '186 baseball IQ scenarios', tag: 'Game-ready' },
+                  { feature: 'AI goal engineering', tag: 'Coach feedback' },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-start justify-between gap-4 p-3 rounded-lg bg-neon-cortex-blue/10 border border-neon-cortex-blue/30">
+                    <div className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-1" style={{filter: 'drop-shadow(0 0 8px rgba(14,165,233,0.8))'}} />
+                      <span className="text-white text-sm font-semibold">{item.feature}</span>
+                    </div>
+                    <span className="text-neon-cortex-blue font-bold text-xs whitespace-nowrap">{item.tag}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="pt-6 border-t border-neon-cortex-blue/30 space-y-4">
+                <div className="flex items-baseline justify-between">
+                  <span className="text-lg font-semibold text-gray-200">Monthly per athlete:</span>
+                  <span className="text-3xl font-black text-solar-surge-orange drop-shadow-[0_0_20px_rgba(249,115,22,0.6)]">$9.92</span>
+                </div>
+                <div className="flex items-baseline justify-between">
+                  <span className="text-xl font-bold text-gray-100">Annual per athlete:</span>
+                  <span className="text-4xl font-black text-solar-surge-orange drop-shadow-[0_0_24px_rgba(249,115,22,0.6)]">$119</span>
+                </div>
+                <div className="pt-4 border-t border-neon-cortex-blue/20">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-xl font-bold text-neon-cortex-green">You Save:</span>
+                    <span className="text-3xl font-black text-neon-cortex-green">$780-2,520</span>
+                  </div>
+                  <p className="text-xs text-gray-400 mt-2">Per athlete, per year</p>
+                </div>
+              </div>
+
+              <div className="mt-6 p-4 rounded-xl bg-gradient-to-br from-neon-cortex-blue/20 via-solar-surge-orange/10 to-transparent border-2 border-neon-cortex-blue/40">
+                <p className="text-xs text-gray-200 leading-relaxed mb-2">
+                  <strong className="text-neon-cortex-blue text-sm">The Difference:</strong> One login. One learning AI that connects swing videos, workouts, mental training, and goals. One system that improves with every session.
+                </p>
+                <p className="text-white font-bold text-sm">
+                  This is development. Fully integrated. Baseball-specific.
+                </p>
+              </div>
+            </div>
+          </LiquidGlass>
+        </div>
+
+        {/* Bottom Value Statement */}
+        <div className="mt-12 text-center">
+          <LiquidGlass variant="neutral" rounded="2xl" className="p-8 max-w-4xl mx-auto [&>div:first-child]:bg-gradient-to-r [&>div:first-child]:from-neon-cortex-blue/5 [&>div:first-child]:via-solar-surge-orange/5 [&>div:first-child]:to-neon-cortex-blue/5">
+            <p className="text-xl sm:text-2xl md:text-3xl font-medium text-gray-300 mb-4 leading-tight">
+              Stop paying more for less.
+            </p>
+            <p className="text-2xl sm:text-3xl md:text-4xl font-black">
+              <span className="text-white">Get the </span>
+              <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">complete development system</span>
+              <span className="text-white"> your athletes deserve.</span>
+            </p>
+          </LiquidGlass>
+        </div>
+      </div>
+
       {/* Feature Comparison Section - Team Licensing Focus */}
       <div className="max-w-7xl mx-auto mb-32">
         <div className="text-center mb-20">

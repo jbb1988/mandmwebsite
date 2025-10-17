@@ -490,6 +490,128 @@ export default function PartnerProgramPage() {
         </div>
       </div>
 
+      {/* Why Partners Choose Mind & Muscle - Competitive Talking Points */}
+      <div className="max-w-7xl mx-auto mb-20">
+        <GradientTextReveal
+          text="What Makes Mind & Muscle Easy to Sell"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
+          gradientFrom="#0EA5E9"
+          gradientTo="#F97316"
+          delay={0.2}
+        />
+        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
+          These talking points help partners explain why Mind & Muscle is different from other apps in the market.
+        </p>
+
+        <div className="space-y-6">
+          {/* Talking Point 1: All-in-One Integration */}
+          <LiquidGlass variant="blue" className="p-8">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-neon-cortex-blue/20 flex items-center justify-center">
+                <Zap className="w-6 h-6 text-neon-cortex-blue" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-black mb-3 text-neon-cortex-blue">All-In-One Integration</h3>
+                <p className="text-text-secondary mb-4 leading-relaxed">
+                  <strong className="text-white">What coaches are dealing with now:</strong> Juggling 7+ different apps (team communication, mental training, video analysis, strength training, nutrition, IQ training, goal tracking). Multiple monthly payments. Data that never connects. Athletes who quit because it's too complicated.
+                </p>
+                <p className="text-gray-200 leading-relaxed">
+                  <strong className="text-neon-cortex-blue">Mind & Muscle solution:</strong> One intelligent platform where everything connects. The AI learns from swing videos, workouts, mental training, and goals—making smarter recommendations across all areas. One login. One annual payment. Development that actually integrates.
+                </p>
+                <div className="mt-4 p-4 bg-neon-cortex-blue/10 border border-neon-cortex-blue/30 rounded-lg">
+                  <p className="text-sm text-gray-300">
+                    💡 <strong>Pitch angle:</strong> "Stop piecing together 7 apps that cost $900-2,640/year per athlete. Get everything integrated for $119/year."
+                  </p>
+                </div>
+              </div>
+            </div>
+          </LiquidGlass>
+
+          {/* Talking Point 2: Baseball-Specific AI */}
+          <LiquidGlass variant="orange" className="p-8">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-solar-surge-orange/20 flex items-center justify-center">
+                <Target className="w-6 h-6 text-solar-surge-orange" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-black mb-3 text-solar-surge-orange">Built from Scratch for Baseball</h3>
+                <p className="text-text-secondary mb-4 leading-relaxed">
+                  <strong className="text-white">What coaches are dealing with now:</strong> Generic multi-sport apps with a "baseball filter" slapped on. Mental training designed for general athletes. Strength programs not optimized for rotational power. Scenarios that don't match real game situations.
+                </p>
+                <p className="text-gray-200 leading-relaxed">
+                  <strong className="text-solar-surge-orange">Mind & Muscle solution:</strong> Every drill designed for baseball movements. AI trained exclusively on baseball content. 186 real game scenarios. Position-specific strength training (pitchers get rotational power, catchers get explosive legs). Not adapted—purpose-built.
+                </p>
+                <div className="mt-4 p-4 bg-solar-surge-orange/10 border border-solar-surge-orange/30 rounded-lg">
+                  <p className="text-sm text-gray-300">
+                    💡 <strong>Pitch angle:</strong> "Unlike multi-sport apps, Mind & Muscle was built exclusively for baseball players. Every feature is designed for your sport."
+                  </p>
+                </div>
+              </div>
+            </div>
+          </LiquidGlass>
+
+          {/* Talking Point 3: Adaptive Learning AI */}
+          <LiquidGlass variant="blue" className="p-8">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-neon-cortex-blue/20 flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-neon-cortex-blue" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-black mb-3 text-neon-cortex-blue">AI That Actually Learns</h3>
+                <p className="text-text-secondary mb-4 leading-relaxed">
+                  <strong className="text-white">What coaches are dealing with now:</strong> Static content libraries. One-size-fits-all training programs. Apps that deliver the same workouts to every athlete regardless of position, skill level, or progress. No personalization. No adaptation.
+                </p>
+                <p className="text-gray-200 leading-relaxed">
+                  <strong className="text-neon-cortex-blue">Mind & Muscle solution:</strong> AI creates a complete profile of each athlete. Learns from every session, workout, and analysis. Cross-feature insights: swing analysis identifies timing issues → Mind Coach recommends focus training → Goals AI suggests milestones → Muscle Coach designs bat speed workouts. Everything connects and improves together.
+                </p>
+                <div className="mt-4 p-4 bg-neon-cortex-blue/10 border border-neon-cortex-blue/30 rounded-lg">
+                  <p className="text-sm text-gray-300">
+                    💡 <strong>Pitch angle:</strong> "Other apps deliver the same content to everyone. Mind & Muscle's AI learns each athlete's strengths and gaps, then engineers personalized development plans."
+                  </p>
+                </div>
+              </div>
+            </div>
+          </LiquidGlass>
+
+          {/* Talking Point 4: Team Value Proposition */}
+          <LiquidGlass variant="orange" className="p-8">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-solar-surge-orange/20 flex items-center justify-center">
+                <Users className="w-6 h-6 text-solar-surge-orange" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-2xl font-black mb-3 text-solar-surge-orange">Beyond Team Logistics</h3>
+                <p className="text-text-secondary mb-4 leading-relaxed">
+                  <strong className="text-white">What coaches are dealing with now:</strong> Free team communication apps handle logistics (schedules, messages, stats) but offer zero athlete development. When practice ends, athletes are on their own for mental training, strength work, and skill development.
+                </p>
+                <p className="text-gray-200 leading-relaxed">
+                  <strong className="text-solar-surge-orange">Mind & Muscle solution:</strong> Team communication PLUS 7 AI development tools. Yes, we have scheduling and team chat. But we also have AI mental training, swing analysis, position-specific strength programs, baseball IQ scenarios, nutrition planning, and goal coaching. We're not replacing team logistics apps—we're adding what happens between games.
+                </p>
+                <div className="mt-4 p-4 bg-solar-surge-orange/10 border border-solar-surge-orange/30 rounded-lg">
+                  <p className="text-sm text-gray-300">
+                    💡 <strong>Pitch angle:</strong> "Team communication apps track what happened. Mind & Muscle develops what happens next. Get logistics + athlete development in one platform."
+                  </p>
+                </div>
+              </div>
+            </div>
+          </LiquidGlass>
+        </div>
+
+        {/* Bottom CTA Box */}
+        <div className="mt-12">
+          <LiquidGlass variant="blue" glow={true} className="p-8 text-center">
+            <h3 className="text-2xl font-black mb-4">These Talking Points Make Sales Easy</h3>
+            <p className="text-text-secondary max-w-3xl mx-auto mb-6 leading-relaxed">
+              Focus on innovation and integration, not competitor comparisons. Coaches are tired of fragmented solutions. Mind & Muscle solves real problems they're already experiencing. Your job is to connect them to what they need.
+            </p>
+            <div className="inline-flex items-center gap-2 px-6 py-3 bg-neon-cortex-green/20 border-2 border-neon-cortex-green/40 rounded-xl">
+              <Check className="w-5 h-5 text-neon-cortex-green" />
+              <span className="font-bold text-neon-cortex-green">Approved partners get detailed sales guides with these talking points</span>
+            </div>
+          </LiquidGlass>
+        </div>
+      </div>
+
       {/* Interactive Calculator */}
       <div className="max-w-7xl mx-auto mb-20">
         <EnhancedEarningsCalculator />

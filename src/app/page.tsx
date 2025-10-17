@@ -276,13 +276,18 @@ export default function HomePage() {
 
             {/* Subheading - 20-22px Medium Weight */}
             <FadeInWhenVisible delay={1.2} direction="up">
-              <p className="text-[20px] sm:text-[22px] text-gray-200 mb-8 leading-relaxed max-w-2xl font-medium" style={{textShadow: '0 2px 12px rgba(0,0,0,0.7)'}}>
-                Train smarter, recover faster, and outthink every play with the all-in-one performance app designed for baseball athletes.
+              <p className="text-[20px] sm:text-[22px] text-gray-200 mb-4 leading-relaxed max-w-2xl font-medium" style={{textShadow: '0 2px 12px rgba(0,0,0,0.7)'}}>
+                The first AI platform that develops complete baseball players. Seven integrated apps. One intelligent system. Adapts to every athlete.
+              </p>
+            </FadeInWhenVisible>
+            <FadeInWhenVisible delay={1.3} direction="up">
+              <p className="text-[18px] sm:text-[20px] text-gray-300 mb-8 leading-relaxed max-w-2xl" style={{textShadow: '0 2px 12px rgba(0,0,0,0.7)'}}>
+                Train smarter, recover faster, and outthink every play with AI that learns from your swing videos, mental training, goals, and workouts.
               </p>
             </FadeInWhenVisible>
 
             {/* Primary CTA */}
-            <FadeInWhenVisible delay={1.3} direction="up" className="mb-6">
+            <FadeInWhenVisible delay={1.5} direction="up" className="mb-6">
               <Link href="#pricing" className="inline-block group">
                 <div className="relative px-10 py-5 bg-white/10 backdrop-blur-md border-2 border-white/30 rounded-2xl hover:border-neon-cortex-blue hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(14,165,233,0.6)]">
                   <div className="flex items-center gap-3">
@@ -1292,6 +1297,165 @@ export default function HomePage() {
                   <span className="text-white">This isn't motivation. It's </span>
                   <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent" style={{textShadow: '0 0 30px rgba(14,165,233,0.5)'}}>
                     mental and physical armor
+                  </span>
+                  <span className="text-white">.</span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* All-In-One Development Platform - Innovation-Focused */}
+      <section className="relative py-48 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Deep Navy Background */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0A0E1F] via-[#0F1123] to-[#0A0E1F]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.9)_100%)]" />
+
+        {/* Subtle Baseball Stitching Pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{
+          backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 100px, rgba(255,255,255,0.1) 100px, rgba(255,255,255,0.1) 102px)',
+        }} />
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          {/* Header */}
+          <div className="text-center mb-20">
+            <div className="inline-flex items-center gap-3 px-6 py-3 backdrop-blur-sm bg-white/5 border border-solar-surge-orange/30 rounded-full mb-8">
+              <div className="w-2 h-2 bg-solar-surge-orange rounded-full animate-pulse" style={{boxShadow: '0 0 12px rgba(249,115,22,0.8)'}} />
+              <span className="text-sm md:text-base font-bold text-gray-200 tracking-wide">ALL-IN-ONE PLATFORM</span>
+            </div>
+
+            <h2 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black mb-6 leading-[1.1]">
+              <span className="text-white" style={{textShadow: '0 4px 30px rgba(0,0,0,0.9)'}}>
+                Stop Juggling Apps.
+              </span>
+              <br />
+              <span className="bg-gradient-to-r from-neon-cortex-blue via-mind-primary to-solar-surge-orange bg-clip-text text-transparent" style={{textShadow: '0 0 40px rgba(14,165,233,0.5)'}}>
+                Start Developing Champions.
+              </span>
+            </h2>
+
+            <div className="max-w-5xl mx-auto">
+              <p className="text-2xl sm:text-3xl md:text-4xl text-gray-300 font-medium leading-relaxed mb-8">
+                Most teams piece together 7+ different apps and hope it all works.
+              </p>
+              <p className="text-2xl sm:text-3xl md:text-4xl text-white font-black leading-relaxed">
+                We built one intelligent system that actually learns.
+              </p>
+            </div>
+          </div>
+
+          {/* The Fragmented Way vs The Mind & Muscle Way */}
+          <div className="grid md:grid-cols-2 gap-12 mb-20">
+            {/* Left: The Fragmented Way */}
+            <div className="backdrop-blur-sm bg-white/[0.02] rounded-3xl border border-red-500/30 p-10">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="w-3 h-3 bg-red-500 rounded-full" style={{boxShadow: '0 0 12px rgba(239,68,68,0.8)'}} />
+                <h3 className="text-3xl md:text-4xl font-black text-red-400">The Fragmented Way</h3>
+              </div>
+
+              <div className="space-y-4">
+                {[
+                  { name: 'Team communication app', cost: '$0-50/mo' },
+                  { name: 'Mental training subscription', cost: '$15-30/mo' },
+                  { name: 'Video analysis tool', cost: '$20-50/mo' },
+                  { name: 'Strength training app', cost: '$10-20/mo' },
+                  { name: 'Nutrition planning service', cost: '$15-30/mo' },
+                  { name: 'Baseball IQ training', cost: '$10-25/mo' },
+                  { name: 'Goal tracking system', cost: '$5-15/mo' },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-start justify-between gap-4 p-4 rounded-xl bg-red-500/5 border border-red-500/20">
+                    <div className="flex items-start gap-3">
+                      <X className="w-5 h-5 text-red-400 flex-shrink-0 mt-1" />
+                      <span className="text-gray-400 font-medium">{item.name}</span>
+                    </div>
+                    <span className="text-red-400 font-bold whitespace-nowrap">{item.cost}</span>
+                  </div>
+                ))}
+
+                <div className="mt-8 pt-6 border-t border-red-500/30">
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-xl font-bold text-gray-300">Total Monthly Cost:</span>
+                    <span className="text-4xl font-black text-red-400">$75-220</span>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-2">Per athlete, per month</p>
+                  <p className="text-lg text-red-400 font-bold mt-4">$900-2,640/year</p>
+                </div>
+              </div>
+
+              <div className="mt-8 p-6 rounded-xl bg-red-500/10 border border-red-500/30">
+                <p className="text-sm text-gray-400 leading-relaxed">
+                  <strong className="text-red-400">The Reality:</strong> Managing 7 different logins, learning 7 different interfaces, paying 7 different bills, and hoping the data somehow connects. <span className="text-white font-semibold">It doesn't.</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Right: The Mind & Muscle Way */}
+            <div className="backdrop-blur-sm bg-white/[0.02] rounded-3xl border-2 border-neon-cortex-blue/50 p-10 relative">
+              {/* Animated glow effect */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-neon-cortex-blue via-solar-surge-orange to-neon-cortex-blue opacity-20 blur-2xl rounded-3xl animate-pulse" />
+
+              <div className="relative">
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="w-3 h-3 bg-neon-cortex-blue rounded-full animate-pulse" style={{boxShadow: '0 0 12px rgba(14,165,233,0.8)'}} />
+                  <h3 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">The Mind & Muscle Way</h3>
+                </div>
+
+                <div className="space-y-4">
+                  {[
+                    { name: 'Team communication & scheduling', feature: 'Built-in' },
+                    { name: 'AI mental training coach', feature: 'Learns from you' },
+                    { name: 'AI swing analysis', feature: 'Instant feedback' },
+                    { name: 'Position-specific strength training', feature: 'Adaptive AI' },
+                    { name: 'Performance nutrition planning', feature: 'AI personalized' },
+                    { name: '186 baseball IQ scenarios', feature: 'Real game situations' },
+                    { name: 'AI-powered goal engineering', feature: 'Coach feedback loop' },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-start justify-between gap-4 p-4 rounded-xl bg-neon-cortex-blue/10 border border-neon-cortex-blue/30">
+                      <div className="flex items-start gap-3">
+                        <Check className="w-5 h-5 text-neon-cortex-blue flex-shrink-0 mt-1" style={{filter: 'drop-shadow(0 0 8px rgba(14,165,233,0.8))'}} />
+                        <span className="text-white font-semibold">{item.name}</span>
+                      </div>
+                      <span className="text-neon-cortex-blue font-bold text-sm whitespace-nowrap">{item.feature}</span>
+                    </div>
+                  ))}
+
+                  <div className="mt-8 pt-6 border-t border-neon-cortex-blue/30">
+                    <div className="flex items-baseline justify-between">
+                      <span className="text-xl font-bold text-gray-200">One Platform:</span>
+                      <span className="text-4xl font-black text-solar-surge-orange drop-shadow-[0_0_24px_rgba(249,115,22,0.6)]">$119</span>
+                    </div>
+                    <p className="text-sm text-gray-400 mt-2">Per athlete, per year</p>
+                    <p className="text-2xl text-neon-cortex-green font-black mt-4">Save $780-2,520/year</p>
+                  </div>
+                </div>
+
+                <div className="mt-8 p-6 rounded-xl bg-gradient-to-br from-neon-cortex-blue/20 via-solar-surge-orange/10 to-transparent border-2 border-neon-cortex-blue/40">
+                  <p className="text-sm text-gray-200 leading-relaxed mb-4">
+                    <strong className="text-neon-cortex-blue">The Difference:</strong> One login. One learning AI that connects your swing videos, mental training, goals, and workouts. One system that gets smarter every day.
+                  </p>
+                  <p className="text-white font-bold text-base">
+                    This is development. Fully integrated.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Statement */}
+          <div className="text-center max-w-5xl mx-auto">
+            <div className="inline-block relative group">
+              {/* Animated Glow */}
+              <div className="absolute -inset-8 bg-gradient-to-r from-neon-cortex-blue via-solar-surge-orange to-neon-cortex-blue opacity-30 blur-3xl group-hover:opacity-50 transition-opacity" />
+
+              <div className="relative px-12 py-8 bg-gradient-to-r from-neon-cortex-blue/10 via-solar-surge-orange/10 to-neon-cortex-blue/10 rounded-2xl border-2 border-white/20 backdrop-blur-sm">
+                <p className="text-2xl sm:text-3xl md:text-4xl font-medium text-gray-300 leading-tight mb-4">
+                  While other teams juggle apps and pray for progress,
+                </p>
+                <p className="text-3xl sm:text-4xl md:text-5xl font-black">
+                  <span className="text-white">your athletes train with </span>
+                  <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent" style={{textShadow: '0 0 30px rgba(14,165,233,0.5)'}}>
+                    one intelligent system
                   </span>
                   <span className="text-white">.</span>
                 </p>

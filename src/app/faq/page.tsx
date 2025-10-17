@@ -130,6 +130,30 @@ export default function FAQPage() {
       ]
     },
     {
+      id: 'platform-features',
+      title: 'Platform & Features',
+      icon: Sparkles,
+      color: 'blue',
+      faqs: [
+        {
+          question: 'What makes Mind & Muscle different from other baseball apps?',
+          answer: 'Mind & Muscle is the first AI platform built exclusively for baseball that integrates all aspects of player development. Instead of juggling 7+ different apps (team communication, mental training, video analysis, strength training, nutrition, IQ training, goal tracking), you get one intelligent system where everything connects. The AI learns from your swing videos, workouts, mental training, and goals—continuously improving recommendations across all areas. Every drill, every scenario, every mental training session is designed specifically for baseball movements and situations. We didn\'t adapt generic training for baseball. We built it from scratch for the sport.'
+        },
+        {
+          question: 'Why is an all-in-one platform better than specialized apps?',
+          answer: 'Fragmented apps create fragmented development:\n\n• Data Silos: Your swing analysis doesn\'t inform your strength training. Your mental training doesn\'t connect to your game situations.\n• No Learning: Specialized apps can\'t improve because they only see one piece of your development.\n• Complexity Kills Consistency: Managing 7 logins, 7 interfaces, and 7 monthly bills means most athletes quit before they see results.\n\nMind & Muscle solves this with integration:\n\n• Connected Intelligence: The AI sees your complete player profile and makes smarter recommendations\n• Adaptive Learning: Every session, workout, and analysis makes the entire system smarter\n• One Experience: Log in once. Everything in one place. One annual payment.\n\nDevelopment isn\'t about using the most tools. It\'s about using tools that work together.'
+        },
+        {
+          question: 'How does AI personalization work across the platform?',
+          answer: 'Mind & Muscle\'s AI creates a complete profile of you as a player:\n\n• Position-Specific Intelligence: Pitchers get rotational power workouts. Catchers get explosive leg training. Outfielders get sprint mechanics.\n• Learning From Feedback: After each mental training session, workout, or swing analysis, the AI asks for feedback and adjusts future recommendations.\n• Cross-Feature Insights: Your swing analysis identifies timing issues → Mind Coach recommends focus training → Goals AI suggests practice milestones → Muscle Coach designs bat speed workouts. Everything connects.\n• Adaptive Difficulty: Game Lab scenarios get harder as your mental batting average improves. Workouts progress as you get stronger.\n\nThe system learns your strengths, identifies your gaps, and engineers development plans that actually work—because it sees the complete picture of who you are as a player.'
+        },
+        {
+          question: 'Does Mind & Muscle require internet connection?',
+          answer: 'Partial offline support:\n\n✅ Works Offline:\n• Previously loaded mental training sessions\n• Logged workouts (sync when back online)\n• Game Lab scenarios you\'ve already played\n• Viewing your saved data and history\n\n❌ Requires Internet:\n• AI analysis (Swing Lab, Goals AI, recommendations)\n• Team chat and events\n• Downloading new content\n• Syncing progress across devices\n\nFor best experience, use wifi or cellular data when using AI-powered features.'
+        }
+      ]
+    },
+    {
       id: 'mind-coach',
       title: 'Mind Coach AI - Mental Training',
       iconImage: '/assets/images/Mind AI Coach.png',
