@@ -1,11 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { Lock, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { GradientTextReveal } from '@/components/animations';
 import Image from 'next/image';
+import { createClient } from '@supabase/supabase-js';
 
 function ResetPasswordContent() {
   const [password, setPassword] = useState('');
@@ -16,18 +17,44 @@ function ResetPasswordContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
+  const [sessionReady, setSessionReady] = useState(false);
   const searchParams = useSearchParams();
+  const router = useRouter();
 
-  const accessToken = searchParams.get('access_token');
-  const refreshToken = searchParams.get('refresh_token');
-  const type = searchParams.get('type');
+  const errorParam = searchParams.get('error');
+  const errorDescription = searchParams.get('error_description');
 
   useEffect(() => {
-    // Check if this is a valid password reset link
-    if (type !== 'recovery' || !accessToken) {
-      setError('Invalid or expired password reset link. Please request a new one.');
+    // Handle auth errors from Supabase
+    if (errorParam) {
+      setError(decodeURIComponent(errorDescription || errorParam));
+      return;
     }
-  }, [type, accessToken]);
+
+    // Initialize Supabase client and handle the auth callback
+    const initSupabase = async () => {
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+
+      // Check if we have a session from Supabase auth
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+
+      if (sessionError) {
+        setError('Failed to verify reset link. Please request a new one.');
+        return;
+      }
+
+      if (session) {
+        setSessionReady(true);
+      } else {
+        setError('Invalid or expired password reset link. Please request a new one.');
+      }
+    };
+
+    initSupabase();
+  }, [errorParam, errorDescription]);
 
   // Validate password requirements
   const validatePassword = (pwd: string): string[] => {
@@ -79,27 +106,25 @@ function ResetPasswordContent() {
       return;
     }
 
-    if (!accessToken || !refreshToken) {
+    if (!sessionReady) {
       setError('Invalid reset link. Please request a new password reset email.');
       setLoading(false);
       return;
     }
 
     try {
-      const response = await fetch('/api/auth/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          password,
-          accessToken,
-          refreshToken,
-        }),
+      // Use Supabase client to update the password
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
+
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to reset password');
+      if (updateError) {
+        throw updateError;
       }
 
       setSuccess(true);
@@ -258,7 +283,7 @@ function ResetPasswordContent() {
                     placeholder="Enter new password"
                     autoFocus
                     className="w-full px-4 py-3 pr-12 bg-slate-900 border-2 border-neon-cortex-blue/40 rounded-lg focus:outline-none focus:border-neon-cortex-blue focus:ring-2 focus:ring-neon-cortex-blue/20 transition-all text-white placeholder:text-gray-400 font-medium"
-                    disabled={loading || !accessToken}
+                    disabled={loading || !sessionReady}
                   />
                   <button
                     type="button"
@@ -280,7 +305,7 @@ function ResetPasswordContent() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Confirm new password"
                     className="w-full px-4 py-3 pr-12 bg-slate-900 border-2 border-neon-cortex-blue/40 rounded-lg focus:outline-none focus:border-neon-cortex-blue focus:ring-2 focus:ring-neon-cortex-blue/20 transition-all text-white placeholder:text-gray-400 font-medium"
-                    disabled={loading || !accessToken}
+                    disabled={loading || !sessionReady}
                   />
                   <button
                     type="button"
@@ -303,7 +328,7 @@ function ResetPasswordContent() {
               {/* Submit Button */}
               <button
                 type="submit"
-                disabled={loading || !password || !confirmPassword || validationErrors.length > 0 || !accessToken}
+                disabled={loading || !password || !confirmPassword || validationErrors.length > 0 || !sessionReady}
                 className="w-full px-8 py-4 bg-gradient-to-br from-neon-cortex-blue to-mind-primary rounded-xl border border-neon-cortex-blue/30 hover:border-neon-cortex-blue/50 transition-all duration-300 hover:scale-105 font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 shadow-liquid-glow-blue"
               >
                 {loading ? 'Resetting Password...' : 'Reset Password'}
