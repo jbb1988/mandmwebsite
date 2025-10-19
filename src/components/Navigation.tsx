@@ -25,6 +25,7 @@ export const Navigation: React.FC = () => {
     { href: '/partner-program', label: 'Partner Program' },
     { href: '/faq', label: 'FAQ' },
     { href: '/support', label: 'Support' },
+    { href: '/feedback', label: 'Feedback' },
   ];
 
   return (

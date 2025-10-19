@@ -60,6 +60,32 @@ export function Footer() {
           <TrustBadges variant="inline" showDescription={false} />
         </div>
 
+        {/* Support Links */}
+        <div className="mb-6">
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
+            <Link
+              href="/support"
+              className="text-text-secondary hover:text-starlight-white transition-colors"
+            >
+              Support
+            </Link>
+            <span className="text-text-secondary/30">•</span>
+            <Link
+              href="/feedback"
+              className="text-text-secondary hover:text-starlight-white transition-colors"
+            >
+              Feedback
+            </Link>
+            <span className="text-text-secondary/30">•</span>
+            <Link
+              href="/faq"
+              className="text-text-secondary hover:text-starlight-white transition-colors"
+            >
+              FAQ
+            </Link>
+          </div>
+        </div>
+
         {/* Legal Links */}
         <div className="mb-8">
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">

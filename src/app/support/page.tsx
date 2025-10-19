@@ -56,7 +56,7 @@ function ContactContent() {
       <div>
         <h2 className="text-3xl font-black mb-4">Contact & Support</h2>
         <p className="text-text-secondary mb-6">
-          Need help? Have questions? We're here for you.
+          Need help with a problem? Have technical questions? We're here for you.
         </p>
       </div>
 
@@ -84,6 +84,19 @@ function ContactContent() {
             privacy@mindandmuscle.ai
           </a>
         </div>
+      </div>
+
+      <div className="p-6 rounded-xl bg-neon-cortex-blue/10 border border-neon-cortex-blue/20">
+        <h3 className="text-xl font-bold mb-3">Have Ideas or Suggestions?</h3>
+        <p className="text-text-secondary mb-4">
+          Want to share feature requests, general feedback, or tell us what you love? Use our feedback form to help us improve Mind & Muscle.
+        </p>
+        <a
+          href="/feedback"
+          className="inline-block px-6 py-3 rounded-lg font-semibold bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange hover:opacity-90 transition-all"
+        >
+          Send Feedback
+        </a>
       </div>
 
       <div className="p-6 rounded-xl bg-solar-surge-orange/10 border border-solar-surge-orange/20">
