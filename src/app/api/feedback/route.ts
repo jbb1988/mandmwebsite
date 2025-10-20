@@ -7,6 +7,8 @@ const feedbackSchema = z.object({
   category: z.enum(['bug_report', 'feature_request', 'general_feedback', 'ai_coach_feedback']),
   subject: z.string().min(5, 'Subject must be at least 5 characters').max(200, 'Subject must be less than 200 characters'),
   message: z.string().min(10, 'Message must be at least 10 characters').max(5000, 'Message must be less than 5000 characters'),
+  contactName: z.string().max(100).optional().nullable(),
+  contactEmail: z.string().email('Invalid email address').max(255).optional().nullable().or(z.literal('')),
 });
 
 type FeedbackInput = z.infer<typeof feedbackSchema>;
@@ -108,7 +110,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { category, subject, message } = validationResult.data;
+    const { category, subject, message, contactName, contactEmail } = validationResult.data;
 
     // Initialize Supabase client
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -141,9 +143,11 @@ export async function POST(request: NextRequest) {
       category,
       subject: subject.trim(),
       message: message.trim(),
+      contact_name: contactName?.trim() || null,
+      contact_email: contactEmail?.trim() || null,
       device_info: deviceInfo,
       url,
-      created_at: new Date().toISOString(),
+      // Let database handle created_at with default now()
     };
 
     // Insert feedback into Supabase

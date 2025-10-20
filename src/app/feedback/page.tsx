@@ -12,11 +12,14 @@ interface FormData {
   category: FeedbackCategory;
   subject: string;
   message: string;
+  contactName?: string;
+  contactEmail?: string;
 }
 
 interface FormErrors {
   subject?: string;
   message?: string;
+  contactEmail?: string;
 }
 
 export default function FeedbackPage() {
@@ -24,6 +27,8 @@ export default function FeedbackPage() {
     category: 'general_feedback',
     subject: '',
     message: '',
+    contactName: '',
+    contactEmail: '',
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -51,6 +56,14 @@ export default function FeedbackPage() {
       newErrors.message = 'Please enter your message';
     } else if (formData.message.trim().length < 10) {
       newErrors.message = 'Message must be at least 10 characters';
+    }
+
+    // Validate email if provided
+    if (formData.contactEmail && formData.contactEmail.trim()) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.contactEmail.trim())) {
+        newErrors.contactEmail = 'Please enter a valid email address';
+      }
     }
 
     setErrors(newErrors);
@@ -92,6 +105,8 @@ export default function FeedbackPage() {
         category: 'general_feedback',
         subject: '',
         message: '',
+        contactName: '',
+        contactEmail: '',
       });
       setErrors({});
 
@@ -195,7 +210,7 @@ export default function FeedbackPage() {
                 id="category"
                 value={formData.category}
                 onChange={(e) => setFormData({ ...formData, category: e.target.value as FeedbackCategory })}
-                className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:border-neon-cortex-blue focus:outline-none focus:ring-2 focus:ring-neon-cortex-blue/50 transition-all"
+                className="w-full px-4 py-3 rounded-lg bg-black/30 border-2 border-white/20 text-white focus:border-neon-cortex-blue focus:bg-black/40 focus:outline-none focus:ring-2 focus:ring-neon-cortex-blue/50 transition-all"
               >
                 {categoryOptions.map((option) => (
                   <option key={option.value} value={option.value} className="bg-background-primary text-white">
@@ -216,9 +231,9 @@ export default function FeedbackPage() {
                 value={formData.subject}
                 onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                 placeholder="Brief summary of your feedback"
-                className={`w-full px-4 py-3 rounded-lg bg-white/5 border ${
-                  errors.subject ? 'border-red-500' : 'border-white/10'
-                } text-white placeholder-text-secondary focus:border-neon-cortex-blue focus:outline-none focus:ring-2 focus:ring-neon-cortex-blue/50 transition-all`}
+                className={`w-full px-4 py-3 rounded-lg bg-black/30 border-2 ${
+                  errors.subject ? 'border-red-500' : 'border-white/20'
+                } text-white placeholder-gray-400 focus:border-neon-cortex-blue focus:bg-black/40 focus:outline-none focus:ring-2 focus:ring-neon-cortex-blue/50 transition-all`}
               />
               {errors.subject && (
                 <p className="mt-2 text-sm text-red-400">{errors.subject}</p>
@@ -236,13 +251,62 @@ export default function FeedbackPage() {
                 onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                 placeholder="Please provide details about your feedback..."
                 rows={8}
-                className={`w-full px-4 py-3 rounded-lg bg-white/5 border ${
-                  errors.message ? 'border-red-500' : 'border-white/10'
-                } text-white placeholder-text-secondary focus:border-neon-cortex-blue focus:outline-none focus:ring-2 focus:ring-neon-cortex-blue/50 transition-all resize-none`}
+                className={`w-full px-4 py-3 rounded-lg bg-black/30 border-2 ${
+                  errors.message ? 'border-red-500' : 'border-white/20'
+                } text-white placeholder-gray-400 focus:border-neon-cortex-blue focus:bg-black/40 focus:outline-none focus:ring-2 focus:ring-neon-cortex-blue/50 transition-all resize-none`}
               />
               {errors.message && (
                 <p className="mt-2 text-sm text-red-400">{errors.message}</p>
               )}
+            </div>
+
+            {/* Optional Contact Information */}
+            <div className="pt-4 border-t border-white/10">
+              <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                <span className="text-neon-cortex-blue">Optional:</span> Contact Information
+                <span className="text-xs font-normal text-text-secondary">(for follow-up)</span>
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Name */}
+                <div>
+                  <label htmlFor="contactName" className="block text-xs font-semibold text-text-secondary mb-2 tracking-wider">
+                    YOUR NAME
+                  </label>
+                  <input
+                    type="text"
+                    id="contactName"
+                    value={formData.contactName || ''}
+                    onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
+                    placeholder="John Doe"
+                    className="w-full px-4 py-3 rounded-lg bg-black/30 border-2 border-white/20 text-white placeholder-gray-400 focus:border-neon-cortex-blue focus:bg-black/40 focus:outline-none focus:ring-2 focus:ring-neon-cortex-blue/50 transition-all"
+                  />
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label htmlFor="contactEmail" className="block text-xs font-semibold text-text-secondary mb-2 tracking-wider">
+                    YOUR EMAIL
+                  </label>
+                  <input
+                    type="email"
+                    id="contactEmail"
+                    value={formData.contactEmail || ''}
+                    onChange={(e) => setFormData({ ...formData, contactEmail: e.target.value })}
+                    placeholder="john@example.com"
+                    className={`w-full px-4 py-3 rounded-lg bg-black/30 border-2 ${
+                      errors.contactEmail ? 'border-red-500' : 'border-white/20'
+                    } text-white placeholder-gray-400 focus:border-neon-cortex-blue focus:bg-black/40 focus:outline-none focus:ring-2 focus:ring-neon-cortex-blue/50 transition-all`}
+                  />
+                  {errors.contactEmail && (
+                    <p className="mt-2 text-sm text-red-400">{errors.contactEmail}</p>
+                  )}
+                </div>
+              </div>
+              
+              <p className="text-xs text-text-secondary mt-3 italic">
+                Leave blank for anonymous submission. We'll only use this to follow up if you've reported a bug or requested a feature.
+              </p>
             </div>
 
             {/* Submit Button */}
