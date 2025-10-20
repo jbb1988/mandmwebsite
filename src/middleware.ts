@@ -27,8 +27,7 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/public') ||
     // SEO routes - allow public access for search engines
     pathname === '/robots.txt' ||
-    pathname === '/sitemap.xml' ||
-    pathname === '/' // Homepage for Google to see your brand
+    pathname === '/sitemap.xml'
   ) {
     return NextResponse.next();
   }
