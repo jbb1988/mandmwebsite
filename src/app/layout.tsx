@@ -15,6 +15,22 @@ export const metadata: Metadata = {
     maximumScale: 5,
     userScalable: true,
   },
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '16x16 32x32 48x48' },
+      { url: '/assets/images/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/assets/images/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/assets/images/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+    other: [
+      {
+        rel: 'apple-touch-icon-precomposed',
+        url: '/assets/images/apple-touch-icon.png',
+      },
+    ],
+  },
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#0EA5E9' },
     { media: '(prefers-color-scheme: dark)', color: '#02124A' },
