@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Search, Copy, CheckCircle, AlertCircle } from 'lucide-react';
 import { LiquidGlass } from '@/components/LiquidGlass';
 
@@ -22,6 +23,7 @@ export default function TeamLookupAdmin() {
   const [error, setError] = useState('');
   const [teams, setTeams] = useState<TeamInfo[]>([]);
   const [copied, setCopied] = useState<string | null>(null);
+  const router = useRouter();
 
   const lookupTeams = async () => {
     if (!email.trim()) {
@@ -39,6 +41,12 @@ export default function TeamLookupAdmin() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim() }),
       });
+
+      if (response.status === 401) {
+        // Not authenticated - redirect to login
+        router.push('/admin/login?returnUrl=/admin/team-lookup');
+        return;
+      }
 
       const data = await response.json();
 

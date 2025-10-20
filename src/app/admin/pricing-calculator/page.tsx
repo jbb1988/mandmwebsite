@@ -1,14 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
-import { Calculator, Download, DollarSign, Users, Lock, TrendingUp, Settings } from 'lucide-react';
+import { Calculator, Download, DollarSign, Users, TrendingUp, Settings } from 'lucide-react';
 import jsPDF from 'jspdf';
 
 export default function AdminPricingCalculator() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState('');
+  const [isChecking, setIsChecking] = useState(true);
+  const router = useRouter();
 
   // Simple profitability inputs
   const [pricePerSeat, setPricePerSeat] = useState(119);
@@ -34,14 +36,32 @@ export default function AdminPricingCalculator() {
   // Calculate total users from teams
   const numUsers = numTeams * usersPerTeam;
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (password === process.env.NEXT_PUBLIC_ADMIN_PASSWORD || password === 'mindmuscle2025') {
-      setIsAuthenticated(true);
-    } else {
-      alert('Incorrect password');
-    }
-  };
+  // Check authentication on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        // Make a simple request to check if admin authenticated
+        const response = await fetch('/api/admin/feedback?limit=1');
+
+        if (response.status === 401) {
+          // Not authenticated - redirect to login
+          router.push('/admin/login?returnUrl=/admin/pricing-calculator');
+          return;
+        }
+
+        if (response.ok) {
+          setIsAuthenticated(true);
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        router.push('/admin/login?returnUrl=/admin/pricing-calculator');
+      } finally {
+        setIsChecking(false);
+      }
+    };
+
+    checkAuth();
+  }, [router]);
 
   // Hard costs calculations (convert to annual)
   const monthlyFixedCosts = oneSignalMonthly + revenueCatMonthly + resendMonthly + toltMonthly + googleWorkspaceMonthly + vercelMonthly + claudeCodeMonthly;
@@ -214,38 +234,12 @@ export default function AdminPricingCalculator() {
     doc.save(`profitability-report-${Date.now()}.pdf`);
   };
 
-  if (!isAuthenticated) {
+  if (isChecking || !isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
-        <LiquidGlass variant="blue" className="max-w-md w-full p-8">
-          <div className="text-center mb-6">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-neon-cortex-blue/20 mb-4">
-              <Lock className="w-8 h-8 text-neon-cortex-blue" />
-            </div>
-            <h1 className="text-3xl font-black mb-2">Admin Access Required</h1>
-            <p className="text-text-secondary text-sm">Enter password to access profitability calculator</p>
-          </div>
-
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label htmlFor="password" className="block text-sm font-semibold mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors"
-                placeholder="Enter admin password"
-                autoFocus
-              />
-            </div>
-
-            <LiquidButton type="submit" variant="blue" size="lg" fullWidth={true}>
-              Access Calculator
-            </LiquidButton>
-          </form>
+        <LiquidGlass variant="blue" className="max-w-md w-full p-8 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-neon-cortex-blue mx-auto mb-4"></div>
+          <p className="text-text-secondary">Verifying access...</p>
         </LiquidGlass>
       </div>
     );

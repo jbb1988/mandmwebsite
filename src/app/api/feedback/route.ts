@@ -170,18 +170,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Optionally trigger email notification via edge function
-    // Note: This is optional and can be set up later
-    // if (data?.id) {
-    //   try {
-    //     await supabase.functions.invoke('send-feedback-notification', {
-    //       body: { feedback_id: data.id },
-    //     });
-    //   } catch (emailError) {
-    //     // Log but don't fail the request if email fails
-    //     console.error('Error sending feedback notification:', emailError);
-    //   }
-    // }
+    // Trigger email notification via edge function
+    if (data?.id) {
+      try {
+        await supabase.functions.invoke('send-feedback-notification', {
+          body: { feedback_id: data.id },
+        });
+      } catch (emailError) {
+        // Log but don't fail the request if email fails
+        console.error('Error sending feedback notification:', emailError);
+      }
+    }
 
     return NextResponse.json(
       {

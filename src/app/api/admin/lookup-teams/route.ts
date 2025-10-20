@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { isAdminAuthenticated } from '@/lib/admin-auth';
 
 export async function POST(request: NextRequest) {
   try {
+    // Check admin authentication
+    const isAuthenticated = await isAdminAuthenticated(request);
+
+    if (!isAuthenticated) {
+      return NextResponse.json(
+        { error: 'Unauthorized - Admin access required' },
+        { status: 401 }
+      );
+    }
+
     const { email } = await request.json();
 
     if (!email) {
