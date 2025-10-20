@@ -6,7 +6,7 @@ export function middleware(request: NextRequest) {
   const isProduction = process.env.NODE_ENV === 'production';
   const previewMode = process.env.PREVIEW_MODE === 'true';
 
-  // Skip middleware if not in preview mode
+  // Skip middleware if not in production preview mode
   if (!isProduction || !previewMode) {
     return NextResponse.next();
   }
