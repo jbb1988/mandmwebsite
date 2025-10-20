@@ -46,7 +46,7 @@ export default function AdminPortal() {
     const checkAuth = async () => {
       try {
         // Check if admin authenticated
-        const response = await fetch('/api/admin/feedback?limit=1');
+        const response = await fetch('/api/admin/check-auth');
 
         if (response.status === 401) {
           // Not authenticated - redirect to login
@@ -56,6 +56,9 @@ export default function AdminPortal() {
 
         if (response.ok) {
           setIsAuthenticated(true);
+        } else {
+          // Any other error - redirect to login
+          router.push('/admin/login?returnUrl=/admin');
         }
       } catch (error) {
         console.error('Auth check failed:', error);

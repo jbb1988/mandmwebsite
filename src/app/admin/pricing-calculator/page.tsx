@@ -40,8 +40,8 @@ export default function AdminPricingCalculator() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        // Make a simple request to check if admin authenticated
-        const response = await fetch('/api/admin/feedback?limit=1');
+        // Check if admin authenticated
+        const response = await fetch('/api/admin/check-auth');
 
         if (response.status === 401) {
           // Not authenticated - redirect to login
@@ -51,6 +51,9 @@ export default function AdminPricingCalculator() {
 
         if (response.ok) {
           setIsAuthenticated(true);
+        } else {
+          // Any other error - redirect to login
+          router.push('/admin/login?returnUrl=/admin/pricing-calculator');
         }
       } catch (error) {
         console.error('Auth check failed:', error);
