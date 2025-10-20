@@ -111,23 +111,23 @@ export default function AdminPortal() {
           {adminTools.map((tool) => {
             const Icon = tool.icon;
             return (
-              <LiquidGlass
-                key={tool.href}
-                variant={tool.color}
-                className="p-6 cursor-pointer hover:scale-105 transition-transform"
-                onClick={() => router.push(tool.href)}
-              >
-                <div className="flex flex-col h-full">
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-white/10 mb-4">
-                    <Icon className="w-6 h-6" />
+              <div key={tool.href} onClick={() => router.push(tool.href)} className="cursor-pointer">
+                <LiquidGlass
+                  variant={tool.color}
+                  className="p-6 hover:scale-105 transition-transform"
+                >
+                  <div className="flex flex-col h-full">
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg bg-white/10 mb-4">
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <h3 className="text-xl font-black mb-2">{tool.title}</h3>
+                    <p className="text-text-secondary text-sm flex-1">{tool.description}</p>
+                    <div className="mt-4 text-neon-cortex-blue text-sm font-semibold">
+                      Open →
+                    </div>
                   </div>
-                  <h3 className="text-xl font-black mb-2">{tool.title}</h3>
-                  <p className="text-text-secondary text-sm flex-1">{tool.description}</p>
-                  <div className="mt-4 text-neon-cortex-blue text-sm font-semibold">
-                    Open →
-                  </div>
-                </div>
-              </LiquidGlass>
+                </LiquidGlass>
+              </div>
             );
           })}
         </div>

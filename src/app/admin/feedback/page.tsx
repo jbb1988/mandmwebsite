@@ -185,12 +185,11 @@ export default function FeedbackDashboard() {
         {!loading && feedback.length > 0 && (
           <div className="space-y-4">
             {feedback.map((item) => (
-              <LiquidGlass
-                key={item.id}
-                variant="neutral"
-                className="p-6 cursor-pointer hover:border-neon-cortex-blue/50 transition-all"
-                onClick={() => setSelectedFeedback(item)}
-              >
+              <div key={item.id} onClick={() => setSelectedFeedback(item)} className="cursor-pointer">
+                <LiquidGlass
+                  variant="neutral"
+                  className="p-6 hover:border-neon-cortex-blue/50 transition-all"
+                >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
@@ -230,6 +229,7 @@ export default function FeedbackDashboard() {
                   )}
                 </div>
               </LiquidGlass>
+              </div>
             ))}
           </div>
         )}
