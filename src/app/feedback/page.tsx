@@ -29,6 +29,7 @@ export default function FeedbackPage() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errorDetails, setErrorDetails] = useState<string>('');
 
   const categoryOptions: { value: FeedbackCategory; label: string }[] = [
     { value: 'bug_report', label: 'Bug Report' },
@@ -65,6 +66,7 @@ export default function FeedbackPage() {
 
     setIsSubmitting(true);
     setSubmitStatus('idle');
+    setErrorDetails('');
 
     try {
       const response = await fetch('/api/feedback', {
@@ -75,8 +77,14 @@ export default function FeedbackPage() {
         body: JSON.stringify(formData),
       });
 
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to submit feedback');
+        // Show more detailed error for debugging
+        const errorMsg = data.error || 'Failed to submit feedback';
+        const details = data.details ? JSON.stringify(data.details) : '';
+        setErrorDetails(`${errorMsg}${details ? ': ' + details : ''}`);
+        throw new Error(errorMsg);
       }
 
       setSubmitStatus('success');
@@ -159,13 +167,18 @@ export default function FeedbackPage() {
           {/* Error Message */}
           {submitStatus === 'error' && (
             <div className="mb-8 p-6 rounded-xl bg-red-500/10 border border-red-500/30 animate-fadeIn">
-              <div className="flex items-center gap-3">
-                <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0" />
-                <div>
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-6 h-6 text-red-400 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
                   <h3 className="text-lg font-bold text-white">Oops!</h3>
                   <p className="text-text-secondary text-sm mt-1">
                     Failed to submit feedback. Please try again or email us at support@mindandmuscle.ai
                   </p>
+                  {errorDetails && (
+                    <p className="text-red-400 text-xs mt-2 font-mono">
+                      Debug: {errorDetails}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

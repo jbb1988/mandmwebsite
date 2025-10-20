@@ -154,9 +154,14 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('Error inserting feedback:', error);
+      console.error('Supabase error inserting feedback:', error);
+      console.error('Feedback data:', feedbackData);
       return NextResponse.json(
-        { error: 'Failed to submit feedback' },
+        {
+          error: 'Failed to submit feedback',
+          details: process.env.NODE_ENV === 'development' ? error.message : undefined,
+          code: error.code
+        },
         { status: 500 }
       );
     }
