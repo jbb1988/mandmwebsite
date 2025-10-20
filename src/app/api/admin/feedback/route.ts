@@ -28,9 +28,10 @@ export async function GET(request: NextRequest) {
     const offset = parseInt(searchParams.get('offset') || '0');
 
     // Build query
+    // Note: profiles join is optional - will be null if profiles table doesn't exist or user has no profile
     let query = supabase
       .from('user_feedback')
-      .select('*, profiles:user_id(full_name, email)', { count: 'exact' })
+      .select('*', { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -62,8 +63,8 @@ export async function GET(request: NextRequest) {
       message: item.message,
       contact_name: item.contact_name,
       contact_email: item.contact_email,
-      user_name: item.profiles?.full_name || null,
-      user_email: item.profiles?.email || null,
+      user_name: null, // Profile data not fetched - can be added later if needed
+      user_email: null,
       app_version: item.app_version,
       device_info: item.device_info,
       url: item.url,
