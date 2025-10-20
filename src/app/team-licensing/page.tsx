@@ -43,9 +43,9 @@ function TeamLicensingContent() {
       };
     }
 
-    // Production mode
-    const basePrice = 119; // Special offer price
-    const originalPrice = 149;
+    // Production mode: 6-month pricing
+    const basePrice = 79; // 6-month price
+    const originalPrice = 79; // No "original" price for 6-month
     let discount = 0;
     let discountLabel = '';
 
@@ -59,7 +59,7 @@ function TeamLicensingContent() {
       discount = 0.10;
       discountLabel = '10% Team Discount';
     }
-    // 1-11 users: no discount (stays at $119)
+    // 1-11 users: no discount (stays at $79)
 
     const pricePerSeat = basePrice * (1 - discount);
     const originalPricePerSeat = originalPrice * (1 - discount);
@@ -314,13 +314,13 @@ function TeamLicensingContent() {
 
               {/* Pricing Breakdown - Cleaner Design */}
               <div className="space-y-6 mb-8">
-                <div className="flex items-baseline justify-between">
-                  <span className="text-xl font-semibold">Per User:</span>
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-5xl font-black text-solar-surge-orange drop-shadow-[0_0_24px_rgba(249,115,22,0.6)]">${pricing.pricePerSeat}</span>
-                    <span className="text-xl text-text-secondary">/year</span>
+                  <div className="flex items-baseline justify-between">
+                    <span className="text-xl font-semibold">Per User:</span>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-5xl font-black text-solar-surge-orange drop-shadow-[0_0_24px_rgba(249,115,22,0.6)]">${pricing.pricePerSeat}</span>
+                      <span className="text-xl text-text-secondary">/6 months</span>
+                    </div>
                   </div>
-                </div>
 
                 {pricing.discountPercent > 0 && (
                   <div className="text-sm text-neon-cortex-green font-semibold">
@@ -330,15 +330,15 @@ function TeamLicensingContent() {
 
                 <div className="h-px bg-white/20"></div>
 
-                <div>
-                  <div className="flex items-baseline justify-between mb-2">
-                    <span className="text-2xl font-bold">Total:</span>
-                    <span className="text-6xl font-black text-solar-surge-orange drop-shadow-[0_0_32px_rgba(249,115,22,0.6)]">${pricing.totalPrice}</span>
+                  <div>
+                    <div className="flex items-baseline justify-between mb-2">
+                      <span className="text-2xl font-bold">Total:</span>
+                      <span className="text-6xl font-black text-solar-surge-orange drop-shadow-[0_0_32px_rgba(249,115,22,0.6)]">${pricing.totalPrice}</span>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-text-secondary">for {seatCount} users for 6 months</p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-text-secondary">for {seatCount} users/year</p>
-                  </div>
-                </div>
 
                 <div className="pt-4 border-t border-white/20">
                   <p className="text-sm text-text-secondary mb-1">
@@ -411,7 +411,7 @@ function TeamLicensingContent() {
                     Processing...
                   </span>
                 ) : (
-                  `Purchase Team License - $${pricing.totalPrice}/year`
+                  `Purchase Team License - $${pricing.totalPrice}/6 months`
                 )}
               </button>
             </div>

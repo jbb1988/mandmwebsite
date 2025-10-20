@@ -82,22 +82,22 @@ export async function POST(request: NextRequest) {
       pricePerSeat = 1.00 / seatCount; // Divide $1 by seat count
       discountPercentage = 0;
     } else {
-      // Production mode: Calculate real pricing
-      const basePrice = 119;
+      // Production mode: 6-month pricing at $79/seat
+      const basePrice = 79;
 
       if (seatCount >= 200) {
         discountPercentage = 20;
-        pricePerSeat = 95.20;
+        pricePerSeat = 63.20; // $79 - 20%
       } else if (seatCount >= 120) {
         discountPercentage = 15;
-        pricePerSeat = 101.15;
+        pricePerSeat = 67.15; // $79 - 15%
       } else if (seatCount >= 12) {
         discountPercentage = 10;
-        pricePerSeat = 107.10;
+        pricePerSeat = 71.10; // $79 - 10%
       } else {
         // 1-11 users: no discount
         discountPercentage = 0;
-        pricePerSeat = 119.00;
+        pricePerSeat = 79.00;
       }
     }
 
@@ -116,15 +116,16 @@ export async function POST(request: NextRequest) {
             product_data: {
               name: testMode
                 ? `[TEST] Mind and Muscle Team License`
-                : `Mind and Muscle Team License (${discountPercentage}% discount)`,
+                : `Mind and Muscle Team License - 6 Months${discountPercentage > 0 ? ` (${discountPercentage}% discount)` : ''}`,
               description: testMode
                 ? `TEST: ${seatCount} seats at $${pricePerSeat.toFixed(2)}/seat`
-                : `Annual team license for ${seatCount} seats at $${pricePerSeat.toFixed(2)}/seat - Unlock Premium for your entire team with AI-powered training, advanced analytics, and personalized coaching.`,
+                : `6-month seasonal team license for ${seatCount} seats at $${pricePerSeat.toFixed(2)}/seat - Unlock Premium for your entire team with AI-powered training, advanced analytics, and personalized coaching.`,
               images: ['https://mindandmuscle.ai/assets/images/logo.png'],
             },
             unit_amount: Math.round(pricePerSeat * 100), // Price per seat in cents
             recurring: {
-              interval: 'year',
+              interval: 'month',
+              interval_count: 6,
             },
           },
           quantity: seatCount,

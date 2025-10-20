@@ -26,7 +26,7 @@ async function sendTeamCodeEmail(email: string, teamCode: string, seatCount: num
           <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
             <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px; text-align: center; margin-bottom: 30px;">
               <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to Mind and Muscle!</h1>
-              <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Your team license is now active</p>
+              <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Your 6-month seasonal team license is now active</p>
             </div>
 
             <div style="background: #f9fafb; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
@@ -64,7 +64,7 @@ async function sendTeamCodeEmail(email: string, teamCode: string, seatCount: num
               <ul style="color: #78350f; margin: 0; padding-left: 20px; font-size: 14px;">
                 <li>Athletes and coaches will consume a license seat</li>
                 <li>Parents can view without consuming a seat</li>
-                <li>Your subscription renews annually</li>
+                <li>Your subscription renews every 6 months</li>
                 <li>You have ${seatCount} seats available</li>
               </ul>
             </div>
