@@ -101,7 +101,7 @@ function TermsContent() {
 
       <h3 className="text-2xl font-bold mt-8 mb-4">3. Team Licenses</h3>
       <p className="text-text-secondary mb-4">
-        <strong>Subscription:</strong> Team licenses are annual subscriptions that auto-renew.<br />
+        <strong>Subscription:</strong> Team licenses are 6-month subscriptions that auto-renew.<br />
         <strong>Seat Allocation:</strong> Athletes and coaches consume a license seat. Parents can view without consuming a seat.<br />
         <strong>Cancellation:</strong> You may cancel your subscription at any time through your Stripe customer portal.<br />
         <strong>Refunds:</strong> Refunds are provided on a case-by-case basis within 30 days of purchase.
@@ -593,7 +593,7 @@ function PartnerTermsContent() {
 
       <h3 className="text-2xl font-bold mt-8 mb-4">Quick Overview</h3>
       <ul className="list-disc pl-6 text-text-secondary space-y-2 mb-4">
-        <li><strong>Commission:</strong> 10% of annual subscription price paid by referred customers</li>
+        <li><strong>Commission:</strong> 10% of 6-month subscription price paid by referred customers</li>
         <li><strong>Payment Schedule:</strong> Monthly via PayPal after 60-day hold period</li>
         <li><strong>Attribution Window:</strong> 90 days from click to signup</li>
         <li><strong>Recurring Income:</strong> Earn commission every year the customer renews</li>

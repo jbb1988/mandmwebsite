@@ -30,16 +30,16 @@ export default function PartnerTermsPage() {
             </div>
             <div className="space-y-3 text-text-secondary">
               <p>
-                <strong className="text-white">Commission Rate:</strong> Partners earn 10% of the annual subscription price paid by referred customers.
+                <strong className="text-white">Commission Rate:</strong> Partners earn 10% of the 6-month subscription price paid by referred customers.
               </p>
               <p>
                 <strong className="text-white">Calculation:</strong> Commission = (Price per seat × Number of seats) × 10%
               </p>
               <p>
-                <strong className="text-white">Example:</strong> Team of 12 seats at $107.10/seat = $1,285.20 annual payment → Partner earns $128.52 per year
+                <strong className="text-white">Example:</strong> Team of 12 seats at $71.10/seat = $853.20 per 6-month payment → Partner earns $85.32 per payment (potential $170.64/year if renewed)
               </p>
               <p>
-                <strong className="text-white">Recurring Income:</strong> Partners continue earning 10% commission on every annual renewal as long as the customer maintains an active subscription.
+                <strong className="text-white">Recurring Income:</strong> Partners continue earning 10% commission on every 6-month renewal as long as the customer maintains an active subscription.
               </p>
               <p>
                 <strong className="text-white">Attribution Window:</strong> 90 days - if a referred customer signs up within 90 days of clicking your unique referral link, you receive credit.
