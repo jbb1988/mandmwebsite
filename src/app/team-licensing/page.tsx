@@ -621,7 +621,7 @@ function TeamLicensingContent() {
                 </div>
                 <div className="flex items-baseline justify-between">
                   <span className="text-xl font-bold text-gray-100">Annual per athlete:</span>
-                  <span className="text-4xl font-black text-solar-surge-orange drop-shadow-[0_0_24px_rgba(249,115,22,0.6)]">$119</span>
+                  <span className="text-4xl font-black text-solar-surge-orange drop-shadow-[0_0_24px_rgba(249,115,22,0.6)]">$79</span>
                 </div>
                 <div className="pt-4 border-t border-neon-cortex-blue/20">
                   <div className="flex items-baseline justify-between">
@@ -681,7 +681,7 @@ function TeamLicensingContent() {
             Get up to 20% off Premium when your team joins together.
           </p>
           <p className="text-sm text-text-secondary/70 max-w-3xl mx-auto mt-4">
-            1-11 users: $119/seat • 12-119 users: 10% off • 120-199 users: 15% off • 200+ users: 20% off
+            1-11 users: $79/seat • 12-119 users: 10% off • 120-199 users: 15% off • 200+ users: 20% off
           </p>
         </div>
 
@@ -731,7 +731,7 @@ function TeamLicensingContent() {
               <h3 className="text-4xl md:text-5xl font-black">Premium</h3>
               <div className="flex flex-col items-end">
                 <div className="flex items-baseline gap-2">
-                  <div className="text-5xl md:text-6xl font-black text-solar-surge-orange drop-shadow-[0_0_24px_rgba(249,115,22,0.6)]">$119</div>
+                  <div className="text-5xl md:text-6xl font-black text-solar-surge-orange drop-shadow-[0_0_24px_rgba(249,115,22,0.6)]">$79</div>
                   <div className="text-xl md:text-2xl text-text-secondary font-semibold">/year</div>
                 </div>
                 <div className="text-sm text-text-secondary mt-1">Individual License</div>
@@ -747,19 +747,19 @@ function TeamLicensingContent() {
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between items-center">
                   <span className="text-text-secondary">1-11 seats:</span>
-                  <span className="font-bold text-white">$119/seat</span>
+                  <span className="font-bold text-white">$79/seat</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-text-secondary">12-119 seats:</span>
-                  <span className="font-bold text-neon-cortex-green">$107.10/seat (10% off)</span>
+                  <span className="font-bold text-neon-cortex-green">$71.10/seat (10% off)</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-text-secondary">120-199 seats:</span>
-                  <span className="font-bold text-neon-cortex-green">$101.15/seat (15% off)</span>
+                  <span className="font-bold text-neon-cortex-green">$67.15/seat (15% off)</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-text-secondary">200+ seats:</span>
-                  <span className="font-bold text-neon-cortex-green">$95.20/seat (20% off)</span>
+                  <span className="font-bold text-neon-cortex-green">$63.20/seat (20% off)</span>
                 </div>
               </div>
               <div className="mt-3 pt-3 border-t border-white/10">

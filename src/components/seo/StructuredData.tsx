@@ -123,7 +123,7 @@ export function TeamLicensingProductSchema() {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: 'Mind & Muscle Team License',
-    description: 'Annual team licensing for baseball organizations. Volume discounts from $119 to $95 per seat. Give your entire team access to AI mental training, strength coaching, and game IQ development.',
+    description: '6-month team licensing for baseball organizations. Volume discounts from $79 to $63.20 per seat (6-month licensing). Give your entire team access to AI mental training, strength coaching, and game IQ development.',
     image: `${SITE_CONFIG.url}/assets/images/og-image.png`,
     brand: {
       '@type': 'Brand',

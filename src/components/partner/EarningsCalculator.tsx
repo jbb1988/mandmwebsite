@@ -9,7 +9,7 @@ export function EarningsCalculator() {
   const [conversionRate, setConversionRate] = useState<'conservative' | 'realistic' | 'optimistic'>('realistic');
 
   // Commission = (Price per seat × 12 users) × 10% ANNUALLY
-  const PRICE_PER_SEAT = 107.10; // 10% off base price of $119
+  const PRICE_PER_SEAT = 71.10; // 10% off base price of $79
   const USERS_PER_TEAM = 12;
   const ANNUAL_REVENUE_PER_TEAM = PRICE_PER_SEAT * USERS_PER_TEAM; // $1,285.20
   const COMMISSION_PER_TEAM_ANNUAL = ANNUAL_REVENUE_PER_TEAM * 0.10; // $128.52 per year
