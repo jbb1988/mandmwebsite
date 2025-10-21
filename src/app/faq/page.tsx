@@ -141,7 +141,7 @@ export default function FAQPage() {
         },
         {
           question: 'Why is an all-in-one platform better than specialized apps?',
-          answer: 'Fragmented apps create fragmented development:\n\n• Data Silos: Your swing analysis doesn\'t inform your strength training. Your mental training doesn\'t connect to your game situations.\n• No Learning: Specialized apps can\'t improve because they only see one piece of your development.\n• Complexity Kills Consistency: Managing 7 logins, 7 interfaces, and 7 monthly bills means most athletes quit before they see results.\n\nMind & Muscle solves this with integration:\n\n• Connected Intelligence: The AI sees your complete player profile and makes smarter recommendations\n• Adaptive Learning: Every session, workout, and analysis makes the entire system smarter\n• One Experience: Log in once. Everything in one place. One annual payment.\n\nDevelopment isn\'t about using the most tools. It\'s about using tools that work together.'
+          answer: 'Fragmented apps create fragmented development:\n\n• Data Silos: Your swing analysis doesn\'t inform your strength training. Your mental training doesn\'t connect to your game situations.\n• No Learning: Specialized apps can\'t improve because they only see one piece of your development.\n• Complexity Kills Consistency: Managing 7 logins, 7 interfaces, and 7 monthly bills means most athletes quit before they see results.\n\nMind & Muscle solves this with integration:\n\n• Connected Intelligence: The AI sees your complete player profile and makes smarter recommendations\n• Adaptive Learning: Every session, workout, and analysis makes the entire system smarter\n• One Experience: Log in once. Everything in one place. One 6-month payment—perfect for seasonal sports.\n\nDevelopment isn\'t about using the most tools. It\'s about using tools that work together.'
         },
         {
           question: 'How does AI personalization work across the platform?',
@@ -478,11 +478,11 @@ export default function FAQPage() {
         },
         {
           question: 'Can I remove someone from my team?',
-          answer: 'Yes. Team admins can go to More → Teams → Roster and remove inactive users to free up seats for new members. Removed users lose Premium access immediately but keep their account and free features.'
+          answer: 'For seasonal sports, there\'s no need to manually remove players! When your 6-month license expires, simply purchase a new license for your returning players only. The team code stays the same year after year. Players who left can join their new teams with different codes. This makes roster management simple and fair—everyone only pays for what they use.'
         },
         {
           question: 'When does my subscription renew?',
-          answer: 'Team licenses are annual subscriptions. You\'ll be charged exactly one year from your purchase date. Your locked-in rate stays the same—even if we raise prices for new customers. You\'ll receive renewal reminder emails 30 days and 7 days before renewal.'
+          answer: 'Team licenses are 6-month subscriptions—perfect for seasonal sports like baseball! You\'ll be charged 6 months from your purchase date. This means: Spring season starts in March → license expires in September. Buy again for fall ball with just your returning players. Your locked-in rate stays the same—even if we raise prices for new customers. You\'ll receive renewal reminder emails 30 days and 7 days before renewal.'
         },
         {
           question: 'What\'s your refund policy?',
