@@ -26,7 +26,7 @@ export const TOP_FAQS = [
   },
   {
     question: 'How much does Mind & Muscle cost?',
-    answer: 'Individual subscription: $119/year. Team licensing with volume discounts: $107.10 (12-120 seats), $101.15 (121-199 seats), $95.20 (200+ seats) per seat annually.',
+    answer: 'Individual subscription: $79 for 6 months. Team licensing with volume discounts: $71.10 (12-119 seats), $67.15 (120-199 seats), $63.20 (200+ seats) per seat for 6 months. Perfect for seasonal sports!',
   },
   {
     question: 'What is included in Premium access?',

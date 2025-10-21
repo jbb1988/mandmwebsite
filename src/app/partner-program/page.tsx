@@ -154,7 +154,7 @@ export default function PartnerProgramPage() {
   const faqs = [
     {
       question: 'How much can I really earn?',
-      answer: 'It depends on your network. Individual users: 10% commission forever (with volume discounts applied). Organizations: 10% on first 100 users, 15% on users 101+. Examples: Refer a 150-user training facility = $1,860.57/year. Refer 3 teams of 50 users each = $1,860.57/year combined. Refer one 200-user travel ball organization = $2,618.31/year. Commission is calculated on volume-discounted prices: $119 (1-11), $107.10 (12-120), $101.15 (121-199), $95.20 (200+).'
+      answer: 'You earn 10% commission on every 6-month payment (15% on users 101+ for organizations). Customers subscribe for 6 months at a time. Examples per 6-month subscription: Individual referrals = $7.90 each. 12-user team = $85.32 total. 150-user facility = $930.29 per payment. If they renew after 6 months, you earn commission again - so annual potential doubles (2 payments = 2× commission). Commission is calculated on 6-month pricing: $79 (1-11 users), $71.10 (12-119 users), $67.15 (120-199 users), $63.20 (200+ users).'
     },
     {
       question: 'What if I know facility owners or league directors?',
