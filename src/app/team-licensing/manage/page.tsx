@@ -115,7 +115,7 @@ export default function ManageTeamLicense() {
     // Test mode: $1.00 total regardless of seats
     if (testMode) return 1.00;
 
-    // Simple annual calculation (Stripe will handle exact proration)
+    // Simple 6-month calculation (Stripe will handle exact proration)
     return additionalSeats * teamData.lockedInRate;
   };
 
@@ -321,15 +321,15 @@ export default function ManageTeamLicense() {
                         <span className="font-bold text-solar-surge-orange text-lg">+{additionalSeats} seats</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="font-semibold">Annual cost:</span>
+                        <span className="font-semibold">6-month cost:</span>
                         <span className="font-black text-neon-cortex-green text-xl">
-                          ${calculateProration().toFixed(2)}/year
+                          ${calculateProration().toFixed(2)}/6 months
                         </span>
                       </div>
                     </div>
                     <div className="mt-3 pt-3 border-t border-white/10">
                       <p className="text-xs text-text-secondary leading-relaxed">
-                        💡 These {additionalSeats} seat{additionalSeats !== 1 ? 's' : ''} will be charged today and auto-renew in 12 months at your locked-in rate of ${teamData.lockedInRate.toFixed(2)}/seat
+                        💡 These {additionalSeats} seat{additionalSeats !== 1 ? 's' : ''} will be charged today and auto-renew in 6 months at your locked-in rate of ${teamData.lockedInRate.toFixed(2)}/seat
                       </p>
                     </div>
                   </div>
@@ -389,7 +389,7 @@ export default function ManageTeamLicense() {
                     ) : (
                       <>
                         <CreditCard className="w-5 h-5" />
-                        Purchase {additionalSeats} Seat{additionalSeats !== 1 ? 's' : ''} - ${calculateProration().toFixed(2)}/year
+                        Purchase {additionalSeats} Seat{additionalSeats !== 1 ? 's' : ''} - ${calculateProration().toFixed(2)}/6 months
                       </>
                     )}
                   </button>
