@@ -1410,7 +1410,7 @@ export default function HomePage() {
 
                 <div className="mt-8 pt-6 border-t border-red-500/30">
                   <div className="flex items-baseline justify-between">
-                    <span className="text-xl font-bold text-gray-300">Annual per athlete:</span>
+                    <span className="text-xl font-bold text-gray-300">Per athlete (6 months):</span>
                     <span className="text-4xl font-black text-red-400">$1,060</span>
                   </div>
                   <p className="text-sm text-gray-500 mt-2">Same cost at any team size</p>
@@ -1456,11 +1456,11 @@ export default function HomePage() {
 
                   <div className="mt-8 pt-6 border-t border-neon-cortex-blue/30">
                     <div className="flex items-baseline justify-between">
-                      <span className="text-xl font-bold text-gray-200">Annual per athlete:</span>
+                      <span className="text-xl font-bold text-gray-200">Per athlete (6 months):</span>
                       <span className="text-4xl font-black text-solar-surge-orange drop-shadow-[0_0_24px_rgba(249,115,22,0.6)]">$79</span>
                     </div>
-                    <p className="text-sm text-gray-400 mt-2">Team discounts from $107-95/seat</p>
-                    <p className="text-2xl text-neon-cortex-green font-black mt-4">You Save: $941/year</p>
+                    <p className="text-sm text-gray-400 mt-2">Team discounts from $71.10-$63.20/seat</p>
+                    <p className="text-2xl text-neon-cortex-green font-black mt-4">You Save: $981 per 6 months</p>
                   </div>
                 </div>
 
@@ -1605,7 +1605,7 @@ export default function HomePage() {
                           <div className="text-4xl sm:text-5xl font-black text-white line-through decoration-red-500 decoration-4 drop-shadow-[0_0_12px_rgba(239,68,68,0.4)]">
                             $1,100
                           </div>
-                          <div className="text-xs text-gray-400 mt-1">per year</div>
+                          <div className="text-xs text-gray-400 mt-1">per 6 months</div>
                         </div>
                       </div>
                     </div>
@@ -1725,7 +1725,7 @@ export default function HomePage() {
                               </div>
                             </div>
                           </div>
-                          <div className="text-xs text-text-secondary mt-1 font-semibold">per year</div>
+                          <div className="text-xs text-text-secondary mt-1 font-semibold">per 6 months</div>
                         </div>
                       </div>
                     </div>
@@ -1804,7 +1804,7 @@ export default function HomePage() {
                             <span className="text-neon-cortex-blue mt-1 font-black">✓</span>
                             <div>
                               <div className="flex items-center gap-2">
-                                <span className="font-black text-white text-xl">$79/year</span>
+                                <span className="font-black text-white text-xl">$79 per 6 months</span>
                               </div>
                               <div className="text-xs text-text-secondary">Individual License</div>
                             </div>
@@ -1832,7 +1832,7 @@ export default function HomePage() {
                     <div className="bg-gradient-to-r from-neon-cortex-blue/20 to-solar-surge-orange/20 border-2 border-neon-cortex-blue/40 rounded-xl px-6 py-3 mb-3 inline-block">
                       <div className="flex items-center gap-3 mb-1">
                         <span className="text-white font-bold">Individual Pro:</span>
-                        <span className="text-3xl font-black bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">$79/year</span>
+                        <span className="text-3xl font-black bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">$79 per 6 months</span>
                       </div>
                     </div>
 
@@ -1932,7 +1932,7 @@ export default function HomePage() {
                 <div className="flex flex-col items-end">
                   <div className="flex items-baseline gap-2">
                     <div className="text-5xl md:text-6xl font-black text-solar-surge-orange drop-shadow-[0_0_24px_rgba(249,115,22,0.6)]">$79</div>
-                    <div className="text-xl md:text-2xl text-text-secondary font-semibold">/year</div>
+                    <div className="text-xl md:text-2xl text-text-secondary font-semibold">/6 months</div>
                   </div>
                   <div className="text-sm text-text-secondary mt-1">Individual License</div>
                 </div>
