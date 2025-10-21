@@ -122,7 +122,7 @@ export default function PartnerProgramPage() {
         { label: 'Total users', value: '45 players' },
         { label: 'Time invested', value: 'Shares at team meetings' },
       ],
-      earnings: '$482.85/year',
+      earnings: '$641.90/year (if renewed)',
       variant: 'blue' as const,
     },
     {
@@ -134,7 +134,7 @@ export default function PartnerProgramPage() {
         { label: 'Commission tier', value: '10% + 15% bonus' },
         { label: 'Time invested', value: 'Promotes in facility + email' },
       ],
-      earnings: '$1,448.06/year',
+      earnings: '$1,972.62/year (if renewed)',
       variant: 'orange' as const,
     },
     {
@@ -146,7 +146,7 @@ export default function PartnerProgramPage() {
         { label: 'Conversion', value: '8 teams (240 users)' },
         { label: 'Time invested', value: 'One video + link' },
       ],
-      earnings: '$3,073.20/year',
+      earnings: '$4,283.38/year (if renewed)',
       variant: 'blue' as const,
     },
   ];
@@ -516,11 +516,11 @@ export default function PartnerProgramPage() {
                   <strong className="text-white">What coaches are dealing with now:</strong> Juggling 7+ different apps (team communication, mental training, video analysis, strength training, nutrition, IQ training, goal tracking). Multiple monthly payments. Data that never connects. Athletes who quit because it's too complicated.
                 </p>
                 <p className="text-gray-200 leading-relaxed">
-                  <strong className="text-neon-cortex-blue">Mind & Muscle solution:</strong> One intelligent platform where everything connects. The AI learns from swing videos, workouts, mental training, and goals—making smarter recommendations across all areas. One login. One annual payment. Development that actually integrates.
+                  <strong className="text-neon-cortex-blue">Mind & Muscle solution:</strong> One intelligent platform where everything connects. The AI learns from swing videos, workouts, mental training, and goals—making smarter recommendations across all areas. One login. One 6-month payment. Development that actually integrates.
                 </p>
                 <div className="mt-4 p-4 bg-neon-cortex-blue/10 border border-neon-cortex-blue/30 rounded-lg">
                   <p className="text-sm text-gray-300">
-                    💡 <strong>Differentiator:</strong> "Stop piecing together 7 apps that cost $1,060/year per athlete. Get everything integrated for $119/year—or less with team discounts."
+                    💡 <strong>Differentiator:</strong> "Stop piecing together 7 apps that cost $1,060/year per athlete. Get everything integrated for $79 per 6 months—or less with team discounts."
                   </p>
                 </div>
               </div>

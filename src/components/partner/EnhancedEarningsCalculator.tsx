@@ -15,11 +15,11 @@ export function EnhancedEarningsCalculator() {
   const [orgInputMode, setOrgInputMode] = useState<'teams' | 'users'>('teams');
   const [orgTeamCount, setOrgTeamCount] = useState(15); // Number of teams for orgs (default 15)
 
-  // Pricing tiers
-  const RETAIL_PRICE = 119;
-  const TIER_12_120 = 107.10; // 10% off
-  const TIER_121_199 = 101.15; // 15% off
-  const TIER_200_PLUS = 95.20; // 20% off
+  // Pricing tiers (6-month pricing)
+  const RETAIL_PRICE = 79;
+  const TIER_12_120 = 71.10; // 10% off
+  const TIER_121_199 = 67.15; // 15% off
+  const TIER_200_PLUS = 63.20; // 20% off
 
   // Team composition
   const USERS_PER_TEAM = 14; // 12 athletes + 2 coaches
@@ -130,12 +130,12 @@ export function EnhancedEarningsCalculator() {
     }
   };
 
-  // Get current pricing tier message
+  // Get current pricing tier message (6-month pricing)
   const getPricingTierMessage = (userCount: number) => {
-    if (userCount < 12) return 'Full price: $119/user';
-    if (userCount <= 120) return '10% volume discount: $107.10/user';
-    if (userCount <= 199) return '15% volume discount: $101.15/user';
-    return '20% volume discount: $95.20/user';
+    if (userCount < 12) return 'Full price: $79/user (6 months)';
+    if (userCount <= 120) return '10% volume discount: $71.10/user (6 months)';
+    if (userCount <= 199) return '15% volume discount: $67.15/user (6 months)';
+    return '20% volume discount: $63.20/user (6 months)';
   };
 
   const individualEarnings = calculateIndividualEarnings(actualIndividualCount);
@@ -151,19 +151,19 @@ export function EnhancedEarningsCalculator() {
             <DollarSign className="w-5 h-5 text-solar-surge-orange" />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-bold mb-2">Volume Discounts for Organizations</h3>
+            <h3 className="text-lg font-bold mb-2">Volume Discounts for Organizations (6-month pricing)</h3>
             <div className="grid sm:grid-cols-3 gap-3 text-sm">
               <div className="bg-white/5 rounded-lg p-3">
                 <div className="text-solar-surge-orange font-bold mb-1">12-120 users</div>
-                <div className="text-text-secondary">$107.10/seat (10% off)</div>
+                <div className="text-text-secondary">$71.10/seat (10% off)</div>
               </div>
               <div className="bg-white/5 rounded-lg p-3">
                 <div className="text-solar-surge-orange font-bold mb-1">121-199 users</div>
-                <div className="text-text-secondary">$101.15/seat (15% off)</div>
+                <div className="text-text-secondary">$67.15/seat (15% off)</div>
               </div>
               <div className="bg-white/5 rounded-lg p-3">
                 <div className="text-solar-surge-orange font-bold mb-1">200+ users</div>
-                <div className="text-text-secondary">$95.20/seat (20% off)</div>
+                <div className="text-text-secondary">$63.20/seat (20% off)</div>
               </div>
             </div>
           </div>
@@ -249,18 +249,18 @@ export function EnhancedEarningsCalculator() {
               </button>
             </div>
 
-            <div className="p-4 bg-neon-cortex-blue/10 border border-neon-cortex-blue/30 rounded-lg">
+              <div className="p-4 bg-neon-cortex-blue/10 border border-neon-cortex-blue/30 rounded-lg">
               <div className="flex items-start gap-2">
                 <Info className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-text-secondary">
                   {individualInputMode === 'teams' ? (
                     <>
                       <strong>Think in teams!</strong> Average team: 12 athletes + 2 coaches = {USERS_PER_TEAM} users.
-                      Earn 10% commission on all users with volume discounts.
+                      Earn 10% commission on each 6-month payment with volume discounts.
                     </>
                   ) : (
                     <>
-                      Earn 10% commission on every individual user. Volume discounts apply: $119 (1-11 users), $107.10 (12-120 users), $101.15 (121-199 users), $95.20 (200+ users).
+                      Earn 10% commission on each 6-month payment. Volume discounts apply: $79 (1-11 users), $71.10 (12-120 users), $67.15 (121-199 users), $63.20 (200+ users).
                     </>
                   )}
                 </p>
@@ -335,12 +335,12 @@ export function EnhancedEarningsCalculator() {
                 </p>
                 <p className="text-xs text-text-secondary mt-1">
                   {actualIndividualCount <= 11
-                    ? `${actualIndividualCount} @ $119/user`
+                    ? `${actualIndividualCount} @ $79/user (6mo)`
                     : actualIndividualCount <= 120
-                      ? `11 @ $119 + ${actualIndividualCount - 11} @ $107.10`
+                      ? `11 @ $79 + ${actualIndividualCount - 11} @ $71.10 (6mo)`
                       : actualIndividualCount <= 199
-                        ? `11 @ $119 + 109 @ $107.10 + ${actualIndividualCount - 120} @ $101.15`
-                        : `11 @ $119 + 109 @ $107.10 + 79 @ $101.15 + ${actualIndividualCount - 199} @ $95.20`
+                        ? `11 @ $79 + 109 @ $71.10 + ${actualIndividualCount - 120} @ $67.15 (6mo)`
+                        : `11 @ $79 + 109 @ $71.10 + 79 @ $67.15 + ${actualIndividualCount - 199} @ $63.20 (6mo)`
                   }
                 </p>
                 <div className="mt-4 pt-4 border-t border-white/10">
