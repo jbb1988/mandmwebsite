@@ -876,7 +876,7 @@ function TeamLicensingContent() {
                   </p>
                   <div className="bg-white/5 rounded-lg p-4 border border-white/10">
                     <p className="mb-2"><span className="font-semibold text-neon-cortex-blue">Your rate is locked in:</span> Additional seats are charged at your original discounted rate (10%, 15%, or 20% off), even if regular pricing changes.</p>
-                    <p className="mb-2"><span className="font-semibold text-solar-surge-orange">Simple annual billing:</span> New seats start their own 12-month subscription from the date you add them.</p>
+                    <p className="mb-2"><span className="font-semibold text-solar-surge-orange">Simple 6-month billing:</span> New seats start their own 6-month subscription from the date you add them.</p>
                     <p><span className="font-semibold text-neon-cortex-green">Maximum seats:</span> You can add up to 2x your original purchase (to prevent code sharing). For larger teams, contact support.</p>
                   </div>
                   <Link href="/team-licensing/manage" className="inline-flex items-center gap-2 text-neon-cortex-blue hover:text-neon-cortex-blue/80 transition-colors font-semibold">
