@@ -1356,8 +1356,14 @@ export default function HomePage() {
                 <span className="text-neon-cortex-blue font-black text-sm tracking-widest drop-shadow-[0_0_8px_rgba(14,165,233,0.8)]">⚾ LINEUP COMPARISON</span>
               </div>
             </div>
-            <h2 className="text-5xl sm:text-6xl lg:text-7xl font-black mb-6 leading-relaxed text-white" style={{textShadow: '0 0 40px rgba(14,165,233,0.3)'}}>
-              Who You Taking to the Championship?
+            <h2 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black mb-6 leading-[1.1]">
+              <span className="text-white" style={{textShadow: '0 4px 30px rgba(0,0,0,0.9)'}}>
+                Who You Taking to the
+              </span>
+              <br />
+              <span className="bg-gradient-to-r from-neon-cortex-blue via-mind-primary to-solar-surge-orange bg-clip-text text-transparent" style={{textShadow: '0 0 40px rgba(14,165,233,0.5)'}}>
+                Championship?
+              </span>
             </h2>
             <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto font-medium leading-relaxed">
               Their roster vs. ours. Same game. Different level.
