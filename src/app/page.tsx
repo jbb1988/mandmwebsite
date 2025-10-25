@@ -128,7 +128,7 @@ export default function HomePage() {
       color: 'blue',
       image: '/assets/mind/Mind AI Coach Hero.png',
       videoUrl: '/assets/videos/mind_coachai.mp4',
-      audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/mindcoachai_ob.mp3',
+      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/mindcoachai_ob.mp3',
       tagline: 'Your Elite Mental Training Coach That Actually Knows You',
       description: 'Where Mental Toughness Becomes Mental Dominance.',
       modalDescription: 'Mind Coach AI doesn\'t guess your mental game. It engineers it.\n\nThat clutch player who never gets rattled? They trained their mind like you train your body.\n\nAI-Powered Mental Training - Personalized sessions in focus, pressure management, confidence, visualization, and mindfulness. Each designed for your mental profile.\n\nLearns From Every Session - Feedback after each session makes the next one smarter. Your mental training evolves with you.\n\nCreate Custom Sessions - Need something specific? Build sessions tailored to your exact mental challenges.\n\nTrack Your Progress - Complete sessions, build streaks, watch your mental game level up.\n\nWhile other athletes hope their mental game shows up, yours gets engineered for peak performance.\n\n**This is your mind. Fully trained.**',
@@ -141,7 +141,7 @@ export default function HomePage() {
       color: 'orange',
       image: '/assets/muscle/Muscle AI Coach Hero.png',
       videoUrl: '/assets/videos/muscle_coachai.mp4',
-      audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/musclecoachai_ob.mp3',
+      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/musclecoachai_ob.mp3',
       tagline: 'Your Elite Strength Engineer That Builds Baseball Power',
       description: 'Build the Strength That Gets You Noticed.',
       modalDescription: 'Muscle Coach AI doesn\'t guess your strength needs. It engineers baseball-specific power.\n\nMLB-level strength training, personalized for your position and power profile.\n\nThree Training Zones - AI Coach (smart recommendations), Exercise Vault (hundreds of baseball-specific exercises), Build Tab (custom workout plan creator).\n\nPosition-Specific Power - Explosive power for bat speed. Rotational strength for throwing velocity. Endurance for clutch moments. All engineered for your position.\n\nAI-Driven Progression - Every set logged. Every workout analyzed. Progressive overload tracked automatically.\n\nCreate Custom Plans - Build workout routines with targeted exercises, track sets/reps, monitor strength gains.\n\nWhile other players hope their strength shows up, yours gets systematically engineered for peak performance.\n\n**This is strength training. Built for baseball.**',
@@ -158,7 +158,7 @@ export default function HomePage() {
       color: 'blue',
       image: '/assets/images/game-lab.png',
       videoUrl: '/assets/videos/game_lab.mp4',
-      audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/gamelab_ob.mp3',
+      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/gamelab_ob.mp3',
       tagline: 'Play Smarter. Not Harder.',
       description: 'Train Your Baseball IQ. Master Every Situation.',
       modalDescription: 'Game Lab isn\'t about guessing. It\'s about knowing.\n\n186 real game scenarios that force you to think faster, decide smarter, and play like you\'ve already seen every situation.\n\nYour Baseball IQ gets measured. Your mental batting average gets tracked. Every decision earns XP, builds streaks, and unlocks badges.\n\nWhile other players freeze under pressure, you\'ll already know the play.\n\n**This is your baseball brain. Fully trained.**',
@@ -171,7 +171,7 @@ export default function HomePage() {
       color: 'orange',
       image: '/assets/dashboard/swing_lab.png',
       videoUrl: '/assets/videos/swing_lab.mp4',
-      audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/swinglab_ob.mp4',
+      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/swinglab_ob.mp4',
       tagline: 'Every Frame Tells a Story.',
       description: 'Every swing analyzed. Every weakness eliminated.',
       modalDescription: '**Upload your swing. Get elite coaching feedback. Fix what\'s holding you back.**\n\nSwing Lab delivers AI coaching analysis that breaks down your swing like a veteran MLB hitting coach—instant, actionable, precise.\n\n**Elite AI Coaching Analysis:**\n\n- **The Good Stuff** - Specific strengths to build on\n- **Power Opportunities** - The 1-2 changes that unlock explosive contact\n- **Your Practice Plan** - 2 precision drills targeting your exact issues\n- **Mental Game Strategy** - Situational hitting advice\n- **#1 Focus** - The most important thing to work on next\n\n**Analysis Features:**\n\n- Video thumbnails for visual reference\n- Complete analysis history for progress tracking\n- Shareable reports for coaches and teammates\n- Favorite your best analyses\n\nWhile other hitters wonder what to fix, you\'ll get precise coaching that tells you exactly what to work on and exactly how to fix it.\n\n**Swing Lab. Upload. Analyze. Improve.**',
@@ -184,7 +184,7 @@ export default function HomePage() {
       color: 'blue',
       image: '/assets/mind/sound_lab.png',
       videoUrl: '/assets/videos/sound_lab.1mp4.mp4',
-      audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/soundlab_ob.mp3',
+      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/soundlab_ob.mp3',
       tagline: 'Train Your Mind Through Sound.',
       description: 'Engineer your mental state for peak performance',
       modalDescription: 'Sound Lab isn\'t background music. It\'s a remote control for your mental state.\n\nBinaural beats sync your brainwaves. Alpha for laser focus. Beta for superhuman concentration. Gamma for explosive reactions.\n\nAncient Solfeggio frequencies meet athletic performance mixes. Pre-built combinations that pros use before competition.\n\nStart 10 minutes before training. Feel your brain lock in.\n\nWhile other athletes hope they\'ll be ready, you\'ll engineer your mental state.\n\n**This is sound. Weaponized for performance.**',
@@ -201,7 +201,7 @@ export default function HomePage() {
       color: 'blue',
       image: '/assets/images/ai_coach_robot_crop.png',
       videoUrl: '/assets/videos/ai_assistant_coach.mp4',
-      audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/assistant.mp3',
+      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/assistant.mp3',
       tagline: 'Your 24/7 Coaching Partner.',
       description: 'Personal Drill Designer. Turns Coaching Notes Into Professional Plans.',
       modalDescription: 'AI Assistant Coach turns your coaching notes into professional practice plans.\n\nShare what you\'re working on. The AI creates custom drills that target exactly what your team needs.\n\nEvery session learns from your feedback. Every drill gets smarter. Every practice plan becomes more powerful.\n\nBuilt for coaches, athletes, and parents who demand training that\'s personalized, not generic.\n\nWhile other teams run cookie-cutter drills, yours will train with precision.\n\n**This is your personal drill designer. Built for champions.**',
@@ -214,7 +214,7 @@ export default function HomePage() {
       color: 'orange',
       image: '/assets/images/Results Goals.png',
       videoUrl: '/assets/videos/goalsai.mp4',
-      audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/goals_ob.mp3',
+      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/goals_ob.mp3',
       tagline: 'Turn Intent Into Progress.',
       description: 'Stop Wishing. Start Engineering Your Excellence with AI-Powered Goal Setting That Actually Gets Results.',
       modalDescription: 'Goals AI transforms vague ambitions into surgical precision.\n\n"I want to get stronger" becomes "Increase squat by 25lbs in 8 weeks through progressive overload."\n\nYour performance architect analyzes goals like a championship coach. Finding gaps you miss. Building bridges between where you are and where you\'re going.\n\nSeason goals. Daily habits. All tracked. All optimized.\n\nWhile other athletes hope for results, you\'ll engineer them.\n\n**This is goal setting. Weaponized for champions.**',
@@ -227,7 +227,7 @@ export default function HomePage() {
       color: 'orange',
       image: '/assets/images/fuel_ai.png',
       videoUrl: '/assets/videos/fuelai.mp4',
-      audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/fuelai_ob.mp3',
+      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/fuelai_ob.mp3',
       tagline: 'Precision Nutrition, No Guesswork.',
       description: 'AI-Powered Meal Plans That Turn Food Into Fuel.',
       modalDescription: 'Fuel AI turns your food preferences into performance-optimized meal plans.\n\nYour body is a high-performance machine. Stop guessing what to eat.\n\nAI-Powered Planning - Tell us what you love, what you avoid, how much time you have. The AI creates 7 days of personalized meals designed for peak performance.\n\nSmart Shopping Lists - Auto-generated from your weekly plan. Walk in with a list, walk out ready to fuel greatness.\n\nPerformance-Focused - Every meal targets training fuel and recovery. Real food that fits your lifestyle, not generic meal prep.\n\nLearns Your Preferences - Dietary restrictions, allergies, favorite foods, cooking time. Each week gets smarter.\n\nWhile other athletes count calories and hope, you\'ll eat with purpose.\n\n**This is nutrition. Engineered for champions.**',
@@ -240,7 +240,7 @@ export default function HomePage() {
       color: 'orange',
       image: '/assets/images/Team Communications.png',
       videoUrl: '/assets/videos/chatter.mp4',
-      audioUrl: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/onboarding/chatter_ob.mp3',
+      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/chatter_ob.mp3',
       tagline: 'Stay Connected. Stay Synced.',
       description: 'Game Day Perfection Starts With Perfect Logistics.',
       modalDescription: 'Chatter & Events: Where championship teams stay perfectly synchronized.\n\nGame day perfection starts with perfect communication and zero logistical chaos.\n\nTeam Chat - That dugout energy, 24/7. Build the brotherhood that separates great teams from good ones.\n\nEvent Management - Every tournament, every practice, every detail. Attendance tracking. Calendar sync. Everyone knows where to be, when to be there.\n\nUniform Creator - Professional team coordination with one tap. Create custom uniforms (home, away, practice) with visual presets. Cap, jersey, pants, belt, socks - all perfectly coordinated.\n\nNavigation Integration - Directions to every field, every facility. No one gets lost. No one shows up late.\n\nWhile other teams deal with communication breakdowns and logistical nightmares, yours moves like a championship machine.\n\n**This is team synchronization. Weaponized.**',
@@ -1341,164 +1341,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* All-In-One Development Platform - Innovation-Focused */}
-      <section className="relative py-48 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        {/* Deep Navy Background */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0A0E1F] via-[#0F1123] to-[#0A0E1F]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.9)_100%)]" />
-
-        {/* Subtle Baseball Stitching Pattern */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 100px, rgba(255,255,255,0.1) 100px, rgba(255,255,255,0.1) 102px)',
-        }} />
-
-        <div className="max-w-7xl mx-auto relative z-10">
-          {/* Header */}
-          <div className="text-center mb-20">
-            <div className="inline-flex items-center gap-3 px-6 py-3 backdrop-blur-sm bg-white/5 border border-solar-surge-orange/30 rounded-full mb-8">
-              <div className="w-2 h-2 bg-solar-surge-orange rounded-full animate-pulse" style={{boxShadow: '0 0 12px rgba(249,115,22,0.8)'}} />
-              <span className="text-sm md:text-base font-bold text-gray-200 tracking-wide">ALL-IN-ONE PLATFORM</span>
-            </div>
-
-            <h2 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black mb-6 leading-[1.1]">
-              <span className="text-white" style={{textShadow: '0 4px 30px rgba(0,0,0,0.9)'}}>
-                Stop Juggling Apps.
-              </span>
-              <br />
-              <span className="bg-gradient-to-r from-neon-cortex-blue via-mind-primary to-solar-surge-orange bg-clip-text text-transparent" style={{textShadow: '0 0 40px rgba(14,165,233,0.5)'}}>
-                Start Developing Champions.
-              </span>
-            </h2>
-
-            <div className="max-w-5xl mx-auto">
-              <p className="text-2xl sm:text-3xl md:text-4xl text-gray-300 font-medium leading-relaxed mb-8">
-                Most teams piece together 7+ different apps and hope it all works.
-              </p>
-              <p className="text-2xl sm:text-3xl md:text-4xl text-white font-black leading-relaxed">
-                We built one intelligent system that actually learns.
-              </p>
-            </div>
-          </div>
-
-          {/* The Fragmented Way vs The Mind & Muscle Way */}
-          <div className="grid md:grid-cols-2 gap-12 mb-20">
-            {/* Left: The Fragmented Way */}
-            <div className="backdrop-blur-sm bg-white/[0.02] rounded-3xl border border-red-500/30 p-10">
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-3 h-3 bg-red-500 rounded-full" style={{boxShadow: '0 0 12px rgba(239,68,68,0.8)'}} />
-                <h3 className="text-3xl md:text-4xl font-black text-red-400">The Fragmented Way</h3>
-              </div>
-
-              <div className="space-y-4">
-                {[
-                  { name: 'Team communication & stats app', cost: '$90/year' },
-                  { name: 'Mental performance training', cost: '$120/year' },
-                  { name: 'Video analysis with coaching', cost: '$360/year' },
-                  { name: 'Strength & conditioning program', cost: '$250/year' },
-                  { name: 'Performance nutrition tracking', cost: '$80/year' },
-                  { name: 'Baseball IQ development', cost: '$100/year' },
-                  { name: 'Goal tracking & communication', cost: '$60/year' },
-                ].map((item, i) => (
-                  <div key={i} className="flex items-start justify-between gap-4 p-4 rounded-xl bg-red-500/5 border border-red-500/20">
-                    <div className="flex items-start gap-3">
-                      <X className="w-5 h-5 text-red-400 flex-shrink-0 mt-1" />
-                      <span className="text-gray-400 font-medium">{item.name}</span>
-                    </div>
-                    <span className="text-red-400 font-bold whitespace-nowrap">{item.cost}</span>
-                  </div>
-                ))}
-
-                <div className="mt-8 pt-6 border-t border-red-500/30">
-                  <div className="flex items-baseline justify-between">
-                    <span className="text-xl font-bold text-gray-300">Per athlete (6 months):</span>
-                    <span className="text-4xl font-black text-red-400">$1,060</span>
-                  </div>
-                  <p className="text-sm text-gray-500 mt-2">Same cost at any team size</p>
-                </div>
-              </div>
-
-              <div className="mt-8 p-6 rounded-xl bg-red-500/10 border border-red-500/30">
-                <p className="text-sm text-gray-400 leading-relaxed">
-                  <strong className="text-red-400">The Hidden Costs:</strong> 7 different logins, 7 learning curves, 7 monthly bills, data that never connects, and apps that can't learn from each other.
-                </p>
-              </div>
-            </div>
-
-            {/* Right: The Mind & Muscle Way */}
-            <div className="backdrop-blur-sm bg-white/[0.02] rounded-3xl border-2 border-neon-cortex-blue/50 p-10 relative">
-              {/* Animated glow effect */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-neon-cortex-blue via-solar-surge-orange to-neon-cortex-blue opacity-20 blur-2xl rounded-3xl animate-pulse" />
-
-              <div className="relative">
-                <div className="flex items-center gap-3 mb-8">
-                  <div className="w-3 h-3 bg-neon-cortex-blue rounded-full animate-pulse" style={{boxShadow: '0 0 12px rgba(14,165,233,0.8)'}} />
-                  <h3 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">The Mind & Muscle Way</h3>
-                </div>
-
-                <div className="space-y-4">
-                  {[
-                    { name: 'Team communication & scheduling', feature: 'Built-in' },
-                    { name: 'AI mental training coach', feature: 'Learns from you' },
-                    { name: 'AI swing analysis', feature: 'Instant feedback' },
-                    { name: 'Position-specific strength training', feature: 'Adaptive AI' },
-                    { name: 'Performance nutrition planning', feature: 'AI personalized' },
-                    { name: '186 baseball IQ scenarios', feature: 'Real game situations' },
-                    { name: 'AI-powered goal engineering', feature: 'Coach feedback loop' },
-                  ].map((item, i) => (
-                    <div key={i} className="flex items-start justify-between gap-4 p-4 rounded-xl bg-neon-cortex-blue/10 border border-neon-cortex-blue/30">
-                      <div className="flex items-start gap-3">
-                        <Check className="w-5 h-5 text-neon-cortex-blue flex-shrink-0 mt-1" style={{filter: 'drop-shadow(0 0 8px rgba(14,165,233,0.8))'}} />
-                        <span className="text-white font-semibold">{item.name}</span>
-                      </div>
-                      <span className="text-neon-cortex-blue font-bold text-sm whitespace-nowrap">{item.feature}</span>
-                    </div>
-                  ))}
-
-                  <div className="mt-8 pt-6 border-t border-neon-cortex-blue/30">
-                    <div className="flex items-baseline justify-between">
-                      <span className="text-xl font-bold text-gray-200">Per athlete (6 months):</span>
-                      <span className="text-4xl font-black text-solar-surge-orange drop-shadow-[0_0_24px_rgba(249,115,22,0.6)]">$79</span>
-                    </div>
-                    <p className="text-sm text-gray-400 mt-2">Team discounts from $71.10-$63.20/seat</p>
-                    <p className="text-2xl text-neon-cortex-green font-black mt-4">You Save: $981 per 6 months</p>
-                  </div>
-                </div>
-
-                <div className="mt-8 p-6 rounded-xl bg-gradient-to-br from-neon-cortex-blue/20 via-solar-surge-orange/10 to-transparent border-2 border-neon-cortex-blue/40">
-                  <p className="text-sm text-gray-200 leading-relaxed mb-4">
-                    <strong className="text-neon-cortex-blue">The Difference:</strong> One login. One learning AI that connects your swing videos, mental training, goals, and workouts. One system that gets smarter every day.
-                  </p>
-                  <p className="text-white font-bold text-base">
-                    This is development. Fully integrated.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Statement */}
-          <div className="text-center max-w-5xl mx-auto">
-            <div className="inline-block relative group">
-              {/* Animated Glow */}
-              <div className="absolute -inset-8 bg-gradient-to-r from-neon-cortex-blue via-solar-surge-orange to-neon-cortex-blue opacity-30 blur-3xl group-hover:opacity-50 transition-opacity" />
-
-              <div className="relative px-12 py-8 bg-gradient-to-r from-neon-cortex-blue/10 via-solar-surge-orange/10 to-neon-cortex-blue/10 rounded-2xl border-2 border-white/20 backdrop-blur-sm">
-                <p className="text-2xl sm:text-3xl md:text-4xl font-medium text-gray-300 leading-tight mb-4">
-                  While other teams juggle apps and pray for progress,
-                </p>
-                <p className="text-3xl sm:text-4xl md:text-5xl font-black">
-                  <span className="text-white">your athletes train with </span>
-                  <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent" style={{textShadow: '0 0 30px rgba(14,165,233,0.5)'}}>
-                    one intelligent system
-                  </span>
-                  <span className="text-white">.</span>
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* Value Comparison - Baseball Lineup Card Design */}
       <section className="relative py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Deep Navy Background */}
@@ -1614,8 +1456,8 @@ export default function HomePage() {
 
                 {/* Mind & Muscle Full Roster Column */}
                 <div className="p-10 md:p-14 bg-gradient-to-br from-neon-cortex-blue/8 via-transparent to-solar-surge-orange/8 relative">
-                  {/* Vibrant glow effect */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-neon-cortex-blue/15 to-solar-surge-orange/15 opacity-50" />
+                  {/* Animated glow effect */}
+                  <div className="absolute -inset-1 bg-gradient-to-r from-neon-cortex-blue via-solar-surge-orange to-neon-cortex-blue opacity-20 blur-2xl rounded-3xl animate-pulse" />
 
                   <div className="relative">
                     {/* Header with Logo */}
