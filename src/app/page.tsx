@@ -321,23 +321,6 @@ export default function HomePage() {
               </p>
             </FadeInWhenVisible>
 
-            {/* Primary CTA */}
-            <FadeInWhenVisible delay={1.5} direction="up" className="mb-6">
-              <Link href="#pricing" className="inline-block group">
-                <div className="relative px-10 py-5 bg-white/10 backdrop-blur-md border-2 border-white/30 rounded-2xl hover:border-neon-cortex-blue hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:shadow-[0_0_40px_rgba(14,165,233,0.6)]">
-                  <div className="flex items-center gap-3">
-                    <span className="font-black text-xl text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
-                      Try Free
-                    </span>
-                    <span className="text-neon-cortex-blue text-2xl font-bold group-hover:translate-x-1 transition-transform duration-300">
-                      →
-                    </span>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-neon-cortex-blue/20 to-solar-surge-orange/20 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
-                </div>
-              </Link>
-            </FadeInWhenVisible>
-
             {/* AI Learning Pulse Badge */}
             <FadeInWhenVisible delay={1.4} direction="up" className="mb-6">
               <div className="inline-block">
