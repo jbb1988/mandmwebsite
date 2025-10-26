@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
     const metadata = subscription?.metadata || session.metadata;
 
     return NextResponse.json({
+      coachCode: metadata.coach_code || '',
       teamCode: metadata.team_code || '',
       email: session.customer_details?.email || '',
       seatCount: parseInt(metadata.seat_count || '12'),
