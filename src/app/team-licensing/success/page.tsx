@@ -10,8 +10,10 @@ import { GradientTextReveal } from '@/components/animations';
 function SuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
-  const [copied, setCopied] = useState(false);
+  const [copiedCoach, setCopiedCoach] = useState(false);
+  const [copiedTeam, setCopiedTeam] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [coachCode, setCoachCode] = useState<string>('');
   const [teamCode, setTeamCode] = useState<string>('');
   const [email, setEmail] = useState<string>('');
   const [seatCount, setSeatCount] = useState<number>(0);
@@ -27,6 +29,7 @@ function SuccessContent() {
     fetch(`/api/checkout-success?session_id=${sessionId}`)
       .then(res => res.json())
       .then(data => {
+        setCoachCode(data.coachCode || '');
         setTeamCode(data.teamCode || '');
         setEmail(data.email || '');
         setSeatCount(data.seatCount || 0);
@@ -39,10 +42,16 @@ function SuccessContent() {
       });
   }, [sessionId]);
 
+  const copyCoachCode = () => {
+    navigator.clipboard.writeText(coachCode);
+    setCopiedCoach(true);
+    setTimeout(() => setCopiedCoach(false), 2000);
+  };
+
   const copyTeamCode = () => {
     navigator.clipboard.writeText(teamCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setCopiedTeam(true);
+    setTimeout(() => setCopiedTeam(false), 2000);
   };
 
   if (loading) {
@@ -100,55 +109,119 @@ function SuccessContent() {
           </p>
         </div>
 
-        {/* Team Code Card */}
-        <LiquidGlass variant="blue" className="mb-6">
-          <div className="p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <Shield className="w-8 h-8 text-neon-cortex-blue" />
-              <h2 className="text-2xl font-bold">Your Team Access Code</h2>
-            </div>
-
-            <div className="mb-6">
-              <p className="text-text-secondary mb-4">
-                Share this code with your {seatCount} team members. Each person will use this code to unlock Premium features in the app.
-              </p>
-
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                <div className="flex-1 p-4 bg-space-black/50 border-2 border-neon-cortex-blue/50 rounded-lg">
-                  <div className="text-2xl md:text-3xl font-black text-neon-cortex-blue text-center tracking-wider font-mono">
-                    {teamCode}
-                  </div>
-                </div>
-                <button
-                  onClick={copyTeamCode}
-                  className="px-6 py-4 rounded-lg font-semibold backdrop-blur-md transition-all duration-300 hover:scale-105 border border-neon-cortex-blue/30 bg-gradient-to-br from-background-primary/80 via-background-secondary/60 to-neon-cortex-blue/10 hover:shadow-liquid-glow-blue hover:border-neon-cortex-blue/50 flex items-center justify-center gap-2"
-                >
-                  {copied ? (
-                    <>
-                      <CheckCircle className="w-5 h-5" />
-                      Copied!
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="w-5 h-5" />
-                      Copy
-                    </>
-                  )}
-                </button>
+        {/* Two-Code System - COACH and TEAM Codes */}
+        <div className="space-y-6 mb-6">
+          {/* COACH CODE - Use First */}
+          <div className="bg-green-50/5 border-2 border-neon-cortex-green/40 rounded-2xl p-6 shadow-lg">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="flex-shrink-0 w-10 h-10 bg-neon-cortex-green/20 rounded-full flex items-center justify-center text-neon-cortex-green font-bold text-lg">
+                1
               </div>
-            </div>
-
-            <div className="p-4 bg-neon-cortex-green/10 border border-neon-cortex-green/30 rounded-lg flex items-start gap-3">
-              <Mail className="w-5 h-5 text-neon-cortex-green flex-shrink-0 mt-0.5" />
-              <div className="text-sm">
-                <p className="text-neon-cortex-green font-semibold mb-1">Email Confirmation Sent</p>
-                <p className="text-text-secondary">
-                  We've sent your team code and instructions to <span className="font-semibold">{email}</span>
+              <div className="flex-1">
+                <h3 className="text-xl font-black text-neon-cortex-green mb-2">
+                  ① YOUR COACH CODE (Use First!)
+                </h3>
+                <p className="text-text-secondary text-sm mb-4">
+                  Redeem this code in the app to claim your team and activate Premium features. This is <span className="font-semibold text-white">single-use</span> and just for you.
                 </p>
+                
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <div className="flex-1 p-4 bg-space-black/50 border-2 border-dashed border-neon-cortex-green/50 rounded-lg">
+                    <div className="text-xl md:text-2xl font-black text-neon-cortex-green text-center tracking-wider font-mono">
+                      {coachCode}
+                    </div>
+                  </div>
+                  <button
+                    onClick={copyCoachCode}
+                    className="px-6 py-3 rounded-lg font-semibold backdrop-blur-md transition-all duration-300 hover:scale-105 border border-neon-cortex-green/30 bg-gradient-to-br from-background-primary/80 via-background-secondary/60 to-neon-cortex-green/10 hover:shadow-[0_0_20px_rgba(34,197,94,0.4)] hover:border-neon-cortex-green/50 flex items-center justify-center gap-2"
+                  >
+                    {copiedCoach ? (
+                      <>
+                        <CheckCircle className="w-5 h-5" />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-5 h-5" />
+                        Copy
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <div className="mt-3 p-3 bg-neon-cortex-green/10 border border-neon-cortex-green/30 rounded-lg">
+                  <p className="text-xs text-neon-cortex-green font-semibold">
+                    ✓ Creates your team (or upgrades existing team to Premium)
+                  </p>
+                  <p className="text-xs text-neon-cortex-green font-semibold">
+                    ✓ Makes you the team owner with full management access
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-        </LiquidGlass>
+
+          {/* TEAM CODE - Share with Team */}
+          <div className="bg-blue-50/5 border-2 border-neon-cortex-blue/40 rounded-2xl p-6 shadow-lg">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="flex-shrink-0 w-10 h-10 bg-neon-cortex-blue/20 rounded-full flex items-center justify-center text-neon-cortex-blue font-bold text-lg">
+                2
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-black text-neon-cortex-blue mb-2">
+                  ② TEAM MEMBER CODE (Share with Team)
+                </h3>
+                <p className="text-text-secondary text-sm mb-4">
+                  Share this code with your {seatCount} athletes and parents. They'll use this to join your team. <span className="font-semibold text-white">Parents get free access!</span>
+                </p>
+                
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <div className="flex-1 p-4 bg-space-black/50 border-2 border-dashed border-neon-cortex-blue/50 rounded-lg">
+                    <div className="text-xl md:text-2xl font-black text-neon-cortex-blue text-center tracking-wider font-mono">
+                      {teamCode}
+                    </div>
+                  </div>
+                  <button
+                    onClick={copyTeamCode}
+                    className="px-6 py-3 rounded-lg font-semibold backdrop-blur-md transition-all duration-300 hover:scale-105 border border-neon-cortex-blue/30 bg-gradient-to-br from-background-primary/80 via-background-secondary/60 to-neon-cortex-blue/10 hover:shadow-liquid-glow-blue hover:border-neon-cortex-blue/50 flex items-center justify-center gap-2"
+                  >
+                    {copiedTeam ? (
+                      <>
+                        <CheckCircle className="w-5 h-5" />
+                        Copied!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-5 h-5" />
+                        Copy
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <div className="mt-3 p-3 bg-neon-cortex-blue/10 border border-neon-cortex-blue/30 rounded-lg">
+                  <p className="text-xs text-neon-cortex-blue font-semibold">
+                    ✓ Athletes/Coaches: Premium access (uses 1 seat each)
+                  </p>
+                  <p className="text-xs text-neon-cortex-blue font-semibold">
+                    ✓ Parents: Free read-only access (no seat used!)
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Email Confirmation */}
+          <div className="p-4 bg-neon-cortex-green/10 border border-neon-cortex-green/30 rounded-lg flex items-start gap-3">
+            <Mail className="w-5 h-5 text-neon-cortex-green flex-shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <p className="text-neon-cortex-green font-semibold mb-1">Email Confirmation Sent</p>
+              <p className="text-text-secondary">
+                We've sent both codes and complete instructions to <span className="font-semibold">{email}</span>
+              </p>
+            </div>
+          </div>
+        </div>
 
         {/* Next Steps */}
         <LiquidGlass variant="neutral" className="mb-6">

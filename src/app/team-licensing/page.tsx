@@ -628,7 +628,7 @@ function TeamLicensingContent() {
                     <span className="text-xl font-bold text-neon-cortex-green">You Save:</span>
                     <span className="text-3xl font-black text-neon-cortex-green">$780-2,520</span>
                   </div>
-                  <p className="text-xs text-gray-400 mt-2">Per athlete, per year</p>
+                  <p className="text-xs text-gray-400 mt-2">Per athlete, per 6 months</p>
                 </div>
               </div>
 
@@ -732,7 +732,7 @@ function TeamLicensingContent() {
               <div className="flex flex-col items-end">
                 <div className="flex items-baseline gap-2">
                   <div className="text-5xl md:text-6xl font-black text-solar-surge-orange drop-shadow-[0_0_24px_rgba(249,115,22,0.6)]">$79</div>
-                  <div className="text-xl md:text-2xl text-text-secondary font-semibold">/year</div>
+                  <div className="text-xl md:text-2xl text-text-secondary font-semibold">/6 months</div>
                 </div>
                 <div className="text-sm text-text-secondary mt-1">Individual License</div>
               </div>
@@ -827,6 +827,292 @@ function TeamLicensingContent() {
         {/* FAQ Accordion */}
         <div className="space-y-3">
           {[
+            {
+              category: 'Setup',
+              icon: Users,
+              color: 'blue',
+              question: 'Why do I receive two codes?',
+              answer: (
+                <div className="text-text-secondary text-sm space-y-3 leading-relaxed">
+                  <p>
+                    You receive <span className="font-semibold text-neon-cortex-green">two separate codes</span> for important security and functionality reasons:
+                  </p>
+                  <div className="space-y-3">
+                    <div className="bg-green-50/5 rounded-lg p-4 border border-neon-cortex-green/20">
+                      <p className="mb-2"><span className="font-bold text-neon-cortex-green">🟢 COACH Code (COACH-XXXX-YYYY-ZZZZ)</span></p>
+                      <ul className="space-y-1 ml-4 text-sm">
+                        <li className="flex items-start gap-2">
+                          <Check className="w-3 h-3 text-neon-cortex-green flex-shrink-0 mt-1" />
+                          <span>Single-use, just for you</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <Check className="w-3 h-3 text-neon-cortex-green flex-shrink-0 mt-1" />
+                          <span>Makes you the team owner</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <Check className="w-3 h-3 text-neon-cortex-green flex-shrink-0 mt-1" />
+                          <span>Creates your team automatically (or upgrades existing team)</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <Check className="w-3 h-3 text-neon-cortex-green flex-shrink-0 mt-1" />
+                          <span><span className="font-semibold">Use this code FIRST</span> before sharing the TEAM code</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <div className="bg-blue-50/5 rounded-lg p-4 border border-neon-cortex-blue/20">
+                      <p className="mb-2"><span className="font-bold text-neon-cortex-blue">🔵 TEAM Code (TEAM-AAAA-BBBB-CCCC)</span></p>
+                      <ul className="space-y-1 ml-4 text-sm">
+                        <li className="flex items-start gap-2">
+                          <Check className="w-3 h-3 text-neon-cortex-blue flex-shrink-0 mt-1" />
+                          <span>Multi-use, for your entire team</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <Check className="w-3 h-3 text-neon-cortex-blue flex-shrink-0 mt-1" />
+                          <span>Athletes and other coaches use this to join</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <Check className="w-3 h-3 text-neon-cortex-blue flex-shrink-0 mt-1" />
+                          <span>Parents use this for free read-only access</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <Check className="w-3 h-3 text-neon-cortex-blue flex-shrink-0 mt-1" />
+                          <span><span className="font-semibold">Share AFTER</span> you've redeemed your COACH code</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              ),
+            },
+            {
+              category: 'Setup',
+              icon: Shield,
+              color: 'green',
+              question: 'What if I already created a free team in the app?',
+              answer: (
+                <div className="text-text-secondary text-sm space-y-3 leading-relaxed">
+                  <p className="text-neon-cortex-green font-bold text-base">
+                    ✅ No problem! Your COACH code will automatically upgrade your existing team.
+                  </p>
+                  <p>
+                    When you redeem your COACH code, our system detects you already own a team and intelligently upgrades it to Premium. You keep:
+                  </p>
+                  <ul className="space-y-2 ml-4">
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">All your members</span> - No one gets removed</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">All chat history</span> - Nothing is lost</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">All settings</span> - Team name, avatar, etc.</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">Premium features</span> - Instantly activated for everyone</span>
+                    </li>
+                  </ul>
+                  <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                    <p className="text-xs">
+                      💡 <span className="font-semibold text-white">Smart Upgrade:</span> The system automatically merges your Premium license with your existing free team. No manual work needed!
+                    </p>
+                  </div>
+                </div>
+              ),
+            },
+            {
+              category: 'Setup',
+              icon: Users,
+              color: 'orange',
+              question: 'Do I need to create a new team after purchasing?',
+              answer: (
+                <div className="text-text-secondary text-sm space-y-3 leading-relaxed">
+                  <p className="text-neon-cortex-green font-bold text-base">
+                    ✅ No! The COACH code handles everything automatically.
+                  </p>
+                  <p>
+                    The system works differently depending on your situation:
+                  </p>
+                  <div className="space-y-3">
+                    <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                      <p className="mb-2"><span className="font-semibold text-neon-cortex-blue">If you're a NEW coach (no team yet):</span></p>
+                      <ul className="space-y-1 ml-4 text-sm">
+                        <li className="flex items-start gap-2">
+                          <span className="text-neon-cortex-blue">1.</span>
+                          <span>Enter your COACH code in the app</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-neon-cortex-blue">2.</span>
+                          <span>Team is created automatically with you as owner</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-neon-cortex-blue">3.</span>
+                          <span>Team chat room is set up</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-neon-cortex-blue">4.</span>
+                          <span>Premium features activated</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                      <p className="mb-2"><span className="font-semibold text-solar-surge-orange">If you ALREADY have a free team:</span></p>
+                      <ul className="space-y-1 ml-4 text-sm">
+                        <li className="flex items-start gap-2">
+                          <span className="text-solar-surge-orange">1.</span>
+                          <span>Enter your COACH code in the app</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-solar-surge-orange">2.</span>
+                          <span>Your existing team is upgraded to Premium</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-solar-surge-orange">3.</span>
+                          <span>All members, chat history preserved</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-solar-surge-orange">4.</span>
+                          <span>License seats added to your team</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                  <p className="text-xs bg-white/5 rounded-lg p-3 border border-white/10">
+                    <span className="font-semibold text-white">Either way:</span> No manual team creation needed. Just redeem your COACH code and you're set!
+                  </p>
+                </div>
+              ),
+            },
+            {
+              category: 'Setup',
+              icon: HelpCircle,
+              color: 'blue',
+              question: "What's the difference between COACH and TEAM codes?",
+              answer: (
+                <div className="text-text-secondary text-sm space-y-3 leading-relaxed">
+                  <p>Understanding the difference is important for smooth team setup:</p>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm border-collapse">
+                      <thead>
+                        <tr className="border-b border-white/20">
+                          <th className="text-left p-3 font-bold text-white">Feature</th>
+                          <th className="text-left p-3 font-bold text-neon-cortex-green">COACH Code</th>
+                          <th className="text-left p-3 font-bold text-neon-cortex-blue">TEAM Code</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/10">
+                        <tr>
+                          <td className="p-3 font-semibold">Who uses it?</td>
+                          <td className="p-3">Just you (the coach/purchaser)</td>
+                          <td className="p-3">Athletes, other coaches, parents</td>
+                        </tr>
+                        <tr>
+                          <td className="p-3 font-semibold">How many times?</td>
+                          <td className="p-3 text-solar-surge-orange">Single-use only</td>
+                          <td className="p-3 text-neon-cortex-green">Multi-use (up to seat limit)</td>
+                        </tr>
+                        <tr>
+                          <td className="p-3 font-semibold">What it does</td>
+                          <td className="p-3">Creates OR upgrades team, makes you owner</td>
+                          <td className="p-3">Joins members to your team</td>
+                        </tr>
+                        <tr>
+                          <td className="p-3 font-semibold">When to use</td>
+                          <td className="p-3 text-neon-cortex-green font-bold">FIRST (immediately after purchase)</td>
+                          <td className="p-3">AFTER coach has redeemed their code</td>
+                        </tr>
+                        <tr>
+                          <td className="p-3 font-semibold">Format</td>
+                          <td className="p-3"><code className="bg-white/10 px-2 py-1 rounded">COACH-XXXX-YYYY-ZZZZ</code></td>
+                          <td className="p-3"><code className="bg-white/10 px-2 py-1 rounded">TEAM-AAAA-BBBB-CCCC</code></td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="bg-solar-surge-orange/10 rounded-lg p-3 border border-solar-surge-orange/30">
+                    <p className="text-xs">
+                      ⚠️ <span className="font-semibold text-solar-surge-orange">Important:</span> You MUST redeem your COACH code before sharing the TEAM code with your team members.
+                    </p>
+                  </div>
+                </div>
+              ),
+            },
+            {
+              category: 'Parents',
+              icon: Heart,
+              color: 'green',
+              question: 'Can parents join without using a license seat?',
+              answer: (
+                <div className="text-text-secondary text-sm space-y-3 leading-relaxed">
+                  <p className="text-neon-cortex-green font-bold text-base">
+                    ✅ Yes! Parents get FREE access and don't consume any license seats.
+                  </p>
+                  <p>
+                    When a parent uses your TEAM code, they automatically receive:
+                  </p>
+                  <ul className="space-y-2 ml-4">
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">Free read-only access</span> to their linked athlete's Goals and Reports</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">Full access</span> to all free features (Chatter, Events, Daily Hit)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">Parent Dashboard</span> to monitor their athlete's progress</span>
+                    </li>
+                  </ul>
+                  <div className="bg-white/5 rounded-lg p-3 border border-white/10">
+                    <p className="text-xs">
+                      💡 <span className="font-semibold text-white">Seat Management:</span> Only athletes and coaches with the TEAM code consume Premium license seats. Parents are always free!
+                    </p>
+                  </div>
+                  <p className="text-xs text-text-secondary/70">
+                    Example: If you purchase 12 seats, you can have 12 athletes/coaches with full Premium access AND unlimited parents with free read-only access.
+                  </p>
+                </div>
+              ),
+            },
+            {
+              category: 'Troubleshooting',
+              icon: AlertCircle,
+              color: 'orange',
+              question: 'What if I lose my COACH code?',
+              answer: (
+                <div className="text-text-secondary text-sm space-y-3 leading-relaxed">
+                  <p>
+                    <span className="font-semibold text-white">First, check your purchase confirmation email</span> - both codes are included there.
+                  </p>
+                  <div className="bg-white/5 rounded-lg p-4 border border-white/10">
+                    <p className="mb-2 font-semibold text-white">If you can't find the email:</p>
+                    <ol className="space-y-2 ml-4 text-sm">
+                      <li className="flex items-start gap-2">
+                        <span className="text-neon-cortex-blue font-bold">1.</span>
+                        <span>Check your spam/junk folder</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-neon-cortex-blue font-bold">2.</span>
+                        <span>Search your email for "Mind & Muscle" or "Team License"</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <span className="text-neon-cortex-blue font-bold">3.</span>
+                        <span>Contact support at <a href="mailto:support@mindandmuscle.ai" className="text-neon-cortex-blue hover:underline">support@mindandmuscle.ai</a></span>
+                      </li>
+                    </ol>
+                  </div>
+                  <div className="bg-neon-cortex-blue/10 rounded-lg p-3 border border-neon-cortex-blue/30">
+                    <p className="text-xs">
+                      📧 <span className="font-semibold text-neon-cortex-blue">Quick Support:</span> Email us with your purchase email address and we'll send you a new COACH code within 24 hours.
+                    </p>
+                  </div>
+                </div>
+              ),
+            },
             {
               category: 'Features',
               icon: Sparkles,
