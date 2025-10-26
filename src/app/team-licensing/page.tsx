@@ -892,32 +892,32 @@ function TeamLicensingContent() {
               answer: (
                 <div className="text-text-secondary text-sm space-y-3 leading-relaxed">
                   <p className="text-neon-cortex-green font-bold text-base">
-                    ✅ No problem! Your COACH code will automatically upgrade your existing team.
+                    ✅ No problem! You can own multiple teams.
                   </p>
                   <p>
-                    When you redeem your COACH code, our system detects you already own a team and intelligently upgrades it to Premium. You keep:
+                    When you redeem your COACH code, it creates a NEW Premium team for the purchased license. Your existing free team stays exactly as it is:
                   </p>
                   <ul className="space-y-2 ml-4">
                     <li className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0 mt-0.5" />
-                      <span><span className="font-semibold text-white">All your members</span> - No one gets removed</span>
+                      <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">Free team remains</span> - Keep coaching your existing team</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0 mt-0.5" />
-                      <span><span className="font-semibold text-white">All chat history</span> - Nothing is lost</span>
+                      <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">New Premium team</span> - Created from your purchase</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0 mt-0.5" />
-                      <span><span className="font-semibold text-white">All settings</span> - Team name, avatar, etc.</span>
+                      <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">Switch between teams</span> - Easy team selector in the app</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0 mt-0.5" />
-                      <span><span className="font-semibold text-white">Premium features</span> - Instantly activated for everyone</span>
+                      <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">Separate rosters & chats</span> - Each team is independent</span>
                     </li>
                   </ul>
                   <div className="bg-white/5 rounded-lg p-3 border border-white/10">
                     <p className="text-xs">
-                      💡 <span className="font-semibold text-white">Smart Upgrade:</span> The system automatically merges your Premium license with your existing free team. No manual work needed!
+                      💡 <span className="font-semibold text-white">Perfect for Travel Baseball:</span> Many coaches work with multiple teams (12U, 14U, different organizations). Each COACH code creates a separate team with its own Premium license.
                     </p>
                   </div>
                 </div>
