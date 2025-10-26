@@ -191,7 +191,7 @@ export default function HomePage() {
     },
   ];
 
-  // Row 3: 4 cards - AI Assistant, Goals, Fuel, Chatter
+  // Row 3: 4 cards - AI Assistant, Goals, Chatter, Fuel
   const row3Features = [
     {
       id: 'ai-assistant',
@@ -220,6 +220,19 @@ export default function HomePage() {
       modalDescription: 'Goals AI transforms vague ambitions into surgical precision.\n\n"I want to get stronger" becomes "Increase squat by 25lbs in 8 weeks through progressive overload."\n\nYour performance architect analyzes goals like a championship coach. Finding gaps you miss. Building bridges between where you are and where you\'re going.\n\nSeason goals. Daily habits. All tracked. All optimized.\n\nWhile other athletes hope for results, you\'ll engineer them.\n\n**This is goal setting. Weaponized for champions.**',
     },
     {
+      id: 'chatter',
+      title: 'Chatter + Events',
+      icon: Users,
+      iconImage: '/assets/images/chatter_icon_3x.png',
+      color: 'blue',
+      image: '/assets/images/Team Communications.png',
+      videoUrl: '/assets/videos/chatter.mp4',
+      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/chatter_ob.mp3',
+      tagline: 'Stay Connected. Stay Synced.',
+      description: 'Game Day Perfection Starts With Perfect Logistics.',
+      modalDescription: 'Chatter & Events: Where championship teams stay perfectly synchronized.\n\nGame day perfection starts with perfect communication and zero logistical chaos.\n\nTeam Chat - That dugout energy, 24/7. Build the brotherhood that separates great teams from good ones.\n\nEvent Management - Every tournament, every practice, every detail. Attendance tracking. Calendar sync. Everyone knows where to be, when to be there.\n\nUniform Creator - Professional team coordination with one tap. Create custom uniforms (home, away, practice) with visual presets. Cap, jersey, pants, belt, socks - all perfectly coordinated.\n\nNavigation Integration - Directions to every field, every facility. No one gets lost. No one shows up late.\n\nWhile other teams deal with communication breakdowns and logistical nightmares, yours moves like a championship machine.\n\n**This is team synchronization. Weaponized.**',
+    },
+    {
       id: 'fuel-ai',
       title: 'Fuel AI',
       icon: Zap,
@@ -231,19 +244,6 @@ export default function HomePage() {
       tagline: 'Precision Nutrition, No Guesswork.',
       description: 'AI-Powered Meal Plans That Turn Food Into Fuel.',
       modalDescription: 'Fuel AI turns your food preferences into performance-optimized meal plans.\n\nYour body is a high-performance machine. Stop guessing what to eat.\n\nAI-Powered Planning - Tell us what you love, what you avoid, how much time you have. The AI creates 7 days of personalized meals designed for peak performance.\n\nSmart Shopping Lists - Auto-generated from your weekly plan. Walk in with a list, walk out ready to fuel greatness.\n\nPerformance-Focused - Every meal targets training fuel and recovery. Real food that fits your lifestyle, not generic meal prep.\n\nLearns Your Preferences - Dietary restrictions, allergies, favorite foods, cooking time. Each week gets smarter.\n\nWhile other athletes count calories and hope, you\'ll eat with purpose.\n\n**This is nutrition. Engineered for champions.**',
-    },
-    {
-      id: 'chatter',
-      title: 'Chatter + Events',
-      icon: Users,
-      iconImage: '/assets/images/chatter_icon_3x.png',
-      color: 'orange',
-      image: '/assets/images/Team Communications.png',
-      videoUrl: '/assets/videos/chatter.mp4',
-      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/chatter_ob.mp3',
-      tagline: 'Stay Connected. Stay Synced.',
-      description: 'Game Day Perfection Starts With Perfect Logistics.',
-      modalDescription: 'Chatter & Events: Where championship teams stay perfectly synchronized.\n\nGame day perfection starts with perfect communication and zero logistical chaos.\n\nTeam Chat - That dugout energy, 24/7. Build the brotherhood that separates great teams from good ones.\n\nEvent Management - Every tournament, every practice, every detail. Attendance tracking. Calendar sync. Everyone knows where to be, when to be there.\n\nUniform Creator - Professional team coordination with one tap. Create custom uniforms (home, away, practice) with visual presets. Cap, jersey, pants, belt, socks - all perfectly coordinated.\n\nNavigation Integration - Directions to every field, every facility. No one gets lost. No one shows up late.\n\nWhile other teams deal with communication breakdowns and logistical nightmares, yours moves like a championship machine.\n\n**This is team synchronization. Weaponized.**',
     },
   ];
 
