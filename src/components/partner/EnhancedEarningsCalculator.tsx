@@ -182,7 +182,7 @@ export function EnhancedEarningsCalculator() {
           </div>
           <div>
             <h2 className="text-3xl font-black">Calculate Your Earnings</h2>
-            <p className="text-text-secondary text-sm">See your potential annual income</p>
+            <p className="text-text-secondary text-sm">See your potential income</p>
           </div>
         </div>
 

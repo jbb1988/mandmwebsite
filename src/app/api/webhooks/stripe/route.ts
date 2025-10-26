@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
 // Send team code email
-async function sendTeamCodeEmail(email: string, teamCode: string, seatCount: number) {
+async function sendTeamCodeEmail(email: string, coachCode: string, teamCode: string, seatCount: number) {
   try {
     const resend = new Resend(process.env.RESEND_API_KEY!);
     await resend.emails.send({
@@ -29,43 +29,87 @@ async function sendTeamCodeEmail(email: string, teamCode: string, seatCount: num
               <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Your 6-month seasonal team license is now active</p>
             </div>
 
-            <div style="background: #f9fafb; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
-              <h2 style="margin-top: 0; color: #1f2937;">Your Team Join Code</h2>
-              <div style="background: white; padding: 20px; border-radius: 8px; border: 2px dashed #667eea; text-align: center; margin: 20px 0;">
-                <div style="font-size: 32px; font-weight: bold; letter-spacing: 4px; color: #667eea; font-family: 'Courier New', monospace;">
-                  ${teamCode}
-                </div>
-              </div>
-              <p style="margin: 15px 0 0 0; color: #6b7280; font-size: 14px; text-align: center;">
-                Share this code with your ${seatCount} team members
+            <!-- IMPORTANT NOTICE -->
+            <div style="background: #fef3c7; padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b; margin-bottom: 30px;">
+              <h3 style="margin-top: 0; color: #92400e; font-size: 18px;">⚠️ Two Codes - Use in Order!</h3>
+              <p style="color: #78350f; margin: 0; font-size: 14px; font-weight: bold;">
+                You must redeem YOUR COACH CODE first before sharing the team code with others.
               </p>
             </div>
 
+            <!-- COACH CODE -->
+            <div style="background: #f0fdf4; padding: 30px; border-radius: 10px; margin-bottom: 20px; border: 3px solid #10b981;">
+              <h2 style="margin-top: 0; color: #065f46; font-size: 20px;">
+                ①  YOUR COACH CODE (Use First!)
+              </h2>
+              <div style="background: white; padding: 20px; border-radius: 8px; border: 2px dashed #10b981; text-align: center; margin: 20px 0;">
+                <div style="font-size: 28px; font-weight: bold; letter-spacing: 3px; color: #10b981; font-family: 'Courier New', monospace;">
+                  ${coachCode}
+                </div>
+              </div>
+              <ul style="color: #065f46; padding-left: 20px; font-size: 14px; margin: 15px 0;">
+                <li><strong>Single use only - for YOU as the coach</strong></li>
+                <li>Creates your team and makes you the owner</li>
+                <li>Unlocks Premium features for you</li>
+                <li>Makes team visible in Chatter</li>
+              </ul>
+              <p style="color: #047857; font-weight: bold; margin: 15px 0 0 0; text-align: center;">
+                👉 Redeem this code FIRST in the app: More → Settings → Redeem Team Code
+              </p>
+            </div>
+
+            <!-- TEAM CODE -->
+            <div style="background: #eff6ff; padding: 30px; border-radius: 10px; margin-bottom: 30px; border: 2px solid #3b82f6;">
+              <h2 style="margin-top: 0; color: #1e40af; font-size: 20px;">
+                ②  TEAM MEMBER CODE (Share with Your Team)
+              </h2>
+              <div style="background: white; padding: 20px; border-radius: 8px; border: 2px dashed #3b82f6; text-align: center; margin: 20px 0;">
+                <div style="font-size: 28px; font-weight: bold; letter-spacing: 3px; color: #3b82f6; font-family: 'Courier New', monospace;">
+                  ${teamCode}
+                </div>
+              </div>
+              <ul style="color: #1e40af; padding-left: 20px; font-size: 14px; margin: 15px 0;">
+                <li><strong>Share with ${seatCount} athletes/coaches</strong></li>
+                <li>Athletes & coaches get Premium access</li>
+                <li>Parents get free read-only access (unlimited!)</li>
+                <li>Adds everyone to your team</li>
+              </ul>
+              <p style="color: #2563eb; font-weight: bold; margin: 15px 0 0 0; text-align: center;">
+                📱 Share this code with your team members
+              </p>
+            </div>
+
+            <!-- NEXT STEPS -->
             <div style="margin-bottom: 30px;">
-              <h2 style="color: #1f2937; font-size: 20px;">Next Steps:</h2>
+              <h2 style="color: #1f2937; font-size: 20px;">Setup Instructions:</h2>
               <ol style="color: #4b5563; padding-left: 20px;">
                 <li style="margin-bottom: 15px;">
                   <strong>Download the app</strong><br>
                   <span style="font-size: 14px;">Get Mind and Muscle from the App Store or Google Play</span>
                 </li>
                 <li style="margin-bottom: 15px;">
-                  <strong>Share your code</strong><br>
-                  <span style="font-size: 14px;">Send the team join code to your athletes and coaches</span>
+                  <strong>YOU redeem your coach code first</strong><br>
+                  <span style="font-size: 14px;">Go to More → Settings → Redeem Team Code → Enter: <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 3px;">${coachCode}</code></span>
                 </li>
                 <li style="margin-bottom: 15px;">
-                  <strong>Redeem in the app</strong><br>
-                  <span style="font-size: 14px;">Go to More > Settings > Redeem Team Code and enter: <strong>${teamCode}</strong></span>
+                  <strong>Name your team</strong><br>
+                  <span style="font-size: 14px;">After redeeming, you can customize your team name and settings</span>
+                </li>
+                <li style="margin-bottom: 15px;">
+                  <strong>Share the team code</strong><br>
+                  <span style="font-size: 14px;">Send <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 3px;">${teamCode}</code> to your athletes and parents</span>
                 </li>
               </ol>
             </div>
 
-            <div style="background: #fef3c7; padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b; margin-bottom: 30px;">
-              <h3 style="margin-top: 0; color: #92400e; font-size: 16px;">Important Notes:</h3>
-              <ul style="color: #78350f; margin: 0; padding-left: 20px; font-size: 14px;">
-                <li>Athletes and coaches will consume a license seat</li>
-                <li>Parents can view without consuming a seat</li>
-                <li>Your subscription renews every 6 months</li>
-                <li>You have ${seatCount} seats available</li>
+            <!-- LICENSE INFO -->
+            <div style="background: #f9fafb; padding: 20px; border-radius: 8px; border-left: 4px solid #667eea; margin-bottom: 30px;">
+              <h3 style="margin-top: 0; color: #4b5563; font-size: 16px;">License Details:</h3>
+              <ul style="color: #6b7280; margin: 0; padding-left: 20px; font-size: 14px;">
+                <li><strong>${seatCount} Premium seats</strong> for athletes and coaches</li>
+                <li><strong>Unlimited parent access</strong> (read-only, doesn't consume seats)</li>
+                <li>Subscription renews every 6 months</li>
+                <li>Manage subscription at mindandmuscle.ai/team-licensing/manage</li>
               </ul>
             </div>
 
@@ -136,35 +180,20 @@ export async function POST(request: NextRequest) {
       const toltReferral = session.metadata?.tolt_referral; // Partner referral code
       const customerEmail = session.customer_email;
 
-      // Get the team code that was generated during checkout
-      // This ensures the code shown on success page matches the code emailed
+      // Get both codes that were generated during checkout
+      const coachCode = session.metadata?.coach_code;
       const teamCode = session.metadata?.team_code;
 
-      if (!seatCount || !customerEmail || !teamCode) {
+      if (!seatCount || !customerEmail || !coachCode || !teamCode) {
         console.error('Missing required metadata in session:', session.id);
         return NextResponse.json({ error: 'Missing metadata' }, { status: 400 });
       }
 
-      // Verify the team code doesn't already exist (shouldn't happen with checkout generation)
-      const { data: existing } = await supabase
-        .from('team_join_codes')
-        .select('id')
-        .eq('code', teamCode)
-        .single();
-
-      if (existing) {
-        console.error('Team code collision detected:', teamCode);
-        return NextResponse.json(
-          { error: 'Team code already exists' },
-          { status: 500 }
-        );
-      }
-
-      // Create team record in Supabase (basic team info + Stripe tracking)
+      // Create team record WITHOUT owner (will be set when coach redeems)
       const { data: team, error: teamError } = await supabase
         .from('teams')
         .insert({
-          name: `Team ${teamCode}`, // Temporary name, can be changed by admin later
+          name: `Team ${coachCode}`, // Temporary name, can be changed by admin later
           stripe_subscription_id: session.subscription as string,
           stripe_customer_id: session.customer as string,
           admin_email: customerEmail,
@@ -172,7 +201,10 @@ export async function POST(request: NextRequest) {
           license_seats_consumed: 0,
           is_premium: true,
           subscription_status: 'active',
+          // NO created_by_user_id - will be set when coach redeems
           metadata: {
+            coach_code: coachCode,
+            team_code: teamCode,
             discount_percentage: discountPercentage,
             price_per_seat: pricePerSeat,
             total_amount: session.amount_total ? session.amount_total / 100 : 0,
@@ -193,8 +225,30 @@ export async function POST(request: NextRequest) {
 
       console.log('Team created:', team.id);
 
-      // Create join code in team_join_codes table
-      const { data: joinCode, error: joinCodeError } = await supabase
+      // Create coach code (single-use)
+      const { data: coachJoinCode, error: coachCodeError } = await supabase
+        .from('team_join_codes')
+        .insert({
+          code: coachCode,
+          team_id: team.id,
+          max_uses: 1, // Single use
+          uses_count: 0,
+          is_active: true,
+          tier: 'premium',
+          code_type: 'coach',
+          allow_parent_linking: false, // Coaches only
+        })
+        .select()
+        .single();
+
+      if (coachCodeError) {
+        console.error('Error creating coach code:', coachCodeError);
+        await supabase.from('teams').delete().eq('id', team.id);
+        return NextResponse.json({ error: 'Failed to create coach code' }, { status: 500 });
+      }
+
+      // Create team member code (multi-use)
+      const { data: teamJoinCode, error: teamCodeError } = await supabase
         .from('team_join_codes')
         .insert({
           code: teamCode,
@@ -203,25 +257,31 @@ export async function POST(request: NextRequest) {
           uses_count: 0,
           is_active: true,
           tier: 'premium',
+          code_type: 'member',
           allow_parent_linking: true,
+          linked_code_id: coachJoinCode.id, // Link to coach code
         })
         .select()
         .single();
 
-      if (joinCodeError) {
-        console.error('Error creating join code:', joinCodeError);
-        // Rollback: delete the team we just created
+      if (teamCodeError) {
+        console.error('Error creating team code:', teamCodeError);
+        // Rollback: delete coach code and team
+        await supabase.from('team_join_codes').delete().eq('id', coachJoinCode.id);
         await supabase.from('teams').delete().eq('id', team.id);
-        return NextResponse.json(
-          { error: 'Failed to create join code' },
-          { status: 500 }
-        );
+        return NextResponse.json({ error: 'Failed to create team code' }, { status: 500 });
       }
 
-      console.log('Join code created:', teamCode, 'for team:', team.id);
+      // Link codes together (bidirectional)
+      await supabase
+        .from('team_join_codes')
+        .update({ linked_code_id: teamJoinCode.id })
+        .eq('id', coachJoinCode.id);
 
-      // Send email with team code
-      await sendTeamCodeEmail(customerEmail, teamCode, seatCount);
+      console.log('Coach code created:', coachCode, 'Team code created:', teamCode, 'for team:', team.id);
+
+      // Send email with both codes
+      await sendTeamCodeEmail(customerEmail, coachCode, teamCode, seatCount);
 
       // Notify Tolt of conversion (for partner commission tracking)
       if (toltReferral) {

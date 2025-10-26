@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'kuswlvbjplkgrqlmqtok.supabase.co',
+        hostname: 'api.mindandmuscle.ai',
       },
     ],
     qualities: [75, 90, 100],
@@ -53,7 +53,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "img-src 'self' data: https: blob:",
               "font-src 'self' data: https://fonts.gstatic.com",
-              "connect-src 'self' https://api.stripe.com https://kuswlvbjplkgrqlmqtok.supabase.co https://api.tolt.io https://api.resend.com https://*.upstash.io https://www.google-analytics.com https://challenges.cloudflare.com",
+              "connect-src 'self' https://api.stripe.com https://api.mindandmuscle.ai https://api.tolt.io https://api.resend.com https://*.upstash.io https://www.google-analytics.com https://challenges.cloudflare.com",
               "frame-src 'self' https://js.stripe.com https://checkout.stripe.com https://challenges.cloudflare.com",
               "frame-ancestors 'self'",
               "base-uri 'self'",

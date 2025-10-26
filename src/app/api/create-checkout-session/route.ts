@@ -23,6 +23,25 @@ function generateTeamCode(): string {
   return `TEAM-${code}`;
 }
 
+// Generate unique coach code
+function generateCoachCode(): string {
+  const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Exclude similar looking chars
+  const segments = 3;
+  const segmentLength = 4;
+
+  const code = Array(segments)
+    .fill(null)
+    .map(() => {
+      return Array(segmentLength)
+        .fill(null)
+        .map(() => characters.charAt(Math.floor(Math.random() * characters.length)))
+        .join('');
+    })
+    .join('-');
+
+  return `COACH-${code}`;
+}
+
 export async function OPTIONS(request: NextRequest) {
   return handleCorsOptions(request) || new NextResponse(null, { status: 204 });
 }
@@ -103,7 +122,8 @@ export async function POST(request: NextRequest) {
 
     const totalAmount = Math.round(pricePerSeat * seatCount * 100); // Convert to cents
 
-    // Generate unique team code
+    // Generate unique coach and team codes
+    const coachCode = generateCoachCode();
     const teamCode = generateTeamCode();
 
     // Create Stripe checkout session
@@ -158,6 +178,7 @@ export async function POST(request: NextRequest) {
         seat_count: seatCount.toString(),
         discount_percentage: discountPercentage.toString(),
         price_per_seat: pricePerSeat.toString(),
+        coach_code: coachCode,
         team_code: teamCode,
         ...(toltReferral && { tolt_referral: toltReferral }),
       },
@@ -166,6 +187,7 @@ export async function POST(request: NextRequest) {
           seat_count: seatCount.toString(),
           discount_percentage: discountPercentage.toString(),
           price_per_seat: pricePerSeat.toString(),
+          coach_code: coachCode,
           team_code: teamCode,
           ...(toltReferral && { tolt_referral: toltReferral }),
         },
