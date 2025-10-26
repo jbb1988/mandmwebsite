@@ -851,7 +851,7 @@ function TeamLicensingContent() {
                         </li>
                         <li className="flex items-start gap-2">
                           <Check className="w-3 h-3 text-neon-cortex-green flex-shrink-0 mt-1" />
-                          <span>Creates your team automatically (or upgrades existing team)</span>
+                          <span>Creates a NEW Premium team automatically</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <Check className="w-3 h-3 text-neon-cortex-green flex-shrink-0 mt-1" />
@@ -931,58 +931,39 @@ function TeamLicensingContent() {
               answer: (
                 <div className="text-text-secondary text-sm space-y-3 leading-relaxed">
                   <p className="text-neon-cortex-green font-bold text-base">
-                    ✅ No! The COACH code handles everything automatically.
+                    ✅ No! The COACH code creates your team automatically.
                   </p>
                   <p>
-                    The system works differently depending on your situation:
+                    When you redeem your COACH code, the system automatically:
                   </p>
-                  <div className="space-y-3">
-                    <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                      <p className="mb-2"><span className="font-semibold text-neon-cortex-blue">If you're a NEW coach (no team yet):</span></p>
-                      <ul className="space-y-1 ml-4 text-sm">
-                        <li className="flex items-start gap-2">
-                          <span className="text-neon-cortex-blue">1.</span>
-                          <span>Enter your COACH code in the app</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-neon-cortex-blue">2.</span>
-                          <span>Team is created automatically with you as owner</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-neon-cortex-blue">3.</span>
-                          <span>Team chat room is set up</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-neon-cortex-blue">4.</span>
-                          <span>Premium features activated</span>
-                        </li>
-                      </ul>
-                    </div>
-                    <div className="bg-white/5 rounded-lg p-4 border border-white/10">
-                      <p className="mb-2"><span className="font-semibold text-solar-surge-orange">If you ALREADY have a free team:</span></p>
-                      <ul className="space-y-1 ml-4 text-sm">
-                        <li className="flex items-start gap-2">
-                          <span className="text-solar-surge-orange">1.</span>
-                          <span>Enter your COACH code in the app</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-solar-surge-orange">2.</span>
-                          <span>Your existing team is upgraded to Premium</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-solar-surge-orange">3.</span>
-                          <span>All members, chat history preserved</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-solar-surge-orange">4.</span>
-                          <span>License seats added to your team</span>
-                        </li>
-                      </ul>
-                    </div>
+                  <ul className="space-y-2 ml-4">
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+                      <span>Creates a NEW Premium team from your purchase</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+                      <span>Makes you the team owner</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+                      <span>Sets up team chat room</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+                      <span>Activates Premium features</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+                      <span>Allocates your license seats</span>
+                    </li>
+                  </ul>
+                  <div className="bg-white/5 rounded-lg p-4 border border-white/10 mt-3">
+                    <p className="mb-2"><span className="font-semibold text-neon-cortex-blue">What if I already have a free team?</span></p>
+                    <p className="text-xs">
+                      No problem! Your free team stays as-is, and your COACH code creates a NEW Premium team. You'll own both teams and can easily switch between them in the app. Perfect for coaches managing multiple age groups!
+                    </p>
                   </div>
-                  <p className="text-xs bg-white/5 rounded-lg p-3 border border-white/10">
-                    <span className="font-semibold text-white">Either way:</span> No manual team creation needed. Just redeem your COACH code and you're set!
-                  </p>
                 </div>
               ),
             },
@@ -1016,7 +997,7 @@ function TeamLicensingContent() {
                         </tr>
                         <tr>
                           <td className="p-3 font-semibold">What it does</td>
-                          <td className="p-3">Creates OR upgrades team, makes you owner</td>
+                          <td className="p-3">Creates NEW Premium team, makes you owner</td>
                           <td className="p-3">Joins members to your team</td>
                         </tr>
                         <tr>
