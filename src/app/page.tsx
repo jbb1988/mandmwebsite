@@ -1860,25 +1860,6 @@ export default function HomePage() {
           </FadeInWhenVisible>
         </div>
       </section>
-
-      {/* Mobile Sticky CTA - Only visible on mobile */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-gradient-to-b from-transparent via-[#0A0D1E]/95 to-[#0A0D1E] backdrop-blur-lg border-t border-white/10 p-4 pb-6 shadow-[0_-8px_32px_rgba(0,0,0,0.6)]">
-        <div className="max-w-md mx-auto">
-          <Link href="#pricing" className="block group">
-            <div className="relative w-full py-4 px-6 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange rounded-xl overflow-hidden">
-              <div className="relative z-10 flex items-center justify-center gap-2">
-                <span className="font-black text-lg text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.6)]">
-                  Try Free
-                </span>
-                <span className="text-xl font-bold group-active:translate-x-1 transition-transform duration-200">
-                  →
-                </span>
-              </div>
-              <div className="absolute inset-0 bg-white/20 opacity-0 group-active:opacity-100 transition-opacity duration-200"></div>
-            </div>
-          </Link>
-        </div>
-      </div>
     </div>
   );
 }
