@@ -18,106 +18,157 @@ async function sendTeamCodeEmail(email: string, coachCode: string, teamCode: str
       html: `
         <!DOCTYPE html>
         <html>
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Your Team License is Active</title>
-          </head>
-          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px; text-align: center; margin-bottom: 30px;">
-              <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to Mind and Muscle!</h1>
-              <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">Your 6-month seasonal team license is now active</p>
-            </div>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #1a1f35;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #1a1f35; padding: 40px 20px;">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background: linear-gradient(to bottom, #2a3148, #1f2537); border-radius: 16px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
+                  
+                  <!-- Header with Logo -->
+                  <tr>
+                    <td align="center" style="padding: 40px 40px 20px;">
+                      <a href="https://www.mindandmuscle.ai" style="display: block; text-decoration: none;">
+                        <img src="https://api.mindandmuscle.ai/storage/v1/object/public/media-thumbnails/New%20MM%20Logo-transparent%20(1).png" alt="Mind & Muscle" width="120" style="display: block; max-width: 120px; height: auto;">
+                      </a>
+                    </td>
+                  </tr>
 
-            <!-- IMPORTANT NOTICE -->
-            <div style="background: #fef3c7; padding: 20px; border-radius: 8px; border-left: 4px solid #f59e0b; margin-bottom: 30px;">
-              <h3 style="margin-top: 0; color: #92400e; font-size: 18px;">⚠️ Two Codes - Use in Order!</h3>
-              <p style="color: #78350f; margin: 0; font-size: 14px; font-weight: bold;">
-                You must redeem YOUR COACH CODE first before sharing the team code with others.
-              </p>
-            </div>
+                  <!-- Welcome Message -->
+                  <tr>
+                    <td style="padding: 20px 40px; text-align: center;">
+                      <h1 style="margin: 0 0 16px; font-size: 32px; font-weight: 900; color: #ffffff;">
+                        Your Team License is Active!
+                      </h1>
+                      <p style="margin: 0; font-size: 18px; color: #E5E7EB; line-height: 1.6;">
+                        Welcome to Mind & Muscle. Your 6-month seasonal team license is now ready.
+                      </p>
+                    </td>
+                  </tr>
 
-            <!-- COACH CODE -->
-            <div style="background: #f0fdf4; padding: 30px; border-radius: 10px; margin-bottom: 20px; border: 3px solid #10b981;">
-              <h2 style="margin-top: 0; color: #065f46; font-size: 20px;">
-                ①  YOUR COACH CODE (Use First!)
-              </h2>
-              <div style="background: white; padding: 20px; border-radius: 8px; border: 2px dashed #10b981; text-align: center; margin: 20px 0;">
-                <div style="font-size: 28px; font-weight: bold; letter-spacing: 3px; color: #10b981; font-family: 'Courier New', monospace;">
-                  ${coachCode}
-                </div>
-              </div>
-              <ul style="color: #065f46; padding-left: 20px; font-size: 14px; margin: 15px 0;">
-                <li><strong>Single use only - for YOU as the coach</strong></li>
-                <li>Creates your team and makes you the owner</li>
-                <li>Unlocks Premium features for you</li>
-                <li>Makes team visible in Chatter</li>
-              </ul>
-              <p style="color: #047857; font-weight: bold; margin: 15px 0 0 0; text-align: center;">
-                👉 Redeem this code FIRST in the app: More → Settings → Redeem Team Code
-              </p>
-            </div>
+                  <!-- IMPORTANT NOTICE -->
+                  <tr>
+                    <td style="padding: 20px 40px;">
+                      <div style="background: rgba(251, 146, 60, 0.15); border-left: 4px solid #fb923c; padding: 20px; border-radius: 8px;">
+                        <p style="margin: 0 0 12px; font-size: 16px; font-weight: 700; color: #fb923c;">
+                          ⚠️ Two Codes - Use in Order!
+                        </p>
+                        <p style="margin: 0; font-size: 14px; color: #E5E7EB; line-height: 1.6;">
+                          You must redeem <strong style="color: #fb923c;">YOUR COACH CODE</strong> first before sharing the team code with others.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
 
-            <!-- TEAM CODE -->
-            <div style="background: #eff6ff; padding: 30px; border-radius: 10px; margin-bottom: 30px; border: 2px solid #3b82f6;">
-              <h2 style="margin-top: 0; color: #1e40af; font-size: 20px;">
-                ②  TEAM MEMBER CODE (Share with Your Team)
-              </h2>
-              <div style="background: white; padding: 20px; border-radius: 8px; border: 2px dashed #3b82f6; text-align: center; margin: 20px 0;">
-                <div style="font-size: 28px; font-weight: bold; letter-spacing: 3px; color: #3b82f6; font-family: 'Courier New', monospace;">
-                  ${teamCode}
-                </div>
-              </div>
-              <ul style="color: #1e40af; padding-left: 20px; font-size: 14px; margin: 15px 0;">
-                <li><strong>Share with ${seatCount} athletes/coaches</strong></li>
-                <li>Athletes & coaches get Premium access</li>
-                <li>Parents get free read-only access (unlimited!)</li>
-                <li>Adds everyone to your team</li>
-              </ul>
-              <p style="color: #2563eb; font-weight: bold; margin: 15px 0 0 0; text-align: center;">
-                📱 Share this code with your team members
-              </p>
-            </div>
+                  <!-- COACH CODE -->
+                  <tr>
+                    <td style="padding: 20px 40px;">
+                      <div style="background: rgba(16, 185, 129, 0.15); border-left: 4px solid #10b981; padding: 24px; border-radius: 8px;">
+                        <p style="margin: 0 0 12px; font-size: 18px; font-weight: 700; color: #10b981;">
+                          ① YOUR COACH CODE (Use First!)
+                        </p>
+                        <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; border: 2px dashed #10b981; text-align: center; margin: 16px 0;">
+                          <div style="font-size: 28px; font-weight: bold; letter-spacing: 3px; color: #10b981; font-family: 'Courier New', monospace;">
+                            ${coachCode}
+                          </div>
+                        </div>
+                        <ul style="color: #E5E7EB; padding-left: 20px; font-size: 14px; margin: 12px 0; line-height: 1.8;">
+                          <li><strong style="color: #10b981;">Single use only</strong> - for YOU as the coach</li>
+                          <li>Creates your team and makes you the owner</li>
+                          <li>Unlocks Premium features for you</li>
+                          <li>Makes team visible in Chatter</li>
+                        </ul>
+                        <p style="color: #10b981; font-weight: bold; margin: 12px 0 0 0; text-align: center; font-size: 14px;">
+                          👉 Redeem this code FIRST: More → Settings → Redeem Team Code
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
 
-            <!-- NEXT STEPS -->
-            <div style="margin-bottom: 30px;">
-              <h2 style="color: #1f2937; font-size: 20px;">Setup Instructions:</h2>
-              <ol style="color: #4b5563; padding-left: 20px;">
-                <li style="margin-bottom: 15px;">
-                  <strong>Download the app</strong><br>
-                  <span style="font-size: 14px;">Get Mind and Muscle from the App Store or Google Play</span>
-                </li>
-                <li style="margin-bottom: 15px;">
-                  <strong>YOU redeem your coach code first</strong><br>
-                  <span style="font-size: 14px;">Go to More → Settings → Redeem Team Code → Enter: <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 3px;">${coachCode}</code></span>
-                </li>
-                <li style="margin-bottom: 15px;">
-                  <strong>Name your team</strong><br>
-                  <span style="font-size: 14px;">After redeeming, you can customize your team name and settings</span>
-                </li>
-                <li style="margin-bottom: 15px;">
-                  <strong>Share the team code</strong><br>
-                  <span style="font-size: 14px;">Send <code style="background: #f3f4f6; padding: 2px 6px; border-radius: 3px;">${teamCode}</code> to your athletes and parents</span>
-                </li>
-              </ol>
-            </div>
+                  <!-- TEAM CODE -->
+                  <tr>
+                    <td style="padding: 20px 40px;">
+                      <div style="background: rgba(59, 130, 246, 0.15); border-left: 4px solid #3b82f6; padding: 24px; border-radius: 8px;">
+                        <p style="margin: 0 0 12px; font-size: 18px; font-weight: 700; color: #3b82f6;">
+                          ② TEAM MEMBER CODE (Share with Your Team)
+                        </p>
+                        <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; border: 2px dashed #3b82f6; text-align: center; margin: 16px 0;">
+                          <div style="font-size: 28px; font-weight: bold; letter-spacing: 3px; color: #3b82f6; font-family: 'Courier New', monospace;">
+                            ${teamCode}
+                          </div>
+                        </div>
+                        <ul style="color: #E5E7EB; padding-left: 20px; font-size: 14px; margin: 12px 0; line-height: 1.8;">
+                          <li><strong style="color: #3b82f6;">Share with ${seatCount} athletes/coaches</strong></li>
+                          <li>Athletes & coaches get Premium access</li>
+                          <li>Parents get free read-only access (unlimited!)</li>
+                          <li>Adds everyone to your team</li>
+                        </ul>
+                        <p style="color: #3b82f6; font-weight: bold; margin: 12px 0 0 0; text-align: center; font-size: 14px;">
+                          📱 Share this code with your team members
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
 
-            <!-- LICENSE INFO -->
-            <div style="background: #f9fafb; padding: 20px; border-radius: 8px; border-left: 4px solid #667eea; margin-bottom: 30px;">
-              <h3 style="margin-top: 0; color: #4b5563; font-size: 16px;">License Details:</h3>
-              <ul style="color: #6b7280; margin: 0; padding-left: 20px; font-size: 14px;">
-                <li><strong>${seatCount} Premium seats</strong> for athletes and coaches</li>
-                <li><strong>Unlimited parent access</strong> (read-only, doesn't consume seats)</li>
-                <li>Subscription renews every 6 months</li>
-                <li>Manage subscription at mindandmuscle.ai/team-licensing/manage</li>
-              </ul>
-            </div>
+                  <!-- NEXT STEPS -->
+                  <tr>
+                    <td style="padding: 20px 40px;">
+                      <div style="background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; padding: 16px; border-radius: 8px;">
+                        <p style="margin: 0 0 12px; font-size: 14px; font-weight: 700; color: #3b82f6;">
+                          Setup Instructions:
+                        </p>
+                        <ol style="margin: 0; padding-left: 20px; font-size: 14px; color: #E5E7EB; line-height: 1.8;">
+                          <li style="margin-bottom: 8px;">Download Mind & Muscle from App Store or Google Play</li>
+                          <li style="margin-bottom: 8px;">YOU redeem your coach code first (${coachCode})</li>
+                          <li style="margin-bottom: 8px;">Customize your team name and settings</li>
+                          <li>Share the team code (${teamCode}) with your athletes and parents</li>
+                        </ol>
+                      </div>
+                    </td>
+                  </tr>
 
-            <div style="text-align: center; padding: 20px; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb;">
-              <p>Questions? Contact us at <a href="mailto:support@mindandmuscle.ai" style="color: #667eea; text-decoration: none;">support@mindandmuscle.ai</a></p>
-              <p style="margin-top: 15px;">© ${new Date().getFullYear()} Mind and Muscle. All rights reserved.</p>
-            </div>
-          </body>
+                  <!-- LICENSE INFO -->
+                  <tr>
+                    <td style="padding: 20px 40px;">
+                      <div style="background: rgba(251, 146, 60, 0.1); border-left: 4px solid #fb923c; padding: 16px; border-radius: 8px;">
+                        <p style="margin: 0 0 12px; font-size: 14px; font-weight: 700; color: #fb923c;">
+                          License Details:
+                        </p>
+                        <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #E5E7EB; line-height: 1.8;">
+                          <li><strong>${seatCount} Premium seats</strong> for athletes and coaches</li>
+                          <li><strong>Unlimited parent access</strong> (read-only, doesn't consume seats)</li>
+                          <li>Subscription renews every 6 months</li>
+                        </ul>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Footer -->
+                  <tr>
+                    <td style="padding: 30px 40px 40px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+                      <p style="margin: 0 0 8px; font-size: 16px; font-weight: 700; color: #ffffff;">
+                        <span style="color: #3b82f6;">Discipline the Mind.</span> <span style="color: #fb923c;">Dominate the Game.</span>
+                      </p>
+                      <p style="margin: 0 0 16px; font-size: 14px; color: #D1D5DB;">
+                        100% Baseball. Zero Generic Content.
+                      </p>
+                      <p style="margin: 0 0 8px; font-size: 12px; color: #9CA3AF;">
+                        Questions? <a href="mailto:support@mindandmuscle.ai" style="color: #3b82f6; text-decoration: none;">support@mindandmuscle.ai</a>
+                      </p>
+                      <p style="margin: 0; font-size: 12px; color: #9CA3AF;">
+                        © ${new Date().getFullYear()} Mind & Muscle Performance. All rights reserved.
+                      </p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
         </html>
       `,
     });
