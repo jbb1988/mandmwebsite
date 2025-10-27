@@ -86,6 +86,19 @@ function ContactContent() {
         </div>
       </div>
 
+      <div className="p-6 rounded-xl bg-red-500/10 border border-red-500/30">
+        <h3 className="text-xl font-bold mb-3">Delete Your Account</h3>
+        <p className="text-text-secondary mb-4">
+          Need to delete your account and all associated data? We've made the process simple and transparent.
+        </p>
+        <a
+          href="/delete-account"
+          className="inline-block px-6 py-3 rounded-lg font-semibold bg-gradient-to-r from-red-500 to-orange-500 hover:opacity-90 transition-all"
+        >
+          View Account Deletion Instructions
+        </a>
+      </div>
+
       <div className="p-6 rounded-xl bg-neon-cortex-blue/10 border border-neon-cortex-blue/20">
         <h3 className="text-xl font-bold mb-3">Have Ideas or Suggestions?</h3>
         <p className="text-text-secondary mb-4">

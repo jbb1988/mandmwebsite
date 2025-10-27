@@ -261,7 +261,7 @@ function PrivacyContent() {
       <ul className="list-disc pl-6 text-text-secondary space-y-1 mb-4">
         <li>Access your personal information</li>
         <li>Correct inaccurate information</li>
-        <li>Delete your account and data</li>
+        <li>Delete your account and data (see our <a href="/delete-account" className="text-solar-surge-orange hover:underline">Account Deletion page</a>)</li>
         <li>Export your data</li>
         <li>Opt-out of communications</li>
       </ul>
