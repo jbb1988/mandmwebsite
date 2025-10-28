@@ -12,6 +12,20 @@ export default function WelcomePage() {
   const [videoEnded, setVideoEnded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
+  // Extract deep link logic to reusable function
+  const openInApp = () => {
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isAndroid = /Android/.test(navigator.userAgent);
+
+    if (isIOS) {
+      // iOS deep link
+      window.location.href = 'mindmuscle://welcome';
+    } else if (isAndroid) {
+      // Android intent URL with fallback to stay on welcome page
+      window.location.href = 'intent://welcome#Intent;scheme=mindmuscle;package=com.mindandmuscle.app;S.browser_fallback_url=https://www.mindandmuscle.ai/welcome;end';
+    }
+  };
+
   useEffect(() => {
     // Check for reduced motion preference
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -21,25 +35,7 @@ export default function WelcomePage() {
       setShowSplash(false);
       setVideoEnded(true);
     }
-
-    // Try to deep link to the app if installed (after splash finishes)
-    if (videoEnded) {
-      const tryDeepLink = () => {
-        // iOS deep link
-        window.location.href = 'mindmuscle://welcome';
-
-        // Android deep link fallback
-        setTimeout(() => {
-          window.location.href = 'intent://welcome#Intent;scheme=mindmuscle;package=com.mindmuscle;end';
-        }, 100);
-      };
-
-      // Give the page a moment to render before trying deep link
-      const timer = setTimeout(tryDeepLink, 500);
-
-      return () => clearTimeout(timer);
-    }
-  }, [videoEnded]);
+  }, []);
 
   const handleVideoEnd = () => {
     setVideoEnded(true);
@@ -128,6 +124,23 @@ export default function WelcomePage() {
               className="object-contain"
             />
           </div>
+        </div>
+
+        {/* Open in App Button (for mobile and tablet) */}
+        <div className="lg:hidden mb-8">
+          <LiquidGlass variant="blue" glow={true}>
+            <div className="p-6">
+              <button
+                onClick={openInApp}
+                className="w-full px-8 py-4 bg-gradient-to-r from-neon-cortex-blue to-mind-primary rounded-xl font-bold text-lg hover:scale-105 transition-transform shadow-lg"
+              >
+                Open in Mind & Muscle App
+              </button>
+              <p className="text-center text-sm text-text-secondary mt-3">
+                Already have the app? Tap to open it now
+              </p>
+            </div>
+          </LiquidGlass>
         </div>
 
         {/* Download App Card */}
