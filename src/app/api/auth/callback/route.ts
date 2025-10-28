@@ -71,28 +71,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(resetUrl);
     }
 
-    // Handle email confirmation (uses OTP verification, not PKCE)
-    console.log('Email confirmation flow detected, using verifyOtp');
-    const { data, error: verifyError } = await supabase.auth.verifyOtp({
-      token_hash: code,
-      type: 'email',
-    });
-
-    if (verifyError || !data.session) {
-      console.log('Email verification failed:');
-      console.log('Error:', verifyError);
-      console.log('Error message:', verifyError?.message);
-      console.log('Has session:', !!data?.session);
-
-      // Still redirect to welcome page so user knows what happened
-      console.log('Email confirmation had issues, but redirecting to welcome page');
-      return NextResponse.redirect(new URL('/welcome', requestUrl.origin));
-    }
-
-    // Email confirmed successfully!
-    console.log('Email verification successful! User email confirmed.');
-    console.log('User:', data.user?.email);
-    console.log('Redirecting to welcome page');
+    // Handle email confirmation
+    // Note: When user clicks the email link, Supabase automatically confirms the email
+    // BEFORE redirecting to this callback. So we just need to redirect to welcome page.
+    console.log('Email confirmation flow detected');
+    console.log('Supabase has already confirmed the email before redirecting here');
+    console.log('Simply redirecting to welcome page');
 
     const welcomeUrl = new URL('/welcome', requestUrl.origin);
     return NextResponse.redirect(welcomeUrl);
