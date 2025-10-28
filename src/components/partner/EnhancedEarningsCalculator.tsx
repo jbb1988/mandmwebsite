@@ -38,7 +38,12 @@ export function EnhancedEarningsCalculator() {
   // Calculate individual earnings - NO volume discounts (individual signups at retail)
   const calculateIndividualEarnings = (count: number) => {
     // Individual users always pay retail price ($79) since they're separate purchases
-    return count * RETAIL_PRICE * 0.10;
+    // But 15% commission kicks in at user 101+
+    if (count <= 100) {
+      return count * RETAIL_PRICE * 0.10;
+    } else {
+      return (100 * RETAIL_PRICE * 0.10) + ((count - 100) * RETAIL_PRICE * 0.15);
+    }
   };
 
   // Calculate team/organization earnings
@@ -218,18 +223,23 @@ export function EnhancedEarningsCalculator() {
               </button>
             </div>
 
-              <div className="p-4 bg-neon-cortex-blue/10 border border-neon-cortex-blue/30 rounded-lg">
+              <div className={`p-4 border rounded-lg ${
+                actualIndividualCount > 100
+                  ? 'bg-solar-surge-orange/10 border-solar-surge-orange/30'
+                  : 'bg-neon-cortex-blue/10 border-neon-cortex-blue/30'
+              }`}>
               <div className="flex items-start gap-2">
-                <Info className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+                <Info className={`w-4 h-4 flex-shrink-0 mt-0.5 ${
+                  actualIndividualCount > 100 ? 'text-solar-surge-orange' : 'text-neon-cortex-blue'
+                }`} />
                 <p className="text-sm text-text-secondary">
-                  {individualInputMode === 'teams' ? (
+                  {actualIndividualCount > 100 ? (
                     <>
-                      <strong>Individual signups = retail price!</strong> Average team: 12 athletes + 2 coaches = {USERS_PER_TEAM} users at $79/user (6mo).
-                      Earn 10% commission ($7.90 per user per payment).
+                      <strong className="text-solar-surge-orange">🔥 15% Commission Activated!</strong> Individual signups at retail $79/user. First 100 users: 10% • Users 101+: 15%
                     </>
                   ) : (
                     <>
-                      <strong>Individual signups = retail price!</strong> Each user pays $79 for 6 months. You earn 10% commission ($7.90 per user per payment).
+                      <strong>Individual signups = retail price!</strong> Each user pays $79 for 6 months. Earn 10% on first 100 users, <strong className="text-solar-surge-orange">15% on users 101+</strong>
                     </>
                   )}
                 </p>
@@ -301,14 +311,40 @@ export function EnhancedEarningsCalculator() {
                 <p className="text-sm text-text-secondary mb-1">
                   Per 6-month payment: ${individualEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
-                <p className="text-xs text-text-secondary mt-1">
-                  {actualIndividualCount} users @ $79/user (retail) × 10% commission
-                </p>
-                <div className="mt-4 pt-4 border-t border-white/10">
-                  <p className="text-xs text-text-secondary">
-                    💰 ${(individualEarnings * 2 / actualIndividualCount).toFixed(2)} per user/year (if renewed)
-                  </p>
-                </div>
+                {actualIndividualCount > 100 ? (
+                  <>
+                    <div className="space-y-2 text-sm border-t border-white/10 pt-3 mt-3">
+                      <p className="text-xs text-text-secondary mb-2">Per-payment breakdown:</p>
+                      <div className="flex items-center justify-between text-text-secondary text-xs">
+                        <span>First 100 users (10%):</span>
+                        <span className="font-bold text-neon-cortex-blue">
+                          ${(100 * RETAIL_PRICE * 0.10).toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between text-text-secondary text-xs">
+                        <span>{actualIndividualCount - 100} users at 15%:</span>
+                        <span className="font-bold text-solar-surge-orange">
+                          +${((actualIndividualCount - 100) * RETAIL_PRICE * 0.15).toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="mt-3 p-2 bg-solar-surge-orange/20 rounded text-solar-surge-orange text-center text-xs">
+                      <TrendingUp className="w-4 h-4 inline mr-1" />
+                      You're earning 15% on {actualIndividualCount - 100} bonus users!
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-xs text-text-secondary mt-1">
+                      {actualIndividualCount} users @ $79/user (retail) × 10% commission
+                    </p>
+                    <div className="mt-4 pt-4 border-t border-white/10">
+                      <p className="text-xs text-text-secondary">
+                        💰 ${(individualEarnings * 2 / actualIndividualCount).toFixed(2)} per user/year (if renewed)
+                      </p>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
