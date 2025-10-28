@@ -157,6 +157,10 @@ export default function PartnerProgramPage() {
       answer: 'You earn 10% commission on every 6-month payment (15% on users 101+ for organizations). Customers subscribe for 6 months at a time. Examples per 6-month subscription: Individual referrals = $7.90 each. 12-user team = $85.32 total. 150-user facility = $930.29 per payment. If they renew after 6 months, you earn commission again - so annual potential doubles (2 payments = 2× commission). Commission is calculated on 6-month pricing: $79 (1-11 users), $71.10 (12-119 users), $67.15 (120-199 users), $63.20 (200+ users).'
     },
     {
+      question: 'How does the referral tracking work?',
+      answer: 'We use Tolt, a professional affiliate tracking platform, to manage your referral link and commissions. When someone clicks your unique tracking link, Tolt sets a 30-day cookie to track the conversion. Your partner dashboard at app.tolt.io shows real-time stats: every click, signup, conversion, and commission earned. You can see exactly which referrals are pending, which have paid, and your total earnings. All commission calculations are automatic, and payouts go directly to your PayPal account 60 days after payment clears.'
+    },
+    {
       question: 'What if I know facility owners or league directors?',
       answer: 'Perfect! One training facility or travel ball organization can generate more recurring income than dozens of individual referrals. Focus on organizations with 100+ users to unlock 15% commission on the volume above 100. We also offer special bonuses for partners who introduce other high-value partners to our program—contact us to learn more.'
     },
@@ -292,6 +296,11 @@ export default function PartnerProgramPage() {
             <div className="text-text-secondary">Coaches nationwide</div>
           </LiquidGlass>
         </div>
+      </div>
+
+      {/* Interactive Calculator */}
+      <div className="max-w-7xl mx-auto mb-20">
+        <EnhancedEarningsCalculator />
       </div>
 
       {/* Perfect For High-Impact Partners */}
@@ -596,11 +605,6 @@ export default function PartnerProgramPage() {
             </div>
           </LiquidGlass>
         </div>
-      </div>
-
-      {/* Interactive Calculator */}
-      <div className="max-w-7xl mx-auto mb-20">
-        <EnhancedEarningsCalculator />
       </div>
 
       {/* Partner Resources Preview */}
