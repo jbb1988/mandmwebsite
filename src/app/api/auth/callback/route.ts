@@ -54,6 +54,13 @@ export async function GET(request: NextRequest) {
     const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
 
     if (exchangeError || !data.session) {
+      // Log the exchange error for debugging
+      console.log('CODE EXCHANGE FAILED:');
+      console.log('Error:', exchangeError);
+      console.log('Error message:', exchangeError?.message);
+      console.log('Error status:', exchangeError?.status);
+      console.log('Has session:', !!data?.session);
+
       // If exchange fails, redirect based on type
       if (type === 'recovery') {
         const resetUrl = new URL('/auth/reset-password', requestUrl.origin);
@@ -61,8 +68,10 @@ export async function GET(request: NextRequest) {
         resetUrl.searchParams.set('error_description', exchangeError?.message || 'Failed to verify reset link');
         return NextResponse.redirect(resetUrl);
       }
-      // For signup errors, redirect to homepage
-      return NextResponse.redirect(new URL('/', requestUrl.origin));
+      // For signup/email confirmation, redirect to welcome page (not homepage)
+      // This way the user sees the welcome page even if there's an issue
+      console.log('Email confirmation failed, redirecting to welcome page');
+      return NextResponse.redirect(new URL('/welcome', requestUrl.origin));
     }
 
     // Successfully exchanged code for session
