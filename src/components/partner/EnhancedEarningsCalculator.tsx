@@ -34,37 +34,10 @@ export function EnhancedEarningsCalculator() {
     ? orgTeamCount * USERS_PER_TEAM
     : teamCount;
 
-  // Calculate individual earnings with volume discounts
+  // Calculate individual earnings - NO volume discounts (individual signups at retail)
   const calculateIndividualEarnings = (count: number) => {
-    let earnings = 0;
-
-    // Users 1-11 at $119
-    if (count <= 11) {
-      earnings = count * RETAIL_PRICE * 0.10;
-    }
-    // Users 12-120 at $107.10 (10% off)
-    else if (count <= 120) {
-      const tier1 = Math.min(11, count);
-      const tier2 = count - tier1;
-      earnings = (tier1 * RETAIL_PRICE * 0.10) + (tier2 * TIER_12_120 * 0.10);
-    }
-    // Users 121-199 at $101.15 (15% off)
-    else if (count <= 199) {
-      const tier1 = 11 * RETAIL_PRICE * 0.10;
-      const tier2 = 109 * TIER_12_120 * 0.10;
-      const tier3 = (count - 120) * TIER_121_199 * 0.10;
-      earnings = tier1 + tier2 + tier3;
-    }
-    // Users 200+ at $95.20 (20% off)
-    else {
-      const tier1 = 11 * RETAIL_PRICE * 0.10;
-      const tier2 = 109 * TIER_12_120 * 0.10;
-      const tier3 = 79 * TIER_121_199 * 0.10;
-      const tier4 = (count - 199) * TIER_200_PLUS * 0.10;
-      earnings = tier1 + tier2 + tier3 + tier4;
-    }
-
-    return earnings;
+    // Individual users always pay retail price ($79) since they're separate purchases
+    return count * RETAIL_PRICE * 0.10;
   };
 
   // Calculate team/organization earnings with volume discounts and tiered commission
@@ -255,12 +228,12 @@ export function EnhancedEarningsCalculator() {
                 <p className="text-sm text-text-secondary">
                   {individualInputMode === 'teams' ? (
                     <>
-                      <strong>Think in teams!</strong> Average team: 12 athletes + 2 coaches = {USERS_PER_TEAM} users.
-                      Earn 10% commission on each 6-month payment with volume discounts.
+                      <strong>Individual signups = retail price!</strong> Average team: 12 athletes + 2 coaches = {USERS_PER_TEAM} users at $79/user (6mo).
+                      Earn 10% commission ($7.90 per user per payment).
                     </>
                   ) : (
                     <>
-                      Earn 10% commission on each 6-month payment. Volume discounts apply: $79 (1-11 users), $71.10 (12-120 users), $67.15 (121-199 users), $63.20 (200+ users).
+                      <strong>Individual signups = retail price!</strong> Each user pays $79 for 6 months. You earn 10% commission ($7.90 per user per payment).
                     </>
                   )}
                 </p>
@@ -333,18 +306,11 @@ export function EnhancedEarningsCalculator() {
                   Per 6-month payment: ${individualEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
                 <p className="text-xs text-text-secondary mt-1">
-                  {actualIndividualCount <= 11
-                    ? `${actualIndividualCount} @ $79/user (6mo)`
-                    : actualIndividualCount <= 120
-                      ? `11 @ $79 + ${actualIndividualCount - 11} @ $71.10 (6mo)`
-                      : actualIndividualCount <= 199
-                        ? `11 @ $79 + 109 @ $71.10 + ${actualIndividualCount - 120} @ $67.15 (6mo)`
-                        : `11 @ $79 + 109 @ $71.10 + 79 @ $67.15 + ${actualIndividualCount - 199} @ $63.20 (6mo)`
-                  }
+                  {actualIndividualCount} users @ $79/user (retail) × 10% commission
                 </p>
                 <div className="mt-4 pt-4 border-t border-white/10">
                   <p className="text-xs text-text-secondary">
-                    💰 Per user average: ${(individualEarnings / actualIndividualCount).toFixed(2)}/year
+                    💰 ${(individualEarnings * 2 / actualIndividualCount).toFixed(2)} per user/year (if renewed)
                   </p>
                 </div>
               </div>
