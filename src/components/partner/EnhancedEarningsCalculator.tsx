@@ -322,20 +322,15 @@ export function EnhancedEarningsCalculator() {
 
             <div className="p-6 bg-gradient-to-br from-neon-cortex-blue/20 to-solar-surge-orange/20 rounded-xl border-2 border-neon-cortex-blue/40">
               <div className="text-center">
-                <p className="text-sm text-text-secondary mb-2">Your Annual Earnings</p>
+                <p className="text-sm text-text-secondary mb-2">Your Annual Earnings Potential</p>
                 <p className="text-5xl font-black text-neon-cortex-blue mb-3">
-                  ${individualEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  ${(individualEarnings * 2).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
-                <p className="text-sm text-text-secondary">
-                  {individualInputMode === 'teams' ? (
-                    <>
-                      {teamInputCount} {teamInputCount === 1 ? 'team' : 'teams'} ({actualIndividualCount} users) × 10% commission
-                    </>
-                  ) : (
-                    <>
-                      {actualIndividualCount} users × 10% commission
-                    </>
-                  )}
+                <p className="text-xs text-text-secondary mb-3">
+                  (2 payments per year if renewed)
+                </p>
+                <p className="text-sm text-text-secondary mb-1">
+                  Per 6-month payment: ${individualEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </p>
                 <p className="text-xs text-text-secondary mt-1">
                   {actualIndividualCount <= 11
@@ -496,9 +491,12 @@ export function EnhancedEarningsCalculator() {
 
             <div className="p-6 bg-gradient-to-br from-solar-surge-orange/20 to-neon-cortex-blue/20 rounded-xl border-2 border-solar-surge-orange/40">
               <div className="text-center mb-4">
-                <p className="text-sm text-text-secondary mb-2">Your Annual Earnings</p>
+                <p className="text-sm text-text-secondary mb-2">Your Annual Earnings Potential</p>
                 <p className="text-5xl font-black text-solar-surge-orange mb-3">
-                  ${teamEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  ${(teamEarnings * 2).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
+                <p className="text-xs text-text-secondary mb-3">
+                  (2 payments per year if renewed)
                 </p>
 
                 {orgInputMode === 'teams' && (
@@ -507,16 +505,21 @@ export function EnhancedEarningsCalculator() {
                   </p>
                 )}
 
+                <p className="text-sm text-text-secondary mb-3">
+                  Per 6-month payment: ${teamEarnings.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </p>
+
                 {teamBreakdown.hasBonus && (
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center justify-between text-text-secondary">
-                      <span>Base (first 100 users at 10%):</span>
+                  <div className="space-y-2 text-sm border-t border-white/10 pt-3">
+                    <p className="text-xs text-text-secondary mb-2">Per-payment breakdown:</p>
+                    <div className="flex items-center justify-between text-text-secondary text-xs">
+                      <span>First 100 users (10%):</span>
                       <span className="font-bold text-neon-cortex-blue">
                         ${teamBreakdown.base.toFixed(2)}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between text-text-secondary">
-                      <span>Bonus ({actualOrgCount - 100} users at 15%):</span>
+                    <div className="flex items-center justify-between text-text-secondary text-xs">
+                      <span>{actualOrgCount - 100} users at 15%:</span>
                       <span className="font-bold text-solar-surge-orange">
                         +${teamBreakdown.bonus.toFixed(2)}
                       </span>
@@ -533,9 +536,9 @@ export function EnhancedEarningsCalculator() {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Per user earnings:</span>
+                  <span>Per user (annual):</span>
                   <span className="font-bold text-white">
-                    ${(teamEarnings / actualOrgCount).toFixed(2)}/year
+                    ${((teamEarnings * 2) / actualOrgCount).toFixed(2)}/year
                   </span>
                 </div>
                 {teamBreakdown.hasBonus && (
