@@ -14,6 +14,7 @@ export function EnhancedEarningsCalculator() {
   const [teamInputCount, setTeamInputCount] = useState(10); // Number of teams (default 10)
   const [orgInputMode, setOrgInputMode] = useState<'teams' | 'users'>('teams');
   const [orgTeamCount, setOrgTeamCount] = useState(15); // Number of teams (default 15) - starts above 8 team threshold
+  const [isBulkPurchase, setIsBulkPurchase] = useState(true); // Toggle for volume discount
 
   // Pricing tiers (6-month pricing)
   const RETAIL_PRICE = 79;
@@ -40,60 +41,55 @@ export function EnhancedEarningsCalculator() {
     return count * RETAIL_PRICE * 0.10;
   };
 
-  // Calculate team/organization earnings with volume discounts and tiered commission
-  const calculateTeamEarnings = (userCount: number) => {
+  // Calculate team/organization earnings
+  const calculateTeamEarnings = (userCount: number, useBulkPricing: boolean) => {
     let earnings = 0;
 
-    // Users 1-11 at $119
-    if (userCount <= 11) {
-      earnings = userCount * RETAIL_PRICE * 0.10;
-    }
-    // Users 12-100 at $107.10 (10% off)
-    else if (userCount <= 100) {
-      const tier1 = Math.min(11, userCount);
-      const tier2 = userCount - tier1;
-      earnings = (tier1 * RETAIL_PRICE * 0.10) + (tier2 * TIER_12_120 * 0.10);
-    }
-    // Users 101-120 at $107.10 (but now 15% commission)
-    else if (userCount <= 120) {
-      const tier1 = 11 * RETAIL_PRICE * 0.10;
-      const tier2 = 89 * TIER_12_120 * 0.10; // users 12-100 at 10%
-      const tier3 = (userCount - 100) * TIER_12_120 * 0.15; // users 101+ at 15%
-      earnings = tier1 + tier2 + tier3;
-    }
-    // Users 121-199 at $101.15 (15% off, 15% commission)
-    else if (userCount <= 199) {
-      const tier1 = 11 * RETAIL_PRICE * 0.10;
-      const tier2 = 89 * TIER_12_120 * 0.10;
-      const tier3 = 20 * TIER_12_120 * 0.15; // users 101-120
-      const tier4 = (userCount - 120) * TIER_121_199 * 0.15; // users 121+
-      earnings = tier1 + tier2 + tier3 + tier4;
-    }
-    // Users 200+ at $95.20 (20% off, 15% commission)
-    else {
-      const tier1 = 11 * RETAIL_PRICE * 0.10;
-      const tier2 = 89 * TIER_12_120 * 0.10;
-      const tier3 = 20 * TIER_12_120 * 0.15;
-      const tier4 = 79 * TIER_121_199 * 0.15;
-      const tier5 = (userCount - 199) * TIER_200_PLUS * 0.15;
-      earnings = tier1 + tier2 + tier3 + tier4 + tier5;
+    if (!useBulkPricing) {
+      // Incremental signups - retail price for all, but 15% commission on users 101+
+      if (userCount <= 100) {
+        earnings = userCount * RETAIL_PRICE * 0.10;
+      } else {
+        earnings = (100 * RETAIL_PRICE * 0.10) + ((userCount - 100) * RETAIL_PRICE * 0.15);
+      }
+    } else {
+      // Bulk purchase - volume discount applies to ALL licenses
+      let pricePerUser = RETAIL_PRICE;
+      let commissionRate = 0.10;
+      
+      // Determine pricing tier based on total users
+      if (userCount >= 200) {
+        pricePerUser = TIER_200_PLUS;
+      } else if (userCount >= 121) {
+        pricePerUser = TIER_121_199;
+      } else if (userCount >= 12) {
+        pricePerUser = TIER_12_120;
+      }
+      
+      // Apply commission: 10% for first 100, 15% for users 101+
+      if (userCount <= 100) {
+        earnings = userCount * pricePerUser * commissionRate;
+      } else {
+        earnings = (100 * pricePerUser * 0.10) + ((userCount - 100) * pricePerUser * 0.15);
+      }
     }
 
     return earnings;
   };
 
   // Calculate breakdown for team earnings
-  const getTeamEarningsBreakdown = (userCount: number) => {
+  const getTeamEarningsBreakdown = (userCount: number, useBulkPricing: boolean) => {
+    const total = calculateTeamEarnings(userCount, useBulkPricing);
+    
     if (userCount <= 100) {
       return {
-        base: calculateTeamEarnings(userCount),
+        base: total,
         bonus: 0,
         hasBonus: false
       };
     } else {
       // Calculate base (first 100 users at 10%)
-      const base = (11 * RETAIL_PRICE * 0.10) + (89 * TIER_12_120 * 0.10);
-      const total = calculateTeamEarnings(userCount);
+      const base = calculateTeamEarnings(100, useBulkPricing);
       const bonus = total - base;
       return {
         base,
@@ -112,8 +108,8 @@ export function EnhancedEarningsCalculator() {
   };
 
   const individualEarnings = calculateIndividualEarnings(actualIndividualCount);
-  const teamEarnings = calculateTeamEarnings(actualOrgCount);
-  const teamBreakdown = getTeamEarningsBreakdown(actualOrgCount);
+  const teamEarnings = calculateTeamEarnings(actualOrgCount, isBulkPurchase);
+  const teamBreakdown = getTeamEarningsBreakdown(actualOrgCount, isBulkPurchase);
 
   return (
     <div className="space-y-6">
@@ -348,6 +344,26 @@ export function EnhancedEarningsCalculator() {
               </button>
             </div>
 
+            {/* Bulk Purchase Toggle */}
+            <div className="p-4 bg-white/5 border border-white/10 rounded-lg">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isBulkPurchase}
+                  onChange={(e) => setIsBulkPurchase(e.target.checked)}
+                  className="w-5 h-5 rounded border-white/20 text-solar-surge-orange focus:ring-solar-surge-orange focus:ring-offset-0 cursor-pointer"
+                />
+                <div className="flex-1">
+                  <div className="font-bold text-sm">Organization buying all licenses at once</div>
+                  <div className="text-xs text-text-secondary">
+                    {isBulkPurchase 
+                      ? 'Volume discount applies to ALL licenses' 
+                      : 'Retail price for incremental team signups'}
+                  </div>
+                </div>
+              </label>
+            </div>
+
             <div className={`p-4 border rounded-lg ${
               teamBreakdown.hasBonus
                 ? 'bg-solar-surge-orange/10 border-solar-surge-orange/30'
@@ -451,9 +467,16 @@ export function EnhancedEarningsCalculator() {
               </div>
             )}
 
-            <div className="mt-3 text-sm text-center">
-              <span className="text-text-secondary">{getPricingTierMessage(actualOrgCount)}</span>
-            </div>
+            {isBulkPurchase && (
+              <div className="mt-3 text-sm text-center">
+                <span className="text-text-secondary">{getPricingTierMessage(actualOrgCount)}</span>
+              </div>
+            )}
+            {!isBulkPurchase && (
+              <div className="mt-3 text-sm text-center">
+                <span className="text-text-secondary">Retail price: $79/user (6 months) - incremental team signups</span>
+              </div>
+            )}
 
             <div className="p-6 bg-gradient-to-br from-solar-surge-orange/20 to-neon-cortex-blue/20 rounded-xl border-2 border-solar-surge-orange/40">
               <div className="text-center mb-4">
