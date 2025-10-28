@@ -13,7 +13,7 @@ export function EnhancedEarningsCalculator() {
   const [individualInputMode, setIndividualInputMode] = useState<'teams' | 'users'>('teams');
   const [teamInputCount, setTeamInputCount] = useState(10); // Number of teams (default 10)
   const [orgInputMode, setOrgInputMode] = useState<'teams' | 'users'>('teams');
-  const [orgTeamCount, setOrgTeamCount] = useState(15); // Number of teams for orgs (default 15)
+  const [orgTeamCount, setOrgTeamCount] = useState(15); // Number of teams (default 15) - starts above 8 team threshold
 
   // Pricing tiers (6-month pricing)
   const RETAIL_PRICE = 79;
@@ -300,11 +300,11 @@ export function EnhancedEarningsCalculator() {
                 <label className="block text-lg font-bold mb-3">
                   How many individual users will you refer?
                 </label>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 mb-2">
                   <input
                     type="range"
                     min="1"
-                    max="100"
+                    max="200"
                     value={individualCount}
                     onChange={(e) => setIndividualCount(parseInt(e.target.value))}
                     className="flex-1 h-3 bg-white/10 rounded-lg appearance-none cursor-pointer accent-neon-cortex-blue"
@@ -312,6 +312,10 @@ export function EnhancedEarningsCalculator() {
                   <div className="text-3xl font-black text-neon-cortex-blue min-w-[80px] text-right">
                     {individualCount}
                   </div>
+                </div>
+                <div className="flex items-center justify-between text-xs text-text-secondary">
+                  <span>1 user</span>
+                  <span>200 users</span>
                 </div>
               </div>
             )}
@@ -397,11 +401,11 @@ export function EnhancedEarningsCalculator() {
                     <>
                       {teamBreakdown.hasBonus ? (
                         <>
-                          <strong className="text-solar-surge-orange">🔥 Bonus Unlocked!</strong> You earn 10% on the first 100 users + 15% on users 101+. {orgTeamCount} teams = {actualOrgCount} users.
+                          <strong className="text-solar-surge-orange">🔥 15% Commission Activated!</strong> First 100 users: 10% • Users 101+: 15% • {orgTeamCount} teams = {actualOrgCount} users total
                         </>
                       ) : (
                         <>
-                          <strong>Think in teams!</strong> Each team: 12 athletes + 2 coaches = {USERS_PER_TEAM} users. <strong className="text-neon-cortex-blue">Reach 8+ teams (101+ users) to unlock 15% commission</strong> on users above 100.
+                          <strong>Think in teams!</strong> Each team: 12 athletes + 2 coaches = {USERS_PER_TEAM} users. <strong className="text-solar-surge-orange">Just 8 teams (112 users) unlocks 15% commission</strong> on users above 100.
                         </>
                       )}
                     </>
@@ -409,11 +413,11 @@ export function EnhancedEarningsCalculator() {
                     <>
                       {teamBreakdown.hasBonus ? (
                         <>
-                          <strong className="text-solar-surge-orange">🔥 Bonus Unlocked!</strong> You earn 10% on the first 100 users + 15% on users 101+. Volume discounts increase as the team grows.
+                          <strong className="text-solar-surge-orange">🔥 15% Commission Activated!</strong> First 100 users: 10% commission • Users 101+: 15% commission
                         </>
                       ) : (
                         <>
-                          You earn 10% commission on team/organization users. <strong className="text-neon-cortex-blue">Reach 101+ users to unlock 15% commission</strong> on users above 100.
+                          First 100 users: 10% commission • <strong className="text-solar-surge-orange">Users 101+: 15% commission</strong> (just {101 - actualOrgCount} more users to unlock!)
                         </>
                       )}
                     </>
@@ -426,7 +430,7 @@ export function EnhancedEarningsCalculator() {
             {orgInputMode === 'teams' && (
               <div>
                 <label className="block text-lg font-bold mb-3">
-                  How many teams in your organizations?
+                  How many teams can you reach?
                 </label>
                 <div className="flex items-center gap-4 mb-2">
                   <input
@@ -460,7 +464,7 @@ export function EnhancedEarningsCalculator() {
             {orgInputMode === 'users' && (
               <div>
                 <label className="block text-lg font-bold mb-3">
-                  How many team/organization users?
+                  How many total users in your teams?
                 </label>
                 <div className="flex items-center gap-4 mb-2">
                   <input
@@ -478,8 +482,8 @@ export function EnhancedEarningsCalculator() {
                 </div>
                 <div className="flex items-center justify-between text-xs text-text-secondary">
                   <span>12 users</span>
-                  <span className={teamCount >= 100 ? 'text-solar-surge-orange font-bold' : ''}>
-                    {teamCount >= 100 ? '🔥 ' : ''}100 users (bonus threshold)
+                  <span className={actualOrgCount > 100 ? 'text-solar-surge-orange font-bold' : ''}>
+                    {actualOrgCount > 100 ? '🔥 ' : ''}101 users (15% bonus starts)
                   </span>
                   <span>500 users</span>
                 </div>

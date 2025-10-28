@@ -257,8 +257,8 @@ export default function PartnerProgramPage() {
           </LiquidGlass>
 
           <LiquidGlass variant="orange" glow={true} className="p-6 text-center min-w-[200px]">
-            <div className="text-4xl font-black text-solar-surge-orange mb-2">100+</div>
-            <div className="text-sm text-text-secondary">Users = 15% Bonus</div>
+            <div className="text-4xl font-black text-solar-surge-orange mb-2">8+ Teams</div>
+            <div className="text-sm text-text-secondary">Unlocks 15%</div>
           </LiquidGlass>
         </div>
       </div>
