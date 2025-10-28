@@ -50,50 +50,52 @@ export async function GET(request: NextRequest) {
       }
     );
 
-    // Exchange the code for a session
-    const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+    // Handle password recovery (uses PKCE flow)
+    if (type === 'recovery') {
+      console.log('Password recovery flow detected');
+      const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (exchangeError || !data.session) {
-      // Log the exchange error for debugging
-      console.log('CODE EXCHANGE FAILED:');
-      console.log('Error:', exchangeError);
-      console.log('Error message:', exchangeError?.message);
-      console.log('Error status:', exchangeError?.status);
-      console.log('Has session:', !!data?.session);
-
-      // If exchange fails, redirect based on type
-      if (type === 'recovery') {
+      if (exchangeError || !data.session) {
+        console.log('Password recovery code exchange failed:', exchangeError?.message);
         const resetUrl = new URL('/auth/reset-password', requestUrl.origin);
         resetUrl.searchParams.set('error', 'invalid_code');
         resetUrl.searchParams.set('error_description', exchangeError?.message || 'Failed to verify reset link');
         return NextResponse.redirect(resetUrl);
       }
-      // For signup/email confirmation, redirect to welcome page (not homepage)
-      // This way the user sees the welcome page even if there's an issue
-      console.log('Email confirmation failed, redirecting to welcome page');
-      return NextResponse.redirect(new URL('/welcome', requestUrl.origin));
-    }
 
-    // Successfully exchanged code for session
-    // Check the type to determine where to redirect
-    console.log('Session exchanged successfully');
-    console.log('Type check: type === "recovery"?', type === 'recovery');
-    console.log('Redirecting to:', type === 'recovery' ? 'reset-password' : 'welcome');
-
-    if (type === 'recovery') {
-      // Password reset flow - redirect to reset password page with tokens
-      console.log('Taking password reset flow');
+      console.log('Password recovery successful, redirecting to reset password page');
       const resetUrl = new URL('/auth/reset-password', requestUrl.origin);
       resetUrl.searchParams.set('access_token', data.session.access_token);
       resetUrl.searchParams.set('refresh_token', data.session.refresh_token);
       resetUrl.searchParams.set('type', 'recovery');
       return NextResponse.redirect(resetUrl);
-    } else {
-      // Email confirmation flow - redirect to welcome page
-      console.log('Taking email confirmation flow - redirecting to /welcome');
-      const welcomeUrl = new URL('/welcome', requestUrl.origin);
-      return NextResponse.redirect(welcomeUrl);
     }
+
+    // Handle email confirmation (uses OTP verification, not PKCE)
+    console.log('Email confirmation flow detected, using verifyOtp');
+    const { data, error: verifyError } = await supabase.auth.verifyOtp({
+      token_hash: code,
+      type: 'email',
+    });
+
+    if (verifyError || !data.session) {
+      console.log('Email verification failed:');
+      console.log('Error:', verifyError);
+      console.log('Error message:', verifyError?.message);
+      console.log('Has session:', !!data?.session);
+
+      // Still redirect to welcome page so user knows what happened
+      console.log('Email confirmation had issues, but redirecting to welcome page');
+      return NextResponse.redirect(new URL('/welcome', requestUrl.origin));
+    }
+
+    // Email confirmed successfully!
+    console.log('Email verification successful! User email confirmed.');
+    console.log('User:', data.user?.email);
+    console.log('Redirecting to welcome page');
+
+    const welcomeUrl = new URL('/welcome', requestUrl.origin);
+    return NextResponse.redirect(welcomeUrl);
   } catch (error) {
     console.error('Auth callback error:', error);
     // Default to homepage for errors
