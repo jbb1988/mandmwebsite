@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import { LiquidGlass } from '@/components/LiquidGlass';
 
@@ -11,7 +11,6 @@ import { LiquidGlass } from '@/components/LiquidGlass';
  */
 export default function ConfirmingPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [showSuccess, setShowSuccess] = React.useState(false);
 
   useEffect(() => {
