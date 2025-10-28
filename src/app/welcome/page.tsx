@@ -3,13 +3,17 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { CheckCircle, SkipForward } from 'lucide-react';
+import { CheckCircle, SkipForward, AlertCircle } from 'lucide-react';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { GradientTextReveal } from '@/components/animations';
+import { createClient } from '@supabase/supabase-js';
 
 export default function WelcomePage() {
   const [showSplash, setShowSplash] = useState(true);
   const [videoEnded, setVideoEnded] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [sessionLoading, setSessionLoading] = useState(true);
+  const [sessionError, setSessionError] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // Extract deep link logic to reusable function
@@ -35,6 +39,41 @@ export default function WelcomePage() {
       setShowSplash(false);
       setVideoEnded(true);
     }
+  }, []);
+
+  // Verify user session
+  useEffect(() => {
+    async function verifySession() {
+      try {
+        // Create Supabase client
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
+
+        // Get the current session
+        const { data: { session }, error } = await supabase.auth.getSession();
+
+        if (error) {
+          console.error('Error verifying session:', error);
+          setSessionError(true);
+        } else if (session?.user) {
+          // Session verified successfully
+          setUserEmail(session.user.email || null);
+          console.log('Email confirmation verified for user:', session.user.email);
+        } else {
+          // No session found - user may have clicked an old link
+          console.warn('No session found after email confirmation');
+        }
+      } catch (error) {
+        console.error('Failed to verify session:', error);
+        setSessionError(true);
+      } finally {
+        setSessionLoading(false);
+      }
+    }
+
+    verifySession();
   }, []);
 
   const handleVideoEnd = () => {
@@ -94,8 +133,17 @@ export default function WelcomePage() {
           <div className="inline-block mb-6">
             <LiquidGlass variant="blue" rounded="full" padding="none" glow={true} className="px-8 py-4">
               <div className="flex items-center gap-3">
-                <CheckCircle className="w-8 h-8 text-neon-cortex-green drop-shadow-[0_0_12px_rgba(34,197,94,0.8)]" />
-                <span className="text-xl md:text-2xl font-bold">EMAIL CONFIRMED!</span>
+                {sessionError ? (
+                  <>
+                    <AlertCircle className="w-8 h-8 text-yellow-500 drop-shadow-[0_0_12px_rgba(234,179,8,0.8)]" />
+                    <span className="text-xl md:text-2xl font-bold">VERIFICATION PENDING</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle className="w-8 h-8 text-neon-cortex-green drop-shadow-[0_0_12px_rgba(34,197,94,0.8)]" />
+                    <span className="text-xl md:text-2xl font-bold">EMAIL CONFIRMED!</span>
+                  </>
+                )}
               </div>
             </LiquidGlass>
           </div>
@@ -108,9 +156,24 @@ export default function WelcomePage() {
             delay={0.2}
           />
 
-          <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-2">
-            Your account is ready. Let's get started.
-          </p>
+          {userEmail ? (
+            <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-2">
+              Welcome, <span className="text-neon-cortex-blue font-bold">{userEmail}</span>!<br />
+              Your account is ready. Let's get started.
+            </p>
+          ) : sessionLoading ? (
+            <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-2">
+              Verifying your account...
+            </p>
+          ) : sessionError ? (
+            <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-2">
+              Welcome! Download the app to continue.
+            </p>
+          ) : (
+            <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-2">
+              Your account is ready. Let's get started.
+            </p>
+          )}
         </div>
 
         {/* Logo */}

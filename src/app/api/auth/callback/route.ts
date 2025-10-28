@@ -1,7 +1,32 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { authCallbackLimiter, getClientIP } from '@/lib/rate-limiter';
 
 export async function GET(request: NextRequest) {
+  // Rate limiting - 10 requests per minute per IP
+  const clientIP = getClientIP(request);
+  const rateLimit = authCallbackLimiter.check(clientIP);
+
+  if (rateLimit.limited) {
+    console.log(`Rate limit exceeded for IP: ${clientIP}`);
+    return new NextResponse(
+      JSON.stringify({
+        error: 'Too many requests',
+        message: 'Please wait a moment before trying again',
+      }),
+      {
+        status: 429,
+        headers: {
+          'Content-Type': 'application/json',
+          'Retry-After': Math.ceil((rateLimit.resetAt - Date.now()) / 1000).toString(),
+          'X-RateLimit-Limit': '10',
+          'X-RateLimit-Remaining': rateLimit.remaining.toString(),
+          'X-RateLimit-Reset': new Date(rateLimit.resetAt).toISOString(),
+        },
+      }
+    );
+  }
+
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
   const error = requestUrl.searchParams.get('error');
@@ -73,13 +98,14 @@ export async function GET(request: NextRequest) {
 
     // Handle email confirmation
     // Note: When user clicks the email link, Supabase automatically confirms the email
-    // BEFORE redirecting to this callback. So we just need to redirect to welcome page.
+    // BEFORE redirecting to this callback. So we just need to redirect to confirming page.
     console.log('Email confirmation flow detected');
     console.log('Supabase has already confirmed the email before redirecting here');
-    console.log('Simply redirecting to welcome page');
+    console.log('Redirecting to confirming page with loading animation');
 
-    const welcomeUrl = new URL('/welcome', requestUrl.origin);
-    return NextResponse.redirect(welcomeUrl);
+    // Redirect to confirming page which shows loading animation before welcome page
+    const confirmingUrl = new URL('/auth/confirming', requestUrl.origin);
+    return NextResponse.redirect(confirmingUrl);
   } catch (error) {
     console.error('Auth callback error:', error);
     // Default to homepage for errors
