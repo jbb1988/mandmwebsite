@@ -303,6 +303,175 @@ export default function PartnerProgramPage() {
         <EnhancedEarningsCalculator />
       </div>
 
+      {/* Application Form */}
+      <div className="max-w-3xl mx-auto mb-20">
+        <LiquidGlass variant="blue" glow={true} className="p-8">
+          <GradientTextReveal
+            text="Ready to Start Earning?"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
+            gradientFrom="#0EA5E9"
+            gradientTo="#F97316"
+            delay={0.2}
+          />
+          <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
+            Apply below. Most applications are approved within 24 hours.
+          </p>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label htmlFor="name" className="block text-sm font-semibold mb-2">
+                Full Name *
+              </label>
+              <input
+                type="text"
+                id="name"
+                required
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors backdrop-blur-md"
+                placeholder="John Doe"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="email" className="block text-sm font-semibold mb-2">
+                Email Address *
+              </label>
+              <input
+                type="email"
+                id="email"
+                required
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors backdrop-blur-md"
+                placeholder="john@example.com"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="organization" className="block text-sm font-semibold mb-2">
+                Organization/Website (Optional)
+              </label>
+              <input
+                type="text"
+                id="organization"
+                value={formData.organization}
+                onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors backdrop-blur-md"
+                placeholder="Your organization or website"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="networkSize" className="block text-sm font-semibold mb-2">
+                How many coaches/teams are in your network? *
+              </label>
+              <select
+                id="networkSize"
+                required
+                value={formData.networkSize}
+                onChange={(e) => setFormData({ ...formData, networkSize: e.target.value })}
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors backdrop-blur-md"
+              >
+                <option value="">Select range...</option>
+                <option value="1-5">1-5 coaches/teams</option>
+                <option value="6-15">6-15 coaches/teams</option>
+                <option value="16-30">16-30 coaches/teams</option>
+                <option value="31-50">31-50 coaches/teams</option>
+                <option value="50+">50+ coaches/teams</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="promotionChannel" className="block text-sm font-semibold mb-2">
+                How will you primarily promote? *
+              </label>
+              <select
+                id="promotionChannel"
+                required
+                value={formData.promotionChannel}
+                onChange={(e) => setFormData({ ...formData, promotionChannel: e.target.value })}
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors backdrop-blur-md"
+              >
+                <option value="">Select channel...</option>
+                <option value="email">Direct email to coaches</option>
+                <option value="social">Social media (Instagram, Twitter, etc.)</option>
+                <option value="blog">Blog or website</option>
+                <option value="inperson">In-person at games/events</option>
+                <option value="community">Online community or group</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="whyExcited" className="block text-sm font-semibold mb-2">
+                Why are you excited about Mind & Muscle? *
+              </label>
+              <textarea
+                id="whyExcited"
+                required
+                rows={3}
+                value={formData.whyExcited}
+                onChange={(e) => setFormData({ ...formData, whyExcited: e.target.value })}
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors backdrop-blur-md resize-none"
+                placeholder="What excites you about helping coaches with mental and physical training..."
+              />
+            </div>
+
+            <div>
+              <label htmlFor="audience" className="block text-sm font-semibold mb-2">
+                Tell us about your audience
+              </label>
+              <textarea
+                id="audience"
+                rows={3}
+                value={formData.audience}
+                onChange={(e) => setFormData({ ...formData, audience: e.target.value })}
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors backdrop-blur-md resize-none"
+                placeholder="Optional: demographics, sports, competitive level, etc."
+              />
+            </div>
+
+            <div className="p-4 bg-neon-cortex-green/10 border border-neon-cortex-green/30 rounded-lg">
+              <div className="flex items-start gap-3">
+                <Check className="w-5 h-5 text-neon-cortex-green flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-text-secondary">
+                  By applying, you agree to our{' '}
+                  <a href="/partner-terms" target="_blank" className="text-neon-cortex-green hover:underline">
+                    partner terms
+                  </a>
+                  . No commitments required - you can stop at any time. Zero risk, all upside.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-center">
+              <Turnstile
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
+                onSuccess={(token) => setCaptchaToken(token)}
+                onError={() => setCaptchaToken('')}
+                onExpire={() => setCaptchaToken('')}
+              />
+            </div>
+
+            <LiquidButton
+              type="submit"
+              variant="orange"
+              size="lg"
+              fullWidth={true}
+              disabled={!captchaToken || isSubmitting}
+              className="!bg-gradient-to-r !from-solar-surge-orange !to-muscle-primary !shadow-[0_0_30px_rgba(251,146,60,0.6)] hover:!shadow-[0_0_40px_rgba(251,146,60,0.8)] !border-solar-surge-orange/60 !text-white !font-black !text-xl animate-pulse-subtle"
+            >
+              {isSubmitting ? 'Submitting...' : 'Apply Now - Start Earning'}
+            </LiquidButton>
+
+            <p className="text-xs text-text-secondary text-center">
+              Most applications are reviewed within 24 hours. You'll receive your tracking link immediately upon approval.
+            </p>
+          </form>
+        </LiquidGlass>
+      </div>
+
       {/* Perfect For High-Impact Partners */}
       <div className="max-w-7xl mx-auto mb-20">
         <GradientTextReveal
@@ -694,175 +863,6 @@ export default function PartnerProgramPage() {
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Application Form */}
-      <div className="max-w-3xl mx-auto mb-20">
-        <LiquidGlass variant="blue" glow={true} className="p-8">
-          <GradientTextReveal
-            text="Ready to Start Earning?"
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
-            gradientFrom="#0EA5E9"
-            gradientTo="#F97316"
-            delay={0.2}
-          />
-          <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
-            Apply below. Most applications are approved within 24 hours.
-          </p>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="name" className="block text-sm font-semibold mb-2">
-                Full Name *
-              </label>
-              <input
-                type="text"
-                id="name"
-                required
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors backdrop-blur-md"
-                placeholder="John Doe"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-semibold mb-2">
-                Email Address *
-              </label>
-              <input
-                type="email"
-                id="email"
-                required
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors backdrop-blur-md"
-                placeholder="john@example.com"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="organization" className="block text-sm font-semibold mb-2">
-                Organization/Website (Optional)
-              </label>
-              <input
-                type="text"
-                id="organization"
-                value={formData.organization}
-                onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors backdrop-blur-md"
-                placeholder="Your organization or website"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="networkSize" className="block text-sm font-semibold mb-2">
-                How many coaches/teams are in your network? *
-              </label>
-              <select
-                id="networkSize"
-                required
-                value={formData.networkSize}
-                onChange={(e) => setFormData({ ...formData, networkSize: e.target.value })}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors backdrop-blur-md"
-              >
-                <option value="">Select range...</option>
-                <option value="1-5">1-5 coaches/teams</option>
-                <option value="6-15">6-15 coaches/teams</option>
-                <option value="16-30">16-30 coaches/teams</option>
-                <option value="31-50">31-50 coaches/teams</option>
-                <option value="50+">50+ coaches/teams</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="promotionChannel" className="block text-sm font-semibold mb-2">
-                How will you primarily promote? *
-              </label>
-              <select
-                id="promotionChannel"
-                required
-                value={formData.promotionChannel}
-                onChange={(e) => setFormData({ ...formData, promotionChannel: e.target.value })}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors backdrop-blur-md"
-              >
-                <option value="">Select channel...</option>
-                <option value="email">Direct email to coaches</option>
-                <option value="social">Social media (Instagram, Twitter, etc.)</option>
-                <option value="blog">Blog or website</option>
-                <option value="inperson">In-person at games/events</option>
-                <option value="community">Online community or group</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-
-            <div>
-              <label htmlFor="whyExcited" className="block text-sm font-semibold mb-2">
-                Why are you excited about Mind & Muscle? *
-              </label>
-              <textarea
-                id="whyExcited"
-                required
-                rows={3}
-                value={formData.whyExcited}
-                onChange={(e) => setFormData({ ...formData, whyExcited: e.target.value })}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors backdrop-blur-md resize-none"
-                placeholder="What excites you about helping coaches with mental and physical training..."
-              />
-            </div>
-
-            <div>
-              <label htmlFor="audience" className="block text-sm font-semibold mb-2">
-                Tell us about your audience
-              </label>
-              <textarea
-                id="audience"
-                rows={3}
-                value={formData.audience}
-                onChange={(e) => setFormData({ ...formData, audience: e.target.value })}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors backdrop-blur-md resize-none"
-                placeholder="Optional: demographics, sports, competitive level, etc."
-              />
-            </div>
-
-            <div className="p-4 bg-neon-cortex-green/10 border border-neon-cortex-green/30 rounded-lg">
-              <div className="flex items-start gap-3">
-                <Check className="w-5 h-5 text-neon-cortex-green flex-shrink-0 mt-0.5" />
-                <p className="text-xs text-text-secondary">
-                  By applying, you agree to our{' '}
-                  <a href="/partner-terms" target="_blank" className="text-neon-cortex-green hover:underline">
-                    partner terms
-                  </a>
-                  . No commitments required - you can stop at any time. Zero risk, all upside.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex justify-center">
-              <Turnstile
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY!}
-                onSuccess={(token) => setCaptchaToken(token)}
-                onError={() => setCaptchaToken('')}
-                onExpire={() => setCaptchaToken('')}
-              />
-            </div>
-
-            <LiquidButton
-              type="submit"
-              variant="orange"
-              size="lg"
-              fullWidth={true}
-              disabled={!captchaToken || isSubmitting}
-              className="!bg-gradient-to-r !from-solar-surge-orange !to-muscle-primary !shadow-[0_0_30px_rgba(251,146,60,0.6)] hover:!shadow-[0_0_40px_rgba(251,146,60,0.8)] !border-solar-surge-orange/60 !text-white !font-black !text-xl animate-pulse-subtle"
-            >
-              {isSubmitting ? 'Submitting...' : 'Apply Now - Start Earning'}
-            </LiquidButton>
-
-            <p className="text-xs text-text-secondary text-center">
-              Most applications are reviewed within 24 hours. You'll receive your tracking link immediately upon approval.
-            </p>
-          </form>
-        </LiquidGlass>
       </div>
 
       {/* FAQ Section */}
