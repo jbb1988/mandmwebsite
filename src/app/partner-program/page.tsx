@@ -696,45 +696,8 @@ export default function PartnerProgramPage() {
         </div>
       </div>
 
-      {/* FAQ Section */}
-      <div className="max-w-4xl mx-auto mb-20">
-        <GradientTextReveal
-          text="Questions? We've Got Answers"
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
-          gradientFrom="#0EA5E9"
-          gradientTo="#F97316"
-          delay={0.2}
-        />
-        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
-          Everything you need to know about becoming a partner.
-        </p>
-
-        <div className="space-y-4">
-          {faqs.map((faq, index) => (
-            <LiquidGlass key={index} variant="blue" className="p-6">
-              <button
-                onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
-                className="w-full text-left flex items-center justify-between gap-4"
-              >
-                <h3 className="text-lg font-bold">{faq.question}</h3>
-                <ChevronDown
-                  className={`w-5 h-5 text-neon-cortex-blue transition-transform flex-shrink-0 ${
-                    expandedFaq === index ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
-              {expandedFaq === index && (
-                <p className="text-text-secondary text-sm mt-4 leading-relaxed">
-                  {faq.answer}
-                </p>
-              )}
-            </LiquidGlass>
-          ))}
-        </div>
-      </div>
-
       {/* Application Form */}
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-3xl mx-auto mb-20">
         <LiquidGlass variant="blue" glow={true} className="p-8">
           <GradientTextReveal
             text="Ready to Start Earning?"
@@ -900,6 +863,43 @@ export default function PartnerProgramPage() {
             </p>
           </form>
         </LiquidGlass>
+      </div>
+
+      {/* FAQ Section */}
+      <div className="max-w-4xl mx-auto mb-20">
+        <GradientTextReveal
+          text="Questions? We've Got Answers"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
+          gradientFrom="#0EA5E9"
+          gradientTo="#F97316"
+          delay={0.2}
+        />
+        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
+          Everything you need to know about becoming a partner.
+        </p>
+
+        <div className="space-y-4">
+          {faqs.map((faq, index) => (
+            <LiquidGlass key={index} variant="blue" className="p-6">
+              <button
+                onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
+                className="w-full text-left flex items-center justify-between gap-4"
+              >
+                <h3 className="text-lg font-bold">{faq.question}</h3>
+                <ChevronDown
+                  className={`w-5 h-5 text-neon-cortex-blue transition-transform flex-shrink-0 ${
+                    expandedFaq === index ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+              {expandedFaq === index && (
+                <p className="text-text-secondary text-sm mt-4 leading-relaxed">
+                  {faq.answer}
+                </p>
+              )}
+            </LiquidGlass>
+          ))}
+        </div>
       </div>
 
       {/* Success Modal */}
