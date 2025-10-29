@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 import { LiquidGlass } from './LiquidGlass';
 import { clsx } from 'clsx';
@@ -9,6 +10,15 @@ import { clsx } from 'clsx';
 export const Navigation: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Helper function to check if link is active
+  const isActive = (href: string) => {
+    if (href === '/') {
+      return pathname === '/';
+    }
+    return pathname.startsWith(href);
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -62,15 +72,28 @@ export const Navigation: React.FC = () => {
 
               {/* Desktop Navigation */}
               <div className="hidden md:flex items-center gap-8">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="text-text-secondary hover:text-starlight-white transition-colors font-medium"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
+                {navLinks.map((link) => {
+                  const active = isActive(link.href);
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={clsx(
+                        'transition-all duration-200 pb-1 relative font-medium',
+                        active
+                          ? 'text-solar-surge-orange font-semibold'
+                          : 'text-text-secondary hover:text-neon-cortex-blue'
+                      )}
+                      style={active ? {
+                        textShadow: '0 0 20px rgba(251, 146, 60, 0.6), 0 0 40px rgba(251, 146, 60, 0.3)',
+                        borderBottom: '2px solid #FB923C',
+                        boxShadow: '0 2px 8px rgba(251, 146, 60, 0.4)'
+                      } : undefined}
+                    >
+                      {link.label}
+                    </Link>
+                  );
+                })}
               </div>
 
               {/* CTA Button - Glassmorphic Style */}
@@ -100,16 +123,27 @@ export const Navigation: React.FC = () => {
             {isMobileMenuOpen && (
               <div className="md:hidden mt-4 pt-4 border-t border-white/10">
                 <div className="flex flex-col gap-4">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="text-text-secondary hover:text-starlight-white transition-colors font-medium py-2"
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
+                  {navLinks.map((link) => {
+                    const active = isActive(link.href);
+                    return (
+                      <Link
+                        key={link.href}
+                        href={link.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={clsx(
+                          'rounded-lg transition-all py-2 px-4 font-medium',
+                          active
+                            ? 'text-solar-surge-orange font-semibold bg-white/5 border-l-4 border-solar-surge-orange'
+                            : 'text-text-secondary hover:text-starlight-white hover:bg-white/5'
+                        )}
+                        style={active ? {
+                          textShadow: '0 0 20px rgba(251, 146, 60, 0.6)'
+                        } : undefined}
+                      >
+                        {link.label}
+                      </Link>
+                    );
+                  })}
                   <Link
                     href="/team-licensing"
                     onClick={() => setIsMobileMenuOpen(false)}
