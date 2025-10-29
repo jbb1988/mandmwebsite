@@ -433,36 +433,36 @@ Enable:
 
 ---
 
-## Mobile App Affiliate Tracking
+## Mobile App Affiliate Tracking (Future Feature)
 
-Since our mobile app doesn't use Tolt's JavaScript tracking, we handle it manually:
+The affiliate tracking columns exist in the database but are **not currently implemented**.
 
-### How It Works
+### Why Not Active
 
-1. **User enters affiliate code in app**
-   - Code stored in user's profile: `profiles.affiliate_code`
-   - Timestamp recorded: `profiles.referred_at`
+- Individual subscriptions: RevenueCat (in-app purchases)
+- Team licensing: Stripe (website) ← **THIS WORKS**
+- Focus: Team licensing generates 16x more commission value
+- Integration challenge: RevenueCat → Tolt requires custom webhooks
 
-2. **User redeems team code**
-   - App checks if user has `affiliate_code`
-   - If yes, tracks that they're part of an affiliate-referred team
+### Database Schema
 
-3. **Future purchase tracking** (To Implement)
-   - When mobile user upgrades to premium or buys individual subscription
-   - Backend sends conversion to Tolt:
-   ```typescript
-   POST https://api.tolt.io/v1/conversions
-   {
-     "referral_code": user.affiliate_code,
-     "amount": purchase_amount,
-     "customer_email": user.email,
-     "external_id": subscription_id,
-     "metadata": {
-       "source": "mobile_app",
-       "platform": "ios" // or "android"
-     }
-   }
-   ```
+The migration `20250110000000_add_affiliate_tracking.sql` created:
+- `profiles.affiliate_code` (TEXT) - Reserved for future use
+- `profiles.referred_at` (TIMESTAMP) - Reserved for future use
+
+These columns are **empty** and **unused** in the current implementation.
+
+### If You Want to Implement This
+
+1. Create RevenueCat webhook handler
+2. Match user email to `profiles.affiliate_code`
+3. Send conversion to Tolt API when user upgrades
+4. Re-enable affiliate code field in mobile registration (`lib/features/authentication/register_screen_riverpod.dart`)
+5. Test across iOS/Android/RevenueCat/Tolt/Supabase
+
+**Estimated effort:** 20-40 hours of development + testing
+
+**Current recommendation:** Focus partner program on team licensing only.
 
 ---
 

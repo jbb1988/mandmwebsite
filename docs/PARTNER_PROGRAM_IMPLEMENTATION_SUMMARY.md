@@ -99,7 +99,7 @@ TOLT_API_KEY=tolt_sk_...
 - Created index on `affiliate_code` for fast lookups
 - Created index on `referred_at` for analytics queries
 
-**Purpose**: Track mobile app users who enter affiliate codes during registration
+**Purpose**: Reserved for future use - currently not implemented (see Section 5 for details)
 
 **Example Data**:
 ```sql
@@ -110,43 +110,37 @@ uuid-123   | athlete@email.com | COACH123       | 2025-01-10 10:30:00+00
 
 ---
 
-### 5. Mobile App Registration (Flutter)
+### 5. Mobile App Affiliate Tracking (NOT IMPLEMENTED)
 
-**File**: `/lib/features/authentication/register_screen_riverpod.dart`
+**Status**: ❌ **NOT ACTIVE** - Database columns exist but feature is not implemented
 
-**Changes Made**:
-1. Added `_affiliateCodeController` TextEditingController
-2. Added disposal for new controller
-3. Added UI field: "Partner Referral Code (Optional)"
-4. Extracted affiliate code from form input
-5. Passed affiliate code to `auth.signUp` in user metadata
-6. Updated profile creation fallback to store affiliate code
+**Why Not Implemented**:
+- Individual subscriptions go through **RevenueCat** (Apple/Google in-app purchases)
+- Team licensing goes through **Stripe** (website) ← **THIS WORKS**
+- RevenueCat and Tolt don't integrate easily
+- One team referral = 16+ individual referrals in commission value
+- Partner program focused on high-value team licensing only
 
-**UI Screenshot Location**: After team code field, before submit button
+**Database Schema**:
+The migration `20250110000000_add_affiliate_tracking.sql` added:
+- `profiles.affiliate_code` (TEXT)
+- `profiles.referred_at` (TIMESTAMP)
 
-**User Experience**:
-```
-Registration Form
-┌─────────────────────────────────────┐
-│ Name:          [John Smith       ] │
-│ Email:         [john@email.com   ] │
-│ Password:      [••••••••••••     ] │
-│ Role:          [Athlete ▼        ] │
-│ Birthday:      [01/15/2010       ] │
-│ Team Code:     [TEAM12345        ] │ ← Optional
-│ Partner Code:  [COACH123         ] │ ← NEW: Optional
-│                                     │
-│           [ Register Account ]      │
-└─────────────────────────────────────┘
-```
+These columns are **reserved for future use** if/when individual subscriptions move from RevenueCat to Stripe.
 
-**Backend Flow**:
-```
-1. User enters COACH123 in partner code field
-2. Code sent to Supabase auth.signUp in user metadata
-3. Profile created with affiliate_code = "COACH123"
-4. Future: When team purchases, COACH123 gets credited
-```
+**Current State**:
+- ❌ No affiliate code field in mobile registration
+- ❌ No tracking of individual subscriptions with Tolt
+- ✅ Database columns exist for potential future implementation
+
+**If You Want to Implement This**:
+1. Create RevenueCat webhook handler
+2. Match user email to `profiles.affiliate_code`
+3. Send conversion to Tolt API when user upgrades
+4. Re-enable affiliate code field in mobile registration
+5. Test across iOS/Android/RevenueCat/Tolt/Supabase
+
+**Current Recommendation**: Focus partner program on team licensing only (much higher ROI).
 
 ---
 
@@ -200,17 +194,16 @@ Registration Form
 
 **Purpose**: Comprehensive testing guide for QA and validation
 
-**Test Scenarios** (10 total):
+**Test Scenarios** (9 total):
 1. ✅ Website Conversion (New Purchase)
-2. ✅ Mobile App Registration with Affiliate Code
-3. ✅ Subscription Renewal (Recurring Commission)
-4. ✅ Failed Payment Handling
-5. ✅ Subscription Cancellation
-6. ✅ Direct Purchase (No Affiliate)
-7. ✅ Cookie Attribution Window (90 Days)
-8. ✅ Multiple Partner Clicks
-9. ✅ Error Handling
-10. ✅ Payout Simulation
+2. ✅ Subscription Renewal (Recurring Commission)
+3. ✅ Failed Payment Handling
+4. ✅ Subscription Cancellation
+5. ✅ Direct Purchase (No Affiliate)
+6. ✅ Cookie Attribution Window (90 Days)
+7. ✅ Multiple Partner Clicks
+8. ✅ Error Handling
+9. ✅ Payout Simulation
 
 **Additional Sections**:
 - Prerequisites and environment setup
@@ -307,33 +300,9 @@ RENEWAL FLOW (Annual Subscription Renewal)
                                         │   Recurring     │
                                         │   Commission    │
                                         └─────────────────┘
-
-MOBILE APP FLOW (Affiliate Code Entry)
-┌─────────────┐    ┌──────────────┐    ┌─────────────┐
-│   Partner   │───→│   Athlete    │───→│  Register   │
-│  Shares     │    │    Hears     │    │   in App    │
-│   Code      │    │  About App   │    └─────────────┘
-└─────────────┘    └──────────────┘             │
-                                                 ↓
-                                        ┌─────────────────┐
-                                        │  Enter Partner  │
-                                        │Code: COACH123   │
-                                        └─────────────────┘
-                                                 │
-                                                 ↓
-                                        ┌─────────────────┐
-                                        │Store in Profile │
-                                        │  affiliate_code │
-                                        │   referred_at   │
-                                        └─────────────────┘
-                                                 │
-                                                 ↓
-                                        ┌─────────────────┐
-                                        │  Future: When   │
-                                        │  team purchases │
-                                        │partner credited │
-                                        └─────────────────┘
 ```
+
+**Note**: Mobile app affiliate tracking is not implemented. See Section 5 for details.
 
 ---
 
@@ -561,11 +530,7 @@ RESEND_API_KEY=re_...
    - Set payout settings: $50 minimum, 60-day hold
    - Configure cookie: 90-day duration
 
-4. **Deploy Mobile App Update**
-   - Build and submit to App Store / Play Store
-   - Ensure affiliate code field is visible in production
-
-5. **Run Test Plan**
+4. **Run Test Plan**
    - Follow `PARTNER_PROGRAM_TEST_PLAN.md`
    - Complete all 10 test scenarios
    - Verify end-to-end flow works
@@ -628,7 +593,6 @@ RESEND_API_KEY=re_...
 - Webhook success rate: Target 99.9%+
 - Tolt API success rate: Target 99%+
 - Attribution accuracy: Target 100%
-- Mobile affiliate code adoption: Target 20%+ of new users
 
 ---
 
@@ -684,11 +648,6 @@ RESEND_API_KEY=re_...
 - Lifetime recurring payments
 - Solution: Monitor profitability closely; adjust if needed
 
-⛔️ **Mobile Attribution**
-- Manual entry (typos possible)
-- No cookie tracking in app
-- Solution: Clear UI, validation, analytics on adoption rate
-
 ---
 
 ## Frequently Asked Questions
@@ -698,8 +657,8 @@ RESEND_API_KEY=re_...
 **Q: What if Tolt goes down?**
 A: Webhooks are designed to handle Tolt failures gracefully. Conversions are logged, and we can manually add them to Tolt later.
 
-**Q: Can we track mobile affiliate codes retroactively?**
-A: Yes, we're storing `affiliate_code` in the profiles table. We can query this data anytime for analytics or manual commission attribution.
+**Q: Is mobile affiliate tracking implemented?**
+A: No. The database columns exist (`profiles.affiliate_code` and `profiles.referred_at`) but the feature is not active. Individual subscriptions go through RevenueCat (in-app purchases), which doesn't integrate easily with Tolt. The partner program focuses on team licensing only.
 
 **Q: How do we prevent partner fraud?**
 A: Tolt has built-in fraud detection. We also monitor for suspicious patterns (self-referrals, unusual conversion rates, etc.).

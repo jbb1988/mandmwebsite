@@ -77,7 +77,7 @@ export default function PartnerProgramPage() {
     {
       icon: Star,
       title: 'Lifetime Recurring Commission',
-      description: 'Earn commission on every payment your referrals make - initial signup plus every renewal, forever.',
+      description: 'Earn 10% commission on every team license you refer - initial purchase plus all renewals, forever. Each team is tracked separately.',
       variant: 'orange' as const,
     },
     {
@@ -158,7 +158,7 @@ export default function PartnerProgramPage() {
     },
     {
       question: 'How does the referral tracking work?',
-      answer: 'We use Tolt, a professional affiliate tracking platform, to manage your referral link and commissions. When someone clicks your unique tracking link, Tolt sets a 30-day cookie to track the conversion. Your partner dashboard at app.tolt.io shows real-time stats: every click, signup, conversion, and commission earned. You can see exactly which referrals are pending, which have paid, and your total earnings. All commission calculations are automatic, and payouts go directly to your PayPal account 60 days after payment clears.'
+      answer: 'We use Tolt, a professional affiliate tracking platform, to manage your referral link and commissions. When someone clicks your unique tracking link, Tolt sets a 90-day cookie to track the conversion. Your partner dashboard at app.tolt.io shows real-time stats: every click, signup, conversion, and commission earned. You can see exactly which referrals are pending, which have paid, and your total earnings. All commission calculations are automatic, and payouts go directly to your PayPal account 60 days after payment clears.'
     },
     {
       question: 'What if I know facility owners or league directors?',
@@ -187,6 +187,14 @@ export default function PartnerProgramPage() {
     {
       question: 'How do payouts work?',
       answer: 'You earn 10% commission each time a referral pays for a subscription. Commissions are held for 60 days after payment clears (standard industry practice to protect against chargebacks), then paid automatically via PayPal. There\'s a $50 minimum threshold. Example: Referral subscribes January 1st = commission paid March 1st. If they renew next year, you earn another commission. Your dashboard shows real-time earnings and tracks every referral.'
+    },
+    {
+      question: 'What if the same organization purchases multiple teams?',
+      answer: 'Each team license is tracked separately. If an organization clicks your referral link and purchases a 12-seat team, you earn commission on that team forever. If they later purchase another 25-seat team (even through a different partner link), each partner earns commission on their respective team. Team licenses are independent subscriptions.'
+    },
+    {
+      question: 'What if someone clicks multiple partner links before purchasing?',
+      answer: 'Tolt uses last-click attribution within the 90-day window. If someone clicks Partner A\'s link on Day 1, then clicks Partner B\'s link on Day 30, Partner B gets credited when they purchase on Day 31. The most recent partner link clicked within 90 days wins the attribution.'
     },
   ];
 
@@ -246,7 +254,7 @@ export default function PartnerProgramPage() {
         />
 
         <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12">
-          Earn up to 15% commission on every subscription payment—forever. Perfect for coaches, facility owners, league directors, and influencers with connections in youth sports.
+          Earn 10-15% commission on every team license payment—forever. Perfect for coaches, facility owners, and league directors with connections in youth sports organizations.
         </p>
 
         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
