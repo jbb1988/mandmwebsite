@@ -111,7 +111,7 @@ export default async function SharePage({ params }: Props) {
 
   const appStoreUrl = 'https://apps.apple.com/app/mind-muscle/id6736613459';
   const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.mindandmuscle.app';
-  const deepLinkUrl = `mindmuscle://content/${content.id}`;
+  const deepLinkUrl = `mindmuscle://daily-hit?contentId=${content.id}`;
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
