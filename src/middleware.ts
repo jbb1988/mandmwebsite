@@ -27,6 +27,9 @@ export function middleware(request: NextRequest) {
     pathname.startsWith('/favicon') ||
     pathname.startsWith('/assets') ||
     pathname.startsWith('/public') ||
+    // Share pages - allow public access for link previews
+    pathname.startsWith('/share/') ||
+    pathname.startsWith('/.well-known/') ||
     // SEO routes - allow public access for search engines
     pathname === '/robots.txt' ||
     pathname === '/sitemap.xml'
