@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { TrustBadges } from './TrustBadges';
 
 export function Footer() {
   return (
@@ -55,11 +54,6 @@ export function Footer() {
           </Link>
         </div>
 
-        {/* Trust Badges */}
-        <div className="mb-12 max-w-4xl mx-auto">
-          <TrustBadges variant="inline" showDescription={false} />
-        </div>
-
         {/* Support Links */}
         <div className="mb-6">
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
@@ -68,13 +62,6 @@ export function Footer() {
               className="text-text-secondary hover:text-starlight-white transition-colors"
             >
               Support
-            </Link>
-            <span className="text-text-secondary/30">•</span>
-            <Link
-              href="/feedback"
-              className="text-text-secondary hover:text-starlight-white transition-colors"
-            >
-              Feedback
             </Link>
             <span className="text-text-secondary/30">•</span>
             <Link
@@ -104,24 +91,10 @@ export function Footer() {
             </Link>
             <span className="text-text-secondary/30">•</span>
             <Link
-              href="/legal#health-disclaimer"
-              className="text-text-secondary hover:text-starlight-white transition-colors"
-            >
-              Health & Fitness
-            </Link>
-            <span className="text-text-secondary/30">•</span>
-            <Link
               href="/legal#coppa"
               className="text-text-secondary hover:text-starlight-white transition-colors"
             >
               Parental Consent
-            </Link>
-            <span className="text-text-secondary/30">•</span>
-            <Link
-              href="/legal#partner-terms"
-              className="text-text-secondary hover:text-starlight-white transition-colors"
-            >
-              Partner Terms
             </Link>
           </div>
         </div>
