@@ -67,7 +67,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     };
   }
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://mindandmuscle.com';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://mindandmuscle.ai';
   const shareUrl = `${baseUrl}/share/${content.id}`;
 
   return {
