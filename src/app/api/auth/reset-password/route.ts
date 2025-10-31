@@ -43,17 +43,46 @@ export async function POST(request: NextRequest) {
     }
 
     // Update user password using admin client
-    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
+    console.log('🔐 Attempting to update password for user:', tokenData.user_id);
+    const { data: updateData, error: updateError } = await supabaseAdmin.auth.admin.updateUserById(
       tokenData.user_id,
       { password: newPassword }
     );
 
     if (updateError) {
-      console.error('Password update error:', updateError);
+      console.error('❌ Password update error:', updateError);
       return NextResponse.json(
         { error: 'Failed to update password' },
         { status: 500 }
       );
+    }
+
+    console.log('✅ Password updated successfully for user:', tokenData.user_id);
+    console.log('📧 User email:', updateData?.user?.email);
+
+    // CRITICAL: Verify the password was actually set correctly by attempting to sign in
+    console.log('🧪 Verifying password was set correctly...');
+    try {
+      const { data: signInData, error: signInError } = await supabaseAdmin.auth.signInWithPassword({
+        email: updateData?.user?.email || '',
+        password: newPassword,
+      });
+
+      if (signInError) {
+        console.error('❌ CRITICAL: Password verification failed immediately after setting!', signInError);
+        console.error('❌ This means the password was NOT saved correctly in Supabase');
+        return NextResponse.json(
+          { error: 'Password was updated but verification failed. Please try resetting again.' },
+          { status: 500 }
+        );
+      }
+
+      console.log('✅ Password verification successful - login works with new password');
+      
+      // Sign out the test session
+      await supabaseAdmin.auth.signOut();
+    } catch (verifyError) {
+      console.error('❌ Exception during password verification:', verifyError);
     }
 
     // Mark token as used
