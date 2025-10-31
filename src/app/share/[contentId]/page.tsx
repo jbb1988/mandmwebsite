@@ -120,28 +120,27 @@ export default async function SharePage({ params }: Props) {
         dangerouslySetInnerHTML={{
           __html: `
             // Try to open the app
-            window.location.href = '${deepLinkUrl}';
-
-            // After a delay, redirect to appropriate app store
-            setTimeout(function() {
-              const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-              const isAndroid = /Android/.test(navigator.userAgent);
-
-              if (isIOS) {
-                window.location.href = '${appStoreUrl}';
-              } else if (isAndroid) {
-                window.location.href = '${playStoreUrl}';
-              } else {
-                // Desktop - stay on page
-                document.getElementById('download-section').style.display = 'block';
-              }
-            }, 2000);
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const isAndroid = /Android/.test(navigator.userAgent);
+            
+            if (isIOS || isAndroid) {
+              window.location.href = '${deepLinkUrl}';
+              
+              // After a delay, redirect to appropriate app store
+              setTimeout(function() {
+                if (isIOS) {
+                  window.location.href = '${appStoreUrl}';
+                } else if (isAndroid) {
+                  window.location.href = '${playStoreUrl}';
+                }
+              }, 2000);
+            }
           `,
         }}
       />
 
-      {/* Fallback content if JavaScript is disabled or redirect fails */}
-      <div id="download-section" className="max-w-2xl mx-auto text-center" style={{ display: 'none' }}>
+      {/* Content visible by default */}
+      <div id="download-section" className="max-w-2xl mx-auto text-center">
         <div className="mb-8">
           {content.thumbnailUrl && (
             <img
@@ -187,11 +186,6 @@ export default async function SharePage({ params }: Props) {
         </div>
       </div>
 
-      {/* Loading spinner (shows briefly during redirect) */}
-      <div id="loading-spinner" className="text-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
-        <p className="text-white text-xl">Opening Mind & Muscle...</p>
-      </div>
     </div>
   );
 }
