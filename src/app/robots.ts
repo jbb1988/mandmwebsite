@@ -19,6 +19,7 @@ export default function robots(): MetadataRoute.Robots {
           '/team-licensing/manage',
           '/team-licensing/success',
           '/welcome',
+          '/share/',
         ],
       },
       {
@@ -33,6 +34,7 @@ export default function robots(): MetadataRoute.Robots {
           '/team-licensing/manage',
           '/team-licensing/success',
           '/welcome',
+          '/share/',
         ],
       },
     ],
