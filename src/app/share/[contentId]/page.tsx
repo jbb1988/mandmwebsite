@@ -14,10 +14,10 @@ async function getContent(contentId: string) {
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    // First try daily_motivation table (Daily Hit content)
+    // First try motivation_content table (Daily Hit content)
     const { data: dailyMotivation, error: dailyError } = await supabase
-      .from('daily_motivation')
-      .select('id, title, headline, body, thumbnail_url, media_type, date')
+      .from('motivation_content')
+      .select('id, title, headline, body, thumbnail_url, media_type, delivery_date')
       .eq('id', contentId)
       .single();
 
