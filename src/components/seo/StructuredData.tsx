@@ -77,7 +77,7 @@ export function SoftwareApplicationSchema() {
       bestRating: '5',
       worstRating: '1',
     },
-    description: 'AI-powered baseball training app with mental skills training, strength coaching, and game IQ development. Built exclusively for baseball players.',
+    description: 'AI-powered baseball and softball training app with mental skills training, strength coaching, and game IQ development. Complete platform for baseball and softball athletes.',
     image: `${SITE_CONFIG.url}/assets/images/og-image.png`,
     url: SITE_CONFIG.url,
     author: {

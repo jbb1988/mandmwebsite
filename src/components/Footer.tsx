@@ -14,7 +14,7 @@ export function Footer() {
             <span className="text-solar-surge-orange">Dominate the Game.</span>
           </p>
           <p className="text-lg sm:text-xl text-text-secondary">
-            100% Baseball. Zero Generic Content.
+            Built for the Diamond. Zero Generic Content.
           </p>
         </div>
 

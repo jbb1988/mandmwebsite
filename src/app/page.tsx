@@ -142,9 +142,9 @@ export default function HomePage() {
       image: '/assets/muscle/Muscle AI Coach Hero.png',
       videoUrl: '/assets/videos/muscle_coachai.mp4',
       audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/musclecoachai_ob.mp3',
-      tagline: 'Your Elite Strength Engineer That Builds Baseball Power',
+      tagline: 'Your Elite Strength Engineer That Builds Baseball and Softball Power',
       description: 'Build the Strength That Gets You Noticed.',
-      modalDescription: 'Muscle Coach AI doesn\'t guess your strength needs. It engineers baseball-specific power.\n\nMLB-level strength training, personalized for your position and power profile.\n\nThree Training Zones - AI Coach (smart recommendations), Exercise Vault (hundreds of baseball-specific exercises), Build Tab (custom workout plan creator).\n\nPosition-Specific Power - Explosive power for bat speed. Rotational strength for throwing velocity. Endurance for clutch moments. All engineered for your position.\n\nAI-Driven Progression - Every set logged. Every workout analyzed. Progressive overload tracked automatically.\n\nCreate Custom Plans - Build workout routines with targeted exercises, track sets/reps, monitor strength gains.\n\nWhile other players hope their strength shows up, yours gets systematically engineered for peak performance.\n\n**This is strength training. Built for baseball.**',
+      modalDescription: 'Muscle Coach AI doesn\'t guess your strength needs. It engineers baseball and softball-specific power.\n\nMLB-level strength training, personalized for your position and power profile.\n\nThree Training Zones - AI Coach (smart recommendations), Exercise Vault (hundreds of baseball and softball-specific exercises), Build Tab (custom workout plan creator).\n\nPosition-Specific Power - Explosive power for bat speed. Rotational strength for throwing velocity. Endurance for clutch moments. All engineered for your position.\n\nAI-Driven Progression - Every set logged. Every workout analyzed. Progressive overload tracked automatically.\n\nCreate Custom Plans - Build workout routines with targeted exercises, track sets/reps, monitor strength gains.\n\nWhile other players hope their strength shows up, yours gets systematically engineered for peak performance.\n\n**This is strength training. Built for baseball and softball.**',
     },
   ];
 
@@ -277,7 +277,7 @@ export default function HomePage() {
             <FadeInWhenVisible delay={0} direction="down">
               <div className="mb-6 inline-block mt-4">
                 <LiquidGlass variant="blue" rounded="full" padding="sm" glow={true} className="inline-flex items-center gap-2 px-6 py-2">
-                  <span className="text-sm font-bold">⚾ 100% BASEBALL. ZERO GENERIC CONTENT.</span>
+                  <span className="text-sm font-bold">⚾🥎 BUILT FOR THE DIAMOND. ZERO GENERIC CONTENT.</span>
                 </LiquidGlass>
               </div>
             </FadeInWhenVisible>
@@ -302,7 +302,7 @@ export default function HomePage() {
 
             {/* Main Heading - Mobile-optimized Typography with Text Reveal */}
             <TextReveal
-              text="The only app built exclusively for baseball players. Every feature. Every drill. Every mental toughness tool."
+              text="The complete training platform for baseball and softball athletes. Every feature. Every drill. Every mental toughness tool."
               as="h1"
               className="text-[40px] sm:text-[56px] md:text-[64px] lg:text-[72px] font-black mb-6 leading-[1.1] text-white"
               delay={0.7}
@@ -312,7 +312,7 @@ export default function HomePage() {
             {/* Subheading - 20-22px Medium Weight */}
             <FadeInWhenVisible delay={1.2} direction="up">
               <p className="text-[20px] sm:text-[22px] text-gray-200 mb-4 leading-relaxed max-w-2xl font-medium" style={{textShadow: '0 2px 12px rgba(0,0,0,0.7)'}}>
-                The first AI platform that develops complete baseball players. Seven integrated apps. One intelligent system. Adapts to every athlete.
+                The first AI platform that develops complete baseball and softball athletes. Seven integrated apps. One intelligent system. Adapts to every athlete.
               </p>
             </FadeInWhenVisible>
             <FadeInWhenVisible delay={1.3} direction="up">
@@ -1080,7 +1080,7 @@ export default function HomePage() {
           <div className="flex justify-center mb-8">
             <div className="inline-flex items-center gap-3 px-6 py-3 backdrop-blur-sm bg-white/5 border border-neon-cortex-blue/30 rounded-full">
               <div className="w-2 h-2 bg-neon-cortex-blue rounded-full animate-pulse" style={{boxShadow: '0 0 12px rgba(14,165,233,0.8)'}} />
-              <span className="text-sm md:text-base font-bold text-gray-200 tracking-wide">100% BASEBALL. ZERO GENERIC CONTENT.</span>
+              <span className="text-sm md:text-base font-bold text-gray-200 tracking-wide">BUILT FOR THE DIAMOND. ZERO GENERIC CONTENT.</span>
             </div>
           </div>
 
@@ -1092,19 +1092,19 @@ export default function HomePage() {
               </span>
               <br />
               <span className="bg-gradient-to-r from-neon-cortex-blue via-mind-primary to-solar-surge-orange bg-clip-text text-transparent" style={{textShadow: '0 0 40px rgba(14,165,233,0.5)'}}>
-                A Baseball Obsession.
+                A Diamond Sport Obsession.
               </span>
             </h2>
             {/* Opening Statement */}
             <div className="max-w-5xl mx-auto mb-20">
               <p className="text-2xl sm:text-3xl md:text-4xl text-gray-300 font-medium leading-relaxed mb-8">
-                Other apps take generic training and slap a baseball filter on it.
+                Other apps take generic training and slap a baseball or softball filter on it.
               </p>
               <p className="text-2xl sm:text-3xl md:text-4xl text-white font-black leading-relaxed mb-6">
                 We started from scratch.
               </p>
               <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 font-medium leading-relaxed">
-                Every drill designed for baseball movements. Every AI model trained exclusively on baseball content. Every mental scenario pulled from real game situations.
+                Every drill designed for baseball and softball movements. Every AI model trained exclusively on baseball and softball content. Every mental scenario pulled from real game situations.
               </p>
               <p className="text-2xl sm:text-3xl md:text-4xl text-neon-cortex-blue font-black leading-relaxed mt-8" style={{textShadow: '0 0 20px rgba(14,165,233,0.8)'}}>
                 This wasn't adapted. It was purpose-built.
@@ -1123,7 +1123,7 @@ export default function HomePage() {
                   </div>
                   <div className="backdrop-blur-sm bg-white/5 border-2 border-neon-cortex-blue/50 rounded-2xl p-8">
                     <div className="text-neon-cortex-blue font-bold text-sm uppercase tracking-wider mb-3">Our AI</div>
-                    <p className="text-2xl text-white font-black">Learns from every swing, journal entry, and workout—continuously improving with countless baseball-specific data points</p>
+                    <p className="text-2xl text-white font-black">Learns from every swing, journal entry, and workout—continuously improving with countless baseball and softball-specific data points</p>
                   </div>
                 </div>
 
@@ -1147,7 +1147,7 @@ export default function HomePage() {
                   </div>
                   <div className="backdrop-blur-sm bg-white/5 border-2 border-neon-cortex-blue/50 rounded-2xl p-8">
                     <div className="text-neon-cortex-blue font-bold text-sm uppercase tracking-wider mb-3">Our Drills</div>
-                    <p className="text-2xl text-white font-black">Custom-built for baseball movements</p>
+                    <p className="text-2xl text-white font-black">Custom-built for baseball and softball movements</p>
                   </div>
                 </div>
 
@@ -1159,7 +1159,7 @@ export default function HomePage() {
                   </div>
                   <div className="backdrop-blur-sm bg-white/5 border-2 border-neon-cortex-blue/50 rounded-2xl p-8">
                     <div className="text-neon-cortex-blue font-bold text-sm uppercase tracking-wider mb-3">Our Approach</div>
-                    <p className="text-2xl text-white font-black">Built from zero for baseball only</p>
+                    <p className="text-2xl text-white font-black">Built from zero for baseball and softball</p>
                   </div>
                 </div>
 
@@ -1176,7 +1176,7 @@ export default function HomePage() {
                 <span className="text-solar-surge-orange" style={{textShadow: '0 0 30px rgba(249,115,22,0.6)'}}>one thing.</span>
               </p>
               <p className="text-5xl sm:text-6xl md:text-7xl font-black text-neon-cortex-blue mt-8" style={{textShadow: '0 0 40px rgba(14,165,233,0.8)'}}>
-                Baseball.
+                Baseball & Softball.
               </p>
             </div>
           </div>
@@ -1252,7 +1252,7 @@ export default function HomePage() {
                     'Pitcher vs. catcher workouts',
                     'Position-specific training',
                     'Swing Lab analysis',
-                    'Baseball movement patterns',
+                    'Baseball and softball movement patterns',
                   ].map((feature, i) => (
                     <li key={i} className="flex items-start gap-3 text-sm text-gray-400">
                       <div className="w-1.5 h-1.5 bg-solar-surge-orange rounded-full mt-2" style={{boxShadow: '0 0 8px rgba(249,115,22,0.8)'}} />
@@ -1467,7 +1467,7 @@ export default function HomePage() {
                       <h4 className="text-sm font-bold text-neon-cortex-blue mb-4 tracking-wide drop-shadow-[0_0_8px_rgba(14,165,233,0.4)]">STARTERS</h4>
                       <div className="space-y-4">
                         {[
-                          { num: '1', name: 'Mind AI Coach + Library', icon: Brain, desc: 'Baseball mental training' },
+                          { num: '1', name: 'Mind AI Coach + Library', icon: Brain, desc: 'Baseball and softball mental training' },
                           { num: '2', name: 'Muscle AI Coach', icon: Dumbbell, desc: 'Position-specific workouts' },
                           { num: '3', name: 'Swing Lab', icon: Video, desc: 'AI video analysis' },
                           { num: '4', name: 'Fuel AI', icon: Apple, desc: 'Position-based nutrition' },
@@ -1535,7 +1535,7 @@ export default function HomePage() {
                           <Zap className="w-3 h-3 text-solar-surge-orange drop-shadow-[0_0_6px_rgba(249,115,22,0.5)]" /> Position-specific training plans
                         </li>
                         <li className="flex items-center gap-2">
-                          <Zap className="w-3 h-3 text-solar-surge-orange drop-shadow-[0_0_6px_rgba(249,115,22,0.5)]" /> 100% baseball-focused content
+                          <Zap className="w-3 h-3 text-solar-surge-orange drop-shadow-[0_0_6px_rgba(249,115,22,0.5)]" /> 100% baseball and softball-focused content
                         </li>
                         <li className="flex items-center gap-2">
                           <Zap className="w-3 h-3 text-solar-surge-orange drop-shadow-[0_0_6px_rgba(249,115,22,0.5)]" /> Everything syncs together
@@ -1629,7 +1629,7 @@ export default function HomePage() {
                             <span className="text-neon-cortex-blue mt-1 font-black">✓</span> PLUS 6 free team/family features
                           </li>
                           <li className="flex items-start gap-2">
-                            <span className="text-neon-cortex-blue mt-1 font-black">✓</span> Baseball-only training library
+                            <span className="text-neon-cortex-blue mt-1 font-black">✓</span> Baseball and softball training library
                           </li>
                           <li className="flex items-start gap-2 pt-3 border-t border-neon-cortex-blue/40">
                             <span className="text-neon-cortex-blue mt-1 font-black">✓</span>
@@ -1851,7 +1851,7 @@ export default function HomePage() {
               Ready to Dominate?
             </h2>
             <p className="text-xl text-text-secondary mb-6 max-w-2xl mx-auto">
-              Join thousands of baseball players, coaches, and teams using Mind & Muscle to elevate their game
+              Join thousands of baseball and softball players, coaches, and teams using Mind & Muscle to elevate their game
             </p>
             <p className="text-sm text-text-secondary">
               Team licensing available • Partner program open

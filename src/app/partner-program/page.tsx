@@ -725,11 +725,11 @@ export default function PartnerProgramPage() {
                   <strong className="text-white">What coaches are dealing with now:</strong> Generic multi-sport apps with a "baseball filter" slapped on. Mental training designed for general athletes. Strength programs not optimized for rotational power. Scenarios that don't match real game situations.
                 </p>
                 <p className="text-gray-200 leading-relaxed">
-                  <strong className="text-solar-surge-orange">Mind & Muscle solution:</strong> Every drill designed for baseball movements. AI trained exclusively on baseball content. 186 real game scenarios. Position-specific strength training (pitchers get rotational power, catchers get explosive legs). Not adapted—purpose-built.
+                  <strong className="text-solar-surge-orange">Mind & Muscle solution:</strong> Every drill designed for baseball and softball movements. AI trained exclusively on baseball and softball content. 186 real game scenarios. Position-specific strength training (pitchers get rotational power, catchers get explosive legs). Not adapted—purpose-built.
                 </p>
                 <div className="mt-4 p-4 bg-solar-surge-orange/10 border border-solar-surge-orange/30 rounded-lg">
                   <p className="text-sm text-gray-300">
-                    💡 <strong>Differentiator:</strong> "Unlike multi-sport apps, Mind & Muscle was built exclusively for baseball players. Every feature is designed for your sport."
+                    💡 <strong>Differentiator:</strong> "Unlike multi-sport apps, Mind & Muscle was built exclusively for baseball and softball athletes. Every feature is designed for your sport."
                   </p>
                 </div>
               </div>

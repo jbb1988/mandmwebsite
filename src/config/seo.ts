@@ -9,17 +9,23 @@ export const SITE_CONFIG = {
   url: 'https://mindandmuscle.ai',
   email: 'support@mindandmuscle.ai',
   twitter: '@mindandmuscleai',
-  description: 'Elite baseball training platform with AI coaching for mind, muscle, and game IQ. Team licensing, partner programs, and cutting-edge sports performance technology.',
+  description: 'Elite baseball and softball training platform with AI coaching for mind, muscle, and game IQ. Team licensing, partner programs, and cutting-edge sports performance technology.',
   keywords: [
     'baseball training app',
+    'softball training app',
     'AI baseball coaching',
+    'AI softball coaching',
     'mental skills training',
     'baseball strength training',
+    'softball strength training',
     'youth baseball training',
+    'youth softball training',
     'team training software',
     'baseball mental training',
+    'softball mental training',
     'sports performance app',
     'baseball team management',
+    'softball team management',
     'athletic development',
   ],
 };
@@ -38,17 +44,24 @@ export interface PageSEO {
 
 export const PAGE_SEO: Record<string, PageSEO> = {
   home: {
-    title: 'Mind & Muscle | AI Baseball Training App - Mental & Physical Development',
-    description: 'The only baseball training app built exclusively for players. AI coaches for mind, muscle, and game IQ. Train smarter, recover faster, outthink every play. Team licensing available.',
+    title: 'Mind & Muscle | AI Baseball & Softball Training App - Mental & Physical Development',
+    description: 'The complete training platform for baseball and softball athletes. AI coaches for mind, muscle, and game IQ. Train smarter, recover faster, outthink every play. Team licensing available.',
     keywords: [
       'baseball training app',
+      'softball training app',
       'AI baseball coaching',
+      'AI softball coaching',
       'mental skills training baseball',
+      'mental skills training softball',
       'baseball strength training app',
+      'softball strength training app',
       'youth baseball training',
+      'youth softball training',
       'baseball game IQ',
+      'softball game IQ',
       'mental training for athletes',
       'baseball development app',
+      'softball development app',
     ],
     ogTitle: 'Mind & Muscle',
     ogDescription: 'Discipline the Mind. Dominate the Game.',
@@ -75,8 +88,8 @@ export const PAGE_SEO: Record<string, PageSEO> = {
   },
 
   'team-licensing': {
-    title: 'Team Licensing | Volume Discounts for Baseball Teams - Mind & Muscle',
-    description: 'Team licensing for baseball organizations. Volume discounts from $79 to $63.20 per seat (6-month licensing). Give your entire team access to AI mental training, strength coaching, and game IQ development.',
+    title: 'Team Licensing | Volume Discounts for Baseball & Softball Teams - Mind & Muscle',
+    description: 'Team licensing for baseball and softball organizations. Volume discounts from $79 to $63.20 per seat (6-month licensing). Give your entire team access to AI mental training, strength coaching, and game IQ development.',
     keywords: [
       'team training software',
       'baseball team management app',
@@ -88,13 +101,13 @@ export const PAGE_SEO: Record<string, PageSEO> = {
       'team volume discounts',
     ],
     ogTitle: 'Team Licensing | Train Your Entire Team with Mind & Muscle',
-    ogDescription: 'Volume discounts for baseball teams. $79-$63.20 per seat. AI coaches for every player on your roster.',
+    ogDescription: 'Volume discounts for baseball and softball teams. $79-$63.20 per seat. AI coaches for every player on your roster.',
     ogImage: `${SITE_CONFIG.url}/assets/images/og-image.png`,
   },
 
   'team-licensing-manage': {
     title: 'Manage Team License | Mind & Muscle',
-    description: 'Manage your team license. View usage, add seats, generate team codes, and manage your baseball team\'s access to Mind & Muscle training platform.',
+    description: 'Manage your team license. View usage, add seats, generate team codes, and manage your baseball or softball team\'s access to Mind & Muscle training platform.',
     noindex: true, // Don't index authenticated management pages
   },
 
@@ -106,7 +119,7 @@ export const PAGE_SEO: Record<string, PageSEO> = {
 
   faq: {
     title: 'FAQ | Frequently Asked Questions - Mind & Muscle',
-    description: 'Get answers about Mind & Muscle baseball training app. Learn about features, pricing, team licensing, AI coaching, mental training, and more. Find solutions to common questions.',
+    description: 'Get answers about Mind & Muscle baseball and softball training app. Learn about features, pricing, team licensing, AI coaching, mental training, and more. Find solutions to common questions.',
     keywords: [
       'baseball training app faq',
       'mind and muscle questions',
@@ -121,7 +134,7 @@ export const PAGE_SEO: Record<string, PageSEO> = {
   },
 
   support: {
-    title: 'Support | Get Help with Mind & Muscle Baseball Training',
+    title: 'Support | Get Help with Mind & Muscle Baseball & Softball Training',
     description: 'Need help with Mind & Muscle? Contact our support team for assistance with the app, team licensing, partner program, technical issues, or general questions.',
     keywords: [
       'baseball app support',
@@ -150,20 +163,20 @@ export const PAGE_SEO: Record<string, PageSEO> = {
   },
 
   welcome: {
-    title: 'Welcome to Mind & Muscle | Get Started with Baseball Training',
-    description: 'Welcome to Mind & Muscle! Get started with AI-powered baseball training. Set up your profile, explore features, and begin your development journey.',
+    title: 'Welcome to Mind & Muscle | Get Started with Baseball & Softball Training',
+    description: 'Welcome to Mind & Muscle! Get started with AI-powered baseball and softball training. Set up your profile, explore features, and begin your development journey.',
     noindex: true, // Don't index onboarding pages
   },
 
   'auth-gate': {
     title: 'Sign In | Mind & Muscle',
-    description: 'Sign in to your Mind & Muscle account to access AI baseball coaching, mental training, strength programs, and game IQ development.',
+    description: 'Sign in to your Mind & Muscle account to access AI baseball and softball coaching, mental training, strength programs, and game IQ development.',
     noindex: true, // Don't index auth pages
   },
 
   'auth-reset-password': {
     title: 'Reset Password | Mind & Muscle',
-    description: 'Reset your Mind & Muscle password to regain access to your baseball training account.',
+    description: 'Reset your Mind & Muscle password to regain access to your baseball and softball training account.',
     noindex: true,
   },
 
