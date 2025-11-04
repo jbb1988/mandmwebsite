@@ -601,7 +601,7 @@ function TeamLicensingContent() {
                   { feature: 'Swing Lab video analysis', tag: 'Instant' },
                   { feature: 'Position-specific strength', tag: 'AI-powered' },
                   { feature: 'Performance nutrition', tag: 'Personalized' },
-                  { feature: '186 baseball IQ scenarios', tag: 'Game-ready' },
+                  { feature: '186 game IQ scenarios', tag: 'Game-ready' },
                   { feature: 'AI goal engineering', tag: 'Coach feedback' },
                 ].map((item, i) => (
                   <div key={i} className="flex items-start justify-between gap-4 p-3 rounded-lg bg-neon-cortex-blue/10 border border-neon-cortex-blue/30">

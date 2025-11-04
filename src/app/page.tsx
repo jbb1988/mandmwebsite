@@ -1135,7 +1135,7 @@ export default function HomePage() {
                   </div>
                   <div className="backdrop-blur-sm bg-white/5 border-2 border-neon-cortex-blue/50 rounded-2xl p-8">
                     <div className="text-neon-cortex-blue font-bold text-sm uppercase tracking-wider mb-3">Our Mental Training</div>
-                    <p className="text-2xl text-white font-black">186 real baseball game scenarios</p>
+                    <p className="text-2xl text-white font-black">186 real game scenarios</p>
                   </div>
                 </div>
 
