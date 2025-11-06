@@ -60,6 +60,26 @@ async function getContent(contentId: string) {
           };
         }
         
+        // Try to fetch as a single soundscape from media_hub
+        const { data: soundscape, error: soundscapeError } = await supabase
+          .from('media_hub')
+          .select('id, title, description, thumbnail_url')
+          .eq('id', mixId)
+          .eq('category', 'mind')
+          .single();
+
+        if (!soundscapeError && soundscape) {
+          // Found actual soundscape - use its real thumbnail!
+          return {
+            id: mixId,
+            title: soundscape.title,
+            description: soundscape.description || 'Immersive soundscape for focus and relaxation',
+            thumbnailUrl: soundscape.thumbnail_url,
+            category: 'sound-lab',
+            type: 'sound-lab',
+          };
+        }
+        
         // Not in database - assume it's a preset mix
         // Handle both "preset-name" and just "name" formats
         const cleanMixId = mixId.replace('preset-', '');
