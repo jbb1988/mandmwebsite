@@ -6,6 +6,30 @@ interface Props {
   params: Promise<{ contentId: string[] }>;
 }
 
+// Get preset image URL from Supabase storage
+function getPresetImageUrl(presetId: string): string {
+  const imageMap: Record<string, string> = {
+    'anxiety_relief': 'Anxiety%20Relief.png',
+    'deep_focus': 'Deep%20Focus.png',
+    'recovery_healing': 'Recovery%20and%20Healing.png',
+    'pre_competition_calm': 'Pre-Competition%20Calm.png',
+    'power_intensity': 'Power%20and%20Intensity.png',
+    'athletic_flow_state': 'Athletic%20Flow%20State.png',
+    'high_energy_focus': 'High-Energy%20Focus.png',
+    'meditation_mindfulness': 'Meditation%20and%20Mindfulness.png',
+    'creative_flow': 'Creative%20Flow.png',
+    'sleep_recovery': 'Sleep%20and%20Recovery.png',
+  };
+  
+  const imageName = imageMap[presetId];
+  if (imageName) {
+    return `https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/media-thumbnails/${imageName}`;
+  }
+  
+  // Fallback to generic Sound Lab image
+  return 'https://mindandmuscle.ai/images/sound-lab-preview.jpg';
+}
+
 // Fetch content data from Supabase
 async function getContent(contentId: string) {
   try {
@@ -44,11 +68,14 @@ async function getContent(contentId: string) {
           .map(word => word.charAt(0).toUpperCase() + word.slice(1))
           .join(' ');
         
+        // Get the actual preset image from Supabase storage
+        const presetImageUrl = getPresetImageUrl(cleanMixId);
+        
         return {
           id: mixId,
           title: mixName,
           description: 'Custom sound mix for focus and relaxation',
-          thumbnailUrl: 'https://mindandmuscle.ai/images/sound-lab-preview.jpg',
+          thumbnailUrl: presetImageUrl,
           category: 'sound-lab',
           type: 'sound-lab',
         };
