@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 
 // Force dynamic rendering to ensure runtime access to environment variables
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 interface Props {
   params: Promise<{ contentId: string[] }>;
@@ -46,7 +47,32 @@ async function getContent(contentId: string) {
     if (contentId.includes('/')) {
       const [type, mixId] = contentId.split('/');
       if (type === 'sound-lab') {
-        // First try to fetch from database (for user-created mixes)
+        console.log('[getContent] Sound Lab route detected, mixId:', mixId);
+        
+        // Try to fetch as a single soundscape from media_hub FIRST
+        // This handles soundscapes shared from the media player
+        const { data: soundscape, error: soundscapeError } = await supabase
+          .from('media_hub')
+          .select('id, title, description, thumbnail_url')
+          .eq('id', mixId)
+          .single();
+
+        console.log('[getContent] media_hub soundscape query:', { data: soundscape, error: soundscapeError });
+
+        if (!soundscapeError && soundscape) {
+          console.log('[getContent] Found soundscape in media_hub:', soundscape.title);
+          // Found actual soundscape - use its real thumbnail!
+          return {
+            id: mixId,
+            title: soundscape.title,
+            description: soundscape.description || 'Immersive soundscape for focus and relaxation',
+            thumbnailUrl: soundscape.thumbnail_url,
+            category: 'sound-lab',
+            type: 'sound-lab',
+          };
+        }
+        
+        // Then try user-created mixes from sound_lab_mixes
         const { data: soundLabMix, error: soundLabError } = await supabase
           .from('sound_lab_mixes')
           .select('id, name, description')
@@ -59,26 +85,6 @@ async function getContent(contentId: string) {
             title: soundLabMix.name || 'Sound Lab Mix',
             description: soundLabMix.description || 'Custom sound mix for focus and relaxation',
             thumbnailUrl: 'https://mindandmuscle.ai/images/sound-lab-preview.jpg',
-            category: 'sound-lab',
-            type: 'sound-lab',
-          };
-        }
-        
-        // Try to fetch as a single soundscape from media_hub
-        const { data: soundscape, error: soundscapeError } = await supabase
-          .from('media_hub')
-          .select('id, title, description, thumbnail_url')
-          .eq('id', mixId)
-          .eq('category', 'mind')
-          .single();
-
-        if (!soundscapeError && soundscape) {
-          // Found actual soundscape - use its real thumbnail!
-          return {
-            id: mixId,
-            title: soundscape.title,
-            description: soundscape.description || 'Immersive soundscape for focus and relaxation',
-            thumbnailUrl: soundscape.thumbnail_url,
             category: 'sound-lab',
             type: 'sound-lab',
           };
