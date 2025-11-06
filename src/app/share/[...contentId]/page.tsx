@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { redirect } from 'next/navigation';
 
 interface Props {
-  params: Promise<{ contentId: string }>;
+  params: Promise<{ contentId: string[] }>;
 }
 
 // Fetch content data from Supabase
@@ -13,6 +13,47 @@ async function getContent(contentId: string) {
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.SUPABASE_SERVICE_ROLE_KEY!
     );
+
+    // Check if this is a Sound Lab share (format: sound-lab/mixId)
+    if (contentId.includes('/')) {
+      const [type, mixId] = contentId.split('/');
+      if (type === 'sound-lab') {
+        // First try to fetch from database (for user-created mixes)
+        const { data: soundLabMix, error: soundLabError } = await supabase
+          .from('sound_lab_mixes')
+          .select('id, name, description')
+          .eq('id', mixId)
+          .single();
+
+        if (!soundLabError && soundLabMix) {
+          return {
+            id: mixId,
+            title: soundLabMix.name || 'Sound Lab Mix',
+            description: soundLabMix.description || 'Custom sound mix for focus and relaxation',
+            thumbnailUrl: 'https://mindandmuscle.ai/images/sound-lab-preview.jpg',
+            category: 'sound-lab',
+            type: 'sound-lab',
+          };
+        }
+        
+        // Not in database - assume it's a preset mix
+        // Handle both "preset-name" and just "name" formats
+        const cleanMixId = mixId.replace('preset-', '');
+        const mixName = cleanMixId
+          .split(/[-_]/)  // Split on hyphens OR underscores
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+        
+        return {
+          id: mixId,
+          title: mixName,
+          description: 'Custom sound mix for focus and relaxation',
+          thumbnailUrl: 'https://mindandmuscle.ai/images/sound-lab-preview.jpg',
+          category: 'sound-lab',
+          type: 'sound-lab',
+        };
+      }
+    }
 
     // First try motivation_content table (Daily Hit content)
     const { data: dailyMotivation, error: dailyError } = await supabase
@@ -28,6 +69,7 @@ async function getContent(contentId: string) {
         description: dailyMotivation.body || dailyMotivation.headline || 'Experience this mental training session',
         thumbnailUrl: dailyMotivation.thumbnail_url,
         category: 'mind',
+        type: 'daily-hit',
       };
     }
 
@@ -45,6 +87,7 @@ async function getContent(contentId: string) {
         description: mediaContent.description || 'Experience this content on Mind & Muscle',
         thumbnailUrl: mediaContent.thumbnail_url,
         category: mediaContent.category || 'mind',
+        type: 'media-hub',
       };
     }
 
@@ -58,7 +101,8 @@ async function getContent(contentId: string) {
 // Generate Open Graph metadata for the content
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params;
-  const content = await getContent(resolvedParams.contentId);
+  const contentId = resolvedParams.contentId.join('/');
+  const content = await getContent(contentId);
 
   if (!content) {
     return {
@@ -68,33 +112,53 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://mindandmuscle.ai';
-  const shareUrl = `${baseUrl}/share/${content.id}`;
+  // Fix URL construction for Sound Lab content
+  const shareUrl = content.type === 'sound-lab' 
+    ? `${baseUrl}/share/sound-lab/${content.id}`
+    : `${baseUrl}/share/${content.id}`;
+
+  // Clean up image URL (remove double slashes if present)
+  // Replace any double slashes that aren't part of https://
+  const cleanImageUrl = content.thumbnailUrl 
+    ? content.thumbnailUrl.replace(/([^:])\/{2,}/g, '$1/')
+    : null;
+
+  const description = content.description.length > 200 
+    ? content.description.substring(0, 197) + '...'
+    : content.description;
 
   return {
     title: content.title,
-    description: content.description,
+    description: description,
+    metadataBase: new URL(baseUrl),
+    alternates: {
+      canonical: shareUrl,
+    },
     openGraph: {
       title: content.title,
-      description: content.description,
+      description: description,
       url: shareUrl,
       siteName: 'Mind & Muscle',
-      images: content.thumbnailUrl
+      locale: 'en_US',
+      type: 'article',
+      images: cleanImageUrl
         ? [
             {
-              url: content.thumbnailUrl,
+              url: cleanImageUrl,
               width: 1200,
               height: 630,
               alt: content.title,
+              type: 'image/jpeg',
             },
           ]
         : [],
-      type: 'article',
     },
     twitter: {
       card: 'summary_large_image',
+      site: '@mindandmuscle',
       title: content.title,
-      description: content.description,
-      images: content.thumbnailUrl ? [content.thumbnailUrl] : [],
+      description: description,
+      images: cleanImageUrl ? [cleanImageUrl] : [],
     },
   };
 }
@@ -102,7 +166,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 // Share page component
 export default async function SharePage({ params }: Props) {
   const resolvedParams = await params;
-  const content = await getContent(resolvedParams.contentId);
+  const contentId = resolvedParams.contentId.join('/');
+  const content = await getContent(contentId);
 
   // If content not found, redirect to homepage
   if (!content) {
@@ -111,7 +176,9 @@ export default async function SharePage({ params }: Props) {
 
   const appStoreUrl = 'https://apps.apple.com/app/mind-muscle/id6736613459';
   const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.mindandmuscle.app';
-  const deepLinkUrl = `mindmuscle://daily-hit?contentId=${content.id}`;
+  const deepLinkUrl = content.type === 'sound-lab' 
+    ? `mindmuscle://sound-lab/${content.id}`
+    : `mindmuscle://daily-hit?contentId=${content.id}`;
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900">
