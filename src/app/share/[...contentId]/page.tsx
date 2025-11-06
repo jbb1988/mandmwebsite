@@ -102,25 +102,8 @@ async function getContent(contentId: string) {
       }
     }
 
-    // First try motivation_content table (Daily Hit content)
-    const { data: dailyMotivation, error: dailyError } = await supabase
-      .from('motivation_content')
-      .select('id, title, headline, body, thumbnail_url, media_type, delivery_date')
-      .eq('id', contentId)
-      .single();
-
-    if (!dailyError && dailyMotivation) {
-      return {
-        id: dailyMotivation.id,
-        title: dailyMotivation.title || 'Daily Hit',
-        description: dailyMotivation.body || dailyMotivation.headline || 'Experience this mental training session',
-        thumbnailUrl: dailyMotivation.thumbnail_url,
-        category: 'mind',
-        type: 'daily-hit',
-      };
-    }
-
-    // Try media_hub table (other content)
+    // First try media_hub table (for soundscapes and other content)
+    // This handles soundscapes shared from Sound Lab via the media player
     const { data: mediaContent, error: mediaError } = await supabase
       .from('media_hub')
       .select('id, title, description, thumbnail_url, category')
@@ -135,6 +118,24 @@ async function getContent(contentId: string) {
         thumbnailUrl: mediaContent.thumbnail_url,
         category: mediaContent.category || 'mind',
         type: 'media-hub',
+      };
+    }
+
+    // Try motivation_content table (Daily Hit content)
+    const { data: dailyMotivation, error: dailyError } = await supabase
+      .from('motivation_content')
+      .select('id, title, headline, body, thumbnail_url, media_type, delivery_date')
+      .eq('id', contentId)
+      .single();
+
+    if (!dailyError && dailyMotivation) {
+      return {
+        id: dailyMotivation.id,
+        title: dailyMotivation.title || 'Daily Hit',
+        description: dailyMotivation.body || dailyMotivation.headline || 'Experience this mental training session',
+        thumbnailUrl: dailyMotivation.thumbnail_url,
+        category: 'mind',
+        type: 'daily-hit',
       };
     }
 
