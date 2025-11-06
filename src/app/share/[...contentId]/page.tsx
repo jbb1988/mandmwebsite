@@ -2,6 +2,9 @@ import { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import { redirect } from 'next/navigation';
 
+// Force dynamic rendering to ensure runtime access to environment variables
+export const dynamic = 'force-dynamic';
+
 interface Props {
   params: Promise<{ contentId: string[] }>;
 }
@@ -32,6 +35,7 @@ function getPresetImageUrl(presetId: string): string {
 
 // Fetch content data from Supabase
 async function getContent(contentId: string) {
+  console.log('[getContent] contentId:', contentId);
   try {
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -110,7 +114,10 @@ async function getContent(contentId: string) {
       .eq('id', contentId)
       .single();
 
+    console.log('[getContent] media_hub query:', { data: mediaContent, error: mediaError });
+
     if (!mediaError && mediaContent) {
+      console.log('[getContent] Found in media_hub:', mediaContent.title);
       return {
         id: mediaContent.id,
         title: mediaContent.title || 'Mind & Muscle Content',
@@ -139,9 +146,10 @@ async function getContent(contentId: string) {
       };
     }
 
+    console.log('[getContent] Content not found in any table');
     return null;
   } catch (error) {
-    console.error('Error fetching content:', error);
+    console.error('[getContent] Error fetching content:', error);
     return null;
   }
 }
