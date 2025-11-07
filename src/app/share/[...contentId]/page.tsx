@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { createClient } from '@supabase/supabase-js';
 import { redirect } from 'next/navigation';
+import { getSoundscapeMetadata } from '@/lib/soundscape-metadata';
 
 // Force dynamic rendering to ensure runtime access to environment variables
 export const dynamic = 'force-dynamic';
@@ -64,21 +65,34 @@ async function getContent(contentId: string) {
     if (contentId.includes('/')) {
       const [type, mixId] = contentId.split('/');
       if (type === 'sound-lab') {
-        console.log('[getContent] Sound Lab route detected, mixId:', mixId);
+        console.log(`[${timestamp}] [getContent] Sound Lab route detected, mixId:`, mixId);
         
-        // Try to fetch as a single soundscape from media_hub FIRST
-        // This handles soundscapes shared from the media player
+        // FIRST: Check static metadata (available at build time)
+        const staticMetadata = getSoundscapeMetadata(mixId);
+        if (staticMetadata) {
+          console.log(`[${timestamp}] [getContent] Found in static metadata:`, staticMetadata.title);
+          return {
+            id: mixId,
+            title: staticMetadata.title,
+            description: staticMetadata.description,
+            thumbnailUrl: staticMetadata.thumbnail_url,
+            category: 'sound-lab',
+            type: 'sound-lab',
+          };
+        }
+        
+        // SECOND: Try to fetch as a single soundscape from media_hub
+        // This handles newly added soundscapes or user-created mixes
         const { data: soundscape, error: soundscapeError } = await supabase
           .from('media_hub')
           .select('id, title, description, thumbnail_url')
           .eq('id', mixId)
           .single();
 
-        console.log('[getContent] media_hub soundscape query:', { data: soundscape, error: soundscapeError });
+        console.log(`[${timestamp}] [getContent] media_hub soundscape query:`, { data: soundscape, error: soundscapeError });
 
         if (!soundscapeError && soundscape) {
-          console.log('[getContent] Found soundscape in media_hub:', soundscape.title);
-          // Found actual soundscape - use its real thumbnail!
+          console.log(`[${timestamp}] [getContent] Found soundscape in media_hub:`, soundscape.title);
           return {
             id: mixId,
             title: soundscape.title,
@@ -129,18 +143,31 @@ async function getContent(contentId: string) {
       }
     }
 
-    // First try media_hub table (for soundscapes and other content)
-    // This handles soundscapes shared from Sound Lab via the media player
+    // Check static metadata first (for direct soundscape IDs without sound-lab prefix)
+    const staticMetadata = getSoundscapeMetadata(contentId);
+    if (staticMetadata) {
+      console.log(`[${timestamp}] [getContent] Found direct soundscape in static metadata:`, staticMetadata.title);
+      return {
+        id: contentId,
+        title: staticMetadata.title,
+        description: staticMetadata.description,
+        thumbnailUrl: staticMetadata.thumbnail_url,
+        category: 'mind',
+        type: 'media-hub',
+      };
+    }
+
+    // Try media_hub table (for soundscapes and other content)
     const { data: mediaContent, error: mediaError } = await supabase
       .from('media_hub')
       .select('id, title, description, thumbnail_url, category')
       .eq('id', contentId)
       .single();
 
-    console.log('[getContent] media_hub query:', { data: mediaContent, error: mediaError });
+    console.log(`[${timestamp}] [getContent] media_hub query:`, { data: mediaContent, error: mediaError });
 
     if (!mediaError && mediaContent) {
-      console.log('[getContent] Found in media_hub:', mediaContent.title);
+      console.log(`[${timestamp}] [getContent] Found in media_hub:`, mediaContent.title);
       return {
         id: mediaContent.id,
         title: mediaContent.title || 'Mind & Muscle Content',
@@ -169,7 +196,7 @@ async function getContent(contentId: string) {
       };
     }
 
-    console.log('[getContent] Content not found in any table');
+    console.log(`[${timestamp}] [getContent] Content not found in any source`);
     return null;
   } catch (error) {
     console.error('[getContent] Error fetching content:', error);
