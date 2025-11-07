@@ -4,7 +4,10 @@ import { redirect } from 'next/navigation';
 
 // Force dynamic rendering to ensure runtime access to environment variables
 export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
 export const revalidate = 0;
+export const fetchCache = 'force-no-store';
+export const runtime = 'nodejs';
 
 interface Props {
   params: Promise<{ contentId: string[] }>;
@@ -36,12 +39,26 @@ function getPresetImageUrl(presetId: string): string {
 
 // Fetch content data from Supabase
 async function getContent(contentId: string) {
-  console.log('[getContent] contentId:', contentId);
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] [getContent] Starting - contentId:`, contentId);
+  
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  console.log(`[${timestamp}] [getContent] Environment check:`, {
+    hasUrl: !!supabaseUrl,
+    hasKey: !!supabaseKey,
+    urlValue: supabaseUrl,
+  });
+  
+  if (!supabaseUrl || !supabaseKey) {
+    console.error(`[${timestamp}] [getContent] CRITICAL: Missing environment variables`);
+    return null;
+  }
+  
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    console.log(`[${timestamp}] [getContent] Supabase client created successfully`);
 
     // Check if this is a Sound Lab share (format: sound-lab/mixId)
     if (contentId.includes('/')) {
