@@ -5,7 +5,9 @@
       {
         "appID": "XMP4UF8X2C.com.mindandmuscle.app",
         "paths": [
-          "/share/*"
+          "/share/*",
+          "/settings",
+          "/settings/"
         ]
       }
     ]
