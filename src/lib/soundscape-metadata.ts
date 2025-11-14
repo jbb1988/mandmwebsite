@@ -117,42 +117,42 @@ export const KNOWN_SOUNDSCAPES: Record<string, SoundscapeMetadata> = {
   'a81fe4a4-869c-4b08-a954-cd0d5b35577f': {
     title: 'Session 1 - First Pitch',
     description: 'Establish your mental baseline with breath, posture, and presence. A perfect warm-up for beginners to begin building calm, focus, and confidence.',
-    thumbnail_url: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/media-thumbnails//Diamond%20Mind.png'
+    thumbnail_url: 'https://api.mindandmuscle.ai/storage/v1/object/public/media-thumbnails/diamond%20mind1.png'
   },
   'edf2494a-392f-4558-821c-4d2e1da4d190': {
     title: 'Session 2 - Finding Your Home Base',
     description: 'Learn to create a personal anchor — a steady internal space you can return to anytime, on or off the field.',
-    thumbnail_url: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/media-thumbnails//Diamond%20Mind.png'
+    thumbnail_url: 'https://api.mindandmuscle.ai/storage/v1/object/public/media-thumbnails/diamond%20mind1.png'
   },
   'ad3c7c39-1d45-4002-a19e-32fde42e50a1': {
     title: 'Session 3 - Energy Shift',
     description: 'Tune into your current energy state and learn how to shift it — whether you need to settle down or fire up.',
-    thumbnail_url: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/media-thumbnails//Diamond%20Mind.png'
+    thumbnail_url: 'https://api.mindandmuscle.ai/storage/v1/object/public/media-thumbnails/diamond%20mind1.png'
   },
   '9e49085b-f746-45fa-842c-6cff2e748243': {
     title: 'Session 4 - Reset After Mistakes',
     description: 'Mistakes happen. This session teaches you how to let go, reset, and move forward with control and clarity.',
-    thumbnail_url: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/media-thumbnails//Diamond%20Mind.png'
+    thumbnail_url: 'https://api.mindandmuscle.ai/storage/v1/object/public/media-thumbnails/diamond%20mind1.png'
   },
   'cca08fec-a113-4655-a227-968b341011dc': {
     title: 'Session 5 - Composure Under Pressure',
     description: 'Build your ability to stay calm when the stakes are high. Practice staying loose, locked in, and unshaken.',
-    thumbnail_url: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/media-thumbnails//Diamond%20Mind.png'
+    thumbnail_url: 'https://api.mindandmuscle.ai/storage/v1/object/public/media-thumbnails/diamond%20mind1.png'
   },
   'f4535116-8618-48be-b8aa-2fa873e63659': {
     title: 'Session 6 - Team Connection',
     description: 'Reconnect with your team and your role within it. Learn how calm, quiet leadership strengthens everyone around you.',
-    thumbnail_url: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/media-thumbnails//Diamond%20Mind.png'
+    thumbnail_url: 'https://api.mindandmuscle.ai/storage/v1/object/public/media-thumbnails/diamond%20mind1.png'
   },
   '568b5d27-0bfe-45f2-b975-80bf6904fc09': {
     title: 'Session 7 - Locked-In Presence',
     description: 'Sharpen your focus and return to the present moment — the only place where real performance happens.',
-    thumbnail_url: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/media-thumbnails//Diamond%20Mind.png'
+    thumbnail_url: 'https://api.mindandmuscle.ai/storage/v1/object/public/media-thumbnails/diamond%20mind1.png'
   },
   '759ba41f-47e0-4b6b-bd1b-bc4a045a6762': {
     title: 'Session 8 - Full Count',
     description: 'Bring it all together. In this final session, you\'ll practice applying your mental tools when it matters most.',
-    thumbnail_url: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/media-thumbnails//Diamond%20Mind.png'
+    thumbnail_url: 'https://api.mindandmuscle.ai/storage/v1/object/public/media-thumbnails/diamond%20mind1.png'
   },
   '24b2679e-16d4-4810-a51d-26c4fcdf18f8': {
     title: 'Sleep Optimization Soundscape',
@@ -193,6 +193,11 @@ export const KNOWN_SOUNDSCAPES: Record<string, SoundscapeMetadata> = {
     title: 'Wind Soundscape',
     description: 'Feel the gentle embrace of natural wind sounds flowing through trees and open spaces. This serene soundscape captures the peaceful whispers and gentle gusts of wind.',
     thumbnail_url: 'https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/media-thumbnails//Wind%20Soundscape.png'
+  },
+  '943836e0-a17b-4aa6-bc01-2da59959be0f': {
+    title: 'Breathwork Fundamentals',
+    description: 'Learn practical breathing techniques to control nerves, boost focus, and perform under pressure - designed specifically for young baseball athletes.',
+    thumbnail_url: 'https://api.mindandmuscle.ai/storage/v1/object/public/media-thumbnails/breathwork%20fundamentals%201.png'
   },
   '288f98b6-711b-48e3-a541-5f8308002ac5': {
     title: 'Zen Meditation Journey',
