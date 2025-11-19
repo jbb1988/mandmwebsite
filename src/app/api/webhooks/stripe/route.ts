@@ -100,14 +100,24 @@ async function sendTeamCodeEmail(email: string, coachCode: string, teamCode: str
                             ${teamCode}
                           </div>
                         </div>
+
+                        <!-- Parent Info Highlight -->
+                        <div style="background: rgba(34, 197, 94, 0.15); border: 2px solid #22c55e; padding: 12px; border-radius: 6px; margin: 16px 0;">
+                          <p style="margin: 0; font-size: 14px; font-weight: 700; color: #22c55e; text-align: center;">
+                            💚 Parents Join FREE - No Seat Required!
+                          </p>
+                          <p style="margin: 4px 0 0 0; font-size: 12px; color: #E5E7EB; text-align: center;">
+                            When they register as a parent, they get read-only access without consuming any of your ${seatCount} paid seat${seatCount === 1 ? '' : 's'}
+                          </p>
+                        </div>
+
                         <ul style="color: #E5E7EB; padding-left: 20px; font-size: 14px; margin: 12px 0; line-height: 1.8;">
-                          <li><strong style="color: #3b82f6;">Share with ${seatCount} athletes/coaches</strong></li>
-                          <li>Athletes & coaches get Premium access</li>
-                          <li>Parents get free read-only access (unlimited!)</li>
-                          <li>Adds everyone to your team</li>
+                          <li><strong style="color: #3b82f6;">Share with ${seatCount} athlete${seatCount === 1 ? '' : 's'}/coach${seatCount === 1 ? '' : 'es'}</strong> (each uses 1 seat)</li>
+                          <li><strong style="color: #22c55e;">Parents: Unlimited FREE access</strong> (monitor progress, no seat used)</li>
+                          <li>Adds everyone to your team chat and updates</li>
                         </ul>
                         <p style="color: #3b82f6; font-weight: bold; margin: 12px 0 0 0; text-align: center; font-size: 14px;">
-                          📱 Share this code with your team members
+                          📱 Share this code with your team members and parents
                         </p>
                       </div>
                     </td>

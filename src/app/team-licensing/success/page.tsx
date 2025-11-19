@@ -172,10 +172,10 @@ function SuccessContent() {
                   ② TEAM MEMBER CODE (Share with Team)
                 </h3>
                 <p className="text-text-secondary text-sm mb-4">
-                  Share this code with your {seatCount} athletes and parents. They'll use this to join your team. <span className="font-semibold text-white">Parents get free access!</span>
+                  Share this code with your {seatCount} athlete{seatCount === 1 ? '' : 's'} and coaches. Parents can also use this code to join for FREE monitoring access!
                 </p>
-                
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-3">
                   <div className="flex-1 p-4 bg-space-black/50 border-2 border-dashed border-neon-cortex-blue/50 rounded-lg">
                     <div className="text-xl md:text-2xl font-black text-neon-cortex-blue text-center tracking-wider font-mono">
                       {teamCode}
@@ -199,12 +199,22 @@ function SuccessContent() {
                   </button>
                 </div>
 
-                <div className="mt-3 p-3 bg-neon-cortex-blue/10 border border-neon-cortex-blue/30 rounded-lg">
+                {/* Parent Info Highlight */}
+                <div className="mb-3 p-3 bg-neon-cortex-green/15 border-2 border-neon-cortex-green/40 rounded-lg">
+                  <p className="text-sm text-neon-cortex-green font-bold text-center mb-1">
+                    💚 Parents Join FREE - No License Seat Required!
+                  </p>
+                  <p className="text-xs text-gray-300 text-center">
+                    When parents register using this code, they get read-only monitoring access without consuming any of your {seatCount} paid seat{seatCount === 1 ? '' : 's'}
+                  </p>
+                </div>
+
+                <div className="p-3 bg-neon-cortex-blue/10 border border-neon-cortex-blue/30 rounded-lg space-y-1">
                   <p className="text-xs text-neon-cortex-blue font-semibold">
                     ✓ Athletes/Coaches: Premium access (uses 1 seat each)
                   </p>
-                  <p className="text-xs text-neon-cortex-blue font-semibold">
-                    ✓ Parents: Free read-only access (no seat used!)
+                  <p className="text-xs text-neon-cortex-green font-semibold">
+                    ✓ Parents: Unlimited FREE read-only access (no seat used!)
                   </p>
                 </div>
               </div>
