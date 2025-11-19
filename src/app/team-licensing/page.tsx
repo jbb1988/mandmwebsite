@@ -91,8 +91,14 @@ function TeamLicensingContent() {
     setIsLoading(true);
 
     try {
-      // Get Tolt referral code from URL parameter (e.g., ?ref=rain)
-      const toltReferral = searchParams.get('ref');
+      // Get Tolt referral code from URL parameter OR sessionStorage
+      // This allows referrals to work even if user lands on home page first
+      let toltReferral = searchParams.get('ref');
+      if (!toltReferral && typeof window !== 'undefined') {
+        toltReferral = sessionStorage.getItem('tolt_referral_code');
+      }
+
+      console.log('Tolt referral code for checkout:', toltReferral);
 
       // Create Stripe checkout session
       const response = await fetch('/api/create-checkout-session', {

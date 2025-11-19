@@ -3,8 +3,10 @@ import './globals.css';
 import Navigation from '@/components/Navigation';
 import { Footer } from '@/components/Footer';
 import { ToltScript } from '@/components/ToltScript';
+import { ReferralTracker } from '@/components/ReferralTracker';
 import { OrganizationSchema, WebSiteSchema, SoftwareApplicationSchema } from '@/components/seo/StructuredData';
 import { generateMetadata } from '@/config/seo';
+import { Suspense } from 'react';
 
 export const metadata: Metadata = {
   ...generateMetadata('home'),
@@ -59,6 +61,9 @@ export default function RootLayout({
       </head>
       <body className="antialiased">
         <ToltScript />
+        <Suspense fallback={null}>
+          <ReferralTracker />
+        </Suspense>
         <div className="animated-bg min-h-screen flex flex-col">
           <Navigation />
           <main className="flex-grow">{children}</main>
