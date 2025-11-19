@@ -32,22 +32,21 @@ export async function POST(request: Request) {
     }
 
     // Notify Tolt of the conversion
-    const response = await fetch('https://api.tolt.io/v1/conversions', {
+    const response = await fetch('https://api.tolt.com/v1/transactions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${toltApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        referral_code: referralCode,
-        amount: amount, // Amount in dollars (e.g., 1285.20)
+        amount: Math.round(amount * 100), // Amount in cents
         customer_email: customerEmail,
-        external_id: subscriptionId, // Track by subscription ID
-        metadata: {
-          subscription_id: subscriptionId,
-          is_renewal: isRenewal || false,
-          timestamp: new Date().toISOString(),
-        },
+        billing_type: 'subscription',
+        charge_id: subscriptionId,
+        product_name: 'Mind & Muscle Team License',
+        source: 'stripe',
+        interval: 'month',
+        partner_referral_code: referralCode, // Partner slug like "rain"
       }),
     });
 
