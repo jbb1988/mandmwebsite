@@ -344,30 +344,12 @@ export async function POST(request: NextRequest) {
       // Send email with both codes
       await sendTeamCodeEmail(customerEmail, coachCode, teamCode, seatCount);
 
-      // Notify Tolt of conversion (for partner commission tracking)
+      // Tolt tracking: Since Stripe is connected to Tolt, they automatically
+      // track conversions via their webhook integration. The tolt_referral
+      // in session.metadata is all they need. No manual API call required.
       if (toltReferral) {
-        try {
-          const totalAmount = (session.amount_total || 0) / 100; // Convert cents to dollars
-
-          await fetch(`${request.url.split('/api')[0]}/api/webhooks/tolt-conversion`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              referralCode: toltReferral,
-              amount: totalAmount,
-              customerEmail: customerEmail,
-              subscriptionId: session.subscription as string,
-              isRenewal: false,
-            }),
-          });
-
-          console.log('Tolt conversion notification sent for:', toltReferral);
-        } catch (error) {
-          console.error('Failed to notify Tolt:', error);
-          // Don't throw - we don't want Tolt failures to break checkout
-        }
+        console.log('Tolt referral tracked in Stripe metadata:', toltReferral);
+        console.log('Tolt will automatically track this conversion via Stripe webhook');
       }
 
       break;
@@ -395,50 +377,10 @@ export async function POST(request: NextRequest) {
           console.error('Error updating team license status:', updateError);
         }
 
-        // Notify Tolt of renewal commission (recurring revenue)
-        // Get the original tolt_referral from team metadata or subscription metadata
-        let toltReferral: string | null = null;
-
-        if (teamData?.metadata && typeof teamData.metadata === 'object') {
-          const metadata = teamData.metadata as { tolt_referral?: string };
-          toltReferral = metadata.tolt_referral || null;
-        }
-
-        // If not in team metadata, fetch from subscription
-        if (!toltReferral && typeof invoice.subscription === 'string') {
-          try {
-            const subscription = await stripe.subscriptions.retrieve(invoice.subscription);
-            toltReferral = subscription.metadata?.tolt_referral || null;
-          } catch (error) {
-            console.error('Error fetching subscription:', error);
-          }
-        }
-
-        // Send renewal commission to Tolt
-        if (toltReferral) {
-          try {
-            const totalAmount = (invoice.amount_paid || 0) / 100; // Convert cents to dollars
-
-            await fetch(`${request.url.split('/api')[0]}/api/webhooks/tolt-conversion`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                referralCode: toltReferral,
-                amount: totalAmount,
-                customerEmail: invoice.customer_email || teamData?.admin_email || 'unknown@email.com',
-                subscriptionId: invoice.subscription,
-                isRenewal: true, // This is a renewal, not initial purchase
-              }),
-            });
-
-            console.log('Tolt renewal commission sent for:', toltReferral);
-          } catch (error) {
-            console.error('Failed to notify Tolt of renewal:', error);
-            // Don't throw - we don't want Tolt failures to break webhook
-          }
-        }
+        // Tolt tracking for renewals: Tolt automatically tracks subscription
+        // renewals via their Stripe webhook integration. No manual API call needed.
+        // The tolt_referral in the subscription metadata is sufficient.
+        console.log('Subscription renewal - Tolt will track via Stripe webhook');
       }
       break;
     }
