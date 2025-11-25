@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 
 // Force dynamic rendering - don't try to statically generate this route
@@ -9,7 +9,7 @@ export const runtime = 'nodejs';
 
 // Create finder fee record and send admin notification email
 async function createFinderFeeAndNotify(
-  supabase: ReturnType<typeof createClient>,
+  supabase: SupabaseClient,
   finderCode: string,
   referredOrgEmail: string,
   stripeSessionId: string,
