@@ -106,6 +106,16 @@ function TeamLicensingContent() {
 
       console.log('Tolt referral for checkout:', toltReferral);
 
+      // Get finder code from URL or sessionStorage (for finder fee program)
+      let finderCode = null;
+      if (typeof window !== 'undefined') {
+        finderCode = searchParams.get('finder') || sessionStorage.getItem('finder_code');
+      }
+
+      if (finderCode) {
+        console.log('Finder code for checkout:', finderCode);
+      }
+
       // Create Stripe checkout session
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
@@ -117,6 +127,7 @@ function TeamLicensingContent() {
           email,
           testMode,
           ...(toltReferral && { toltReferral }),
+          ...(finderCode && { finderCode }),
         }),
       });
 

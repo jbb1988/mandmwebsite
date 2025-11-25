@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { seatCount, email, testMode, toltReferral } = validationResult.data;
+    const { seatCount, email, testMode, toltReferral, finderCode } = validationResult.data;
 
     // TEST MODE: Use $1.00 per seat for testing
     let pricePerSeat: number;
@@ -181,6 +181,7 @@ export async function POST(request: NextRequest) {
         coach_code: coachCode,
         team_code: teamCode,
         ...(toltReferral && { tolt_referral: toltReferral }),
+        ...(finderCode && { finder_code: finderCode }),
       },
       subscription_data: {
         metadata: {
@@ -190,6 +191,7 @@ export async function POST(request: NextRequest) {
           coach_code: coachCode,
           team_code: teamCode,
           ...(toltReferral && { tolt_referral: toltReferral }),
+          ...(finderCode && { finder_code: finderCode }),
         },
       },
     });

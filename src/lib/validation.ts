@@ -73,6 +73,7 @@ export const checkoutSessionSchema = z.object({
   email: emailSchema,
   testMode: z.boolean().optional(),
   toltReferral: z.string().max(100).trim().optional(),
+  finderCode: z.string().max(100).trim().optional(),
 });
 
 // Add team seats schema

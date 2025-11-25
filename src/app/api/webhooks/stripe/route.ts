@@ -7,6 +7,164 @@ import { Resend } from 'resend';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Create finder fee record and send admin notification email
+async function createFinderFeeAndNotify(
+  supabase: ReturnType<typeof createClient>,
+  finderCode: string,
+  referredOrgEmail: string,
+  stripeSessionId: string,
+  purchaseAmount: number
+) {
+  const resend = new Resend(process.env.RESEND_API_KEY!);
+  const feeAmount = purchaseAmount * 0.10; // 10% finder fee
+
+  try {
+    // Check if finder fee already exists for this organization (first purchase only)
+    const { data: existingFee } = await supabase
+      .from('finder_fees')
+      .select('id')
+      .eq('referred_org_email', referredOrgEmail)
+      .single();
+
+    if (existingFee) {
+      console.log('Finder fee already exists for org:', referredOrgEmail);
+      return;
+    }
+
+    // Create pending finder fee record
+    const { data: fee, error } = await supabase
+      .from('finder_fees')
+      .insert({
+        finder_code: finderCode,
+        referred_org_email: referredOrgEmail,
+        stripe_session_id: stripeSessionId,
+        purchase_amount: purchaseAmount,
+        fee_amount: feeAmount,
+        status: 'pending',
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating finder fee record:', error);
+      return;
+    }
+
+    console.log('Finder fee record created:', fee.id, 'Amount:', feeAmount);
+
+    // Send admin notification email with approve/reject buttons
+    const baseUrl = 'https://mindandmuscle.ai/api/finder-fee-action';
+
+    await resend.emails.send({
+      from: 'Mind and Muscle <noreply@mindandmuscle.ai>',
+      to: process.env.ADMIN_EMAIL || 'admin@mindandmuscle.ai',
+      subject: `Finder Fee: ${finderCode} → $${feeAmount.toFixed(2)}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background-color: #f5f5f5;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 40px 20px;">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+
+                  <!-- Header -->
+                  <tr>
+                    <td style="background: linear-gradient(135deg, #1a1f35 0%, #2a3148 100%); padding: 30px; text-align: center;">
+                      <h1 style="margin: 0; font-size: 24px; color: #ffffff;">
+                        💰 Finder Fee Pending Approval
+                      </h1>
+                    </td>
+                  </tr>
+
+                  <!-- Details Table -->
+                  <tr>
+                    <td style="padding: 30px;">
+                      <table width="100%" cellpadding="12" cellspacing="0" style="border-collapse: collapse;">
+                        <tr style="background: #f8fafc;">
+                          <td style="border: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Finder (Connector)</td>
+                          <td style="border: 1px solid #e2e8f0; color: #1e293b; font-family: monospace; font-size: 16px;">${finderCode}</td>
+                        </tr>
+                        <tr>
+                          <td style="border: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Organization Email</td>
+                          <td style="border: 1px solid #e2e8f0; color: #1e293b;">${referredOrgEmail}</td>
+                        </tr>
+                        <tr style="background: #f8fafc;">
+                          <td style="border: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Purchase Amount</td>
+                          <td style="border: 1px solid #e2e8f0; color: #1e293b;">$${purchaseAmount.toFixed(2)}</td>
+                        </tr>
+                        <tr>
+                          <td style="border: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Finder Fee (10%)</td>
+                          <td style="border: 1px solid #e2e8f0; color: #16a34a; font-weight: 700; font-size: 18px;">$${feeAmount.toFixed(2)}</td>
+                        </tr>
+                        <tr style="background: #f8fafc;">
+                          <td style="border: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Stripe Session</td>
+                          <td style="border: 1px solid #e2e8f0; color: #64748b; font-size: 12px; font-family: monospace;">${stripeSessionId}</td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+
+                  <!-- Action Buttons -->
+                  <tr>
+                    <td style="padding: 0 30px 30px; text-align: center;">
+                      <p style="margin: 0 0 20px; color: #64748b; font-size: 14px;">
+                        Review and take action:
+                      </p>
+                      <a href="${baseUrl}?token=${fee.approve_token}&action=approve"
+                         style="display: inline-block; background: #16a34a; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; margin-right: 12px;">
+                        ✓ APPROVE
+                      </a>
+                      <a href="${baseUrl}?token=${fee.reject_token}&action=reject"
+                         style="display: inline-block; background: #dc2626; color: white; padding: 14px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
+                        ✗ REJECT
+                      </a>
+                    </td>
+                  </tr>
+
+                  <!-- Instructions -->
+                  <tr>
+                    <td style="padding: 0 30px 30px;">
+                      <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; border-radius: 4px;">
+                        <p style="margin: 0 0 8px; font-weight: 600; color: #92400e;">After approving:</p>
+                        <ol style="margin: 0; padding-left: 20px; color: #78350f; font-size: 14px; line-height: 1.6;">
+                          <li>Pay finder $${feeAmount.toFixed(2)} via PayPal or bank transfer</li>
+                          <li>Click the "Mark Paid" button in the confirmation email</li>
+                          <li>Finder will be automatically notified</li>
+                        </ol>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Footer -->
+                  <tr>
+                    <td style="background: #f8fafc; padding: 20px 30px; text-align: center; border-top: 1px solid #e2e8f0;">
+                      <p style="margin: 0; font-size: 12px; color: #94a3b8;">
+                        Finder Fee System • Mind & Muscle
+                      </p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `,
+    });
+
+    console.log('Finder fee admin notification sent');
+  } catch (error) {
+    console.error('Error in createFinderFeeAndNotify:', error);
+    // Don't throw - we don't want finder fee issues to break the main webhook flow
+  }
+}
+
 // Send team code email
 async function sendTeamCodeEmail(email: string, coachCode: string, teamCode: string, seatCount: number) {
   try {
@@ -350,6 +508,25 @@ export async function POST(request: NextRequest) {
       if (toltReferral) {
         console.log('Tolt referral tracked in Stripe metadata:', toltReferral);
         console.log('Tolt will automatically track this conversion via Stripe webhook');
+      }
+
+      // Finder fee tracking: If a finder code is present, create a pending finder fee
+      // This is separate from Tolt's recurring commission - it's a one-time 10% fee
+      const finderCode = session.metadata?.finder_code;
+      if (finderCode) {
+        const purchaseAmount = session.amount_total ? session.amount_total / 100 : 0;
+        console.log('Finder code detected:', finderCode, 'Purchase amount:', purchaseAmount);
+
+        // Create finder fee record and send admin notification
+        // Note: If both finder and tolt_referral exist, finder takes priority (one-time fee)
+        // The tolt_referral won't earn recurring commission on this purchase
+        await createFinderFeeAndNotify(
+          supabase,
+          finderCode,
+          customerEmail,
+          session.id,
+          purchaseAmount
+        );
       }
 
       break;
