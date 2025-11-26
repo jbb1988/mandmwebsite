@@ -292,7 +292,7 @@ export default function HomePage() {
                 staggerDelay={0.05}
               />
               <TextReveal
-                text="Dominate the Game."
+                text="Dominate the Game.™"
                 as="h2"
                 className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight leading-relaxed text-solar-surge-orange block"
                 delay={0.4}
@@ -1860,6 +1860,29 @@ export default function HomePage() {
           </FadeInWhenVisible>
         </div>
       </section>
+
+      {/* Footer with Trademark Notice */}
+      <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-white/10">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Image
+              src="/assets/images/logo.png"
+              alt="Mind & Muscle Logo"
+              width={32}
+              height={32}
+              className="w-8 h-8"
+            />
+            <span className="text-lg font-semibold text-white/90">Mind & Muscle™</span>
+          </div>
+          <p className="text-sm text-white/50 italic mb-4">
+            &ldquo;Discipline the Mind. Dominate the Game.&rdquo;™
+          </p>
+          <p className="text-xs text-white/30 leading-relaxed">
+            © {new Date().getFullYear()} Mind & Muscle Performance. All rights reserved.<br />
+            Mind & Muscle and &ldquo;Discipline the Mind. Dominate the Game.&rdquo; are trademarks of Mind & Muscle Performance.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
