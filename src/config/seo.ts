@@ -192,11 +192,6 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     noindex: true,
   },
 
-  'admin-pricing-calculator': {
-    title: 'Admin: Pricing Calculator | Mind & Muscle',
-    description: 'Admin tool for calculating team licensing pricing.',
-    noindex: true,
-  },
 };
 
 /**

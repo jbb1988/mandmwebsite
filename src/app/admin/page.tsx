@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Shield, MessageSquare, Calculator, Search, LogOut } from 'lucide-react';
+import { Shield, MessageSquare, Search, LogOut } from 'lucide-react';
 import { LiquidGlass } from '@/components/LiquidGlass';
 
 interface AdminTool {
@@ -27,13 +27,6 @@ const adminTools: AdminTool[] = [
     href: '/admin/team-lookup',
     icon: Search,
     color: 'orange',
-  },
-  {
-    title: 'Pricing Calculator',
-    description: 'Model profitability scenarios and export reports',
-    href: '/admin/pricing-calculator',
-    icon: Calculator,
-    color: 'neutral',
   },
 ];
 
