@@ -15,7 +15,6 @@ function TeamLicensingContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [showCanceledMessage, setShowCanceledMessage] = useState(false);
-  const [testMode, setTestMode] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
 
   useEffect(() => {
@@ -27,23 +26,8 @@ function TeamLicensingContent() {
   }, [searchParams]);
 
   // Calculate pricing based on seat count
-  const calculatePricing = (seats: number, isTestMode: boolean) => {
-    if (isTestMode) {
-      // Test mode: $1.00 total (not per seat)
-      const pricePerSeat = 1.00 / seats;
-      return {
-        pricePerSeat: pricePerSeat.toFixed(4),
-        originalPricePerSeat: pricePerSeat.toFixed(4),
-        totalPrice: '1.00',
-        originalTotalPrice: '1.00',
-        individualTotal: '1.00',
-        savings: '0.00',
-        discountLabel: 'TEST MODE',
-        discountPercent: 0,
-      };
-    }
-
-    // Production mode: 6-month pricing
+  const calculatePricing = (seats: number) => {
+    // 6-month pricing
     const basePrice = 79; // 6-month price
     const originalPrice = 79; // No "original" price for 6-month
     let discount = 0;
@@ -80,7 +64,7 @@ function TeamLicensingContent() {
     };
   };
 
-  const pricing = calculatePricing(seatCount, testMode);
+  const pricing = calculatePricing(seatCount);
 
   const handlePurchase = async () => {
     if (!email || !email.includes('@')) {
@@ -125,7 +109,6 @@ function TeamLicensingContent() {
         body: JSON.stringify({
           seatCount,
           email,
-          testMode,
           ...(toltReferral && { toltReferral }),
           ...(finderCode && { finderCode }),
         }),
@@ -394,29 +377,6 @@ function TeamLicensingContent() {
                   </svg>
                   We'll send your team access code to this email address
                 </p>
-              </div>
-
-              {/* Test Mode Toggle */}
-              <div className="mb-6 p-4 rounded-xl border border-white/10 bg-background-secondary/30">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={testMode}
-                    onChange={(e) => setTestMode(e.target.checked)}
-                    className="w-5 h-5 rounded border-white/20 bg-white/10 text-solar-surge-orange focus:ring-2 focus:ring-solar-surge-orange/50"
-                  />
-                  <div>
-                    <span className="text-sm font-medium text-text-primary">Test Mode ($1 total)</span>
-                    <p className="text-xs text-text-secondary/70">For testing the checkout flow - only $1.00 total charge</p>
-                  </div>
-                </label>
-                {testMode && (
-                  <div className="mt-3 p-3 rounded-lg bg-solar-surge-orange/10 border border-solar-surge-orange/20">
-                    <p className="text-xs text-solar-surge-orange font-medium">
-                      ⚠️ Test Mode Active: You'll be charged only $1.00 total instead of the full price
-                    </p>
-                  </div>
-                )}
               </div>
 
               {/* CTA Button */}
