@@ -75,10 +75,19 @@ export async function POST(request: NextRequest) {
 
     // Search for subscription by coach code in metadata
     // Note: 'teamCode' variable contains the coach code input by the user
-    const subscriptions = await stripe.subscriptions.search({
+    let subscriptions = await stripe.subscriptions.search({
       query: `metadata['coach_code']:'${teamCode}' AND status:'active'`,
       limit: 1,
     });
+
+    // Backwards compatibility: older subscriptions may have stored the code as 'team_code'
+    // This handles cases where coach codes were previously stored under 'team_code' key
+    if (subscriptions.data.length === 0) {
+      subscriptions = await stripe.subscriptions.search({
+        query: `metadata['team_code']:'${teamCode}' AND status:'active'`,
+        limit: 1,
+      });
+    }
 
     if (subscriptions.data.length === 0) {
       return NextResponse.json(
