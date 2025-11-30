@@ -185,6 +185,10 @@ export default function PartnerProgramPage() {
       answer: 'Not at all! We welcome coaches, athletic directors, sports bloggers, influencers, parents, and anyone with connections to the youth sports community. If you know people who coach teams, you\'re qualified.'
     },
     {
+      question: 'What if I sign up but don\'t actively promote?',
+      answer: 'While there\'s no minimum referral requirement, we reserve the right to remove partnerships that show no activity for extended periods (6+ months). The program is designed for active promoters who genuinely believe in Mind & Muscle and share it with their networks.'
+    },
+    {
       question: 'How do payouts work?',
       answer: 'You earn 10% commission each time a referral pays for a subscription. Commissions are held for 60 days after payment clears (standard industry practice to protect against chargebacks), then paid automatically via PayPal. There\'s a $50 minimum threshold. Example: Referral subscribes January 1st = commission paid March 1st. If they renew next year, you earn another commission. Your dashboard shows real-time earnings and tracks every referral.'
     },

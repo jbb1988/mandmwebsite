@@ -122,6 +122,9 @@ export default function PartnerTermsPage() {
               <p>
                 <strong className="text-white">Prohibited Activities:</strong> Self-referrals, paid advertising using trademarked terms, spam, or any deceptive marketing practices are strictly prohibited.
               </p>
+              <p>
+                <strong className="text-white">Active Participation Requirement:</strong> Partners are expected to actively promote Mind & Muscle. Mind & Muscle reserves the right to terminate partnerships that remain inactive (no referrals within 6 months) or show no promotional activity. This ensures the program rewards genuine advocates rather than passive participants.
+              </p>
             </div>
           </LiquidGlass>
 
