@@ -461,7 +461,7 @@ export default function FAQPage() {
         },
         {
           question: 'My videos won\'t upload - help!',
-          answer: 'Video upload issues are usually related to:\n\n1. File Size: Videos over 200MB may timeout. Trim your video to 10-15 seconds of your swing.\n2. Internet Speed: Use wifi for best results. Cellular uploads can be slow.\n3. Format: Use MP4 or MOV. Other formats may not be supported.\n4. Permissions: Make sure the app has permission to access your camera and photo library (Settings → Mind & Muscle → Photos).\n\nIf issues persist, try recording a new video directly in the Swing Lab camera.'
+          answer: 'Video upload issues are usually related to:\n\n1. File Size: Videos over 25MB may timeout. Trim your video to 10-15 seconds of your swing.\n2. Internet Speed: Use wifi for best results. Cellular uploads can be slow.\n3. Format: Use MP4 or MOV. Other formats may not be supported.\n4. Permissions: Make sure the app has permission to access your camera and photo library (Settings → Mind & Muscle → Photos).\n\nIf issues persist, try recording a new video directly in the Swing Lab camera.'
         },
         {
           question: 'How do I update the app?',
