@@ -388,15 +388,20 @@ async function sendPromoCodeNotification(
   totalSaved: number,
   utmSource?: string,
   utmMedium?: string,
-  utmCampaign?: string
+  utmCampaign?: string,
+  organizationName?: string,
+  numberOfTeams?: number
 ) {
   try {
     const resend = new Resend(process.env.RESEND_API_KEY!);
-    
+
+    const isMultiTeam = organizationName && numberOfTeams && numberOfTeams > 1;
+    const subjectPrefix = isMultiTeam ? `🏢 ${organizationName} - ` : '';
+
     await resend.emails.send({
       from: 'Mind and Muscle <noreply@mindandmuscle.ai>',
       to: process.env.ADMIN_EMAIL || 'marketing@mindandmuscle.ai',
-      subject: `🎉 Promo Code Used: ${promoCode} - ${discountPercent}% off ($${totalSaved.toFixed(2)} saved)`,
+      subject: `🎉 ${subjectPrefix}Promo Code Used: ${promoCode} - ${discountPercent}% off ($${totalSaved.toFixed(2)} saved)`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -416,6 +421,11 @@ async function sendPromoCodeNotification(
                       <h1 style="margin: 0; font-size: 24px; color: #ffffff;">
                         🎉 Promo Code Used!
                       </h1>
+                      ${isMultiTeam ? `
+                      <p style="margin: 8px 0 0; font-size: 16px; color: #ffffff; opacity: 0.9;">
+                        🏢 ${organizationName} (${numberOfTeams} teams)
+                      </p>
+                      ` : ''}
                     </td>
                   </tr>
 
@@ -430,10 +440,16 @@ async function sendPromoCodeNotification(
                     </td>
                   </tr>
 
-                  <!-- Details Table -->}
+                  <!-- Details Table -->
                   <tr>
                     <td style="padding: 0 30px 30px;">
                       <table width="100%" cellpadding="12" cellspacing="0" style="border-collapse: collapse;">
+                        ${isMultiTeam ? `
+                        <tr style="background: #f0fdf4;">
+                          <td style="border: 1px solid #e2e8f0; font-weight: 600; color: #166534;">Organization</td>
+                          <td style="border: 1px solid #e2e8f0; color: #166534; font-weight: 700;">${organizationName} (${numberOfTeams} teams)</td>
+                        </tr>
+                        ` : ''}
                         <tr style="background: #f8fafc;">
                           <td style="border: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Customer Email</td>
                           <td style="border: 1px solid #e2e8f0; color: #1e293b;">${customerEmail}</td>
@@ -988,7 +1004,9 @@ export async function POST(request: NextRequest) {
                 totalSaved,
                 session.metadata?.utm_source,
                 session.metadata?.utm_medium,
-                session.metadata?.utm_campaign
+                session.metadata?.utm_campaign,
+                organizationName,
+                numberOfTeams
               );
             }
           } catch (error) {
