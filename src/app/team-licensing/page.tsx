@@ -24,6 +24,12 @@ function TeamLicensingContent() {
     error?: string;
   } | null>(null);
   const [isValidatingPromo, setIsValidatingPromo] = useState(false);
+  
+  // Multi-team organization state
+  const [isMultiTeamOrg, setIsMultiTeamOrg] = useState(false);
+  const [organizationName, setOrganizationName] = useState('');
+  const [numberOfTeams, setNumberOfTeams] = useState(2);
+  const [seatsPerTeam, setSeatsPerTeam] = useState<number[]>([0, 0]); // Array of seats for each team
 
   useEffect(() => {
     if (searchParams.get('canceled') === 'true') {
@@ -134,6 +140,22 @@ function TeamLicensingContent() {
       return;
     }
 
+    // Validate multi-team org fields if enabled
+    if (isMultiTeamOrg) {
+      if (!organizationName.trim()) {
+        alert('Please enter your organization name');
+        return;
+      }
+      if (numberOfTeams < 2) {
+        alert('Multi-team organizations must have at least 2 teams');
+        return;
+      }
+      if (seatCount < numberOfTeams * 2) {
+        alert(`With ${numberOfTeams} teams, you need at least ${numberOfTeams * 2} seats (minimum 2 per team)`);
+        return;
+      }
+    }
+
     setIsLoading(true);
 
     try {
@@ -174,6 +196,12 @@ function TeamLicensingContent() {
           ...(toltReferral && { toltReferral }),
           ...(finderCode && { finderCode }),
           ...(promoValidation?.valid && promoCode && { promoCode: promoCode.toUpperCase() }),
+          ...(isMultiTeamOrg && {
+            isMultiTeamOrg: true,
+            organizationName: organizationName.trim(),
+            numberOfTeams,
+            seatsPerTeam,
+          }),
         }),
       });
 
@@ -283,12 +311,192 @@ function TeamLicensingContent() {
         </LiquidGlass>
       </div>
 
+      {/* Multi-Team Organization Toggle */}
+      <div className="max-w-5xl mx-auto mb-12">
+        <LiquidGlass variant="neutral" className="border-2 border-purple-500/40">
+          <div className="p-6">
+            <div className="flex items-start gap-4">
+              <Users className="w-6 h-6 text-purple-400 flex-shrink-0 mt-1" />
+              <div className="flex-1">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-bold text-lg">Multi-Team Organization?</h3>
+                  <button
+                    onClick={() => {
+                      setIsMultiTeamOrg(!isMultiTeamOrg);
+                      if (!isMultiTeamOrg) {
+                        // Reset teams to minimum when enabling
+                        if (numberOfTeams < 2) setNumberOfTeams(2);
+                      }
+                    }}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                      isMultiTeamOrg ? 'bg-purple-500' : 'bg-white/20'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                        isMultiTeamOrg ? 'translate-x-6' : 'translate-x-1'
+                      }`}
+                    />
+                  </button>
+                </div>
+                <p className="text-sm text-text-secondary mb-4">
+                  Managing 200+ users across multiple teams? Get automatic code generation for each team, centralized billing, and organization-level management.
+                </p>
+                
+                {isMultiTeamOrg && (
+                  <div className="space-y-4 mt-4 pt-4 border-t border-white/10">
+                    <div>
+                      <label htmlFor="organizationName" className="block text-sm font-semibold text-white mb-2">
+                        Organization Name <span className="text-solar-surge-orange">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        id="organizationName"
+                        value={organizationName}
+                        onChange={(e) => setOrganizationName(e.target.value)}
+                        placeholder="e.g., XYZ Travel Baseball Association"
+                        required={isMultiTeamOrg}
+                        className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/10 backdrop-blur-md text-white placeholder:text-text-secondary/50 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label htmlFor="numberOfTeams" className="block text-sm font-semibold text-white mb-2">
+                        Number of Teams <span className="text-solar-surge-orange">*</span>
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => {
+                            const newCount = Math.max(2, numberOfTeams - 1);
+                            setNumberOfTeams(newCount);
+                            setSeatsPerTeam(Array(newCount).fill(0).map((_, i) => seatsPerTeam[i] || 0));
+                          }}
+                          className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center font-bold"
+                        >
+                          -
+                        </button>
+                        <input
+                          type="number"
+                          id="numberOfTeams"
+                          min="2"
+                          max="50"
+                          value={numberOfTeams}
+                          onChange={(e) => {
+                            const newCount = Math.max(2, Math.min(50, parseInt(e.target.value) || 2));
+                            setNumberOfTeams(newCount);
+                            setSeatsPerTeam(Array(newCount).fill(0).map((_, i) => seatsPerTeam[i] || 0));
+                          }}
+                          required={isMultiTeamOrg}
+                          className="w-20 h-10 text-center text-2xl font-black bg-white/10 border border-white/20 rounded-lg focus:border-purple-500 focus:outline-none"
+                        />
+                        <button
+                          onClick={() => {
+                            const newCount = Math.min(50, numberOfTeams + 1);
+                            setNumberOfTeams(newCount);
+                            setSeatsPerTeam(Array(newCount).fill(0).map((_, i) => seatsPerTeam[i] || 0));
+                          }}
+                          className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center font-bold"
+                        >
+                          +
+                        </button>
+                        <span className="text-sm text-text-secondary">
+                          (2-50 teams)
+                        </span>
+                      </div>
+                      <p className="text-xs text-purple-400 mt-2">
+                        Each team gets its own COACH code + TEAM code automatically
+                      </p>
+                    </div>
+
+                    {/* Seat Allocation Per Team */}
+                    <div>
+                      <label className="block text-sm font-semibold text-white mb-3">
+                        Seats Per Team <span className="text-solar-surge-orange">*</span>
+                      </label>
+                      <div className="space-y-3">
+                        {Array(numberOfTeams).fill(0).map((_, index) => (
+                          <div key={index} className="flex items-center gap-3">
+                            <span className="text-sm font-semibold text-purple-400 w-20">Team {index + 1}:</span>
+                            <input
+                              type="number"
+                              min="1"
+                              max={seatCount}
+                              value={seatsPerTeam[index] || 0}
+                              onChange={(e) => {
+                                const newSeats = [...seatsPerTeam];
+                                newSeats[index] = Math.max(1, Math.min(seatCount, parseInt(e.target.value) || 0));
+                                setSeatsPerTeam(newSeats);
+                              }}
+                              className="flex-1 px-4 py-2 rounded-lg bg-white/10 border border-white/20 text-white focus:border-purple-500 focus:outline-none"
+                              placeholder="Seats"
+                            />
+                            <span className="text-xs text-text-secondary w-16">seats</span>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {/* Seat Allocation Summary */}
+                      <div className="mt-4 p-3 rounded-lg bg-purple-500/10 border border-purple-500/30">
+                        <div className="flex items-center justify-between text-sm mb-2">
+                          <span className="text-text-secondary">Total allocated:</span>
+                          <span className={`font-bold ${
+                            seatsPerTeam.reduce((sum, seats) => sum + seats, 0) === seatCount
+                              ? 'text-neon-cortex-green'
+                              : seatsPerTeam.reduce((sum, seats) => sum + seats, 0) > seatCount
+                              ? 'text-red-400'
+                              : 'text-solar-surge-orange'
+                          }`}>
+                            {seatsPerTeam.reduce((sum, seats) => sum + seats, 0)} / {seatCount}
+                          </span>
+                        </div>
+                        {seatsPerTeam.reduce((sum, seats) => sum + seats, 0) !== seatCount && (
+                          <p className="text-xs text-solar-surge-orange">
+                            {seatsPerTeam.reduce((sum, seats) => sum + seats, 0) > seatCount
+                              ? `⚠️ You've allocated ${seatsPerTeam.reduce((sum, seats) => sum + seats, 0) - seatCount} too many seats`
+                              : `ℹ️ You have ${seatCount - seatsPerTeam.reduce((sum, seats) => sum + seats, 0)} unallocated seats`
+                            }
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="bg-purple-500/10 rounded-lg p-4 border border-purple-500/30">
+                      <p className="text-sm font-semibold text-purple-400 mb-2">
+                        📋 What You'll Receive:
+                      </p>
+                      <ul className="space-y-1 text-xs text-text-secondary">
+                        <li className="flex items-start gap-2">
+                          <Check className="w-3 h-3 text-purple-400 flex-shrink-0 mt-0.5" />
+                          <span>{numberOfTeams} COACH codes (one per team, single-use)</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <Check className="w-3 h-3 text-purple-400 flex-shrink-0 mt-0.5" />
+                          <span>{numberOfTeams} TEAM codes (one per team, custom seat limits)</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <Check className="w-3 h-3 text-purple-400 flex-shrink-0 mt-0.5" />
+                          <span>One email with all codes organized by team</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <Check className="w-3 h-3 text-purple-400 flex-shrink-0 mt-0.5" />
+                          <span>Custom allocation: {seatsPerTeam.map((seats, i) => `Team ${i+1}: ${seats}`).join(', ')}</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </LiquidGlass>
+      </div>
+
       {/* Seat Calculator Section */}
       <div className="max-w-5xl mx-auto mb-32">
         {/* Best Value Badge - Above Card */}
         <div className="flex justify-center mb-6">
           <div className="px-6 py-2 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange rounded-full text-sm font-bold shadow-lg">
-            🏆 BEST VALUE FOR TEAMS
+            {isMultiTeamOrg ? `🏆 ${numberOfTeams} TEAMS - ORGANIZATION PRICING` : '🏆 BEST VALUE FOR TEAMS'}
           </div>
         </div>
 

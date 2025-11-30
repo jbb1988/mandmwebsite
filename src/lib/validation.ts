@@ -83,7 +83,42 @@ export const checkoutSessionSchema = z.object({
   toltReferral: z.string().max(100).trim().optional(),
   finderCode: z.string().max(100).trim().optional(),
   promoCode: z.string().regex(/^[A-Z0-9]{6,12}$/, 'Invalid promo code format').optional(),
-});
+  // Multi-team organization fields
+  isMultiTeamOrg: z.boolean().optional(),
+  organizationName: organizationSchema,
+  numberOfTeams: z.number().int().min(2).max(50).optional(), // If multi-team, must be 2-50
+  seatsPerTeam: z.array(z.number().int().min(1)).optional(), // Array of seat counts per team
+}).refine(
+  (data) => {
+    // If multi-team org, organization name and number of teams are required
+    if (data.isMultiTeamOrg) {
+      if (!data.organizationName || !data.numberOfTeams || data.numberOfTeams < 2) {
+        return false;
+      }
+      // Validate seats allocation
+      if (data.seatsPerTeam) {
+        // Must have one seat count for each team
+        if (data.seatsPerTeam.length !== data.numberOfTeams) {
+          return false;
+        }
+        // Total allocated seats must equal total seat count
+        const totalAllocated = data.seatsPerTeam.reduce((sum, seats) => sum + seats, 0);
+        if (totalAllocated !== data.seatCount) {
+          return false;
+        }
+        // Each team must have at least 1 seat
+        if (data.seatsPerTeam.some(seats => seats < 1)) {
+          return false;
+        }
+      }
+      return true;
+    }
+    return true;
+  },
+  {
+    message: 'Multi-team organizations require valid organization name, number of teams, and proper seat allocation that totals to seat count',
+  }
+);
 
 // Add team seats schema
 export const addTeamSeatsSchema = z.object({

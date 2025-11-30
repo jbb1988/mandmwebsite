@@ -90,15 +90,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { seatCount, email, testMode, toltReferral, finderCode, promoCode } = validationResult.data;
+    const { 
+      seatCount, 
+      email, 
+      testMode, 
+      toltReferral, 
+      finderCode, 
+      promoCode,
+      isMultiTeamOrg,
+      organizationName,
+      numberOfTeams,
+      seatsPerTeam,
+    } = validationResult.data;
 
-    // If promo code provided, validate it first
+    // Validate promo code if provided
     let promoDiscount = 0;
     let stripeCouponId: string | undefined;
-    
+
     if (promoCode) {
       try {
-        // Call our validation endpoint to check the promo code
         const validationResponse = await fetch(`${request.headers.get('origin')}/api/validate-promo-code`, {
           method: 'POST',
           headers: {
@@ -236,6 +246,12 @@ export async function POST(request: NextRequest) {
         ...(finderCode && { finder_code: finderCode }),
         ...(promoCode && { promo_code: promoCode.toUpperCase() }),
         ...(promoDiscount > 0 && { promo_discount_percent: promoDiscount.toString() }),
+      ...(isMultiTeamOrg && {
+        is_multi_team_org: 'true',
+        organization_name: organizationName,
+        number_of_teams: numberOfTeams?.toString() || '0',
+        seats_per_team: seatsPerTeam ? JSON.stringify(seatsPerTeam) : '',
+      }),
       },
       subscription_data: {
         metadata: {

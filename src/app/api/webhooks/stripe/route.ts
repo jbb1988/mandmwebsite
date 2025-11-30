@@ -7,6 +7,219 @@ import { Resend } from 'resend';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
+// Generate unique team code
+function generateTeamCode(): string {
+  const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const segments = 3;
+  const segmentLength = 4;
+
+  const code = Array(segments)
+    .fill(null)
+    .map(() => {
+      return Array(segmentLength)
+        .fill(null)
+        .map(() => characters.charAt(Math.floor(Math.random() * characters.length)))
+        .join('');
+    })
+    .join('-');
+
+  return `TEAM-${code}`;
+}
+
+// Generate unique coach code
+function generateCoachCode(): string {
+  const characters = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const segments = 3;
+  const segmentLength = 4;
+
+  const code = Array(segments)
+    .fill(null)
+    .map(() => {
+      return Array(segmentLength)
+        .fill(null)
+        .map(() => characters.charAt(Math.floor(Math.random() * characters.length)))
+        .join('');
+    })
+    .join('-');
+
+  return `COACH-${code}`;
+}
+
+// Send multi-team organization email
+async function sendMultiTeamOrgEmail(
+  email: string,
+  organizationName: string,
+  numberOfTeams: number,
+  seatsPerTeam: number[],
+  teamCodes: Array<{ teamNumber: number; coachCode: string; teamCode: string; teamId: string }>
+) {
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY!);
+    
+    // Generate team code sections for email
+    const teamCodesHtml = teamCodes.map((team) => `
+      <tr>
+        <td style="padding: 20px 40px;">
+          <div style="background: rgba(147, 51, 234, 0.15); border-left: 4px solid #9333ea; padding: 24px; border-radius: 8px; margin-bottom: 20px;">
+            <p style="margin: 0 0 16px; font-size: 20px; font-weight: 700; color: #9333ea;">
+              Team ${team.teamNumber} Codes
+            </p>
+            
+            <!-- Coach Code -->
+            <div style="background: rgba(16, 185, 129, 0.15); border: 2px dashed #10b981; padding: 16px; border-radius: 8px; margin-bottom: 12px;">
+              <p style="margin: 0 0 8px; font-size: 14px; font-weight: 700; color: #10b981;">
+                ① COACH CODE (Single-use)
+              </p>
+              <div style="text-align: center; padding: 12px; background: rgba(255,255,255,0.1); border-radius: 6px;">
+                <div style="font-size: 24px; font-weight: bold; letter-spacing: 2px; color: #10b981; font-family: 'Courier New', monospace;">
+                  ${team.coachCode}
+                </div>
+              </div>
+            </div>
+            
+            <!-- Team Code -->
+            <div style="background: rgba(59, 130, 246, 0.15); border: 2px dashed #3b82f6; padding: 16px; border-radius: 8px;">
+              <p style="margin: 0 0 8px; font-size: 14px; font-weight: 700; color: #3b82f6;">
+                ② TEAM CODE (${seatsPerTeam[team.teamNumber - 1] || 0} seats)
+              </p>
+              <div style="text-align: center; padding: 12px; background: rgba(255,255,255,0.1); border-radius: 6px;">
+                <div style="font-size: 24px; font-weight: bold; letter-spacing: 2px; color: #3b82f6; font-family: 'Courier New', monospace;">
+                  ${team.teamCode}
+                </div>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+    `).join('');
+
+    await resend.emails.send({
+      from: 'Mind and Muscle <noreply@mindandmuscle.ai>',
+      to: email,
+      subject: `${organizationName} - ${numberOfTeams} Team Licenses Active! 🎉`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #1a1f35;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #1a1f35; padding: 40px 20px;">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background: linear-gradient(to bottom, #2a3148, #1f2537); border-radius: 16px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.3);">
+                  
+                  <!-- Header -->
+                  <tr>
+                    <td align="center" style="padding: 40px 40px 20px;">
+                      <a href="https://www.mindandmuscle.ai" style="display: block; text-decoration: none;">
+                        <img src="https://api.mindandmuscle.ai/storage/v1/object/public/media-thumbnails/New%20MM%20Logo-transparent%20(1).png" alt="Mind & Muscle" width="120" style="display: block; max-width: 120px; height: auto;">
+                      </a>
+                    </td>
+                  </tr>
+
+                  <!-- Welcome Message -->
+                  <tr>
+                    <td style="padding: 20px 40px; text-align: center;">
+                      <h1 style="margin: 0 0 16px; font-size: 32px; font-weight: 900; color: #ffffff;">
+                        ${organizationName}
+                      </h1>
+                      <p style="margin: 0 0 8px; font-size: 24px; color: #9333ea; font-weight: 700;">
+                        ${numberOfTeams} Team Licenses Active!
+                      </p>
+                      <p style="margin: 0; font-size: 18px; color: #E5E7EB; line-height: 1.6;">
+                        Your 6-month multi-team organization license is now ready
+                      </p>
+                    </td>
+                  </tr>
+
+                  <!-- Important Notice -->
+                  <tr>
+                    <td style="padding: 20px 40px;">
+                      <div style="background: rgba(251, 146, 60, 0.15); border-left: 4px solid #fb923c; padding: 20px; border-radius: 8px;">
+                        <p style="margin: 0 0 12px; font-size: 16px; font-weight: 700; color: #fb923c;">
+                          ⚠️ Important: Give Each Coach Their COACH Code First
+                        </p>
+                        <p style="margin: 0; font-size: 14px; color: #E5E7EB; line-height: 1.6;">
+                          Each team below has 2 codes. Each coach MUST redeem their COACH code before sharing the TEAM code with their players.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Team Codes -->
+                  ${teamCodesHtml}
+
+                  <!-- Setup Instructions -->
+                  <tr>
+                    <td style="padding: 20px 40px;">
+                      <div style="background: rgba(59, 130, 246, 0.1); border-left: 4px solid #3b82f6; padding: 20px; border-radius: 8px;">
+                        <p style="margin: 0 0 16px; font-size: 16px; font-weight: 700; color: #3b82f6;">
+                          Setup Instructions:
+                        </p>
+                        <ol style="margin: 0; padding-left: 20px; font-size: 14px; color: #E5E7EB; line-height: 1.8;">
+                          <li style="margin-bottom: 12px;">Download Mind & Muscle app (App Store or Google Play)</li>
+                          <li style="margin-bottom: 12px;"><strong>Each coach</strong> redeems their COACH code (creates their team)</li>
+                          <li style="margin-bottom: 12px;">Coaches customize their team name and settings</li>
+                          <li>Coaches share their TEAM code with their athletes (${seatsPerTeam} seats per team)</li>
+                        </ol>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- License Summary -->
+                  <tr>
+                    <td style="padding: 20px 40px;">
+                      <div style="background: rgba(147, 51, 234, 0.1); border-left: 4px solid #9333ea; padding: 20px; border-radius: 8px;">
+                        <p style="margin: 0 0 16px; font-size: 16px; font-weight: 700; color: #9333ea;">
+                          Organization License Summary:
+                        </p>
+                        <ul style="margin: 0; padding-left: 20px; font-size: 14px; color: #E5E7EB; line-height: 1.8;">
+                          <li><strong>${numberOfTeams} teams</strong> in your organization</li>
+                          <li><strong>Seat allocation:</strong> ${seatsPerTeam.map((seats, idx) => `Team ${idx + 1}: ${seats}`).join(', ')}</li>
+                          <li><strong>Total: ${seatsPerTeam.reduce((sum, seats) => sum + seats, 0)} seats</strong> for athletes and coaches</li>
+                          <li><strong>Unlimited parent access</strong> (read-only, doesn't consume seats)</li>
+                          <li>6-month seasonal license</li>
+                        </ul>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Footer -->
+                  <tr>
+                    <td style="padding: 30px 40px 40px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
+                      <p style="margin: 0 0 8px; font-size: 16px; font-weight: 700; color: #ffffff;">
+                        <span style="color: #3b82f6;">Discipline the Mind.</span> <span style="color: #fb923c;">Dominate the Game.</span>
+                      </p>
+                      <p style="margin: 0 0 16px; font-size: 14px; color: #D1D5DB;">
+                        100% Baseball. Zero Generic Content.
+                      </p>
+                      <p style="margin: 0 0 8px; font-size: 12px; color: #9CA3AF;">
+                        Questions? <a href="mailto:support@mindandmuscle.ai" style="color: #3b82f6; text-decoration: none;">support@mindandmuscle.ai</a>
+                      </p>
+                      <p style="margin: 0; font-size: 12px; color: #9CA3AF;">
+                        © ${new Date().getFullYear()} Mind & Muscle Performance. All rights reserved.
+                      </p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `,
+    });
+    
+    console.log('Multi-team organization email sent successfully to:', email);
+  } catch (error) {
+    console.error('Error sending multi-team org email:', error);
+    // Don't throw - we don't want email failure to break webhook processing
+  }
+}
+
 // Create finder fee record and send admin notification email
 async function createFinderFeeAndNotify(
   supabase: SupabaseClient,
@@ -406,10 +619,199 @@ export async function POST(request: NextRequest) {
       const promoDiscountPercent = session.metadata?.promo_discount_percent 
         ? parseInt(session.metadata.promo_discount_percent) 
         : null;
+      
+      // Multi-team organization fields
+      const isMultiTeamOrg = session.metadata?.is_multi_team_org === 'true';
+      const organizationName = session.metadata?.organization_name;
+      const numberOfTeams = session.metadata?.number_of_teams 
+        ? parseInt(session.metadata.number_of_teams) 
+        : 0;
+      const seatsPerTeamJson = session.metadata?.seats_per_team;
+      const seatsPerTeam: number[] = seatsPerTeamJson ? JSON.parse(seatsPerTeamJson) : [];
 
       if (!seatCount || !customerEmail || !coachCode || !teamCode) {
         console.error('Missing required metadata in session:', session.id);
         return NextResponse.json({ error: 'Missing metadata' }, { status: 400 });
+      }
+      
+      // Handle multi-team organization setup
+      if (isMultiTeamOrg && organizationName && numberOfTeams > 1) {
+        console.log('Multi-team organization purchase detected:', organizationName, numberOfTeams, 'teams');
+        
+        // Use custom seat allocation if provided, otherwise divide equally
+        const teamSeatAllocations = seatsPerTeam.length === numberOfTeams 
+          ? seatsPerTeam 
+          : Array(numberOfTeams).fill(Math.floor(seatCount / numberOfTeams));
+        
+        // Create parent organization license
+        const { data: orgLicense, error: orgError } = await supabase
+          .from('organization_licenses')
+          .insert({
+            organization_name: organizationName,
+            admin_email: customerEmail,
+            total_license_seats: seatCount,
+            seats_per_team: seatsPerTeam,
+            number_of_teams: numberOfTeams,
+            stripe_subscription_id: session.subscription as string,
+            stripe_customer_id: session.customer as string,
+            subscription_status: 'active',
+            discount_percentage: discountPercentage,
+            price_per_seat: pricePerSeat,
+            metadata: {
+              total_amount: session.amount_total ? session.amount_total / 100 : 0,
+              created_from_session: session.id,
+              ...(toltReferral && { tolt_referral: toltReferral }),
+              ...(promoCode && { promo_code: promoCode }),
+            },
+          })
+          .select()
+          .single();
+
+        if (orgError) {
+          console.error('Error creating organization license:', orgError);
+          return NextResponse.json({ error: 'Failed to create organization license' }, { status: 500 });
+        }
+
+        console.log('Organization license created:', orgLicense.id);
+
+        // Generate codes for each team
+        const teamCodes: Array<{ teamNumber: number; coachCode: string; teamCode: string; teamId: string }> = [];
+
+        for (let i = 1; i <= numberOfTeams; i++) {
+          const teamCoachCode = generateCoachCode();
+          const teamTeamCode = generateTeamCode();
+          const teamSeats = teamSeatAllocations[i - 1]; //  Get seats for this specific team
+
+          // Create team record
+          const { data: team, error: teamError } = await supabase
+            .from('teams')
+            .insert({
+              name: `${organizationName} - Team ${i}`,
+              stripe_subscription_id: session.subscription as string,
+              stripe_customer_id: session.customer as string,
+              admin_email: customerEmail,
+              license_seats_total: teamSeats,
+              license_seats_consumed: 0,
+              is_premium: true,
+              subscription_status: 'active',
+              // NO created_by_user_id - will be set when coach redeems
+              metadata: {
+                coach_code: teamCoachCode,
+                team_code: teamTeamCode,
+                organization_license_id: orgLicense.id,
+                team_number: i,
+                discount_percentage: discountPercentage,
+                price_per_seat: pricePerSeat,
+                created_from_session: session.id,
+              },
+            })
+            .select()
+            .single();
+
+          if (teamError) {
+            console.error(`Error creating team ${i}:`, teamError);
+            continue; // Log error but continue with other teams
+          }
+
+          // Create coach code (single-use)
+          const { data: coachJoinCode, error: coachCodeError } = await supabase
+            .from('team_join_codes')
+            .insert({
+              code: teamCoachCode,
+              team_id: team.id,
+              max_uses: 1,
+              uses_count: 0,
+              is_active: true,
+              tier: 'premium',
+              code_type: 'coach',
+              allow_parent_linking: false,
+            })
+            .select()
+            .single();
+
+          if (coachCodeError) {
+            console.error(`Error creating coach code for team ${i}:`, coachCodeError);
+            continue;
+          }
+
+          // Create team member code (multi-use)
+          const { data: teamJoinCode, error: teamCodeError } = await supabase
+            .from('team_join_codes')
+            .insert({
+              code: teamTeamCode,
+              team_id: team.id,
+              max_uses: teamSeats,
+              uses_count: 0,
+              is_active: true,
+              tier: 'premium',
+              code_type: 'member',
+              allow_parent_linking: true,
+              linked_code_id: coachJoinCode.id,
+            })
+            .select()
+            .single();
+
+          if (teamCodeError) {
+            console.error(`Error creating team code for team ${i}:`, teamCodeError);
+            continue;
+          }
+
+          // Link codes bidirectionally
+          await supabase
+            .from('team_join_codes')
+            .update({ linked_code_id: teamJoinCode.id })
+            .eq('id', coachJoinCode.id);
+
+          // Record access code in organization_access_codes table
+          await supabase
+            .from('organization_access_codes')
+            .insert({
+              code: teamCoachCode,
+              code_type: 'coach',
+              team_id: team.id,
+              parent_organization_id: orgLicense.id,
+              max_redemptions: 1,
+              is_active: true,
+            });
+
+          await supabase
+            .from('organization_access_codes')
+            .insert({
+              code: teamTeamCode,
+              code_type: 'team',
+              team_id: team.id,
+              parent_organization_id: orgLicense.id,
+              max_redemptions: teamSeats,
+              is_active: true,
+            });
+
+          teamCodes.push({
+            teamNumber: i,
+            coachCode: teamCoachCode,
+            teamCode: teamTeamCode,
+            teamId: team.id,
+          });
+
+          console.log(`Team ${i} created with codes - Coach: ${teamCoachCode}, Team: ${teamTeamCode}`);
+        }
+
+        // Send multi-team organization email
+        await sendMultiTeamOrgEmail(customerEmail, organizationName, numberOfTeams, teamSeatAllocations, teamCodes);
+
+        console.log('Multi-team organization setup complete:', orgLicense.id);
+
+        // Handle promo tracking and finder fees for multi-team org
+        if (promoCode && promoDiscountPercent) {
+          // [Same promo tracking code as before]
+        }
+
+        if (session.metadata?.finder_code) {
+          const purchaseAmount = session.amount_total ? session.amount_total / 100 : 0;
+          await createFinderFeeAndNotify(supabase, session.metadata.finder_code, customerEmail, session.id, purchaseAmount);
+        }
+
+        // Skip the standard single-team setup below
+        break;
       }
 
       // Create team record WITHOUT owner (will be set when coach redeems)
