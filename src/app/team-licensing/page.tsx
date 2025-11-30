@@ -25,6 +25,13 @@ function TeamLicensingContent() {
   } | null>(null);
   const [isValidatingPromo, setIsValidatingPromo] = useState(false);
   
+  // UTM tracking state
+  const [utmParams, setUtmParams] = useState<{
+    source?: string;
+    medium?: string;
+    campaign?: string;
+  }>({});
+  
   // Multi-team organization state
   const [isMultiTeamOrg, setIsMultiTeamOrg] = useState(false);
   const [organizationName, setOrganizationName] = useState('');
@@ -36,6 +43,20 @@ function TeamLicensingContent() {
       setShowCanceledMessage(true);
       // Auto-hide after 10 seconds
       setTimeout(() => setShowCanceledMessage(false), 10000);
+    }
+    
+    // Capture UTM parameters from URL
+    const source = searchParams.get('utm_source');
+    const medium = searchParams.get('utm_medium');
+    const campaign = searchParams.get('utm_campaign');
+    
+    if (source || medium || campaign) {
+      setUtmParams({
+        source: source || undefined,
+        medium: medium || undefined,
+        campaign: campaign || undefined,
+      });
+      console.log('UTM params captured:', { source, medium, campaign });
     }
   }, [searchParams]);
 
@@ -209,6 +230,9 @@ function TeamLicensingContent() {
           ...(toltReferral && { toltReferral }),
           ...(finderCode && { finderCode }),
           ...(promoValidation?.valid && promoCode && { promoCode: promoCode.toUpperCase() }),
+          ...(utmParams.source && { utmSource: utmParams.source }),
+          ...(utmParams.medium && { utmMedium: utmParams.medium }),
+          ...(utmParams.campaign && { utmCampaign: utmParams.campaign }),
           ...(isMultiTeamOrg && {
             isMultiTeamOrg: true,
             organizationName: organizationName.trim(),
@@ -325,7 +349,7 @@ function TeamLicensingContent() {
       </div>
 
       {/* Multi-Team Organization Toggle */}
-      <div className="max-w-5xl mx-auto mb-12">
+      <div className={`max-w-5xl mx-auto ${isMultiTeamOrg ? 'mb-6' : 'mb-12'}`}>
         <LiquidGlass variant="neutral" className="border-2 border-purple-500/40">
           <div className="p-6">
             <div className="flex items-start gap-4">
@@ -335,10 +359,20 @@ function TeamLicensingContent() {
                   <h3 className="font-bold text-lg">Multi-Team Organization?</h3>
                   <button
                     onClick={() => {
-                      setIsMultiTeamOrg(!isMultiTeamOrg);
-                      if (!isMultiTeamOrg) {
-                        // Reset teams to minimum when enabling
+                      const newIsMultiTeam = !isMultiTeamOrg;
+                      setIsMultiTeamOrg(newIsMultiTeam);
+                      if (newIsMultiTeam) {
+                        // Set minimum teams and auto-distribute seats evenly when enabling
+                        const teams = numberOfTeams < 2 ? 2 : numberOfTeams;
                         if (numberOfTeams < 2) setNumberOfTeams(2);
+
+                        // Auto-distribute seats evenly across teams
+                        const baseSeats = Math.floor(seatCount / teams);
+                        const remainder = seatCount % teams;
+                        const distributed = Array(teams).fill(baseSeats).map((seats, i) =>
+                          i < remainder ? seats + 1 : seats
+                        );
+                        setSeatsPerTeam(distributed);
                       }
                     }}
                     className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
@@ -494,7 +528,25 @@ function TeamLicensingContent() {
                           </div>
                         ))}
                       </div>
-                      
+
+                      {/* Distribute Evenly Button */}
+                      <button
+                        onClick={() => {
+                          const baseSeats = Math.floor(seatCount / numberOfTeams);
+                          const remainder = seatCount % numberOfTeams;
+                          const distributed = Array(numberOfTeams).fill(baseSeats).map((seats, i) =>
+                            i < remainder ? seats + 1 : seats
+                          );
+                          setSeatsPerTeam(distributed);
+                        }}
+                        className="w-full mt-3 px-4 py-2 rounded-lg bg-purple-500/20 border border-purple-500/40 text-purple-300 text-sm font-semibold hover:bg-purple-500/30 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Distribute Evenly
+                      </button>
+
                       {/* Seat Allocation Summary */}
                       <div className="mt-4 p-3 rounded-lg bg-purple-500/10 border border-purple-500/30">
                         <div className="flex items-center justify-between text-sm mb-2">
@@ -573,49 +625,56 @@ function TeamLicensingContent() {
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-4">
                   <label className="text-lg font-semibold">Number of Users</label>
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => !isMultiTeamOrg && setSeatCount(Math.max(1, seatCount - 1))}
-                      disabled={isMultiTeamOrg}
-                      className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      -
-                    </button>
-                    <input
-                      type="number"
-                      min="1"
-                      max="200"
-                      value={seatCount}
-                      onChange={(e) => !isMultiTeamOrg && setSeatCount(Math.max(1, Math.min(200, parseInt(e.target.value) || 1)))}
-                      disabled={isMultiTeamOrg}
-                      className="w-20 h-10 text-center text-2xl font-black bg-white/10 border border-white/20 rounded-lg focus:border-solar-surge-orange focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-                    />
-                    <button
-                      onClick={() => !isMultiTeamOrg && setSeatCount(Math.min(200, seatCount + 1))}
-                      disabled={isMultiTeamOrg}
-                      className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      +
-                    </button>
-                  </div>
+                  {isMultiTeamOrg ? (
+                    // Display-only when multi-team is active
+                    <span className="w-20 h-10 flex items-center justify-center text-2xl font-black bg-white/10 border border-purple-500/40 rounded-lg text-purple-300">
+                      {seatCount}
+                    </span>
+                  ) : (
+                    // Interactive controls when NOT multi-team
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setSeatCount(Math.max(1, seatCount - 1))}
+                        className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center font-bold"
+                      >
+                        -
+                      </button>
+                      <input
+                        type="number"
+                        min="1"
+                        max="200"
+                        value={seatCount}
+                        onChange={(e) => setSeatCount(Math.max(1, Math.min(200, parseInt(e.target.value) || 1)))}
+                        className="w-20 h-10 text-center text-2xl font-black bg-white/10 border border-white/20 rounded-lg focus:border-solar-surge-orange focus:outline-none"
+                      />
+                      <button
+                        onClick={() => setSeatCount(Math.min(200, seatCount + 1))}
+                        className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center font-bold"
+                      >
+                        +
+                      </button>
+                    </div>
+                  )}
                 </div>
 
-                <input
-                  type="range"
-                  min="1"
-                  max="200"
-                  value={seatCount}
-                  onChange={(e) => !isMultiTeamOrg && setSeatCount(parseInt(e.target.value))}
-                  disabled={isMultiTeamOrg}
-                  className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{
-                    background: `linear-gradient(to right, #F97316 0%, #F97316 ${((seatCount - 1) / (200 - 1)) * 100}%, rgba(255,255,255,0.2) ${((seatCount - 1) / (200 - 1)) * 100}%, rgba(255,255,255,0.2) 100%)`
-                  }}
-                />
+                {/* Only show slider when NOT multi-team */}
+                {!isMultiTeamOrg && (
+                  <input
+                    type="range"
+                    min="1"
+                    max="200"
+                    value={seatCount}
+                    onChange={(e) => setSeatCount(parseInt(e.target.value))}
+                    className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                    style={{
+                      background: `linear-gradient(to right, #F97316 0%, #F97316 ${((seatCount - 1) / (200 - 1)) * 100}%, rgba(255,255,255,0.2) ${((seatCount - 1) / (200 - 1)) * 100}%, rgba(255,255,255,0.2) 100%)`
+                    }}
+                  />
+                )}
 
                 {isMultiTeamOrg ? (
                   <p className="text-xs text-purple-400 mt-2 flex items-center gap-1">
-                    <span>↑</span> Using total from Multi-Team Organization section above
+                    <span>↑</span> Adjust total users in the Multi-Team Organization section above
                   </p>
                 ) : (
                   <p className="text-xs text-text-secondary mt-2">
@@ -789,11 +848,19 @@ function TeamLicensingContent() {
                 )}
               </div>
 
+              {/* Inline Validation Message for Multi-Team Allocation */}
+              {isMultiTeamOrg && seatsPerTeam.reduce((sum, seats) => sum + seats, 0) !== seatCount && (
+                <p className="text-sm text-solar-surge-orange mb-4 flex items-center gap-2 p-3 rounded-lg bg-solar-surge-orange/10 border border-solar-surge-orange/30">
+                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                  Allocate all {seatCount} seats across your {numberOfTeams} teams to continue
+                </p>
+              )}
+
               {/* CTA Button */}
               <button
                 onClick={handlePurchase}
-                disabled={isLoading || !email}
-                className="w-full px-8 py-6 text-2xl font-black text-white bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange rounded-2xl transition-all duration-300 hover:shadow-liquid-glow-orange hover:scale-[1.02] active:scale-95 disabled:cursor-not-allowed shadow-lg"
+                disabled={isLoading || !email || (isMultiTeamOrg && seatsPerTeam.reduce((sum, seats) => sum + seats, 0) !== seatCount)}
+                className="w-full px-8 py-6 text-2xl font-black text-white bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange rounded-2xl transition-all duration-300 hover:shadow-liquid-glow-orange hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
               >
                 {isLoading ? (
                   <span className="flex items-center justify-center gap-2">
