@@ -425,7 +425,7 @@ export default function FAQPage() {
       faqs: [
         {
           question: 'What are streaks and how do I build them?',
-          answer: 'Streaks track consecutive days you complete activities:\n\n• Mental Training Streak: Complete Mind Coach sessions daily\n• Workout Streak: Log strength training daily\n• Game Lab Streak: Play baseball IQ scenarios daily\n\nLonger streaks earn bonus XP and special badges. Miss a day? Your streak resets, but your progress and total completions remain. Streaks motivate consistency—the key to real improvement.'
+          answer: 'Streaks track consecutive days you complete activities:\n\n• Daily Hit Streak: Complete your daily content\n• Mind Coach Streak: Complete Mind Coach AI exercises daily\n• Muscle Coach Streak: Log Muscle Coach AI exercises daily\n• Dugout Talk Streak: Make Dugout Talk entries daily\n\nLonger streaks earn bonus XP and special badges. Miss a day? Your streak resets, but your progress and total completions remain. Streaks motivate consistency—the key to real improvement.'
         },
         {
           question: 'What badges can I unlock?',
