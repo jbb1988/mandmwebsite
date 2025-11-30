@@ -1,10 +1,10 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { GradientTextReveal } from '@/components/animations';
-import { ChevronDown, Search, Brain, Dumbbell, Zap, TrendingUp, Award, Users, Utensils, HelpCircle, Lock, X, AlertCircle } from 'lucide-react';
+import { ChevronDown, Search, Brain, Dumbbell, Zap, TrendingUp, Award, Users, Utensils, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface FAQ {
@@ -19,74 +19,14 @@ interface FAQSection {
   iconImage?: string;
   color: 'blue' | 'orange';
   faqs: FAQ[];
-  isPremium?: boolean;
 }
 
 export default function FAQPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
   const [expandedQuestions, setExpandedQuestions] = useState<Record<string, boolean>>({});
-  const [hasPremiumAccess, setHasPremiumAccess] = useState(false);
-  const [showUnlockModal, setShowUnlockModal] = useState(false);
-  const [teamCode, setTeamCode] = useState('');
-  const [verifying, setVerifying] = useState(false);
-  const [error, setError] = useState('');
-  const [checkingAccess, setCheckingAccess] = useState(true);
 
-  // Check if user has premium access on mount
-  useEffect(() => {
-    checkPremiumAccess();
-  }, []);
-
-  const checkPremiumAccess = async () => {
-    try {
-      const response = await fetch('/api/faq/verify-team-code');
-      const data = await response.json();
-      setHasPremiumAccess(data.hasPremiumAccess || false);
-    } catch (error) {
-      console.error('Error checking premium access:', error);
-      setHasPremiumAccess(false);
-    } finally {
-      setCheckingAccess(false);
-    }
-  };
-
-  const handleUnlockPremium = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setVerifying(true);
-    setError('');
-
-    try {
-      const response = await fetch('/api/faq/verify-team-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ teamCode }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Invalid team code');
-      }
-
-      // Success! Premium access granted
-      setHasPremiumAccess(true);
-      setShowUnlockModal(false);
-      setTeamCode('');
-    } catch (err: any) {
-      setError(err.message || 'Invalid team code');
-    } finally {
-      setVerifying(false);
-    }
-  };
-
-  const toggleSection = (sectionId: string, isPremium?: boolean) => {
-    // If section is premium and user doesn't have access, show unlock modal
-    if (isPremium && !hasPremiumAccess) {
-      setShowUnlockModal(true);
-      return;
-    }
-
+  const toggleSection = (sectionId: string) => {
     setExpandedSections(prev => ({
       ...prev,
       [sectionId]: !prev[sectionId]
@@ -158,7 +98,6 @@ export default function FAQPage() {
       title: 'Mind Coach AI - Mental Training',
       iconImage: '/assets/images/Mind AI Coach.png',
       color: 'blue',
-      isPremium: true,
       faqs: [
         {
           question: 'What is Mind Coach AI?',
@@ -191,7 +130,6 @@ export default function FAQPage() {
       title: 'Muscle Coach AI - Strength Training',
       iconImage: '/assets/images/Muscle AI Coach Icon.png',
       color: 'orange',
-      isPremium: true,
       faqs: [
         {
           question: 'What is Muscle Coach AI?',
@@ -224,7 +162,6 @@ export default function FAQPage() {
       title: 'Game Lab - Baseball IQ Training',
       iconImage: '/assets/images/game_lab_icon copy.png',
       color: 'blue',
-      isPremium: true,
       faqs: [
         {
           question: 'What is Game Lab?',
@@ -257,7 +194,6 @@ export default function FAQPage() {
       title: 'Swing Lab - Video Analysis',
       iconImage: '/assets/images/Swing Lab1.png',
       color: 'orange',
-      isPremium: true,
       faqs: [
         {
           question: 'How do I upload my swing video?',
@@ -290,7 +226,6 @@ export default function FAQPage() {
       title: 'Sound Lab - Mental State Engineering',
       iconImage: '/assets/images/Sound Lab copy.png',
       color: 'blue',
-      isPremium: true,
       faqs: [
         {
           question: 'What is Sound Lab?',
@@ -323,7 +258,6 @@ export default function FAQPage() {
       title: 'Goals AI - Goal Setting & Tracking',
       iconImage: '/assets/images/Goals Icon.png',
       color: 'orange',
-      isPremium: true,
       faqs: [
         {
           question: 'How do I create a goal?',
@@ -356,7 +290,6 @@ export default function FAQPage() {
       title: 'Fuel AI - Nutrition Planning',
       iconImage: '/assets/images/Fuel.png',
       color: 'orange',
-      isPremium: true,
       faqs: [
         {
           question: 'How do I create a meal plan?',
@@ -385,7 +318,6 @@ export default function FAQPage() {
       title: 'AI Assistant Coach - Custom Drills',
       iconImage: '/assets/images/Whistle.png',
       color: 'blue',
-      isPremium: true,
       faqs: [
         {
           question: 'What is AI Assistant Coach?',
@@ -410,7 +342,6 @@ export default function FAQPage() {
       title: 'Chatter + Events - Team Communication',
       iconImage: '/assets/images/chatter_icon_3x.png',
       color: 'orange',
-      isPremium: true,
       faqs: [
         {
           question: 'How do I join team chat?',
@@ -634,11 +565,11 @@ export default function FAQPage() {
               >
                 {/* Section Header */}
                 <button
-                  onClick={() => toggleSection(section.id, section.isPremium)}
+                  onClick={() => toggleSection(section.id)}
                   className="w-full p-6 flex items-center justify-between hover:bg-white/5 transition-all"
                 >
                   <div className="flex items-center gap-4">
-                    <div className={`w-16 h-16 rounded-xl flex items-center justify-center relative ${
+                    <div className={`w-16 h-16 rounded-xl flex items-center justify-center ${
                       section.color === 'blue'
                         ? 'bg-neon-cortex-blue/20 border border-neon-cortex-blue/30'
                         : 'bg-solar-surge-orange/20 border border-solar-surge-orange/30'
@@ -647,39 +578,23 @@ export default function FAQPage() {
                         <img
                           src={section.iconImage}
                           alt={`${section.title} icon`}
-                          className={`w-10 h-10 object-contain ${section.isPremium && !hasPremiumAccess ? 'opacity-40' : ''}`}
+                          className="w-10 h-10 object-contain"
                           style={{filter: `drop-shadow(0 0 10px ${section.color === 'blue' ? 'rgba(14,165,233,0.8)' : 'rgba(249,115,22,0.8)'})`}}
                         />
                       ) : Icon ? (
                         <Icon className={`w-6 h-6 ${
                           section.color === 'blue' ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'
-                        } ${section.isPremium && !hasPremiumAccess ? 'opacity-40' : ''}`} />
+                        }`} />
                       ) : null}
-                      {section.isPremium && !hasPremiumAccess && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/60 rounded-xl">
-                          <Lock className="w-6 h-6 text-solar-surge-orange" />
-                        </div>
-                      )}
                     </div>
                     <div className="text-left">
-                      <div className="flex items-center gap-3">
-                        <h2 className="text-2xl font-black">{section.title}</h2>
-                        {section.isPremium && !hasPremiumAccess && (
-                          <span className="px-2 py-1 text-xs font-bold bg-solar-surge-orange/20 border border-solar-surge-orange/40 rounded-md text-solar-surge-orange">
-                            PREMIUM
-                          </span>
-                        )}
-                      </div>
+                      <h2 className="text-2xl font-black">{section.title}</h2>
                       <p className="text-sm text-text-secondary">{section.faqs.length} questions</p>
                     </div>
                   </div>
-                  {section.isPremium && !hasPremiumAccess ? (
-                    <Lock className="w-6 h-6 text-solar-surge-orange" />
-                  ) : (
-                    <ChevronDown
-                      className={`w-6 h-6 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                    />
-                  )}
+                  <ChevronDown
+                    className={`w-6 h-6 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+                  />
                 </button>
 
                 {/* Section Content */}
@@ -766,96 +681,6 @@ export default function FAQPage() {
           </div>
         </LiquidGlass>
       </div>
-
-      {/* Unlock Premium Modal */}
-      <AnimatePresence>
-        {showUnlockModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
-            onClick={() => setShowUnlockModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="max-w-md w-full"
-            >
-              <LiquidGlass variant="neutral" rounded="2xl" className="relative [&>div:first-child]:bg-gradient-to-br [&>div:first-child]:from-white/[0.02] [&>div:first-child]:via-transparent [&>div:first-child]:to-transparent">
-                <div className="p-8">
-                  <button
-                    onClick={() => setShowUnlockModal(false)}
-                    className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-lg transition-all"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
-
-                  <div className="text-center mb-6">
-                    <div className="inline-block p-4 bg-solar-surge-orange/20 border border-solar-surge-orange/40 rounded-2xl mb-4">
-                      <Lock className="w-12 h-12 text-solar-surge-orange" />
-                    </div>
-                    <h3 className="text-3xl font-black mb-3">
-                      <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">
-                        Premium Feature FAQs
-                      </span>
-                    </h3>
-                    <p className="text-text-secondary">
-                      Access detailed "how-to" guides for all Mind & Muscle features by verifying your team code.
-                    </p>
-                  </div>
-
-                  <form onSubmit={handleUnlockPremium} className="space-y-4">
-                    <div>
-                      <label className="block text-sm font-semibold mb-2 text-starlight-white">
-                        Team Code
-                      </label>
-                      <input
-                        type="text"
-                        value={teamCode}
-                        onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
-                        placeholder="TEAM-XXXX-XXXX-XXXX"
-                        autoFocus
-                        className="w-full px-4 py-3 bg-slate-900 border-2 border-neon-cortex-blue/40 rounded-lg focus:outline-none focus:border-neon-cortex-blue focus:ring-2 focus:ring-neon-cortex-blue/20 transition-all text-white placeholder:text-gray-400 font-mono uppercase"
-                        disabled={verifying}
-                      />
-                    </div>
-
-                    {error && (
-                      <div className="p-4 bg-red-500/10 border border-red-500/30 rounded-lg flex items-start gap-3">
-                        <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-                        <p className="text-sm text-red-200">{error}</p>
-                      </div>
-                    )}
-
-                    <button
-                      type="submit"
-                      disabled={verifying || !teamCode}
-                      className="w-full px-6 py-3 rounded-lg font-semibold backdrop-blur-md transition-all duration-300 hover:scale-105 border border-neon-cortex-blue/30 bg-gradient-to-br from-background-primary/80 via-background-secondary/60 to-neon-cortex-blue/10 hover:shadow-liquid-glow-blue hover:border-neon-cortex-blue/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
-                    >
-                      {verifying ? 'Verifying...' : 'Unlock Premium FAQs'}
-                    </button>
-                  </form>
-
-                  <div className="mt-6 pt-6 border-t border-white/10">
-                    <p className="text-xs text-text-secondary text-center mb-2">
-                      Don't have a team code?
-                    </p>
-                    <a
-                      href="/team-licensing"
-                      className="block text-center text-sm font-semibold text-solar-surge-orange hover:underline"
-                    >
-                      Learn about Team Licensing →
-                    </a>
-                  </div>
-                </div>
-              </LiquidGlass>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
