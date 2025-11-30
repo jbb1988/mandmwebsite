@@ -29,7 +29,7 @@ export default function ManageTeamLicense() {
 
   const lookupTeamCode = async () => {
     if (!teamCode.trim()) {
-      setError('Please enter your team code');
+      setError('Please enter your coach code');
       return;
     }
 
@@ -162,20 +162,20 @@ export default function ManageTeamLicense() {
             <div className="p-8">
               <div className="text-center mb-6">
                 <Users className="w-16 h-16 text-neon-cortex-blue mx-auto mb-4" />
-                <h2 className="text-2xl font-bold mb-2">Enter Your Team Code</h2>
+                <h2 className="text-2xl font-bold mb-2">Enter Your Coach Code</h2>
                 <p className="text-text-secondary">
-                  Your team code was sent to your email after purchase
+                  Your coach code was sent to your email after purchase
                 </p>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold mb-2">Team Code</label>
+                  <label className="block text-sm font-semibold mb-2">Coach Code</label>
                   <input
                     type="text"
                     value={teamCode}
                     onChange={(e) => setTeamCode(e.target.value.toUpperCase())}
-                    placeholder="TEAM-XXXX-XXXX"
+                    placeholder="COACH-XXXX-XXXX"
                     className="w-full px-4 py-3 bg-slate-900 border-2 border-neon-cortex-blue/40 rounded-lg focus:outline-none focus:border-neon-cortex-blue focus:ring-2 focus:ring-neon-cortex-blue/20 transition-all text-center text-lg font-mono text-white placeholder:text-gray-400"
                     onKeyDown={(e) => e.key === 'Enter' && lookupTeamCode()}
                   />
@@ -199,7 +199,7 @@ export default function ManageTeamLicense() {
 
               <div className="mt-6 pt-6 border-t border-white/10">
                 <p className="text-sm text-text-secondary text-center">
-                  Can't find your team code?{' '}
+                  Can't find your coach code?{' '}
                   <Link href="/support" className="text-neon-cortex-blue hover:underline">
                     Contact Support
                   </Link>

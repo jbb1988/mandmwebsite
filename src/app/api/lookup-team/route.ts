@@ -41,16 +41,24 @@ export async function POST(request: NextRequest) {
     const validationResult = lookupTeamSchema.safeParse(body);
 
     if (!validationResult.success) {
+      // Check if it looks like a TEAM code instead of a COACH code
+      const teamCode = body.teamCode?.toUpperCase() || '';
+      if (teamCode.startsWith('TEAM-')) {
+        return NextResponse.json(
+          { error: 'Please enter your Coach Code (starts with COACH-), not your Team Code. The Team Code is for athletes to join your team.' },
+          { status: 400 }
+        );
+      }
       return NextResponse.json(
-        { error: 'Invalid team code format' },
+        { error: 'Invalid coach code format. Coach codes start with COACH-' },
         { status: 400 }
       );
     }
 
     const { teamCode } = validationResult.data;
 
-    // Handle test team codes
-    const TEST_CODES = ['TEAM-PKRM-L75S-6A29'];
+    // Handle test coach codes
+    const TEST_CODES = ['COACH-PKRM-L75S-6A29'];
     if (TEST_CODES.includes(teamCode.toUpperCase())) {
       return NextResponse.json({
         teamCode: teamCode.toUpperCase(),
@@ -65,15 +73,16 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Search for subscription by team code in metadata
+    // Search for subscription by coach code in metadata
+    // Note: 'teamCode' variable contains the coach code input by the user
     const subscriptions = await stripe.subscriptions.search({
-      query: `metadata['team_code']:'${teamCode}' AND status:'active'`,
+      query: `metadata['coach_code']:'${teamCode}' AND status:'active'`,
       limit: 1,
     });
 
     if (subscriptions.data.length === 0) {
       return NextResponse.json(
-        { error: 'Invalid team code' },
+        { error: 'Invalid coach code. Please check your code and try again.' },
         { status: 404 }
       );
     }
@@ -84,11 +93,13 @@ export async function POST(request: NextRequest) {
     // Get customer details
     const customer = await stripe.customers.retrieve(subscription.customer as string);
 
-    // Get team_id from team_join_codes table
+    // Get team_id from team_join_codes table using the TEAM code (not COACH code)
+    // The TEAM code is stored in Stripe metadata and used for athlete joining
+    const teamCodeFromMetadata = metadata.team_code;
     const { data: teamJoinCode } = await supabase
       .from('team_join_codes')
       .select('team_id')
-      .eq('code', teamCode.toUpperCase())
+      .eq('code', teamCodeFromMetadata?.toUpperCase())
       .eq('is_active', true)
       .single();
 

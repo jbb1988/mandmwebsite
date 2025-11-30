@@ -33,12 +33,20 @@ export const textFieldSchema = z
   .trim()
   .optional();
 
-// Team code validation
+// Team code validation (for athletes/parents joining a team)
 export const teamCodeSchema = z
   .string()
   .regex(/^[A-Z0-9-]+$/, 'Invalid team code format')
   .min(8, 'Team code too short')
-  .max(20, 'Team code too long')
+  .max(24, 'Team code too long')
+  .trim();
+
+// Coach code validation (for coaches managing their license)
+export const coachCodeSchema = z
+  .string()
+  .regex(/^COACH-[A-Z0-9-]+$/, 'Please enter your Coach Code (starts with COACH-), not your Team Code')
+  .min(14, 'Coach code too short')
+  .max(24, 'Coach code too long')
   .trim();
 
 // Seat count validation
@@ -86,9 +94,9 @@ export const addTeamSeatsSchema = z.object({
   testMode: z.boolean().optional(),
 });
 
-// Lookup team schema
+// Lookup team schema (for coaches accessing management - requires COACH code)
 export const lookupTeamSchema = z.object({
-  teamCode: teamCodeSchema,
+  teamCode: coachCodeSchema,
 });
 
 // Sanitize HTML in user input (removes script tags, event handlers, etc.)
