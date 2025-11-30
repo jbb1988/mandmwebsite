@@ -349,7 +349,7 @@ export default function FAQPage() {
         },
         {
           question: 'What is the Uniform Creator?',
-          answer: 'Create custom team uniforms with one tap. Select:\n\n• Cap style and color\n• Jersey (home/away/practice)\n• Pants color\n• Belt color\n• Sock style\n\nVisual presets show exactly how the uniform will look. Perfect team coordination, zero confusion on game day.'
+          answer: 'Coaches and Admins can create and save custom uniform presets for the team. Build a uniform by selecting hat, jersey, belt, pants, and socks—you can even add a photo of the actual uniform. Once saved, just select your preset when creating events. No more re-entering the same uniform details every time. Perfect team coordination, zero confusion on game day.'
         },
         {
           question: 'How do I get directions to fields?',
