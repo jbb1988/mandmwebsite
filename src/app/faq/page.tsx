@@ -317,7 +317,7 @@ export default function FAQPage() {
         },
         {
           question: 'How do I create custom drills?',
-          answer: 'Go to AI Assistant Coach → tap "Create Drill". Describe what you want to work on (e.g., "infield double play footwork" or "hitting outside fastballs"). The AI generates a complete drill with:\n\n• Setup instructions\n• Step-by-step execution\n• Common mistakes to avoid\n• Variations for different skill levels\n• Success metrics to track'
+          answer: 'Go to AI Assistant Coach → tap "Create Drill". You can create your own custom drills to save alongside AI-generated drills. Add a title, description, and any notes you want to remember. Your custom drills are saved for easy access anytime.'
         },
         {
           question: 'Can the AI design practice plans for my team?',
