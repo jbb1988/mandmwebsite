@@ -340,11 +340,58 @@ function TeamLicensingContent() {
                   </button>
                 </div>
                 <p className="text-sm text-text-secondary mb-4">
-                  Managing 200+ users across multiple teams? Get automatic code generation for each team, centralized billing, and organization-level management.
+                  Running multiple teams? Get separate COACH + TEAM codes for each team with custom seat allocation and centralized billing.
                 </p>
                 
                 {isMultiTeamOrg && (
                   <div className="space-y-4 mt-4 pt-4 border-t border-white/10">
+                    {/* Total Users Slider - Synced with Team Size below */}
+                    <div>
+                      <label htmlFor="totalUsers" className="block text-sm font-semibold text-white mb-2">
+                        Total Users <span className="text-solar-surge-orange">*</span>
+                      </label>
+                      <div className="flex items-center gap-3 mb-2">
+                        <button
+                          onClick={() => setSeatCount(Math.max(1, seatCount - 1))}
+                          className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center font-bold"
+                        >
+                          -
+                        </button>
+                        <input
+                          type="number"
+                          id="totalUsers"
+                          min="1"
+                          max="200"
+                          value={seatCount}
+                          onChange={(e) => setSeatCount(Math.max(1, Math.min(200, parseInt(e.target.value) || 1)))}
+                          className="w-20 h-10 text-center text-2xl font-black bg-white/10 border border-white/20 rounded-lg focus:border-purple-500 focus:outline-none"
+                        />
+                        <button
+                          onClick={() => setSeatCount(Math.min(200, seatCount + 1))}
+                          className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center font-bold"
+                        >
+                          +
+                        </button>
+                        <span className="text-sm text-text-secondary">
+                          (1-200 users)
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="1"
+                        max="200"
+                        value={seatCount}
+                        onChange={(e) => setSeatCount(parseInt(e.target.value))}
+                        className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                        style={{
+                          background: `linear-gradient(to right, #9333ea 0%, #9333ea ${((seatCount - 1) / (200 - 1)) * 100}%, rgba(255,255,255,0.2) ${((seatCount - 1) / (200 - 1)) * 100}%, rgba(255,255,255,0.2) 100%)`
+                        }}
+                      />
+                      <p className="text-xs text-purple-400 mt-2">
+                        💡 This total will be allocated across your teams below (syncs with Team Size section)
+                      </p>
+                    </div>
+
                     <div>
                       <label htmlFor="organizationName" className="block text-sm font-semibold text-white mb-2">
                         Organization Name <span className="text-solar-surge-orange">*</span>
@@ -515,8 +562,9 @@ function TeamLicensingContent() {
                   <label className="text-lg font-semibold">Number of Users</label>
                   <div className="flex items-center gap-3">
                     <button
-                      onClick={() => setSeatCount(Math.max(1, seatCount - 1))}
-                      className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center font-bold"
+                      onClick={() => !isMultiTeamOrg && setSeatCount(Math.max(1, seatCount - 1))}
+                      disabled={isMultiTeamOrg}
+                      className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       -
                     </button>
@@ -525,12 +573,14 @@ function TeamLicensingContent() {
                       min="1"
                       max="200"
                       value={seatCount}
-                      onChange={(e) => setSeatCount(Math.max(1, Math.min(200, parseInt(e.target.value) || 1)))}
-                      className="w-20 h-10 text-center text-2xl font-black bg-white/10 border border-white/20 rounded-lg focus:border-solar-surge-orange focus:outline-none"
+                      onChange={(e) => !isMultiTeamOrg && setSeatCount(Math.max(1, Math.min(200, parseInt(e.target.value) || 1)))}
+                      disabled={isMultiTeamOrg}
+                      className="w-20 h-10 text-center text-2xl font-black bg-white/10 border border-white/20 rounded-lg focus:border-solar-surge-orange focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                     />
                     <button
-                      onClick={() => setSeatCount(Math.min(200, seatCount + 1))}
-                      className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center font-bold"
+                      onClick={() => !isMultiTeamOrg && setSeatCount(Math.min(200, seatCount + 1))}
+                      disabled={isMultiTeamOrg}
+                      className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center font-bold disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       +
                     </button>
@@ -542,18 +592,25 @@ function TeamLicensingContent() {
                   min="1"
                   max="200"
                   value={seatCount}
-                  onChange={(e) => setSeatCount(parseInt(e.target.value))}
-                  className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                  onChange={(e) => !isMultiTeamOrg && setSeatCount(parseInt(e.target.value))}
+                  disabled={isMultiTeamOrg}
+                  className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{
                     background: `linear-gradient(to right, #F97316 0%, #F97316 ${((seatCount - 1) / (200 - 1)) * 100}%, rgba(255,255,255,0.2) ${((seatCount - 1) / (200 - 1)) * 100}%, rgba(255,255,255,0.2) 100%)`
                   }}
                 />
 
-                <p className="text-xs text-text-secondary mt-2">
-                  Athletes and coaches who need Premium access
-                  <br />
-                  <span className="text-neon-cortex-blue font-semibold">Parents get free read-only access to their athlete's Goals & Reports</span>
-                </p>
+                {isMultiTeamOrg ? (
+                  <p className="text-xs text-purple-400 mt-2 flex items-center gap-1">
+                    <span>↑</span> Using total from Multi-Team Organization section above
+                  </p>
+                ) : (
+                  <p className="text-xs text-text-secondary mt-2">
+                    Athletes and coaches who need Premium access
+                    <br />
+                    <span className="text-neon-cortex-blue font-semibold">Parents get free read-only access to their athlete's Goals & Reports</span>
+                  </p>
+                )}
 
                 {pricing.discountLabel && (
                   <div
