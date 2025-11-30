@@ -3,20 +3,38 @@
 import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { CheckCircle, Copy, Mail, ArrowRight, Shield, Users } from 'lucide-react';
+import { CheckCircle, Copy, Mail, ArrowRight, Shield, Users, Building2 } from 'lucide-react';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { GradientTextReveal } from '@/components/animations';
+
+interface TeamCode {
+  teamNumber: number;
+  teamName: string;
+  coachCode: string;
+  teamCode: string;
+  seatCount: number;
+}
 
 function SuccessContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session_id');
-  const [copiedCoach, setCopiedCoach] = useState(false);
-  const [copiedTeam, setCopiedTeam] = useState(false);
+  const [copiedCoach, setCopiedCoach] = useState<number | null>(null);
+  const [copiedTeam, setCopiedTeam] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Single team state
   const [coachCode, setCoachCode] = useState<string>('');
   const [teamCode, setTeamCode] = useState<string>('');
-  const [email, setEmail] = useState<string>('');
   const [seatCount, setSeatCount] = useState<number>(0);
+
+  // Multi-team org state
+  const [isMultiTeamOrg, setIsMultiTeamOrg] = useState(false);
+  const [organizationName, setOrganizationName] = useState<string>('');
+  const [teamCodes, setTeamCodes] = useState<TeamCode[]>([]);
+  const [totalSeatCount, setTotalSeatCount] = useState<number>(0);
+
+  // Shared state
+  const [email, setEmail] = useState<string>('');
   const [lockedInRate, setLockedInRate] = useState<number>(0);
 
   useEffect(() => {
@@ -29,10 +47,17 @@ function SuccessContent() {
     fetch(`/api/checkout-success?session_id=${sessionId}`)
       .then(res => res.json())
       .then(data => {
-        setCoachCode(data.coachCode || '');
-        setTeamCode(data.teamCode || '');
+        if (data.isMultiTeamOrg) {
+          setIsMultiTeamOrg(true);
+          setOrganizationName(data.organizationName || '');
+          setTeamCodes(data.teamCodes || []);
+          setTotalSeatCount(data.totalSeatCount || 0);
+        } else {
+          setCoachCode(data.coachCode || '');
+          setTeamCode(data.teamCode || '');
+          setSeatCount(data.seatCount || 0);
+        }
         setEmail(data.email || '');
-        setSeatCount(data.seatCount || 0);
         setLockedInRate(data.lockedInRate || 0);
         setLoading(false);
       })
@@ -42,16 +67,15 @@ function SuccessContent() {
       });
   }, [sessionId]);
 
-  const copyCoachCode = () => {
-    navigator.clipboard.writeText(coachCode);
-    setCopiedCoach(true);
-    setTimeout(() => setCopiedCoach(false), 2000);
-  };
-
-  const copyTeamCode = () => {
-    navigator.clipboard.writeText(teamCode);
-    setCopiedTeam(true);
-    setTimeout(() => setCopiedTeam(false), 2000);
+  const copyCode = (code: string, type: 'coach' | 'team', teamIndex: number) => {
+    navigator.clipboard.writeText(code);
+    if (type === 'coach') {
+      setCopiedCoach(teamIndex);
+      setTimeout(() => setCopiedCoach(null), 2000);
+    } else {
+      setCopiedTeam(teamIndex);
+      setTimeout(() => setCopiedTeam(null), 2000);
+    }
   };
 
   if (loading) {
@@ -65,7 +89,7 @@ function SuccessContent() {
     );
   }
 
-  if (!sessionId || !teamCode) {
+  if (!sessionId || (!teamCode && teamCodes.length === 0)) {
     return (
       <div className="min-h-screen pt-32 pb-20">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -84,6 +108,203 @@ function SuccessContent() {
     );
   }
 
+  // Multi-team organization success view
+  if (isMultiTeamOrg && teamCodes.length > 0) {
+    return (
+      <div className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto">
+          {/* Success Header */}
+          <div className="text-center mb-12">
+            <div className="inline-block mb-6">
+              <LiquidGlass variant="blue" rounded="full" padding="none" glow={true} className="px-8 py-4">
+                <div className="flex items-center gap-3">
+                  <CheckCircle className="w-8 h-8 text-neon-cortex-green drop-shadow-[0_0_12px_rgba(34,197,94,0.8)]" />
+                  <span className="text-xl md:text-2xl font-bold">ORGANIZATION PURCHASE COMPLETE</span>
+                </div>
+              </LiquidGlass>
+            </div>
+            <GradientTextReveal
+              text="Welcome to Mind & Muscle Premium!"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-relaxed"
+              gradientFrom="#0EA5E9"
+              gradientTo="#F97316"
+              delay={0.2}
+            />
+            <p className="text-xl sm:text-2xl text-gray-300 max-w-4xl mx-auto font-medium leading-relaxed">
+              Your organization license for <span className="text-purple-400 font-bold">{organizationName}</span> is now active
+            </p>
+          </div>
+
+          {/* Organization Summary */}
+          <div className="mb-8">
+            <LiquidGlass variant="neutral" className="border-2 border-purple-500/40">
+              <div className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <Building2 className="w-8 h-8 text-purple-400" />
+                  <div>
+                    <h3 className="text-2xl font-black text-purple-400">{organizationName}</h3>
+                    <p className="text-text-secondary">
+                      {teamCodes.length} Teams • {totalSeatCount} Total Seats
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </LiquidGlass>
+          </div>
+
+          {/* Team Codes */}
+          <div className="space-y-6 mb-8">
+            {teamCodes.map((team, index) => (
+              <div key={index} className="bg-gradient-to-br from-purple-500/5 to-neon-cortex-blue/5 border-2 border-purple-500/30 rounded-2xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center text-purple-400 font-bold text-lg">
+                    {team.teamNumber}
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-black text-white">{team.teamName}</h3>
+                    <p className="text-sm text-text-secondary">{team.seatCount} seats allocated</p>
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  {/* Coach Code */}
+                  <div className="bg-neon-cortex-green/10 border border-neon-cortex-green/30 rounded-xl p-4">
+                    <p className="text-xs font-semibold text-neon-cortex-green mb-2">COACH CODE (Single-Use)</p>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 p-3 bg-space-black/50 border border-dashed border-neon-cortex-green/50 rounded-lg">
+                        <div className="text-lg font-black text-neon-cortex-green text-center tracking-wider font-mono">
+                          {team.coachCode}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => copyCode(team.coachCode, 'coach', index)}
+                        className="px-4 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105 border border-neon-cortex-green/30 bg-neon-cortex-green/10 hover:bg-neon-cortex-green/20 flex items-center gap-2"
+                      >
+                        {copiedCoach === index ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Team Code */}
+                  <div className="bg-neon-cortex-blue/10 border border-neon-cortex-blue/30 rounded-xl p-4">
+                    <p className="text-xs font-semibold text-neon-cortex-blue mb-2">TEAM CODE (Share with Athletes)</p>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 p-3 bg-space-black/50 border border-dashed border-neon-cortex-blue/50 rounded-lg">
+                        <div className="text-lg font-black text-neon-cortex-blue text-center tracking-wider font-mono">
+                          {team.teamCode}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => copyCode(team.teamCode, 'team', index)}
+                        className="px-4 py-3 rounded-lg font-semibold transition-all duration-300 hover:scale-105 border border-neon-cortex-blue/30 bg-neon-cortex-blue/10 hover:bg-neon-cortex-blue/20 flex items-center gap-2"
+                      >
+                        {copiedTeam === index ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Email Confirmation */}
+          <div className="p-4 bg-neon-cortex-green/10 border border-neon-cortex-green/30 rounded-lg flex items-start gap-3 mb-8">
+            <Mail className="w-5 h-5 text-neon-cortex-green flex-shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <p className="text-neon-cortex-green font-semibold mb-1">Email Confirmation Sent</p>
+              <p className="text-text-secondary">
+                We've sent all {teamCodes.length} team codes and complete instructions to <span className="font-semibold">{email}</span>
+              </p>
+            </div>
+          </div>
+
+          {/* Instructions */}
+          <LiquidGlass variant="neutral" className="mb-6">
+            <div className="p-8">
+              <h3 className="text-2xl font-bold mb-6">Next Steps for Each Team</h3>
+
+              <div className="space-y-4">
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-neon-cortex-blue to-mind-primary rounded-full flex items-center justify-center font-bold">
+                    1
+                  </div>
+                  <div>
+                    <h4 className="font-bold mb-1">Distribute Codes to Each Team Coach</h4>
+                    <p className="text-text-secondary text-sm">
+                      Share each team's COACH code with their designated coach. They'll use it to claim ownership.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-neon-cortex-blue to-mind-primary rounded-full flex items-center justify-center font-bold">
+                    2
+                  </div>
+                  <div>
+                    <h4 className="font-bold mb-1">Coaches Redeem Their Code</h4>
+                    <p className="text-text-secondary text-sm">
+                      Each coach downloads the app and enters their COACH code to activate their team.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-neon-cortex-blue to-mind-primary rounded-full flex items-center justify-center font-bold">
+                    3
+                  </div>
+                  <div>
+                    <h4 className="font-bold mb-1">Share Team Codes with Athletes</h4>
+                    <p className="text-text-secondary text-sm">
+                      Athletes use their team's TEAM code to join. Parents can also join for FREE monitoring access!
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </LiquidGlass>
+
+          {/* Manage License */}
+          <LiquidGlass variant="orange" className="mb-8">
+            <div className="p-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <Users className="w-6 h-6 text-solar-surge-orange flex-shrink-0 mt-1" />
+                  <div>
+                    <h4 className="font-bold">Need More Seats?</h4>
+                    <p className="text-sm text-text-secondary">
+                      Add seats to your organization at your locked-in rate of ${lockedInRate.toFixed(2)}/seat
+                    </p>
+                  </div>
+                </div>
+                <Link
+                  href="/team-licensing/manage"
+                  className="px-6 py-3 rounded-lg font-semibold backdrop-blur-md transition-all duration-300 hover:scale-105 border border-solar-surge-orange/30 bg-gradient-to-br from-background-primary/80 via-background-secondary/60 to-solar-surge-orange/10 hover:shadow-liquid-glow-orange hover:border-solar-surge-orange/50 flex items-center gap-2 whitespace-nowrap"
+                >
+                  Manage License
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+              </div>
+            </div>
+          </LiquidGlass>
+
+          {/* Support */}
+          <div className="text-center">
+            <p className="text-text-secondary mb-4">
+              Questions about your organization license?
+            </p>
+            <Link
+              href="/support"
+              className="text-neon-cortex-blue hover:underline font-semibold"
+            >
+              Contact Support →
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Single team success view (original)
   return (
     <div className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
@@ -124,7 +345,7 @@ function SuccessContent() {
                 <p className="text-text-secondary text-sm mb-4">
                   Redeem this code in the app to claim your team and activate Premium features. This is <span className="font-semibold text-white">single-use</span> and just for you.
                 </p>
-                
+
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                   <div className="flex-1 p-4 bg-space-black/50 border-2 border-dashed border-neon-cortex-green/50 rounded-lg">
                     <div className="text-xl md:text-2xl font-black text-neon-cortex-green text-center tracking-wider font-mono">
@@ -132,10 +353,10 @@ function SuccessContent() {
                     </div>
                   </div>
                   <button
-                    onClick={copyCoachCode}
+                    onClick={() => copyCode(coachCode, 'coach', 0)}
                     className="px-6 py-3 rounded-lg font-semibold backdrop-blur-md transition-all duration-300 hover:scale-105 border border-neon-cortex-green/30 bg-gradient-to-br from-background-primary/80 via-background-secondary/60 to-neon-cortex-green/10 hover:shadow-[0_0_20px_rgba(34,197,94,0.4)] hover:border-neon-cortex-green/50 flex items-center justify-center gap-2"
                   >
-                    {copiedCoach ? (
+                    {copiedCoach === 0 ? (
                       <>
                         <CheckCircle className="w-5 h-5" />
                         Copied!
@@ -182,10 +403,10 @@ function SuccessContent() {
                     </div>
                   </div>
                   <button
-                    onClick={copyTeamCode}
+                    onClick={() => copyCode(teamCode, 'team', 0)}
                     className="px-6 py-3 rounded-lg font-semibold backdrop-blur-md transition-all duration-300 hover:scale-105 border border-neon-cortex-blue/30 bg-gradient-to-br from-background-primary/80 via-background-secondary/60 to-neon-cortex-blue/10 hover:shadow-liquid-glow-blue hover:border-neon-cortex-blue/50 flex items-center justify-center gap-2"
                   >
-                    {copiedTeam ? (
+                    {copiedTeam === 0 ? (
                       <>
                         <CheckCircle className="w-5 h-5" />
                         Copied!
