@@ -113,7 +113,7 @@ export default function FAQPage() {
         },
         {
           question: 'Can I create custom mental training sessions?',
-          answer: 'Yes! In Mind Coach AI, tap "Create Custom Session". Describe what you\'re working on (e.g., "pre-game anxiety" or "staying confident after an error"), and the AI will generate a personalized session targeting your specific challenge.'
+          answer: 'Yes! In Mind Coach AI, tap "Create Custom Session". You can build your own session by selecting exercises and customizing the focus areas that matter most to you (e.g., pre-game anxiety, staying confident after an error). Your custom sessions are saved for easy access anytime.'
         },
         {
           question: 'How do I track my mental training progress?',
