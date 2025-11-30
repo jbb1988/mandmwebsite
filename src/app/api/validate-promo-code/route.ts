@@ -67,9 +67,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Supabase RPC returns an array, get the first element
+    const result = Array.isArray(data) ? data[0] : data;
+    
     // Return validation result
-    console.log('[validate-promo-code] Returning success response');
-    return NextResponse.json(data);
+    console.log('[validate-promo-code] Returning success response:', result);
+    return NextResponse.json(result);
   } catch (error: any) {
     console.error('[validate-promo-code] Caught error:', error);
     return NextResponse.json(
