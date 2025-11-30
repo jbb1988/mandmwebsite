@@ -402,6 +402,10 @@ export async function POST(request: NextRequest) {
       // Get both codes that were generated during checkout
       const coachCode = session.metadata?.coach_code;
       const teamCode = session.metadata?.team_code;
+      const promoCode = session.metadata?.promo_code;
+      const promoDiscountPercent = session.metadata?.promo_discount_percent 
+        ? parseInt(session.metadata.promo_discount_percent) 
+        : null;
 
       if (!seatCount || !customerEmail || !coachCode || !teamCode) {
         console.error('Missing required metadata in session:', session.id);
@@ -499,12 +503,56 @@ export async function POST(request: NextRequest) {
 
       console.log('Coach code created:', coachCode, 'Team code created:', teamCode, 'for team:', team.id);
 
-      // Send email with both codes
+      // Track promo code redemption if present
+      if (promoCode && promoDiscountPercent) {
+        try {
+          // Get promo code ID from database
+          const { data: promoCodeData } = await supabase
+            .from('promo_codes')
+            .select('id')
+            .eq('code', promoCode.toUpperCase())
+            .single();
+
+          if (promoCodeData) {
+            // Record redemption
+            await supabase
+              .from('promo_code_redemptions')
+              .insert({
+                promo_code_id: promoCodeData.id,
+                code: promoCode.toUpperCase(),
+                redeemed_by_email: customerEmail,
+                stripe_session_id: session.id,
+                discount_applied: promoDiscountPercent,
+                team_id: team.id,
+              });
+
+            // Increment redemption count - fetch current and add 1
+            const { data: currentPromo } = await supabase
+              .from('promo_codes')
+              .select('redemptions_count')
+              .eq('id', promoCodeData.id)
+              .single();
+            
+            if (currentPromo) {
+              await supabase
+                .from('promo_codes')
+                .update({ redemptions_count: currentPromo.redemptions_count + 1 })
+                .eq('id', promoCodeData.id);
+            }
+
+            console.log('Promo code redemption tracked:', promoCode);
+          }
+        } catch (error) {
+          console.error('Error tracking promo code redemption:', error);
+          // Don't fail the webhook if promo tracking fails
+        }
+      }
+
+      // Send team code email
       await sendTeamCodeEmail(customerEmail, coachCode, teamCode, seatCount);
 
-      // Tolt tracking: Since Stripe is connected to Tolt, they automatically
-      // track conversions via their webhook integration. The tolt_referral
-      // in session.metadata is all they need. No manual API call required.
+      // Tolt tracking: Tolt automatically tracks conversions via their Stripe webhook
+      // integration. The tolt_referral in session.metadata is all they need.
       if (toltReferral) {
         console.log('Tolt referral tracked in Stripe metadata:', toltReferral);
         console.log('Tolt will automatically track this conversion via Stripe webhook');

@@ -82,6 +82,7 @@ export const checkoutSessionSchema = z.object({
   testMode: z.boolean().optional(),
   toltReferral: z.string().max(100).trim().optional(),
   finderCode: z.string().max(100).trim().optional(),
+  promoCode: z.string().regex(/^[A-Z0-9]{6,12}$/, 'Invalid promo code format').optional(),
 });
 
 // Add team seats schema

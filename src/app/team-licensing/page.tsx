@@ -16,6 +16,14 @@ function TeamLicensingContent() {
   const [email, setEmail] = useState('');
   const [showCanceledMessage, setShowCanceledMessage] = useState(false);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [promoCode, setPromoCode] = useState('');
+  const [promoValidation, setPromoValidation] = useState<{
+    valid: boolean;
+    discount_percent?: number;
+    description?: string;
+    error?: string;
+  } | null>(null);
+  const [isValidatingPromo, setIsValidatingPromo] = useState(false);
 
   useEffect(() => {
     if (searchParams.get('canceled') === 'true') {
@@ -30,41 +38,95 @@ function TeamLicensingContent() {
     // 6-month pricing
     const basePrice = 79; // 6-month price
     const originalPrice = 79; // No "original" price for 6-month
-    let discount = 0;
-    let discountLabel = '';
+    let volumeDiscount = 0;
+    let volumeDiscountLabel = '';
 
     if (seats >= 200) {
-      discount = 0.20;
-      discountLabel = '20% League Discount';
+      volumeDiscount = 0.20;
+      volumeDiscountLabel = '20% League Discount';
     } else if (seats >= 120) {
-      discount = 0.15;
-      discountLabel = '15% Organization Discount';
+      volumeDiscount = 0.15;
+      volumeDiscountLabel = '15% Organization Discount';
     } else if (seats >= 12) {
-      discount = 0.10;
-      discountLabel = '10% Team Discount';
+      volumeDiscount = 0.10;
+      volumeDiscountLabel = '10% Team Discount';
     }
     // 1-11 users: no discount (stays at $79)
 
-    const pricePerSeat = basePrice * (1 - discount);
-    const originalPricePerSeat = originalPrice * (1 - discount);
+    // Apply volume discount first
+    const priceAfterVolumeDiscount = basePrice * (1 - volumeDiscount);
+    
+    // Apply promo code discount on top of volume discount if valid
+    const promoDiscount = promoValidation?.valid ? (promoValidation.discount_percent || 0) / 100 : 0;
+    const pricePerSeat = priceAfterVolumeDiscount * (1 - promoDiscount);
+    
     const totalPrice = pricePerSeat * seats;
-    const originalTotalPrice = originalPricePerSeat * seats;
+    const totalBeforePromo = priceAfterVolumeDiscount * seats;
     const individualTotal = basePrice * seats;
-    const savings = individualTotal - totalPrice;
+    const volumeSavings = individualTotal - totalBeforePromo;
+    const promoSavings = totalBeforePromo - totalPrice;
+    const totalSavings = individualTotal - totalPrice;
 
     return {
       pricePerSeat: pricePerSeat.toFixed(2),
-      originalPricePerSeat: originalPricePerSeat.toFixed(2),
       totalPrice: totalPrice.toFixed(2),
-      originalTotalPrice: originalTotalPrice.toFixed(2),
+      totalBeforePromo: totalBeforePromo.toFixed(2),
       individualTotal: individualTotal.toFixed(2),
-      savings: savings.toFixed(2),
-      discountLabel,
-      discountPercent: Math.round(discount * 100),
+      savings: totalSavings.toFixed(2),
+      volumeSavings: volumeSavings.toFixed(2),
+      promoSavings: promoSavings.toFixed(2),
+      discountLabel: volumeDiscountLabel,
+      discountPercent: Math.round(volumeDiscount * 100),
+      promoDiscountPercent: Math.round(promoDiscount * 100),
+      hasPromo: promoValidation?.valid || false,
     };
   };
 
   const pricing = calculatePricing(seatCount);
+
+  const handleValidatePromo = async () => {
+    if (!promoCode.trim()) {
+      setPromoValidation({ valid: false, error: 'Please enter a promo code' });
+      return;
+    }
+
+    if (!email || !email.includes('@')) {
+      setPromoValidation({ valid: false, error: 'Please enter your email first' });
+      return;
+    }
+
+    setIsValidatingPromo(true);
+    setPromoValidation(null);
+
+    try {
+      const response = await fetch('/api/validate-promo-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          code: promoCode.toUpperCase(),
+          email: email.toLowerCase(),
+        }),
+      });
+
+      const data = await response.json();
+      setPromoValidation(data);
+    } catch (error) {
+      console.error('Promo validation error:', error);
+      setPromoValidation({
+        valid: false,
+        error: 'Failed to validate promo code',
+      });
+    } finally {
+      setIsValidatingPromo(false);
+    }
+  };
+
+  const handleRemovePromo = () => {
+    setPromoCode('');
+    setPromoValidation(null);
+  };
 
   const handlePurchase = async () => {
     if (!email || !email.includes('@')) {
@@ -111,6 +173,7 @@ function TeamLicensingContent() {
           email,
           ...(toltReferral && { toltReferral }),
           ...(finderCode && { finderCode }),
+          ...(promoValidation?.valid && promoCode && { promoCode: promoCode.toUpperCase() }),
         }),
       });
 
@@ -377,6 +440,75 @@ function TeamLicensingContent() {
                   </svg>
                   We'll send your team access code to this email address
                 </p>
+              </div>
+
+              {/* Promo Code Input */}
+              <div className="mb-6">
+                <label htmlFor="promoCode" className="block text-sm font-semibold text-starlight-white mb-2">
+                  Promo Code (Optional)
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    id="promoCode"
+                    value={promoCode}
+                    onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                    placeholder="EARLYBIRD2025"
+                    disabled={promoValidation?.valid}
+                    className="flex-1 px-4 py-3 rounded-xl border border-white/10 bg-white/10 backdrop-blur-md text-white placeholder:text-text-secondary/50 focus:outline-none focus:ring-2 focus:ring-neon-cortex-blue/50 focus:border-neon-cortex-blue/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed uppercase"
+                  />
+                  {!promoValidation?.valid ? (
+                    <button
+                      onClick={handleValidatePromo}
+                      disabled={isValidatingPromo || !promoCode.trim() || !email}
+                      className="px-6 py-3 rounded-xl bg-gradient-to-r from-neon-cortex-blue to-neon-cortex-blue/80 font-semibold hover:shadow-liquid-glow-blue transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                    >
+                      {isValidatingPromo ? 'Checking...' : 'Apply'}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleRemovePromo}
+                      className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 font-semibold transition-all duration-300 whitespace-nowrap"
+                    >
+                      Remove
+                    </button>
+                  )}
+                </div>
+
+                {/* Promo Validation Messages */}
+                {promoValidation && (
+                  <div className="mt-3">
+                    {promoValidation.valid ? (
+                      <div className="flex items-center gap-2 p-3 rounded-lg bg-neon-cortex-green/10 border border-neon-cortex-green/30">
+                        <Check className="w-5 h-5 text-neon-cortex-green flex-shrink-0" />
+                        <div>
+                          <p className="text-sm font-semibold text-neon-cortex-green">
+                            {promoValidation.discount_percent}% discount applied!
+                          </p>
+                          {promoValidation.description && (
+                            <p className="text-xs text-text-secondary mt-0.5">
+                              {promoValidation.description}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/30">
+                        <X className="w-5 h-5 text-red-400 flex-shrink-0" />
+                        <p className="text-sm text-red-400">{promoValidation.error}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {pricing.hasPromo && pricing.promoSavings !== '0.00' && (
+                  <div className="mt-3 p-3 rounded-lg bg-gradient-to-r from-neon-cortex-blue/20 to-solar-surge-orange/20 border border-neon-cortex-blue/30">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-text-secondary">Promo code savings:</span>
+                      <span className="text-neon-cortex-green font-bold">-${pricing.promoSavings}</span>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* CTA Button */}

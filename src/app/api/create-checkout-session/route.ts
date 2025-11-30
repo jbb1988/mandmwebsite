@@ -90,7 +90,58 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { seatCount, email, testMode, toltReferral, finderCode } = validationResult.data;
+    const { seatCount, email, testMode, toltReferral, finderCode, promoCode } = validationResult.data;
+
+    // If promo code provided, validate it first
+    let promoDiscount = 0;
+    let stripeCouponId: string | undefined;
+    
+    if (promoCode) {
+      try {
+        // Call our validation endpoint to check the promo code
+        const validationResponse = await fetch(`${request.headers.get('origin')}/api/validate-promo-code`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            code: promoCode.toUpperCase(),
+            email: email.toLowerCase(),
+          }),
+        });
+
+        const validationData = await validationResponse.json();
+        
+        if (validationData.valid) {
+          promoDiscount = validationData.discount_percent || 0;
+          
+          // Create or retrieve Stripe coupon
+          const couponId = `PROMO_${promoCode.toUpperCase()}`;
+          
+          try {
+            // Try to retrieve existing coupon
+            await stripe.coupons.retrieve(couponId);
+            stripeCouponId = couponId;
+          } catch (retrieveError: any) {
+            // Coupon doesn't exist, create it
+            if (retrieveError.code === 'resource_missing') {
+              const coupon = await stripe.coupons.create({
+                id: couponId,
+                percent_off: promoDiscount,
+                duration: 'once', // Apply only to first payment
+                name: `Promo Code: ${promoCode.toUpperCase()}`,
+              });
+              stripeCouponId = coupon.id;
+            } else {
+              throw retrieveError;
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error processing promo code:', error);
+        // Continue without promo code if validation fails
+      }
+    }
 
     // TEST MODE: Use $1.00 per seat for testing
     let pricePerSeat: number;
@@ -174,6 +225,7 @@ export async function POST(request: NextRequest) {
       tax_id_collection: {
         enabled: true,
       },
+      ...(stripeCouponId && { discounts: [{ coupon: stripeCouponId }] }),
       metadata: {
         seat_count: seatCount.toString(),
         discount_percentage: discountPercentage.toString(),
@@ -182,6 +234,8 @@ export async function POST(request: NextRequest) {
         team_code: teamCode,
         ...(toltReferral && { tolt_referral: toltReferral }),
         ...(finderCode && { finder_code: finderCode }),
+        ...(promoCode && { promo_code: promoCode.toUpperCase() }),
+        ...(promoDiscount > 0 && { promo_discount_percent: promoDiscount.toString() }),
       },
       subscription_data: {
         metadata: {
@@ -192,6 +246,8 @@ export async function POST(request: NextRequest) {
           team_code: teamCode,
           ...(toltReferral && { tolt_referral: toltReferral }),
           ...(finderCode && { finder_code: finderCode }),
+          ...(promoCode && { promo_code: promoCode.toUpperCase() }),
+          ...(promoDiscount > 0 && { promo_discount_percent: promoDiscount.toString() }),
         },
       },
     });
