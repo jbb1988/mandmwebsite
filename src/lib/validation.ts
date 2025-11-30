@@ -83,6 +83,10 @@ export const checkoutSessionSchema = z.object({
   toltReferral: z.string().max(100).trim().optional(),
   finderCode: z.string().max(100).trim().optional(),
   promoCode: z.string().regex(/^[A-Z0-9]{6,12}$/, 'Invalid promo code format').optional(),
+  // UTM tracking parameters
+  utmSource: z.string().max(100).trim().optional(),
+  utmMedium: z.string().max(100).trim().optional(),
+  utmCampaign: z.string().max(100).trim().optional(),
   // Multi-team organization fields
   isMultiTeamOrg: z.boolean().optional(),
   organizationName: organizationSchema,

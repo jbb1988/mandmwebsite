@@ -270,7 +270,7 @@ async function createFinderFeeAndNotify(
 
     await resend.emails.send({
       from: 'Mind and Muscle <noreply@mindandmuscle.ai>',
-      to: process.env.ADMIN_EMAIL || 'admin@mindandmuscle.ai',
+      to: process.env.ADMIN_EMAIL || 'marketing@mindandmuscle.ai',
       subject: `Finder Fee: ${finderCode} → $${feeAmount.toFixed(2)}`,
       html: `
         <!DOCTYPE html>
@@ -375,6 +375,138 @@ async function createFinderFeeAndNotify(
   } catch (error) {
     console.error('Error in createFinderFeeAndNotify:', error);
     // Don't throw - we don't want finder fee issues to break the main webhook flow
+  }
+}
+
+// Send promo code admin notification
+async function sendPromoCodeNotification(
+  promoCode: string,
+  customerEmail: string,
+  seatCount: number,
+  discountPercent: number,
+  totalAmount: number,
+  totalSaved: number,
+  utmSource?: string,
+  utmMedium?: string,
+  utmCampaign?: string
+) {
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY!);
+    
+    await resend.emails.send({
+      from: 'Mind and Muscle <noreply@mindandmuscle.ai>',
+      to: process.env.ADMIN_EMAIL || 'marketing@mindandmuscle.ai',
+      subject: `🎉 Promo Code Used: ${promoCode} - ${discountPercent}% off ($${totalSaved.toFixed(2)} saved)`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background-color: #f5f5f5;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f5f5f5; padding: 40px 20px;">
+            <tr>
+              <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+
+                  <!-- Header -->
+                  <tr>
+                    <td style="background: linear-gradient(135deg, #0EA5E9 0%, #F97316 100%); padding: 30px; text-align: center;">
+                      <h1 style="margin: 0; font-size: 24px; color: #ffffff;">
+                        🎉 Promo Code Used!
+                      </h1>
+                    </td>
+                  </tr>
+
+                  <!-- Code Badge -->
+                  <tr>
+                    <td style="padding: 30px; text-align: center;">
+                      <div style="display: inline-block; background: linear-gradient(135deg, #0EA5E9 0%, #F97316 100%); padding: 16px 32px; border-radius: 12px; margin-bottom: 20px;">
+                        <div style="font-size: 32px; font-weight: 900; color: #ffffff; letter-spacing: 2px; font-family: monospace;">
+                          ${promoCode}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <!-- Details Table -->}
+                  <tr>
+                    <td style="padding: 0 30px 30px;">
+                      <table width="100%" cellpadding="12" cellspacing="0" style="border-collapse: collapse;">
+                        <tr style="background: #f8fafc;">
+                          <td style="border: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Customer Email</td>
+                          <td style="border: 1px solid #e2e8f0; color: #1e293b;">${customerEmail}</td>
+                        </tr>
+                        <tr>
+                          <td style="border: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Seats Purchased</td>
+                          <td style="border: 1px solid #e2e8f0; color: #1e293b; font-weight: 700;">${seatCount}</td>
+                        </tr>
+                        <tr style="background: #f8fafc;">
+                          <td style="border: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Discount Applied</td>
+                          <td style="border: 1px solid #e2e8f0; color: #F97316; font-weight: 700; font-size: 18px;">${discountPercent}%</td>
+                        </tr>
+                        <tr>
+                          <td style="border: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Amount Charged</td>
+                          <td style="border: 1px solid #e2e8f0; color: #16a34a; font-weight: 700; font-size: 18px;">$${totalAmount.toFixed(2)}</td>
+                        </tr>
+                        <tr style="background: #f8fafc;">
+                          <td style="border: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Amount Saved</td>
+                          <td style="border: 1px solid #e2e8f0; color: #dc2626; font-weight: 700; font-size: 18px;">-$${totalSaved.toFixed(2)}</td>
+                        </tr>
+                        ${utmSource || utmMedium || utmCampaign ? `
+                        <tr>
+                          <td colspan="2" style="border: 1px solid #e2e8f0; background: #fef3c7; padding: 16px;">
+                            <p style="margin: 0 0 8px; font-weight: 600; color: #92400e; font-size: 14px;">📊 Attribution Data:</p>
+                            <table width="100%" cellpadding="4" cellspacing="0">
+                              ${utmSource ? `
+                              <tr>
+                                <td style="color: #78350f; font-size: 12px; padding: 2px 0;">Source:</td>
+                                <td style="color: #78350f; font-size: 12px; font-weight: 600; padding: 2px 0;">${utmSource}</td>
+                              </tr>
+                              ` : ''}
+                              ${utmMedium ? `
+                              <tr>
+                                <td style="color: #78350f; font-size: 12px; padding: 2px 0;">Medium:</td>
+                                <td style="color: #78350f; font-size: 12px; font-weight: 600; padding: 2px 0;">${utmMedium}</td>
+                              </tr>
+                              ` : ''}
+                              ${utmCampaign ? `
+                              <tr>
+                                <td style="color: #78350f; font-size: 12px; padding: 2px 0;">Campaign:</td>
+                                <td style="color: #78350f; font-size: 12px; font-weight: 600; padding: 2px 0;">${utmCampaign}</td>
+                              </tr>
+                              ` : ''}
+                            </table>
+                          </td>
+                        </tr>
+                        ` : ''}
+                      </table>
+                    </td>
+                  </tr>
+
+                  <!-- Footer -->
+                  <tr>
+                    <td style="background: #f8fafc; padding: 20px 30px; text-align: center; border-top: 1px solid #e2e8f0;">
+                      <p style="margin: 0; font-size: 12px; color: #94a3b8;">
+                        Promo Code Notification • Mind & Muscle
+                      </p>
+                    </td>
+                  </tr>
+
+                </table>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
+      `,
+    });
+
+    console.log('Promo code admin notification sent:', promoCode);
+  } catch (error) {
+    console.error('Error sending promo code notification:', error);
+    // Don't throw - we don't want email failure to break webhook processing
   }
 }
 
@@ -943,6 +1075,24 @@ export async function POST(request: NextRequest) {
             }
 
             console.log('Promo code redemption tracked:', promoCode);
+            
+            // Send admin notification about promo code usage
+            const totalAmount = session.amount_total ? session.amount_total / 100 : 0;
+            const pricePerSeatBeforePromo = pricePerSeat / (1 - (promoDiscountPercent / 100));
+            const totalBeforePromo = pricePerSeatBeforePromo * seatCount;
+            const totalSaved = totalBeforePromo - totalAmount;
+            
+            await sendPromoCodeNotification(
+              promoCode.toUpperCase(),
+              customerEmail,
+              seatCount,
+              promoDiscountPercent,
+              totalAmount,
+              totalSaved,
+              session.metadata?.utm_source,
+              session.metadata?.utm_medium,
+              session.metadata?.utm_campaign
+            );
           }
         } catch (error) {
           console.error('Error tracking promo code redemption:', error);
