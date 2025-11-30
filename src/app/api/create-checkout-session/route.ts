@@ -234,7 +234,7 @@ export async function POST(request: NextRequest) {
       consent_collection: {
         terms_of_service: 'required',
       },
-      allow_promotion_codes: true,
+      allow_promotion_codes: !stripeCouponId, // Only allow manual codes if no promo applied
       tax_id_collection: {
         enabled: true,
       },
