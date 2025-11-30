@@ -10,7 +10,7 @@ const supabase = createClient(
 
 // Validation schema
 const validatePromoCodeSchema = z.object({
-  code: z.string().min(6).max(12).regex(/^[A-Z0-9]+$/),
+  code: z.string().min(4).max(12).regex(/^[A-Z0-9]+$/),
   email: z.string().email(),
 });
 
@@ -22,10 +22,20 @@ export async function POST(request: NextRequest) {
     const validationResult = validatePromoCodeSchema.safeParse(body);
 
     if (!validationResult.success) {
+      const errors = validationResult.error.issues;
+      let errorMessage = 'Invalid input format';
+      
+      // Provide more specific error messages
+      if (errors.some((e: any) => e.path[0] === 'code')) {
+        errorMessage = 'Promo code must be 4-12 uppercase letters/numbers only';
+      } else if (errors.some((e: any) => e.path[0] === 'email')) {
+        errorMessage = 'Please enter a valid email address';
+      }
+      
       return NextResponse.json(
         {
           valid: false,
-          error: 'Invalid input format',
+          error: errorMessage,
         },
         { status: 400 }
       );
