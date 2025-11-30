@@ -105,7 +105,7 @@ export default function FAQPage() {
         },
         {
           question: 'How do I start a mental training session?',
-          answer: 'Go to the Mind tab → Mind Coach AI. Browse available sessions or let the AI recommend one based on your goals. Tap a session to start. You\'ll be guided through exercises with audio coaching. After completing, provide feedback so the AI can personalize future sessions.'
+          answer: 'Go to the Mind tab → Mind Coach AI. New exercises are generated each week, or you can browse sessions you\'ve favorited or custom sessions you\'ve created. Tap a session to start and follow the guided exercises. After completing, provide feedback so the AI can personalize future sessions.'
         },
         {
           question: 'What types of mental training are available?',
