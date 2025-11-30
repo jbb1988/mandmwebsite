@@ -172,16 +172,12 @@ export default function FAQPage() {
           answer: 'Game Lab includes 186 unique game scenarios covering all positions and situations. Scenarios include: defensive positioning, baserunning decisions, pitch selection, cutoff plays, bunt defense, and more. New scenarios are added regularly.'
         },
         {
-          question: 'What is my "mental batting average"?',
-          answer: 'Your mental batting average is the percentage of scenarios you answer correctly. Just like a batting average measures hitting success, your mental average measures baseball IQ. Track it over time to see your game knowledge improve.'
-        },
-        {
           question: 'How do I earn XP and unlock badges?',
           answer: 'Every correct answer earns XP (experience points). Build streaks by training multiple days in a row for bonus XP. As you accumulate XP, you unlock badges like "IQ Rookie", "Student of the Game", and "Baseball Einstein". Higher difficulty scenarios earn more XP.'
         },
         {
           question: 'Do scenarios get harder as I improve?',
-          answer: 'Yes! Game Lab adapts to your skill level. As your mental batting average increases, you\'ll see more advanced scenarios with multiple correct answers, tighter game situations, and complex strategic decisions. This keeps challenging even elite players.'
+          answer: 'Yes! Game Lab adapts to your skill level. Each level gets progressively harder with more advanced scenarios, tighter game situations, and complex strategic decisions. This keeps challenging even elite players.'
         }
       ]
     },
