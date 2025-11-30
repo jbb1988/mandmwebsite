@@ -357,7 +357,7 @@ export default function FAQPage() {
         },
         {
           question: 'Can parents see team events?',
-          answer: 'Yes! Parents linked to their athlete see all team events on their calendar. They can view event details, location, and RSVP for their athlete. Parents stay informed without needing Premium access.'
+          answer: 'Yes! Parents linked to their athlete see all team events on their calendar. They can view event details, location, and RSVP for their athlete. Parents stay informed without needing Premium access. Plus, all users (Apple and Android) can sync events to their phone\'s calendar—either single events or the full team schedule.'
         }
       ]
     },
