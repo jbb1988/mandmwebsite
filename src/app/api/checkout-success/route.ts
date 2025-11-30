@@ -55,19 +55,32 @@ export async function GET(request: NextRequest) {
       // Multi-team org: fetch all team codes from database
       console.log('Multi-team org detected, fetching codes for:', organizationName);
 
-      // Find the organization license by session ID
-      const { data: orgLicense, error: orgError } = await supabase
-        .from('organization_licenses')
-        .select('id, organization_name')
-        .eq('metadata->>created_from_session', sessionId)
-        .single();
+      // Get subscription ID for querying teams
+      const subscriptionId = typeof session.subscription === 'string'
+        ? session.subscription
+        : (session.subscription as Stripe.Subscription)?.id;
 
-      if (orgError || !orgLicense) {
-        console.error('Error finding organization license:', orgError);
-        // Fallback: try to find teams by stripe subscription ID
-        const subscriptionId = session.subscription as string;
+      console.log('Looking for teams with subscription ID:', subscriptionId);
 
-        const { data: teams, error: teamsError } = await supabase
+      // Primary method: Find teams by stripe_subscription_id (most reliable)
+      const { data: teams, error: teamsError } = await supabase
+        .from('teams')
+        .select(`
+          id,
+          name,
+          license_seats_total,
+          metadata
+        `)
+        .eq('stripe_subscription_id', subscriptionId)
+        .order('created_at', { ascending: true });
+
+      console.log('Teams query result:', { teamsCount: teams?.length, error: teamsError });
+
+      if (teamsError || !teams || teams.length === 0) {
+        console.error('Error fetching teams by subscription:', teamsError);
+
+        // Fallback: try to find by session ID in metadata
+        const { data: teamsBySession, error: sessionError } = await supabase
           .from('teams')
           .select(`
             id,
@@ -75,12 +88,14 @@ export async function GET(request: NextRequest) {
             license_seats_total,
             metadata
           `)
-          .eq('stripe_subscription_id', subscriptionId)
-          .order('metadata->>team_number', { ascending: true });
+          .eq('metadata->>created_from_session', sessionId)
+          .order('created_at', { ascending: true });
 
-        if (teamsError || !teams || teams.length === 0) {
-          console.error('Error fetching teams by subscription:', teamsError);
-          // Ultimate fallback: return single codes from metadata
+        console.log('Teams by session result:', { teamsCount: teamsBySession?.length, error: sessionError });
+
+        if (sessionError || !teamsBySession || teamsBySession.length === 0) {
+          // Ultimate fallback: return single codes from metadata (shouldn't happen)
+          console.error('No teams found, falling back to metadata codes');
           return NextResponse.json({
             isMultiTeamOrg: false,
             coachCode: metadata.coach_code || '',
@@ -92,8 +107,8 @@ export async function GET(request: NextRequest) {
           });
         }
 
-        // Build team codes from teams
-        const teamCodes: TeamCode[] = teams.map((team, index) => ({
+        // Build team codes from teams found by session
+        const teamCodes: TeamCode[] = teamsBySession.map((team, index) => ({
           teamNumber: team.metadata?.team_number || index + 1,
           teamName: team.name,
           coachCode: team.metadata?.coach_code || '',
@@ -104,7 +119,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({
           isMultiTeamOrg: true,
           organizationName: organizationName || 'Your Organization',
-          numberOfTeams: teams.length,
+          numberOfTeams: teamCodes.length,
           teamCodes,
           email: session.customer_details?.email || '',
           totalSeatCount: parseInt(metadata.seat_count || '0'),
@@ -113,23 +128,8 @@ export async function GET(request: NextRequest) {
         });
       }
 
-      // Fetch all teams associated with this organization
-      const { data: teams, error: teamsError } = await supabase
-        .from('teams')
-        .select(`
-          id,
-          name,
-          license_seats_total,
-          metadata
-        `)
-        .eq('metadata->>organization_license_id', orgLicense.id)
-        .order('metadata->>team_number', { ascending: true });
-
-      if (teamsError) {
-        console.error('Error fetching organization teams:', teamsError);
-      }
-
-      const teamCodes: TeamCode[] = (teams || []).map((team, index) => ({
+      // Build team codes from teams found by subscription
+      const teamCodes: TeamCode[] = teams.map((team, index) => ({
         teamNumber: team.metadata?.team_number || index + 1,
         teamName: team.name,
         coachCode: team.metadata?.coach_code || '',
@@ -137,9 +137,12 @@ export async function GET(request: NextRequest) {
         seatCount: team.license_seats_total,
       }));
 
+      // Get organization name from first team or metadata
+      const orgName = organizationName || teams[0]?.name?.split(' - ')[0] || 'Your Organization';
+
       return NextResponse.json({
         isMultiTeamOrg: true,
-        organizationName: orgLicense.organization_name || organizationName,
+        organizationName: orgName,
         numberOfTeams: teamCodes.length,
         teamCodes,
         email: session.customer_details?.email || '',

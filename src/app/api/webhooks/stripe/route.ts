@@ -932,9 +932,69 @@ export async function POST(request: NextRequest) {
 
         console.log('Multi-team organization setup complete:', orgLicense.id);
 
-        // Handle promo tracking and finder fees for multi-team org
+        // Handle promo tracking for multi-team org
         if (promoCode && promoDiscountPercent) {
-          // [Same promo tracking code as before]
+          try {
+            // Get promo code ID from database
+            const { data: promoCodeData } = await supabase
+              .from('promo_codes')
+              .select('id')
+              .eq('code', promoCode.toUpperCase())
+              .single();
+
+            if (promoCodeData) {
+              // Record redemption (use first team ID for reference)
+              const firstTeamId = teamCodes.length > 0 ? teamCodes[0].teamId : null;
+
+              await supabase
+                .from('promo_code_redemptions')
+                .insert({
+                  promo_code_id: promoCodeData.id,
+                  code: promoCode.toUpperCase(),
+                  redeemed_by_email: customerEmail,
+                  stripe_session_id: session.id,
+                  discount_applied: promoDiscountPercent,
+                  team_id: firstTeamId,
+                });
+
+              // Increment redemption count
+              const { data: currentPromo } = await supabase
+                .from('promo_codes')
+                .select('redemptions_count')
+                .eq('id', promoCodeData.id)
+                .single();
+
+              if (currentPromo) {
+                await supabase
+                  .from('promo_codes')
+                  .update({ redemptions_count: currentPromo.redemptions_count + 1 })
+                  .eq('id', promoCodeData.id);
+              }
+
+              console.log('Multi-team org promo code redemption tracked:', promoCode);
+
+              // Send admin notification about promo code usage
+              const totalAmount = session.amount_total ? session.amount_total / 100 : 0;
+              const pricePerSeatBeforePromo = pricePerSeat / (1 - (promoDiscountPercent / 100));
+              const totalBeforePromo = pricePerSeatBeforePromo * seatCount;
+              const totalSaved = totalBeforePromo - totalAmount;
+
+              await sendPromoCodeNotification(
+                promoCode.toUpperCase(),
+                customerEmail,
+                seatCount,
+                promoDiscountPercent,
+                totalAmount,
+                totalSaved,
+                session.metadata?.utm_source,
+                session.metadata?.utm_medium,
+                session.metadata?.utm_campaign
+              );
+            }
+          } catch (error) {
+            console.error('Error tracking multi-team org promo code redemption:', error);
+            // Don't fail the webhook if promo tracking fails
+          }
         }
 
         if (session.metadata?.finder_code) {
