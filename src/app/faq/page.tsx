@@ -428,10 +428,6 @@ export default function FAQPage() {
           answer: 'Streaks track consecutive days you complete activities:\n\n• Daily Hit Streak: Complete your daily content\n• Mind Coach Streak: Complete Mind Coach AI exercises daily\n• Muscle Coach Streak: Log Muscle Coach AI exercises daily\n• Dugout Talk Streak: Make Dugout Talk entries daily\n\nLonger streaks earn bonus XP and special badges. Miss a day? Your streak resets, but your progress and total completions remain. Streaks motivate consistency—the key to real improvement.'
         },
         {
-          question: 'What badges can I unlock?',
-          answer: 'Badges reward achievements across all areas:\n\n• Training Badges: "7-Day Warrior", "30-Day Champion", "100 Sessions"\n• IQ Badges: "Student of the Game", "Baseball Einstein"\n• Strength Badges: "Iron Will", "Power Player"\n• Progress Badges: "Goal Crusher", "Comeback Kid"\n• Special Badges: Hidden achievements for elite milestones\n\nView all available badges in your profile. See which ones you\'ve unlocked and what you need to earn the rest.'
-        },
-        {
           question: 'How do I earn XP?',
           answer: 'XP (Experience Points) is earned through:\n\n• Completing mental training sessions (10-50 XP)\n• Logging workouts (10-30 XP)\n• Playing Game Lab scenarios (5-20 XP based on difficulty)\n• Achieving goals (50-200 XP)\n• Building streaks (bonus multipliers)\n• Uploading swing analysis (15 XP)\n\nHigher difficulty activities earn more XP. Perfect scores and streaks earn bonus XP.'
         },
@@ -440,8 +436,8 @@ export default function FAQPage() {
           answer: 'Your progress is tracked in multiple places:\n\n• Dashboard: Daily overview of all activities, current streaks, recent achievements\n• Profile: Total XP, level, badges earned, lifetime stats\n• Goals Section: Individual goal progress with milestones\n• Reports Tab: Weekly summaries showing training volume, consistency, areas of improvement\n\nEach section gives you different insights into your development.'
         },
         {
-          question: 'What\'s tracked in Dashboard vs Reports?',
-          answer: 'Dashboard: Real-time, today-focused. Shows today\'s activities, active streaks, quick stats, and your daily checklist. Use it every day to see what to work on.\n\nReports: Historical analysis. Weekly summaries showing trends over time, comparing this week to last week, identifying patterns, and providing coaching insights. Use it weekly to reflect on progress and adjust your training.'
+          question: 'What are Weekly Reports?',
+          answer: 'Weekly Reports provide historical analysis of your training. Get weekly summaries showing trends over time, comparing this week to last week, identifying patterns, and providing coaching insights. Use it weekly to reflect on progress and adjust your training.'
         }
       ]
     },
