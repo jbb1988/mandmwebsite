@@ -15,11 +15,15 @@ const validatePromoCodeSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  console.log('[validate-promo-code] Request received');
+  
   try {
     const body = await request.json();
+    console.log('[validate-promo-code] Request body:', JSON.stringify(body));
 
     // Validate input
     const validationResult = validatePromoCodeSchema.safeParse(body);
+    console.log('[validate-promo-code] Validation result:', validationResult.success);
 
     if (!validationResult.success) {
       const errors = validationResult.error.issues;
@@ -42,12 +46,15 @@ export async function POST(request: NextRequest) {
     }
 
     const { code, email } = validationResult.data;
+    console.log('[validate-promo-code] Calling Supabase with code:', code);
 
     // Call Supabase function to validate code
     const { data, error } = await supabase.rpc('validate_promo_code', {
       p_code: code.toUpperCase(),
       p_email: email.toLowerCase(),
     });
+    
+    console.log('[validate-promo-code] Supabase response - data:', data, 'error:', error);
 
     if (error) {
       console.error('Error validating promo code:', error);
@@ -61,9 +68,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Return validation result
+    console.log('[validate-promo-code] Returning success response');
     return NextResponse.json(data);
   } catch (error: any) {
-    console.error('Error in validate-promo-code API:', error);
+    console.error('[validate-promo-code] Caught error:', error);
     return NextResponse.json(
       {
         valid: false,
