@@ -133,7 +133,7 @@ export default function FAQPage() {
       faqs: [
         {
           question: 'What is Muscle Coach AI?',
-          answer: 'Muscle Coach AI is your baseball-specific strength training system. It provides position-specific power training, tracks progressive overload, and offers hundreds of exercises designed by MLB coaches. Build explosive bat speed, throwing velocity, and game-ready endurance.'
+          answer: 'Muscle Coach AI is your baseball and softball-specific strength training system. It provides position-specific power training, tracks progressive overload, and offers hundreds of exercises designed by professional coaches. Build explosive bat speed, throwing velocity, and game-ready endurance.'
         },
         {
           question: 'What are the three training zones?',
