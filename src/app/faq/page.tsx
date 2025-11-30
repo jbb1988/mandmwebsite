@@ -197,7 +197,7 @@ export default function FAQPage() {
         },
         {
           question: 'How long does analysis take?',
-          answer: 'AI analysis is nearly instant—typically 5-15 seconds after upload. You\'ll get a complete breakdown with video thumbnails showing key positions in your swing.'
+          answer: 'AI analysis typically takes around 1 minute after upload. You\'ll get a complete breakdown with detailed feedback on your swing mechanics.'
         },
         {
           question: 'Can I save and favorite analyses?',
