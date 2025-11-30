@@ -43,10 +43,24 @@ function SuccessContent() {
       return;
     }
 
-    // Fetch session details from Stripe
-    fetch(`/api/checkout-success?session_id=${sessionId}`)
-      .then(res => res.json())
-      .then(data => {
+    // Fetch session details with retry logic for multi-team orgs
+    // The webhook may still be processing when we first load
+    const fetchWithRetry = async (attempt: number = 1, maxAttempts: number = 5) => {
+      try {
+        const res = await fetch(`/api/checkout-success?session_id=${sessionId}`);
+        const data = await res.json();
+
+        // Check if this is a multi-team org but we got single codes (webhook not done yet)
+        const isMultiTeam = data.isMultiTeamOrg;
+        const hasMultipleTeams = data.teamCodes && data.teamCodes.length > 1;
+
+        // If multi-team org but only got 1 or no teams, webhook may still be processing
+        if (isMultiTeam && !hasMultipleTeams && attempt < maxAttempts) {
+          console.log(`Multi-team org detected but teams not ready yet. Retry ${attempt}/${maxAttempts}...`);
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+          return fetchWithRetry(attempt + 1, maxAttempts);
+        }
+
         if (data.isMultiTeamOrg) {
           setIsMultiTeamOrg(true);
           setOrganizationName(data.organizationName || '');
@@ -60,11 +74,17 @@ function SuccessContent() {
         setEmail(data.email || '');
         setLockedInRate(data.lockedInRate || 0);
         setLoading(false);
-      })
-      .catch(err => {
+      } catch (err) {
         console.error('Error fetching session:', err);
+        if (attempt < maxAttempts) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          return fetchWithRetry(attempt + 1, maxAttempts);
+        }
         setLoading(false);
-      });
+      }
+    };
+
+    fetchWithRetry();
   }, [sessionId]);
 
   const copyCode = (code: string, type: 'coach' | 'team', teamIndex: number) => {

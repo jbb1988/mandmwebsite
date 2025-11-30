@@ -42,9 +42,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Get subscription metadata
-    const subscription = session.subscription as Stripe.Subscription;
-    const metadata = subscription?.metadata || session.metadata;
+    // Get metadata - always prefer session.metadata as that's where we store our data
+    // Subscription metadata is only used by Stripe internally
+    const metadata = session.metadata || {};
+
+    console.log('Session metadata:', metadata);
+    console.log('is_multi_team_org:', metadata?.is_multi_team_org);
+    console.log('number_of_teams:', metadata?.number_of_teams);
 
     // Check if this is a multi-team organization purchase
     const isMultiTeamOrg = metadata?.is_multi_team_org === 'true';
@@ -54,13 +58,19 @@ export async function GET(request: NextRequest) {
     if (isMultiTeamOrg && numberOfTeams > 1) {
       // Multi-team org: fetch all team codes from database
       console.log('Multi-team org detected, fetching codes for:', organizationName);
+      console.log('Session ID:', sessionId);
+      console.log('Number of teams expected:', numberOfTeams);
 
-      // Get subscription ID for querying teams
-      const subscriptionId = typeof session.subscription === 'string'
-        ? session.subscription
-        : (session.subscription as Stripe.Subscription)?.id;
+      // Get subscription ID for querying teams - handle both string and expanded object
+      let subscriptionId: string | null = null;
+      if (typeof session.subscription === 'string') {
+        subscriptionId = session.subscription;
+      } else if (session.subscription && typeof session.subscription === 'object') {
+        subscriptionId = (session.subscription as Stripe.Subscription).id;
+      }
 
       console.log('Looking for teams with subscription ID:', subscriptionId);
+      console.log('Session subscription raw:', session.subscription);
 
       // Primary method: Find teams by stripe_subscription_id (most reliable)
       const { data: teams, error: teamsError } = await supabase
