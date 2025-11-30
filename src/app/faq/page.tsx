@@ -345,7 +345,7 @@ export default function FAQPage() {
         },
         {
           question: 'How does attendance tracking work?',
-          answer: 'Each event has RSVP options: Going, Can\'t Make It, Maybe. Coaches see attendance dashboard with real-time responses. Parents can mark their athlete\'s availability. No more "I thought practice was at 5pm" excuses.'
+          answer: 'Simply swipe on any event card to reveal the attendance screen. Each event has RSVP options: Going, Can\'t Make It, Maybe. Coaches see attendance dashboard with real-time responses. Parents can mark their athlete\'s availability. No more "I thought practice was at 5pm" excuses.'
         },
         {
           question: 'What is the Uniform Creator?',
