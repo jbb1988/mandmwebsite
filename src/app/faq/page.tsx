@@ -150,10 +150,6 @@ export default function FAQPage() {
         {
           question: 'How do I create a custom workout plan?',
           answer: 'Go to Muscle → Build Tab → Create New Plan. Name your plan, select exercises from the vault, set target sets/reps for each. Save the plan to reuse it. Track your progress each time you complete the plan. The app automatically suggests progressive overload.'
-        },
-        {
-          question: 'Can I see exercise demonstrations?',
-          answer: 'Yes! Every exercise in the Exercise Vault includes video demonstrations showing proper form. Tap any exercise to see the demo, read coaching notes, and learn common mistakes to avoid.'
         }
       ]
     },
