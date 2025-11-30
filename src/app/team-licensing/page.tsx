@@ -113,6 +113,7 @@ function TeamLicensingContent() {
         body: JSON.stringify({
           code: promoCode.toUpperCase(),
           email: email.toLowerCase(),
+          seatCount: seatCount,
         }),
       });
 

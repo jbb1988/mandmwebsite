@@ -12,6 +12,7 @@ const supabase = createClient(
 const validatePromoCodeSchema = z.object({
   code: z.string().min(4).max(12).regex(/^[A-Z0-9]+$/),
   email: z.string().email(),
+  seatCount: z.number().int().min(1).optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -45,13 +46,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { code, email } = validationResult.data;
-    console.log('[validate-promo-code] Calling Supabase with code:', code);
+    const { code, email, seatCount } = validationResult.data;
+    console.log('[validate-promo-code] Calling Supabase with code:', code, 'seatCount:', seatCount);
 
     // Call Supabase function to validate code
     const { data, error } = await supabase.rpc('validate_promo_code', {
       p_code: code.toUpperCase(),
       p_email: email.toLowerCase(),
+      p_seat_count: seatCount || null,
     });
     
     console.log('[validate-promo-code] Supabase response - data:', data, 'error:', error);
