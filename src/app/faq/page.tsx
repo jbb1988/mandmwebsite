@@ -268,8 +268,8 @@ export default function FAQPage() {
           answer: 'Each goal has a progress tracker. Log updates as you hit milestones (completed workouts, measurable improvements, game stats). Goals AI analyzes your progress and provides coaching feedback. You\'ll see visual progress bars and trend charts showing your trajectory toward the goal.'
         },
         {
-          question: 'Can I share goals with my coach or team?',
-          answer: 'Yes! Goals can be shared with your coach for accountability and feedback. Team goals can be created for entire roster (e.g., "win conference championship"). Coaches see all athlete goals on their dashboard and can provide encouragement and adjustments.'
+          question: 'Can I share goals with my coach or parent?',
+          answer: 'Yes! Athletes can choose to share their goals with their coach and/or parent for accountability and feedback. This is optional—you control who sees your goals.'
         },
         {
           question: 'What happens when I complete a goal?',
