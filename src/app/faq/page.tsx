@@ -77,7 +77,7 @@ export default function FAQPage() {
       faqs: [
         {
           question: 'What makes Mind & Muscle different from other baseball apps?',
-          answer: 'Mind & Muscle is the first AI platform built exclusively for baseball that integrates all aspects of player development. Instead of juggling 7+ different apps (team communication, mental training, video analysis, strength training, nutrition, IQ training, goal tracking), you get one intelligent system where everything connects. The AI learns from your swing videos, workouts, mental training, and goals—continuously improving recommendations across all areas. Every drill, every scenario, every mental training session is designed specifically for baseball movements and situations. We didn\'t adapt generic training for baseball. We built it from scratch for the sport.'
+          answer: 'Mind & Muscle is the first AI platform built exclusively for baseball and softball that integrates all aspects of player development. Instead of juggling 7+ different apps (team communication, mental training, video analysis, strength training, nutrition, IQ training, goal tracking), you get one intelligent system where everything connects. The AI learns from your swing videos, workouts, mental training, and goals—continuously improving recommendations across all areas. Every drill, every scenario, every mental training session is designed specifically for baseball and softball movements and situations. We didn\'t adapt generic training for baseball and softball. We built it from scratch for the sport.'
         },
         {
           question: 'Why is an all-in-one platform better than specialized apps?',
