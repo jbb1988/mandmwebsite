@@ -453,7 +453,7 @@ function TeamLicensingContent() {
                     id="promoCode"
                     value={promoCode}
                     onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                    placeholder="EARLYBIRD2025"
+                    placeholder=""
                     disabled={promoValidation?.valid}
                     className="flex-1 px-4 py-3 rounded-xl border border-white/10 bg-white/10 backdrop-blur-md text-white placeholder:text-text-secondary/50 focus:outline-none focus:ring-2 focus:ring-neon-cortex-blue/50 focus:border-neon-cortex-blue/50 transition-all disabled:opacity-50 disabled:cursor-not-allowed uppercase"
                   />
