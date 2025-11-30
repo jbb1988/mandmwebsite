@@ -341,7 +341,7 @@ export default function FAQPage() {
         },
         {
           question: 'How do I create an event?',
-          answer: 'Coaches: Go to Events → tap "Create Event". Add details (game, practice, tournament), set date/time/location. The event automatically appears on all team members\' calendars. Enable notifications so nobody misses it.'
+          answer: 'Coaches and Admins can create events. Go to Events → tap "Create Event". Add details (game, practice, tournament), set date/time/location. The event automatically appears on all team members\' calendars. Coaches can also promote team members to Admin, giving them the ability to create and manage events.'
         },
         {
           question: 'How does attendance tracking work?',
