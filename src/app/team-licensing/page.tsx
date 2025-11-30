@@ -154,6 +154,18 @@ function TeamLicensingContent() {
         alert(`With ${numberOfTeams} teams, you need at least ${numberOfTeams * 2} seats (minimum 2 per team)`);
         return;
       }
+      
+      // Check if all seats are allocated
+      const totalAllocated = seatsPerTeam.reduce((sum, seats) => sum + seats, 0);
+      if (totalAllocated !== seatCount) {
+        const difference = seatCount - totalAllocated;
+        if (difference > 0) {
+          alert(`❌ Seat Allocation Error\n\nYou have ${difference} unallocated seats.\n\nPlease allocate all ${seatCount} seats across your ${numberOfTeams} teams before checkout.\n\nCurrently allocated: ${totalAllocated} / ${seatCount}`);
+        } else {
+          alert(`❌ Seat Allocation Error\n\nYou've allocated ${Math.abs(difference)} too many seats.\n\nPlease reduce allocation to match ${seatCount} total seats.\n\nCurrently allocated: ${totalAllocated} / ${seatCount}`);
+        }
+        return;
+      }
     }
 
     setIsLoading(true);
