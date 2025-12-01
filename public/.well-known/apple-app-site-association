@@ -7,7 +7,9 @@
         "paths": [
           "/share/*",
           "/settings",
-          "/settings/"
+          "/settings/",
+          "/dugout-talk",
+          "/dugout-talk/"
         ]
       }
     ]
