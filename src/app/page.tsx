@@ -353,7 +353,7 @@ export default function HomePage() {
                 </div>
               </Link>
               <Link
-                href="https://play.google.com/store/apps/details?id=com.mindandmuscle.app"
+                href="https://play.google.com/store/apps/details?id=com.exceptionalhabit.mind_and_muscle"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block"

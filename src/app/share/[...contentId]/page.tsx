@@ -281,7 +281,7 @@ export default async function SharePage({ params }: Props) {
   }
 
   const appStoreUrl = 'https://apps.apple.com/app/mind-muscle/id6736613459';
-  const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.mindandmuscle.app';
+  const playStoreUrl = 'https://play.google.com/store/apps/details?id=com.exceptionalhabit.mind_and_muscle';
   const deepLinkUrl = content.type === 'sound-lab' 
     ? `mindmuscle://sound-lab/${content.id}`
     : `mindmuscle://daily-hit?contentId=${content.id}`;

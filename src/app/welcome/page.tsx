@@ -26,7 +26,7 @@ export default function WelcomePage() {
       window.location.href = 'mindmuscle://welcome';
     } else if (isAndroid) {
       // Android intent URL with fallback to stay on welcome page
-      window.location.href = 'intent://welcome#Intent;scheme=mindmuscle;package=com.mindandmuscle.app;S.browser_fallback_url=https://www.mindandmuscle.ai/welcome;end';
+      window.location.href = 'intent://welcome#Intent;scheme=mindmuscle;package=com.exceptionalhabit.mind_and_muscle;S.browser_fallback_url=https://www.mindandmuscle.ai/welcome;end';
     }
   };
 
@@ -235,7 +235,7 @@ export default function WelcomePage() {
 
               {/* Google Play */}
               <Link
-                href="https://play.google.com/store/apps/details?id=com.mindandmuscle.app"
+                href="https://play.google.com/store/apps/details?id=com.exceptionalhabit.mind_and_muscle"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block"
