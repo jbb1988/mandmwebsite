@@ -423,7 +423,7 @@ function TeamLicensingContent() {
 
           {/* League / Large Org - Email link */}
           <a
-            href="mailto:info@mindandmuscle.ai?subject=League%20%2F%20Organization%20Licensing%20Inquiry"
+            href="mailto:leagues@mindandmuscle.ai?subject=League%20%2F%20Organization%20Licensing%20Inquiry"
             className="group relative p-6 md:p-8 rounded-2xl cursor-pointer transition-all duration-300 text-center
               hover:scale-105 hover:-translate-y-1
               bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 hover:shadow-lg"
