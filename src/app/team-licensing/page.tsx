@@ -350,7 +350,10 @@ function TeamLicensingContent() {
           <div className="grid grid-cols-3 gap-3 md:gap-4">
             {/* Just Me */}
             <button
-              onClick={() => setTeamMode('individual')}
+              onClick={() => {
+                setTeamMode('individual');
+                setSeatCount(1); // Individual = 1 seat
+              }}
               className={`p-4 md:p-6 rounded-xl border-2 transition-all text-center ${
                 teamMode === 'individual'
                   ? 'border-neon-cortex-blue bg-neon-cortex-blue/10 shadow-[0_0_20px_rgba(14,165,233,0.3)]'
@@ -359,7 +362,7 @@ function TeamLicensingContent() {
             >
               <div className="text-2xl md:text-3xl mb-2">👤</div>
               <div className="font-bold text-sm md:text-base">Just Me</div>
-              <div className="text-xs md:text-sm text-text-secondary">Individual</div>
+              <div className="text-xs md:text-sm text-text-secondary">1 seat</div>
             </button>
 
             {/* 1 Team */}
@@ -404,35 +407,17 @@ function TeamLicensingContent() {
         </LiquidGlass>
       </div>
 
-      {/* Individual Mode - Redirect */}
+      {/* Individual Mode - Set seat count to 1 and show checkout */}
       {teamMode === 'individual' && (
-        <div className="max-w-5xl mx-auto mb-12">
-          <LiquidGlass variant="blue" glow={true} className="p-8 text-center">
-            <div className="text-4xl mb-4">🎯</div>
-            <h3 className="text-2xl font-bold mb-2">Looking for Individual Access?</h3>
-            <p className="text-text-secondary mb-6 max-w-lg mx-auto">
-              Get Premium for yourself directly in the app. Download Mind & Muscle and subscribe from the app for the best individual experience.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="https://apps.apple.com/app/mind-muscle-baseball/id6504691092"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-8 py-4 bg-gradient-to-r from-neon-cortex-blue to-mind-primary rounded-xl font-bold hover:shadow-liquid-glow-blue transition-all duration-300 flex items-center justify-center gap-2"
-              >
-                <span>Download on App Store</span>
-                <ArrowRight className="w-5 h-5" />
-              </a>
-              <a
-                href="https://play.google.com/store/apps/details?id=com.exceptionalhabit.mind_and_muscle"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-8 py-4 bg-white/10 border border-white/20 rounded-xl font-bold hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2"
-              >
-                <span>Get on Google Play</span>
-                <ArrowRight className="w-5 h-5" />
-              </a>
+        <div className="max-w-5xl mx-auto mb-6">
+          <LiquidGlass variant="blue" glow={true} className="p-6 text-center">
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <Check className="w-6 h-6 text-neon-cortex-green" />
+              <span className="text-lg font-bold">Individual Premium License</span>
             </div>
+            <p className="text-text-secondary text-sm">
+              1 seat for personal use • Full Premium access for 6 months
+            </p>
           </LiquidGlass>
         </div>
       )}
@@ -677,12 +662,16 @@ function TeamLicensingContent() {
         )}
 
       {/* Seat Calculator Section - Only show when team mode selected */}
-      {(teamMode === 'single' || teamMode === 'multi') && (
+      {(teamMode === 'individual' || teamMode === 'single' || teamMode === 'multi') && (
       <div className="max-w-5xl mx-auto mb-32">
         {/* Best Value Badge - Above Card */}
         <div className="flex justify-center mb-6">
           <div className="px-6 py-2 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange rounded-full text-sm font-bold shadow-lg">
-            {isMultiTeamOrg ? `🏆 ${numberOfTeams} TEAMS - ORGANIZATION PRICING` : '🏆 BEST VALUE FOR TEAMS'}
+            {teamMode === 'individual'
+              ? '🎯 INDIVIDUAL PREMIUM'
+              : isMultiTeamOrg
+                ? `🏆 ${numberOfTeams} TEAMS - ORGANIZATION PRICING`
+                : '🏆 BEST VALUE FOR TEAMS'}
           </div>
         </div>
 
@@ -692,14 +681,19 @@ function TeamLicensingContent() {
             <div>
               <div className="flex items-center gap-3 mb-6">
                 <Calculator className="w-8 h-8 text-solar-surge-orange" />
-                <h2 className="text-3xl font-black">Team Size</h2>
+                <h2 className="text-3xl font-black">{teamMode === 'individual' ? 'Your License' : 'Team Size'}</h2>
               </div>
 
               {/* User Count Slider */}
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-4">
                   <label className="text-lg font-semibold">Number of Users</label>
-                  {isMultiTeamOrg ? (
+                  {teamMode === 'individual' ? (
+                    // Fixed 1 seat for individual
+                    <span className="w-20 h-10 flex items-center justify-center text-2xl font-black bg-neon-cortex-blue/20 border border-neon-cortex-blue/40 rounded-lg text-neon-cortex-blue">
+                      1
+                    </span>
+                  ) : isMultiTeamOrg ? (
                     // Display-only when multi-team is active
                     <span className="w-20 h-10 flex items-center justify-center text-2xl font-black bg-white/10 border border-purple-500/40 rounded-lg text-purple-300">
                       {seatCount}
@@ -731,8 +725,8 @@ function TeamLicensingContent() {
                   )}
                 </div>
 
-                {/* Only show slider when NOT multi-team - capped at 20 users */}
-                {!isMultiTeamOrg && (
+                {/* Only show slider for single team mode */}
+                {teamMode === 'single' && !isMultiTeamOrg && (
                   <input
                     type="range"
                     min="1"
@@ -746,7 +740,11 @@ function TeamLicensingContent() {
                   />
                 )}
 
-                {isMultiTeamOrg ? (
+                {teamMode === 'individual' ? (
+                  <p className="text-xs text-text-secondary mt-2">
+                    Personal Premium access for 6 months
+                  </p>
+                ) : isMultiTeamOrg ? (
                   <div className="mt-4 p-4 rounded-lg bg-purple-500/10 border border-purple-500/30">
                     <div className="flex items-center gap-2 text-purple-300 text-sm font-semibold mb-1">
                       <Info className="w-4 h-4" />
@@ -776,6 +774,7 @@ function TeamLicensingContent() {
                         </p>
                         <button
                           onClick={() => {
+                            setTeamMode('multi');
                             setIsMultiTeamOrg(true);
                             // Scroll to multi-team section
                             document.getElementById('multi-team-section')?.scrollIntoView({ behavior: 'smooth' });
