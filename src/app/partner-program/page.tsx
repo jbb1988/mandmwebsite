@@ -725,7 +725,7 @@ export default function PartnerProgramPage() {
                 <Target className="w-6 h-6 text-solar-surge-orange" />
               </div>
               <div className="flex-1">
-                <h3 className="text-2xl font-black mb-3 text-solar-surge-orange">Built from Scratch for Baseball</h3>
+                <h3 className="text-2xl font-black mb-3 text-solar-surge-orange">Built from Scratch for Baseball and Softball</h3>
                 <p className="text-text-secondary mb-4 leading-relaxed">
                   <strong className="text-white">What coaches are dealing with now:</strong> Generic multi-sport apps with a "baseball filter" slapped on. Mental training designed for general athletes. Strength programs not optimized for rotational power. Scenarios that don't match real game situations.
                 </p>
