@@ -7,7 +7,11 @@ import { LiquidGlass } from '@/components/LiquidGlass';
 import { SocialProofBar } from '@/components/SocialProofBar';
 import { GradientTextReveal } from '@/components/animations';
 import Link from 'next/link';
-import { Check, X, Users, TrendingUp, Award, Sparkles, Calculator, AlertCircle, ChevronDown, Heart, CreditCard, HelpCircle, ArrowRight, Shield } from 'lucide-react';
+import { Check, X, Users, TrendingUp, Award, Sparkles, Calculator, AlertCircle, ChevronDown, Heart, CreditCard, HelpCircle, ArrowRight, Shield, Info } from 'lucide-react';
+
+// Single-team mode caps at 20 users to guide multi-team orgs to the right flow
+const MAX_SINGLE_TEAM_SEATS = 20;
+const MULTI_TEAM_NUDGE_THRESHOLD = 15;
 
 function TeamLicensingContent() {
   const searchParams = useSearchParams();
@@ -349,14 +353,14 @@ function TeamLicensingContent() {
       </div>
 
       {/* Multi-Team Organization Toggle */}
-      <div className={`max-w-5xl mx-auto ${isMultiTeamOrg ? 'mb-6' : 'mb-12'}`}>
+      <div id="multi-team-section" className={`max-w-5xl mx-auto ${isMultiTeamOrg ? 'mb-6' : 'mb-12'}`}>
         <LiquidGlass variant="neutral" className="border-2 border-purple-500/40">
-          <div className="p-6">
+          <div className="p-6 md:p-8">
             <div className="flex items-start gap-4">
-              <Users className="w-6 h-6 text-purple-400 flex-shrink-0 mt-1" />
+              <Users className="w-8 h-8 text-purple-400 flex-shrink-0" />
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-bold text-lg">Multi-Team Organization?</h3>
+                  <h3 className="font-bold text-xl md:text-2xl">Multi-Team Organization?</h3>
                   <button
                     onClick={() => {
                       const newIsMultiTeam = !isMultiTeamOrg;
@@ -548,9 +552,20 @@ function TeamLicensingContent() {
                       </button>
 
                       {/* Seat Allocation Summary */}
-                      <div className="mt-4 p-3 rounded-lg bg-purple-500/10 border border-purple-500/30">
-                        <div className="flex items-center justify-between text-sm mb-2">
-                          <span className="text-text-secondary">Total allocated:</span>
+                      <div className={`mt-4 p-3 rounded-lg ${
+                        seatsPerTeam.reduce((sum, seats) => sum + seats, 0) === seatCount
+                          ? 'bg-neon-cortex-green/10 border border-neon-cortex-green/30'
+                          : seatsPerTeam.reduce((sum, seats) => sum + seats, 0) > seatCount
+                          ? 'bg-red-500/10 border border-red-500/30'
+                          : 'bg-purple-500/10 border border-purple-500/30'
+                      }`}>
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-text-secondary flex items-center gap-2">
+                            {seatsPerTeam.reduce((sum, seats) => sum + seats, 0) === seatCount && (
+                              <Check className="w-4 h-4 text-neon-cortex-green" />
+                            )}
+                            Allocated:
+                          </span>
                           <span className={`font-bold ${
                             seatsPerTeam.reduce((sum, seats) => sum + seats, 0) === seatCount
                               ? 'text-neon-cortex-green'
@@ -559,10 +574,15 @@ function TeamLicensingContent() {
                               : 'text-solar-surge-orange'
                           }`}>
                             {seatsPerTeam.reduce((sum, seats) => sum + seats, 0)} / {seatCount}
+                            {seatsPerTeam.reduce((sum, seats) => sum + seats, 0) === seatCount && ' ✓'}
                           </span>
                         </div>
                         {seatsPerTeam.reduce((sum, seats) => sum + seats, 0) !== seatCount && (
-                          <p className="text-xs text-solar-surge-orange">
+                          <p className={`text-xs mt-2 ${
+                            seatsPerTeam.reduce((sum, seats) => sum + seats, 0) > seatCount
+                              ? 'text-red-400'
+                              : 'text-solar-surge-orange'
+                          }`}>
                             {seatsPerTeam.reduce((sum, seats) => sum + seats, 0) > seatCount
                               ? `⚠️ You've allocated ${seatsPerTeam.reduce((sum, seats) => sum + seats, 0) - seatCount} too many seats`
                               : `ℹ️ You have ${seatCount - seatsPerTeam.reduce((sum, seats) => sum + seats, 0)} unallocated seats`
@@ -631,7 +651,7 @@ function TeamLicensingContent() {
                       {seatCount}
                     </span>
                   ) : (
-                    // Interactive controls when NOT multi-team
+                    // Interactive controls when NOT multi-team (capped at 20)
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => setSeatCount(Math.max(1, seatCount - 1))}
@@ -642,13 +662,13 @@ function TeamLicensingContent() {
                       <input
                         type="number"
                         min="1"
-                        max="200"
+                        max={MAX_SINGLE_TEAM_SEATS}
                         value={seatCount}
-                        onChange={(e) => setSeatCount(Math.max(1, Math.min(200, parseInt(e.target.value) || 1)))}
+                        onChange={(e) => setSeatCount(Math.max(1, Math.min(MAX_SINGLE_TEAM_SEATS, parseInt(e.target.value) || 1)))}
                         className="w-20 h-10 text-center text-2xl font-black bg-white/10 border border-white/20 rounded-lg focus:border-solar-surge-orange focus:outline-none"
                       />
                       <button
-                        onClick={() => setSeatCount(Math.min(200, seatCount + 1))}
+                        onClick={() => setSeatCount(Math.min(MAX_SINGLE_TEAM_SEATS, seatCount + 1))}
                         className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center font-bold"
                       >
                         +
@@ -657,31 +677,62 @@ function TeamLicensingContent() {
                   )}
                 </div>
 
-                {/* Only show slider when NOT multi-team */}
+                {/* Only show slider when NOT multi-team - capped at 20 users */}
                 {!isMultiTeamOrg && (
                   <input
                     type="range"
                     min="1"
-                    max="200"
+                    max={MAX_SINGLE_TEAM_SEATS}
                     value={seatCount}
                     onChange={(e) => setSeatCount(parseInt(e.target.value))}
                     className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"
                     style={{
-                      background: `linear-gradient(to right, #F97316 0%, #F97316 ${((seatCount - 1) / (200 - 1)) * 100}%, rgba(255,255,255,0.2) ${((seatCount - 1) / (200 - 1)) * 100}%, rgba(255,255,255,0.2) 100%)`
+                      background: `linear-gradient(to right, #F97316 0%, #F97316 ${((seatCount - 1) / (MAX_SINGLE_TEAM_SEATS - 1)) * 100}%, rgba(255,255,255,0.2) ${((seatCount - 1) / (MAX_SINGLE_TEAM_SEATS - 1)) * 100}%, rgba(255,255,255,0.2) 100%)`
                     }}
                   />
                 )}
 
                 {isMultiTeamOrg ? (
-                  <p className="text-xs text-purple-400 mt-2 flex items-center gap-1">
-                    <span>↑</span> Adjust total users in the Multi-Team Organization section above
-                  </p>
+                  <div className="mt-4 p-4 rounded-lg bg-purple-500/10 border border-purple-500/30">
+                    <div className="flex items-center gap-2 text-purple-300 text-sm font-semibold mb-1">
+                      <Info className="w-4 h-4" />
+                      Controlled by Multi-Team Organization
+                    </div>
+                    <p className="text-xs text-purple-400">
+                      ↑ Adjust total users in the Multi-Team section above. Seat count is locked to match your team allocations.
+                    </p>
+                  </div>
                 ) : (
-                  <p className="text-xs text-text-secondary mt-2">
-                    Athletes and coaches who need Premium access
-                    <br />
-                    <span className="text-neon-cortex-blue font-semibold">Parents get free read-only access to their athlete's Goals & Reports</span>
-                  </p>
+                  <>
+                    <p className="text-xs text-text-secondary mt-2">
+                      Athletes and coaches who need Premium access
+                      <br />
+                      <span className="text-neon-cortex-blue font-semibold">Parents get free read-only access to their athlete's Goals & Reports</span>
+                    </p>
+
+                    {/* Smart nudge for multi-team when approaching cap */}
+                    {seatCount >= MULTI_TEAM_NUDGE_THRESHOLD && (
+                      <div className="mt-4 p-4 rounded-lg bg-solar-surge-orange/10 border border-solar-surge-orange/40">
+                        <p className="text-solar-surge-orange font-semibold text-sm mb-1">
+                          🏢 Have multiple teams?
+                        </p>
+                        <p className="text-xs text-text-secondary mb-3">
+                          Enable Multi-Team Organization above to get separate coach & team codes for each team.
+                          This lets you manage up to 200 users across multiple teams.
+                        </p>
+                        <button
+                          onClick={() => {
+                            setIsMultiTeamOrg(true);
+                            // Scroll to multi-team section
+                            document.getElementById('multi-team-section')?.scrollIntoView({ behavior: 'smooth' });
+                          }}
+                          className="text-xs font-semibold text-solar-surge-orange hover:text-muscle-primary transition-colors flex items-center gap-1"
+                        >
+                          Enable Multi-Team Mode <ArrowRight className="w-3 h-3" />
+                        </button>
+                      </div>
+                    )}
+                  </>
                 )}
 
                 {pricing.discountLabel && (
@@ -755,6 +806,52 @@ function TeamLicensingContent() {
                     <span className="text-2xl font-black text-neon-cortex-green">${pricing.savings}</span>
                   </div>
                 </div>
+
+                {/* What You'll Receive - Single Team Mode */}
+                {!isMultiTeamOrg && (
+                  <div className="bg-solar-surge-orange/10 rounded-lg p-4 border border-solar-surge-orange/30">
+                    <p className="text-sm font-semibold text-solar-surge-orange mb-2">
+                      ✅ What You'll Receive:
+                    </p>
+                    <ul className="space-y-1 text-xs text-text-secondary">
+                      <li className="flex items-start gap-2">
+                        <Check className="w-3 h-3 text-solar-surge-orange flex-shrink-0 mt-0.5" />
+                        <span>1 COACH code (single-use for team owner/coach)</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-3 h-3 text-solar-surge-orange flex-shrink-0 mt-0.5" />
+                        <span>1 TEAM code (share with up to {seatCount} {seatCount === 1 ? 'athlete' : 'athletes'})</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-3 h-3 text-solar-surge-orange flex-shrink-0 mt-0.5" />
+                        <span>All codes delivered instantly via email</span>
+                      </li>
+                    </ul>
+                  </div>
+                )}
+
+                {/* What You'll Receive - Multi-Team Mode */}
+                {isMultiTeamOrg && (
+                  <div className="bg-purple-500/10 rounded-lg p-4 border border-purple-500/30">
+                    <p className="text-sm font-semibold text-purple-400 mb-2">
+                      ✅ What You'll Receive:
+                    </p>
+                    <ul className="space-y-1 text-xs text-text-secondary">
+                      <li className="flex items-start gap-2">
+                        <Check className="w-3 h-3 text-purple-400 flex-shrink-0 mt-0.5" />
+                        <span>{numberOfTeams} COACH codes (one per team, single-use)</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-3 h-3 text-purple-400 flex-shrink-0 mt-0.5" />
+                        <span>{numberOfTeams} TEAM codes (one per team, with your custom seat limits)</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="w-3 h-3 text-purple-400 flex-shrink-0 mt-0.5" />
+                        <span>One email with all codes organized by team name</span>
+                      </li>
+                    </ul>
+                  </div>
+                )}
               </div>
 
               {/* Email Input */}
