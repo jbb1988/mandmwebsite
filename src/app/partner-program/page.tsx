@@ -811,21 +811,24 @@ export default function PartnerProgramPage() {
             <ul className="space-y-2 text-sm text-text-secondary">
               <li className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0" />
-                3 pre-written email templates (ready to send)
+                Email templates (ready to customize and send)
               </li>
               <li className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0" />
-                20+ social media graphics (all sizes)
+                Social media graphics and posts
               </li>
               <li className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0" />
-                Product demo videos (30s, 60s, 2min)
+                Program guides (leagues, scholarships, community)
               </li>
               <li className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0" />
-                Landing page copy templates
+                Brand assets (logo, colors, usage tips)
               </li>
             </ul>
+            <p className="text-xs text-text-secondary/70 mt-3 italic">
+              New resources added regularly
+            </p>
           </LiquidGlass>
 
           <LiquidGlass variant="orange" className="p-6">
