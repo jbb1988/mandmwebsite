@@ -175,7 +175,7 @@ export default function PartnerProgramPage() {
     },
     {
       question: 'Why should I join the partner program?',
-      answer: 'Partners earn 10% lifetime commission on every referral - true passive income that compounds as your referrals renew year after year. Plus, you get co-marketing opportunities and access to new features before they\'re publicly available.'
+      answer: 'Partners earn 10% lifetime commission on every referral - true passive income that compounds as your referrals renew every 6 months. Plus, you get co-marketing opportunities and access to new features before they\'re publicly available.'
     },
     {
       question: 'How long does approval take?',
@@ -191,7 +191,7 @@ export default function PartnerProgramPage() {
     },
     {
       question: 'How do payouts work?',
-      answer: 'You earn 10% commission each time a referral pays for a subscription. Commissions are held for 60 days after payment clears (standard industry practice to protect against chargebacks), then paid automatically via PayPal. There\'s a $50 minimum threshold. Example: Referral subscribes January 1st = commission paid March 1st. If they renew next year, you earn another commission. Your dashboard shows real-time earnings and tracks every referral.'
+      answer: 'You earn 10% commission each time a referral pays for a subscription. Commissions are held for 60 days after payment clears (standard industry practice to protect against chargebacks), then paid automatically via PayPal. There\'s a $50 minimum threshold. Example: Referral subscribes January 1st = commission paid March 1st. If they renew after 6 months, you earn another commission. Your dashboard shows real-time earnings and tracks every referral.'
     },
     {
       question: 'What if the same organization purchases multiple teams?',

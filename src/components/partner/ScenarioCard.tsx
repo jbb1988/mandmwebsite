@@ -52,7 +52,7 @@ export function ScenarioCard({ title, subtitle, icon: Icon, stats, earnings, var
           <br />
           <span className="text-lg">(if renewed)</span>
         </div>
-        <div className="text-xs text-text-secondary mt-1">Recurring yearly</div>
+        <div className="text-xs text-text-secondary mt-1">2 payments per year (every 6 months)</div>
       </div>
     </LiquidGlass>
   );
