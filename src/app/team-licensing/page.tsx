@@ -346,7 +346,7 @@ function TeamLicensingContent() {
           Select an option to continue
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Just Me */}
           <button
             onClick={() => {
@@ -420,6 +420,21 @@ function TeamLicensingContent() {
               {teamMode === 'multi' ? 'Selected' : 'Select'} <ArrowRight className="w-3 h-3" />
             </div>
           </button>
+
+          {/* League / Large Org - Email link */}
+          <a
+            href="mailto:info@mindandmuscle.ai?subject=League%20%2F%20Organization%20Licensing%20Inquiry"
+            className="group relative p-6 md:p-8 rounded-2xl cursor-pointer transition-all duration-300 text-center
+              hover:scale-105 hover:-translate-y-1
+              bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 hover:shadow-lg"
+          >
+            <div className="text-4xl md:text-5xl mb-3">🏟️</div>
+            <div className="font-bold text-lg md:text-xl mb-1">League</div>
+            <div className="text-sm text-text-secondary mb-4">200+ users</div>
+            <div className="text-xs font-semibold flex items-center justify-center gap-1 text-text-secondary group-hover:text-emerald-400 transition-colors">
+              Contact Sales <ArrowRight className="w-3 h-3" />
+            </div>
+          </a>
         </div>
       </div>
 
@@ -694,9 +709,7 @@ function TeamLicensingContent() {
         </div>
 
         <div className="relative overflow-hidden rounded-xl border border-solar-surge-orange/20 bg-gradient-to-br from-solar-surge-orange/10 via-transparent to-transparent p-8 md:p-12 shadow-liquid-glow-orange">
-          <div className="grid md:grid-cols-2 gap-12">
-            {/* Left: Calculator */}
-            <div>
+          <div className="max-w-xl mx-auto">
               <div className="flex items-center gap-3 mb-6">
                 <Calculator className="w-8 h-8 text-solar-surge-orange" />
                 <h2 className="text-3xl font-black">{teamMode === 'individual' ? 'Your License' : 'Team Size'}</h2>
@@ -1042,98 +1055,6 @@ function TeamLicensingContent() {
                   `Purchase Team License - $${pricing.totalPrice}/6 months`
                 )}
               </button>
-            </div>
-
-            {/* Right: What You Get */}
-            <div>
-              <div className="flex items-center gap-3 mb-6">
-                <Award className="w-8 h-8 text-solar-surge-orange" />
-                <h3 className="text-2xl font-black">What's Included</h3>
-              </div>
-
-              <div className="space-y-4">
-                <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Check className="w-5 h-5 text-neon-cortex-green" />
-                    <span className="font-bold text-neon-cortex-green">Reusable Premium Code</span>
-                  </div>
-                  <p className="text-sm text-text-secondary pl-7 mb-2">
-                    Share one code with {seatCount} user{seatCount !== 1 ? 's' : ''}. Athletes and coaches get full Premium access when they join.
-                  </p>
-                  <p className="text-xs text-neon-cortex-blue pl-7 font-semibold">
-                    Bonus: Parents get free read-only access to their athlete's Goals & Reports—they don't count toward your user limit!
-                  </p>
-                </div>
-
-                <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Check className="w-5 h-5 text-neon-cortex-green" />
-                    <span className="font-bold text-neon-cortex-green">All Premium Features Unlocked</span>
-                  </div>
-                  <p className="text-sm text-text-secondary pl-7">
-                    Goals AI coaching, coach feedback, all 7 Premium apps, advanced analytics, and weekly AI reports.
-                  </p>
-                </div>
-
-                <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Check className="w-5 h-5 text-neon-cortex-green" />
-                    <span className="font-bold text-neon-cortex-green">Coach Dashboard Access</span>
-                  </div>
-                  <p className="text-sm text-text-secondary pl-7">
-                    Track team progress, provide feedback on athlete goals, and access team analytics.
-                  </p>
-                </div>
-
-                <div className="p-4 bg-white/5 border border-white/10 rounded-xl">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Check className="w-5 h-5 text-neon-cortex-green" />
-                    <span className="font-bold text-neon-cortex-green">Priority Support</span>
-                  </div>
-                  <p className="text-sm text-text-secondary pl-7">
-                    Dedicated support team for coaches and team administrators.
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-6 p-6 bg-gradient-to-br from-neon-cortex-blue/20 via-neon-cortex-blue/10 to-transparent border-2 border-neon-cortex-blue/50 rounded-2xl shadow-lg">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-neon-cortex-blue/20 rounded-xl">
-                    <Users className="w-8 h-8 text-neon-cortex-blue" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="text-xl font-black text-neon-cortex-blue mb-2">Organizations & Leagues</h4>
-                    <p className="text-sm text-text-secondary mb-3">
-                      Perfect for baseball leagues, multi-team organizations, school districts, and large clubs with 200+ users
-                    </p>
-                    <ul className="text-xs text-text-secondary space-y-1 mb-4">
-                      <li className="flex items-center gap-2">
-                        <Check className="w-3 h-3 text-neon-cortex-blue" />
-                        Custom pricing and volume discounts
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Check className="w-3 h-3 text-neon-cortex-blue" />
-                        Dedicated account manager
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Check className="w-3 h-3 text-neon-cortex-blue" />
-                        Custom onboarding & training
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Check className="w-3 h-3 text-neon-cortex-blue" />
-                        Multi-organization management tools
-                      </li>
-                    </ul>
-                    <a
-                      href="mailto:leagues@mindandmuscle.ai"
-                      className="inline-block px-6 py-2 bg-neon-cortex-blue/20 hover:bg-neon-cortex-blue/30 border border-neon-cortex-blue/40 rounded-lg font-semibold text-sm transition-all duration-300 hover:scale-105"
-                    >
-                      Contact League Sales
-                    </a>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
