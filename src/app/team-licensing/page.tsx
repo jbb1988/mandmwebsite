@@ -323,6 +323,24 @@ function TeamLicensingContent() {
         <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed">
           One Premium team license unlocks all 7 AI-powered apps, personalized training, and advanced analytics for your entire team.
         </p>
+
+        {/* Simple 1-2-3 Steps */}
+        <div className="flex justify-center items-center gap-4 md:gap-8 text-sm md:text-base text-text-secondary mt-10">
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-full bg-neon-cortex-blue/20 text-neon-cortex-blue font-bold flex items-center justify-center text-sm">1</span>
+            <span>Choose size</span>
+          </div>
+          <span className="text-white/30">→</span>
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-full bg-solar-surge-orange/20 text-solar-surge-orange font-bold flex items-center justify-center text-sm">2</span>
+            <span>Checkout</span>
+          </div>
+          <span className="text-white/30">→</span>
+          <div className="flex items-center gap-2">
+            <span className="w-7 h-7 rounded-full bg-neon-cortex-green/20 text-neon-cortex-green font-bold flex items-center justify-center text-sm">3</span>
+            <span>Get codes</span>
+          </div>
+        </div>
       </div>
 
 
@@ -354,7 +372,7 @@ function TeamLicensingContent() {
 
       {/* Multi-Team Organization Toggle */}
       <div id="multi-team-section" className={`max-w-5xl mx-auto ${isMultiTeamOrg ? 'mb-6' : 'mb-12'}`}>
-        <LiquidGlass variant="neutral" className="border-2 border-purple-500/40">
+        <LiquidGlass variant="neutral" className="border-2 border-purple-500/40 shadow-[0_0_30px_rgba(168,85,247,0.3)]">
           <div className="p-6 md:p-8">
             <div className="flex items-start gap-4">
               <Users className="w-8 h-8 text-purple-400 flex-shrink-0" />
@@ -391,7 +409,8 @@ function TeamLicensingContent() {
                   </button>
                 </div>
                 <p className="text-sm text-text-secondary mb-4">
-                  Running multiple teams? Get separate COACH + TEAM codes for each team with custom seat allocation and centralized billing.
+                  <span className="text-purple-400 font-semibold">Most coaches skip this section.</span>{' '}
+                  Only enable if you manage multiple separate teams and need individual codes for each.
                 </p>
                 
                 {isMultiTeamOrg && (
