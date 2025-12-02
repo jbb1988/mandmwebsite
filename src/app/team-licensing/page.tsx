@@ -337,74 +337,90 @@ function TeamLicensingContent() {
         </p>
       </div>
 
-      {/* STEP 1: Team Selection */}
+      {/* STEP 1: Team Selection - Standalone clickable cards */}
       <div className="max-w-5xl mx-auto mb-8">
-        <LiquidGlass variant="blue" glow={true} className="p-6 md:p-8">
-          <h2 className="text-xl md:text-2xl font-bold text-center mb-2">
-            Step 1: How many teams do you need to license?
-          </h2>
-          <p className="text-text-secondary text-center mb-6 text-sm md:text-base">
-            This determines your pricing and how many access codes you'll receive
-          </p>
+        <h2 className="text-xl md:text-2xl font-bold text-center mb-2">
+          How many teams do you need to license?
+        </h2>
+        <p className="text-text-secondary text-center mb-6 text-sm md:text-base">
+          Select an option to continue
+        </p>
 
-          <div className="grid grid-cols-3 gap-3 md:gap-4">
-            {/* Just Me */}
-            <button
-              onClick={() => {
-                setTeamMode('individual');
-                setSeatCount(1); // Individual = 1 seat
-              }}
-              className={`p-4 md:p-6 rounded-xl border-2 transition-all text-center ${
-                teamMode === 'individual'
-                  ? 'border-neon-cortex-blue bg-neon-cortex-blue/10 shadow-[0_0_20px_rgba(14,165,233,0.3)]'
-                  : 'border-white/20 hover:border-white/40'
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Just Me */}
+          <button
+            onClick={() => {
+              setTeamMode('individual');
+              setSeatCount(1); // Individual = 1 seat
+            }}
+            className={`group relative p-6 md:p-8 rounded-2xl cursor-pointer transition-all duration-300 text-center
+              hover:scale-105 hover:-translate-y-1
+              ${teamMode === 'individual'
+                ? 'ring-2 ring-neon-cortex-blue bg-neon-cortex-blue/20 shadow-[0_0_30px_rgba(14,165,233,0.4)]'
+                : 'bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 hover:shadow-lg'
               }`}
-            >
-              <div className="text-2xl md:text-3xl mb-2">👤</div>
-              <div className="font-bold text-sm md:text-base">Just Me</div>
-              <div className="text-xs md:text-sm text-text-secondary">1 seat</div>
-            </button>
+          >
+            <div className="text-4xl md:text-5xl mb-3">👤</div>
+            <div className="font-bold text-lg md:text-xl mb-1">Just Me</div>
+            <div className="text-sm text-text-secondary mb-4">1 seat</div>
+            <div className={`text-xs font-semibold flex items-center justify-center gap-1 transition-colors ${
+              teamMode === 'individual' ? 'text-neon-cortex-blue' : 'text-text-secondary group-hover:text-neon-cortex-blue'
+            }`}>
+              {teamMode === 'individual' ? 'Selected' : 'Select'} <ArrowRight className="w-3 h-3" />
+            </div>
+          </button>
 
-            {/* 1 Team */}
-            <button
-              onClick={() => setTeamMode('single')}
-              className={`p-4 md:p-6 rounded-xl border-2 transition-all text-center ${
-                teamMode === 'single'
-                  ? 'border-solar-surge-orange bg-solar-surge-orange/10 shadow-[0_0_20px_rgba(249,115,22,0.3)]'
-                  : 'border-white/20 hover:border-white/40'
+          {/* 1 Team */}
+          <button
+            onClick={() => setTeamMode('single')}
+            className={`group relative p-6 md:p-8 rounded-2xl cursor-pointer transition-all duration-300 text-center
+              hover:scale-105 hover:-translate-y-1
+              ${teamMode === 'single'
+                ? 'ring-2 ring-solar-surge-orange bg-solar-surge-orange/20 shadow-[0_0_30px_rgba(249,115,22,0.4)]'
+                : 'bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 hover:shadow-lg'
               }`}
-            >
-              <div className="text-2xl md:text-3xl mb-2">👥</div>
-              <div className="font-bold text-sm md:text-base">1 Team</div>
-              <div className="text-xs md:text-sm text-text-secondary">Up to 20 users</div>
-            </button>
+          >
+            <div className="text-4xl md:text-5xl mb-3">👥</div>
+            <div className="font-bold text-lg md:text-xl mb-1">1 Team</div>
+            <div className="text-sm text-text-secondary mb-4">Up to 20 users</div>
+            <div className={`text-xs font-semibold flex items-center justify-center gap-1 transition-colors ${
+              teamMode === 'single' ? 'text-solar-surge-orange' : 'text-text-secondary group-hover:text-solar-surge-orange'
+            }`}>
+              {teamMode === 'single' ? 'Selected' : 'Select'} <ArrowRight className="w-3 h-3" />
+            </div>
+          </button>
 
-            {/* 2+ Teams */}
-            <button
-              onClick={() => {
-                setTeamMode('multi');
-                // Auto-distribute seats when switching to multi
-                const teams = numberOfTeams < 2 ? 2 : numberOfTeams;
-                if (numberOfTeams < 2) setNumberOfTeams(2);
-                const baseSeats = Math.floor(seatCount / teams);
-                const remainder = seatCount % teams;
-                const distributed = Array(teams).fill(baseSeats).map((seats, i) =>
-                  i < remainder ? seats + 1 : seats
-                );
-                setSeatsPerTeam(distributed);
-              }}
-              className={`p-4 md:p-6 rounded-xl border-2 transition-all text-center ${
-                teamMode === 'multi'
-                  ? 'border-purple-500 bg-purple-500/10 shadow-[0_0_20px_rgba(168,85,247,0.3)]'
-                  : 'border-white/20 hover:border-white/40'
+          {/* 2+ Teams */}
+          <button
+            onClick={() => {
+              setTeamMode('multi');
+              // Auto-distribute seats when switching to multi
+              const teams = numberOfTeams < 2 ? 2 : numberOfTeams;
+              if (numberOfTeams < 2) setNumberOfTeams(2);
+              const baseSeats = Math.floor(seatCount / teams);
+              const remainder = seatCount % teams;
+              const distributed = Array(teams).fill(baseSeats).map((seats, i) =>
+                i < remainder ? seats + 1 : seats
+              );
+              setSeatsPerTeam(distributed);
+            }}
+            className={`group relative p-6 md:p-8 rounded-2xl cursor-pointer transition-all duration-300 text-center
+              hover:scale-105 hover:-translate-y-1
+              ${teamMode === 'multi'
+                ? 'ring-2 ring-purple-500 bg-purple-500/20 shadow-[0_0_30px_rgba(168,85,247,0.4)]'
+                : 'bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/30 hover:shadow-lg'
               }`}
-            >
-              <div className="text-2xl md:text-3xl mb-2">🏢</div>
-              <div className="font-bold text-sm md:text-base">2+ Teams</div>
-              <div className="text-xs md:text-sm text-text-secondary">Organization</div>
-            </button>
-          </div>
-        </LiquidGlass>
+          >
+            <div className="text-4xl md:text-5xl mb-3">🏢</div>
+            <div className="font-bold text-lg md:text-xl mb-1">2+ Teams</div>
+            <div className="text-sm text-text-secondary mb-4">Organization</div>
+            <div className={`text-xs font-semibold flex items-center justify-center gap-1 transition-colors ${
+              teamMode === 'multi' ? 'text-purple-400' : 'text-text-secondary group-hover:text-purple-400'
+            }`}>
+              {teamMode === 'multi' ? 'Selected' : 'Select'} <ArrowRight className="w-3 h-3" />
+            </div>
+          </button>
+        </div>
       </div>
 
       {/* Individual Mode - Set seat count to 1 and show checkout */}
