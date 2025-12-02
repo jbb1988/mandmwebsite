@@ -55,14 +55,32 @@ const useCases = [
   },
 ];
 
+// Validate that the URL is a valid Mind & Muscle partner referral link
+const isValidPartnerLink = (url: string): boolean => {
+  try {
+    const parsed = new URL(url);
+    const isValidDomain = parsed.hostname === 'mindandmuscle.ai' ||
+                          parsed.hostname === 'www.mindandmuscle.ai';
+    const hasRefParam = parsed.searchParams.has('ref') &&
+                        parsed.searchParams.get('ref')?.trim() !== '';
+    return isValidDomain && hasRefParam;
+  } catch {
+    return false;
+  }
+};
+
 export function QRCodeGenerator() {
   const [url, setUrl] = useState('');
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
+  const [isValidLink, setIsValidLink] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  // Generate QR code whenever URL changes
+  // Generate QR code whenever URL changes (only for valid partner links)
   useEffect(() => {
-    if (url.trim()) {
+    const valid = isValidPartnerLink(url);
+    setIsValidLink(valid);
+
+    if (url.trim() && valid) {
       generateQRCode(url);
     } else {
       setQrCodeDataUrl('');
@@ -268,11 +286,32 @@ export function QRCodeGenerator() {
             </p>
           </div>
         ) : (
-          <div className="text-center py-8 border-2 border-dashed border-white/20 rounded-lg">
-            <QrCode className="w-12 h-12 text-text-secondary/50 mx-auto mb-3" />
-            <p className="text-text-secondary text-sm">
-              Enter your referral link above to generate a QR code
-            </p>
+          <div className={`text-center py-8 border-2 border-dashed rounded-lg ${
+            url.trim() && !isValidLink
+              ? 'border-red-500/40 bg-red-500/5'
+              : 'border-white/20'
+          }`}>
+            <QrCode className={`w-12 h-12 mx-auto mb-3 ${
+              url.trim() && !isValidLink
+                ? 'text-red-400/70'
+                : 'text-text-secondary/50'
+            }`} />
+            {url.trim() && !isValidLink ? (
+              <>
+                <p className="text-red-400 text-sm font-semibold mb-2">
+                  Invalid partner link
+                </p>
+                <p className="text-text-secondary text-xs max-w-sm mx-auto">
+                  Please enter a valid Mind & Muscle referral link with a <code className="bg-white/10 px-1 rounded">?ref=</code> parameter.
+                  <br />
+                  Example: <span className="text-solar-surge-orange">https://mindandmuscle.ai/?ref=your-code</span>
+                </p>
+              </>
+            ) : (
+              <p className="text-text-secondary text-sm">
+                Enter your referral link above to generate a QR code
+              </p>
+            )}
           </div>
         )}
       </LiquidGlass>
