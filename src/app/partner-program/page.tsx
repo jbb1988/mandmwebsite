@@ -8,6 +8,7 @@ import { LiquidButton } from '@/components/LiquidButton';
 import { GradientTextReveal } from '@/components/animations';
 import { EnhancedEarningsCalculator } from '@/components/partner/EnhancedEarningsCalculator';
 import { ScenarioCard } from '@/components/partner/ScenarioCard';
+import { QRCodeGenerator } from '@/components/partner/QRCodeGenerator';
 import { DollarSign, TrendingUp, Users, Gift, BarChart, Rocket, Check, Link2, Star, Zap, Target, Award, BookOpen, Sparkles, Clock, Trophy, ChevronDown, GraduationCap, Briefcase, UserPlus, Building2 } from 'lucide-react';
 
 export default function PartnerProgramPage() {
@@ -852,6 +853,22 @@ export default function PartnerProgramPage() {
             </ul>
           </LiquidGlass>
         </div>
+      </div>
+
+      {/* QR Code Generator Section */}
+      <div className="max-w-6xl mx-auto mb-20">
+        <GradientTextReveal
+          text="Create Your Partner QR Code"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
+          gradientFrom="#F97316"
+          gradientTo="#0EA5E9"
+          delay={0.2}
+        />
+        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
+          Generate branded QR codes to promote your referral link at facilities, tournaments, and events.
+        </p>
+
+        <QRCodeGenerator />
       </div>
 
       {/* How It Works */}
