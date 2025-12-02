@@ -36,11 +36,23 @@ function TeamLicensingContent() {
     campaign?: string;
   }>({});
   
+  // Team mode selection: 'individual' | 'single' | 'multi' | null
+  const [teamMode, setTeamMode] = useState<'individual' | 'single' | 'multi' | null>(null);
+
   // Multi-team organization state
   const [isMultiTeamOrg, setIsMultiTeamOrg] = useState(false);
   const [organizationName, setOrganizationName] = useState('');
   const [numberOfTeams, setNumberOfTeams] = useState(2);
   const [seatsPerTeam, setSeatsPerTeam] = useState<number[]>([0, 0]); // Array of seats for each team
+
+  // Sync teamMode with isMultiTeamOrg for backwards compatibility
+  useEffect(() => {
+    if (teamMode === 'multi') {
+      setIsMultiTeamOrg(true);
+    } else if (teamMode === 'single') {
+      setIsMultiTeamOrg(false);
+    }
+  }, [teamMode]);
 
   useEffect(() => {
     if (searchParams.get('canceled') === 'true') {
@@ -323,98 +335,122 @@ function TeamLicensingContent() {
         <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed">
           One Premium team license unlocks all 7 AI-powered apps, personalized training, and advanced analytics for your entire team.
         </p>
-
-        {/* Simple 1-2-3 Steps */}
-        <div className="flex justify-center items-center gap-4 md:gap-8 text-sm md:text-base text-text-secondary mt-10">
-          <div className="flex items-center gap-2">
-            <span className="w-7 h-7 rounded-full bg-neon-cortex-blue/20 text-neon-cortex-blue font-bold flex items-center justify-center text-sm">1</span>
-            <span>Choose size</span>
-          </div>
-          <span className="text-white/30">→</span>
-          <div className="flex items-center gap-2">
-            <span className="w-7 h-7 rounded-full bg-solar-surge-orange/20 text-solar-surge-orange font-bold flex items-center justify-center text-sm">2</span>
-            <span>Checkout</span>
-          </div>
-          <span className="text-white/30">→</span>
-          <div className="flex items-center gap-2">
-            <span className="w-7 h-7 rounded-full bg-neon-cortex-green/20 text-neon-cortex-green font-bold flex items-center justify-center text-sm">3</span>
-            <span>Get codes</span>
-          </div>
-        </div>
       </div>
 
+      {/* STEP 1: Team Selection */}
+      <div className="max-w-5xl mx-auto mb-8">
+        <LiquidGlass variant="blue" glow={true} className="p-6 md:p-8">
+          <h2 className="text-xl md:text-2xl font-bold text-center mb-2">
+            Step 1: How many teams do you need to license?
+          </h2>
+          <p className="text-text-secondary text-center mb-6 text-sm md:text-base">
+            This determines your pricing and how many access codes you'll receive
+          </p>
 
-      {/* Already Have a License? */}
-      <div className="max-w-5xl mx-auto mb-12">
-        <LiquidGlass variant="blue" className="border-2 border-neon-cortex-blue/40">
-          <div className="p-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div className="flex items-start gap-3">
-                <Shield className="w-6 h-6 text-neon-cortex-blue flex-shrink-0 mt-1" />
-                <div>
-                  <h3 className="font-bold text-lg mb-1">Already Have a Team License?</h3>
-                  <p className="text-sm text-text-secondary">
-                    Add seats, view your team code, or manage your subscription
-                  </p>
-                </div>
-              </div>
-              <Link
-                href="/team-licensing/manage"
-                className="px-6 py-3 bg-gradient-to-r from-neon-cortex-blue to-mind-primary rounded-lg font-semibold hover:shadow-liquid-glow-blue transition-all duration-300 flex items-center gap-2 whitespace-nowrap"
-              >
-                Manage License
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-            </div>
+          <div className="grid grid-cols-3 gap-3 md:gap-4">
+            {/* Just Me */}
+            <button
+              onClick={() => setTeamMode('individual')}
+              className={`p-4 md:p-6 rounded-xl border-2 transition-all text-center ${
+                teamMode === 'individual'
+                  ? 'border-neon-cortex-blue bg-neon-cortex-blue/10 shadow-[0_0_20px_rgba(14,165,233,0.3)]'
+                  : 'border-white/20 hover:border-white/40'
+              }`}
+            >
+              <div className="text-2xl md:text-3xl mb-2">👤</div>
+              <div className="font-bold text-sm md:text-base">Just Me</div>
+              <div className="text-xs md:text-sm text-text-secondary">Individual</div>
+            </button>
+
+            {/* 1 Team */}
+            <button
+              onClick={() => setTeamMode('single')}
+              className={`p-4 md:p-6 rounded-xl border-2 transition-all text-center ${
+                teamMode === 'single'
+                  ? 'border-solar-surge-orange bg-solar-surge-orange/10 shadow-[0_0_20px_rgba(249,115,22,0.3)]'
+                  : 'border-white/20 hover:border-white/40'
+              }`}
+            >
+              <div className="text-2xl md:text-3xl mb-2">👥</div>
+              <div className="font-bold text-sm md:text-base">1 Team</div>
+              <div className="text-xs md:text-sm text-text-secondary">Up to 20 users</div>
+            </button>
+
+            {/* 2+ Teams */}
+            <button
+              onClick={() => {
+                setTeamMode('multi');
+                // Auto-distribute seats when switching to multi
+                const teams = numberOfTeams < 2 ? 2 : numberOfTeams;
+                if (numberOfTeams < 2) setNumberOfTeams(2);
+                const baseSeats = Math.floor(seatCount / teams);
+                const remainder = seatCount % teams;
+                const distributed = Array(teams).fill(baseSeats).map((seats, i) =>
+                  i < remainder ? seats + 1 : seats
+                );
+                setSeatsPerTeam(distributed);
+              }}
+              className={`p-4 md:p-6 rounded-xl border-2 transition-all text-center ${
+                teamMode === 'multi'
+                  ? 'border-purple-500 bg-purple-500/10 shadow-[0_0_20px_rgba(168,85,247,0.3)]'
+                  : 'border-white/20 hover:border-white/40'
+              }`}
+            >
+              <div className="text-2xl md:text-3xl mb-2">🏢</div>
+              <div className="font-bold text-sm md:text-base">2+ Teams</div>
+              <div className="text-xs md:text-sm text-text-secondary">Organization</div>
+            </button>
           </div>
         </LiquidGlass>
       </div>
 
-      {/* Multi-Team Organization Toggle */}
-      <div id="multi-team-section" className={`max-w-5xl mx-auto ${isMultiTeamOrg ? 'mb-6' : 'mb-12'}`}>
-        <LiquidGlass variant="neutral" className="border-2 border-purple-500/40 shadow-[0_0_30px_rgba(168,85,247,0.3)]">
-          <div className="p-6 md:p-8">
-            <div className="flex items-start gap-4">
-              <Users className="w-8 h-8 text-purple-400 flex-shrink-0" />
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-bold text-xl md:text-2xl">Multi-Team Organization?</h3>
-                  <button
-                    onClick={() => {
-                      const newIsMultiTeam = !isMultiTeamOrg;
-                      setIsMultiTeamOrg(newIsMultiTeam);
-                      if (newIsMultiTeam) {
-                        // Set minimum teams and auto-distribute seats evenly when enabling
-                        const teams = numberOfTeams < 2 ? 2 : numberOfTeams;
-                        if (numberOfTeams < 2) setNumberOfTeams(2);
+      {/* Individual Mode - Redirect */}
+      {teamMode === 'individual' && (
+        <div className="max-w-5xl mx-auto mb-12">
+          <LiquidGlass variant="blue" glow={true} className="p-8 text-center">
+            <div className="text-4xl mb-4">🎯</div>
+            <h3 className="text-2xl font-bold mb-2">Looking for Individual Access?</h3>
+            <p className="text-text-secondary mb-6 max-w-lg mx-auto">
+              Get Premium for yourself directly in the app. Download Mind & Muscle and subscribe from the app for the best individual experience.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a
+                href="https://apps.apple.com/app/mind-muscle-baseball/id6504691092"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-8 py-4 bg-gradient-to-r from-neon-cortex-blue to-mind-primary rounded-xl font-bold hover:shadow-liquid-glow-blue transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                <span>Download on App Store</span>
+                <ArrowRight className="w-5 h-5" />
+              </a>
+              <a
+                href="https://play.google.com/store/apps/details?id=com.exceptionalhabit.mind_and_muscle"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-8 py-4 bg-white/10 border border-white/20 rounded-xl font-bold hover:bg-white/20 transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                <span>Get on Google Play</span>
+                <ArrowRight className="w-5 h-5" />
+              </a>
+            </div>
+          </LiquidGlass>
+        </div>
+      )}
 
-                        // Auto-distribute seats evenly across teams
-                        const baseSeats = Math.floor(seatCount / teams);
-                        const remainder = seatCount % teams;
-                        const distributed = Array(teams).fill(baseSeats).map((seats, i) =>
-                          i < remainder ? seats + 1 : seats
-                        );
-                        setSeatsPerTeam(distributed);
-                      }
-                    }}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                      isMultiTeamOrg ? 'bg-purple-500' : 'bg-white/20'
-                    }`}
-                  >
-                    <span
-                      className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                        isMultiTeamOrg ? 'translate-x-6' : 'translate-x-1'
-                      }`}
-                    />
-                  </button>
-                </div>
-                <p className="text-sm text-text-secondary mb-4">
-                  <span className="text-purple-400 font-semibold">Most coaches skip this section.</span>{' '}
-                  Only enable if you manage multiple separate teams and need individual codes for each.
-                </p>
-                
-                {isMultiTeamOrg && (
-                  <div className="space-y-4 mt-4 pt-4 border-t border-white/10">
+      {/* Multi-Team Organization Details - Only show when 2+ teams selected */}
+      {teamMode === 'multi' && (
+        <div id="multi-team-section" className="max-w-5xl mx-auto mb-6">
+          <LiquidGlass variant="neutral" className="border-2 border-purple-500/40 shadow-[0_0_30px_rgba(168,85,247,0.3)]">
+            <div className="p-6 md:p-8">
+              <div className="flex items-center gap-3 mb-4">
+                <Users className="w-8 h-8 text-purple-400" />
+                <h3 className="font-bold text-xl md:text-2xl">Organization Details</h3>
+              </div>
+              <p className="text-sm text-text-secondary mb-6">
+                Configure your teams and how seats are distributed across them.
+              </p>
+
+              <div className="space-y-4">
                     {/* Total Users Slider - Synced with Team Size below */}
                     <div>
                       <label htmlFor="totalUsers" className="block text-sm font-semibold text-white mb-2">
@@ -635,14 +671,13 @@ function TeamLicensingContent() {
                       </ul>
                     </div>
                   </div>
-                )}
               </div>
-            </div>
+            </LiquidGlass>
           </div>
-        </LiquidGlass>
-      </div>
+        )}
 
-      {/* Seat Calculator Section */}
+      {/* Seat Calculator Section - Only show when team mode selected */}
+      {(teamMode === 'single' || teamMode === 'multi') && (
       <div className="max-w-5xl mx-auto mb-32">
         {/* Best Value Badge - Above Card */}
         <div className="flex justify-center mb-6">
@@ -1085,6 +1120,7 @@ function TeamLicensingContent() {
           </div>
         </div>
       </div>
+      )}
 
       {/* Complete Development System - Value Story */}
       <div className="max-w-7xl mx-auto mb-32">
