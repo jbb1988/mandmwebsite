@@ -45,10 +45,12 @@ export function ScenarioCard({ title, subtitle, icon: Icon, stats, earnings, var
           : 'bg-solar-surge-orange/10 border-solar-surge-orange/30'
       }`}>
         <div className="text-xs text-text-secondary mb-1">Potential Annual Income</div>
-        <div className={`text-3xl font-black ${
+        <div className={`font-black ${
           variant === 'blue' ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'
         }`}>
-          {earnings}
+          <span className="text-3xl">{earnings.replace(' (if renewed)', '').replace(/\(if renewed\)/, '')}</span>
+          <br />
+          <span className="text-lg">(if renewed)</span>
         </div>
         <div className="text-xs text-text-secondary mt-1">Recurring yearly</div>
       </div>
