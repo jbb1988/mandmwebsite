@@ -436,53 +436,7 @@ function TeamLicensingContent() {
               </p>
 
               <div className="space-y-4">
-                    {/* Total Users Slider - Synced with Team Size below */}
-                    <div>
-                      <label htmlFor="totalUsers" className="block text-sm font-semibold text-white mb-2">
-                        Total Users <span className="text-solar-surge-orange">*</span>
-                      </label>
-                      <div className="flex items-center gap-3 mb-2">
-                        <button
-                          onClick={() => setSeatCount(Math.max(1, seatCount - 1))}
-                          className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center font-bold"
-                        >
-                          -
-                        </button>
-                        <input
-                          type="number"
-                          id="totalUsers"
-                          min="1"
-                          max="200"
-                          value={seatCount}
-                          onChange={(e) => setSeatCount(Math.max(1, Math.min(200, parseInt(e.target.value) || 1)))}
-                          className="w-20 h-10 text-center text-2xl font-black bg-white/10 border border-white/20 rounded-lg focus:border-purple-500 focus:outline-none"
-                        />
-                        <button
-                          onClick={() => setSeatCount(Math.min(200, seatCount + 1))}
-                          className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center font-bold"
-                        >
-                          +
-                        </button>
-                        <span className="text-sm text-text-secondary">
-                          (1-200 users)
-                        </span>
-                      </div>
-                      <input
-                        type="range"
-                        min="1"
-                        max="200"
-                        value={seatCount}
-                        onChange={(e) => setSeatCount(parseInt(e.target.value))}
-                        className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"
-                        style={{
-                          background: `linear-gradient(to right, #9333ea 0%, #9333ea ${((seatCount - 1) / (200 - 1)) * 100}%, rgba(255,255,255,0.2) ${((seatCount - 1) / (200 - 1)) * 100}%, rgba(255,255,255,0.2) 100%)`
-                        }}
-                      />
-                      <p className="text-xs text-purple-400 mt-2">
-                        💡 This total will be allocated across your teams below (syncs with Team Size section)
-                      </p>
-                    </div>
-
+                    {/* 1. Organization Name */}
                     <div>
                       <label htmlFor="organizationName" className="block text-sm font-semibold text-white mb-2">
                         Organization Name <span className="text-solar-surge-orange">*</span>
@@ -497,7 +451,8 @@ function TeamLicensingContent() {
                         className="w-full px-4 py-3 rounded-xl border border-white/10 bg-white/10 backdrop-blur-md text-white placeholder:text-text-secondary/50 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500/50 transition-all"
                       />
                     </div>
-                    
+
+                    {/* 2. Number of Teams */}
                     <div>
                       <label htmlFor="numberOfTeams" className="block text-sm font-semibold text-white mb-2">
                         Number of Teams <span className="text-solar-surge-orange">*</span>
@@ -543,6 +498,53 @@ function TeamLicensingContent() {
                       </div>
                       <p className="text-xs text-purple-400 mt-2">
                         Each team gets its own COACH code + TEAM code automatically
+                      </p>
+                    </div>
+
+                    {/* 3. Total Users */}
+                    <div>
+                      <label htmlFor="totalUsers" className="block text-sm font-semibold text-white mb-2">
+                        Total Users <span className="text-solar-surge-orange">*</span>
+                      </label>
+                      <div className="flex items-center gap-3 mb-2">
+                        <button
+                          onClick={() => setSeatCount(Math.max(numberOfTeams, seatCount - 1))}
+                          className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center font-bold"
+                        >
+                          -
+                        </button>
+                        <input
+                          type="number"
+                          id="totalUsers"
+                          min={numberOfTeams}
+                          max="200"
+                          value={seatCount}
+                          onChange={(e) => setSeatCount(Math.max(numberOfTeams, Math.min(200, parseInt(e.target.value) || numberOfTeams)))}
+                          className="w-20 h-10 text-center text-2xl font-black bg-white/10 border border-white/20 rounded-lg focus:border-purple-500 focus:outline-none"
+                        />
+                        <button
+                          onClick={() => setSeatCount(Math.min(200, seatCount + 1))}
+                          className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center font-bold"
+                        >
+                          +
+                        </button>
+                        <span className="text-sm text-text-secondary">
+                          (min {numberOfTeams} for {numberOfTeams} teams)
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min={numberOfTeams}
+                        max="200"
+                        value={seatCount}
+                        onChange={(e) => setSeatCount(parseInt(e.target.value))}
+                        className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                        style={{
+                          background: `linear-gradient(to right, #9333ea 0%, #9333ea ${((seatCount - numberOfTeams) / (200 - numberOfTeams)) * 100}%, rgba(255,255,255,0.2) ${((seatCount - numberOfTeams) / (200 - numberOfTeams)) * 100}%, rgba(255,255,255,0.2) 100%)`
+                        }}
+                      />
+                      <p className="text-xs text-purple-400 mt-2">
+                        💡 Allocate these seats across your teams below
                       </p>
                     </div>
 
