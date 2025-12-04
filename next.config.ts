@@ -10,7 +10,6 @@ const nextConfig: NextConfig = {
         hostname: 'api.mindandmuscle.ai',
       },
     ],
-    qualities: [75, 90, 100],
   },
   async headers() {
     return [
