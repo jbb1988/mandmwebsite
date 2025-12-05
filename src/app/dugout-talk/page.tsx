@@ -100,7 +100,7 @@ export default function DugoutTalkRedirectPage() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               {/* App Store */}
               <Link
-                href="https://apps.apple.com/app/mind-muscle/id6736613459"
+                href="https://apps.apple.com/us/app/mind-muscle/id6754098729"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block"

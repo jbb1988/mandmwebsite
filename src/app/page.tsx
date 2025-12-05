@@ -337,7 +337,7 @@ export default function HomePage() {
             {/* Download Links */}
             <FadeInWhenVisible delay={1.5} direction="up" className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center w-full sm:w-auto">
               <Link
-                href="https://apps.apple.com/app/mind-muscle"
+                href="https://apps.apple.com/us/app/mind-muscle/id6754098729"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block"

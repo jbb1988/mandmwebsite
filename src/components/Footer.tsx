@@ -21,7 +21,7 @@ export function Footer() {
         {/* App Store Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-8">
           <Link
-            href="https://apps.apple.com/app/mind-muscle"
+            href="https://apps.apple.com/us/app/mind-muscle/id6754098729"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block"
