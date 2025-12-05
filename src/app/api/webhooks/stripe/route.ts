@@ -560,10 +560,10 @@ async function sendTeamCodeEmail(email: string, coachCode: string, teamCode: str
                   <tr>
                     <td style="padding: 20px 40px; text-align: center;">
                       <h1 style="margin: 0 0 16px; font-size: 32px; font-weight: 900; color: #ffffff;">
-                        Your Team License is Active!
+                        Welcome to Mind and Muscle!
                       </h1>
                       <p style="margin: 0; font-size: 18px; color: #E5E7EB; line-height: 1.6;">
-                        Welcome to Mind & Muscle. Your 6-month seasonal team license is now ready.
+                        Your 6-month seasonal team license is now active
                       </p>
                     </td>
                   </tr>
