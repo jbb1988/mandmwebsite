@@ -380,8 +380,8 @@ export default function FinderFeeVIPPage() {
               <LiquidButton
                 type="submit"
                 disabled={isSubmitting || !captchaToken}
-                className="w-full bg-gradient-to-r from-orange-600 to-purple-600 hover:from-orange-700 hover:to-purple-700"
-                variant="primary"
+                fullWidth
+                variant="orange"
               >
                 {isSubmitting ? 'Submitting...' : 'Apply for VIP Status'}
               </LiquidButton>

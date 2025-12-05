@@ -221,8 +221,8 @@ export default function FinderFeePage() {
               <LiquidButton
                 type="submit"
                 disabled={isSubmitting || !captchaToken}
-                className="w-full"
-                variant="primary"
+                fullWidth
+                variant="orange"
               >
                 {isSubmitting ? 'Submitting...' : 'Join Finder Fee Program'}
               </LiquidButton>
