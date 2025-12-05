@@ -220,58 +220,161 @@ async function sendMultiTeamOrgEmail(
   }
 }
 
-// Create finder fee record and send admin notification email
-async function createFinderFeeAndNotify(
-  supabase: SupabaseClient,
-  finderCode: string,
-  referredOrgEmail: string,
-  stripeSessionId: string,
-  purchaseAmount: number
-) {
-  const resend = new Resend(process.env.RESEND_API_KEY!);
-  const feeAmount = purchaseAmount * 0.10; // 10% finder fee
+// Create finder fee record for VIP recurring or standard one-time
+async function handleFinderFee(params: {
+  supabase: SupabaseClient;
+  finderCode: string;
+  customerEmail: string;
+  amount: number;
+  invoiceId?: string;
+  subscriptionId?: string;
+  sessionId?: string;
+}) {
+  const { supabase, finderCode, customerEmail, amount, invoiceId, subscriptionId, sessionId } = params;
 
   try {
-    // Check if finder fee already exists for this organization (first purchase only)
-    const { data: existingFee } = await supabase
-      .from('finder_fees')
-      .select('id')
-      .eq('referred_org_email', referredOrgEmail)
+    // Get finder partner details
+    const { data: finderPartner } = await supabase
+      .from('finder_fee_partners')
+      .select('is_recurring, partner_email, partner_name, enabled')
+      .eq('partner_code', finderCode)
       .single();
 
-    if (existingFee) {
-      console.log('Finder fee already exists for org:', referredOrgEmail);
+    if (!finderPartner || !finderPartner.enabled) {
+      console.log('Finder partner not found or disabled:', finderCode);
       return;
     }
 
-    // Create pending finder fee record
-    const { data: fee, error } = await supabase
-      .from('finder_fees')
-      .insert({
-        finder_code: finderCode,
-        referred_org_email: referredOrgEmail,
-        stripe_session_id: stripeSessionId,
-        purchase_amount: purchaseAmount,
-        fee_amount: feeAmount,
-        status: 'pending',
-      })
-      .select()
-      .single();
+    // STANDARD MODE (is_recurring = false)
+    if (!finderPartner.is_recurring) {
+      // Check if already paid for this org
+      const { data: existingFee } = await supabase
+        .from('finder_fees')
+        .select('id')
+        .eq('referred_org_email', customerEmail)
+        .eq('finder_code', finderCode)
+        .single();
+      
+      if (existingFee) {
+        console.log('Standard finder fee already paid - skipping');
+        return;
+      }
 
-    if (error) {
-      console.error('Error creating finder fee record:', error);
+      // Create one-time finder fee (10%)
+      const feeAmount = amount * 0.10;
+      await createFinderFeeRecord({
+        supabase,
+        finderCode,
+        customerEmail,
+        amount,
+        feeAmount,
+        feePercentage: 10.00,
+        isFirstPurchase: true,
+        isRecurring: false,
+        invoiceId,
+        subscriptionId,
+        sessionId,
+      });
+      console.log('Standard finder fee created: $' + feeAmount.toFixed(2));
       return;
     }
 
-    console.log('Finder fee record created:', fee.id, 'Amount:', feeAmount);
+    // VIP RECURRING MODE (is_recurring = true)
+    // Count existing fees for this org + finder
+    const { count } = await supabase
+      .from('finder_fees')
+      .select('id', { count: 'exact', head: true })
+      .eq('referred_org_email', customerEmail)
+      .eq('finder_code', finderCode);
 
-    // Send admin notification email with approve/reject buttons
+    const isFirstPurchase = (count === 0);
+    const feePercentage = isFirstPurchase ? 10.00 : 5.00;
+    const feeAmount = amount * (feePercentage / 100);
+
+    // Create finder fee
+    await createFinderFeeRecord({
+      supabase,
+      finderCode,
+      customerEmail,
+      amount,
+      feeAmount,
+      feePercentage,
+      isFirstPurchase,
+      isRecurring: true,
+      invoiceId,
+      subscriptionId,
+      sessionId,
+    });
+
+    console.log(`VIP finder fee created: $${feeAmount.toFixed(2)} (${feePercentage}% - ${isFirstPurchase ? 'First' : 'Renewal'})`);
+  } catch (error) {
+    console.error('Error in handleFinderFee:', error);
+    // Don't throw - we don't want finder fee issues to break webhook
+  }
+}
+
+// Create finder fee record in database
+async function createFinderFeeRecord(data: {
+  supabase: SupabaseClient;
+  finderCode: string;
+  customerEmail: string;
+  amount: number;
+  feeAmount: number;
+  feePercentage: number;
+  isFirstPurchase: boolean;
+  isRecurring: boolean;
+  invoiceId?: string;
+  subscriptionId?: string;
+  sessionId?: string;
+}) {
+  const { supabase, finderCode, customerEmail, amount, feeAmount, feePercentage, isFirstPurchase, isRecurring, invoiceId, subscriptionId, sessionId } = data;
+
+  const { data: fee, error } = await supabase
+    .from('finder_fees')
+    .insert({
+      finder_code: finderCode,
+      referred_org_email: customerEmail,
+      purchase_amount: amount,
+      fee_amount: feeAmount,
+      fee_percentage: feePercentage,
+      is_first_purchase: isFirstPurchase,
+      is_recurring: isRecurring,
+      status: 'pending',
+      stripe_invoice_id: invoiceId,
+      stripe_subscription_id: subscriptionId,
+      stripe_session_id: sessionId,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating finder fee record:', error);
+    return;
+  }
+
+  console.log('Finder fee record created:', fee.id);
+  
+  // Send admin notification
+  await sendFinderFeeNotification(fee, feeAmount, feePercentage, isFirstPurchase, isRecurring);
+}
+
+// Send admin notification about new finder fee
+async function sendFinderFeeNotification(
+  fee: any,
+  feeAmount: number,
+  feePercentage: number,
+  isFirstPurchase: boolean,
+  isRecurring: boolean
+) {
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY!);
     const baseUrl = 'https://mindandmuscle.ai/api/finder-fee-action';
+    const typeLabel = isRecurring ? (isFirstPurchase ? 'VIP First Payment' : 'VIP Renewal') : 'Standard One-Time';
 
     await resend.emails.send({
       from: 'Mind and Muscle <noreply@mindandmuscle.ai>',
       to: process.env.ADMIN_EMAIL || 'marketing@mindandmuscle.ai',
-      subject: `Finder Fee: ${finderCode} → $${feeAmount.toFixed(2)}`,
+      subject: `💰 ${typeLabel}: ${fee.finder_code} → $${feeAmount.toFixed(2)} (${feePercentage}%)`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -287,10 +390,13 @@ async function createFinderFeeAndNotify(
 
                   <!-- Header -->
                   <tr>
-                    <td style="background: linear-gradient(135deg, #1a1f35 0%, #2a3148 100%); padding: 30px; text-align: center;">
+                    <td style="background: linear-gradient(135deg, ${isRecurring ? '#9333ea' : '#1a1f35'} 0%, ${isRecurring ? '#7c3aed' : '#2a3148'} 100%); padding: 30px; text-align: center;">
                       <h1 style="margin: 0; font-size: 24px; color: #ffffff;">
-                        💰 Finder Fee Pending Approval
+                        ${isRecurring ? '⭐ VIP Recurring Finder Fee' : '💰 Standard Finder Fee'}
                       </h1>
+                      <p style="margin: 8px 0 0; font-size: 14px; color: rgba(255,255,255,0.9);">
+                        ${typeLabel} ${isRecurring && !isFirstPurchase ? '(Auto-tracked)' : '(Pending Approval)'}
+                      </p>
                     </td>
                   </tr>
 
@@ -298,25 +404,33 @@ async function createFinderFeeAndNotify(
                   <tr>
                     <td style="padding: 30px;">
                       <table width="100%" cellpadding="12" cellspacing="0" style="border-collapse: collapse;">
-                        <tr style="background: #f8fafc;">
-                          <td style="border: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Finder (Connector)</td>
-                          <td style="border: 1px solid #e2e8f0; color: #1e293b; font-family: monospace; font-size: 16px;">${finderCode}</td>
+                        <tr style="background: ${isRecurring ? 'rgba(147, 51, 234, 0.1)' : '#f8fafc'};">
+                          <td style="border: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Finder Code</td>
+                          <td style="border: 1px solid #e2e8f0; color: #1e293b; font-family: monospace; font-size: 16px;">${fee.finder_code}</td>
                         </tr>
                         <tr>
+                          <td style="border: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Type</td>
+                          <td style="border: 1px solid #e2e8f0;">
+                            <span style="background: ${isRecurring ? 'rgba(147, 51, 234, 0.2)' : 'rgba(59, 130, 246, 0.2)'}; color: ${isRecurring ? '#9333ea' : '#3b82f6'}; padding: 4px 12px; border-radius: 12px; font-weight: 600; font-size: 13px;">
+                              ${typeLabel}
+                            </span>
+                          </td>
+                        </tr>
+                        <tr style="background: #f8fafc;">
                           <td style="border: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Organization Email</td>
-                          <td style="border: 1px solid #e2e8f0; color: #1e293b;">${referredOrgEmail}</td>
-                        </tr>
-                        <tr style="background: #f8fafc;">
-                          <td style="border: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Purchase Amount</td>
-                          <td style="border: 1px solid #e2e8f0; color: #1e293b;">$${purchaseAmount.toFixed(2)}</td>
+                          <td style="border: 1px solid #e2e8f0; color: #1e293b;">${fee.referred_org_email}</td>
                         </tr>
                         <tr>
-                          <td style="border: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Finder Fee (10%)</td>
-                          <td style="border: 1px solid #e2e8f0; color: #16a34a; font-weight: 700; font-size: 18px;">$${feeAmount.toFixed(2)}</td>
+                          <td style="border: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Purchase Amount</td>
+                          <td style="border: 1px solid #e2e8f0; color: #1e293b;">$${fee.purchase_amount.toFixed(2)}</td>
                         </tr>
                         <tr style="background: #f8fafc;">
-                          <td style="border: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Stripe Session</td>
-                          <td style="border: 1px solid #e2e8f0; color: #64748b; font-size: 12px; font-family: monospace;">${stripeSessionId}</td>
+                          <td style="border: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Fee Percentage</td>
+                          <td style="border: 1px solid #e2e8f0; color: ${isRecurring && !isFirstPurchase ? '#ea580c' : '#16a34a'}; font-weight: 700;">${feePercentage}%</td>
+                        </tr>
+                        <tr>
+                          <td style="border: 1px solid #e2e8f0; font-weight: 600; color: #475569;">Finder Fee Total</td>
+                          <td style="border: 1px solid #e2e8f0; color: #16a34a; font-weight: 700; font-size: 18px;">$${feeAmount.toFixed(2)}</td>
                         </tr>
                       </table>
                     </td>
@@ -373,8 +487,7 @@ async function createFinderFeeAndNotify(
 
     console.log('Finder fee admin notification sent');
   } catch (error) {
-    console.error('Error in createFinderFeeAndNotify:', error);
-    // Don't throw - we don't want finder fee issues to break the main webhook flow
+    console.error('Error sending finder fee notification:', error);
   }
 }
 
@@ -1017,7 +1130,14 @@ export async function POST(request: NextRequest) {
 
         if (session.metadata?.finder_code) {
           const purchaseAmount = session.amount_total ? session.amount_total / 100 : 0;
-          await createFinderFeeAndNotify(supabase, session.metadata.finder_code, customerEmail, session.id, purchaseAmount);
+          await handleFinderFee({
+            supabase,
+            finderCode: session.metadata.finder_code,
+            customerEmail,
+            amount: purchaseAmount,
+            subscriptionId: session.subscription as string,
+            sessionId: session.id,
+          });
         }
 
         // Skip the standard single-team setup below
@@ -1188,23 +1308,20 @@ export async function POST(request: NextRequest) {
         console.log('Tolt will automatically track this conversion via Stripe webhook');
       }
 
-      // Finder fee tracking: If a finder code is present, create a pending finder fee
-      // This is separate from Tolt's recurring commission - it's a one-time 10% fee
+      // Finder fee tracking: VIP recurring or standard one-time
       const finderCode = session.metadata?.finder_code;
       if (finderCode) {
         const purchaseAmount = session.amount_total ? session.amount_total / 100 : 0;
         console.log('Finder code detected:', finderCode, 'Purchase amount:', purchaseAmount);
 
-        // Create finder fee record and send admin notification
-        // Note: If both finder and tolt_referral exist, finder takes priority (one-time fee)
-        // The tolt_referral won't earn recurring commission on this purchase
-        await createFinderFeeAndNotify(
+        await handleFinderFee({
           supabase,
           finderCode,
-          customerEmail,
-          session.id,
-          purchaseAmount
-        );
+          customerEmail: customerEmail,
+          amount: purchaseAmount,
+          subscriptionId: session.subscription as string,
+          sessionId: session.id,
+        });
       }
 
       break;
@@ -1230,6 +1347,24 @@ export async function POST(request: NextRequest) {
 
         if (updateError) {
           console.error('Error updating team license status:', updateError);
+        }
+
+        // VIP RECURRING FINDER FEE TRACKING
+        // Check if this subscription has a finder code in metadata
+        const finderCode = teamData?.metadata?.finder_code || invoice.metadata?.finder_code;
+        
+        if (finderCode && invoice.customer_email) {
+          const renewalAmount = invoice.amount_paid ? invoice.amount_paid / 100 : 0;
+          console.log('VIP recurring finder fee - renewal detected:', finderCode, '$' + renewalAmount);
+
+          await handleFinderFee({
+            supabase,
+            finderCode,
+            customerEmail: invoice.customer_email,
+            amount: renewalAmount,
+            invoiceId: invoice.id,
+            subscriptionId: invoice.subscription as string,
+          });
         }
 
         // Tolt tracking for renewals: Tolt automatically tracks subscription

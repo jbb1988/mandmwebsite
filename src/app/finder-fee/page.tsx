@@ -1,274 +1,245 @@
-'use client';
-
-import React, { useState } from 'react';
-import { Turnstile } from '@marsidev/react-turnstile';
-import { LiquidGlass } from '@/components/LiquidGlass';
-import { LiquidButton } from '@/components/LiquidButton';
-import { DollarSign, Users, Check, Handshake, Clock, Shield } from 'lucide-react';
+import PasswordGate from '@/components/PasswordGate';
 
 export default function FinderFeePage() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    organization: '',
-    howYouKnowUs: '',
-  });
-
-  const [captchaToken, setCaptchaToken] = useState<string>('');
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!captchaToken) {
-      alert('Please complete the security verification.');
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      const response = await fetch('/api/finder-fee-signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          turnstileToken: captchaToken,
-          programType: 'standard',
-        }),
-      });
-
-      if (response.ok) {
-        setShowSuccessModal(true);
-        setFormData({ name: '', email: '', phone: '', organization: '', howYouKnowUs: '' });
-        setCaptchaToken('');
-      } else {
-        const data = await response.json();
-        alert(data.error || 'There was an error submitting your application. Please try again.');
-      }
-    } catch (error) {
-      alert('There was an error submitting your application. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const password = process.env.FINDER_FEE_PASSWORD || '';
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white">
-      {/* Hero Section */}
-      <section className="relative pt-24 pb-16 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-green-500/20 border border-green-500/30 rounded-full px-4 py-2 mb-6">
-            <DollarSign className="w-5 h-5 text-green-400" />
-            <span className="text-green-300 font-medium">Finder Fee Program</span>
-          </div>
-
-          <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            Earn <span className="text-green-400">10%</span> For Every Team You Refer
-          </h1>
-
-          <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-            Know a youth baseball organization that would benefit from Mind & Muscle?
-            Introduce them to us and earn a 10% finder fee on their first purchase.
-          </p>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="py-16 px-4">
-        <div className="max-w-5xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">How It Works</h2>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            <LiquidGlass className="p-8 text-center">
-              <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Handshake className="w-8 h-8 text-green-400" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">1. Make an Introduction</h3>
-              <p className="text-gray-400">
-                Connect us with a youth baseball league, training facility, or travel ball organization you know.
-              </p>
-            </LiquidGlass>
-
-            <LiquidGlass className="p-8 text-center">
-              <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Users className="w-8 h-8 text-blue-400" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">2. We Handle the Rest</h3>
-              <p className="text-gray-400">
-                Our team takes over - demos, onboarding, and support. You just make the introduction.
-              </p>
-            </LiquidGlass>
-
-            <LiquidGlass className="p-8 text-center">
-              <div className="w-16 h-16 bg-orange-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <DollarSign className="w-8 h-8 text-orange-400" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">3. Get Paid</h3>
-              <p className="text-gray-400">
-                When they purchase, you earn 10% of their first payment. Simple as that.
-              </p>
-            </LiquidGlass>
-          </div>
-        </div>
-      </section>
-
-      {/* Benefits */}
-      <section className="py-16 px-4 bg-gray-900/50">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-12">Why Become a Finder?</h2>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            {[
-              { icon: DollarSign, text: '10% commission on first purchase', color: 'green' },
-              { icon: Clock, text: 'No ongoing commitment required', color: 'blue' },
-              { icon: Shield, text: 'We handle all sales and support', color: 'orange' },
-              { icon: Check, text: 'Get paid within 60 days of purchase', color: 'green' },
-            ].map((benefit, index) => (
-              <div key={index} className="flex items-center gap-4 p-4 bg-gray-800/50 rounded-lg">
-                <div className={`w-10 h-10 bg-${benefit.color}-500/20 rounded-full flex items-center justify-center`}>
-                  <benefit.icon className={`w-5 h-5 text-${benefit.color}-400`} />
-                </div>
-                <span className="text-lg">{benefit.text}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-12 p-6 bg-gradient-to-r from-green-900/30 to-blue-900/30 rounded-xl border border-green-500/20">
-            <h3 className="text-xl font-bold mb-2">Example Earnings</h3>
-            <p className="text-gray-300">
-              A travel ball organization purchases a 50-seat annual license for $2,500.
-              <span className="text-green-400 font-bold"> You earn $250</span> just for making the introduction.
+    <PasswordGate 
+      password={password}
+      title="Finder Fee Program"
+      description="Enter password to view program details"
+    >
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
+        <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-xl p-8 md:p-12">
+          
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              Mind & Muscle Finder Fee Program
+            </h1>
+            <p className="text-xl text-gray-600">
+              Earn Money for Introductions
             </p>
           </div>
-        </div>
-      </section>
 
-      {/* Sign Up Form */}
-      <section className="py-16 px-4">
-        <div className="max-w-2xl mx-auto">
-          <LiquidGlass className="p-8">
-            <h2 className="text-2xl font-bold text-center mb-8">Join the Finder Fee Program</h2>
+          {/* What Is This */}
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">What is this?</h2>
+            <p className="text-gray-700 mb-4">
+              The <strong>Finder Fee Program</strong> rewards people who introduce organizations (travel ball associations, facilities, leagues) to Mind & Muscle.
+            </p>
+            <p className="text-gray-700">
+              If you connect us with an organization and they purchase, <strong className="text-blue-600">you earn 10% of their first purchase</strong>.
+            </p>
+          </section>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium mb-2">Full Name *</label>
-                <input
-                  type="text"
-                  id="name"
-                  required
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
+          {/* How It Works */}
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">How it works</h2>
+            
+            <div className="space-y-6">
+              <div className="border-l-4 border-blue-500 pl-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">1. You get a custom link</h3>
+                <code className="bg-gray-100 px-3 py-1 rounded text-sm">
+                  https://mindandmuscle.ai/team-licensing?finder=yourcode
+                </code>
               </div>
 
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium mb-2">Email *</label>
-                <input
-                  type="email"
-                  id="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
+              <div className="border-l-4 border-blue-500 pl-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">2. You share it with organizations</h3>
+                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                  <li>Travel ball associations</li>
+                  <li>Baseball/softball facilities</li>
+                  <li>Youth sports leagues</li>
+                  <li>Tournament organizers</li>
+                </ul>
               </div>
 
-              <div>
-                <label htmlFor="phone" className="block text-sm font-medium mb-2">Phone Number</label>
-                <input
-                  type="tel"
-                  id="phone"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
+              <div className="border-l-4 border-blue-500 pl-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">3. They purchase</h3>
+                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                  <li>Organization clicks your link</li>
+                  <li>They buy team licensing ($3,000-$50,000+)</li>
+                  <li>We track the intro to you</li>
+                </ul>
               </div>
 
-              <div>
-                <label htmlFor="organization" className="block text-sm font-medium mb-2">Your Organization (if any)</label>
-                <input
-                  type="text"
-                  id="organization"
-                  value={formData.organization}
-                  onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
-                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                  placeholder="League, team, facility, etc."
-                />
+              <div className="border-l-4 border-green-500 pl-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">4. You get paid</h3>
+                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                  <li>First purchase: <strong className="text-green-600">10% finder fee</strong></li>
+                  <li>Example: $10,000 purchase = $1,000 for you</li>
+                  <li>Payment via your choice (Venmo, Zelle, check, etc.)</li>
+                </ul>
               </div>
-
-              <div>
-                <label htmlFor="howYouKnowUs" className="block text-sm font-medium mb-2">How did you hear about us?</label>
-                <textarea
-                  id="howYouKnowUs"
-                  rows={3}
-                  value={formData.howYouKnowUs}
-                  onChange={(e) => setFormData({ ...formData, howYouKnowUs: e.target.value })}
-                  className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                />
-              </div>
-
-              <div className="flex justify-center">
-                <Turnstile
-                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || ''}
-                  onSuccess={(token) => setCaptchaToken(token)}
-                />
-              </div>
-
-              <LiquidButton
-                type="submit"
-                disabled={isSubmitting || !captchaToken}
-                fullWidth
-                variant="orange"
-              >
-                {isSubmitting ? 'Submitting...' : 'Join Finder Fee Program'}
-              </LiquidButton>
-            </form>
-          </LiquidGlass>
-        </div>
-      </section>
-
-      {/* VIP Upsell */}
-      <section className="py-16 px-4 bg-gradient-to-r from-purple-900/20 to-orange-900/20">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-2xl font-bold mb-4">Want More? Check Out Our VIP Program</h2>
-          <p className="text-gray-300 mb-6">
-            For high-value partners, we offer a VIP Finder Fee program with 10% on first purchase
-            PLUS 5% on all renewals - forever.
-          </p>
-          <a
-            href="/finder-fee-vip"
-            className="inline-flex items-center gap-2 text-orange-400 hover:text-orange-300 font-medium"
-          >
-            Learn about VIP Finder Fees →
-          </a>
-        </div>
-      </section>
-
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <LiquidGlass className="max-w-md p-8 text-center">
-            <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Check className="w-8 h-8 text-green-400" />
             </div>
-            <h3 className="text-2xl font-bold mb-4">You&apos;re In!</h3>
-            <p className="text-gray-300 mb-6">
-              Thanks for joining our Finder Fee program. We&apos;ll be in touch within 24-48 hours
-              with your unique referral information.
+          </section>
+
+          {/* Real Examples */}
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Real examples</h2>
+            
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="bg-blue-50 rounded-lg p-6">
+                <h3 className="font-semibold text-gray-900 mb-3">Small travel ball team</h3>
+                <p className="text-sm text-gray-600 mb-2">50 players + coaches, 6 months</p>
+                <p className="text-gray-700 mb-2">Purchase: <strong>$3,357.50</strong></p>
+                <p className="text-green-600 font-bold text-lg">Your Fee: $335.75</p>
+              </div>
+
+              <div className="bg-blue-50 rounded-lg p-6">
+                <h3 className="font-semibold text-gray-900 mb-3">Large facility</h3>
+                <p className="text-sm text-gray-600 mb-2">200 athletes, annual</p>
+                <p className="text-gray-700 mb-2">Purchase: <strong>$15,000</strong></p>
+                <p className="text-green-600 font-bold text-lg">Your Fee: $1,500</p>
+              </div>
+
+              <div className="bg-blue-50 rounded-lg p-6">
+                <h3 className="font-semibold text-gray-900 mb-3">Regional association</h3>
+                <p className="text-sm text-gray-600 mb-2">500+ players</p>
+                <p className="text-gray-700 mb-2">Purchase: <strong>$35,000</strong></p>
+                <p className="text-green-600 font-bold text-lg">Your Fee: $3,500</p>
+              </div>
+            </div>
+          </section>
+
+          {/* Payment Process */}
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Payment process</h2>
+            
+            <div className="space-y-4">
+              <div className="flex items-start">
+                <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">1</div>
+                <div className="ml-4">
+                  <h3 className="font-semibold text-gray-900">Introduction tracked</h3>
+                  <p className="text-gray-700">Organization uses your finder link, system records you as connector</p>
+                </div>
+              </div>
+
+              <div className="flex items-start">
+                <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">2</div>
+                <div className="ml-4">
+                  <h3 className="font-semibold text-gray-900">They purchase</h3>
+                  <p className="text-gray-700">Organization completes checkout, we receive instant notification</p>
+                </div>
+              </div>
+
+              <div className="flex items-start">
+                <div className="flex-shrink-0 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">3</div>
+                <div className="ml-4">
+                  <h3 className="font-semibold text-gray-900">You get email notification</h3>
+                  <div className="bg-gray-100 p-3 rounded mt-2 text-sm">
+                    <p className="font-mono">Subject: Finder Fee Opportunity: $1,500</p>
+                    <p className="text-gray-600 mt-1">Organization purchased $15,000</p>
+                    <p className="text-gray-600">Your Finder Fee (10%): $1,500</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-start">
+                <div className="flex-shrink-0 w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold">4</div>
+                <div className="ml-4">
+                  <h3 className="font-semibold text-gray-900">We approve & pay</h3>
+                  <p className="text-gray-700">We verify, contact you for payment method, send payment (usually 5-7 business days)</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* FAQ */}
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Frequently asked questions</h2>
+            
+            <div className="space-y-6">
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">Is there a limit to how many organizations I can introduce?</h3>
+                <p className="text-gray-700">No limit! Introduce as many as you'd like.</p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">What counts as an "organization"?</h3>
+                <p className="text-gray-700">Travel ball teams, leagues, facilities, associations, tournaments - any multi-athlete group purchase.</p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">How do you track that they came from my link?</h3>
+                <p className="text-gray-700">When they click your link, we store a tracking code. When they purchase (even weeks later), we know it was your introduction.</p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">How long does the tracking last?</h3>
+                <p className="text-gray-700">90 days from when they click your link. If they purchase within 90 days, you get credit.</p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-2">What if I'm already a Tolt Partner?</h3>
+                <p className="text-gray-700">Absolutely! These are separate programs. Use Partner link for individuals, Finder link for organizations.</p>
+              </div>
+            </div>
+          </section>
+
+          {/* Who to Introduce */}
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">Who should you introduce?</h2>
+            
+            <div className="grid md:grid-cols-2 gap-8">
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-3">Perfect candidates:</h3>
+                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                  <li>Travel ball teams (10+ players)</li>
+                  <li>Baseball/softball training facilities</li>
+                  <li>Youth sports leagues and associations</li>
+                  <li>Tournament organizers</li>
+                  <li>High school teams</li>
+                  <li>College club programs</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="font-semibold text-gray-900 mb-3">Pricing transparency:</h3>
+                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                  <li>6-month license: $6,715 (unlimited users)</li>
+                  <li>Annual license: $13,430 (save $6,715)</li>
+                  <li>Enterprise: Custom pricing for 200+ athletes</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          {/* The Difference */}
+          <section className="bg-blue-50 rounded-lg p-8 mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">The difference you make</h2>
+            <p className="text-gray-700 mb-4">When you introduce an organization to Mind & Muscle:</p>
+            <ul className="space-y-2 text-gray-700">
+              <li className="flex items-start">
+                <span className="text-green-500 mr-2">✓</span>
+                <span><strong>You earn money</strong> for the introduction</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 mr-2">✓</span>
+                <span><strong>Coaches get better tools</strong> to develop athletes</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 mr-2">✓</span>
+                <span><strong>Athletes get personalized training</strong> that actually works</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-green-500 mr-2">✓</span>
+                <span><strong>Parents stay informed</strong> about their child's development</span>
+              </li>
+            </ul>
+            <p className="text-gray-700 mt-6 font-semibold">
+              You're not just earning a fee - you're helping transform youth baseball and softball.
             </p>
-            <button
-              onClick={() => setShowSuccessModal(false)}
-              className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-            >
-              Got It
-            </button>
-          </LiquidGlass>
+          </section>
+
+          {/* Footer */}
+          <div className="text-center text-gray-600 text-sm">
+            <p className="mb-2">Questions? Contact us for details.</p>
+            <p className="font-semibold">This is an invitation-only program. If you received access, you've been selected to participate!</p>
+          </div>
         </div>
-      )}
-    </main>
+      </div>
+    </PasswordGate>
   );
 }

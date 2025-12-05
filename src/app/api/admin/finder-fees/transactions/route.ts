@@ -8,8 +8,7 @@ export async function GET(request: NextRequest) {
   try {
     // Validate admin password
     const adminPassword = request.headers.get('X-Admin-Password');
-    if (adminPassword !== process.env.ADMIN_DASHBOARD_PASSWORD &&
-        adminPassword !== process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD) {
+    if (adminPassword !== process.env.ADMIN_DASHBOARD_PASSWORD) {
       return NextResponse.json(
         { success: false, message: 'Unauthorized' },
         { status: 401 }
@@ -27,14 +26,13 @@ export async function GET(request: NextRequest) {
     // Create Supabase client with service role key
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Build query for transactions with partner info
+    // Build query
     let query = supabase
       .from('finder_fees')
       .select(`
         *,
-        finder_fee_partners(
+        finder_fee_partners!inner(
           partner_name,
-          partner_email,
           is_recurring
         )
       `, { count: 'exact' })
@@ -45,11 +43,11 @@ export async function GET(request: NextRequest) {
       query = query.eq('status', status);
     }
 
-    // Apply type filter (requires checking the partner's is_recurring flag)
+    // Apply type filter
     if (type === 'standard') {
-      query = query.eq('is_recurring', false);
+      query = query.eq('finder_fee_partners.is_recurring', false);
     } else if (type === 'vip') {
-      query = query.eq('is_recurring', true);
+      query = query.eq('finder_fee_partners.is_recurring', true);
     }
 
     // Apply pagination
@@ -70,16 +68,14 @@ export async function GET(request: NextRequest) {
       id: tx.id,
       finder_code: tx.finder_code,
       partner_name: tx.finder_fee_partners?.partner_name || 'Unknown',
-      partner_email: tx.finder_fee_partners?.partner_email || '',
       referred_org_email: tx.referred_org_email,
-      purchase_amount: parseFloat(tx.purchase_amount || 0),
-      fee_percentage: parseFloat(tx.fee_percentage || 0),
-      fee_amount: parseFloat(tx.fee_amount || 0),
+      purchase_amount: parseFloat(tx.purchase_amount),
+      fee_percentage: parseFloat(tx.fee_percentage),
+      fee_amount: parseFloat(tx.fee_amount),
       is_recurring: tx.is_recurring || false,
       is_first_purchase: tx.is_first_purchase ?? true,
       status: tx.status,
       created_at: tx.created_at,
-      stripe_payment_id: tx.stripe_payment_id,
     })) || [];
 
     const totalPages = Math.ceil((count || 0) / pageSize);
@@ -89,76 +85,12 @@ export async function GET(request: NextRequest) {
       transactions,
       pagination: {
         page,
-        pageSize,
         totalPages,
         totalCount: count || 0,
       },
     });
   } catch (error) {
     console.error('Error in transactions route:', error);
-    return NextResponse.json(
-      { success: false, message: 'Internal server error' },
-      { status: 500 }
-    );
-  }
-}
-
-// Update transaction status (approve/mark as paid)
-export async function PATCH(request: NextRequest) {
-  try {
-    // Validate admin password
-    const adminPassword = request.headers.get('X-Admin-Password');
-    if (adminPassword !== process.env.ADMIN_DASHBOARD_PASSWORD &&
-        adminPassword !== process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD) {
-      return NextResponse.json(
-        { success: false, message: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
-
-    const body = await request.json();
-    const { transactionId, newStatus } = body;
-
-    if (!transactionId || !newStatus) {
-      return NextResponse.json(
-        { success: false, message: 'Transaction ID and new status are required' },
-        { status: 400 }
-      );
-    }
-
-    if (!['pending', 'approved', 'paid', 'cancelled'].includes(newStatus)) {
-      return NextResponse.json(
-        { success: false, message: 'Invalid status' },
-        { status: 400 }
-      );
-    }
-
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    const updateData: any = { status: newStatus };
-    if (newStatus === 'paid') {
-      updateData.paid_at = new Date().toISOString();
-    }
-
-    const { error } = await supabase
-      .from('finder_fees')
-      .update(updateData)
-      .eq('id', transactionId);
-
-    if (error) {
-      console.error('Error updating transaction:', error);
-      return NextResponse.json(
-        { success: false, message: `Database error: ${error.message}` },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({
-      success: true,
-      message: `Transaction status updated to ${newStatus}`,
-    });
-  } catch (error) {
-    console.error('Error in update transaction route:', error);
     return NextResponse.json(
       { success: false, message: 'Internal server error' },
       { status: 500 }

@@ -8,8 +8,7 @@ export async function POST(request: NextRequest) {
   try {
     // Validate admin password
     const adminPassword = request.headers.get('X-Admin-Password');
-    if (adminPassword !== process.env.ADMIN_DASHBOARD_PASSWORD &&
-        adminPassword !== process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD) {
+    if (adminPassword !== process.env.ADMIN_DASHBOARD_PASSWORD) {
       return NextResponse.json(
         { success: false, message: 'Unauthorized' },
         { status: 401 }
@@ -22,15 +21,7 @@ export async function POST(request: NextRequest) {
     // Validate required fields
     if (!partnerCode || !partnerEmail || !partnerName) {
       return NextResponse.json(
-        { success: false, message: 'Partner code, email, and name are required' },
-        { status: 400 }
-      );
-    }
-
-    // Validate partner code format (alphanumeric, no spaces)
-    if (!/^[a-zA-Z0-9]+$/.test(partnerCode)) {
-      return NextResponse.json(
-        { success: false, message: 'Partner code must be alphanumeric with no spaces' },
+        { success: false, message: 'Missing required fields' },
         { status: 400 }
       );
     }
@@ -41,54 +32,50 @@ export async function POST(request: NextRequest) {
     // Check if partner code already exists
     const { data: existingPartner } = await supabase
       .from('finder_fee_partners')
-      .select('id')
-      .eq('finder_code', partnerCode.toUpperCase())
+      .select('partner_code')
+      .eq('partner_code', partnerCode)
       .single();
 
     if (existingPartner) {
       return NextResponse.json(
-        { success: false, message: 'This partner code already exists' },
+        { success: false, message: `Partner code "${partnerCode}" already exists` },
         { status: 400 }
       );
     }
 
-    // Create the partner
-    const { data: partner, error } = await supabase
+    // Insert new finder partner
+    const { data, error } = await supabase
       .from('finder_fee_partners')
       .insert({
-        finder_code: partnerCode.toUpperCase(),
+        partner_code: partnerCode,
         partner_email: partnerEmail,
         partner_name: partnerName,
+        enabled: true,
         is_recurring: isRecurring || false,
-        is_active: true,
-        fee_percentage_first: 10, // 10% for first purchase
-        fee_percentage_renewal: isRecurring ? 5 : 0, // 5% for renewals if VIP
       })
       .select()
       .single();
 
     if (error) {
-      console.error('Error creating partner:', error);
+      console.error('Error creating finder partner:', error);
       return NextResponse.json(
         { success: false, message: `Database error: ${error.message}` },
         { status: 500 }
       );
     }
 
-    // Generate the finder link
-    const finderLink = `https://mindandmuscle.ai/team-licensing?ref=${partnerCode.toUpperCase()}`;
+    // Generate finder link
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://themindandmuscleapp.com';
+    const finderLink = `${baseUrl}/team-licensing?finder=${partnerCode}`;
+
+    // TODO: Send email to partner with their finder link
+    // You can implement this using your existing email system
 
     return NextResponse.json({
       success: true,
-      message: `Successfully enabled ${isRecurring ? 'VIP' : 'standard'} finder partner: ${partnerName}`,
+      message: `Partner "${partnerName}" enabled successfully! ${isRecurring ? '(VIP Recurring)' : '(Standard)'}`,
       finderLink,
-      partner: {
-        id: partner.id,
-        code: partner.finder_code,
-        name: partner.partner_name,
-        email: partner.partner_email,
-        isRecurring: partner.is_recurring,
-      },
+      partner: data,
     });
   } catch (error) {
     console.error('Error in enable partner route:', error);
