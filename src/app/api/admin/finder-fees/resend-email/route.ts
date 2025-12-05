@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(request: NextRequest) {
@@ -20,7 +17,6 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { partnerCode, partnerEmail, partnerName, isRecurring } = body;
 
-    // Validate required fields
     if (!partnerCode || !partnerEmail || !partnerName) {
       return NextResponse.json(
         { success: false, message: 'Missing required fields' },
@@ -28,92 +24,43 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create Supabase client with service role key
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mindandmuscle.ai';
+    const finderLink = `${baseUrl}/team-licensing?finder=${partnerCode}`;
 
-    // Check if partner code already exists
-    const { data: existingPartner } = await supabase
-      .from('finder_fee_partners')
-      .select('partner_code')
-      .eq('partner_code', partnerCode)
-      .single();
+    // Build email HTML
+    const emailHtml = buildFinderFeeWelcomeEmail({
+      partnerName,
+      partnerCode,
+      finderLink,
+      isRecurring,
+    });
 
-    if (existingPartner) {
+    // Send email
+    const result = await resend.emails.send({
+      from: 'Mind & Muscle <partners@mindandmuscle.ai>',
+      to: partnerEmail,
+      subject: isRecurring
+        ? `Welcome to the Mind & Muscle VIP Finder Program!`
+        : `Welcome to the Mind & Muscle Finder Fee Program!`,
+      html: emailHtml,
+    });
+
+    if (result.error) {
+      console.error('Resend error:', result.error);
       return NextResponse.json(
-        { success: false, message: `Partner code "${partnerCode}" already exists` },
-        { status: 400 }
-      );
-    }
-
-    // Insert new finder partner
-    const { data, error } = await supabase
-      .from('finder_fee_partners')
-      .insert({
-        partner_code: partnerCode,
-        partner_email: partnerEmail,
-        partner_name: partnerName,
-        enabled: true,
-        is_recurring: isRecurring || false,
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error creating finder partner:', error);
-      return NextResponse.json(
-        { success: false, message: `Database error: ${error.message}` },
+        { success: false, message: `Email error: ${result.error.message}` },
         { status: 500 }
       );
     }
 
-    // Generate finder link
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://mindandmuscle.ai';
-    const finderLink = `${baseUrl}/team-licensing?finder=${partnerCode}`;
-
-    // Send welcome email to partner
-    let emailSent = false;
-    let emailError = '';
-    try {
-      const emailHtml = buildFinderFeeWelcomeEmail({
-        partnerName,
-        partnerCode,
-        finderLink,
-        isRecurring: isRecurring || false,
-      });
-
-      const emailResult = await resend.emails.send({
-        from: 'Mind & Muscle <partners@mindandmuscle.ai>',
-        to: partnerEmail,
-        subject: isRecurring
-          ? `Welcome to the Mind & Muscle VIP Finder Program!`
-          : `Welcome to the Mind & Muscle Finder Fee Program!`,
-        html: emailHtml,
-      });
-
-      if (emailResult.error) {
-        emailError = emailResult.error.message;
-        console.error('Email send error:', emailResult.error);
-      } else {
-        emailSent = true;
-      }
-    } catch (emailErr) {
-      emailError = emailErr instanceof Error ? emailErr.message : 'Unknown error';
-      console.error('Email send exception:', emailErr);
-    }
-
     return NextResponse.json({
       success: true,
-      message: emailSent
-        ? `Partner "${partnerName}" enabled successfully! Welcome email sent to ${partnerEmail}. ${isRecurring ? '(VIP Recurring)' : '(Standard)'}`
-        : `Partner "${partnerName}" enabled successfully! ${isRecurring ? '(VIP Recurring)' : '(Standard)'} (Email failed: ${emailError})`,
-      finderLink,
-      partner: data,
-      emailSent,
+      message: `Welcome email sent to ${partnerEmail}`,
     });
   } catch (error) {
-    console.error('Error in enable partner route:', error);
+    console.error('Error sending finder fee email:', error);
     return NextResponse.json(
-      { success: false, message: 'Internal server error' },
+      { success: false, message: 'Failed to send email' },
       { status: 500 }
     );
   }

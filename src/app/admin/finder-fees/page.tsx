@@ -4,9 +4,25 @@ import { useState, useEffect } from 'react';
 import PasswordGate from '@/components/PasswordGate';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
-import { Users, DollarSign, CheckCircle, Clock, Crown, RefreshCw, Copy, UserPlus, List } from 'lucide-react';
+import {
+  Users, DollarSign, CheckCircle, Clock, Crown, RefreshCw, Copy, UserPlus, List,
+  Mail, Info, ExternalLink, Search, ToggleLeft, ToggleRight, ChevronDown, ChevronUp,
+  TrendingUp, Wallet, Calendar
+} from 'lucide-react';
 
-type Tab = 'enable' | 'transactions';
+type Tab = 'enable' | 'partners' | 'transactions';
+
+interface Partner {
+  id: string;
+  partner_code: string;
+  partner_email: string;
+  partner_name: string;
+  enabled: boolean;
+  is_recurring: boolean;
+  finder_link: string;
+  total_earnings: number;
+  created_at: string;
+}
 
 interface Transaction {
   id: string;
@@ -22,12 +38,74 @@ interface Transaction {
   created_at: string;
 }
 
+interface Stats {
+  totalPartners: number;
+  pendingPayments: number;
+  totalPaidOut: number;
+  thisMonthFees: number;
+}
+
 export default function AdminFinderFeesPage() {
   const [activeTab, setActiveTab] = useState<Tab>('enable');
+  const [showCheatSheet, setShowCheatSheet] = useState(true);
+  const [stats, setStats] = useState<Stats>({ totalPartners: 0, pendingPayments: 0, totalPaidOut: 0, thisMonthFees: 0 });
+  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
+
+  // Fetch stats on mount
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      // Fetch partners count
+      const partnersRes = await fetch('/api/admin/finder-fees/partners', {
+        headers: { 'X-Admin-Password': adminPassword },
+      });
+      const partnersData = await partnersRes.json();
+
+      // Fetch transactions for payment stats
+      const txRes = await fetch('/api/admin/finder-fees/transactions?status=all', {
+        headers: { 'X-Admin-Password': adminPassword },
+      });
+      const txData = await txRes.json();
+
+      let pendingPayments = 0;
+      let totalPaidOut = 0;
+      let thisMonthFees = 0;
+      const now = new Date();
+      const thisMonth = now.getMonth();
+      const thisYear = now.getFullYear();
+
+      if (txData.transactions) {
+        txData.transactions.forEach((tx: Transaction) => {
+          if (tx.status === 'pending' || tx.status === 'approved') {
+            pendingPayments += tx.fee_amount;
+          }
+          if (tx.status === 'paid') {
+            totalPaidOut += tx.fee_amount;
+          }
+          const txDate = new Date(tx.created_at);
+          if (txDate.getMonth() === thisMonth && txDate.getFullYear() === thisYear) {
+            thisMonthFees += tx.fee_amount;
+          }
+        });
+      }
+
+      setStats({
+        totalPartners: partnersData.pagination?.totalCount || 0,
+        pendingPayments,
+        totalPaidOut,
+        thisMonthFees,
+      });
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+    }
+  };
 
   return (
     <PasswordGate
-      password={process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!'}
+      password={adminPassword}
       title="Admin: Finder Fee Management"
       description="Enter admin password to access dashboard"
     >
@@ -46,35 +124,176 @@ export default function AdminFinderFeesPage() {
               <p className="text-gray-400">Manage partners and view transactions</p>
             </div>
 
+            {/* Stats Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <LiquidGlass className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center border border-blue-500/30">
+                    <Users className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-white">{stats.totalPartners}</p>
+                    <p className="text-xs text-gray-400">Total Partners</p>
+                  </div>
+                </div>
+              </LiquidGlass>
+
+              <LiquidGlass className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center border border-yellow-500/30">
+                    <Clock className="w-5 h-5 text-yellow-400" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-yellow-400">${stats.pendingPayments.toFixed(0)}</p>
+                    <p className="text-xs text-gray-400">Pending</p>
+                  </div>
+                </div>
+              </LiquidGlass>
+
+              <LiquidGlass className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center border border-green-500/30">
+                    <Wallet className="w-5 h-5 text-green-400" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-green-400">${stats.totalPaidOut.toFixed(0)}</p>
+                    <p className="text-xs text-gray-400">Total Paid</p>
+                  </div>
+                </div>
+              </LiquidGlass>
+
+              <LiquidGlass className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center border border-purple-500/30">
+                    <TrendingUp className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold text-purple-400">${stats.thisMonthFees.toFixed(0)}</p>
+                    <p className="text-xs text-gray-400">This Month</p>
+                  </div>
+                </div>
+              </LiquidGlass>
+            </div>
+
+            {/* Cheat Sheet */}
+            <LiquidGlass className="p-4 mb-8">
+              <button
+                onClick={() => setShowCheatSheet(!showCheatSheet)}
+                className="w-full flex items-center justify-between text-left"
+              >
+                <div className="flex items-center gap-2">
+                  <Info className="w-5 h-5 text-orange-400" />
+                  <span className="font-semibold text-white">Finder Fee Program Cheat Sheet</span>
+                </div>
+                {showCheatSheet ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+              </button>
+
+              {showCheatSheet && (
+                <div className="mt-4 grid md:grid-cols-2 gap-6">
+                  {/* How It Works */}
+                  <div>
+                    <h3 className="text-sm font-semibold text-orange-400 mb-3">How It Works</h3>
+                    <ol className="text-sm text-gray-300 space-y-2">
+                      <li className="flex gap-2"><span className="text-blue-400 font-bold">1.</span> You create a partner here with a unique code</li>
+                      <li className="flex gap-2"><span className="text-blue-400 font-bold">2.</span> They get an email with their personal finder link</li>
+                      <li className="flex gap-2"><span className="text-blue-400 font-bold">3.</span> They share the link with organizations</li>
+                      <li className="flex gap-2"><span className="text-blue-400 font-bold">4.</span> Organization purchases → you pay the finder fee</li>
+                    </ol>
+                  </div>
+
+                  {/* Commission Structure */}
+                  <div>
+                    <h3 className="text-sm font-semibold text-orange-400 mb-3">Commission Structure</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-lg p-2">
+                        <span className="text-blue-400 font-semibold">Standard:</span>
+                        <span className="text-gray-300">10% one-time (first purchase only)</span>
+                      </div>
+                      <div className="flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 rounded-lg p-2">
+                        <Crown className="w-4 h-4 text-purple-400" />
+                        <span className="text-purple-400 font-semibold">VIP:</span>
+                        <span className="text-gray-300">10% first + 5% every renewal</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quick Links */}
+                  <div>
+                    <h3 className="text-sm font-semibold text-orange-400 mb-3">Program Info Pages</h3>
+                    <div className="space-y-2 text-sm">
+                      <a
+                        href="/finder-fee"
+                        target="_blank"
+                        className="flex items-center gap-2 text-blue-400 hover:text-blue-300"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        /finder-fee <span className="text-gray-500">(password: fastball)</span>
+                      </a>
+                      <a
+                        href="/finder-fee-vip"
+                        target="_blank"
+                        className="flex items-center gap-2 text-purple-400 hover:text-purple-300"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                        /finder-fee-vip <span className="text-gray-500">(password: dominate)</span>
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Link Format */}
+                  <div>
+                    <h3 className="text-sm font-semibold text-orange-400 mb-3">Finder Link Format</h3>
+                    <code className="block bg-gray-800 text-cyan-400 p-2 rounded text-xs break-all">
+                      https://mindandmuscle.ai/team-licensing?finder=CODE
+                    </code>
+                    <p className="text-xs text-gray-500 mt-2">90-day cookie tracking window</p>
+                  </div>
+                </div>
+              )}
+            </LiquidGlass>
+
             {/* Tab Navigation */}
-            <div className="flex justify-center gap-4 mb-8">
+            <div className="flex justify-center gap-2 md:gap-4 mb-8 flex-wrap">
               <button
                 onClick={() => setActiveTab('enable')}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
+                className={`flex items-center gap-2 px-4 md:px-6 py-3 rounded-xl font-medium transition-all text-sm md:text-base ${
                   activeTab === 'enable'
                     ? 'bg-orange-500/20 border border-orange-500/30 text-orange-400'
                     : 'bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10'
                 }`}
               >
                 <UserPlus className="w-5 h-5" />
-                Enable Partners
+                <span className="hidden sm:inline">Add Partner</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('partners')}
+                className={`flex items-center gap-2 px-4 md:px-6 py-3 rounded-xl font-medium transition-all text-sm md:text-base ${
+                  activeTab === 'partners'
+                    ? 'bg-green-500/20 border border-green-500/30 text-green-400'
+                    : 'bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10'
+                }`}
+              >
+                <Users className="w-5 h-5" />
+                <span className="hidden sm:inline">Partners</span>
               </button>
               <button
                 onClick={() => setActiveTab('transactions')}
-                className={`flex items-center gap-2 px-6 py-3 rounded-xl font-medium transition-all ${
+                className={`flex items-center gap-2 px-4 md:px-6 py-3 rounded-xl font-medium transition-all text-sm md:text-base ${
                   activeTab === 'transactions'
                     ? 'bg-blue-500/20 border border-blue-500/30 text-blue-400'
                     : 'bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10'
                 }`}
               >
                 <List className="w-5 h-5" />
-                View Transactions
+                <span className="hidden sm:inline">Transactions</span>
               </button>
             </div>
 
             {/* Tab Content */}
-            <LiquidGlass className="p-8">
-              {activeTab === 'enable' ? <EnablePartnerTab /> : <TransactionsTab />}
+            <LiquidGlass className="p-6 md:p-8">
+              {activeTab === 'enable' && <EnablePartnerTab onSuccess={fetchStats} />}
+              {activeTab === 'partners' && <PartnersTab />}
+              {activeTab === 'transactions' && <TransactionsTab onStatusChange={fetchStats} />}
             </LiquidGlass>
           </div>
         </div>
@@ -83,7 +302,7 @@ export default function AdminFinderFeesPage() {
   );
 }
 
-function EnablePartnerTab() {
+function EnablePartnerTab({ onSuccess }: { onSuccess: () => void }) {
   const [formData, setFormData] = useState({
     partnerCode: '',
     partnerEmail: '',
@@ -91,7 +310,8 @@ function EnablePartnerTab() {
     isRecurring: false,
   });
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState<{ success: boolean; message: string; finderLink?: string } | null>(null);
+  const [result, setResult] = useState<{ success: boolean; message: string; finderLink?: string; emailSent?: boolean } | null>(null);
+  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,7 +323,7 @@ function EnablePartnerTab() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!',
+          'X-Admin-Password': adminPassword,
         },
         body: JSON.stringify(formData),
       });
@@ -118,6 +338,7 @@ function EnablePartnerTab() {
           partnerName: '',
           isRecurring: false,
         });
+        onSuccess();
       }
     } catch {
       setResult({
@@ -136,8 +357,8 @@ function EnablePartnerTab() {
           <UserPlus className="w-6 h-6 text-orange-400" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-white">Enable New Finder Partner</h2>
-          <p className="text-gray-400">Create a new partner with their unique finder code</p>
+          <h2 className="text-2xl font-bold text-white">Add New Finder Partner</h2>
+          <p className="text-gray-400">Create a partner - welcome email sends automatically</p>
         </div>
       </div>
 
@@ -151,11 +372,11 @@ function EnablePartnerTab() {
             id="partnerCode"
             required
             value={formData.partnerCode}
-            onChange={(e) => setFormData({ ...formData, partnerCode: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, partnerCode: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '') })}
             className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50"
             placeholder="e.g., SMITH2024"
           />
-          <p className="mt-1 text-sm text-gray-500">Unique code for this partner (alphanumeric, no spaces)</p>
+          <p className="mt-1 text-sm text-gray-500">Unique code (letters & numbers only, auto-uppercase)</p>
         </div>
 
         <div>
@@ -198,13 +419,13 @@ function EnablePartnerTab() {
               className="h-5 w-5 text-orange-500 focus:ring-orange-500 border-gray-600 rounded bg-gray-700"
             />
             <label htmlFor="isRecurring" className="ml-3 block text-white font-medium">
-              VIP Recurring (10% first payment + 5% all renewals)
+              VIP Recurring (10% first + 5% all renewals)
             </label>
           </div>
           <p className="text-sm text-gray-400 mt-2 ml-8">
             {formData.isRecurring
-              ? '⭐ VIP: Partner earns 10% on first purchase + 5% on every renewal (rare, high-value partners only)'
-              : '📋 Standard: Partner earns 10% one-time fee on first purchase only'}
+              ? '⭐ VIP: Partner earns ongoing - rare, high-value partners only'
+              : '📋 Standard: Partner earns 10% one-time on first purchase'}
           </p>
         </div>
 
@@ -214,15 +435,27 @@ function EnablePartnerTab() {
           variant="orange"
           fullWidth
         >
-          {loading ? 'Enabling Partner...' : 'Enable Finder Partner'}
+          {loading ? 'Creating Partner...' : 'Create Partner & Send Email'}
         </LiquidButton>
       </form>
 
       {result && (
         <div className={`mt-6 p-4 rounded-xl ${result.success ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
-          <p className={`font-semibold ${result.success ? 'text-green-400' : 'text-red-400'}`}>
-            {result.message}
-          </p>
+          <div className="flex items-start gap-2">
+            {result.success ? (
+              <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0 mt-0.5" />
+            ) : null}
+            <div className="flex-1">
+              <p className={`font-semibold ${result.success ? 'text-green-400' : 'text-red-400'}`}>
+                {result.message}
+              </p>
+              {result.emailSent && (
+                <p className="text-sm text-green-300 mt-1 flex items-center gap-1">
+                  <Mail className="w-4 h-4" /> Welcome email sent!
+                </p>
+              )}
+            </div>
+          </div>
           {result.finderLink && (
             <div className="mt-3">
               <label className="block text-sm font-medium text-green-400 mb-1">Finder Link:</label>
@@ -249,9 +482,210 @@ function EnablePartnerTab() {
   );
 }
 
-function TransactionsTab() {
+function PartnersTab() {
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState('');
+  const [sendingEmail, setSendingEmail] = useState<string | null>(null);
+  const [togglingPartner, setTogglingPartner] = useState<string | null>(null);
+  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
+
+  const fetchPartners = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({ search });
+      const response = await fetch(`/api/admin/finder-fees/partners?${params}`, {
+        headers: { 'X-Admin-Password': adminPassword },
+      });
+      const data = await response.json();
+      if (data.partners) {
+        setPartners(data.partners);
+      }
+    } catch (error) {
+      console.error('Failed to fetch partners:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPartners();
+  }, [search]);
+
+  const handleResendEmail = async (partner: Partner) => {
+    setSendingEmail(partner.id);
+    try {
+      const response = await fetch('/api/admin/finder-fees/resend-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': adminPassword,
+        },
+        body: JSON.stringify({
+          partnerCode: partner.partner_code,
+          partnerEmail: partner.partner_email,
+          partnerName: partner.partner_name,
+          isRecurring: partner.is_recurring,
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        alert('Email sent successfully!');
+      } else {
+        alert(`Failed to send email: ${data.message}`);
+      }
+    } catch {
+      alert('Failed to send email');
+    } finally {
+      setSendingEmail(null);
+    }
+  };
+
+  const handleTogglePartner = async (partner: Partner) => {
+    setTogglingPartner(partner.id);
+    try {
+      const response = await fetch('/api/admin/finder-fees/partners', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': adminPassword,
+        },
+        body: JSON.stringify({
+          partnerId: partner.id,
+          enabled: !partner.enabled,
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        fetchPartners();
+      } else {
+        alert(`Failed to update partner: ${data.message}`);
+      }
+    } catch {
+      alert('Failed to update partner');
+    } finally {
+      setTogglingPartner(null);
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center border border-green-500/30">
+            <Users className="w-6 h-6 text-green-400" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-white">Finder Partners</h2>
+            <p className="text-gray-400">View and manage all partners</p>
+          </div>
+        </div>
+
+        <div className="flex gap-2 w-full md:w-auto">
+          <div className="relative flex-1 md:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+            <input
+              type="text"
+              placeholder="Search partners..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500/50"
+            />
+          </div>
+          <button
+            onClick={fetchPartners}
+            className="px-4 py-2 bg-green-500/20 border border-green-500/30 rounded-xl text-green-400 hover:bg-green-500/30"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-400"></div>
+          <p className="mt-2 text-gray-400">Loading partners...</p>
+        </div>
+      ) : partners.length === 0 ? (
+        <div className="text-center py-12 bg-white/5 border border-white/10 rounded-xl">
+          <Users className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+          <p className="text-gray-400">No partners found</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {partners.map((partner) => (
+            <div
+              key={partner.id}
+              className={`p-4 rounded-xl border ${partner.enabled ? 'bg-white/5 border-white/10' : 'bg-red-500/5 border-red-500/20'}`}
+            >
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="font-semibold text-white">{partner.partner_name}</span>
+                    {partner.is_recurring ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                        <Crown className="w-3 h-3" /> VIP
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                        Standard
+                      </span>
+                    )}
+                    {!partner.enabled && (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/20 text-red-400 border border-red-500/30">
+                        Disabled
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-400">{partner.partner_email}</p>
+                  <div className="flex items-center gap-4 mt-2 text-sm">
+                    <span className="text-gray-500">Code: <span className="text-cyan-400 font-mono">{partner.partner_code}</span></span>
+                    <span className="text-gray-500">Earned: <span className="text-green-400 font-semibold">${partner.total_earnings.toFixed(2)}</span></span>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => navigator.clipboard.writeText(partner.finder_link)}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 text-sm"
+                  >
+                    <Copy className="w-3 h-3" /> Link
+                  </button>
+                  <button
+                    onClick={() => handleResendEmail(partner)}
+                    disabled={sendingEmail === partner.id}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-orange-500/20 text-orange-400 rounded-lg hover:bg-orange-500/30 text-sm disabled:opacity-50"
+                  >
+                    <Mail className={`w-3 h-3 ${sendingEmail === partner.id ? 'animate-pulse' : ''}`} />
+                    {sendingEmail === partner.id ? 'Sending...' : 'Resend'}
+                  </button>
+                  <button
+                    onClick={() => handleTogglePartner(partner)}
+                    disabled={togglingPartner === partner.id}
+                    className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm disabled:opacity-50 ${
+                      partner.enabled
+                        ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                        : 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
+                    }`}
+                  >
+                    {partner.enabled ? <ToggleRight className="w-3 h-3" /> : <ToggleLeft className="w-3 h-3" />}
+                    {partner.enabled ? 'Disable' : 'Enable'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TransactionsTab({ onStatusChange }: { onStatusChange: () => void }) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [paymentNotes, setPaymentNotes] = useState<Record<string, string>>({});
   const [filters, setFilters] = useState({
     status: 'all',
     type: 'all',
@@ -261,6 +695,7 @@ function TransactionsTab() {
     totalPages: 1,
     totalCount: 0,
   });
+  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   const fetchTransactions = async () => {
     setLoading(true);
@@ -272,9 +707,7 @@ function TransactionsTab() {
       });
 
       const response = await fetch(`/api/admin/finder-fees/transactions?${params}`, {
-        headers: {
-          'X-Admin-Password': process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!',
-        },
+        headers: { 'X-Admin-Password': adminPassword },
       });
 
       const data = await response.json();
@@ -292,6 +725,35 @@ function TransactionsTab() {
   useEffect(() => {
     fetchTransactions();
   }, [filters]);
+
+  const handleStatusUpdate = async (transactionId: string, newStatus: string) => {
+    setUpdatingStatus(transactionId);
+    try {
+      const response = await fetch('/api/admin/finder-fees/update-status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': adminPassword,
+        },
+        body: JSON.stringify({
+          transactionId,
+          status: newStatus,
+          paymentNotes: paymentNotes[transactionId] || '',
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        fetchTransactions();
+        onStatusChange();
+      } else {
+        alert(`Failed to update status: ${data.message}`);
+      }
+    } catch {
+      alert('Failed to update status');
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
 
   return (
     <div>
@@ -338,13 +800,13 @@ function TransactionsTab() {
             className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500/50"
           >
             <option value="all">All Types</option>
-            <option value="standard">Standard (One-time)</option>
-            <option value="vip">VIP (Recurring)</option>
+            <option value="standard">Standard</option>
+            <option value="vip">VIP</option>
           </select>
         </div>
       </div>
 
-      {/* Transactions Table */}
+      {/* Transactions */}
       {loading ? (
         <div className="text-center py-12">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
@@ -352,72 +814,99 @@ function TransactionsTab() {
         </div>
       ) : transactions.length === 0 ? (
         <div className="text-center py-12 bg-white/5 border border-white/10 rounded-xl">
-          <Users className="w-12 h-12 text-gray-600 mx-auto mb-3" />
+          <DollarSign className="w-12 h-12 text-gray-600 mx-auto mb-3" />
           <p className="text-gray-400">No transactions found</p>
         </div>
       ) : (
-        <>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-white/5 border-b border-white/10">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Code</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Partner</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Organization</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Amount</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Fee %</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Fee Amount</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Type</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Date</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {transactions.map((tx) => (
-                  <tr key={tx.id} className="hover:bg-white/5">
-                    <td className="px-4 py-3 text-sm font-medium text-white">{tx.finder_code}</td>
-                    <td className="px-4 py-3 text-sm text-gray-300">{tx.partner_name}</td>
-                    <td className="px-4 py-3 text-sm text-gray-300">{tx.referred_org_email}</td>
-                    <td className="px-4 py-3 text-sm text-white">${tx.purchase_amount.toFixed(2)}</td>
-                    <td className="px-4 py-3 text-sm text-gray-300">{tx.fee_percentage}%</td>
-                    <td className="px-4 py-3 text-sm font-semibold text-green-400">${tx.fee_amount.toFixed(2)}</td>
-                    <td className="px-4 py-3 text-sm">
-                      {tx.is_recurring ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-400 border border-purple-500/30">
-                          <Crown className="w-3 h-3" />
-                          VIP {tx.is_first_purchase ? '(First)' : '(Renewal)'}
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                          Standard
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3 text-sm">
-                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                        tx.status === 'paid' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
-                        tx.status === 'approved' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
-                        'bg-gray-500/20 text-gray-400 border border-gray-500/30'
-                      }`}>
-                        {tx.status === 'paid' && <CheckCircle className="w-3 h-3" />}
-                        {tx.status === 'approved' && <Clock className="w-3 h-3" />}
-                        {tx.status}
+        <div className="space-y-4">
+          {transactions.map((tx) => (
+            <div
+              key={tx.id}
+              className={`p-4 rounded-xl border ${
+                tx.status === 'paid' ? 'bg-green-500/5 border-green-500/20' :
+                tx.status === 'approved' ? 'bg-yellow-500/5 border-yellow-500/20' :
+                'bg-white/5 border-white/10'
+              }`}
+            >
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="font-semibold text-white">{tx.partner_name}</span>
+                    <span className="text-gray-500">•</span>
+                    <span className="text-cyan-400 font-mono text-sm">{tx.finder_code}</span>
+                    {tx.is_recurring ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                        <Crown className="w-3 h-3" />
+                        VIP {tx.is_first_purchase ? '(First)' : '(Renewal)'}
                       </span>
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-400">
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                        Standard
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-400 mb-2">Org: {tx.referred_org_email}</p>
+                  <div className="flex items-center gap-4 text-sm">
+                    <span className="text-gray-400">Purchase: <span className="text-white font-semibold">${tx.purchase_amount.toFixed(2)}</span></span>
+                    <span className="text-gray-400">Fee ({tx.fee_percentage}%): <span className="text-green-400 font-bold">${tx.fee_amount.toFixed(2)}</span></span>
+                    <span className="text-gray-500 flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
                       {new Date(tx.created_at).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                  {/* Status Badge */}
+                  <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
+                    tx.status === 'paid' ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
+                    tx.status === 'approved' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30' :
+                    'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+                  }`}>
+                    {tx.status === 'paid' && <CheckCircle className="w-4 h-4" />}
+                    {tx.status === 'approved' && <Clock className="w-4 h-4" />}
+                    {tx.status.charAt(0).toUpperCase() + tx.status.slice(1)}
+                  </span>
+
+                  {/* Action Buttons */}
+                  {tx.status === 'pending' && (
+                    <button
+                      onClick={() => handleStatusUpdate(tx.id, 'approved')}
+                      disabled={updatingStatus === tx.id}
+                      className="px-4 py-1.5 bg-yellow-500/20 text-yellow-400 rounded-lg hover:bg-yellow-500/30 text-sm font-medium disabled:opacity-50"
+                    >
+                      {updatingStatus === tx.id ? 'Updating...' : 'Approve'}
+                    </button>
+                  )}
+
+                  {tx.status === 'approved' && (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        placeholder="Payment note (Venmo #)"
+                        value={paymentNotes[tx.id] || ''}
+                        onChange={(e) => setPaymentNotes({ ...paymentNotes, [tx.id]: e.target.value })}
+                        className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-gray-500 w-40"
+                      />
+                      <button
+                        onClick={() => handleStatusUpdate(tx.id, 'paid')}
+                        disabled={updatingStatus === tx.id}
+                        className="px-4 py-1.5 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 text-sm font-medium disabled:opacity-50"
+                      >
+                        {updatingStatus === tx.id ? 'Updating...' : 'Mark Paid'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
 
           {/* Pagination */}
           {pagination.totalPages > 1 && (
             <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-6 pt-6 border-t border-white/10">
               <p className="text-sm text-gray-400">
-                Showing page {filters.page} of {pagination.totalPages} ({pagination.totalCount} total)
+                Page {filters.page} of {pagination.totalPages} ({pagination.totalCount} total)
               </p>
               <div className="flex gap-2">
                 <button
@@ -437,7 +926,7 @@ function TransactionsTab() {
               </div>
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );
