@@ -51,12 +51,12 @@ export default function DeleteAccountPage() {
           </div>
         </LiquidGlass>
 
-        {/* How to Delete Section */}
+        {/* How to Delete Section - In App */}
         <LiquidGlass variant="blue" rounded="2xl" className="p-8 md:p-12">
           <h2 className="text-3xl font-black mb-8">How to Delete Your Account</h2>
 
           <div className="space-y-6">
-            {/* Step 1 */}
+            {/* Option 1 - In App */}
             <div className="flex gap-4">
               <div className="flex-shrink-0">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange flex items-center justify-center font-bold text-lg">
@@ -65,10 +65,39 @@ export default function DeleteAccountPage() {
               </div>
               <div className="flex-1">
                 <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
-                  <Mail className="w-5 h-5 text-neon-cortex-blue" />
-                  Send an Email Request
+                  <Smartphone className="w-5 h-5 text-neon-cortex-blue" />
+                  Delete in the App (Recommended)
                 </h3>
                 <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                  <p className="text-text-secondary mb-3">
+                    You can delete your account directly from the Mind & Muscle app:
+                  </p>
+                  <ol className="list-decimal pl-6 space-y-2 text-text-secondary">
+                    <li>Open the Mind & Muscle app</li>
+                    <li>Go to <strong className="text-white">Settings</strong> <Settings className="w-4 h-4 inline" /></li>
+                    <li>Scroll down and tap <strong className="text-red-400">Delete Account</strong></li>
+                    <li>Confirm your decision</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+
+            {/* Option 2 - Email */}
+            <div className="flex gap-4">
+              <div className="flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange flex items-center justify-center font-bold text-lg">
+                  2
+                </div>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold mb-3 flex items-center gap-2">
+                  <Mail className="w-5 h-5 text-neon-cortex-blue" />
+                  Or Email Us
+                </h3>
+                <div className="p-4 rounded-lg bg-white/5 border border-white/10">
+                  <p className="text-text-secondary mb-4">
+                    If you prefer, we can delete your account for you:
+                  </p>
                   <p className="text-text-secondary mb-3">
                     <strong>Email:</strong>{' '}
                     <a
@@ -88,11 +117,11 @@ export default function DeleteAccountPage() {
               </div>
             </div>
 
-            {/* Step 2 */}
+            {/* What Gets Deleted */}
             <div className="flex gap-4">
               <div className="flex-shrink-0">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange flex items-center justify-center font-bold text-lg">
-                  2
+                  3
                 </div>
               </div>
               <div className="flex-1">
@@ -101,7 +130,7 @@ export default function DeleteAccountPage() {
                   What Gets Deleted
                 </h3>
                 <div className="space-y-2 text-text-secondary">
-                  <p>When you request account deletion, we will permanently remove:</p>
+                  <p>When your account is deleted, we will permanently remove:</p>
                   <ul className="list-disc pl-6 space-y-1">
                     <li>Your profile information (name, email, birthday)</li>
                     <li>Training history and workout data</li>
@@ -114,11 +143,11 @@ export default function DeleteAccountPage() {
               </div>
             </div>
 
-            {/* Step 3 */}
+            {/* Timeline - only for email requests */}
             <div className="flex gap-4">
               <div className="flex-shrink-0">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange flex items-center justify-center font-bold text-lg">
-                  3
+                  4
                 </div>
               </div>
               <div className="flex-1">
@@ -127,17 +156,17 @@ export default function DeleteAccountPage() {
                   Timeline
                 </h3>
                 <p className="text-text-secondary">
-                  Account deletion requests are processed within <strong className="text-white">30 days</strong> of receipt.
+                  Deletion in the app is <strong className="text-white">immediate</strong>. Email requests are processed within <strong className="text-white">30 days</strong>.
                   You will receive a confirmation email once your account has been deleted.
                 </p>
               </div>
             </div>
 
-            {/* Step 4 */}
+            {/* Cannot Be Undone */}
             <div className="flex gap-4">
               <div className="flex-shrink-0">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange flex items-center justify-center font-bold text-lg">
-                  4
+                  5
                 </div>
               </div>
               <div className="flex-1">
@@ -152,11 +181,11 @@ export default function DeleteAccountPage() {
               </div>
             </div>
 
-            {/* Step 5 */}
+            {/* Subscription Cancellation */}
             <div className="flex gap-4">
               <div className="flex-shrink-0">
                 <div className="w-10 h-10 rounded-full bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange flex items-center justify-center font-bold text-lg">
-                  5
+                  6
                 </div>
               </div>
               <div className="flex-1">
@@ -168,7 +197,7 @@ export default function DeleteAccountPage() {
                   <p className="text-text-secondary">
                     <strong className="text-yellow-400">Important:</strong> Deleting your account does NOT automatically
                     cancel active subscriptions. Please cancel your subscription through the App Store or Google Play
-                    <strong className="text-white"> before</strong> requesting account deletion.
+                    <strong className="text-white"> before</strong> deleting your account.
                   </p>
                 </div>
               </div>
