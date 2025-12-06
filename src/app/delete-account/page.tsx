@@ -4,7 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { GradientTextReveal } from '@/components/animations';
-import { Mail, AlertTriangle, Clock, ShieldAlert, CreditCard, Info } from 'lucide-react';
+import { Mail, AlertTriangle, Clock, ShieldAlert, CreditCard, Info, Smartphone, Settings } from 'lucide-react';
 
 export default function DeleteAccountPage() {
   return (
