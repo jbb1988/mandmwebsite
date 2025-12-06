@@ -407,7 +407,7 @@ function TeamLicensingContent() {
           >
             <div className="text-4xl md:text-5xl mb-3">🏟️</div>
             <div className="font-bold text-lg md:text-xl mb-1">League</div>
-            <div className="text-sm text-text-secondary mb-4">200+ users • Contact sales</div>
+            <div className="text-sm text-text-secondary mb-4">500+ users • Contact sales</div>
             <div className="text-xs font-semibold flex items-center justify-center gap-1 text-text-secondary group-hover:text-emerald-400 transition-colors">
               Contact Sales <ArrowRight className="w-3 h-3" />
             </div>
@@ -525,13 +525,13 @@ function TeamLicensingContent() {
                           type="number"
                           id="totalUsers"
                           min={numberOfTeams}
-                          max="200"
+                          max="500"
                           value={seatCount}
-                          onChange={(e) => setSeatCount(Math.max(numberOfTeams, Math.min(200, parseInt(e.target.value) || numberOfTeams)))}
+                          onChange={(e) => setSeatCount(Math.max(numberOfTeams, Math.min(500, parseInt(e.target.value) || numberOfTeams)))}
                           className="w-20 h-10 text-center text-2xl font-black bg-white/10 border border-white/20 rounded-lg focus:border-purple-500 focus:outline-none"
                         />
                         <button
-                          onClick={() => setSeatCount(Math.min(200, seatCount + 1))}
+                          onClick={() => setSeatCount(Math.min(500, seatCount + 1))}
                           className="w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center font-bold"
                         >
                           +
@@ -543,12 +543,12 @@ function TeamLicensingContent() {
                       <input
                         type="range"
                         min={numberOfTeams}
-                        max="200"
+                        max="500"
                         value={seatCount}
                         onChange={(e) => setSeatCount(parseInt(e.target.value))}
                         className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer"
                         style={{
-                          background: `linear-gradient(to right, #9333ea 0%, #9333ea ${((seatCount - numberOfTeams) / (200 - numberOfTeams)) * 100}%, rgba(255,255,255,0.2) ${((seatCount - numberOfTeams) / (200 - numberOfTeams)) * 100}%, rgba(255,255,255,0.2) 100%)`
+                          background: `linear-gradient(to right, #9333ea 0%, #9333ea ${((seatCount - numberOfTeams) / (500 - numberOfTeams)) * 100}%, rgba(255,255,255,0.2) ${((seatCount - numberOfTeams) / (500 - numberOfTeams)) * 100}%, rgba(255,255,255,0.2) 100%)`
                         }}
                       />
                       <p className="text-xs text-purple-400 mt-2">
