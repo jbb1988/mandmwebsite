@@ -175,7 +175,7 @@ export default function AdminFinderFeesPage() {
               </LiquidGlass>
             </div>
 
-            {/* Cheat Sheet */}
+            {/* Comprehensive Cheat Sheet */}
             <LiquidGlass className="p-4 mb-8">
               <button
                 onClick={() => setShowCheatSheet(!showCheatSheet)}
@@ -183,70 +183,135 @@ export default function AdminFinderFeesPage() {
               >
                 <div className="flex items-center gap-2">
                   <Info className="w-5 h-5 text-orange-400" />
-                  <span className="font-semibold text-white">Finder Fee Program Cheat Sheet</span>
+                  <span className="font-semibold text-white">Referral Programs Cheat Sheet</span>
+                  <span className="text-xs text-gray-500">(Partner Program + Finder Fee)</span>
                 </div>
                 {showCheatSheet ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
               </button>
 
               {showCheatSheet && (
-                <div className="mt-4 grid md:grid-cols-2 gap-6">
-                  {/* How It Works */}
-                  <div>
-                    <h3 className="text-sm font-semibold text-orange-400 mb-3">How It Works</h3>
-                    <ol className="text-sm text-gray-300 space-y-2">
-                      <li className="flex gap-2"><span className="text-blue-400 font-bold">1.</span> You create a partner here with a unique code</li>
-                      <li className="flex gap-2"><span className="text-blue-400 font-bold">2.</span> They get an email with their personal finder link</li>
-                      <li className="flex gap-2"><span className="text-blue-400 font-bold">3.</span> They share the link with organizations</li>
-                      <li className="flex gap-2"><span className="text-blue-400 font-bold">4.</span> Organization purchases → you pay the finder fee</li>
-                    </ol>
-                  </div>
-
-                  {/* Commission Structure */}
-                  <div>
-                    <h3 className="text-sm font-semibold text-orange-400 mb-3">Commission Structure</h3>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-lg p-2">
-                        <span className="text-blue-400 font-semibold">Standard:</span>
-                        <span className="text-gray-300">10% one-time (first purchase only)</span>
+                <div className="mt-4 space-y-6">
+                  {/* Two Programs Comparison */}
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {/* Partner Program (Tolt) */}
+                    <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
+                          <Users className="w-4 h-4 text-green-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-bold text-green-400">Partner Program (Tolt)</h3>
+                          <p className="text-xs text-gray-500">Automated via Tolt</p>
+                        </div>
                       </div>
-                      <div className="flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 rounded-lg p-2">
-                        <Crown className="w-4 h-4 text-purple-400" />
-                        <span className="text-purple-400 font-semibold">VIP:</span>
-                        <span className="text-gray-300">10% first + 5% every renewal</span>
+                      <ul className="text-xs text-gray-300 space-y-1.5">
+                        <li className="flex gap-2"><span className="text-green-400">•</span> For individuals (coaches, parents, influencers)</li>
+                        <li className="flex gap-2"><span className="text-green-400">•</span> <strong className="text-white">10%</strong> recurring (1-99 users)</li>
+                        <li className="flex gap-2"><span className="text-green-400">•</span> <strong className="text-white">15%</strong> recurring (100+ users)</li>
+                        <li className="flex gap-2"><span className="text-green-400">•</span> Affiliate for life (renewals tracked automatically)</li>
+                        <li className="flex gap-2"><span className="text-green-400">•</span> Self-service signup at /partner-program</li>
+                        <li className="flex gap-2"><span className="text-green-400">•</span> Partners manage via app.tolt.io</li>
+                      </ul>
+                      <div className="mt-3 pt-3 border-t border-green-500/20">
+                        <p className="text-xs text-gray-400 mb-1">Link format:</p>
+                        <code className="text-xs text-cyan-400 bg-gray-800 px-2 py-1 rounded block break-all">
+                          mindandmuscle.ai/team-licensing?ref=CODE
+                        </code>
+                      </div>
+                    </div>
+
+                    {/* Finder Fee (Manual) */}
+                    <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-8 h-8 bg-orange-500/20 rounded-full flex items-center justify-center">
+                          <DollarSign className="w-4 h-4 text-orange-400" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-bold text-orange-400">Finder Fee (This Page)</h3>
+                          <p className="text-xs text-gray-500">Manual / Invite-only</p>
+                        </div>
+                      </div>
+                      <ul className="text-xs text-gray-300 space-y-1.5">
+                        <li className="flex gap-2"><span className="text-orange-400">•</span> For introducing organizations (not individuals)</li>
+                        <li className="flex gap-2"><span className="text-orange-400">•</span> <strong className="text-white">Standard: 10%</strong> one-time only</li>
+                        <li className="flex gap-2"><span className="text-orange-400">•</span> <strong className="text-purple-400">VIP: 10%</strong> first + <strong className="text-purple-400">5%</strong> every renewal</li>
+                        <li className="flex gap-2"><span className="text-orange-400">•</span> You create partners manually here</li>
+                        <li className="flex gap-2"><span className="text-orange-400">•</span> You pay out manually (Venmo/Zelle/Check)</li>
+                        <li className="flex gap-2"><span className="text-orange-400">•</span> Private program - not advertised</li>
+                      </ul>
+                      <div className="mt-3 pt-3 border-t border-orange-500/20">
+                        <p className="text-xs text-gray-400 mb-1">Link format:</p>
+                        <code className="text-xs text-cyan-400 bg-gray-800 px-2 py-1 rounded block break-all">
+                          mindandmuscle.ai/team-licensing?finder=CODE
+                        </code>
                       </div>
                     </div>
                   </div>
 
-                  {/* Quick Links */}
-                  <div>
-                    <h3 className="text-sm font-semibold text-orange-400 mb-3">Program Info Pages</h3>
-                    <div className="space-y-2 text-sm">
-                      <a
-                        href="/finder-fee"
-                        target="_blank"
-                        className="flex items-center gap-2 text-blue-400 hover:text-blue-300"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                        /finder-fee <span className="text-gray-500">(password: fastball)</span>
-                      </a>
-                      <a
-                        href="/finder-fee-vip"
-                        target="_blank"
-                        className="flex items-center gap-2 text-purple-400 hover:text-purple-300"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                        /finder-fee-vip <span className="text-gray-500">(password: dominate)</span>
-                      </a>
+                  {/* When to Use Each */}
+                  <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+                    <h3 className="text-sm font-bold text-blue-400 mb-3">When to Use Each Program</h3>
+                    <div className="grid md:grid-cols-2 gap-4 text-xs">
+                      <div>
+                        <p className="text-green-400 font-semibold mb-1">Use Partner Program when:</p>
+                        <ul className="text-gray-300 space-y-1">
+                          <li>• Person wants to refer multiple people over time</li>
+                          <li>• They want their own dashboard to track earnings</li>
+                          <li>• Automated payouts are preferred</li>
+                        </ul>
+                      </div>
+                      <div>
+                        <p className="text-orange-400 font-semibold mb-1">Use Finder Fee when:</p>
+                        <ul className="text-gray-300 space-y-1">
+                          <li>• One-time introduction to an organization</li>
+                          <li>• VIP relationship deserving recurring cut</li>
+                          <li>• Org wants to become partner themselves (finder still gets credit)</li>
+                        </ul>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Link Format */}
-                  <div>
-                    <h3 className="text-sm font-semibold text-orange-400 mb-3">Finder Link Format</h3>
-                    <code className="block bg-gray-800 text-cyan-400 p-2 rounded text-xs break-all">
-                      https://mindandmuscle.ai/team-licensing?finder=CODE
-                    </code>
-                    <p className="text-xs text-gray-500 mt-2">90-day cookie tracking window</p>
+                  {/* Quick Links & Verified Info */}
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {/* Partner Program Links */}
+                    <div>
+                      <h3 className="text-xs font-semibold text-green-400 mb-2">Partner Program Pages</h3>
+                      <div className="space-y-1.5 text-xs">
+                        <a href="/partner-program" target="_blank" className="flex items-center gap-2 text-gray-300 hover:text-white">
+                          <ExternalLink className="w-3 h-3" /> /partner-program <span className="text-gray-500">(public)</span>
+                        </a>
+                        <a href="https://app.tolt.io" target="_blank" className="flex items-center gap-2 text-gray-300 hover:text-white">
+                          <ExternalLink className="w-3 h-3" /> app.tolt.io <span className="text-gray-500">(admin)</span>
+                        </a>
+                        <a href="https://mind-and-muscle.tolt.io" target="_blank" className="flex items-center gap-2 text-gray-300 hover:text-white">
+                          <ExternalLink className="w-3 h-3" /> Partner portal <span className="text-gray-500">(partners login)</span>
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Finder Fee Links */}
+                    <div>
+                      <h3 className="text-xs font-semibold text-orange-400 mb-2">Finder Fee Pages</h3>
+                      <div className="space-y-1.5 text-xs">
+                        <a href="/finder-fee" target="_blank" className="flex items-center gap-2 text-gray-300 hover:text-white">
+                          <ExternalLink className="w-3 h-3" /> /finder-fee <span className="text-gray-500">(pw: fastball)</span>
+                        </a>
+                        <a href="/finder-fee-vip" target="_blank" className="flex items-center gap-2 text-purple-400 hover:text-purple-300">
+                          <Crown className="w-3 h-3" /> /finder-fee-vip <span className="text-gray-500">(pw: dominate)</span>
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Verified Facts */}
+                    <div>
+                      <h3 className="text-xs font-semibold text-cyan-400 mb-2">Verified Facts</h3>
+                      <ul className="text-xs text-gray-300 space-y-1">
+                        <li className="flex items-center gap-1"><CheckCircle className="w-3 h-3 text-green-400" /> Tolt tracks renewals automatically</li>
+                        <li className="flex items-center gap-1"><CheckCircle className="w-3 h-3 text-green-400" /> Partners get credit for life</li>
+                        <li className="flex items-center gap-1"><CheckCircle className="w-3 h-3 text-green-400" /> 90-day cookie window</li>
+                        <li className="flex items-center gap-1"><CheckCircle className="w-3 h-3 text-green-400" /> Stripe integration active</li>
+                      </ul>
+                    </div>
                   </div>
                 </div>
               )}
