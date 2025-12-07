@@ -156,7 +156,7 @@ export default function USAPrimePage() {
       iconImage: "/assets/images/Goals Icon.png",
       tagline: "See who's committed without asking.",
       description:
-        "Players set goals, share with coaches. Weekly AI reports go to coaches AND parents (parents don't take license seats).",
+        "Players set goals, coaches provide feedback and guidance. Weekly AI reports go to coaches AND parents (parents don't take license seats).",
       color: "orange",
       videoUrl: "/assets/videos/goalsai.mp4",
       image: "/assets/images/Results Goals.png",
