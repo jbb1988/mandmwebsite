@@ -85,6 +85,7 @@ export default function USAPrimePage() {
       replaces: "Generic motivation apps",
       description:
         "3-minute daily mental toughness audiograms. 100% baseball/softball - zero generic content.",
+      image: "/assets/images/dailyhit.png",
     },
     {
       icon: BookOpen,
@@ -92,6 +93,7 @@ export default function USAPrimePage() {
       replaces: "Nothing (they skip this)",
       description:
         "Player journal that feeds AI learning. What they write here makes Pro features smarter.",
+      image: "/assets/images/dugout_talk.png",
     },
     {
       icon: Gamepad2,
@@ -109,6 +111,7 @@ export default function USAPrimePage() {
       replaces: "YouTube videos",
       description:
         "Pre-game focus animation. Repeatable routine players can use before every at-bat.",
+      image: "/assets/images/breathwork.png",
     },
   ];
 
@@ -364,8 +367,8 @@ export default function USAPrimePage() {
                     padding="md"
                     className="h-full hover:scale-[1.02] transition-transform"
                   >
-                    {/* Video/Image if available */}
-                    {feature.videoUrl && (
+                    {/* Video if available, otherwise Image */}
+                    {feature.videoUrl ? (
                       <div
                         className="relative aspect-video bg-gradient-to-br from-white/5 to-transparent rounded-xl mb-4 overflow-hidden"
                         onMouseEnter={(e) => {
@@ -393,7 +396,16 @@ export default function USAPrimePage() {
                           preload="metadata"
                         />
                       </div>
-                    )}
+                    ) : feature.image ? (
+                      <div className="relative aspect-video bg-gradient-to-br from-white/5 to-transparent rounded-xl mb-4 overflow-hidden">
+                        <Image
+                          src={feature.image}
+                          alt={feature.title}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    ) : null}
 
                     <div className="flex items-center gap-3 mb-3">
                       {feature.iconImage ? (
