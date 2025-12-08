@@ -904,11 +904,51 @@ export default function HomePage() {
               {/* Description */}
               <div className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 leading-relaxed whitespace-pre-line pb-6 sm:pb-0">
                 {(activeFeature.modalDescription || activeFeature.description).split('\n').map((line: string, i: number) => {
+                  // Handle horizontal rule ---
+                  if (line.trim() === '---') {
+                    return <hr key={i} className="border-t border-white/20 my-6" />;
+                  }
+
+                  // Handle ## Heading
+                  if (line.startsWith('## ')) {
+                    const headingText = line.slice(3);
+                    return (
+                      <h3 key={i} className="text-xl sm:text-2xl font-black text-white mt-6 mb-3">
+                        {headingText}
+                      </h3>
+                    );
+                  }
+
+                  // Handle list items - **text**
+                  if (line.startsWith('- **') && line.includes('**')) {
+                    const parts = line.slice(2).split('**');
+                    return (
+                      <div key={i} className="flex items-start gap-2 ml-2 mb-1">
+                        <span className="text-neon-cortex-blue mt-1">•</span>
+                        <p>
+                          {parts.map((part, j) =>
+                            j % 2 === 1 ? <strong key={j} className="text-white font-bold">{part}</strong> : part
+                          )}
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  // Handle plain list items
+                  if (line.startsWith('- ')) {
+                    return (
+                      <div key={i} className="flex items-start gap-2 ml-2 mb-1">
+                        <span className="text-neon-cortex-blue mt-1">•</span>
+                        <p>{line.slice(2)}</p>
+                      </div>
+                    );
+                  }
+
                   // Check if line starts with ** and ends with **
                   if (line.startsWith('**') && line.endsWith('**')) {
                     const boldText = line.slice(2, -2);
                     return (
-                      <p key={i} className="text-white font-black">
+                      <p key={i} className="text-white font-black mt-4 mb-2">
                         {boldText}
                       </p>
                     );
