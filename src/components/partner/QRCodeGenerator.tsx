@@ -203,7 +203,7 @@ export function QRCodeGenerator() {
           </h3>
 
           <p className="text-text-secondary">
-            Create branded QR codes with the Mind & Muscle logo for your referral link
+            Once you create your link in your Tolt dashboard, you can create a QR code with it here
           </p>
         </div>
 
