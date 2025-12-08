@@ -233,8 +233,11 @@ export async function POST(request: NextRequest) {
                 <p style="font-size: 16px; line-height: 1.6; color: #555; margin: 0 0 10px 0;">
                   <strong style="color: #22c55e;">Step 2:</strong> Enter your email: <strong>${safeEmail}</strong>
                 </p>
+                <p style="font-size: 16px; line-height: 1.6; color: #555; margin: 0 0 10px 0;">
+                  <strong style="color: #22c55e;">Step 3:</strong> Check your email for an <strong>authentication code</strong> from Tolt
+                </p>
                 <p style="font-size: 16px; line-height: 1.6; color: #555; margin: 0;">
-                  <strong style="color: #22c55e;">Step 3:</strong> Click "Send magic link" - check your email for the login link
+                  <strong style="color: #22c55e;">Step 4:</strong> Enter the code in the Tolt portal to access your dashboard
                 </p>
               </div>
 
@@ -245,7 +248,7 @@ export async function POST(request: NextRequest) {
               </div>
 
               <p style="font-size: 14px; line-height: 1.6; color: #666; margin-top: 15px; font-style: italic; text-align: center;">
-                💡 No password needed - Tolt uses magic links for secure, easy login!
+                💡 No password needed - Tolt uses secure authentication codes for easy login!
               </p>
             </div>
 
@@ -273,12 +276,12 @@ export async function POST(request: NextRequest) {
             <div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 20px; margin: 30px 0; border-radius: 4px;">
               <h2 style="margin: 0 0 15px 0; font-size: 20px; color: #22c55e;">🎯 Next Steps to Start Earning</h2>
               <ol style="font-size: 15px; line-height: 1.8; color: #555; margin: 10px 0; padding-left: 20px;">
-                <li><strong>Log in to your portal</strong> - Click the button above or go to mind-and-muscle.tolt.io</li>
-                <li><strong>Request magic link</strong> - Enter ${safeEmail} and click "Send magic link"</li>
-                <li><strong>Check your email</strong> - Click the login link from Tolt (check spam if needed)</li>
-                <li><strong>Create your referral link</strong> - Click "Create link" in the dashboard and customize it</li>
-                <li><strong>Download marketing assets</strong> - Find templates, graphics, and copy in the Resources tab</li>
-                <li><strong>Start sharing</strong> - Promote your link and earn 10% lifetime commission!</li>
+                <li><strong>Go to the partner portal</strong> - Visit <a href="https://mind-and-muscle.tolt.io" style="color: #fb923c;">mind-and-muscle.tolt.io</a></li>
+                <li><strong>Enter your email</strong> - Use ${safeEmail} (the email you registered with)</li>
+                <li><strong>Check your email for auth code</strong> - Tolt will send you an authentication code (check spam if needed)</li>
+                <li><strong>Enter the code</strong> - Input the authentication code in the Tolt portal to access your dashboard</li>
+                <li><strong>Create your referral link</strong> - On the main dashboard, click "Create Link" in the Links section. In the popup, enter a custom value for your link (e.g., "john", "wildcats", or "dinger")</li>
+                <li><strong>Share your link</strong> - This is your unique referral link! Share it to earn 10% lifetime commission. You can also generate a QR code for it on our <a href="https://mindandmuscle.ai/partner-program" style="color: #fb923c;">partner program page</a></li>
               </ol>
               <p style="font-size: 14px; line-height: 1.6; color: #666; margin-top: 15px; font-style: italic;">
                 💡 Tip: Your referral link works immediately - no approval needed! Start earning as soon as you share it.

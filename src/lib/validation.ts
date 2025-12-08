@@ -17,14 +17,17 @@ export const nameSchema = z
   .regex(/^[a-zA-Z\s'-]+$/, 'Name can only contain letters, spaces, hyphens, and apostrophes')
   .trim();
 
-// Organization name validation
+// Organization name validation - truly optional (empty string allowed)
 export const organizationSchema = z
   .string()
-  .min(2, 'Organization name must be at least 2 characters')
   .max(200, 'Organization name too long')
-  .regex(/^[a-zA-Z0-9\s&,.'()-]+$/, 'Invalid characters in organization name')
   .trim()
-  .optional();
+  .optional()
+  .transform(val => val === '' ? undefined : val)
+  .refine(
+    val => val === undefined || val === '' || (val.length >= 2 && /^[a-zA-Z0-9\s&,.'()-]+$/.test(val)),
+    { message: 'Organization name must be at least 2 characters with valid characters only' }
+  );
 
 // Text field validation (for descriptions, comments, etc.)
 export const textFieldSchema = z
