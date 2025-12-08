@@ -1114,7 +1114,7 @@ function TeamLicensingContent() {
                 {[
                   { feature: 'Team communication & events', tag: 'Built-in' },
                   { feature: 'AI mental training coach', tag: 'Adaptive' },
-                  { feature: 'Swing Lab video analysis', tag: 'Instant' },
+                  { feature: 'Swing Lab & Plate IQ', tag: 'Video + IQ' },
                   { feature: 'Position-specific strength', tag: 'AI-powered' },
                   { feature: 'Performance nutrition', tag: 'Personalized' },
                   { feature: '186 game IQ scenarios', tag: 'Game-ready' },
@@ -1292,7 +1292,7 @@ function TeamLicensingContent() {
                 'Muscle AI Coach: All workouts',
                 'Fuel AI: Position-specific nutrition',
                 'Goals AI: Personalized roadmaps',
-                'Swing Lab: AI video analysis',
+                'Swing Lab & Plate IQ: Video analysis + pitch anticipation',
                 'Game Lab: All levels unlocked',
                 'Sound Lab: Customize frequencies for peak mental state',
                 'Weekly AI Reports',
@@ -1617,7 +1617,7 @@ function TeamLicensingContent() {
               question: 'What features do Premium codes unlock?',
               answer: (
                 <p className="text-text-secondary text-sm leading-relaxed">
-                  Premium team codes unlock <span className="text-neon-cortex-blue font-semibold">ALL Premium features</span> for your athletes: Goals AI coaching, coach feedback, Mind & Muscle AI coaches, Fuel AI nutrition, Swing Lab video analysis, Sound Lab music library, Game Lab (all levels), weekly AI reports, and advanced analytics.
+                  Premium team codes unlock <span className="text-neon-cortex-blue font-semibold">ALL Premium features</span> for your athletes: Goals AI coaching, coach feedback, Mind & Muscle AI coaches, Fuel AI nutrition, Swing Lab & Plate IQ (video analysis + pitch anticipation), Sound Lab music library, Game Lab (all levels), weekly AI reports, and advanced analytics.
                 </p>
               ),
             },

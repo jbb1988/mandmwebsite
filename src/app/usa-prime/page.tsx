@@ -130,11 +130,11 @@ export default function USAPrimePage() {
     },
     {
       id: "swing-lab",
-      title: "Swing Lab",
+      title: "Swing Lab & Plate IQ",
       iconImage: "/assets/images/Swing Lab1.png",
       tagline: "Like having a hitting coach in their pocket.",
       description:
-        "Upload video → Get AI coaching analysis → Drill recommendations for exactly what to fix. Every swing analyzed.",
+        "Upload video → Get AI coaching analysis → Plus Plate IQ trains pitch anticipation with real game situations. See it. Swing it. Know it.",
       color: "orange",
       videoUrl: "/assets/videos/swing_lab.mp4",
       image: "/assets/dashboard/swing_lab.png",
@@ -626,7 +626,7 @@ export default function USAPrimePage() {
                         boxShadow: "0 2px 8px rgba(249, 115, 22, 0.2)",
                       }}
                     >
-                      Swing Lab analysis
+                      Swing Lab & Plate IQ
                     </span>
                     <ArrowRight className="w-5 h-5 text-white/50" />
                     <span

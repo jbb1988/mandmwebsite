@@ -165,16 +165,16 @@ export default function HomePage() {
     },
     {
       id: 'swing-lab',
-      title: 'Swing Lab',
+      title: 'Swing Lab & Plate IQ',
       icon: TrendingUp,
       iconImage: '/assets/images/Swing Lab1.png',
       color: 'orange',
       image: '/assets/dashboard/swing_lab.png',
       videoUrl: '/assets/videos/swing_lab.mp4',
       audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/swinglab_ob.mp3',
-      tagline: 'Every Frame Tells a Story.',
-      description: 'Every swing analyzed. Every weakness eliminated.',
-      modalDescription: '**Upload your swing. Get elite coaching feedback. Fix what\'s holding you back.**\n\nSwing Lab delivers AI coaching analysis that breaks down your swing like a veteran MLB hitting coach—instant, actionable, precise.\n\n**Elite AI Coaching Analysis:**\n\n- **The Good Stuff** - Specific strengths to build on\n- **Power Opportunities** - The 1-2 changes that unlock explosive contact\n- **Your Practice Plan** - 2 precision drills targeting your exact issues\n- **Mental Game Strategy** - Situational hitting advice\n- **#1 Focus** - The most important thing to work on next\n\n**Analysis Features:**\n\n- Video thumbnails for visual reference\n- Complete analysis history for progress tracking\n- Shareable reports for coaches and teammates\n- Favorite your best analyses\n\nWhile other hitters wonder what to fix, you\'ll get precise coaching that tells you exactly what to work on and exactly how to fix it.\n\n**Swing Lab. Upload. Analyze. Improve.**',
+      tagline: 'Analyze Your Swing. Anticipate Every Pitch.',
+      description: 'AI video analysis meets pitch anticipation training.',
+      modalDescription: '**Two powerful tools to transform your hitting.**\n\n---\n\n## Swing Lab - AI Video Analysis\n\n**Upload your swing. Get elite coaching feedback. Fix what\'s holding you back.**\n\nSwing Lab delivers AI coaching analysis that breaks down your swing like a veteran MLB hitting coach—instant, actionable, precise.\n\n**Elite AI Coaching Analysis:**\n\n- **The Good Stuff** - Specific strengths to build on\n- **Power Opportunities** - The 1-2 changes that unlock explosive contact\n- **Your Practice Plan** - 2 precision drills targeting your exact issues\n- **Mental Game Strategy** - Situational hitting advice\n- **#1 Focus** - The most important thing to work on next\n\n**Analysis Features:**\n\n- Video thumbnails for visual reference\n- Complete analysis history for progress tracking\n- Shareable reports for coaches and teammates\n- Favorite your best analyses\n\n---\n\n## Plate IQ - Pitch Anticipation Training\n\n**Anticipate. Adjust. Attack.**\n\nGreat hitters don\'t just react—they step in with a PLAN. Plate IQ trains the mental approach that separates good hitters from elite ones.\n\n**How It Works:**\n\n- Read the SITUATION (count, runners, outs, score)\n- Pick your MODE (Hunt with 0-1 strikes, Battle with 2 strikes)\n- Anticipate the ZONE (where will the pitcher throw?)\n- Lock in your approach and see if you read it right\n\n**Learn Situational Pitching:**\n\n- Why pitchers throw DOWN with runner on 3rd (prevent sac fly)\n- Why pitchers work AWAY with runner on 2nd (prevent pull-side damage)\n- How count changes pitcher aggression (2-0 vs 0-2)\n- How score affects location (nibbling when behind vs attacking when ahead)\n\n**Features:**\n\n- 20 real game scenarios with increasing difficulty\n- Heatmap visualization of pitcher tendencies by count\n- Streak tracking and accuracy stats\n- Explains the WHY behind every pitch location\n\nWhile other hitters guess, you\'ll KNOW what\'s coming.\n\n**Swing Lab + Plate IQ. Fix your swing. Anticipate every pitch.**',
     },
     {
       id: 'sound-lab',
@@ -1251,8 +1251,8 @@ export default function HomePage() {
                   {[
                     'Pitcher vs. catcher workouts',
                     'Position-specific training',
-                    'Swing Lab analysis',
-                    'Baseball and softball movement patterns',
+                    'Swing Lab AI video analysis',
+                    'Plate IQ pitch anticipation',
                   ].map((feature, i) => (
                     <li key={i} className="flex items-start gap-3 text-sm text-gray-400">
                       <div className="w-1.5 h-1.5 bg-solar-surge-orange rounded-full mt-2" style={{boxShadow: '0 0 8px rgba(249,115,22,0.8)'}} />
@@ -1469,7 +1469,7 @@ export default function HomePage() {
                         {[
                           { num: '1', name: 'Mind AI Coach + Library', icon: Brain, desc: 'Baseball and softball mental training' },
                           { num: '2', name: 'Muscle AI Coach', icon: Dumbbell, desc: 'Position-specific workouts' },
-                          { num: '3', name: 'Swing Lab', icon: Video, desc: 'AI video analysis' },
+                          { num: '3', name: 'Swing Lab & Plate IQ', icon: Video, desc: 'AI video analysis + pitch anticipation' },
                           { num: '4', name: 'Fuel AI', icon: Apple, desc: 'Position-based nutrition' },
                           { num: '5', name: 'Game Lab', icon: Award, desc: 'All levels unlocked' },
                           { num: '6', name: 'Sound Lab', icon: Music, desc: 'Full music library' },

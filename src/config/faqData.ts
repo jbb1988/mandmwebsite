@@ -30,7 +30,7 @@ export const TOP_FAQS = [
   },
   {
     question: 'What is included in Premium access?',
-    answer: 'Premium includes: Mind Coach AI (mental training), Muscle Coach AI (strength training), Swing Lab (video analysis), Game Lab (baseball IQ), Sound Lab (mental state engineering), Goals AI, Fuel AI (nutrition), AI Assistant Coach, and team communication features.',
+    answer: 'Premium includes: Mind Coach AI (mental training), Muscle Coach AI (strength training), Swing Lab & Plate IQ (video analysis + pitch anticipation training), Game Lab (baseball IQ), Sound Lab (mental state engineering), Goals AI, Fuel AI (nutrition), AI Assistant Coach, and team communication features.',
   },
   {
     question: 'Can I cancel anytime?',
