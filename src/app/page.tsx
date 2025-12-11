@@ -118,8 +118,64 @@ export default function HomePage() {
     }
   };
 
-  // Row 1: 2 cards - Mind & Muscle AI Coaches
+  // Row 1: 4 cards - Game Lab, Plate IQ, Swing Lab, Sound Lab
   const row1Features = [
+    {
+      id: 'game-lab',
+      title: 'Game Lab',
+      icon: Zap,
+      iconImage: '/assets/images/game_lab_icon copy.png',
+      color: 'blue',
+      image: '/assets/images/game-lab.png',
+      videoUrl: '/assets/videos/game_lab.mp4',
+      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/gamelab_ob.mp3',
+      tagline: 'Play Smarter. Not Harder.',
+      description: 'Train Your Baseball IQ. Master Every Situation.',
+      modalDescription: 'Game Lab isn\'t about guessing. It\'s about knowing.\n\n186 real game scenarios that force you to think faster, decide smarter, and play like you\'ve already seen every situation.\n\nYour Baseball IQ gets measured. Your mental batting average gets tracked. Every decision earns XP, builds streaks, and unlocks badges.\n\nWhile other players freeze under pressure, you\'ll already know the play.\n\n**This is your baseball brain. Fully trained.**',
+    },
+    {
+      id: 'plate-iq',
+      title: 'Plate IQ',
+      icon: TrendingUp,
+      iconImage: '/assets/images/plate_iq_icon.png',
+      color: 'orange',
+      image: '/assets/images/plate_iq_detail.png',
+      videoUrl: '/assets/videos/plate_iq.mp4',
+      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/swinglab_ob.mp3',
+      tagline: 'Anticipate. Adjust. Attack.',
+      description: 'Train your pitch anticipation like elite hitters.',
+      modalDescription: '**Anticipate. Adjust. Attack.**\n\nGreat hitters don\'t just react—they step in with a PLAN. Plate IQ trains the mental approach that separates good hitters from elite ones.\n\n**How It Works:**\n\n- Read the SITUATION (count, runners, outs, score)\n- Pick your MODE (Hunt with 0-1 strikes, Battle with 2 strikes)\n- Anticipate the ZONE (where will the pitcher throw?)\n- Lock in your approach and see if you read it right\n\n**Learn Situational Pitching:**\n\n- Why pitchers throw DOWN with runner on 3rd (prevent sac fly)\n- Why pitchers work AWAY with runner on 2nd (prevent pull-side damage)\n- How count changes pitcher aggression (2-0 vs 0-2)\n- How score affects location (nibbling when behind vs attacking when ahead)\n\n**Features:**\n\n- 20 real game scenarios with increasing difficulty\n- Heatmap visualization of pitcher tendencies by count\n- Streak tracking and accuracy stats\n- Explains the WHY behind every pitch location\n\nWhile other hitters guess, you\'ll KNOW what\'s coming.\n\n**This is pitch anticipation. Engineered for elite hitters.**',
+    },
+    {
+      id: 'swing-lab',
+      title: 'Swing Lab',
+      icon: TrendingUp,
+      iconImage: '/assets/images/Swing Lab1.png',
+      color: 'blue',
+      image: '/assets/dashboard/swing_lab.png',
+      videoUrl: '/assets/videos/swing_lab.mp4',
+      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/swinglab_ob.mp3',
+      tagline: 'AI Video Analysis For Your Swing.',
+      description: 'Upload your swing. Get elite coaching feedback.',
+      modalDescription: '**Upload your swing. Get elite coaching feedback. Fix what\'s holding you back.**\n\nSwing Lab delivers AI coaching analysis that breaks down your swing like a veteran MLB hitting coach—instant, actionable, precise.\n\n**Elite AI Coaching Analysis:**\n\n- **The Good Stuff** - Specific strengths to build on\n- **Power Opportunities** - The 1-2 changes that unlock explosive contact\n- **Your Practice Plan** - 2 precision drills targeting your exact issues\n- **Mental Game Strategy** - Situational hitting advice\n- **#1 Focus** - The most important thing to work on next\n\n**Analysis Features:**\n\n- Video thumbnails for visual reference\n- Complete analysis history for progress tracking\n- Shareable reports for coaches and teammates\n- Favorite your best analyses\n\nWhile other players guess what\'s wrong, you\'ll KNOW exactly what to fix.\n\n**This is swing analysis. Engineered for champions.**',
+    },
+    {
+      id: 'sound-lab',
+      title: 'Sound Lab',
+      icon: Brain,
+      iconImage: '/assets/images/Sound Lab copy.png',
+      color: 'orange',
+      image: '/assets/mind/sound_lab.png',
+      videoUrl: '/assets/videos/sound_lab.1mp4.mp4',
+      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/soundlab_ob.mp3',
+      tagline: 'Train Your Mind Through Sound.',
+      description: 'Engineer your mental state for peak performance',
+      modalDescription: 'Sound Lab isn\'t background music. It\'s a remote control for your mental state.\n\nBinaural beats sync your brainwaves. Alpha for laser focus. Beta for superhuman concentration. Gamma for explosive reactions.\n\nAncient Solfeggio frequencies meet athletic performance mixes. Pre-built combinations that pros use before competition.\n\nStart 10 minutes before training. Feel your brain lock in.\n\nWhile other athletes hope they\'ll be ready, you\'ll engineer your mental state.\n\n**This is sound. Weaponized for performance.**',
+    },
+  ];
+
+  // Row 2: 2 cards - Mind Coach AI, Muscle Coach AI
+  const row2Features = [
     {
       id: 'mind-coach',
       title: 'Mind Coach AI',
@@ -145,49 +201,6 @@ export default function HomePage() {
       tagline: 'Your Elite Strength Engineer That Builds Baseball and Softball Power',
       description: 'Build the Strength That Gets You Noticed.',
       modalDescription: 'Muscle Coach AI doesn\'t guess your strength needs. It engineers baseball and softball-specific power.\n\nMLB-level strength training, personalized for your position and power profile.\n\nThree Training Zones - AI Coach (smart recommendations), Exercise Vault (hundreds of baseball and softball-specific exercises), Build Tab (custom workout plan creator).\n\nPosition-Specific Power - Explosive power for bat speed. Rotational strength for throwing velocity. Endurance for clutch moments. All engineered for your position.\n\nAI-Driven Progression - Every set logged. Every workout analyzed. Progressive overload tracked automatically.\n\nCreate Custom Plans - Build workout routines with targeted exercises, track sets/reps, monitor strength gains.\n\nWhile other players hope their strength shows up, yours gets systematically engineered for peak performance.\n\n**This is strength training. Built for baseball and softball.**',
-    },
-  ];
-
-  // Row 2: 3 cards - Game Lab, Swing Lab, Sound Lab
-  const row2Features = [
-    {
-      id: 'game-lab',
-      title: 'Game Lab',
-      icon: Zap,
-      iconImage: '/assets/images/game_lab_icon copy.png',
-      color: 'blue',
-      image: '/assets/images/game-lab.png',
-      videoUrl: '/assets/videos/game_lab.mp4',
-      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/gamelab_ob.mp3',
-      tagline: 'Play Smarter. Not Harder.',
-      description: 'Train Your Baseball IQ. Master Every Situation.',
-      modalDescription: 'Game Lab isn\'t about guessing. It\'s about knowing.\n\n186 real game scenarios that force you to think faster, decide smarter, and play like you\'ve already seen every situation.\n\nYour Baseball IQ gets measured. Your mental batting average gets tracked. Every decision earns XP, builds streaks, and unlocks badges.\n\nWhile other players freeze under pressure, you\'ll already know the play.\n\n**This is your baseball brain. Fully trained.**',
-    },
-    {
-      id: 'swing-lab',
-      title: 'Swing Lab & Plate IQ',
-      icon: TrendingUp,
-      iconImage: '/assets/images/Swing Lab1.png',
-      color: 'orange',
-      image: '/assets/dashboard/swing_lab.png',
-      videoUrl: '/assets/videos/swing_lab.mp4',
-      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/swinglab_ob.mp3',
-      tagline: 'Analyze Your Swing. Anticipate Every Pitch.',
-      description: 'AI video analysis meets pitch anticipation training.',
-      modalDescription: '**Two powerful tools to transform your hitting.**\n\n---\n\n## Swing Lab - AI Video Analysis\n\n**Upload your swing. Get elite coaching feedback. Fix what\'s holding you back.**\n\nSwing Lab delivers AI coaching analysis that breaks down your swing like a veteran MLB hitting coach—instant, actionable, precise.\n\n**Elite AI Coaching Analysis:**\n\n- **The Good Stuff** - Specific strengths to build on\n- **Power Opportunities** - The 1-2 changes that unlock explosive contact\n- **Your Practice Plan** - 2 precision drills targeting your exact issues\n- **Mental Game Strategy** - Situational hitting advice\n- **#1 Focus** - The most important thing to work on next\n\n**Analysis Features:**\n\n- Video thumbnails for visual reference\n- Complete analysis history for progress tracking\n- Shareable reports for coaches and teammates\n- Favorite your best analyses\n\n---\n\n## Plate IQ - Pitch Anticipation Training\n\n**Anticipate. Adjust. Attack.**\n\nGreat hitters don\'t just react—they step in with a PLAN. Plate IQ trains the mental approach that separates good hitters from elite ones.\n\n**How It Works:**\n\n- Read the SITUATION (count, runners, outs, score)\n- Pick your MODE (Hunt with 0-1 strikes, Battle with 2 strikes)\n- Anticipate the ZONE (where will the pitcher throw?)\n- Lock in your approach and see if you read it right\n\n**Learn Situational Pitching:**\n\n- Why pitchers throw DOWN with runner on 3rd (prevent sac fly)\n- Why pitchers work AWAY with runner on 2nd (prevent pull-side damage)\n- How count changes pitcher aggression (2-0 vs 0-2)\n- How score affects location (nibbling when behind vs attacking when ahead)\n\n**Features:**\n\n- 20 real game scenarios with increasing difficulty\n- Heatmap visualization of pitcher tendencies by count\n- Streak tracking and accuracy stats\n- Explains the WHY behind every pitch location\n\nWhile other hitters guess, you\'ll KNOW what\'s coming.\n\n**Swing Lab + Plate IQ. Fix your swing. Anticipate every pitch.**',
-    },
-    {
-      id: 'sound-lab',
-      title: 'Sound Lab',
-      icon: Brain,
-      iconImage: '/assets/images/Sound Lab copy.png',
-      color: 'blue',
-      image: '/assets/mind/sound_lab.png',
-      videoUrl: '/assets/videos/sound_lab.1mp4.mp4',
-      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/soundlab_ob.mp3',
-      tagline: 'Train Your Mind Through Sound.',
-      description: 'Engineer your mental state for peak performance',
-      modalDescription: 'Sound Lab isn\'t background music. It\'s a remote control for your mental state.\n\nBinaural beats sync your brainwaves. Alpha for laser focus. Beta for superhuman concentration. Gamma for explosive reactions.\n\nAncient Solfeggio frequencies meet athletic performance mixes. Pre-built combinations that pros use before competition.\n\nStart 10 minutes before training. Feel your brain lock in.\n\nWhile other athletes hope they\'ll be ready, you\'ll engineer your mental state.\n\n**This is sound. Weaponized for performance.**',
     },
   ];
 
@@ -408,9 +421,137 @@ export default function HomePage() {
             </p>
           </FadeInWhenVisible>
 
-          {/* Row 1 - 2 Large Hero Cards: Mind & Muscle AI */}
-          <StaggerChildren staggerDelay={0.15} className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          {/* Row 1 - 4 Cards: Game Lab, Plate IQ, Swing Lab, Sound Lab */}
+          <StaggerChildren staggerDelay={0.12} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             {row1Features.map((feature, i) => {
+              const Icon = feature.icon;
+              const isBlue = feature.color === 'blue';
+
+              return (
+                <motion.div
+                  key={feature.id}
+                  onClick={() => setActiveFeature(feature)}
+                  className="group relative cursor-pointer"
+                  variants={staggerItemVariants}
+                >
+                  {/* Glow Effect */}
+                  <div className={`absolute -inset-2 rounded-3xl blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500 ${
+                    isBlue ? 'bg-gradient-to-b from-neon-cortex-blue/30 to-mind-primary/10' : 'bg-gradient-to-b from-solar-surge-orange/30 to-muscle-primary/10'
+                  }`} />
+
+                  {/* Card */}
+                  <div className={`relative backdrop-blur-sm bg-white/[0.02] p-6 rounded-2xl border-2 transition-all duration-500 hover:scale-105 hover:bg-white/[0.05] h-full ${
+                    isBlue ? 'border-neon-cortex-blue/40 hover:border-neon-cortex-blue shadow-[0_0_20px_rgba(14,165,233,0.3)] hover:shadow-[0_0_40px_rgba(14,165,233,0.5)]' : 'border-solar-surge-orange/40 hover:border-solar-surge-orange shadow-[0_0_20px_rgba(249,115,22,0.3)] hover:shadow-[0_0_40px_rgba(249,115,22,0.5)]'
+                  }`}>
+                    {/* Video/Image */}
+                    <div
+                      className="relative aspect-video bg-gradient-to-br from-white/5 to-transparent rounded-xl mb-4 overflow-hidden group/image"
+                      ref={(node) => {
+                        if (node) {
+                          const video = node.querySelector('video');
+                          if (video) {
+                            // Intersection Observer for mobile auto-play on scroll
+                            const observer = new IntersectionObserver(
+                              (entries) => {
+                                entries.forEach((entry) => {
+                                  if (entry.isIntersecting) {
+                                    video.currentTime = 0;
+                                    video.play().catch(() => {});
+                                  } else {
+                                    video.pause();
+                                    video.currentTime = 0;
+                                  }
+                                });
+                              },
+                              { threshold: 0.5 }
+                            );
+                            observer.observe(node);
+                          }
+                        }
+                      }}
+                      onMouseEnter={(e) => {
+                        const video = e.currentTarget.querySelector('video');
+                        if (video) {
+                          video.currentTime = 0;
+                          video.play().catch(() => {/* Ignore autoplay errors */});
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        const video = e.currentTarget.querySelector('video');
+                        if (video) {
+                          video.pause();
+                          video.currentTime = 0;
+                        }
+                      }}
+                    >
+                      {feature.videoUrl ? (
+                        <video
+                          src={feature.videoUrl}
+                          poster={feature.image}
+                          className="w-full h-full object-cover opacity-95"
+                          muted
+                          loop
+                          playsInline
+                          preload="metadata"
+                        />
+                      ) : (
+                        <img
+                          src={feature.image}
+                          alt={feature.title}
+                          className="w-full h-full object-cover opacity-95"
+                        />
+                      )}
+                    </div>
+
+                    {/* Icon + Title */}
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${
+                        isBlue ? 'bg-neon-cortex-blue/10 border border-neon-cortex-blue/30' : 'bg-solar-surge-orange/10 border border-solar-surge-orange/30'
+                      }`}>
+                        {feature.iconImage ? (
+                          <img
+                            src={feature.iconImage}
+                            alt={`${feature.title} icon`}
+                            className="w-8 h-8 object-contain"
+                            style={{filter: `drop-shadow(0 0 10px ${isBlue ? 'rgba(14,165,233,0.8)' : 'rgba(249,115,22,0.8)'})`}}
+                          />
+                        ) : (
+                          <Icon className={`w-6 h-6 ${isBlue ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`}
+                                style={{filter: `drop-shadow(0 0 10px ${isBlue ? 'rgba(14,165,233,0.8)' : 'rgba(249,115,22,0.8)'})`}} />
+                        )}
+                      </div>
+
+                      {/* Title */}
+                      <h3 className={`text-xl font-black shimmer-text ${isBlue ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`}>
+                        {feature.title}
+                      </h3>
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-sm text-gray-300 leading-relaxed pr-12 pb-2">
+                      {feature.description}
+                    </p>
+
+                    {/* Click Icon */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenModal(feature);
+                      }}
+                      className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white/10 border border-white/30 flex items-center justify-center transition-all cursor-pointer hover:bg-white/20 hover:border-white/50 active:scale-95"
+                      aria-label={`View details for ${feature.title}`}
+                    >
+                      <MousePointerClick className="w-4 h-4 text-white" />
+                    </button>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </StaggerChildren>
+
+          {/* Row 2 - 2 Large Hero Cards: Mind & Muscle AI */}
+          <StaggerChildren staggerDelay={0.15} className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            {row2Features.map((feature, i) => {
               const Icon = feature.icon;
               const isBlue = feature.color === 'blue';
 
@@ -489,130 +630,6 @@ export default function HomePage() {
                           className="w-full h-full object-cover opacity-95"
                           style={feature.id === 'mind-coach' ? { transform: 'scale(1.44)' } : undefined}
                         />
-                      )}
-                    </div>
-
-                    {/* Icon + Title */}
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className={`flex-shrink-0 w-16 h-16 rounded-xl flex items-center justify-center ${
-                        isBlue ? 'bg-neon-cortex-blue/10 border border-neon-cortex-blue/30' : 'bg-solar-surge-orange/10 border border-solar-surge-orange/30'
-                      }`}>
-                        {feature.iconImage ? (
-                          <img
-                            src={feature.iconImage}
-                            alt={`${feature.title} icon`}
-                            className="w-10 h-10 object-contain"
-                            style={{filter: `drop-shadow(0 0 10px ${isBlue ? 'rgba(14,165,233,0.8)' : 'rgba(249,115,22,0.8)'})`}}
-                          />
-                        ) : (
-                          <Icon className={`w-8 h-8 ${isBlue ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`}
-                                style={{filter: `drop-shadow(0 0 10px ${isBlue ? 'rgba(14,165,233,0.8)' : 'rgba(249,115,22,0.8)'})`}} />
-                        )}
-                      </div>
-
-                      {/* Title */}
-                      <h3 className={`text-2xl font-black shimmer-text ${isBlue ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`}>
-                        {feature.title}
-                      </h3>
-                    </div>
-
-                    {/* Description */}
-                    <p className="text-base text-gray-300 leading-relaxed pr-16 pb-2">
-                      {feature.description}
-                    </p>
-
-                    {/* Click Icon */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleOpenModal(feature);
-                      }}
-                      className="absolute bottom-4 right-4 w-11 h-11 rounded-full bg-white/10 border border-white/30 flex items-center justify-center transition-all cursor-pointer hover:bg-white/20 hover:border-white/50 active:scale-95"
-                      aria-label={`View details for ${feature.title}`}
-                    >
-                      <MousePointerClick className="w-5 h-5 text-white" />
-                    </button>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </StaggerChildren>
-
-          {/* Row 2 - 3 Cards: Game Lab, Swing Lab, Sound Lab */}
-          <StaggerChildren staggerDelay={0.12} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {row2Features.map((feature, i) => {
-              const Icon = feature.icon;
-              const isBlue = feature.color === 'blue';
-
-              return (
-                <motion.div
-                  key={feature.id}
-                  onClick={() => setActiveFeature(feature)}
-                  className="group relative cursor-pointer"
-                  variants={staggerItemVariants}
-                >
-                  {/* Glow Effect */}
-                  <div className={`absolute -inset-2 rounded-3xl blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500 ${
-                    isBlue ? 'bg-gradient-to-b from-neon-cortex-blue/30 to-mind-primary/10' : 'bg-gradient-to-b from-solar-surge-orange/30 to-muscle-primary/10'
-                  }`} />
-
-                  {/* Card */}
-                  <div className={`relative backdrop-blur-sm bg-white/[0.02] p-6 rounded-2xl border-2 transition-all duration-500 hover:scale-105 hover:bg-white/[0.05] h-full ${
-                    isBlue ? 'border-neon-cortex-blue/40 hover:border-neon-cortex-blue shadow-[0_0_20px_rgba(14,165,233,0.3)] hover:shadow-[0_0_40px_rgba(14,165,233,0.5)]' : 'border-solar-surge-orange/40 hover:border-solar-surge-orange shadow-[0_0_20px_rgba(249,115,22,0.3)] hover:shadow-[0_0_40px_rgba(249,115,22,0.5)]'
-                  }`}>
-                    {/* Video/Image */}
-                    <div
-                      className="relative aspect-video bg-gradient-to-br from-white/5 to-transparent rounded-xl mb-4 overflow-hidden group/image"
-                      ref={(node) => {
-                        if (node) {
-                          const video = node.querySelector('video');
-                          if (video) {
-                            // Intersection Observer for mobile auto-play on scroll
-                            const observer = new IntersectionObserver(
-                              (entries) => {
-                                entries.forEach((entry) => {
-                                  if (entry.isIntersecting) {
-                                    video.currentTime = 0;
-                                    video.play().catch(() => {});
-                                  } else {
-                                    video.pause();
-                                    video.currentTime = 0;
-                                  }
-                                });
-                              },
-                              { threshold: 0.5 }
-                            );
-                            observer.observe(node);
-                          }
-                        }
-                      }}
-                      onMouseEnter={(e) => {
-                        const video = e.currentTarget.querySelector('video');
-                        if (video) {
-                          video.currentTime = 0;
-                          video.play().catch(() => {/* Ignore autoplay errors */});
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        const video = e.currentTarget.querySelector('video');
-                        if (video) {
-                          video.pause();
-                          video.currentTime = 0;
-                        }
-                      }}
-                    >
-                      {feature.videoUrl ? (
-                        <video
-                          src={feature.videoUrl}
-                          poster={feature.image}
-                          className="w-full h-full object-cover opacity-95"
-                          muted
-                          loop
-                          playsInline
-                          preload="metadata"
-                        />
-                      ) : (
-                        <img src={feature.image} alt={feature.title} className="w-full h-full object-cover opacity-95" />
                       )}
                     </div>
 
