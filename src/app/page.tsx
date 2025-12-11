@@ -1526,12 +1526,12 @@ export default function HomePage() {
                         {[
                           { num: '1', name: 'Mind AI Coach + Library', icon: Brain, desc: 'Baseball and softball mental training' },
                           { num: '2', name: 'Muscle AI Coach', icon: Dumbbell, desc: 'Position-specific workouts' },
-                          { num: '3', name: 'Swing Lab & Plate IQ', icon: Video, desc: 'AI video analysis + pitch anticipation' },
-                          { num: '4', name: 'Fuel AI', icon: Apple, desc: 'Position-based nutrition' },
+                          { num: '3', name: 'Swing Lab', icon: Video, desc: 'AI video analysis' },
+                          { num: '4', name: 'Plate IQ', icon: TrendingUp, desc: 'Pitch anticipation training' },
                           { num: '5', name: 'Game Lab', icon: Award, desc: 'All levels unlocked' },
                           { num: '6', name: 'Sound Lab', icon: Music, desc: 'Full music library' },
-                          { num: '7', name: 'AI Assistant Coach', icon: Users, desc: 'Custom drill builder' },
-                          { num: '8', name: 'Stats & Swag', icon: TrendingUp, desc: 'AI scouting reports' },
+                          { num: '7', name: 'Fuel AI', icon: Apple, desc: 'Position-based nutrition' },
+                          { num: '8', name: 'AI Assistant Coach', icon: Users, desc: 'Custom drill builder' },
                           { num: '9', name: 'Goals AI', icon: Award, desc: 'Enhanced, shareable goals' },
                         ].map((item, i) => {
                           const Icon = item.icon;
@@ -1849,13 +1849,14 @@ export default function HomePage() {
                   'Everything in Free',
                   'Mind AI Coach: Mental toughness training',
                   'Muscle AI Coach: All workouts',
-                  'Fuel AI: Position-specific nutrition',
-                  'Goals AI: Personalized roadmaps',
                   'Swing Lab: AI video analysis',
+                  'Plate IQ: Pitch anticipation training',
                   'Game Lab: All levels unlocked',
                   'Sound Lab: Customize frequencies for peak mental state',
-                  'Weekly AI Reports',
+                  'Fuel AI: Position-specific nutrition',
+                  'Goals AI: Personalized roadmaps',
                   'AI Assistant Coach: Custom drill builder for coaches, parents & athletes',
+                  'Weekly AI Reports',
                   'Parent Dashboard (for parents)',
                 ].map((feature, i) => (
                   <li key={i} className="flex items-start gap-3 text-base md:text-lg text-gray-300">
