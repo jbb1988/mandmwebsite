@@ -1783,6 +1783,7 @@ export default function HomePage() {
                   'Daily Hit: Motivational content',
                   'Dugout Talk: Field notes (performance log)',
                   'Game Lab Level 1: Baseball IQ basics',
+                  'Breathwork: Guided breathing exercises',
                 ].map((feature, i) => (
                   <li key={i} className="flex items-center gap-3 text-base md:text-lg text-gray-300">
                     <div className="w-2 h-2 bg-neon-cortex-blue rounded-full flex-shrink-0" />
