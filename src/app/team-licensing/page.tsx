@@ -1216,6 +1216,7 @@ function TeamLicensingContent() {
                 'Daily Hit: Motivational content',
                 'Dugout Talk: Personal journal tracker',
                 'Game Lab Level 1: Baseball IQ basics',
+                'Breathwork: Guided breathing exercises',
               ].map((feature, i) => (
                 <li key={i} className="flex items-center gap-3 text-base md:text-lg text-gray-300">
                   <div className="w-2 h-2 bg-neon-cortex-blue rounded-full flex-shrink-0" />
@@ -1244,7 +1245,7 @@ function TeamLicensingContent() {
             </div>
             <LiquidGlass variant="orange" glow={true} className="p-10">
               <div className="flex items-center justify-between mb-6">
-              <h3 className="text-4xl md:text-5xl font-black">Premium</h3>
+              <h3 className="text-4xl md:text-5xl font-black">Pro</h3>
               <div className="flex flex-col items-end">
                 <div className="flex items-baseline gap-2">
                   <div className="text-5xl md:text-6xl font-black text-solar-surge-orange drop-shadow-[0_0_24px_rgba(249,115,22,0.6)]">$79</div>
@@ -1290,13 +1291,14 @@ function TeamLicensingContent() {
                 'Everything in Free',
                 'Mind AI Coach: Mental toughness training',
                 'Muscle AI Coach: All workouts',
-                'Fuel AI: Position-specific nutrition',
-                'Goals AI: Personalized roadmaps',
-                'Swing Lab & Plate IQ: Video analysis + pitch anticipation',
+                'Swing Lab: AI video analysis',
+                'Plate IQ: Pitch anticipation training',
                 'Game Lab: All levels unlocked',
                 'Sound Lab: Customize frequencies for peak mental state',
-                'Weekly AI Reports',
+                'Fuel AI: Position-specific nutrition',
+                'Goals AI: Personalized roadmaps',
                 'AI Assistant Coach: Custom drill builder for coaches, parents & athletes',
+                'Weekly AI Reports',
                 'Parent Dashboard (for parents)',
               ].map((feature, i) => (
                 <li key={i} className="flex items-start gap-3 text-base md:text-lg text-gray-300">
@@ -1309,7 +1311,7 @@ function TeamLicensingContent() {
               href="/team-licensing"
               className="block w-full px-12 py-5 text-lg font-semibold font-poppins text-center rounded-xl bg-gradient-to-br from-solar-surge-orange/20 to-solar-surge-orange/10 border border-solar-surge-orange/30 backdrop-blur-liquid transition-all duration-300 hover:from-solar-surge-orange/30 hover:to-solar-surge-orange/15 hover:shadow-liquid-glow-orange hover:border-solar-surge-orange/50 hover:scale-105 active:scale-95"
             >
-              Upgrade to Premium
+              Upgrade to Pro
             </a>
             </LiquidGlass>
           </div>
