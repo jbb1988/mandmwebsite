@@ -359,7 +359,7 @@ function TeamLicensingContent() {
           >
             <div className="text-4xl md:text-5xl mb-3">👥</div>
             <div className="font-bold text-lg md:text-xl mb-1">1 Team</div>
-            <div className="text-sm text-text-secondary mb-4">Organization license • 12-20 users</div>
+            <div className="text-sm text-text-secondary mb-4">Organization license • 12+ users</div>
             <div className={`text-xs font-semibold flex items-center justify-center gap-1 transition-colors ${
               teamMode === 'single' ? 'text-solar-surge-orange' : 'text-text-secondary group-hover:text-solar-surge-orange'
             }`}>
