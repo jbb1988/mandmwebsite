@@ -522,7 +522,8 @@ export default function HomePage() {
                           muted
                           loop
                           playsInline
-                          preload="metadata"
+                          autoPlay
+                          preload="auto"
                         />
                       ) : (
                         <img
@@ -650,7 +651,8 @@ export default function HomePage() {
                           muted
                           loop
                           playsInline
-                          preload="metadata"
+                          autoPlay
+                          preload="auto"
                         />
                       ) : (
                         <img
@@ -778,7 +780,8 @@ export default function HomePage() {
                           muted
                           loop
                           playsInline
-                          preload="metadata"
+                          autoPlay
+                          preload="auto"
                         />
                       ) : (
                         <img src={feature.image} alt={feature.title} className="w-full h-full object-cover opacity-95" />
@@ -902,7 +905,8 @@ export default function HomePage() {
                           muted
                           loop
                           playsInline
-                          preload="metadata"
+                          autoPlay
+                          preload="auto"
                         />
                       ) : (
                         <img src={feature.image} alt={feature.title} className="w-full h-full object-cover opacity-95" />
