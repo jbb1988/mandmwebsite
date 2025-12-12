@@ -1997,13 +1997,14 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              <p className="text-text-secondary mb-8 text-lg md:text-xl">Everything free has, plus 7 AI coaches and unlimited access</p>
+              <p className="text-text-secondary mb-8 text-lg md:text-xl">Everything free has, plus 8 AI coaches and unlimited access</p>
               <ul className="space-y-4 mb-8">
                 {[
                   'Everything in Free',
                   'Mind AI Coach: Mental toughness training',
                   'Muscle AI Coach: All workouts',
-                  'Swing Lab: AI video analysis',
+                  'Swing Lab: AI swing analysis',
+                  'Pitch Lab: AI pitching analysis + arm health',
                   'Plate IQ: Pitch anticipation training',
                   'Game Lab: All levels unlocked',
                   'Sound Lab: Customize frequencies for peak mental state',
