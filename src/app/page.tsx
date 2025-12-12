@@ -1678,13 +1678,14 @@ export default function HomePage() {
                         {[
                           { num: '1', name: 'Mind AI Coach + Library', icon: Brain, desc: 'Baseball and softball mental training' },
                           { num: '2', name: 'Muscle AI Coach', icon: Dumbbell, desc: 'Position-specific workouts' },
-                          { num: '3', name: 'Swing Lab', icon: Video, desc: 'AI video analysis' },
-                          { num: '4', name: 'Plate IQ', icon: TrendingUp, desc: 'Pitch anticipation training' },
-                          { num: '5', name: 'Game Lab', icon: Award, desc: 'All levels unlocked' },
-                          { num: '6', name: 'Sound Lab', icon: Music, desc: 'Full music library' },
-                          { num: '7', name: 'Fuel AI', icon: Apple, desc: 'Position-based nutrition' },
-                          { num: '8', name: 'AI Assistant Coach', icon: Users, desc: 'Custom drill builder' },
-                          { num: '9', name: 'Goals AI', icon: Award, desc: 'Enhanced, shareable goals' },
+                          { num: '3', name: 'Swing Lab', icon: Video, desc: 'AI swing analysis' },
+                          { num: '4', name: 'Pitch Lab', icon: TrendingUp, desc: 'AI pitching analysis + arm health' },
+                          { num: '5', name: 'Plate IQ', icon: TrendingUp, desc: 'Pitch anticipation training' },
+                          { num: '6', name: 'Game Lab', icon: Award, desc: 'All levels unlocked' },
+                          { num: '7', name: 'Sound Lab', icon: Music, desc: 'Full music library' },
+                          { num: '8', name: 'Fuel AI', icon: Apple, desc: 'Position-based nutrition' },
+                          { num: '9', name: 'AI Assistant Coach', icon: Users, desc: 'Custom drill builder' },
+                          { num: '10', name: 'Goals AI', icon: Award, desc: 'Enhanced, shareable goals' },
                         ].map((item, i) => {
                           const Icon = item.icon;
                           return (
@@ -1738,7 +1739,7 @@ export default function HomePage() {
                       <h4 className="text-sm font-bold text-solar-surge-orange mb-3 tracking-wide drop-shadow-[0_0_8px_rgba(249,115,22,0.6)]">COACHING STAFF</h4>
                       <ul className="space-y-2 text-sm text-white">
                         <li className="flex items-center gap-2">
-                          <Zap className="w-3 h-3 text-solar-surge-orange drop-shadow-[0_0_6px_rgba(249,115,22,0.5)]" /> 7 AI coaches learn YOUR game
+                          <Zap className="w-3 h-3 text-solar-surge-orange drop-shadow-[0_0_6px_rgba(249,115,22,0.5)]" /> 8 AI coaches learn YOUR game
                         </li>
                         <li className="flex items-center gap-2">
                           <Zap className="w-3 h-3 text-solar-surge-orange drop-shadow-[0_0_6px_rgba(249,115,22,0.5)]" /> Position-specific training plans
