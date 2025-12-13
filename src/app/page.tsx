@@ -1686,7 +1686,7 @@ export default function HomePage() {
                           { num: '4', name: 'Pitch Lab', icon: TrendingUp, desc: 'AI pitching analysis + arm health' },
                           { num: '5', name: 'Plate IQ', icon: TrendingUp, desc: 'Pitch anticipation training' },
                           { num: '6', name: 'Game Lab', icon: Award, desc: 'All levels unlocked' },
-                          { num: '7', name: 'Sound Lab', icon: Music, desc: 'Full music library' },
+                          { num: '7', name: 'Sound Lab', icon: Music, desc: 'Customize frequencies for peak mental state' },
                           { num: '8', name: 'Fuel AI', icon: Apple, desc: 'Position-based nutrition' },
                           { num: '9', name: 'AI Assistant Coach', icon: Users, desc: 'Custom drill builder' },
                           { num: '10', name: 'Goals AI', icon: Award, desc: 'Enhanced, shareable goals' },
