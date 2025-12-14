@@ -141,12 +141,25 @@ function OnboardingVideosContent() {
         </p>
       </div>
 
-      {/* Placeholder for future video content */}
-      <div className="p-8 rounded-xl bg-white/5 border border-white/10 text-center">
-        <Video className="w-16 h-16 text-text-secondary mx-auto mb-4 opacity-50" />
-        <p className="text-text-secondary">
-          Onboarding videos coming soon! In the meantime, explore the app and reach out to support if you need help.
-        </p>
+      {/* Video Grid */}
+      <div className="grid gap-6">
+        {/* Partner Program Tutorial */}
+        <div className="rounded-xl bg-white/5 border border-white/10 overflow-hidden">
+          <video
+            controls
+            className="w-full aspect-video"
+            poster="/assets/images/logo.png"
+          >
+            <source src="/assets/videos/partner_program_tutorial.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          <div className="p-4">
+            <h3 className="text-xl font-bold mb-2">Apply for Partner Program & Get Your Affiliate Link</h3>
+            <p className="text-text-secondary text-sm">
+              Learn how to join our Partner Program and set up your affiliate link to earn 10% commission on referrals.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
