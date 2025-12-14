@@ -1735,6 +1735,9 @@ export default function HomePage() {
                         <li className="flex items-center gap-2">
                           <span className="text-neon-cortex-blue font-black">•</span> Parent Dashboard
                         </li>
+                        <li className="flex items-center gap-2">
+                          <span className="text-neon-cortex-blue font-black">•</span> Arm Builder (arm care & long toss)
+                        </li>
                       </ul>
                     </div>
 

@@ -214,6 +214,98 @@ export default function FAQPage() {
       ]
     },
     {
+      id: 'plate-iq',
+      title: 'Plate IQ - Pitch Anticipation Training',
+      icon: TrendingUp,
+      color: 'orange',
+      faqs: [
+        {
+          question: 'What is Plate IQ?',
+          answer: 'Plate IQ trains your brain to anticipate pitches through interactive scenario-based drills. It\'s like studying game film, but you\'re making decisions in real-time. 20+ real game scenarios teach you to think like an elite hitter—knowing what pitch is coming and where before it\'s thrown.'
+        },
+        {
+          question: 'How does Plate IQ work?',
+          answer: 'Each scenario presents a game situation: count, runners, outs, pitcher tendencies. You choose your approach:\n\n• Hunt Mode (0-1 strikes): Attack YOUR pitch. Pick a zone to hunt.\n• Battle Mode (2 strikes): Protect the plate. Compete and survive.\n\nSelect your zone target in our 13-zone system (9 strike zones + 4 chase zones), then get instant feedback on whether your approach matches what elite hitters would do.'
+        },
+        {
+          question: 'What are Hunt Mode and Battle Mode?',
+          answer: 'These two modes reflect how elite hitters approach different counts:\n\n<strong>Hunt Mode (0-1 strikes):</strong> You\'re the predator. Sit on your pitch, in your zone. Don\'t swing at anything else. Attack the fastball or wait for your pitch.\n\n<strong>Battle Mode (2 strikes):</strong> Survival mode. Expand your zone, shorten your swing, put the ball in play. A strikeout is the only bad outcome—make the pitcher earn it.'
+        },
+        {
+          question: 'What is the 13-zone system?',
+          answer: 'Based on MLB Statcast zones, the system includes:\n\n• 9 Strike Zones: Up-In, Up-Middle, Up-Away, Mid-In, Middle, Mid-Away, Down-In, Down-Middle, Down-Away\n• 4 Chase Zones: High (take), Low (classic chase zone), Inside (jam pitch), Outside (pitcher\'s favorite chase zone)\n\nEach zone has coaching tips about what pitches you\'ll see there and how to attack or lay off.'
+        },
+        {
+          question: 'How do I improve my Plate IQ score?',
+          answer: 'Your score improves by:\n\n1. Choosing the correct mode (Hunt vs Battle) for the count\n2. Selecting optimal zones based on the situation\n3. Learning from feedback after each scenario\n4. Practicing consistently to build instincts\n\nThe more you train, the faster these decisions become automatic—so you can focus on execution at the plate instead of thinking.'
+        }
+      ]
+    },
+    {
+      id: 'pitch-lab',
+      title: 'Pitch Lab - Pitching Video Analysis',
+      icon: TrendingUp,
+      color: 'blue',
+      faqs: [
+        {
+          question: 'What is Pitch Lab?',
+          answer: 'Pitch Lab is our AI-powered pitching video analysis tool. Upload a video of your pitching motion and get professional-grade mechanics breakdown in seconds. Design filthy pitches while protecting your arm.'
+        },
+        {
+          question: 'How do I upload my pitching video?',
+          answer: 'Go to Pitch Lab → tap "Upload". Record a new video or select from your camera roll.\n\nBest practices:\n• Film from the side (perpendicular to the rubber)\n• Capture full wind-up through follow-through\n• Good lighting helps the AI see better\n• Keep camera steady—use a tripod if possible\n\nWorks for both baseball (overhand) and softball (windmill/underhand) pitchers.'
+        },
+        {
+          question: 'What analysis will I get?',
+          answer: 'Pitch Lab provides an 8-component mechanical analysis:\n\n• Balance & posture\n• Leg drive & hip rotation\n• Arm action & slot\n• Release point consistency\n• Follow-through mechanics\n• Timing & tempo\n• Deception elements\n• Overall efficiency\n\nPlus arm health risk assessment and custom drill recommendations targeting your specific needs.'
+        },
+        {
+          question: 'What is the Arm Health Assessment?',
+          answer: 'Pitch Lab analyzes your mechanics for injury risk indicators:\n\n• Inverted W position (shoulder stress)\n• Early trunk rotation (arm drag)\n• Improper hip-shoulder separation\n• Landing mechanics (knee/ankle stress)\n• Deceleration patterns\n\nYou\'ll get a risk level indicator and specific recommendations to protect your arm while still throwing gas.'
+        },
+        {
+          question: 'Does Pitch Lab work for softball pitchers?',
+          answer: 'Yes! Pitch Lab supports both:\n\n• Baseball (overhand): Traditional pitching mechanics analysis\n• Softball (windmill): Underhand pitching motion analysis\n\nSelect your sport type before uploading, and the AI adjusts its analysis to match the specific mechanics of your pitching style.'
+        },
+        {
+          question: 'How do analysis credits work?',
+          answer: 'Analysis credits are shared between Swing Lab and Pitch Lab. Pro subscribers get monthly credits. Each video analysis uses 1 credit. You can purchase additional credit packs if needed, or upgrade your plan for more monthly credits.'
+        }
+      ]
+    },
+    {
+      id: 'arm-builder',
+      title: 'Arm Builder - Arm Care & Throwing Development',
+      icon: Dumbbell,
+      color: 'blue',
+      faqs: [
+        {
+          question: 'What is Arm Builder?',
+          answer: 'Arm Builder is your complete arm care and throwing development system. Build velocity, prevent injury, and throw gas. Track your arm health, follow proper warmup routines, log long toss sessions, and work toward distance and velocity goals.'
+        },
+        {
+          question: 'Is Arm Builder free?',
+          answer: 'Yes! Arm Builder is completely free for all users. We believe arm health is too important to put behind a paywall. Every player deserves access to proper arm care tools. Build it right, build it for free.'
+        },
+        {
+          question: 'What is the Arm Feel Check-In?',
+          answer: 'Start each session by rating how your arm feels on a 1-5 scale:\n\n• 1-2: Rest day recommended (recovery focus)\n• 3: Light throwing only\n• 4: Normal throwing day\n• 5: Feeling great, full go\n\nThis helps you make smart decisions about your throwing load and prevents overuse injuries. Your arm is your career—listen to it.'
+        },
+        {
+          question: 'How do I use the Long Toss Logger?',
+          answer: 'After your throwing session:\n\n1. Log your maximum distance reached\n2. Record number of throws\n3. Add notes about how you felt\n4. Track progress toward your distance goals\n\nOver time, you\'ll see your arm strength improve as you consistently build up distance and recovery capacity.'
+        },
+        {
+          question: 'What warmup routines are included?',
+          answer: 'Arm Builder includes position-specific warmup routines:\n\n• Band work for shoulder stability\n• Arm circles and stretches\n• Progressive throwing distances\n• Wrist and forearm exercises\n\nFollow the routine before every throwing session. Proper prep prevents injury and helps you throw harder, longer.'
+        },
+        {
+          question: 'How do I set throwing goals?',
+          answer: 'In Arm Builder, you can set two types of goals:\n\n• Distance Goals: Target max long toss distance (e.g., "throw 250 feet by end of season")\n• Velocity Goals: Target throwing velocity if you have access to a radar gun\n\nThe app tracks your progress and celebrates when you hit milestones. Consistent training + proper arm care = velocity gains.'
+        }
+      ]
+    },
+    {
       id: 'sound-lab',
       title: 'Sound Lab - Mental State Engineering',
       iconImage: '/assets/images/Sound Lab copy.png',
