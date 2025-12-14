@@ -11,10 +11,6 @@ import '../styles/lightbox-custom.css';
 
 const screenshots = [
   {
-    src: '/assets/screenshots/1a.png',
-    alt: 'Mind & Muscle App Screenshot 1',
-  },
-  {
     src: '/assets/screenshots/2.png',
     alt: 'Mind & Muscle App Screenshot 2',
   },
