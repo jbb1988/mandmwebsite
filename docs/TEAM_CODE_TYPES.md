@@ -33,7 +33,7 @@ There are **two types** of team codes in the Mind and Muscle app:
 - **Unlocks Premium for all team members** 🎉
 - Athletes/coaches consume a license seat (counted against max_seats)
 - Parents can view without consuming a seat
-- All 7 AI-powered apps unlocked
+- All 8 AI-powered apps unlocked
 - Advanced analytics and training
 - Auto-renews annually
 

@@ -776,7 +776,7 @@ export default function PartnerProgramPage() {
                   <strong className="text-white">What coaches are dealing with now:</strong> Free team communication apps handle logistics (schedules, messages, stats) but offer zero athlete development. When practice ends, athletes are on their own for mental training, strength work, and skill development.
                 </p>
                 <p className="text-gray-200 leading-relaxed">
-                  <strong className="text-solar-surge-orange">Mind & Muscle solution:</strong> Team communication PLUS 7 AI development tools. Yes, we have scheduling and team chat. But we also have AI mental training, swing analysis, position-specific strength programs, baseball IQ scenarios, nutrition planning, and goal coaching. We're not replacing team logistics apps—we're adding what happens between games.
+                  <strong className="text-solar-surge-orange">Mind & Muscle solution:</strong> Team communication PLUS 8 AI development tools. Yes, we have scheduling and team chat. But we also have AI mental training, swing analysis, position-specific strength programs, baseball IQ scenarios, nutrition planning, and goal coaching. We're not replacing team logistics apps—we're adding what happens between games.
                 </p>
                 <div className="mt-4 p-4 bg-solar-surge-orange/10 border border-solar-surge-orange/30 rounded-lg">
                   <p className="text-sm text-gray-300">

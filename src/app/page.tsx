@@ -1834,7 +1834,7 @@ export default function HomePage() {
                         </div>
                         <ul className="space-y-3 text-base text-white">
                           <li className="flex items-start gap-2">
-                            <span className="text-neon-cortex-blue mt-1 font-black">✓</span> 7 AI coaches learn YOUR game
+                            <span className="text-neon-cortex-blue mt-1 font-black">✓</span> 8 AI coaches learn YOUR game
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-neon-cortex-blue mt-1 font-black">✓</span> Everything syncs together
@@ -1941,6 +1941,7 @@ export default function HomePage() {
                   'Dugout Talk: Field notes (performance log)',
                   'Game Lab Level 1: Baseball IQ basics',
                   'Breathwork: Guided breathing exercises',
+                  'Arm Builder: Arm care & throwing routines',
                 ].map((feature, i) => (
                   <li key={i} className="flex items-center gap-3 text-base md:text-lg text-gray-300">
                     <div className="w-2 h-2 bg-neon-cortex-blue rounded-full flex-shrink-0" />

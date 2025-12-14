@@ -333,7 +333,7 @@ function TeamLicensingContent() {
         />
 
         <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed">
-          One Premium team license unlocks all 7 AI-powered apps, personalized training, and advanced analytics for your entire team.
+          One Premium team license unlocks all 8 AI-powered apps, personalized training, and advanced analytics for your entire team.
         </p>
       </div>
 
@@ -1116,6 +1116,7 @@ function TeamLicensingContent() {
                   { feature: 'AI mental training coach', tag: 'Adaptive' },
                   { feature: 'Swing Lab & Pitch Lab', tag: 'Video Analysis' },
                   { feature: 'Plate IQ: Pitch anticipation', tag: 'IQ Training' },
+                  { feature: 'Arm Builder: Throwing routines', tag: 'Free' },
                   { feature: 'Position-specific strength', tag: 'AI-powered' },
                   { feature: 'Performance nutrition', tag: 'Personalized' },
                   { feature: '186 game IQ scenarios', tag: 'Game-ready' },
@@ -1218,6 +1219,7 @@ function TeamLicensingContent() {
                 'Dugout Talk: Personal journal tracker',
                 'Game Lab Level 1: Baseball IQ basics',
                 'Breathwork: Guided breathing exercises',
+                'Arm Builder: Arm care & throwing routines',
               ].map((feature, i) => (
                 <li key={i} className="flex items-center gap-3 text-base md:text-lg text-gray-300">
                   <div className="w-2 h-2 bg-neon-cortex-blue rounded-full flex-shrink-0" />
@@ -1744,6 +1746,111 @@ function TeamLicensingContent() {
                 <p className="text-text-secondary text-sm leading-relaxed">
                   <span className="text-neon-cortex-green font-semibold">Absolutely.</span> There are no long-term contracts. You can cancel your subscription at any time. All users will retain Premium access until the end of your billing period, then revert to free tier features.
                 </p>
+              ),
+            },
+            {
+              category: 'Features',
+              icon: Sparkles,
+              color: 'blue',
+              question: 'What is Arm Builder and why is it free?',
+              answer: (
+                <div className="text-text-secondary text-sm space-y-3 leading-relaxed">
+                  <p>
+                    <span className="font-semibold text-neon-cortex-blue">Arm Builder</span> is our arm care and throwing development tool, designed to help players build velocity, prevent injury, and throw gas.
+                  </p>
+                  <p>Key features include:</p>
+                  <ul className="space-y-2 ml-4">
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">Arm Feel Check-In</span> – Daily monitoring of arm health and readiness</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">Warmup Routines</span> – Proper arm prep before throwing</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">Long Toss Logging</span> – Track distance and progress over time</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">Goal Setting</span> – Distance and velocity targets</span>
+                    </li>
+                  </ul>
+                  <p className="bg-neon-cortex-green/10 rounded-lg p-3 border border-neon-cortex-green/20 mt-4">
+                    💪 <span className="font-semibold text-neon-cortex-green">Why free?</span> Arm health is too important to put behind a paywall. Every player deserves access to proper arm care tools. Build it right, build it for free.
+                  </p>
+                </div>
+              ),
+            },
+            {
+              category: 'Features',
+              icon: Sparkles,
+              color: 'orange',
+              question: 'What is Plate IQ?',
+              answer: (
+                <div className="text-text-secondary text-sm space-y-3 leading-relaxed">
+                  <p>
+                    <span className="font-semibold text-solar-surge-orange">Plate IQ</span> trains your brain to anticipate pitches through scenario-based drills. It's like studying game film, but interactive.
+                  </p>
+                  <p>How it works:</p>
+                  <ul className="space-y-2 ml-4">
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-solar-surge-orange flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">20+ Game Scenarios</span> – Real at-bat situations with count, runners, outs</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-solar-surge-orange flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">Approach Selection</span> – Choose Hunt Mode (0-1 strikes) or Battle Mode (2 strikes)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-solar-surge-orange flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">Zone Targeting</span> – Select where you'd hunt your pitch in the 13-zone system</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-solar-surge-orange flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">Instant Feedback</span> – Learn pitcher tendencies and optimal approaches</span>
+                    </li>
+                  </ul>
+                  <p className="bg-solar-surge-orange/10 rounded-lg p-3 border border-solar-surge-orange/20 mt-4">
+                    🧠 Train your approach before you step in the box. Better plate IQ = better at-bats.
+                  </p>
+                </div>
+              ),
+            },
+            {
+              category: 'Features',
+              icon: Sparkles,
+              color: 'blue',
+              question: 'What is Pitch Lab?',
+              answer: (
+                <div className="text-text-secondary text-sm space-y-3 leading-relaxed">
+                  <p>
+                    <span className="font-semibold text-neon-cortex-blue">Pitch Lab</span> is our AI-powered pitching video analysis tool. Upload a video and get professional-grade mechanics breakdown in seconds.
+                  </p>
+                  <p>What you get:</p>
+                  <ul className="space-y-2 ml-4">
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">8-Component Analysis</span> – Detailed breakdown of pitching mechanics</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">Arm Health Assessment</span> – Injury risk indicators and prevention insights</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">Custom Drill Recommendations</span> – Targeted exercises for your specific needs</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+                      <span><span className="font-semibold text-white">Progress Tracking</span> – Save analyses and compare over time</span>
+                    </li>
+                  </ul>
+                  <p className="bg-neon-cortex-blue/10 rounded-lg p-3 border border-neon-cortex-blue/20 mt-4">
+                    ⚾ Works for both baseball and softball pitchers. Design filthy pitches. Protect your arm.
+                  </p>
+                </div>
               ),
             },
           ].map((faq, index) => {
