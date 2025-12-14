@@ -228,6 +228,10 @@ body {
     50% { left: 100%; }
     100% { left: 100%; }
   }
+
+  .shimmer-button-delayed::after {
+    animation-delay: 1.5s;
+  }
 }
 
 /* Smooth Scrolling */
