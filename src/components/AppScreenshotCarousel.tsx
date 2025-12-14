@@ -70,6 +70,10 @@ const screenshots = [
     src: '/assets/screenshots/16.png',
     alt: 'Mind & Muscle App Screenshot 15',
   },
+  {
+    src: '/assets/screenshots/17.png',
+    alt: 'Performance Lab - Tools to elevate your game',
+  },
 ];
 
 export function AppScreenshotCarousel() {
