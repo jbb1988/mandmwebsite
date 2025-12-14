@@ -54,6 +54,22 @@ export function Footer() {
           </Link>
         </div>
 
+        {/* Social Links */}
+        <div className="flex justify-center items-center gap-4 mb-8">
+          <Link
+            href="https://x.com/MindMuscleAI"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Follow us on X"
+            className="p-3 bg-black rounded-xl border border-white/20 hover:border-white/40 transition-all hover:scale-105"
+          >
+            <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+          </Link>
+          {/* Add more social icons here: Instagram, TikTok, etc. */}
+        </div>
+
         {/* Support Links */}
         <div className="mb-6">
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm">
