@@ -9,8 +9,10 @@ import { Upload, Download, RefreshCw, Image as ImageIcon, Smartphone } from 'luc
 
 export default function BannerGeneratorPage() {
   const [qrCodeImage, setQrCodeImage] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const bannerRef = useRef<HTMLDivElement>(null);
+  const [isGeneratingFacebook, setIsGeneratingFacebook] = useState(false);
+  const [isGeneratingTwitter, setIsGeneratingTwitter] = useState(false);
+  const facebookBannerRef = useRef<HTMLDivElement>(null);
+  const twitterBannerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
@@ -40,15 +42,12 @@ export default function BannerGeneratorPage() {
     event.preventDefault();
   }, []);
 
-  const downloadBanner = async () => {
-    if (!bannerRef.current) return;
-
-    setIsGenerating(true);
-
+  const downloadFacebookBanner = async () => {
+    if (!facebookBannerRef.current) return;
+    setIsGeneratingFacebook(true);
     try {
       const html2canvas = (await import('html2canvas')).default;
-
-      const canvas = await html2canvas(bannerRef.current, {
+      const canvas = await html2canvas(facebookBannerRef.current, {
         scale: 1,
         useCORS: true,
         allowTaint: true,
@@ -56,16 +55,40 @@ export default function BannerGeneratorPage() {
         width: 1080,
         height: 1080,
       });
-
       const link = document.createElement('a');
-      link.download = `mind-muscle-partner-banner-${Date.now()}.png`;
+      link.download = `mind-muscle-facebook-${Date.now()}.png`;
       link.href = canvas.toDataURL('image/png');
       link.click();
     } catch (error) {
-      console.error('Error generating banner:', error);
+      console.error('Error generating Facebook banner:', error);
       alert('Error generating banner. Please try again.');
     } finally {
-      setIsGenerating(false);
+      setIsGeneratingFacebook(false);
+    }
+  };
+
+  const downloadTwitterBanner = async () => {
+    if (!twitterBannerRef.current) return;
+    setIsGeneratingTwitter(true);
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      const canvas = await html2canvas(twitterBannerRef.current, {
+        scale: 1,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#0f172a',
+        width: 1600,
+        height: 900,
+      });
+      const link = document.createElement('a');
+      link.download = `mind-muscle-twitter-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (error) {
+      console.error('Error generating Twitter banner:', error);
+      alert('Error generating banner. Please try again.');
+    } finally {
+      setIsGeneratingTwitter(false);
     }
   };
 
@@ -194,7 +217,7 @@ export default function BannerGeneratorPage() {
               Export: PNG, sRGB
             */}
             <div
-              ref={bannerRef}
+              ref={facebookBannerRef}
               style={{
                 width: '1080px',
                 height: '1080px',
@@ -439,34 +462,318 @@ export default function BannerGeneratorPage() {
               </div>
             </div>
           </div>
+
+          {/* Facebook Download Button */}
+          <div className="flex justify-center mt-4">
+            <LiquidButton
+              onClick={downloadFacebookBanner}
+              variant="blue"
+              size="md"
+              disabled={!qrCodeImage || isGeneratingFacebook}
+            >
+              {isGeneratingFacebook ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Facebook PNG
+                </>
+              )}
+            </LiquidButton>
+          </div>
         </div>
 
-        {/* Download Button */}
-        <div className="flex justify-center">
-          <LiquidButton
-            onClick={downloadBanner}
-            variant="orange"
-            size="lg"
-            disabled={!qrCodeImage || isGenerating}
-            className="!px-12"
-          >
-            {isGenerating ? (
-              <>
-                <RefreshCw className="w-5 h-5 animate-spin mr-2" />
-                Generating...
-              </>
-            ) : (
-              <>
-                <Download className="w-5 h-5 mr-2" />
-                Download Banner PNG
-              </>
-            )}
-          </LiquidButton>
+        {/* ================================================================== */}
+        {/* TWITTER/X BANNER PREVIEW - 1600x900px (16:9) */}
+        {/* ================================================================== */}
+        <div className="mb-8">
+          <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+            <ImageIcon className="w-5 h-5 text-neon-cortex-blue" />
+            X (Twitter) Feed Post (1600x900px - 16:9)
+          </h3>
+
+          <div className="overflow-auto rounded-xl border border-white/10">
+            {/*
+              X (TWITTER) FEED POST IMAGE - LOCKED SPECS
+              Canvas: 1600x900px (16:9)
+              Safe Zone: 1320x720px (140px L/R, 90px T/B)
+              Export: PNG, sRGB
+            */}
+            <div
+              ref={twitterBannerRef}
+              style={{
+                width: '1600px',
+                height: '900px',
+                position: 'relative',
+                overflow: 'hidden',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              }}
+            >
+              {/* Background Image */}
+              <img
+                src="/assets/images/baseball_field_dusk.png"
+                alt=""
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                }}
+              />
+
+              {/* Gradient overlay - soft vignette behind headline */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: `
+                    radial-gradient(ellipse at 35% 50%, rgba(15, 23, 42, 0.7) 0%, transparent 65%),
+                    linear-gradient(to right, rgba(15, 23, 42, 0.65) 0%, rgba(15, 23, 42, 0.35) 55%, rgba(15, 23, 42, 0.45) 100%)
+                  `,
+                }}
+              />
+
+              {/* SAFE ZONE CONTAINER: 1320x720px centered (140px L/R, 90px T/B) */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '90px',
+                  left: '140px',
+                  width: '1320px',
+                  height: '720px',
+                  display: 'flex',
+                }}
+              >
+                {/* LEFT SIDE - 65% width - Primary Message Block */}
+                <div
+                  style={{
+                    width: '65%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    paddingRight: '40px',
+                  }}
+                >
+                  {/* Headline - Left aligned, vertically centered */}
+                  <h1
+                    style={{
+                      margin: 0,
+                      fontSize: '64px',
+                      fontWeight: 900,
+                      fontStyle: 'italic',
+                      lineHeight: 1.12,
+                      letterSpacing: '-1px',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    <span style={{
+                      color: '#0EA5E9',
+                      display: 'block',
+                      textShadow: '0 2px 20px rgba(0,0,0,0.85), 0 4px 40px rgba(14, 165, 233, 0.3)'
+                    }}>
+                      Discipline the Mind.
+                    </span>
+                    <span style={{
+                      color: '#F97316',
+                      display: 'block',
+                      textShadow: '0 2px 20px rgba(0,0,0,0.85), 0 4px 40px rgba(249, 115, 22, 0.3)'
+                    }}>
+                      Dominate the Game.
+                    </span>
+                  </h1>
+
+                  {/* Subhead - only if readable at phone size */}
+                  <p
+                    style={{
+                      margin: '28px 0 0 0',
+                      fontSize: '22px',
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      fontWeight: 500,
+                      letterSpacing: '0.3px',
+                      textShadow: '0 2px 10px rgba(0,0,0,0.8)',
+                    }}
+                  >
+                    AI Training for Baseball & Softball Athletes
+                  </p>
+                </div>
+
+                {/* RIGHT SIDE - 35% width - Brand + Action Block */}
+                <div
+                  style={{
+                    width: '35%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '24px',
+                  }}
+                >
+                  {/* Logo - smaller than Facebook (~5-10% smaller = 145px) */}
+                  <img
+                    src="/assets/images/logo.png"
+                    alt="Mind & Muscle"
+                    style={{
+                      width: '145px',
+                      height: '145px',
+                      filter: 'drop-shadow(0 0 25px rgba(14, 165, 233, 0.2)) drop-shadow(0 6px 16px rgba(0,0,0,0.5))',
+                    }}
+                  />
+
+                  {/* QR Code Section */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                    }}
+                  >
+                    {qrCodeImage ? (
+                      <>
+                        {/* QR Code on white card - MIN 240x240px for Twitter */}
+                        <div
+                          style={{
+                            backgroundColor: '#FFFFFF',
+                            borderRadius: '10px',
+                            padding: '14px',
+                            boxShadow: '0 6px 28px rgba(0, 0, 0, 0.4)',
+                          }}
+                        >
+                          <img
+                            src={qrCodeImage}
+                            alt="Partner QR Code"
+                            style={{
+                              width: '240px',
+                              height: '240px',
+                              objectFit: 'contain',
+                              display: 'block',
+                            }}
+                          />
+                        </div>
+
+                        {/* Label below QR - REQUIRED: "Scan to Get Started" */}
+                        <p
+                          style={{
+                            margin: '14px 0 0 0',
+                            fontSize: '16px',
+                            fontWeight: 600,
+                            color: 'white',
+                            textAlign: 'center',
+                            textShadow: '0 2px 8px rgba(0,0,0,0.7)',
+                            letterSpacing: '0.2px',
+                          }}
+                        >
+                          Scan to Get Started
+                        </p>
+
+                        {/* CTA: "Get Started FREE" - secondary */}
+                        <div
+                          style={{
+                            marginTop: '6px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: '18px',
+                              fontWeight: 700,
+                              color: 'white',
+                              textShadow: '0 2px 8px rgba(0,0,0,0.6)',
+                            }}
+                          >
+                            Get Started
+                          </span>
+                          <span
+                            style={{
+                              fontSize: '18px',
+                              fontWeight: 800,
+                              color: '#4ADE80',
+                              textShadow: '0 2px 8px rgba(0,0,0,0.6)',
+                            }}
+                          >
+                            FREE
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      /* Placeholder when no QR uploaded */
+                      <>
+                        <div
+                          style={{
+                            width: '268px',
+                            height: '268px',
+                            backgroundColor: 'rgba(255,255,255,0.1)',
+                            borderRadius: '10px',
+                            border: '2px dashed rgba(255,255,255,0.3)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <p
+                            style={{
+                              color: 'rgba(255,255,255,0.5)',
+                              fontSize: '13px',
+                              textAlign: 'center',
+                            }}
+                          >
+                            QR Code<br />240x240px min
+                          </p>
+                        </div>
+                        <p
+                          style={{
+                            margin: '14px 0 0 0',
+                            fontSize: '16px',
+                            fontWeight: 600,
+                            color: 'rgba(255,255,255,0.4)',
+                            textAlign: 'center',
+                          }}
+                        >
+                          Scan to Get Started
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Twitter Download Button */}
+          <div className="flex justify-center mt-4">
+            <LiquidButton
+              onClick={downloadTwitterBanner}
+              variant="orange"
+              size="md"
+              disabled={!qrCodeImage || isGeneratingTwitter}
+            >
+              {isGeneratingTwitter ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Download X/Twitter PNG
+                </>
+              )}
+            </LiquidButton>
+          </div>
         </div>
 
         {!qrCodeImage && (
           <p className="text-center text-sm text-gray-500 mt-4">
-            Upload a QR code first to enable download
+            Upload a QR code first to enable downloads
           </p>
         )}
       </div>
