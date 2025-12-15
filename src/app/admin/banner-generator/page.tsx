@@ -49,12 +49,12 @@ export default function BannerGeneratorPage() {
       const html2canvas = (await import('html2canvas')).default;
 
       const canvas = await html2canvas(bannerRef.current, {
-        scale: 2,
+        scale: 1,
         useCORS: true,
         allowTaint: true,
         backgroundColor: '#0f172a',
-        width: 1200,
-        height: 628,
+        width: 1080,
+        height: 1080,
       });
 
       const link = document.createElement('a');
@@ -183,16 +183,21 @@ export default function BannerGeneratorPage() {
         <div className="mb-8">
           <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
             <ImageIcon className="w-5 h-5 text-solar-surge-orange" />
-            Banner Preview (1200x628px)
+            Facebook Feed Post (1080x1080px Square)
           </h3>
 
           <div className="overflow-auto rounded-xl border border-white/10">
-            {/* Professional Banner Design */}
+            {/*
+              FACEBOOK FEED POST IMAGE - LOCKED SPECS
+              Canvas: 1080x1080px (1:1 square)
+              Safe Zone: 860x860px (110px padding all sides)
+              Export: PNG, sRGB
+            */}
             <div
               ref={bannerRef}
               style={{
-                width: '1200px',
-                height: '628px',
+                width: '1080px',
+                height: '1080px',
                 position: 'relative',
                 overflow: 'hidden',
                 fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
@@ -212,7 +217,7 @@ export default function BannerGeneratorPage() {
                 }}
               />
 
-              {/* Dark Gradient Overlay - Creates depth and text legibility */}
+              {/* Gradient overlay - subtle vignette for headline readability */}
               <div
                 style={{
                   position: 'absolute',
@@ -220,207 +225,216 @@ export default function BannerGeneratorPage() {
                   left: 0,
                   right: 0,
                   bottom: 0,
-                  background: 'linear-gradient(135deg, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.7) 50%, rgba(15, 23, 42, 0.6) 100%)',
+                  background: `
+                    radial-gradient(ellipse at 30% 40%, rgba(15, 23, 42, 0.75) 0%, transparent 70%),
+                    linear-gradient(to right, rgba(15, 23, 42, 0.7) 0%, rgba(15, 23, 42, 0.4) 60%, rgba(15, 23, 42, 0.5) 100%)
+                  `,
                 }}
               />
 
-              {/* Content Container */}
+              {/* SAFE ZONE CONTAINER: 860x860px centered (110px padding all sides) */}
               <div
                 style={{
                   position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
+                  top: '110px',
+                  left: '110px',
+                  width: '860px',
+                  height: '860px',
                   display: 'flex',
-                  flexDirection: 'column',
-                  padding: '50px 60px',
                 }}
               >
-                {/* TOP SECTION - Text Left + Logo Right */}
+                {/* LEFT SIDE - 60% width - Primary Message Block */}
                 <div
                   style={{
+                    width: '60%',
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    flex: '1',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    paddingRight: '30px',
                   }}
                 >
-                  {/* Left - Headline & Subtext */}
-                  <div>
-                    {/* Headline */}
-                    <h1
-                      style={{
-                        margin: 0,
-                        fontSize: '56px',
-                        fontWeight: 900,
-                        fontStyle: 'italic',
-                        lineHeight: 1.1,
-                        letterSpacing: '-1px',
-                        textTransform: 'uppercase',
-                      }}
-                    >
-                      <span style={{ color: '#0EA5E9', display: 'block', textShadow: '0 2px 20px rgba(14, 165, 233, 0.4)' }}>
-                        Discipline the Mind.
-                      </span>
-                      <span style={{ color: '#F97316', display: 'block', textShadow: '0 2px 20px rgba(249, 115, 22, 0.4)' }}>
-                        Dominate the Game.
-                      </span>
-                    </h1>
+                  {/* Headline - Left aligned, vertically centered */}
+                  <h1
+                    style={{
+                      margin: 0,
+                      fontSize: '52px',
+                      fontWeight: 900,
+                      fontStyle: 'italic',
+                      lineHeight: 1.15,
+                      letterSpacing: '-0.5px',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    <span style={{
+                      color: '#0EA5E9',
+                      display: 'block',
+                      textShadow: '0 2px 16px rgba(0,0,0,0.8), 0 4px 32px rgba(14, 165, 233, 0.3)'
+                    }}>
+                      Discipline the Mind.
+                    </span>
+                    <span style={{
+                      color: '#F97316',
+                      display: 'block',
+                      textShadow: '0 2px 16px rgba(0,0,0,0.8), 0 4px 32px rgba(249, 115, 22, 0.3)'
+                    }}>
+                      Dominate the Game.
+                    </span>
+                  </h1>
 
-                    {/* Subtext */}
-                    <p
-                      style={{
-                        margin: '20px 0 0 0',
-                        fontSize: '22px',
-                        color: 'rgba(255, 255, 255, 0.85)',
-                        fontWeight: 500,
-                        letterSpacing: '0.5px',
-                      }}
-                    >
-                      AI Training for Baseball & Softball Athletes
-                    </p>
-                  </div>
+                  {/* Subhead - only if readable at phone size */}
+                  <p
+                    style={{
+                      margin: '24px 0 0 0',
+                      fontSize: '20px',
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      fontWeight: 500,
+                      letterSpacing: '0.3px',
+                      textShadow: '0 2px 8px rgba(0,0,0,0.7)',
+                    }}
+                  >
+                    AI Training for Baseball & Softball Athletes
+                  </p>
+                </div>
 
-                  {/* Right - Logo */}
+                {/* RIGHT SIDE - 40% width - Action + Brand Block */}
+                <div
+                  style={{
+                    width: '40%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    paddingTop: '20px',
+                    paddingBottom: '20px',
+                  }}
+                >
+                  {/* Logo - near top-right, with subtle halo */}
                   <img
                     src="/assets/images/logo.png"
                     alt="Mind & Muscle"
                     style={{
-                      width: '180px',
-                      height: '180px',
-                      filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.5))',
+                      width: '160px',
+                      height: '160px',
+                      filter: 'drop-shadow(0 0 30px rgba(14, 165, 233, 0.25)) drop-shadow(0 8px 20px rgba(0,0,0,0.5))',
                     }}
                   />
-                </div>
 
-                {/* BOTTOM SECTION - QR Centered + CTA Right */}
-                <div
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    paddingTop: '20px',
-                  }}
-                >
-                  {qrCodeImage ? (
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '30px',
-                      }}
-                    >
-                      {/* QR Code Container */}
-                      <div
-                        style={{
-                          backgroundColor: 'white',
-                          borderRadius: '16px',
-                          padding: '14px',
-                          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5), 0 10px 20px rgba(0, 0, 0, 0.3)',
-                        }}
-                      >
-                        <img
-                          src={qrCodeImage}
-                          alt="Partner QR Code"
+                  {/* QR Code Section - centered vertically */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                    }}
+                  >
+                    {qrCodeImage ? (
+                      <>
+                        {/* QR Code on white card - MIN 260x260px with quiet zone */}
+                        <div
                           style={{
-                            width: '140px',
-                            height: '140px',
-                            objectFit: 'contain',
+                            backgroundColor: '#FFFFFF',
+                            borderRadius: '12px',
+                            padding: '16px',
+                            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
                           }}
-                        />
-                      </div>
+                        >
+                          <img
+                            src={qrCodeImage}
+                            alt="Partner QR Code"
+                            style={{
+                              width: '260px',
+                              height: '260px',
+                              objectFit: 'contain',
+                              display: 'block',
+                            }}
+                          />
+                        </div>
 
-                      {/* CTA Text - Right of QR */}
-                      <div
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'flex-start',
-                        }}
-                      >
+                        {/* Label below QR - REQUIRED: "Scan to Get Started" */}
                         <p
                           style={{
-                            margin: 0,
-                            fontSize: '28px',
-                            fontWeight: 800,
+                            margin: '16px 0 0 0',
+                            fontSize: '18px',
+                            fontWeight: 600,
                             color: 'white',
-                            textShadow: '0 2px 12px rgba(0,0,0,0.6)',
-                            letterSpacing: '0.5px',
-                          }}
-                        >
-                          Get Started
-                        </p>
-                        <p
-                          style={{
-                            margin: '4px 0 0 0',
-                            fontSize: '36px',
-                            fontWeight: 900,
-                            color: '#22C55E',
-                            textShadow: '0 2px 12px rgba(0,0,0,0.6)',
-                            letterSpacing: '1px',
-                          }}
-                        >
-                          FREE
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    /* Placeholder */
-                    <div
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '30px',
-                      }}
-                    >
-                      <div
-                        style={{
-                          width: '168px',
-                          height: '168px',
-                          backgroundColor: 'rgba(255,255,255,0.1)',
-                          borderRadius: '16px',
-                          border: '2px dashed rgba(255,255,255,0.3)',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                        }}
-                      >
-                        <p
-                          style={{
-                            color: 'rgba(255,255,255,0.5)',
-                            fontSize: '14px',
                             textAlign: 'center',
-                            padding: '20px',
+                            textShadow: '0 2px 8px rgba(0,0,0,0.7)',
+                            letterSpacing: '0.3px',
                           }}
                         >
-                          QR Code here
+                          Scan to Get Started
                         </p>
-                      </div>
-                      <div>
+
+                        {/* CTA: "Get Started FREE" - secondary to headline */}
+                        <div
+                          style={{
+                            marginTop: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: '22px',
+                              fontWeight: 700,
+                              color: 'white',
+                              textShadow: '0 2px 8px rgba(0,0,0,0.6)',
+                            }}
+                          >
+                            Get Started
+                          </span>
+                          <span
+                            style={{
+                              fontSize: '22px',
+                              fontWeight: 800,
+                              color: '#4ADE80',
+                              textShadow: '0 2px 8px rgba(0,0,0,0.6)',
+                            }}
+                          >
+                            FREE
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      /* Placeholder when no QR uploaded */
+                      <>
+                        <div
+                          style={{
+                            width: '292px',
+                            height: '292px',
+                            backgroundColor: 'rgba(255,255,255,0.1)',
+                            borderRadius: '12px',
+                            border: '2px dashed rgba(255,255,255,0.3)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <p
+                            style={{
+                              color: 'rgba(255,255,255,0.5)',
+                              fontSize: '14px',
+                              textAlign: 'center',
+                            }}
+                          >
+                            QR Code<br />260x260px min
+                          </p>
+                        </div>
                         <p
                           style={{
-                            margin: 0,
-                            fontSize: '28px',
-                            fontWeight: 800,
+                            margin: '16px 0 0 0',
+                            fontSize: '18px',
+                            fontWeight: 600,
                             color: 'rgba(255,255,255,0.4)',
+                            textAlign: 'center',
                           }}
                         >
-                          Get Started
+                          Scan to Get Started
                         </p>
-                        <p
-                          style={{
-                            margin: '4px 0 0 0',
-                            fontSize: '36px',
-                            fontWeight: 900,
-                            color: 'rgba(34, 197, 94, 0.4)',
-                          }}
-                        >
-                          FREE
-                        </p>
-                      </div>
-                    </div>
-                  )}
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
