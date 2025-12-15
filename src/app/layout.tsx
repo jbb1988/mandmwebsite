@@ -7,6 +7,7 @@ import { ReferralTracker } from '@/components/ReferralTracker';
 import { OrganizationSchema, WebSiteSchema, SoftwareApplicationSchema } from '@/components/seo/StructuredData';
 import { generateMetadata } from '@/config/seo';
 import { Suspense } from 'react';
+import { GoogleAnalytics } from '@/components/GoogleAnalytics';
 
 export const metadata: Metadata = {
   ...generateMetadata('home'),
@@ -60,6 +61,7 @@ export default function RootLayout({
         <SoftwareApplicationSchema />
       </head>
       <body className="antialiased">
+        <GoogleAnalytics />
         <ToltScript />
         <Suspense fallback={null}>
           <ReferralTracker />
