@@ -326,23 +326,23 @@ export default function BannerGeneratorPage() {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
-                    paddingTop: '20px',
-                    paddingBottom: '20px',
+                    justifyContent: 'center',
+                    gap: '20px',
                   }}
                 >
-                  {/* Logo - near top-right, with subtle halo */}
+                  {/* Logo + QR as one unified vertical stack */}
+                  {/* Logo: 120px, soft ambient shadow only, NO glow */}
                   <img
                     src="/assets/images/logo.png"
                     alt="Mind & Muscle"
                     style={{
-                      width: '160px',
-                      height: '160px',
-                      filter: 'drop-shadow(0 0 30px rgba(14, 165, 233, 0.25)) drop-shadow(0 8px 20px rgba(0,0,0,0.5))',
+                      width: '120px',
+                      height: '120px',
+                      filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.15))',
                     }}
                   />
 
-                  {/* QR Code Section - centered vertically */}
+                  {/* QR Code Section - tight spacing with logo */}
                   <div
                     style={{
                       display: 'flex',
@@ -606,6 +606,7 @@ export default function BannerGeneratorPage() {
                 </div>
 
                 {/* RIGHT SIDE - 35% width - Brand + Action Block */}
+                {/* Logo + QR as ONE unified vertical unit, tight spacing */}
                 <div
                   style={{
                     width: '35%',
@@ -613,21 +614,22 @@ export default function BannerGeneratorPage() {
                     flexDirection: 'column',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '24px',
+                    gap: '16px',
                   }}
                 >
-                  {/* Logo - smaller than Facebook (~5-10% smaller = 145px) */}
+                  {/* Logo: 120px, soft ambient shadow ONLY, NO glow */}
+                  {/* Moved down from top to align with QR block */}
                   <img
                     src="/assets/images/logo.png"
                     alt="Mind & Muscle"
                     style={{
-                      width: '145px',
-                      height: '145px',
-                      filter: 'drop-shadow(0 0 25px rgba(14, 165, 233, 0.2)) drop-shadow(0 6px 16px rgba(0,0,0,0.5))',
+                      width: '120px',
+                      height: '120px',
+                      filter: 'drop-shadow(0 6px 20px rgba(0,0,0,0.12))',
                     }}
                   />
 
-                  {/* QR Code Section */}
+                  {/* QR Code Section - tight with logo above */}
                   <div
                     style={{
                       display: 'flex',
