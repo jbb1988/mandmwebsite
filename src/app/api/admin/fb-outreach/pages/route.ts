@@ -74,22 +74,45 @@ export async function GET(request: NextRequest) {
     // Then get admins for these pages with their linked partner data
     if (pages && pages.length > 0) {
       const pageIds = pages.map(p => p.id);
-      const { data: admins, error: adminsError } = await supabase
-        .from('fb_page_admins')
-        .select(`
-          *,
-          finder_fee_partner:finder_fee_partner_id (
-            id,
-            partner_code,
-            partner_email,
-            partner_name,
-            enabled,
-            is_recurring
-          )
-        `)
-        .in('page_id', pageIds);
 
-      if (!adminsError && admins) {
+      // Try to fetch with partner join first
+      let admins = null;
+      let adminsError = null;
+
+      try {
+        const result = await supabase
+          .from('fb_page_admins')
+          .select(`
+            *,
+            finder_fee_partner:finder_fee_partner_id (
+              id,
+              partner_code,
+              partner_email,
+              partner_name,
+              enabled,
+              is_recurring
+            )
+          `)
+          .in('page_id', pageIds);
+
+        admins = result.data;
+        adminsError = result.error;
+      } catch (e) {
+        console.error('Error with partner join, falling back:', e);
+        // Fallback to simple query without join
+        const result = await supabase
+          .from('fb_page_admins')
+          .select('*')
+          .in('page_id', pageIds);
+        admins = result.data;
+        adminsError = result.error;
+      }
+
+      if (adminsError) {
+        console.error('Error fetching admins:', adminsError);
+      }
+
+      if (admins) {
         // Attach admins to their pages
         const adminsByPage: Record<string, typeof admins> = {};
         admins.forEach(admin => {
