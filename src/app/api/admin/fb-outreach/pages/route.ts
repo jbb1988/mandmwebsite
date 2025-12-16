@@ -8,6 +8,26 @@ const supabase = createClient(
 
 const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
+// Normalize Facebook URLs to prevent duplicates with slight variations
+function normalizeFacebookUrl(url: string): string {
+  try {
+    const parsed = new URL(url);
+    // Remove trailing slash
+    let path = parsed.pathname.replace(/\/$/, '');
+    // Remove /about suffix if present
+    path = path.replace(/\/about$/, '');
+    // Reconstruct clean URL without query params
+    return `https://www.facebook.com${path}`.toLowerCase();
+  } catch {
+    // If URL parsing fails, just clean up basic variations
+    return url
+      .toLowerCase()
+      .replace(/\/about\/?$/, '')
+      .replace(/\/$/, '')
+      .replace(/\?.*$/, '');
+  }
+}
+
 function verifyAdmin(request: NextRequest): boolean {
   const password = request.headers.get('X-Admin-Password');
   return password === ADMIN_PASSWORD;
@@ -79,11 +99,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Page name and URL are required' }, { status: 400 });
     }
 
+    // Normalize the URL to prevent duplicates with variations
+    const normalizedUrl = normalizeFacebookUrl(page_url);
+
     // Check for duplicate
     const { data: existing, error: checkError } = await supabase
       .from('fb_page_outreach')
-      .select('id')
-      .eq('page_url', page_url)
+      .select('id, page_name')
+      .eq('page_url', normalizedUrl)
       .maybeSingle();
 
     if (checkError) {
@@ -92,14 +115,17 @@ export async function POST(request: NextRequest) {
     }
 
     if (existing) {
-      return NextResponse.json({ success: false, message: 'This page URL already exists' }, { status: 400 });
+      return NextResponse.json({
+        success: false,
+        message: `This group already exists as "${existing.page_name}"`
+      }, { status: 400 });
     }
 
     const { data, error } = await supabase
       .from('fb_page_outreach')
       .insert({
         page_name,
-        page_url,
+        page_url: normalizedUrl, // Store normalized URL
         page_type: 'group', // Required field - default to 'group'
         sport: sport || 'baseball', // Required field - accept from body or default to 'baseball'
         admin_name: admin_name || null,
