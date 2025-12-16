@@ -22,7 +22,8 @@ export async function GET(request: NextRequest) {
     const { data: templates, error } = await supabase
       .from('x_dm_templates')
       .select('*')
-      .eq('target_category', 'fb_group')
+      .in('target_category', ['fb_group', 'x_influencer'])
+      .order('target_category')
       .order('template_type')
       .order('template_name');
 
