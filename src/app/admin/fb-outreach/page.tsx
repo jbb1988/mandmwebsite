@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import AdminGate from '@/components/AdminGate';
-import { LiquidGlass } from '@/components/LiquidGlass';
-import { LiquidButton } from '@/components/LiquidButton';
 import {
   Users, Plus, RefreshCw, Search, MapPin, ExternalLink, MessageCircle,
   CheckCircle, Clock, XCircle, Send, FileText, ChevronDown, ChevronUp,
@@ -50,9 +48,9 @@ interface FBPage {
   id: string;
   page_name: string;
   page_url: string;
-  admin_name: string | null; // Legacy field
-  admin_profile_url: string | null; // Legacy field
-  fb_page_admins: FBPageAdmin[]; // New admins array
+  admin_name: string | null;
+  admin_profile_url: string | null;
+  fb_page_admins: FBPageAdmin[];
   state: string | null;
   member_count: number | null;
   group_type: GroupType | null;
@@ -63,11 +61,9 @@ interface FBPage {
   notes: string | null;
   priority_score: number;
   created_at: string;
-  // Partner Assets
   partner_qr_code_url: string | null;
   partner_referral_link: string | null;
   partner_landing_page: string | null;
-  // Follow-up tracking
   first_contact_at: string | null;
   last_contact_at: string | null;
   follow_up_date: string | null;
@@ -89,7 +85,6 @@ interface Stats {
   byState: Record<string, number>;
   needsFollowUp?: number;
   readyToPost?: number;
-  // Conversion stats
   partnersSignedUp?: number;
   appUsersConverted?: number;
   totalReferrals?: number;
@@ -114,7 +109,6 @@ const US_STATES = [
   'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
 ];
 
-// Helper function to calculate days since a date
 function daysSince(date: string | null): number | null {
   if (!date) return null;
   const sent = new Date(date);
@@ -123,7 +117,6 @@ function daysSince(date: string | null): number | null {
   return Math.floor(diff / (1000 * 60 * 60 * 24));
 }
 
-// Get follow-up urgency based on days since DM
 function getFollowUpUrgency(days: number | null): { label: string; color: string; urgent: boolean } | null {
   if (days === null) return null;
   if (days >= 7) return { label: `${days}d - Follow up!`, color: 'red', urgent: true };
@@ -132,7 +125,6 @@ function getFollowUpUrgency(days: number | null): { label: string; color: string
   return { label: 'Today', color: 'green', urgent: false };
 }
 
-// Admin response status options
 const ADMIN_RESPONSE_STATUS = {
   not_contacted: { label: 'Not Contacted', color: 'gray' },
   dm_sent: { label: 'DM Sent', color: 'blue' },
@@ -142,11 +134,190 @@ const ADMIN_RESPONSE_STATUS = {
   no_response: { label: 'No Response', color: 'orange' },
 };
 
+// Sophisticated Card Component
+function Card({ children, className = '', variant = 'default', glow = false }: {
+  children: React.ReactNode;
+  className?: string;
+  variant?: 'default' | 'elevated' | 'bordered';
+  glow?: boolean;
+}) {
+  const baseClasses = 'rounded-2xl transition-all duration-200';
+  const variantClasses = {
+    default: 'bg-[#0F1123]/80 border border-white/[0.08]',
+    elevated: 'bg-gradient-to-br from-[#0F1123] to-[#1B1F39] border border-white/[0.12] shadow-xl',
+    bordered: 'bg-[#0A0B14]/60 border-2 border-white/[0.1]',
+  };
+  const glowClass = glow ? 'shadow-lg shadow-blue-500/10' : '';
+
+  return (
+    <div className={`${baseClasses} ${variantClasses[variant]} ${glowClass} ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+// Stat Card Component
+function StatCard({ value, label, icon: Icon, color = 'white', highlight = false }: {
+  value: number | string;
+  label: string;
+  icon?: typeof Clock;
+  color?: string;
+  highlight?: boolean;
+}) {
+  const colorClasses: Record<string, string> = {
+    white: 'text-white',
+    gray: 'text-gray-400',
+    blue: 'text-blue-400',
+    green: 'text-emerald-400',
+    red: 'text-red-400',
+    purple: 'text-purple-400',
+    cyan: 'text-cyan-400',
+    amber: 'text-amber-400',
+  };
+
+  return (
+    <Card variant={highlight ? 'elevated' : 'default'} className="p-4">
+      <div className="text-center">
+        {Icon && <Icon className={`w-5 h-5 ${colorClasses[color]} mx-auto mb-2 opacity-80`} />}
+        <p className={`text-2xl font-bold ${colorClasses[color]}`}>{value}</p>
+        <p className="text-xs text-white/50 mt-1">{label}</p>
+      </div>
+    </Card>
+  );
+}
+
+// Tab Button Component
+function TabButton({
+  active,
+  onClick,
+  icon: Icon,
+  label,
+  color = 'blue',
+  badge
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: typeof Clock;
+  label: string;
+  color?: string;
+  badge?: number;
+}) {
+  const colorMap: Record<string, { bg: string; border: string; text: string }> = {
+    blue: { bg: 'bg-blue-500/15', border: 'border-blue-500/40', text: 'text-blue-400' },
+    red: { bg: 'bg-red-500/15', border: 'border-red-500/40', text: 'text-red-400' },
+    green: { bg: 'bg-emerald-500/15', border: 'border-emerald-500/40', text: 'text-emerald-400' },
+    cyan: { bg: 'bg-cyan-500/15', border: 'border-cyan-500/40', text: 'text-cyan-400' },
+    orange: { bg: 'bg-orange-500/15', border: 'border-orange-500/40', text: 'text-orange-400' },
+  };
+
+  const colors = colorMap[color] || colorMap.blue;
+
+  return (
+    <button
+      onClick={onClick}
+      className={`relative flex items-center gap-2 px-5 py-3 rounded-xl font-medium transition-all text-sm ${
+        active
+          ? `${colors.bg} border ${colors.border} ${colors.text}`
+          : 'bg-white/[0.03] border border-white/[0.06] text-white/60 hover:bg-white/[0.06] hover:text-white/80'
+      }`}
+    >
+      <Icon className="w-5 h-5" />
+      <span className="hidden sm:inline">{label}</span>
+      {badge !== undefined && badge > 0 && (
+        <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg shadow-red-500/30">
+          {badge}
+        </span>
+      )}
+    </button>
+  );
+}
+
+// Input Component
+function Input({ label, required, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { label?: string; required?: boolean }) {
+  return (
+    <div>
+      {label && (
+        <label className="block text-sm font-medium text-white/70 mb-2">
+          {label} {required && <span className="text-red-400">*</span>}
+        </label>
+      )}
+      <input
+        {...props}
+        className={`w-full px-4 py-3 bg-white/[0.03] border border-white/[0.1] rounded-xl text-white placeholder-white/30
+          focus:outline-none focus:border-blue-500/50 focus:bg-white/[0.05] transition-all ${props.className || ''}`}
+      />
+    </div>
+  );
+}
+
+// Select Component
+function Select({ label, required, children, ...props }: React.SelectHTMLAttributes<HTMLSelectElement> & { label?: string; required?: boolean }) {
+  return (
+    <div>
+      {label && (
+        <label className="block text-sm font-medium text-white/70 mb-2">
+          {label} {required && <span className="text-red-400">*</span>}
+        </label>
+      )}
+      <select
+        {...props}
+        className={`w-full px-4 py-3 bg-white/[0.03] border border-white/[0.1] rounded-xl text-white
+          focus:outline-none focus:border-blue-500/50 focus:bg-white/[0.05] transition-all cursor-pointer ${props.className || ''}`}
+      >
+        {children}
+      </select>
+    </div>
+  );
+}
+
+// Button Component
+function Button({
+  children,
+  variant = 'primary',
+  size = 'md',
+  icon: Icon,
+  loading,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+  size?: 'sm' | 'md' | 'lg';
+  icon?: typeof Clock;
+  loading?: boolean;
+}) {
+  const variantClasses = {
+    primary: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0 shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40',
+    secondary: 'bg-white/[0.05] border border-white/[0.1] text-white/90 hover:bg-white/[0.1]',
+    ghost: 'bg-transparent border-0 text-white/70 hover:text-white hover:bg-white/[0.05]',
+    danger: 'bg-red-500/20 border border-red-500/30 text-red-400 hover:bg-red-500/30',
+  };
+
+  const sizeClasses = {
+    sm: 'px-3 py-1.5 text-xs',
+    md: 'px-4 py-2.5 text-sm',
+    lg: 'px-6 py-3 text-base',
+  };
+
+  return (
+    <button
+      {...props}
+      disabled={loading || props.disabled}
+      className={`inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed
+        ${variantClasses[variant]} ${sizeClasses[size]} ${props.className || ''}`}
+    >
+      {loading ? (
+        <RefreshCw className="w-4 h-4 animate-spin" />
+      ) : Icon ? (
+        <Icon className="w-4 h-4" />
+      ) : null}
+      {children}
+    </button>
+  );
+}
+
 export default function AdminFBOutreachPage() {
   const [activeTab, setActiveTab] = useState<Tab>('pipeline');
   const [stats, setStats] = useState<Stats>({ total: 0, byStatus: {} as Record<OutreachStatus, number>, byState: {} });
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
-  // Note: adminPassword is still used for API calls
 
   const fetchStats = async () => {
     try {
@@ -171,173 +342,121 @@ export default function AdminFBOutreachPage() {
       title="Admin: FB Outreach"
       description="Enter admin password to access dashboard"
     >
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white">
-        {/* Background effects */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
-        </div>
+      <div className="min-h-screen bg-[#0A0B14] text-white">
+        {/* Subtle gradient overlay */}
+        <div className="fixed inset-0 bg-gradient-to-br from-blue-900/5 via-transparent to-purple-900/5 pointer-events-none" />
 
-        <div className="relative z-10 pt-32 pb-12 px-4">
+        <div className="relative z-10 pt-28 pb-12 px-4 sm:px-6">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold mb-2">Facebook Outreach Pipeline</h1>
-              <p className="text-gray-400">Track admin DMs and group posts - Starting with Florida</p>
+            <div className="text-center mb-10">
+              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 tracking-tight">
+                Facebook Outreach Pipeline
+              </h1>
+              <p className="text-white/50 text-sm sm:text-base">
+                Track admin DMs and group posts — Starting with Florida
+              </p>
             </div>
 
-            {/* Stats Cards - Row 1: Pipeline Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-4">
-              <LiquidGlass className="p-4">
+            {/* Stats Grid - Row 1 */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 mb-3">
+              <StatCard value={stats.total} label="Total Pages" color="white" />
+              <StatCard value={stats.byStatus?.not_started || 0} label="Not Started" color="gray" />
+              <StatCard value={stats.byStatus?.dm_sent || 0} label="DMs Sent" color="blue" />
+              <Card variant="elevated" className="p-4 border-red-500/30">
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-white">{stats.total}</p>
-                  <p className="text-xs text-gray-400">Total Pages</p>
-                </div>
-              </LiquidGlass>
-              <LiquidGlass className="p-4">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-gray-400">{stats.byStatus?.not_started || 0}</p>
-                  <p className="text-xs text-gray-400">Not Started</p>
-                </div>
-              </LiquidGlass>
-              <LiquidGlass className="p-4">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-blue-400">{stats.byStatus?.dm_sent || 0}</p>
-                  <p className="text-xs text-gray-400">DMs Sent</p>
-                </div>
-              </LiquidGlass>
-              <LiquidGlass className="p-4 border-2 border-red-500/30">
-                <div className="text-center">
+                  <Bell className="w-5 h-5 text-red-400 mx-auto mb-2" />
                   <p className="text-2xl font-bold text-red-400">{stats.needsFollowUp || 0}</p>
-                  <p className="text-xs text-red-400 flex items-center justify-center gap-1">
-                    <Bell className="w-3 h-3" /> Follow Up!
-                  </p>
+                  <p className="text-xs text-red-400/70 mt-1">Follow Up!</p>
                 </div>
-              </LiquidGlass>
-              <LiquidGlass className="p-4">
+              </Card>
+              <StatCard value={stats.byStatus?.approved || 0} label="Approved" color="green" />
+              <Card variant="elevated" className="p-4 border-emerald-500/30">
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-green-400">{stats.byStatus?.approved || 0}</p>
-                  <p className="text-xs text-gray-400">Approved</p>
+                  <p className="text-2xl font-bold text-emerald-400">{stats.readyToPost || 0}</p>
+                  <p className="text-xs text-emerald-400/70 mt-1">Ready to Post</p>
                 </div>
-              </LiquidGlass>
-              <LiquidGlass className="p-4 border-2 border-green-500/30">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-green-400">{stats.readyToPost || 0}</p>
-                  <p className="text-xs text-green-400">Ready to Post</p>
-                </div>
-              </LiquidGlass>
-              <LiquidGlass className="p-4">
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-purple-400">{stats.byStatus?.posted || 0}</p>
-                  <p className="text-xs text-gray-400">Posted</p>
-                </div>
-              </LiquidGlass>
+              </Card>
+              <StatCard value={stats.byStatus?.posted || 0} label="Posted" color="purple" />
             </div>
 
-            {/* Stats Cards - Row 2: Conversion Funnel */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              <LiquidGlass className="p-4 border border-cyan-500/20">
-                <div className="text-center">
-                  <Handshake className="w-5 h-5 text-cyan-400 mx-auto mb-1" />
-                  <p className="text-2xl font-bold text-cyan-400">{stats.partnersSignedUp || 0}</p>
-                  <p className="text-xs text-gray-400">Partner Signups</p>
-                </div>
-              </LiquidGlass>
-              <LiquidGlass className="p-4 border border-emerald-500/20">
-                <div className="text-center">
-                  <UserCheck className="w-5 h-5 text-emerald-400 mx-auto mb-1" />
-                  <p className="text-2xl font-bold text-emerald-400">{stats.appUsersConverted || 0}</p>
-                  <p className="text-xs text-gray-400">App Users</p>
-                </div>
-              </LiquidGlass>
-              <LiquidGlass className="p-4 border border-amber-500/20">
-                <div className="text-center">
-                  <TrendingUp className="w-5 h-5 text-amber-400 mx-auto mb-1" />
-                  <p className="text-2xl font-bold text-amber-400">{stats.totalReferrals || 0}</p>
-                  <p className="text-xs text-gray-400">Total Referrals</p>
-                </div>
-              </LiquidGlass>
-              <LiquidGlass className="p-4 border border-green-500/20">
-                <div className="text-center">
-                  <DollarSign className="w-5 h-5 text-green-400 mx-auto mb-1" />
-                  <p className="text-2xl font-bold text-green-400">${(stats.totalRevenue || 0).toLocaleString()}</p>
-                  <p className="text-xs text-gray-400">Revenue Generated</p>
-                </div>
-              </LiquidGlass>
+            {/* Stats Grid - Row 2: Conversion Funnel */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
+              <StatCard
+                value={stats.partnersSignedUp || 0}
+                label="Partner Signups"
+                icon={Handshake}
+                color="cyan"
+              />
+              <StatCard
+                value={stats.appUsersConverted || 0}
+                label="App Users"
+                icon={UserCheck}
+                color="green"
+              />
+              <StatCard
+                value={stats.totalReferrals || 0}
+                label="Total Referrals"
+                icon={TrendingUp}
+                color="amber"
+              />
+              <StatCard
+                value={`$${(stats.totalRevenue || 0).toLocaleString()}`}
+                label="Revenue Generated"
+                icon={DollarSign}
+                color="green"
+                highlight
+              />
             </div>
 
             {/* Tab Navigation */}
-            <div className="flex justify-center gap-2 md:gap-4 mb-8 flex-wrap">
-              <button
+            <div className="flex justify-center gap-2 sm:gap-3 mb-8 flex-wrap">
+              <TabButton
+                active={activeTab === 'pipeline'}
                 onClick={() => setActiveTab('pipeline')}
-                className={`flex items-center gap-2 px-4 md:px-6 py-3 rounded-xl font-medium transition-all text-sm md:text-base ${
-                  activeTab === 'pipeline'
-                    ? 'bg-blue-500/20 border border-blue-500/30 text-blue-400'
-                    : 'bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10'
-                }`}
-              >
-                <BarChart3 className="w-5 h-5" />
-                <span className="hidden sm:inline">Pipeline</span>
-              </button>
-              <button
+                icon={BarChart3}
+                label="Pipeline"
+                color="blue"
+              />
+              <TabButton
+                active={activeTab === 'follow-up'}
                 onClick={() => setActiveTab('follow-up')}
-                className={`flex items-center gap-2 px-4 md:px-6 py-3 rounded-xl font-medium transition-all text-sm md:text-base relative ${
-                  activeTab === 'follow-up'
-                    ? 'bg-red-500/20 border border-red-500/30 text-red-400'
-                    : 'bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10'
-                }`}
-              >
-                <Bell className="w-5 h-5" />
-                <span className="hidden sm:inline">Follow-Up</span>
-                {(stats.needsFollowUp || 0) > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
-                    {stats.needsFollowUp}
-                  </span>
-                )}
-              </button>
-              <button
+                icon={Bell}
+                label="Follow-Up"
+                color="red"
+                badge={stats.needsFollowUp}
+              />
+              <TabButton
+                active={activeTab === 'partners'}
                 onClick={() => setActiveTab('partners')}
-                className={`flex items-center gap-2 px-4 md:px-6 py-3 rounded-xl font-medium transition-all text-sm md:text-base ${
-                  activeTab === 'partners'
-                    ? 'bg-cyan-500/20 border border-cyan-500/30 text-cyan-400'
-                    : 'bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10'
-                }`}
-              >
-                <Handshake className="w-5 h-5" />
-                <span className="hidden sm:inline">Partners</span>
-              </button>
-              <button
+                icon={Handshake}
+                label="Partners"
+                color="cyan"
+              />
+              <TabButton
+                active={activeTab === 'add'}
                 onClick={() => setActiveTab('add')}
-                className={`flex items-center gap-2 px-4 md:px-6 py-3 rounded-xl font-medium transition-all text-sm md:text-base ${
-                  activeTab === 'add'
-                    ? 'bg-green-500/20 border border-green-500/30 text-green-400'
-                    : 'bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10'
-                }`}
-              >
-                <Plus className="w-5 h-5" />
-                <span className="hidden sm:inline">Add Page</span>
-              </button>
-              <button
+                icon={Plus}
+                label="Add Page"
+                color="green"
+              />
+              <TabButton
+                active={activeTab === 'templates'}
                 onClick={() => setActiveTab('templates')}
-                className={`flex items-center gap-2 px-4 md:px-6 py-3 rounded-xl font-medium transition-all text-sm md:text-base ${
-                  activeTab === 'templates'
-                    ? 'bg-orange-500/20 border border-orange-500/30 text-orange-400'
-                    : 'bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10'
-                }`}
-              >
-                <FileText className="w-5 h-5" />
-                <span className="hidden sm:inline">Templates</span>
-              </button>
+                icon={FileText}
+                label="Templates"
+                color="orange"
+              />
             </div>
 
             {/* Tab Content */}
-            <LiquidGlass className="p-6 md:p-8">
+            <Card variant="elevated" className="p-6 sm:p-8">
               {activeTab === 'pipeline' && <PipelineTab onUpdate={fetchStats} />}
               {activeTab === 'follow-up' && <FollowUpTab onUpdate={fetchStats} />}
               {activeTab === 'partners' && <PartnersTab onUpdate={fetchStats} />}
               {activeTab === 'add' && <AddPageTab onSuccess={fetchStats} />}
               {activeTab === 'templates' && <TemplatesTab />}
-            </LiquidGlass>
+            </Card>
           </div>
         </div>
       </div>
@@ -361,16 +480,10 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
-  const addAdmin = () => {
-    setAdmins([...admins, { name: '', profile_url: '' }]);
-  };
-
+  const addAdmin = () => setAdmins([...admins, { name: '', profile_url: '' }]);
   const removeAdmin = (index: number) => {
-    if (admins.length > 1) {
-      setAdmins(admins.filter((_, i) => i !== index));
-    }
+    if (admins.length > 1) setAdmins(admins.filter((_, i) => i !== index));
   };
-
   const updateAdmin = (index: number, field: 'name' | 'profile_url', value: string) => {
     const updated = [...admins];
     updated[index][field] = value;
@@ -391,7 +504,7 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
         },
         body: JSON.stringify({
           ...formData,
-          admins: admins.filter(a => a.name.trim()), // Only send admins with names
+          admins: admins.filter(a => a.name.trim()),
           member_count: formData.member_count ? parseInt(formData.member_count) : null,
           priority_score: parseInt(formData.priority_score),
         }),
@@ -402,14 +515,8 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
 
       if (data.success) {
         setFormData({
-          page_name: '',
-          page_url: '',
-          state: 'FL',
-          member_count: '',
-          group_type: 'travel_ball',
-          sport: 'baseball',
-          priority_score: '3',
-          notes: '',
+          page_name: '', page_url: '', state: 'FL', member_count: '',
+          group_type: 'travel_ball', sport: 'baseball', priority_score: '3', notes: '',
         });
         setAdmins([{ name: '', profile_url: '' }]);
         onSuccess();
@@ -423,53 +530,46 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center border border-green-500/30">
-          <Plus className="w-6 h-6 text-green-400" />
+      <div className="flex items-center gap-4 mb-8">
+        <div className="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center border border-emerald-500/30">
+          <Plus className="w-6 h-6 text-emerald-400" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-white">Add Facebook Page/Group</h2>
-          <p className="text-gray-400">Track a new travel ball group for outreach</p>
+          <h2 className="text-xl font-bold text-white">Add Facebook Page/Group</h2>
+          <p className="text-white/50 text-sm">Track a new travel ball group for outreach</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-300 mb-2">Group Name *</label>
-            <input
-              type="text"
+            <Input
+              label="Group Name"
               required
               value={formData.page_name}
               onChange={(e) => setFormData({ ...formData, page_name: e.target.value })}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500/50"
               placeholder="e.g., Florida Travel Ball Connect"
             />
           </div>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-300 mb-2">Group URL *</label>
-            <input
-              type="url"
+            <Input
+              label="Group URL"
               required
+              type="url"
               value={formData.page_url}
               onChange={(e) => setFormData({ ...formData, page_url: e.target.value })}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500/50"
               placeholder="https://facebook.com/groups/..."
             />
           </div>
 
           {/* Admins Section */}
           <div className="md:col-span-2">
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium text-gray-300">Group Admins</label>
-              <button
-                type="button"
-                onClick={addAdmin}
-                className="flex items-center gap-1 px-2 py-1 text-xs bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30"
-              >
-                <UserPlus className="w-3 h-3" /> Add Admin
-              </button>
+            <div className="flex items-center justify-between mb-3">
+              <label className="text-sm font-medium text-white/70">Group Admins</label>
+              <Button type="button" variant="ghost" size="sm" icon={UserPlus} onClick={addAdmin}>
+                Add Admin
+              </Button>
             </div>
             <div className="space-y-3">
               {admins.map((admin, index) => (
@@ -479,7 +579,7 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
                       type="text"
                       value={admin.name}
                       onChange={(e) => updateAdmin(index, 'name', e.target.value)}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500/50 text-sm"
+                      className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/[0.1] rounded-xl text-white placeholder-white/30 text-sm focus:outline-none focus:border-blue-500/50"
                       placeholder={`Admin ${index + 1} name`}
                     />
                   </div>
@@ -488,7 +588,7 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
                       type="url"
                       value={admin.profile_url}
                       onChange={(e) => updateAdmin(index, 'profile_url', e.target.value)}
-                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500/50 text-sm"
+                      className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/[0.1] rounded-xl text-white placeholder-white/30 text-sm focus:outline-none focus:border-blue-500/50"
                       placeholder="Profile URL (optional)"
                     />
                   </div>
@@ -496,383 +596,171 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
                     <button
                       type="button"
                       onClick={() => removeAdmin(index)}
-                      className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg"
+                      className="p-2.5 text-red-400/70 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <X className="w-4 h-4" />
                     </button>
                   )}
                 </div>
               ))}
             </div>
-            <p className="mt-1 text-xs text-gray-500">First admin is marked as primary contact</p>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">State *</label>
-            <select
-              required
-              value={formData.state}
-              onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-green-500/50"
-            >
-              {US_STATES.map((s) => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-          </div>
+          <Select
+            label="State"
+            value={formData.state}
+            onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+          >
+            {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+          </Select>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Member Count</label>
-            <input
-              type="number"
-              value={formData.member_count}
-              onChange={(e) => {
-                const members = parseInt(e.target.value) || 0;
-                // Auto-calculate priority based on member count
-                let priority = '1';
-                if (members >= 10000) priority = '5';
-                else if (members >= 5000) priority = '4';
-                else if (members >= 1000) priority = '3';
-                else if (members >= 500) priority = '2';
-                setFormData({ ...formData, member_count: e.target.value, priority_score: priority });
-              }}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500/50"
-              placeholder="e.g., 5000"
-            />
-          </div>
+          <Input
+            label="Member Count"
+            type="number"
+            value={formData.member_count}
+            onChange={(e) => setFormData({ ...formData, member_count: e.target.value })}
+            placeholder="e.g., 5000"
+          />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Group Type</label>
-            <select
-              value={formData.group_type}
-              onChange={(e) => setFormData({ ...formData, group_type: e.target.value as GroupType })}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-green-500/50"
-            >
-              <option value="travel_ball">Travel Ball</option>
-              <option value="rec_league">Rec League</option>
-              <option value="showcase">Showcase</option>
-              <option value="tournament">Tournament</option>
-              <option value="coaching">Coaching</option>
-              <option value="parents">Parents</option>
-              <option value="equipment">Equipment</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
+          <Select
+            label="Group Type"
+            value={formData.group_type}
+            onChange={(e) => setFormData({ ...formData, group_type: e.target.value as GroupType })}
+          >
+            <option value="travel_ball">Travel Ball</option>
+            <option value="rec_league">Rec League</option>
+            <option value="showcase">Showcase</option>
+            <option value="tournament">Tournament</option>
+            <option value="coaching">Coaching</option>
+            <option value="parents">Parents</option>
+            <option value="equipment">Equipment</option>
+            <option value="other">Other</option>
+          </Select>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Sport</label>
-            <select
-              value={formData.sport}
-              onChange={(e) => setFormData({ ...formData, sport: e.target.value as 'baseball' | 'softball' | 'both' })}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-green-500/50"
-            >
-              <option value="baseball">Baseball</option>
-              <option value="softball">Softball</option>
-              <option value="both">Both</option>
-            </select>
-          </div>
+          <Select
+            label="Sport"
+            value={formData.sport}
+            onChange={(e) => setFormData({ ...formData, sport: e.target.value as 'baseball' | 'softball' | 'both' })}
+          >
+            <option value="baseball">Baseball</option>
+            <option value="softball">Softball</option>
+            <option value="both">Both</option>
+          </Select>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Priority (1-5)</label>
-            <div className="flex items-center gap-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  onClick={() => setFormData({ ...formData, priority_score: String(star) })}
-                  className={`text-2xl transition-colors ${
-                    parseInt(formData.priority_score) >= star ? 'text-orange-400' : 'text-gray-600'
-                  }`}
-                >
-                  ★
-                </button>
-              ))}
-              <span className="ml-2 text-sm text-gray-400">
-                {formData.priority_score}/5
-              </span>
-            </div>
-            <p className="mt-2 text-xs text-gray-500">
-              Auto-set by members: &lt;500=1, &lt;1K=2, &lt;5K=3, &lt;10K=4, 10K+=5
-            </p>
-          </div>
+          <Select
+            label="Priority Score"
+            value={formData.priority_score}
+            onChange={(e) => setFormData({ ...formData, priority_score: e.target.value })}
+          >
+            {[1, 2, 3, 4, 5].map(n => (
+              <option key={n} value={n}>{n} - {'★'.repeat(n)}{'☆'.repeat(5-n)}</option>
+            ))}
+          </Select>
 
           <div className="md:col-span-2">
-            <label className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
+            <label className="block text-sm font-medium text-white/70 mb-2">Notes</label>
             <textarea
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500/50"
-              placeholder="Any notes about this group..."
+              className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.1] rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-blue-500/50 resize-none"
               rows={3}
+              placeholder="Any notes about this group..."
             />
           </div>
         </div>
 
-        <LiquidButton type="submit" disabled={loading} variant="orange" fullWidth>
-          {loading ? 'Adding...' : 'Add to Pipeline'}
-        </LiquidButton>
-      </form>
+        <Button type="submit" variant="primary" size="lg" className="w-full" loading={loading} icon={Plus}>
+          Add to Pipeline
+        </Button>
 
-      {result && (
-        <div className={`mt-6 p-4 rounded-xl ${result.success ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
-          <p className={result.success ? 'text-green-400' : 'text-red-400'}>{result.message}</p>
-        </div>
-      )}
+        {result && (
+          <Card variant={result.success ? 'default' : 'bordered'} className={`p-4 ${result.success ? 'border-emerald-500/30 bg-emerald-500/10' : 'border-red-500/30 bg-red-500/10'}`}>
+            <p className={`text-sm ${result.success ? 'text-emerald-400' : 'text-red-400'}`}>
+              {result.message}
+            </p>
+          </Card>
+        )}
+      </form>
     </div>
   );
 }
 
 function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
   const [pages, setPages] = useState<FBPage[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [filters, setFilters] = useState({
-    state: 'FL',
-    status: 'all',
-    search: '',
-  });
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [updatingId, setUpdatingId] = useState<string | null>(null);
-  const [editingPage, setEditingPage] = useState<FBPage | null>(null);
-  const [editForm, setEditForm] = useState({
-    page_name: '',
-    page_url: '',
-    state: '',
-    member_count: '',
-    group_type: '',
-    priority_score: '',
-    notes: '',
-  });
-  const [editLoading, setEditLoading] = useState(false);
-  const [editError, setEditError] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({ state: 'all', status: 'all', search: '' });
+  const [expandedPage, setExpandedPage] = useState<string | null>(null);
+  const [editingPage, setEditingPage] = useState<string | null>(null);
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   const fetchPages = async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams({
-        state: filters.state,
-        status: filters.status,
-        search: filters.search,
-      });
+      const params = new URLSearchParams();
+      if (filters.state !== 'all') params.set('state', filters.state);
+      if (filters.status !== 'all') params.set('status', filters.status);
+      if (filters.search) params.set('search', filters.search);
+
       const response = await fetch(`/api/admin/fb-outreach/pages?${params}`, {
         headers: { 'X-Admin-Password': adminPassword },
       });
       const data = await response.json();
-      if (data.pages) {
-        setPages(data.pages);
-      }
+      if (data.pages) setPages(data.pages);
     } catch (error) {
-      console.error('Failed to fetch pages:', error);
+      console.error('Error fetching pages:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchPages();
-  }, [filters]);
+  useEffect(() => { fetchPages(); }, [filters]);
 
-  // DM Templates - multiple options
-  const DM_TEMPLATES = {
-    direct_value: {
-      name: 'Direct Value',
-      getText: (pageName: string, firstName: string) => `Hey ${firstName} - love what you're doing with ${pageName}.
-
-Quick question: Are most teams in your group juggling GroupMe + GameChanger + random text threads for schedules?
-
-We built Mind & Muscle specifically for travel ball - FREE team chat, scheduling, and uniform coordination in one app. Parents get access without paying.
-
-Would you be open to me sharing a post with your group? Happy to create a custom QR code for ${pageName} so you can see if anyone signs up through you.
-
-No pressure either way - just thought it might help some teams simplify.`
-    },
-    curiosity: {
-      name: 'Curiosity',
-      getText: (pageName: string, firstName: string) => `Hey ${firstName} - saw your group has a lot of teams. Quick question:
-
-What apps are most coaches using for team communication? We keep hearing GroupMe + GameChanger + a million text threads.
-
-We made something that replaces all of that (free version) - curious if that would land with your members or if I'm off base.
-
-Either way, appreciate what you're doing for the baseball/softball community here.`
-    },
-    partner: {
-      name: 'Partner',
-      getText: (pageName: string, firstName: string) => `Hey ${firstName} - I run Mind & Muscle, an app built specifically for baseball/softball teams.
-
-We're looking for Facebook group partners who want to help their community while earning a small commission on any paid upgrades.
-
-The FREE version alone replaces GroupMe + GameChanger for team communication. Coaches love it.
-
-Would you be open to a quick chat about how it works? Or I can just send details if that's easier.`
-    },
-    short: {
-      name: 'Short & Sweet',
-      getText: (pageName: string, firstName: string) => `Hey ${firstName}! Mind if I share a free app for travel ball teams in ${pageName}?
-
-It's called Mind & Muscle - replaces GroupMe + GameChanger in one place. Parents get free access too.
-
-Let me know if you'd like to see it first!`
-    }
-  };
-
-  const [selectedDmTemplate, setSelectedDmTemplate] = useState<string>('direct_value');
-
-  const getDMTemplate = (page: FBPage, adminName?: string) => {
-    const name = adminName || page.fb_page_admins?.[0]?.admin_name || 'there';
-    const firstName = name.split(' ')[0];
-    const template = DM_TEMPLATES[selectedDmTemplate as keyof typeof DM_TEMPLATES] || DM_TEMPLATES.direct_value;
-    return template.getText(page.page_name, firstName);
-  };
-
-  const [copiedDmId, setCopiedDmId] = useState<string | null>(null);
-  const [updatingAdminId, setUpdatingAdminId] = useState<string | null>(null);
-
-  const updateAdminStatus = async (adminId: string, status: string) => {
-    setUpdatingAdminId(adminId);
+  const updateStatus = async (id: string, status: OutreachStatus) => {
     try {
-      const response = await fetch('/api/admin/fb-outreach/admins', {
+      const updates: Record<string, unknown> = { id, outreach_status: status };
+      if (status === 'dm_sent') updates.dm_sent_at = new Date().toISOString();
+      if (status === 'posted') updates.posted_at = new Date().toISOString();
+
+      await fetch('/api/admin/fb-outreach/pages', {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
-        },
-        body: JSON.stringify({
-          admin_id: adminId,
-          response_status: status,
-          ...(status === 'dm_sent' && { dm_sent_at: new Date().toISOString() }),
-        }),
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+        body: JSON.stringify(updates),
       });
-      const data = await response.json();
-      if (data.success) {
-        fetchPages();
-        onUpdate();
-      }
+      fetchPages();
+      onUpdate();
     } catch (error) {
-      console.error('Failed to update admin status:', error);
-    } finally {
-      setUpdatingAdminId(null);
+      console.error('Error updating status:', error);
     }
   };
 
-  const copyDMTemplate = (page: FBPage, adminName?: string) => {
-    const template = getDMTemplate(page, adminName);
-    navigator.clipboard.writeText(template);
-    setCopiedDmId(adminName ? `${page.id}-${adminName}` : page.id);
-    setTimeout(() => setCopiedDmId(null), 2000);
-  };
-
-  const handleStatusUpdate = async (pageId: string, newStatus: OutreachStatus, postTemplate?: string) => {
-    setUpdatingId(pageId);
+  const deletePage = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this page?')) return;
     try {
-      const response = await fetch('/api/admin/fb-outreach/pages', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
-        },
-        body: JSON.stringify({
-          id: pageId,
-          outreach_status: newStatus,
-          ...(newStatus === 'dm_sent' && { dm_sent_at: new Date().toISOString() }),
-          ...(newStatus === 'posted' && { posted_at: new Date().toISOString(), post_template_used: postTemplate }),
-        }),
-      });
-      const data = await response.json();
-      if (data.success) {
-        fetchPages();
-        onUpdate();
-      }
-    } catch (error) {
-      console.error('Failed to update status:', error);
-    } finally {
-      setUpdatingId(null);
-    }
-  };
-
-  const openEditModal = (page: FBPage) => {
-    setEditingPage(page);
-    setEditError(null);
-    setEditForm({
-      page_name: page.page_name || '',
-      page_url: page.page_url || '',
-      state: page.state || '',
-      member_count: page.member_count?.toString() || '',
-      group_type: page.group_type || '',
-      priority_score: page.priority_score?.toString() || '3',
-      notes: page.notes || '',
-    });
-  };
-
-  const closeEditModal = () => {
-    setEditingPage(null);
-    setEditError(null);
-  };
-
-  const handleEditSave = async () => {
-    if (!editingPage) return;
-    setEditLoading(true);
-    setEditError(null);
-    try {
-      const response = await fetch('/api/admin/fb-outreach/pages', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
-        },
-        body: JSON.stringify({
-          id: editingPage.id,
-          page_name: editForm.page_name,
-          page_url: editForm.page_url,
-          state: editForm.state || null,
-          member_count: editForm.member_count ? parseInt(editForm.member_count) : null,
-          group_type: editForm.group_type || null,
-          priority_score: parseInt(editForm.priority_score) || 3,
-          notes: editForm.notes || null,
-        }),
-      });
-      const data = await response.json();
-      if (data.success) {
-        closeEditModal();
-        fetchPages();
-        onUpdate();
-      } else {
-        setEditError(data.message || 'Failed to save changes');
-      }
-    } catch (error) {
-      console.error('Failed to update page:', error);
-      setEditError('Network error - please try again');
-    } finally {
-      setEditLoading(false);
-    }
-  };
-
-  const handleDelete = async (pageId: string) => {
-    if (!confirm('Are you sure you want to delete this entry? This cannot be undone.')) return;
-    setDeletingId(pageId);
-    try {
-      const response = await fetch(`/api/admin/fb-outreach/pages?id=${pageId}`, {
+      await fetch(`/api/admin/fb-outreach/pages?id=${id}`, {
         method: 'DELETE',
         headers: { 'X-Admin-Password': adminPassword },
       });
-      const data = await response.json();
-      if (data.success) {
-        fetchPages();
-        onUpdate();
-      }
+      fetchPages();
+      onUpdate();
     } catch (error) {
-      console.error('Failed to delete page:', error);
-    } finally {
-      setDeletingId(null);
+      console.error('Error deleting page:', error);
     }
   };
 
   const StatusBadge = ({ status }: { status: OutreachStatus }) => {
     const config = STATUS_CONFIG[status];
     const Icon = config.icon;
+    const colorClasses: Record<string, string> = {
+      gray: 'bg-gray-500/15 text-gray-400 border-gray-500/30',
+      blue: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
+      yellow: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30',
+      green: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
+      purple: 'bg-purple-500/15 text-purple-400 border-purple-500/30',
+      red: 'bg-red-500/15 text-red-400 border-red-500/30',
+      orange: 'bg-orange-500/15 text-orange-400 border-orange-500/30',
+    };
     return (
-      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-${config.color}-500/20 text-${config.color}-400 border border-${config.color}-500/30`}>
+      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium border ${colorClasses[config.color]}`}>
         <Icon className="w-3 h-3" />
         {config.label}
       </span>
@@ -881,584 +769,604 @@ Let me know if you'd like to see it first!`
 
   return (
     <div>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center border border-blue-500/30">
-            <BarChart3 className="w-6 h-6 text-blue-400" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-white">Outreach Pipeline</h2>
-            <p className="text-gray-400">Track and manage your FB group outreach</p>
-          </div>
-        </div>
-
-        <button
-          onClick={fetchPages}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 border border-blue-500/30 rounded-xl text-blue-400 hover:bg-blue-500/30"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
-      </div>
-
       {/* Filters */}
-      <div className="flex flex-wrap gap-4 mb-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-400 mb-1">State</label>
-          <select
-            value={filters.state}
-            onChange={(e) => setFilters({ ...filters, state: e.target.value })}
-            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500/50"
-          >
-            <option value="all">All States</option>
-            {US_STATES.map((s) => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+          <input
+            type="text"
+            placeholder="Search groups..."
+            value={filters.search}
+            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+            className="w-full pl-10 pr-4 py-2.5 bg-white/[0.03] border border-white/[0.1] rounded-xl text-white placeholder-white/30 text-sm focus:outline-none focus:border-blue-500/50"
+          />
         </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-400 mb-1">Status</label>
-          <select
-            value={filters.status}
-            onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500/50"
-          >
-            <option value="all">All Status</option>
-            {Object.entries(STATUS_CONFIG).map(([key, config]) => (
-              <option key={key} value={key}>{config.label}</option>
-            ))}
-          </select>
-        </div>
-
-        <div className="flex-1 min-w-[200px]">
-          <label className="block text-sm font-medium text-gray-400 mb-1">Search</label>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
-            <input
-              type="text"
-              placeholder="Search groups..."
-              value={filters.search}
-              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-              className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500/50"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-400 mb-1">DM Template</label>
-          <select
-            value={selectedDmTemplate}
-            onChange={(e) => setSelectedDmTemplate(e.target.value)}
-            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500/50"
-          >
-            {Object.entries(DM_TEMPLATES).map(([key, template]) => (
-              <option key={key} value={key}>{template.name}</option>
-            ))}
-          </select>
-        </div>
+        <select
+          value={filters.state}
+          onChange={(e) => setFilters({ ...filters, state: e.target.value })}
+          className="px-4 py-2.5 bg-white/[0.03] border border-white/[0.1] rounded-xl text-white text-sm focus:outline-none focus:border-blue-500/50"
+        >
+          <option value="all">All States</option>
+          {US_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+        <select
+          value={filters.status}
+          onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+          className="px-4 py-2.5 bg-white/[0.03] border border-white/[0.1] rounded-xl text-white text-sm focus:outline-none focus:border-blue-500/50"
+        >
+          <option value="all">All Status</option>
+          {Object.entries(STATUS_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+        </select>
+        <Button variant="secondary" size="md" icon={RefreshCw} onClick={fetchPages}>
+          Refresh
+        </Button>
       </div>
+
+      {/* Results count */}
+      <p className="text-sm text-white/40 mb-4">{pages.length} groups found</p>
 
       {/* Pages List */}
       {loading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
-          <p className="mt-2 text-gray-400">Loading pages...</p>
+        <div className="flex items-center justify-center py-12">
+          <RefreshCw className="w-6 h-6 text-white/30 animate-spin" />
         </div>
       ) : pages.length === 0 ? (
-        <div className="text-center py-12 bg-white/5 border border-white/10 rounded-xl">
-          <Users className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-          <p className="text-gray-400">No pages found. Add some groups to get started!</p>
-        </div>
+        <div className="text-center py-12 text-white/40">No pages found</div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {pages.map((page) => {
-            const dmDays = daysSince(page.dm_sent_at);
-            const followUp = getFollowUpUrgency(dmDays);
-            const showFollowUp = followUp && ['dm_sent', 'awaiting_response'].includes(page.outreach_status);
+            const isExpanded = expandedPage === page.id;
+            const daysSinceDM = daysSince(page.dm_sent_at);
+            const urgency = getFollowUpUrgency(daysSinceDM);
+            const admins = page.fb_page_admins || [];
 
             return (
-            <div
-              key={page.id}
-              className={`p-4 rounded-xl border transition-colors ${
-                showFollowUp && followUp.urgent
-                  ? 'bg-red-500/5 border-red-500/30 hover:bg-red-500/10'
-                  : 'bg-white/5 border-white/10 hover:bg-white/[0.07]'
-              }`}
-            >
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2 flex-wrap">
-                    <span className="font-semibold text-white">{page.page_name}</span>
-                    <StatusBadge status={page.outreach_status} />
-                    {/* Follow-up badge */}
-                    {showFollowUp && (
-                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                        followUp.urgent
-                          ? 'bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse'
-                          : followUp.color === 'yellow'
-                            ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-                            : 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
-                      }`}>
-                        <Bell className="w-3 h-3" />
-                        {followUp.label}
+              <Card key={page.id} variant="default" className="overflow-hidden">
+                {/* Header Row */}
+                <div
+                  className="p-4 cursor-pointer hover:bg-white/[0.02] transition-colors"
+                  onClick={() => setExpandedPage(isExpanded ? null : page.id)}
+                >
+                  <div className="flex items-center gap-4">
+                    {/* Priority Stars */}
+                    <div className="hidden sm:flex flex-col items-center w-10">
+                      <span className="text-orange-400 text-xs tracking-tight">
+                        {'★'.repeat(page.priority_score)}{'☆'.repeat(5 - page.priority_score)}
                       </span>
-                    )}
-                    {page.member_count && (
-                      <span className="text-xs text-gray-500">
-                        <Users className="w-3 h-3 inline mr-1" />
-                        {page.member_count.toLocaleString()}
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex flex-wrap items-center gap-3 text-sm text-gray-400">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />
-                      {page.state || 'N/A'}
-                    </span>
-                    {/* Show admins count or legacy admin */}
-                    {page.fb_page_admins?.length > 0 ? (
-                      <span className="flex items-center gap-1">
-                        <Users className="w-3 h-3" />
-                        {page.fb_page_admins.length} admin{page.fb_page_admins.length > 1 ? 's' : ''}
-                      </span>
-                    ) : page.admin_name && (
-                      <span className="flex items-center gap-1">
-                        <MessageCircle className="w-3 h-3" />
-                        {page.admin_name}
-                      </span>
-                    )}
-                    <span className="text-orange-400">
-                      {'★'.repeat(page.priority_score || 0)}{'☆'.repeat(5 - (page.priority_score || 0))}
-                    </span>
+                    </div>
+
+                    {/* Main Info */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-white truncate">{page.page_name}</h3>
+                        {page.state && (
+                          <span className="text-xs text-white/40 bg-white/[0.05] px-2 py-0.5 rounded">
+                            {page.state}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-white/40">
+                        {page.member_count && (
+                          <span className="flex items-center gap-1">
+                            <Users className="w-3 h-3" />
+                            {page.member_count.toLocaleString()}
+                          </span>
+                        )}
+                        {admins.length > 0 && (
+                          <span>{admins.length} admin{admins.length > 1 ? 's' : ''}</span>
+                        )}
+                        {urgency && (
+                          <span className={`text-${urgency.color}-400`}>{urgency.label}</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Status & Actions */}
+                    <div className="flex items-center gap-3">
+                      <StatusBadge status={page.outreach_status} />
+                      <ChevronDown className={`w-5 h-5 text-white/30 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+                    </div>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
+                {/* Expanded Content */}
+                {isExpanded && (
+                  <div className="border-t border-white/[0.06] p-4 bg-white/[0.01]">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* Left: Info & Status */}
+                      <div className="space-y-4">
+                        <div>
+                          <label className="text-xs text-white/40 uppercase tracking-wide">Group URL</label>
+                          <a
+                            href={page.page_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 text-blue-400 hover:text-blue-300 text-sm mt-1"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            {page.page_url.replace('https://', '').slice(0, 40)}...
+                          </a>
+                        </div>
+
+                        <div>
+                          <label className="text-xs text-white/40 uppercase tracking-wide mb-2 block">Update Status</label>
+                          <div className="flex flex-wrap gap-2">
+                            {Object.entries(STATUS_CONFIG).map(([status, config]) => (
+                              <button
+                                key={status}
+                                onClick={() => updateStatus(page.id, status as OutreachStatus)}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+                                  page.outreach_status === status
+                                    ? `bg-${config.color}-500/20 border-${config.color}-500/40 text-${config.color}-400`
+                                    : 'bg-white/[0.03] border-white/[0.08] text-white/50 hover:bg-white/[0.06]'
+                                }`}
+                              >
+                                {config.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {page.notes && (
+                          <div>
+                            <label className="text-xs text-white/40 uppercase tracking-wide">Notes</label>
+                            <p className="text-sm text-white/70 mt-1">{page.notes}</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Right: Admins */}
+                      <div>
+                        <label className="text-xs text-white/40 uppercase tracking-wide mb-3 block">
+                          Admins ({admins.length})
+                        </label>
+                        {admins.length > 0 ? (
+                          <div className="space-y-2">
+                            {admins.map((admin) => (
+                              <div key={admin.id} className="flex items-center justify-between p-3 bg-white/[0.03] rounded-xl border border-white/[0.06]">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center border border-blue-500/30">
+                                    <Users className="w-4 h-4 text-blue-400" />
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-medium text-white">{admin.admin_name}</p>
+                                    <p className="text-xs text-white/40">
+                                      {ADMIN_RESPONSE_STATUS[admin.response_status as keyof typeof ADMIN_RESPONSE_STATUS]?.label || 'Not Contacted'}
+                                    </p>
+                                  </div>
+                                </div>
+                                {admin.admin_profile_url && (
+                                  <a
+                                    href={admin.admin_profile_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="p-2 text-white/40 hover:text-white hover:bg-white/[0.05] rounded-lg transition-colors"
+                                  >
+                                    <ExternalLink className="w-4 h-4" />
+                                  </a>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-sm text-white/30">No admins added</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-white/[0.06]">
+                      <Button variant="danger" size="sm" icon={Trash2} onClick={() => deletePage(page.id)}>
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FollowUpTab({ onUpdate }: { onUpdate: () => void }) {
+  const [pages, setPages] = useState<FBPage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<'all' | 'urgent' | 'due'>('all');
+  const [responseModal, setResponseModal] = useState<{ admin: FBPageAdmin; page: FBPage } | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
+
+  const FOLLOW_UP_TEMPLATES = {
+    first_follow_up: `Hey {name}! Just following up on my message from a few days ago. Would love to share Mind & Muscle with your group - it's been helping teams simplify their communication (replaces GroupMe + scheduling apps). Let me know if you'd be open to a quick post!`,
+    second_follow_up: `Hey {name}, hope you're having a great week! Wanted to circle back one more time about Mind & Muscle. Happy to answer any questions or create a custom QR code for {group_name}. No pressure either way!`,
+    post_approved: `Awesome, thank you so much! Here's the post copy and QR code you can share:\n\n[PASTE POST COPY HERE]\n\nLet me know if you'd like any changes!`,
+  };
+
+  const fetchFollowUps = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/admin/fb-outreach/pages?status=dm_sent', {
+        headers: { 'X-Admin-Password': adminPassword },
+      });
+      const data = await response.json();
+      if (data.pages) {
+        const filtered = data.pages.filter((p: FBPage) => {
+          const days = daysSince(p.dm_sent_at);
+          return days !== null && days >= 1;
+        });
+        setPages(filtered);
+      }
+    } catch (error) {
+      console.error('Error fetching follow-ups:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchFollowUps(); }, []);
+
+  const copyTemplate = (template: string, adminName: string, groupName: string) => {
+    const filled = template
+      .replace(/{name}/g, adminName.split(' ')[0])
+      .replace(/{group_name}/g, groupName);
+    navigator.clipboard.writeText(filled);
+    setCopiedId(template);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const logResponse = async (admin: FBPageAdmin, responseType: ResponseType, notes: string) => {
+    try {
+      let nextFollowUp: string | null = null;
+      const today = new Date();
+
+      if (responseType === 'maybe_later') {
+        today.setDate(today.getDate() + 7);
+        nextFollowUp = today.toISOString().split('T')[0];
+      } else if (responseType === 'no_response') {
+        today.setDate(today.getDate() + 3);
+        nextFollowUp = today.toISOString().split('T')[0];
+      }
+
+      await fetch('/api/admin/fb-outreach/admins', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+        body: JSON.stringify({
+          admin_id: admin.id,
+          response_type: responseType,
+          response_notes: notes,
+          next_follow_up: nextFollowUp,
+          follow_up_count: (admin.follow_up_count || 0) + 1,
+          response_status: responseType === 'interested' || responseType === 'posted' ? 'approved' :
+                          responseType === 'not_interested' ? 'declined' : 'dm_sent',
+        }),
+      });
+
+      setResponseModal(null);
+      fetchFollowUps();
+      onUpdate();
+    } catch (error) {
+      console.error('Error logging response:', error);
+    }
+  };
+
+  const filteredPages = pages.filter((page) => {
+    const days = daysSince(page.dm_sent_at);
+    if (filter === 'urgent') return days !== null && days >= 7;
+    if (filter === 'due') return days !== null && days >= 3;
+    return true;
+  });
+
+  return (
+    <div>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-red-500/20 rounded-xl flex items-center justify-center border border-red-500/30">
+            <Bell className="w-5 h-5 text-red-400" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-white">Follow-Up Queue</h2>
+            <p className="text-sm text-white/40">{filteredPages.length} groups need attention</p>
+          </div>
+        </div>
+
+        <div className="flex gap-2">
+          {(['all', 'due', 'urgent'] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                filter === f
+                  ? f === 'urgent' ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                    : f === 'due' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                    : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                  : 'bg-white/[0.03] text-white/50 border border-white/[0.08] hover:bg-white/[0.06]'
+              }`}
+            >
+              {f === 'all' ? 'All' : f === 'due' ? '3+ Days' : '7+ Days'}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* DM Templates */}
+      <Card variant="default" className="p-4 mb-6">
+        <h3 className="text-sm font-medium text-white/70 mb-3">Quick Follow-Up Templates</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {Object.entries(FOLLOW_UP_TEMPLATES).map(([key, template]) => (
+            <button
+              key={key}
+              onClick={() => copyTemplate(template, '[Admin Name]', '[Group Name]')}
+              className="p-3 bg-white/[0.03] border border-white/[0.08] rounded-xl text-left hover:bg-white/[0.06] transition-all group"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-medium text-white/60 capitalize">
+                  {key.replace(/_/g, ' ')}
+                </span>
+                <Copy className={`w-4 h-4 ${copiedId === template ? 'text-emerald-400' : 'text-white/30 group-hover:text-white/60'}`} />
+              </div>
+              <p className="text-xs text-white/40 line-clamp-2">{template.slice(0, 80)}...</p>
+            </button>
+          ))}
+        </div>
+      </Card>
+
+      {/* Follow-up List */}
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <RefreshCw className="w-6 h-6 text-white/30 animate-spin" />
+        </div>
+      ) : filteredPages.length === 0 ? (
+        <div className="text-center py-12 text-white/40">No follow-ups needed</div>
+      ) : (
+        <div className="space-y-3">
+          {filteredPages.map((page) => {
+            const days = daysSince(page.dm_sent_at);
+            const urgency = getFollowUpUrgency(days);
+            const admins = page.fb_page_admins || [];
+
+            return (
+              <Card key={page.id} variant="default" className={`p-4 ${urgency?.urgent ? 'border-red-500/30' : ''}`}>
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="font-semibold text-white">{page.page_name}</h3>
+                      {urgency && (
+                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                          urgency.urgent ? 'bg-red-500/20 text-red-400' : 'bg-yellow-500/20 text-yellow-400'
+                        }`}>
+                          {urgency.label}
+                        </span>
+                      )}
+                    </div>
+
+                    {admins.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {admins.map((admin) => (
+                          <div key={admin.id} className="flex items-center gap-2">
+                            <span className="text-sm text-white/70">{admin.admin_name}</span>
+                            <button
+                              onClick={() => setResponseModal({ admin, page })}
+                              className="px-2 py-1 bg-blue-500/20 text-blue-400 text-xs rounded-lg hover:bg-blue-500/30"
+                            >
+                              Log Response
+                            </button>
+                            <button
+                              onClick={() => copyTemplate(FOLLOW_UP_TEMPLATES.first_follow_up, admin.admin_name, page.page_name)}
+                              className="p-1 text-white/40 hover:text-white/70"
+                            >
+                              <Copy className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   <a
                     href={page.page_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1 px-3 py-1.5 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 text-sm"
+                    className="p-2 text-white/40 hover:text-white hover:bg-white/[0.05] rounded-lg"
                   >
-                    <ExternalLink className="w-3 h-3" /> Group
+                    <ExternalLink className="w-4 h-4" />
                   </a>
-                  {/* Show DM buttons for all admins */}
-                  {page.fb_page_admins?.filter(a => a.admin_profile_url).slice(0, 2).map((admin, idx) => (
-                    <a
-                      key={admin.id}
-                      href={admin.admin_profile_url!}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 text-sm"
-                      title={admin.admin_name}
-                    >
-                      <MessageCircle className="w-3 h-3" /> {admin.admin_name.split(' ')[0]}
-                    </a>
-                  ))}
-                  {/* Fallback to legacy admin_profile_url */}
-                  {(!page.fb_page_admins?.length && page.admin_profile_url) && (
-                    <a
-                      href={page.admin_profile_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 text-sm"
-                    >
-                      <MessageCircle className="w-3 h-3" /> DM Admin
-                    </a>
-                  )}
-                  <button
-                    onClick={() => openEditModal(page)}
-                    className="flex items-center gap-1 px-3 py-1.5 bg-yellow-500/20 text-yellow-400 rounded-lg hover:bg-yellow-500/30 text-sm"
-                  >
-                    <Pencil className="w-3 h-3" /> Edit
-                  </button>
-                  <button
-                    onClick={() => setExpandedId(expandedId === page.id ? null : page.id)}
-                    className="flex items-center gap-1 px-3 py-1.5 bg-white/10 text-gray-300 rounded-lg hover:bg-white/20 text-sm"
-                  >
-                    {expandedId === page.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                    Actions
-                  </button>
                 </div>
-              </div>
-
-              {/* Expanded Actions */}
-              {expandedId === page.id && (
-                <div className="mt-4 pt-4 border-t border-white/10">
-                  <p className="text-sm text-gray-400 mb-3">Update Status:</p>
-                  <div className="flex flex-wrap gap-2">
-                    {page.outreach_status === 'not_started' && (
-                      <button
-                        onClick={() => handleStatusUpdate(page.id, 'dm_sent')}
-                        disabled={updatingId === page.id}
-                        className="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 text-sm disabled:opacity-50"
-                      >
-                        {updatingId === page.id ? 'Updating...' : 'Mark DM Sent'}
-                      </button>
-                    )}
-                    {page.outreach_status === 'dm_sent' && (
-                      <>
-                        <button
-                          onClick={() => handleStatusUpdate(page.id, 'awaiting_response')}
-                          disabled={updatingId === page.id}
-                          className="px-4 py-2 bg-yellow-500/20 text-yellow-400 rounded-lg hover:bg-yellow-500/30 text-sm disabled:opacity-50"
-                        >
-                          Awaiting Response
-                        </button>
-                        <button
-                          onClick={() => handleStatusUpdate(page.id, 'approved')}
-                          disabled={updatingId === page.id}
-                          className="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 text-sm disabled:opacity-50"
-                        >
-                          Approved!
-                        </button>
-                        <button
-                          onClick={() => handleStatusUpdate(page.id, 'declined')}
-                          disabled={updatingId === page.id}
-                          className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-sm disabled:opacity-50"
-                        >
-                          Declined
-                        </button>
-                      </>
-                    )}
-                    {page.outreach_status === 'awaiting_response' && (
-                      <>
-                        <button
-                          onClick={() => handleStatusUpdate(page.id, 'approved')}
-                          disabled={updatingId === page.id}
-                          className="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 text-sm disabled:opacity-50"
-                        >
-                          Approved!
-                        </button>
-                        <button
-                          onClick={() => handleStatusUpdate(page.id, 'declined')}
-                          disabled={updatingId === page.id}
-                          className="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-sm disabled:opacity-50"
-                        >
-                          Declined
-                        </button>
-                        <button
-                          onClick={() => handleStatusUpdate(page.id, 'no_response')}
-                          disabled={updatingId === page.id}
-                          className="px-4 py-2 bg-orange-500/20 text-orange-400 rounded-lg hover:bg-orange-500/30 text-sm disabled:opacity-50"
-                        >
-                          No Response
-                        </button>
-                      </>
-                    )}
-                    {page.outreach_status === 'approved' && (
-                      <button
-                        onClick={() => handleStatusUpdate(page.id, 'posted', 'fb_post_primary')}
-                        disabled={updatingId === page.id}
-                        className="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30 text-sm disabled:opacity-50"
-                      >
-                        {updatingId === page.id ? 'Updating...' : 'Mark as Posted'}
-                      </button>
-                    )}
-                  </div>
-                  {/* Show all admins in expanded view with status tracking */}
-                  {page.fb_page_admins?.length > 0 && (
-                    <div className="mt-4 pt-3 border-t border-white/5">
-                      <p className="text-xs text-gray-500 mb-3">Admin Outreach Status:</p>
-                      <div className="space-y-2">
-                        {page.fb_page_admins.map((admin) => {
-                          const adminDays = daysSince(admin.dm_sent_at);
-                          const adminFollowUp = getFollowUpUrgency(adminDays);
-                          const statusConfig = ADMIN_RESPONSE_STATUS[admin.response_status as keyof typeof ADMIN_RESPONSE_STATUS] || ADMIN_RESPONSE_STATUS.not_contacted;
-
-                          return (
-                          <div key={admin.id} className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 bg-white/5 rounded-lg">
-                            <div className="flex items-center gap-2 flex-1 min-w-0">
-                              <span className="font-medium text-white truncate">{admin.admin_name}</span>
-                              {admin.is_primary && (
-                                <span className="text-xs text-yellow-500 shrink-0">(Primary)</span>
-                              )}
-                              <span className={`text-xs px-2 py-0.5 rounded-full bg-${statusConfig.color}-500/20 text-${statusConfig.color}-400 shrink-0`}>
-                                {statusConfig.label}
-                              </span>
-                              {adminFollowUp && admin.response_status === 'dm_sent' && (
-                                <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${
-                                  adminFollowUp.urgent ? 'bg-red-500/20 text-red-400' : 'bg-gray-500/20 text-gray-400'
-                                }`}>
-                                  {adminFollowUp.label}
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-1 flex-wrap">
-                              {/* Copy DM */}
-                              <button
-                                onClick={() => copyDMTemplate(page, admin.admin_name)}
-                                className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${
-                                  copiedDmId === `${page.id}-${admin.admin_name}`
-                                    ? 'bg-green-500/20 text-green-400'
-                                    : 'bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30'
-                                }`}
-                                title="Copy personalized DM"
-                              >
-                                {copiedDmId === `${page.id}-${admin.admin_name}` ? <CheckCircle className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                                Copy DM
-                              </button>
-                              {/* Open Profile */}
-                              {admin.admin_profile_url && (
-                                <a
-                                  href={admin.admin_profile_url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="flex items-center gap-1 px-2 py-1 rounded text-xs bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
-                                >
-                                  <ExternalLink className="w-3 h-3" /> Profile
-                                </a>
-                              )}
-                              {/* Status buttons based on current status */}
-                              {admin.response_status === 'not_contacted' && (
-                                <button
-                                  onClick={() => updateAdminStatus(admin.id, 'dm_sent')}
-                                  disabled={updatingAdminId === admin.id}
-                                  className="flex items-center gap-1 px-2 py-1 rounded text-xs bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 disabled:opacity-50"
-                                >
-                                  <Send className="w-3 h-3" /> Mark DM Sent
-                                </button>
-                              )}
-                              {admin.response_status === 'dm_sent' && (
-                                <>
-                                  <button
-                                    onClick={() => updateAdminStatus(admin.id, 'responded')}
-                                    disabled={updatingAdminId === admin.id}
-                                    className="px-2 py-1 rounded text-xs bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 disabled:opacity-50"
-                                  >
-                                    Responded
-                                  </button>
-                                  <button
-                                    onClick={() => updateAdminStatus(admin.id, 'no_response')}
-                                    disabled={updatingAdminId === admin.id}
-                                    className="px-2 py-1 rounded text-xs bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 disabled:opacity-50"
-                                  >
-                                    No Response
-                                  </button>
-                                </>
-                              )}
-                              {(admin.response_status === 'responded' || admin.response_status === 'dm_sent') && (
-                                <>
-                                  <button
-                                    onClick={() => updateAdminStatus(admin.id, 'approved')}
-                                    disabled={updatingAdminId === admin.id}
-                                    className="px-2 py-1 rounded text-xs bg-green-500/20 text-green-400 hover:bg-green-500/30 disabled:opacity-50"
-                                  >
-                                    Approved
-                                  </button>
-                                  <button
-                                    onClick={() => updateAdminStatus(admin.id, 'declined')}
-                                    disabled={updatingAdminId === admin.id}
-                                    className="px-2 py-1 rounded text-xs bg-red-500/20 text-red-400 hover:bg-red-500/30 disabled:opacity-50"
-                                  >
-                                    Declined
-                                  </button>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                  {/* Quick copy DM if no admins listed */}
-                  {(!page.fb_page_admins || page.fb_page_admins.length === 0) && (
-                    <div className="mt-4 pt-3 border-t border-white/5">
-                      <button
-                        onClick={() => copyDMTemplate(page)}
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
-                          copiedDmId === page.id
-                            ? 'bg-green-500/20 text-green-400'
-                            : 'bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30'
-                        }`}
-                      >
-                        {copiedDmId === page.id ? (
-                          <>
-                            <CheckCircle className="w-3 h-3" /> Copied!
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-3 h-3" /> Copy DM Template
-                          </>
-                        )}
-                      </button>
-                    </div>
-                  )}
-                  {page.notes && (
-                    <p className="mt-3 text-sm text-gray-500">Notes: {page.notes}</p>
-                  )}
-                  {page.dm_sent_at && (
-                    <p className="mt-2 text-xs text-gray-600">
-                      <Calendar className="w-3 h-3 inline mr-1" />
-                      DM sent: {new Date(page.dm_sent_at).toLocaleDateString()}
-                    </p>
-                  )}
-                  {page.posted_at && (
-                    <p className="mt-1 text-xs text-gray-600">
-                      <Calendar className="w-3 h-3 inline mr-1" />
-                      Posted: {new Date(page.posted_at).toLocaleDateString()}
-                    </p>
-                  )}
-                  {/* Delete Button */}
-                  <div className="mt-4 pt-3 border-t border-white/5">
-                    <button
-                      onClick={() => handleDelete(page.id)}
-                      disabled={deletingId === page.id}
-                      className="flex items-center gap-1 px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-sm disabled:opacity-50"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                      {deletingId === page.id ? 'Deleting...' : 'Delete Entry'}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
+              </Card>
+            );
           })}
         </div>
       )}
 
-      {/* Edit Modal */}
-      {editingPage && (
-        <div
-          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) closeEditModal();
-          }}
-        >
-          <div className="bg-gray-900 border border-white/10 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-4 border-b border-white/10">
-              <h3 className="text-lg font-semibold text-white">Edit Entry</h3>
-              <button
-                onClick={closeEditModal}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5 text-gray-400" />
+      {/* Response Modal */}
+      {responseModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+          <Card variant="elevated" className="w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-white">Log Response</h3>
+              <button onClick={() => setResponseModal(null)} className="p-2 text-white/40 hover:text-white">
+                <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Group Name *</label>
-                <input
-                  type="text"
-                  value={editForm.page_name}
-                  onChange={(e) => setEditForm({ ...editForm, page_name: e.target.value })}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Group URL *</label>
-                <input
-                  type="url"
-                  value={editForm.page_url}
-                  onChange={(e) => setEditForm({ ...editForm, page_url: e.target.value })}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">State</label>
-                  <select
-                    value={editForm.state}
-                    onChange={(e) => setEditForm({ ...editForm, state: e.target.value })}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
-                  >
-                    <option value="">-- Select --</option>
-                    {US_STATES.map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Members</label>
-                  <input
-                    type="number"
-                    value={editForm.member_count}
-                    onChange={(e) => {
-                      const members = parseInt(e.target.value) || 0;
-                      let priority = '1';
-                      if (members >= 10000) priority = '5';
-                      else if (members >= 5000) priority = '4';
-                      else if (members >= 1000) priority = '3';
-                      else if (members >= 500) priority = '2';
-                      setEditForm({ ...editForm, member_count: e.target.value, priority_score: priority });
-                    }}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500"
-                    placeholder="e.g., 5000"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Group Type</label>
-                  <select
-                    value={editForm.group_type}
-                    onChange={(e) => setEditForm({ ...editForm, group_type: e.target.value })}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
-                  >
-                    <option value="">-- Select --</option>
-                    <option value="travel_ball">Travel Ball</option>
-                    <option value="rec_league">Rec League</option>
-                    <option value="showcase">Showcase</option>
-                    <option value="tournament">Tournament</option>
-                    <option value="coaching">Coaching</option>
-                    <option value="parents">Parents</option>
-                    <option value="equipment">Equipment</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Priority (1-5)</label>
-                  <div className="flex items-center gap-1">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        type="button"
-                        onClick={() => setEditForm({ ...editForm, priority_score: String(star) })}
-                        className={`text-xl transition-colors ${
-                          parseInt(editForm.priority_score) >= star ? 'text-orange-400' : 'text-gray-600'
-                        }`}
-                      >
-                        ★
-                      </button>
-                    ))}
+
+            <p className="text-sm text-white/60 mb-4">
+              Response from <span className="text-white">{responseModal.admin.admin_name}</span> at{' '}
+              <span className="text-white">{responseModal.page.page_name}</span>
+            </p>
+
+            <div className="space-y-3">
+              {(Object.entries(RESPONSE_TYPES) as [ResponseType, typeof RESPONSE_TYPES[ResponseType]][]).map(([type, config]) => (
+                <button
+                  key={type}
+                  onClick={() => logResponse(responseModal.admin, type, '')}
+                  className={`w-full p-4 rounded-xl border text-left transition-all hover:bg-white/[0.03] ${
+                    config.color === 'green' ? 'border-emerald-500/30 hover:border-emerald-500/50' :
+                    config.color === 'yellow' ? 'border-yellow-500/30 hover:border-yellow-500/50' :
+                    config.color === 'red' ? 'border-red-500/30 hover:border-red-500/50' :
+                    config.color === 'purple' ? 'border-purple-500/30 hover:border-purple-500/50' :
+                    'border-orange-500/30 hover:border-orange-500/50'
+                  } bg-white/[0.02]`}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-xl">{config.icon}</span>
+                    <div>
+                      <p className="font-medium text-white">{config.label}</p>
+                      <p className="text-xs text-white/40">{config.nextAction}</p>
+                    </div>
                   </div>
+                </button>
+              ))}
+            </div>
+          </Card>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PartnersTab({ onUpdate }: { onUpdate: () => void }) {
+  const [pages, setPages] = useState<FBPage[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingPartner, setEditingPartner] = useState<string | null>(null);
+  const [partnerForm, setPartnerForm] = useState({ qr_url: '', referral_link: '', landing_page: '' });
+  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
+
+  const fetchPartners = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/admin/fb-outreach/pages?status=approved', {
+        headers: { 'X-Admin-Password': adminPassword },
+      });
+      const data = await response.json();
+      if (data.pages) setPages(data.pages);
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchPartners(); }, []);
+
+  const savePartnerAssets = async (pageId: string) => {
+    try {
+      await fetch('/api/admin/fb-outreach/pages', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+        body: JSON.stringify({
+          id: pageId,
+          partner_qr_code_url: partnerForm.qr_url || null,
+          partner_referral_link: partnerForm.referral_link || null,
+          partner_landing_page: partnerForm.landing_page || null,
+        }),
+      });
+      setEditingPartner(null);
+      fetchPartners();
+      onUpdate();
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
+  return (
+    <div>
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 bg-cyan-500/20 rounded-xl flex items-center justify-center border border-cyan-500/30">
+          <Handshake className="w-5 h-5 text-cyan-400" />
+        </div>
+        <div>
+          <h2 className="text-lg font-bold text-white">Partner Management</h2>
+          <p className="text-sm text-white/40">{pages.length} approved partners</p>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="flex items-center justify-center py-12">
+          <RefreshCw className="w-6 h-6 text-white/30 animate-spin" />
+        </div>
+      ) : pages.length === 0 ? (
+        <div className="text-center py-12 text-white/40">No approved partners yet</div>
+      ) : (
+        <div className="space-y-3">
+          {pages.map((page) => {
+            const isEditing = editingPartner === page.id;
+            const hasAssets = page.partner_qr_code_url || page.partner_referral_link;
+
+            return (
+              <Card key={page.id} variant="default" className="p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="font-semibold text-white">{page.page_name}</h3>
+                      {hasAssets ? (
+                        <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">Assets Ready</span>
+                      ) : (
+                        <span className="text-xs bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-full">Needs Assets</span>
+                      )}
+                    </div>
+
+                    {isEditing ? (
+                      <div className="space-y-3 mt-4">
+                        <Input
+                          placeholder="QR Code URL"
+                          value={partnerForm.qr_url}
+                          onChange={(e) => setPartnerForm({ ...partnerForm, qr_url: e.target.value })}
+                        />
+                        <Input
+                          placeholder="Referral Link"
+                          value={partnerForm.referral_link}
+                          onChange={(e) => setPartnerForm({ ...partnerForm, referral_link: e.target.value })}
+                        />
+                        <Input
+                          placeholder="Landing Page URL"
+                          value={partnerForm.landing_page}
+                          onChange={(e) => setPartnerForm({ ...partnerForm, landing_page: e.target.value })}
+                        />
+                        <div className="flex gap-2">
+                          <Button variant="primary" size="sm" onClick={() => savePartnerAssets(page.id)}>
+                            Save
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => setEditingPartner(null)}>
+                            Cancel
+                          </Button>
+                        </div>
+                      </div>
+                    ) : hasAssets && (
+                      <div className="flex flex-wrap gap-4 mt-3 text-xs text-white/50">
+                        {page.partner_qr_code_url && (
+                          <span className="flex items-center gap-1"><QrCode className="w-3 h-3" /> QR Code</span>
+                        )}
+                        {page.partner_referral_link && (
+                          <span className="flex items-center gap-1"><Link2 className="w-3 h-3" /> Referral Link</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {!isEditing && (
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      icon={Pencil}
+                      onClick={() => {
+                        setEditingPartner(page.id);
+                        setPartnerForm({
+                          qr_url: page.partner_qr_code_url || '',
+                          referral_link: page.partner_referral_link || '',
+                          landing_page: page.partner_landing_page || '',
+                        });
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  )}
                 </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
-                <textarea
-                  value={editForm.notes}
-                  onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500"
-                  rows={3}
-                  placeholder="Any notes about this group..."
-                />
-              </div>
-            </div>
-            {editError && (
-              <div className="mx-4 mb-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-                <p className="text-red-400 text-sm">{editError}</p>
-              </div>
-            )}
-            <div className="flex gap-3 p-4 border-t border-white/10">
-              <button
-                onClick={closeEditModal}
-                className="flex-1 px-4 py-2 bg-white/10 text-gray-300 rounded-xl hover:bg-white/20"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleEditSave}
-                disabled={editLoading || !editForm.page_name || !editForm.page_url}
-                className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 disabled:opacity-50"
-              >
-                {editLoading ? 'Saving...' : 'Save Changes'}
-              </button>
-            </div>
-          </div>
+              </Card>
+            );
+          })}
         </div>
       )}
     </div>
@@ -1467,1052 +1375,106 @@ Let me know if you'd like to see it first!`
 
 function TemplatesTab() {
   const [templates, setTemplates] = useState<Template[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [filter, setFilter] = useState<'all' | 'initial' | 'post'>('all');
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
-  const fetchTemplates = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('/api/admin/fb-outreach/templates', {
-        headers: { 'X-Admin-Password': adminPassword },
-      });
-      const data = await response.json();
-      if (data.templates) {
-        setTemplates(data.templates);
-      }
-    } catch (error) {
-      console.error('Failed to fetch templates:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const fetchTemplates = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch('/api/admin/fb-outreach/templates', {
+          headers: { 'X-Admin-Password': adminPassword },
+        });
+        const data = await response.json();
+        if (data.templates) setTemplates(data.templates);
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchTemplates();
   }, []);
 
-  const handleCopy = (template: Template) => {
+  const copyTemplate = (template: Template) => {
     navigator.clipboard.writeText(template.body);
     setCopiedId(template.id);
     setTimeout(() => setCopiedId(null), 2000);
   };
 
-  const dmTemplates = templates.filter(t => t.template_type === 'initial');
-  const postTemplates = templates.filter(t => t.template_type === 'post');
-
-  return (
-    <div>
-      <div className="flex items-center gap-3 mb-8">
-        <div className="w-12 h-12 bg-orange-500/20 rounded-full flex items-center justify-center border border-orange-500/30">
-          <FileText className="w-6 h-6 text-orange-400" />
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold text-white">Outreach Templates</h2>
-          <p className="text-gray-400">Copy templates for admin DMs and group posts</p>
-        </div>
-      </div>
-
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-orange-400"></div>
-        </div>
-      ) : (
-        <div className="space-y-8">
-          {/* DM Templates */}
-          <div>
-            <h3 className="text-lg font-semibold text-blue-400 mb-4 flex items-center gap-2">
-              <MessageCircle className="w-5 h-5" />
-              Step 1: Admin DM Templates
-            </h3>
-            <div className="space-y-4">
-              {dmTemplates.map((template) => (
-                <div key={template.id} className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-4">
-                  <div className="flex justify-between items-start mb-3">
-                    <span className="font-medium text-blue-400">{template.template_name.replace('fb_admin_', '').replace(/_/g, ' ')}</span>
-                    <button
-                      onClick={() => handleCopy(template)}
-                      className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm transition-colors ${
-                        copiedId === template.id
-                          ? 'bg-green-500/20 text-green-400'
-                          : 'bg-blue-500/20 text-blue-400 hover:bg-blue-500/30'
-                      }`}
-                    >
-                      {copiedId === template.id ? (
-                        <>
-                          <CheckCircle className="w-3 h-3" /> Copied!
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3 h-3" /> Copy
-                        </>
-                      )}
-                    </button>
-                  </div>
-                  <pre className="text-sm text-gray-300 whitespace-pre-wrap font-sans bg-black/20 p-3 rounded-lg max-h-48 overflow-y-auto">
-                    {template.body}
-                  </pre>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Post Templates */}
-          <div>
-            <h3 className="text-lg font-semibold text-purple-400 mb-4 flex items-center gap-2">
-              <FileText className="w-5 h-5" />
-              Step 2: Group Post Templates
-            </h3>
-            <div className="space-y-4">
-              {postTemplates.map((template) => (
-                <div key={template.id} className="bg-purple-500/5 border border-purple-500/20 rounded-xl p-4">
-                  <div className="flex justify-between items-start mb-3">
-                    <span className="font-medium text-purple-400">{template.template_name.replace('fb_post_', '').replace(/_/g, ' ')}</span>
-                    <button
-                      onClick={() => handleCopy(template)}
-                      className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm transition-colors ${
-                        copiedId === template.id
-                          ? 'bg-green-500/20 text-green-400'
-                          : 'bg-purple-500/20 text-purple-400 hover:bg-purple-500/30'
-                      }`}
-                    >
-                      {copiedId === template.id ? (
-                        <>
-                          <CheckCircle className="w-3 h-3" /> Copied!
-                        </>
-                      ) : (
-                        <>
-                          <Copy className="w-3 h-3" /> Copy
-                        </>
-                      )}
-                    </button>
-                  </div>
-                  <pre className="text-sm text-gray-300 whitespace-pre-wrap font-sans bg-black/20 p-3 rounded-lg max-h-48 overflow-y-auto">
-                    {template.body}
-                  </pre>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Partners Tab - Track partner signups, assets, and conversions
-function PartnersTab({ onUpdate }: { onUpdate: () => void }) {
-  const [pages, setPages] = useState<FBPage[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [editingPartner, setEditingPartner] = useState<FBPage | null>(null);
-  const [partnerForm, setPartnerForm] = useState({
-    partner_qr_code_url: '',
-    partner_referral_link: '',
-    partner_landing_page: '',
+  const filteredTemplates = templates.filter((t) => {
+    if (filter === 'initial') return t.template_type === 'initial';
+    if (filter === 'post') return t.template_type === 'post';
+    return true;
   });
-  const [savingPartner, setSavingPartner] = useState(false);
-  const [uploadingQR, setUploadingQR] = useState(false);
-  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
-
-  const fetchPartners = async () => {
-    setLoading(true);
-    try {
-      // Fetch pages that have been approved or posted (potential partners)
-      const params = new URLSearchParams({ status: 'all' });
-      const response = await fetch(`/api/admin/fb-outreach/pages?${params}`, {
-        headers: { 'X-Admin-Password': adminPassword },
-      });
-      const data = await response.json();
-      if (data.pages) {
-        // Filter to show approved/posted or pages with partner assets
-        const partnerPages = data.pages.filter((p: FBPage) =>
-          p.outreach_status === 'approved' ||
-          p.outreach_status === 'posted' ||
-          p.partner_qr_code_url ||
-          p.partner_referral_link ||
-          p.fb_page_admins?.some(a => a.partner_signed_up || a.app_user_id)
-        );
-        setPages(partnerPages);
-      }
-    } catch (error) {
-      console.error('Failed to fetch partners:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchPartners();
-  }, []);
-
-  const openPartnerEditor = (page: FBPage) => {
-    setEditingPartner(page);
-    setPartnerForm({
-      partner_qr_code_url: page.partner_qr_code_url || '',
-      partner_referral_link: page.partner_referral_link || '',
-      partner_landing_page: page.partner_landing_page || '',
-    });
-  };
-
-  const generateReferralLink = (pageName: string) => {
-    const slug = pageName.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 30);
-    return `https://mindandmuscle.ai/r/${slug}`;
-  };
-
-  const savePartnerAssets = async () => {
-    if (!editingPartner) return;
-    setSavingPartner(true);
-    try {
-      const response = await fetch('/api/admin/fb-outreach/pages', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
-        },
-        body: JSON.stringify({
-          id: editingPartner.id,
-          partner_qr_code_url: partnerForm.partner_qr_code_url || null,
-          partner_referral_link: partnerForm.partner_referral_link || null,
-          partner_landing_page: partnerForm.partner_landing_page || null,
-        }),
-      });
-      const data = await response.json();
-      if (data.success) {
-        setEditingPartner(null);
-        fetchPartners();
-        onUpdate();
-      }
-    } catch (error) {
-      console.error('Failed to save partner assets:', error);
-    } finally {
-      setSavingPartner(false);
-    }
-  };
-
-  const updateAdminConversion = async (adminId: string, updates: Record<string, unknown>) => {
-    try {
-      const response = await fetch('/api/admin/fb-outreach/admins', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
-        },
-        body: JSON.stringify({
-          admin_id: adminId,
-          ...updates,
-        }),
-      });
-      const data = await response.json();
-      if (data.success) {
-        fetchPartners();
-        onUpdate();
-      }
-    } catch (error) {
-      console.error('Failed to update admin:', error);
-    }
-  };
-
-  // Calculate totals for displayed partners
-  const totals = pages.reduce((acc, page) => {
-    page.fb_page_admins?.forEach(admin => {
-      if (admin.partner_signed_up) acc.partners++;
-      if (admin.app_user_id) acc.appUsers++;
-      acc.referrals += admin.referral_count || 0;
-      acc.revenue += admin.referral_revenue || 0;
-    });
-    return acc;
-  }, { partners: 0, appUsers: 0, referrals: 0, revenue: 0 });
 
   return (
     <div>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-cyan-500/20 rounded-full flex items-center justify-center border border-cyan-500/30">
-            <Handshake className="w-6 h-6 text-cyan-400" />
+          <div className="w-10 h-10 bg-orange-500/20 rounded-xl flex items-center justify-center border border-orange-500/30">
+            <FileText className="w-5 h-5 text-orange-400" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-white">Partner Tracking</h2>
-            <p className="text-gray-400">Manage QR codes, referral links, and track conversions</p>
+            <h2 className="text-lg font-bold text-white">DM & Post Templates</h2>
+            <p className="text-sm text-white/40">{templates.length} templates available</p>
           </div>
         </div>
-        <button
-          onClick={fetchPartners}
-          className="flex items-center gap-2 px-4 py-2 bg-cyan-500/20 border border-cyan-500/30 rounded-xl text-cyan-400 hover:bg-cyan-500/30"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
-      </div>
 
-      {/* Summary Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-cyan-500/10 border border-cyan-500/20 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <Handshake className="w-4 h-4 text-cyan-400" />
-            <span className="text-sm text-gray-400">Partners</span>
-          </div>
-          <p className="text-2xl font-bold text-cyan-400">{totals.partners}</p>
-        </div>
-        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <UserCheck className="w-4 h-4 text-emerald-400" />
-            <span className="text-sm text-gray-400">App Users</span>
-          </div>
-          <p className="text-2xl font-bold text-emerald-400">{totals.appUsers}</p>
-        </div>
-        <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <TrendingUp className="w-4 h-4 text-amber-400" />
-            <span className="text-sm text-gray-400">Total Referrals</span>
-          </div>
-          <p className="text-2xl font-bold text-amber-400">{totals.referrals}</p>
-        </div>
-        <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <DollarSign className="w-4 h-4 text-green-400" />
-            <span className="text-sm text-gray-400">Revenue</span>
-          </div>
-          <p className="text-2xl font-bold text-green-400">${totals.revenue.toLocaleString()}</p>
+        <div className="flex gap-2">
+          {(['all', 'initial', 'post'] as const).map((f) => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+                filter === f
+                  ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
+                  : 'bg-white/[0.03] text-white/50 border border-white/[0.08] hover:bg-white/[0.06]'
+              }`}
+            >
+              {f === 'all' ? 'All' : f === 'initial' ? 'DM Templates' : 'Post Templates'}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Partners List */}
       {loading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-400"></div>
-          <p className="mt-2 text-gray-400">Loading partners...</p>
+        <div className="flex items-center justify-center py-12">
+          <RefreshCw className="w-6 h-6 text-white/30 animate-spin" />
         </div>
-      ) : pages.length === 0 ? (
-        <div className="text-center py-12 bg-white/5 border border-white/10 rounded-xl">
-          <Handshake className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-          <p className="text-gray-400">No approved groups yet. Get some approvals to start tracking partners!</p>
-        </div>
+      ) : filteredTemplates.length === 0 ? (
+        <div className="text-center py-12 text-white/40">No templates found</div>
       ) : (
-        <div className="space-y-4">
-          {pages.map((page) => {
-            const hasPartnerAssets = page.partner_qr_code_url || page.partner_referral_link;
-            const partnerAdmins = page.fb_page_admins?.filter(a => a.partner_signed_up) || [];
-            const appUserAdmins = page.fb_page_admins?.filter(a => a.app_user_id) || [];
-
-            return (
-              <div
-                key={page.id}
-                className={`p-4 rounded-xl border transition-colors ${
-                  hasPartnerAssets
-                    ? 'bg-cyan-500/5 border-cyan-500/20 hover:bg-cyan-500/10'
-                    : 'bg-white/5 border-white/10 hover:bg-white/[0.07]'
-                }`}
-              >
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2 flex-wrap">
-                      <span className="font-semibold text-white">{page.page_name}</span>
-                      {hasPartnerAssets && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
-                          <QrCode className="w-3 h-3" /> Assets Ready
-                        </span>
-                      )}
-                      {partnerAdmins.length > 0 && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-green-500/20 text-green-400 border border-green-500/30">
-                          <Handshake className="w-3 h-3" /> {partnerAdmins.length} Partner{partnerAdmins.length > 1 ? 's' : ''}
-                        </span>
-                      )}
-                      {appUserAdmins.length > 0 && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                          <UserCheck className="w-3 h-3" /> {appUserAdmins.length} App User{appUserAdmins.length > 1 ? 's' : ''}
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex flex-wrap items-center gap-3 text-sm text-gray-400">
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        {page.state || 'N/A'}
-                      </span>
-                      {page.member_count && (
-                        <span className="flex items-center gap-1">
-                          <Users className="w-3 h-3" />
-                          {page.member_count.toLocaleString()} members
-                        </span>
-                      )}
-                      {page.partner_referral_link && (
-                        <span className="flex items-center gap-1 text-cyan-400">
-                          <Link2 className="w-3 h-3" />
-                          Has referral link
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      onClick={() => openPartnerEditor(page)}
-                      className="flex items-center gap-1 px-3 py-1.5 bg-cyan-500/20 text-cyan-400 rounded-lg hover:bg-cyan-500/30 text-sm"
-                    >
-                      <QrCode className="w-3 h-3" /> {hasPartnerAssets ? 'Edit Assets' : 'Add Assets'}
-                    </button>
-                    <button
-                      onClick={() => setExpandedId(expandedId === page.id ? null : page.id)}
-                      className="flex items-center gap-1 px-3 py-1.5 bg-white/10 text-gray-300 rounded-lg hover:bg-white/20 text-sm"
-                    >
-                      {expandedId === page.id ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                      Details
-                    </button>
-                  </div>
-                </div>
-
-                {/* Expanded Details */}
-                {expandedId === page.id && (
-                  <div className="mt-4 pt-4 border-t border-white/10">
-                    {/* Partner Assets Display */}
-                    {hasPartnerAssets && (
-                      <div className="mb-4 p-3 bg-cyan-500/5 border border-cyan-500/20 rounded-lg">
-                        <h4 className="text-sm font-medium text-cyan-400 mb-2">Partner Assets</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-                          {page.partner_qr_code_url && (
-                            <div className="flex items-center gap-2">
-                              <Image className="w-4 h-4 text-gray-400" />
-                              <a href={page.partner_qr_code_url} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline truncate">
-                                QR Code
-                              </a>
-                            </div>
-                          )}
-                          {page.partner_referral_link && (
-                            <div className="flex items-center gap-2">
-                              <Link2 className="w-4 h-4 text-gray-400" />
-                              <button
-                                onClick={() => {
-                                  navigator.clipboard.writeText(page.partner_referral_link!);
-                                }}
-                                className="text-cyan-400 hover:underline truncate flex items-center gap-1"
-                              >
-                                {page.partner_referral_link.replace('https://', '')}
-                                <Copy className="w-3 h-3" />
-                              </button>
-                            </div>
-                          )}
-                          {page.partner_landing_page && (
-                            <div className="flex items-center gap-2">
-                              <ExternalLink className="w-4 h-4 text-gray-400" />
-                              <a href={page.partner_landing_page} target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline truncate">
-                                Landing Page
-                              </a>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Admin Conversion Tracking */}
-                    {page.fb_page_admins?.length > 0 && (
-                      <div>
-                        <h4 className="text-sm font-medium text-gray-300 mb-3">Admin Conversion Status</h4>
-                        <div className="space-y-2">
-                          {page.fb_page_admins.map((admin) => (
-                            <div key={admin.id} className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 bg-white/5 rounded-lg">
-                              <div className="flex items-center gap-2 flex-1 min-w-0">
-                                <span className="font-medium text-white truncate">{admin.admin_name}</span>
-                                {admin.partner_signed_up && (
-                                  <span className="text-xs px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 shrink-0">
-                                    Partner ✓
-                                  </span>
-                                )}
-                                {admin.app_user_id && (
-                                  <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 shrink-0">
-                                    App User ✓
-                                  </span>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-3 text-sm">
-                                {admin.referral_count > 0 && (
-                                  <span className="text-amber-400">
-                                    <TrendingUp className="w-3 h-3 inline mr-1" />
-                                    {admin.referral_count} referrals
-                                  </span>
-                                )}
-                                {admin.referral_revenue > 0 && (
-                                  <span className="text-green-400">
-                                    <DollarSign className="w-3 h-3 inline" />
-                                    {admin.referral_revenue}
-                                  </span>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-1 flex-wrap">
-                                {!admin.partner_signed_up && (
-                                  <button
-                                    onClick={() => updateAdminConversion(admin.id, {
-                                      partner_signed_up: true,
-                                      partner_signed_up_at: new Date().toISOString()
-                                    })}
-                                    className="px-2 py-1 rounded text-xs bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30"
-                                  >
-                                    Mark Partner ✓
-                                  </button>
-                                )}
-                                {!admin.app_user_id && (
-                                  <button
-                                    onClick={() => updateAdminConversion(admin.id, {
-                                      app_signed_up_at: new Date().toISOString()
-                                      // Note: app_user_id would be set when we actually link to a profile
-                                    })}
-                                    className="px-2 py-1 rounded text-xs bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
-                                  >
-                                    Mark App User ✓
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Partner Assets Editor Modal */}
-      {editingPartner && (
-        <div
-          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setEditingPartner(null);
-          }}
-        >
-          <div className="bg-gray-900 border border-white/10 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-4 border-b border-white/10">
-              <h3 className="text-lg font-semibold text-white">Partner Assets: {editingPartner.page_name}</h3>
-              <button
-                onClick={() => setEditingPartner(null)}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5 text-gray-400" />
-              </button>
-            </div>
-            <div className="p-4 space-y-4">
-              {/* QR Code URL */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  <QrCode className="w-4 h-4 inline mr-2" />
-                  QR Code Image URL
-                </label>
-                <input
-                  type="url"
-                  value={partnerForm.partner_qr_code_url}
-                  onChange={(e) => setPartnerForm({ ...partnerForm, partner_qr_code_url: e.target.value })}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500"
-                  placeholder="https://storage.mindandmuscle.ai/qr/..."
-                />
-                <p className="mt-1 text-xs text-gray-500">Direct link to the QR code PNG image</p>
-              </div>
-
-              {/* Referral Link */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  <Link2 className="w-4 h-4 inline mr-2" />
-                  Partner Referral Link
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="url"
-                    value={partnerForm.partner_referral_link}
-                    onChange={(e) => setPartnerForm({ ...partnerForm, partner_referral_link: e.target.value })}
-                    className="flex-1 px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500"
-                    placeholder="https://mindandmuscle.ai/r/..."
-                  />
-                  <button
-                    onClick={() => setPartnerForm({
-                      ...partnerForm,
-                      partner_referral_link: generateReferralLink(editingPartner.page_name)
-                    })}
-                    className="px-3 py-2 bg-cyan-500/20 text-cyan-400 rounded-xl hover:bg-cyan-500/30 text-sm whitespace-nowrap"
-                  >
-                    Generate
-                  </button>
-                </div>
-                <p className="mt-1 text-xs text-gray-500">Unique tracking link for this partner</p>
-              </div>
-
-              {/* Landing Page */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  <ExternalLink className="w-4 h-4 inline mr-2" />
-                  Custom Landing Page (Optional)
-                </label>
-                <input
-                  type="url"
-                  value={partnerForm.partner_landing_page}
-                  onChange={(e) => setPartnerForm({ ...partnerForm, partner_landing_page: e.target.value })}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500"
-                  placeholder="https://mindandmuscle.ai/partners/..."
-                />
-                <p className="mt-1 text-xs text-gray-500">Custom landing page URL if applicable</p>
-              </div>
-
-              {/* Preview */}
-              {partnerForm.partner_qr_code_url && (
-                <div className="p-3 bg-white/5 rounded-xl">
-                  <p className="text-sm text-gray-400 mb-2">QR Code Preview:</p>
-                  <img
-                    src={partnerForm.partner_qr_code_url}
-                    alt="QR Code Preview"
-                    className="w-32 h-32 mx-auto rounded-lg bg-white p-2"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-            <div className="flex gap-3 p-4 border-t border-white/10">
-              <button
-                onClick={() => setEditingPartner(null)}
-                className="flex-1 px-4 py-2 bg-white/10 text-gray-300 rounded-xl hover:bg-white/20"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={savePartnerAssets}
-                disabled={savingPartner}
-                className="flex-1 px-4 py-2 bg-cyan-500 text-white rounded-xl hover:bg-cyan-600 disabled:opacity-50"
-              >
-                {savingPartner ? 'Saving...' : 'Save Assets'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Follow-Up Tab - Track all admins who need follow-up
-function FollowUpTab({ onUpdate }: { onUpdate: () => void }) {
-  const [pages, setPages] = useState<FBPage[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [responseModal, setResponseModal] = useState<{ admin: FBPageAdmin; page: FBPage } | null>(null);
-  const [responseForm, setResponseForm] = useState({
-    response_type: '' as ResponseType | '',
-    response_notes: '',
-    next_follow_up: '',
-  });
-  const [savingResponse, setSavingResponse] = useState(false);
-  const [copiedDmId, setCopiedDmId] = useState<string | null>(null);
-  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
-
-  // DM Templates for quick copy
-  const FOLLOW_UP_TEMPLATES = {
-    first_follow_up: (name: string, groupName: string) => `Hey ${name}! Just wanted to follow up on my message about Mind & Muscle.
-
-I know you're busy running ${groupName} - just wanted to make sure my message didn't get lost in the shuffle.
-
-Would love to share the app with your community if you're open to it. Let me know!`,
-    second_follow_up: (name: string) => `Hey ${name}! One last quick follow-up.
-
-If now isn't the right time, totally understand. Just didn't want to leave you hanging without the info if you were interested.
-
-Either way, have a great season! 🙌`,
-    post_approved: (name: string, groupName: string) => `Hey ${name}! Thanks for approving the post for ${groupName}!
-
-Here's the post copy and QR code image ready to go. Let me know if you need anything adjusted.
-
-Really appreciate you helping get the word out to your community! 🙏`,
-  };
-
-  const fetchFollowUps = async () => {
-    setLoading(true);
-    try {
-      // Fetch pages that need follow-up (DM sent but no response 3+ days ago)
-      const params = new URLSearchParams({ status: 'all' });
-      const response = await fetch(`/api/admin/fb-outreach/pages?${params}`, {
-        headers: { 'X-Admin-Password': adminPassword },
-      });
-      const data = await response.json();
-      if (data.pages) {
-        // Filter to show pages needing follow-up
-        const now = new Date();
-        const followUpPages = data.pages.filter((p: FBPage) => {
-          // Check if any admin needs follow-up
-          if (p.fb_page_admins?.length) {
-            return p.fb_page_admins.some(admin => {
-              if (!admin.dm_sent_at) return false;
-              if (['approved', 'declined', 'posted'].includes(admin.response_status)) return false;
-              const dmDate = new Date(admin.dm_sent_at);
-              const daysSince = Math.floor((now.getTime() - dmDate.getTime()) / (1000 * 60 * 60 * 24));
-              return daysSince >= 3;
-            });
-          }
-          // Legacy check for page-level dm_sent_at
-          if (p.dm_sent_at && ['dm_sent', 'awaiting_response'].includes(p.outreach_status)) {
-            const dmDate = new Date(p.dm_sent_at);
-            const daysSince = Math.floor((now.getTime() - dmDate.getTime()) / (1000 * 60 * 60 * 24));
-            return daysSince >= 3;
-          }
-          return false;
-        });
-        // Sort by oldest DM first (most urgent)
-        followUpPages.sort((a: FBPage, b: FBPage) => {
-          const aDate = a.fb_page_admins?.[0]?.dm_sent_at || a.dm_sent_at || '';
-          const bDate = b.fb_page_admins?.[0]?.dm_sent_at || b.dm_sent_at || '';
-          return new Date(aDate).getTime() - new Date(bDate).getTime();
-        });
-        setPages(followUpPages);
-      }
-    } catch (error) {
-      console.error('Failed to fetch follow-ups:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchFollowUps();
-  }, []);
-
-  const copyFollowUpDM = (admin: FBPageAdmin, page: FBPage, templateKey: keyof typeof FOLLOW_UP_TEMPLATES) => {
-    const firstName = admin.admin_name.split(' ')[0];
-    const template = FOLLOW_UP_TEMPLATES[templateKey](firstName, page.page_name);
-    navigator.clipboard.writeText(template);
-    setCopiedDmId(`${admin.id}-${templateKey}`);
-    setTimeout(() => setCopiedDmId(null), 2000);
-  };
-
-  const openResponseModal = (admin: FBPageAdmin, page: FBPage) => {
-    setResponseModal({ admin, page });
-    setResponseForm({
-      response_type: admin.response_type || '',
-      response_notes: admin.response_notes || '',
-      next_follow_up: admin.next_follow_up || '',
-    });
-  };
-
-  const saveResponse = async () => {
-    if (!responseModal) return;
-    setSavingResponse(true);
-    try {
-      // Calculate next follow-up based on response type
-      let nextFollowUp = responseForm.next_follow_up;
-      if (!nextFollowUp && responseForm.response_type) {
-        const now = new Date();
-        if (responseForm.response_type === 'maybe_later') {
-          now.setDate(now.getDate() + 7); // 1 week
-          nextFollowUp = now.toISOString().split('T')[0];
-        } else if (responseForm.response_type === 'no_response') {
-          now.setDate(now.getDate() + 3); // 3 days
-          nextFollowUp = now.toISOString().split('T')[0];
-        }
-      }
-
-      // Map response type to response status
-      let newStatus = responseModal.admin.response_status;
-      if (responseForm.response_type === 'interested') newStatus = 'approved';
-      else if (responseForm.response_type === 'posted') newStatus = 'approved';
-      else if (responseForm.response_type === 'not_interested') newStatus = 'declined';
-      else if (responseForm.response_type === 'maybe_later') newStatus = 'responded';
-      else if (responseForm.response_type === 'no_response') newStatus = 'no_response';
-
-      const response = await fetch('/api/admin/fb-outreach/admins', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
-        },
-        body: JSON.stringify({
-          admin_id: responseModal.admin.id,
-          response_status: newStatus,
-          response_type: responseForm.response_type || null,
-          response_notes: responseForm.response_notes || null,
-          next_follow_up: nextFollowUp || null,
-          follow_up_count: (responseModal.admin.follow_up_count || 0) + 1,
-        }),
-      });
-      const data = await response.json();
-      if (data.success) {
-        setResponseModal(null);
-        fetchFollowUps();
-        onUpdate();
-      }
-    } catch (error) {
-      console.error('Failed to save response:', error);
-    } finally {
-      setSavingResponse(false);
-    }
-  };
-
-  const markFollowedUp = async (adminId: string, currentCount: number) => {
-    try {
-      const nextDate = new Date();
-      nextDate.setDate(nextDate.getDate() + 3);
-
-      await fetch('/api/admin/fb-outreach/admins', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
-        },
-        body: JSON.stringify({
-          admin_id: adminId,
-          follow_up_count: currentCount + 1,
-          next_follow_up: nextDate.toISOString().split('T')[0],
-        }),
-      });
-      fetchFollowUps();
-      onUpdate();
-    } catch (error) {
-      console.error('Failed to mark followed up:', error);
-    }
-  };
-
-  // Get admins that need follow-up with their pages
-  const followUpItems: { admin: FBPageAdmin; page: FBPage; daysSince: number }[] = [];
-  const now = new Date();
-  pages.forEach(page => {
-    page.fb_page_admins?.forEach(admin => {
-      if (!admin.dm_sent_at) return;
-      if (['approved', 'declined', 'posted'].includes(admin.response_status)) return;
-      const dmDate = new Date(admin.dm_sent_at);
-      const daysSince = Math.floor((now.getTime() - dmDate.getTime()) / (1000 * 60 * 60 * 24));
-      if (daysSince >= 3) {
-        followUpItems.push({ admin, page, daysSince });
-      }
-    });
-  });
-  // Sort by days since DM (most urgent first)
-  followUpItems.sort((a, b) => b.daysSince - a.daysSince);
-
-  return (
-    <div>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center border border-red-500/30">
-            <Bell className="w-6 h-6 text-red-400" />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-white">Follow-Up Queue</h2>
-            <p className="text-gray-400">Admins who need a follow-up (3+ days since DM)</p>
-          </div>
-        </div>
-        <button
-          onClick={fetchFollowUps}
-          className="flex items-center gap-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-xl text-red-400 hover:bg-red-500/30"
-        >
-          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
-      </div>
-
-      {/* Summary */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-center">
-          <p className="text-3xl font-bold text-red-400">{followUpItems.filter(i => i.daysSince >= 7).length}</p>
-          <p className="text-xs text-gray-400">Urgent (7+ days)</p>
-        </div>
-        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 text-center">
-          <p className="text-3xl font-bold text-yellow-400">{followUpItems.filter(i => i.daysSince >= 3 && i.daysSince < 7).length}</p>
-          <p className="text-xs text-gray-400">Due (3-6 days)</p>
-        </div>
-        <div className="bg-gray-500/10 border border-gray-500/20 rounded-xl p-4 text-center">
-          <p className="text-3xl font-bold text-gray-400">{followUpItems.length}</p>
-          <p className="text-xs text-gray-400">Total Pending</p>
-        </div>
-      </div>
-
-      {/* Follow-Up List */}
-      {loading ? (
-        <div className="text-center py-12">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-400"></div>
-          <p className="mt-2 text-gray-400">Loading follow-ups...</p>
-        </div>
-      ) : followUpItems.length === 0 ? (
-        <div className="text-center py-12 bg-green-500/5 border border-green-500/20 rounded-xl">
-          <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-3" />
-          <p className="text-green-400 font-medium">All caught up!</p>
-          <p className="text-gray-500 text-sm">No admins need follow-up right now.</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {followUpItems.map(({ admin, page, daysSince }) => {
-            const isUrgent = daysSince >= 7;
-            const followUpCount = admin.follow_up_count || 0;
-
-            return (
-              <div
-                key={admin.id}
-                className={`p-4 rounded-xl border transition-colors ${
-                  isUrgent
-                    ? 'bg-red-500/10 border-red-500/30'
-                    : 'bg-yellow-500/5 border-yellow-500/20'
-                }`}
-              >
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="font-semibold text-white">{admin.admin_name}</span>
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${
-                        isUrgent ? 'bg-red-500/20 text-red-400 animate-pulse' : 'bg-yellow-500/20 text-yellow-400'
-                      }`}>
-                        {daysSince} days ago
-                      </span>
-                      {followUpCount > 0 && (
-                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-500/20 text-gray-400">
-                          {followUpCount} follow-up{followUpCount > 1 ? 's' : ''} sent
-                        </span>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-3 text-sm text-gray-400">
-                      <span className="flex items-center gap-1">
-                        <Users className="w-3 h-3" />
-                        {page.page_name}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        {page.state || 'N/A'}
-                      </span>
-                      {page.member_count && (
-                        <span>{page.member_count.toLocaleString()} members</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    {/* Copy follow-up DM */}
-                    <button
-                      onClick={() => copyFollowUpDM(admin, page, followUpCount === 0 ? 'first_follow_up' : 'second_follow_up')}
-                      className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm ${
-                        copiedDmId === `${admin.id}-${followUpCount === 0 ? 'first_follow_up' : 'second_follow_up'}`
-                          ? 'bg-green-500/20 text-green-400'
-                          : 'bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30'
-                      }`}
-                    >
-                      {copiedDmId?.startsWith(admin.id) ? <CheckCircle className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                      Copy Follow-Up
-                    </button>
-                    {/* Open profile */}
-                    {admin.admin_profile_url && (
-                      <a
-                        href={admin.admin_profile_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 px-3 py-1.5 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 text-sm"
-                      >
-                        <ExternalLink className="w-3 h-3" /> Profile
-                      </a>
-                    )}
-                    {/* Log Response */}
-                    <button
-                      onClick={() => openResponseModal(admin, page)}
-                      className="flex items-center gap-1 px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 text-sm"
-                    >
-                      <MessageCircle className="w-3 h-3" /> Log Response
-                    </button>
-                    {/* Quick mark as followed up */}
-                    <button
-                      onClick={() => markFollowedUp(admin.id, followUpCount)}
-                      className="flex items-center gap-1 px-3 py-1.5 bg-orange-500/20 text-orange-400 rounded-lg hover:bg-orange-500/30 text-sm"
-                    >
-                      <Send className="w-3 h-3" /> Sent Follow-Up
-                    </button>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Response Modal */}
-      {responseModal && (
-        <div
-          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setResponseModal(null);
-          }}
-        >
-          <div className="bg-gray-900 border border-white/10 rounded-2xl w-full max-w-md">
-            <div className="flex items-center justify-between p-4 border-b border-white/10">
-              <h3 className="text-lg font-semibold text-white">Log Response: {responseModal.admin.admin_name}</h3>
-              <button
-                onClick={() => setResponseModal(null)}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5 text-gray-400" />
-              </button>
-            </div>
-            <div className="p-4 space-y-4">
-              {/* Response Type */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">What did they say?</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {(Object.keys(RESPONSE_TYPES) as ResponseType[]).map((type) => {
-                    const config = RESPONSE_TYPES[type];
-                    return (
-                      <button
-                        key={type}
-                        onClick={() => setResponseForm({ ...responseForm, response_type: type })}
-                        className={`p-3 rounded-xl text-left text-sm transition-colors ${
-                          responseForm.response_type === type
-                            ? `bg-${config.color}-500/20 border-2 border-${config.color}-500/50`
-                            : 'bg-white/5 border border-white/10 hover:bg-white/10'
-                        }`}
-                      >
-                        <span className="text-lg mr-2">{config.icon}</span>
-                        <span className={responseForm.response_type === type ? `text-${config.color}-400` : 'text-white'}>
-                          {config.label}
-                        </span>
-                        <p className="text-xs text-gray-500 mt-1">{config.nextAction}</p>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Notes */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Notes (what exactly did they say?)</label>
-                <textarea
-                  value={responseForm.response_notes}
-                  onChange={(e) => setResponseForm({ ...responseForm, response_notes: e.target.value })}
-                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500"
-                  rows={3}
-                  placeholder="e.g., 'Said they'll look at it this weekend'"
-                />
-              </div>
-
-              {/* Next Follow-Up Date */}
-              {(responseForm.response_type === 'maybe_later' || responseForm.response_type === 'no_response') && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {filteredTemplates.map((template) => (
+            <Card key={template.id} variant="default" className="p-5">
+              <div className="flex items-start justify-between gap-3 mb-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">Next Follow-Up Date</label>
-                  <input
-                    type="date"
-                    value={responseForm.next_follow_up}
-                    onChange={(e) => setResponseForm({ ...responseForm, next_follow_up: e.target.value })}
-                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
-                  />
-                  <p className="mt-1 text-xs text-gray-500">
-                    Auto-set: {responseForm.response_type === 'maybe_later' ? '1 week' : '3 days'} from now if left empty
-                  </p>
+                  <h3 className="font-medium text-white capitalize">
+                    {template.template_name.replace(/_/g, ' ')}
+                  </h3>
+                  <span className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${
+                    template.template_type === 'initial'
+                      ? 'bg-blue-500/20 text-blue-400'
+                      : 'bg-purple-500/20 text-purple-400'
+                  }`}>
+                    {template.template_type === 'initial' ? 'DM Template' : 'Post Template'}
+                  </span>
                 </div>
-              )}
-            </div>
-            <div className="flex gap-3 p-4 border-t border-white/10">
-              <button
-                onClick={() => setResponseModal(null)}
-                className="flex-1 px-4 py-2 bg-white/10 text-gray-300 rounded-xl hover:bg-white/20"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={saveResponse}
-                disabled={savingResponse || !responseForm.response_type}
-                className="flex-1 px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 disabled:opacity-50"
-              >
-                {savingResponse ? 'Saving...' : 'Save Response'}
-              </button>
-            </div>
-          </div>
+                <Button
+                  variant={copiedId === template.id ? 'primary' : 'secondary'}
+                  size="sm"
+                  icon={copiedId === template.id ? CheckCircle : Copy}
+                  onClick={() => copyTemplate(template)}
+                >
+                  {copiedId === template.id ? 'Copied!' : 'Copy'}
+                </Button>
+              </div>
+              <p className="text-sm text-white/60 whitespace-pre-wrap line-clamp-6">{template.body}</p>
+            </Card>
+          ))}
         </div>
       )}
     </div>
