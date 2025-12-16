@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import PasswordGate from '@/components/PasswordGate';
+import AdminGate from '@/components/AdminGate';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
 import {
@@ -68,6 +68,7 @@ export default function AdminFBOutreachPage() {
   const [activeTab, setActiveTab] = useState<Tab>('pipeline');
   const [stats, setStats] = useState<Stats>({ total: 0, byStatus: {} as Record<OutreachStatus, number>, byState: {} });
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
+  // Note: adminPassword is still used for API calls
 
   const fetchStats = async () => {
     try {
@@ -88,8 +89,7 @@ export default function AdminFBOutreachPage() {
   }, []);
 
   return (
-    <PasswordGate
-      password={adminPassword}
+    <AdminGate
       title="Admin: FB Outreach"
       description="Enter admin password to access dashboard"
     >
@@ -188,7 +188,7 @@ export default function AdminFBOutreachPage() {
           </div>
         </div>
       </div>
-    </PasswordGate>
+    </AdminGate>
   );
 }
 

@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
-import PasswordGate from '@/components/PasswordGate';
+import AdminGate from '@/components/AdminGate';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
 import { GradientTextReveal } from '@/components/animations';
@@ -15,7 +15,6 @@ export default function BannerGeneratorPage() {
   const facebookBannerRef = useRef<HTMLDivElement>(null);
   const twitterBannerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -102,8 +101,7 @@ export default function BannerGeneratorPage() {
   };
 
   return (
-    <PasswordGate
-      password={adminPassword}
+    <AdminGate
       title="Partner Banner Generator"
       description="Enter admin password to access this tool"
     >
@@ -774,6 +772,6 @@ export default function BannerGeneratorPage() {
         )}
       </div>
     </div>
-    </PasswordGate>
+    </AdminGate>
   );
 }

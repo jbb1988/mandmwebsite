@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import PasswordGate from '@/components/PasswordGate';
+import AdminGate from '@/components/AdminGate';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
 import {
@@ -50,6 +50,7 @@ export default function AdminFinderFeesPage() {
   const [showCheatSheet, setShowCheatSheet] = useState(true);
   const [stats, setStats] = useState<Stats>({ totalPartners: 0, pendingPayments: 0, totalPaidOut: 0, thisMonthFees: 0 });
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
+  // Note: adminPassword is still used for API calls
 
   // Fetch stats on mount
   useEffect(() => {
@@ -104,8 +105,7 @@ export default function AdminFinderFeesPage() {
   };
 
   return (
-    <PasswordGate
-      password={adminPassword}
+    <AdminGate
       title="Admin: Finder Fee Management"
       description="Enter admin password to access dashboard"
     >
@@ -363,7 +363,7 @@ export default function AdminFinderFeesPage() {
           </div>
         </div>
       </div>
-    </PasswordGate>
+    </AdminGate>
   );
 }
 

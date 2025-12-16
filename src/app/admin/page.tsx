@@ -1,12 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import PasswordGate from '@/components/PasswordGate';
+import AdminGate from '@/components/AdminGate';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import Link from 'next/link';
 import {
-  DollarSign, Users, Image, Facebook, Mail, Settings,
-  ExternalLink, Shield, BarChart3, FileText
+  DollarSign, Users, Image, Facebook, Settings,
+  ExternalLink, Shield, BarChart3, FileText, LogOut
 } from 'lucide-react';
 
 interface AdminTool {
@@ -87,18 +87,10 @@ const QUICK_LINKS = [
 ];
 
 export default function AdminHubPage() {
-  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
-
-  const getColorClasses = (color: string) => ({
-    bg: `bg-${color}-500/20`,
-    border: `border-${color}-500/30`,
-    text: `text-${color}-400`,
-    hover: `hover:bg-${color}-500/30`,
-  });
+  const { logout } = useAdminAuth();
 
   return (
-    <PasswordGate
-      password={adminPassword}
+    <AdminGate
       title="Admin Hub"
       description="Enter admin password to access all tools"
     >
@@ -118,6 +110,13 @@ export default function AdminHubPage() {
               </div>
               <h1 className="text-3xl font-bold mb-2">Mind & Muscle Admin</h1>
               <p className="text-gray-400">Central hub for all admin tools and dashboards</p>
+              <button
+                onClick={logout}
+                className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                Logout
+              </button>
             </div>
 
             {/* Admin Tools Grid */}
@@ -200,6 +199,6 @@ export default function AdminHubPage() {
           </div>
         </div>
       </div>
-    </PasswordGate>
+    </AdminGate>
   );
 }
