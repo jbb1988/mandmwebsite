@@ -38,6 +38,8 @@ export async function PATCH(request: NextRequest) {
       app_signed_up_at,
       referral_count,
       referral_revenue,
+      // Email for partner matching
+      admin_email,
     } = body;
 
     if (!admin_id) {
@@ -63,6 +65,9 @@ export async function PATCH(request: NextRequest) {
     if (referral_count !== undefined) updates.referral_count = referral_count;
     if (referral_revenue !== undefined) updates.referral_revenue = referral_revenue;
 
+    // Email for partner auto-matching (trigger will link to finder_fee_partners)
+    if (admin_email !== undefined) updates.admin_email = admin_email;
+
     const { data, error } = await supabase
       .from('fb_page_admins')
       .update(updates)
@@ -87,7 +92,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { page_id, admin_name, admin_profile_url } = body;
+    const { page_id, admin_name, admin_profile_url, admin_email } = body;
 
     if (!page_id || !admin_name) {
       return NextResponse.json({ success: false, message: 'Page ID and admin name are required' }, { status: 400 });
@@ -99,6 +104,7 @@ export async function POST(request: NextRequest) {
         page_id,
         admin_name,
         admin_profile_url: admin_profile_url || null,
+        admin_email: admin_email || null,
         is_primary: false,
         response_status: 'not_contacted',
       })

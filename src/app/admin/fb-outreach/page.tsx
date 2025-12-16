@@ -15,10 +15,20 @@ type OutreachStatus = 'not_started' | 'dm_sent' | 'awaiting_response' | 'approve
 type ResponseType = 'interested' | 'maybe_later' | 'not_interested' | 'posted' | 'no_response';
 type GroupType = 'travel_ball' | 'rec_league' | 'showcase' | 'tournament' | 'coaching' | 'parents' | 'equipment' | 'other';
 
+interface FinderFeePartner {
+  id: string;
+  partner_code: string;
+  partner_email: string;
+  partner_name: string;
+  enabled: boolean;
+  is_recurring: boolean;
+}
+
 interface FBPageAdmin {
   id: string;
   admin_name: string;
   admin_profile_url: string | null;
+  admin_email: string | null;
   is_primary: boolean;
   dm_sent_at: string | null;
   response_status: string;
@@ -33,6 +43,9 @@ interface FBPageAdmin {
   app_signed_up_at: string | null;
   referral_count: number;
   referral_revenue: number;
+  // Partner link
+  finder_fee_partner_id: string | null;
+  finder_fee_partner: FinderFeePartner | null;
 }
 
 // Response type configuration
@@ -475,16 +488,16 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
     priority_score: '3',
     notes: '',
   });
-  const [admins, setAdmins] = useState([{ name: '', profile_url: '' }]);
+  const [admins, setAdmins] = useState([{ name: '', profile_url: '', email: '' }]);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
-  const addAdmin = () => setAdmins([...admins, { name: '', profile_url: '' }]);
+  const addAdmin = () => setAdmins([...admins, { name: '', profile_url: '', email: '' }]);
   const removeAdmin = (index: number) => {
     if (admins.length > 1) setAdmins(admins.filter((_, i) => i !== index));
   };
-  const updateAdmin = (index: number, field: 'name' | 'profile_url', value: string) => {
+  const updateAdmin = (index: number, field: 'name' | 'profile_url' | 'email', value: string) => {
     const updated = [...admins];
     updated[index][field] = value;
     setAdmins(updated);
@@ -518,7 +531,7 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
           page_name: '', page_url: '', state: 'FL', member_count: '',
           group_type: 'travel_ball', sport: 'baseball', priority_score: '3', notes: '',
         });
-        setAdmins([{ name: '', profile_url: '' }]);
+        setAdmins([{ name: '', profile_url: '', email: '' }]);
         onSuccess();
       }
     } catch {
@@ -590,6 +603,15 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
                       onChange={(e) => updateAdmin(index, 'profile_url', e.target.value)}
                       className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/[0.1] rounded-xl text-white placeholder-white/30 text-sm focus:outline-none focus:border-blue-500/50"
                       placeholder="Profile URL (optional)"
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <input
+                      type="email"
+                      value={admin.email}
+                      onChange={(e) => updateAdmin(index, 'email', e.target.value)}
+                      className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/[0.1] rounded-xl text-white placeholder-white/30 text-sm focus:outline-none focus:border-emerald-500/50"
+                      placeholder="Email (for partner sync)"
                     />
                   </div>
                   {admins.length > 1 && (
@@ -925,26 +947,54 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
                             {admins.map((admin) => (
                               <div key={admin.id} className="flex items-center justify-between p-3 bg-white/[0.03] rounded-xl border border-white/[0.06]">
                                 <div className="flex items-center gap-3">
-                                  <div className="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center border border-blue-500/30">
-                                    <Users className="w-4 h-4 text-blue-400" />
+                                  <div className={`w-8 h-8 ${admin.finder_fee_partner ? 'bg-emerald-500/20 border-emerald-500/30' : 'bg-blue-500/20 border-blue-500/30'} rounded-full flex items-center justify-center border`}>
+                                    {admin.finder_fee_partner ? (
+                                      <Handshake className="w-4 h-4 text-emerald-400" />
+                                    ) : (
+                                      <Users className="w-4 h-4 text-blue-400" />
+                                    )}
                                   </div>
                                   <div>
-                                    <p className="text-sm font-medium text-white">{admin.admin_name}</p>
+                                    <div className="flex items-center gap-2">
+                                      <p className="text-sm font-medium text-white">{admin.admin_name}</p>
+                                      {admin.finder_fee_partner && (
+                                        <span className="px-1.5 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded border border-emerald-500/30">
+                                          Partner
+                                        </span>
+                                      )}
+                                    </div>
                                     <p className="text-xs text-white/40">
+                                      {admin.admin_email && <span className="text-white/50">{admin.admin_email} • </span>}
                                       {ADMIN_RESPONSE_STATUS[admin.response_status as keyof typeof ADMIN_RESPONSE_STATUS]?.label || 'Not Contacted'}
                                     </p>
+                                    {admin.finder_fee_partner && (
+                                      <p className="text-xs text-emerald-400/70 mt-0.5">
+                                        Code: {admin.finder_fee_partner.partner_code} {admin.finder_fee_partner.is_recurring && '(VIP)'}
+                                      </p>
+                                    )}
                                   </div>
                                 </div>
-                                {admin.admin_profile_url && (
-                                  <a
-                                    href={admin.admin_profile_url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="p-2 text-white/40 hover:text-white hover:bg-white/[0.05] rounded-lg transition-colors"
-                                  >
-                                    <ExternalLink className="w-4 h-4" />
-                                  </a>
-                                )}
+                                <div className="flex items-center gap-1">
+                                  {admin.finder_fee_partner && (
+                                    <a
+                                      href={`/admin/finder-fees?partner=${admin.finder_fee_partner.partner_code}`}
+                                      className="p-2 text-emerald-400/60 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"
+                                      title="View Partner"
+                                    >
+                                      <DollarSign className="w-4 h-4" />
+                                    </a>
+                                  )}
+                                  {admin.admin_profile_url && (
+                                    <a
+                                      href={admin.admin_profile_url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="p-2 text-white/40 hover:text-white hover:bg-white/[0.05] rounded-lg transition-colors"
+                                    >
+                                      <ExternalLink className="w-4 h-4" />
+                                    </a>
+                                  )}
+                                </div>
                               </div>
                             ))}
                           </div>

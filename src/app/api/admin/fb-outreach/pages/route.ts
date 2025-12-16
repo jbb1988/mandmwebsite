@@ -71,12 +71,22 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
 
-    // Then get admins for these pages
+    // Then get admins for these pages with their linked partner data
     if (pages && pages.length > 0) {
       const pageIds = pages.map(p => p.id);
       const { data: admins, error: adminsError } = await supabase
         .from('fb_page_admins')
-        .select('*')
+        .select(`
+          *,
+          finder_fee_partner:finder_fee_partner_id (
+            id,
+            partner_code,
+            partner_email,
+            partner_name,
+            enabled,
+            is_recurring
+          )
+        `)
         .in('page_id', pageIds);
 
       if (!adminsError && admins) {
@@ -186,11 +196,12 @@ export async function POST(request: NextRequest) {
     // Insert admins if provided
     if (admins && Array.isArray(admins) && admins.length > 0) {
       const adminRecords = admins
-        .filter((a: { name: string; profile_url?: string }) => a.name?.trim())
-        .map((a: { name: string; profile_url?: string }, index: number) => ({
+        .filter((a: { name: string; profile_url?: string; email?: string }) => a.name?.trim())
+        .map((a: { name: string; profile_url?: string; email?: string }, index: number) => ({
           page_id: pageData.id,
           admin_name: a.name.trim(),
           admin_profile_url: a.profile_url?.trim() || null,
+          admin_email: a.email?.trim() || null, // For auto-linking to finder_fee_partners
           is_primary: index === 0, // First admin is primary
         }));
 
