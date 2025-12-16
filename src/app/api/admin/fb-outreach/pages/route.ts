@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from('fb_page_outreach')
-      .select('*')
+      .select('*, fb_page_admins(*)')
       .order('priority_score', { ascending: false })
       .order('member_count', { ascending: false, nullsFirst: false });
 
@@ -85,8 +85,7 @@ export async function POST(request: NextRequest) {
     const {
       page_name,
       page_url,
-      admin_name,
-      admin_profile_url,
+      admins, // Array of { name, profile_url }
       state,
       member_count,
       group_type,
@@ -121,15 +120,14 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const { data, error } = await supabase
+    // Insert the page first
+    const { data: pageData, error: pageError } = await supabase
       .from('fb_page_outreach')
       .insert({
         page_name,
         page_url: normalizedUrl, // Store normalized URL
         page_type: 'group', // Required field - default to 'group'
         sport: sport || 'baseball', // Required field - accept from body or default to 'baseball'
-        admin_name: admin_name || null,
-        admin_profile_url: admin_profile_url || null,
         state: state || null,
         member_count: member_count || null,
         group_type: group_type || null,
@@ -140,12 +138,35 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
 
-    if (error) {
-      console.error('Error inserting page:', error);
-      return NextResponse.json({ success: false, message: `Insert error: ${error.message}` }, { status: 500 });
+    if (pageError) {
+      console.error('Error inserting page:', pageError);
+      return NextResponse.json({ success: false, message: `Insert error: ${pageError.message}` }, { status: 500 });
     }
 
-    return NextResponse.json({ success: true, message: 'Page added successfully!', page: data });
+    // Insert admins if provided
+    if (admins && Array.isArray(admins) && admins.length > 0) {
+      const adminRecords = admins
+        .filter((a: { name: string; profile_url?: string }) => a.name?.trim())
+        .map((a: { name: string; profile_url?: string }, index: number) => ({
+          page_id: pageData.id,
+          admin_name: a.name.trim(),
+          admin_profile_url: a.profile_url?.trim() || null,
+          is_primary: index === 0, // First admin is primary
+        }));
+
+      if (adminRecords.length > 0) {
+        const { error: adminsError } = await supabase
+          .from('fb_page_admins')
+          .insert(adminRecords);
+
+        if (adminsError) {
+          console.error('Error inserting admins:', adminsError);
+          // Page was created, just warn about admins
+        }
+      }
+    }
+
+    return NextResponse.json({ success: true, message: 'Page added successfully!', page: pageData });
   } catch (error) {
     console.error('Error adding page:', error);
     const message = error instanceof Error ? error.message : 'Failed to add page';

@@ -7,19 +7,29 @@ import { LiquidButton } from '@/components/LiquidButton';
 import {
   Users, Plus, RefreshCw, Search, MapPin, ExternalLink, MessageCircle,
   CheckCircle, Clock, XCircle, Send, FileText, ChevronDown, ChevronUp,
-  Copy, Filter, BarChart3, Calendar
+  Copy, Filter, BarChart3, Calendar, Trash2, UserPlus
 } from 'lucide-react';
 
 type Tab = 'add' | 'pipeline' | 'templates';
 type OutreachStatus = 'not_started' | 'dm_sent' | 'awaiting_response' | 'approved' | 'posted' | 'declined' | 'no_response';
 type GroupType = 'travel_ball' | 'rec_league' | 'showcase' | 'tournament' | 'coaching' | 'parents' | 'equipment' | 'other';
 
+interface FBPageAdmin {
+  id: string;
+  admin_name: string;
+  admin_profile_url: string | null;
+  is_primary: boolean;
+  dm_sent_at: string | null;
+  response_status: string;
+}
+
 interface FBPage {
   id: string;
   page_name: string;
   page_url: string;
-  admin_name: string | null;
-  admin_profile_url: string | null;
+  admin_name: string | null; // Legacy field
+  admin_profile_url: string | null; // Legacy field
+  fb_page_admins: FBPageAdmin[]; // New admins array
   state: string | null;
   member_count: number | null;
   group_type: GroupType | null;
@@ -196,8 +206,6 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
   const [formData, setFormData] = useState({
     page_name: '',
     page_url: '',
-    admin_name: '',
-    admin_profile_url: '',
     state: 'FL',
     member_count: '',
     group_type: 'travel_ball' as GroupType,
@@ -205,9 +213,26 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
     priority_score: '70',
     notes: '',
   });
+  const [admins, setAdmins] = useState([{ name: '', profile_url: '' }]);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
+
+  const addAdmin = () => {
+    setAdmins([...admins, { name: '', profile_url: '' }]);
+  };
+
+  const removeAdmin = (index: number) => {
+    if (admins.length > 1) {
+      setAdmins(admins.filter((_, i) => i !== index));
+    }
+  };
+
+  const updateAdmin = (index: number, field: 'name' | 'profile_url', value: string) => {
+    const updated = [...admins];
+    updated[index][field] = value;
+    setAdmins(updated);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -223,6 +248,7 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
         },
         body: JSON.stringify({
           ...formData,
+          admins: admins.filter(a => a.name.trim()), // Only send admins with names
           member_count: formData.member_count ? parseInt(formData.member_count) : null,
           priority_score: parseInt(formData.priority_score),
         }),
@@ -235,8 +261,6 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
         setFormData({
           page_name: '',
           page_url: '',
-          admin_name: '',
-          admin_profile_url: '',
           state: 'FL',
           member_count: '',
           group_type: 'travel_ball',
@@ -244,6 +268,7 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
           priority_score: '70',
           notes: '',
         });
+        setAdmins([{ name: '', profile_url: '' }]);
         onSuccess();
       }
     } catch {
@@ -291,26 +316,52 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Admin Name</label>
-            <input
-              type="text"
-              value={formData.admin_name}
-              onChange={(e) => setFormData({ ...formData, admin_name: e.target.value })}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500/50"
-              placeholder="Coach Mike"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Admin Profile URL</label>
-            <input
-              type="url"
-              value={formData.admin_profile_url}
-              onChange={(e) => setFormData({ ...formData, admin_profile_url: e.target.value })}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500/50"
-              placeholder="https://facebook.com/coach.mike"
-            />
+          {/* Admins Section */}
+          <div className="md:col-span-2">
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-300">Group Admins</label>
+              <button
+                type="button"
+                onClick={addAdmin}
+                className="flex items-center gap-1 px-2 py-1 text-xs bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30"
+              >
+                <UserPlus className="w-3 h-3" /> Add Admin
+              </button>
+            </div>
+            <div className="space-y-3">
+              {admins.map((admin, index) => (
+                <div key={index} className="flex gap-2 items-start">
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      value={admin.name}
+                      onChange={(e) => updateAdmin(index, 'name', e.target.value)}
+                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500/50 text-sm"
+                      placeholder={`Admin ${index + 1} name`}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <input
+                      type="url"
+                      value={admin.profile_url}
+                      onChange={(e) => updateAdmin(index, 'profile_url', e.target.value)}
+                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500/50 text-sm"
+                      placeholder="Profile URL (optional)"
+                    />
+                  </div>
+                  {admins.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeAdmin(index)}
+                      className="p-2 text-red-400 hover:bg-red-500/20 rounded-lg"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+            <p className="mt-1 text-xs text-gray-500">First admin is marked as primary contact</p>
           </div>
 
           <div>
@@ -587,7 +638,13 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
                       <MapPin className="w-3 h-3" />
                       {page.state || 'N/A'}
                     </span>
-                    {page.admin_name && (
+                    {/* Show admins count or legacy admin */}
+                    {page.fb_page_admins?.length > 0 ? (
+                      <span className="flex items-center gap-1">
+                        <Users className="w-3 h-3" />
+                        {page.fb_page_admins.length} admin{page.fb_page_admins.length > 1 ? 's' : ''}
+                      </span>
+                    ) : page.admin_name && (
                       <span className="flex items-center gap-1">
                         <MessageCircle className="w-3 h-3" />
                         {page.admin_name}
@@ -606,7 +663,21 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
                   >
                     <ExternalLink className="w-3 h-3" /> Group
                   </a>
-                  {page.admin_profile_url && (
+                  {/* Show DM buttons for all admins */}
+                  {page.fb_page_admins?.filter(a => a.admin_profile_url).slice(0, 2).map((admin, idx) => (
+                    <a
+                      key={admin.id}
+                      href={admin.admin_profile_url!}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 text-sm"
+                      title={admin.admin_name}
+                    >
+                      <MessageCircle className="w-3 h-3" /> {admin.admin_name.split(' ')[0]}
+                    </a>
+                  ))}
+                  {/* Fallback to legacy admin_profile_url */}
+                  {(!page.fb_page_admins?.length && page.admin_profile_url) && (
                     <a
                       href={page.admin_profile_url}
                       target="_blank"
@@ -700,6 +771,32 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
                       </button>
                     )}
                   </div>
+                  {/* Show all admins in expanded view */}
+                  {page.fb_page_admins?.length > 0 && (
+                    <div className="mt-4 pt-3 border-t border-white/5">
+                      <p className="text-xs text-gray-500 mb-2">Admins:</p>
+                      <div className="flex flex-wrap gap-2">
+                        {page.fb_page_admins.map((admin) => (
+                          <div key={admin.id} className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg text-sm">
+                            <span className="text-gray-300">{admin.admin_name}</span>
+                            {admin.is_primary && (
+                              <span className="text-xs text-yellow-500">(Primary)</span>
+                            )}
+                            {admin.admin_profile_url && (
+                              <a
+                                href={admin.admin_profile_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-400 hover:text-blue-300"
+                              >
+                                <ExternalLink className="w-3 h-3" />
+                              </a>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   {page.notes && (
                     <p className="mt-3 text-sm text-gray-500">Notes: {page.notes}</p>
                   )}
