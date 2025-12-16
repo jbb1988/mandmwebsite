@@ -1035,6 +1035,7 @@ function TransactionsTab({ onStatusChange }: { onStatusChange: () => void }) {
 function ManualAttributionTab({ onSuccess }: { onSuccess: () => void }) {
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loadingPartners, setLoadingPartners] = useState(false);
+  const [partnerSearch, setPartnerSearch] = useState('');
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   // Finder Fee Form State
@@ -1077,6 +1078,13 @@ function ManualAttributionTab({ onSuccess }: { onSuccess: () => void }) {
     fetchPartners();
   }, []);
 
+  // Filter partners by search
+  const filteredPartners = partners.filter(p =>
+    p.partner_name.toLowerCase().includes(partnerSearch.toLowerCase()) ||
+    p.partner_code.toLowerCase().includes(partnerSearch.toLowerCase()) ||
+    p.partner_email.toLowerCase().includes(partnerSearch.toLowerCase())
+  );
+
   // Calculate Finder Fee preview
   const selectedPartner = partners.find(p => p.partner_code === finderFeeForm.finderCode);
   const finderFeePercentage = selectedPartner?.is_recurring
@@ -1112,6 +1120,7 @@ function ManualAttributionTab({ onSuccess }: { onSuccess: () => void }) {
           purchaseAmount: '',
           isFirstPurchase: true,
         });
+        setPartnerSearch('');
         onSuccess();
       }
     } catch {
@@ -1161,33 +1170,69 @@ function ManualAttributionTab({ onSuccess }: { onSuccess: () => void }) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center border border-purple-500/30">
-          <PlusCircle className="w-6 h-6 text-purple-400" />
+    <div className="max-w-5xl mx-auto">
+      {/* Header with explanation */}
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center border border-purple-500/30">
+            <PlusCircle className="w-6 h-6 text-purple-400" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-white">Manual Attribution</h2>
+            <p className="text-white/50">Credit partners when automatic link tracking fails</p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-2xl font-bold text-white">Manual Attribution</h2>
-          <p className="text-white/50">Credit partners when automatic link tracking fails</p>
+
+        {/* When to use this */}
+        <div className="bg-blue-500/10 border border-blue-500/20 rounded-xl p-4">
+          <div className="flex items-start gap-3">
+            <Info className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <p className="text-blue-400 font-medium mb-1">When to use manual attribution:</p>
+              <ul className="text-gray-400 space-y-1">
+                <li>• Customer didn&apos;t click the partner&apos;s referral link</li>
+                <li>• Link tracking failed (cleared cookies, different device, etc.)</li>
+                <li>• Partner told you about a referral that wasn&apos;t tracked automatically</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid lg:grid-cols-2 gap-8">
         {/* Finder Fee Form */}
-        <div className="bg-orange-500/5 border border-orange-500/20 rounded-xl p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <DollarSign className="w-5 h-5 text-orange-400" />
-            <h3 className="text-lg font-semibold text-orange-400">Finder Fee Attribution</h3>
+        <div className="bg-gradient-to-br from-orange-500/10 to-orange-500/5 border border-orange-500/20 rounded-2xl p-6">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-orange-500/20 rounded-xl flex items-center justify-center border border-orange-500/30">
+              <DollarSign className="w-5 h-5 text-orange-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-orange-400">Finder Fee Program</h3>
+              <p className="text-xs text-orange-400/60">Manual / Invite-Only Partners</p>
+            </div>
           </div>
-          <p className="text-sm text-gray-400 mb-4">
-            For manual/invite-only finder partners (10% one-time or VIP recurring)
-          </p>
+
+          <div className="bg-orange-500/10 rounded-lg p-3 mb-5 text-xs text-gray-300">
+            <strong className="text-orange-400">How it works:</strong> You manually set up finder partners (in the &quot;Add Partner&quot; tab).
+            When they refer an org that purchases, create a fee record here. You pay them via Venmo/Zelle.
+          </div>
 
           <form onSubmit={handleFinderFeeSubmit} className="space-y-4">
+            {/* Searchable Partner Selection */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Select Finder Partner
+                1. Select Finder Partner
               </label>
+              <div className="relative mb-2">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
+                <input
+                  type="text"
+                  placeholder="Search by name, code, or email..."
+                  value={partnerSearch}
+                  onChange={(e) => setPartnerSearch(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm placeholder-gray-500 focus:ring-2 focus:ring-orange-500/50"
+                />
+              </div>
               <select
                 required
                 value={finderFeeForm.finderCode}
@@ -1196,17 +1241,40 @@ function ManualAttributionTab({ onSuccess }: { onSuccess: () => void }) {
                 disabled={loadingPartners}
               >
                 <option value="">-- Select Partner --</option>
-                {partners.map((partner) => (
+                {filteredPartners.map((partner) => (
                   <option key={partner.id} value={partner.partner_code}>
-                    {partner.partner_name} ({partner.partner_code}) {partner.is_recurring ? '⭐ VIP' : ''}
+                    {partner.partner_name} ({partner.partner_code}) {partner.is_recurring ? '⭐ VIP' : '• Standard'}
                   </option>
                 ))}
               </select>
+              {loadingPartners && <p className="text-xs text-gray-500 mt-1">Loading partners...</p>}
+              {!loadingPartners && filteredPartners.length === 0 && partnerSearch && (
+                <p className="text-xs text-yellow-400 mt-1">No partners match &quot;{partnerSearch}&quot;</p>
+              )}
             </div>
+
+            {/* Selected Partner Info */}
+            {selectedPartner && (
+              <div className="bg-white/5 border border-white/10 rounded-lg p-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-white font-medium">{selectedPartner.partner_name}</p>
+                    <p className="text-xs text-gray-400">{selectedPartner.partner_email}</p>
+                  </div>
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    selectedPartner.is_recurring
+                      ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                      : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                  }`}>
+                    {selectedPartner.is_recurring ? '⭐ VIP (10%/5%)' : 'Standard (10%)'}
+                  </span>
+                </div>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Organization Email
+                2. Organization Email <span className="text-gray-500 font-normal">(who purchased)</span>
               </label>
               <input
                 type="email"
@@ -1220,18 +1288,21 @@ function ManualAttributionTab({ onSuccess }: { onSuccess: () => void }) {
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Purchase Amount ($)
+                3. Purchase Amount <span className="text-gray-500 font-normal">(from Stripe)</span>
               </label>
-              <input
-                type="number"
-                required
-                min="0"
-                step="0.01"
-                value={finderFeeForm.purchaseAmount}
-                onChange={(e) => setFinderFeeForm({ ...finderFeeForm, purchaseAmount: e.target.value })}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500/50"
-                placeholder="1284.00"
-              />
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  step="0.01"
+                  value={finderFeeForm.purchaseAmount}
+                  onChange={(e) => setFinderFeeForm({ ...finderFeeForm, purchaseAmount: e.target.value })}
+                  className="w-full pl-8 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500/50"
+                  placeholder="1284.00"
+                />
+              </div>
             </div>
 
             {selectedPartner?.is_recurring && (
@@ -1245,80 +1316,109 @@ function ManualAttributionTab({ onSuccess }: { onSuccess: () => void }) {
                     className="h-4 w-4 text-purple-500 focus:ring-purple-500 border-gray-600 rounded bg-gray-700"
                   />
                   <label htmlFor="isFirstPurchase" className="ml-2 text-sm text-gray-300">
-                    First purchase (10%)
+                    First purchase from this org
                   </label>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  {finderFeeForm.isFirstPurchase ? 'Partner gets 10%' : 'Renewal: Partner gets 5%'}
+                  VIP partners get <strong className="text-purple-400">10%</strong> on first purchase, <strong className="text-purple-400">5%</strong> on renewals
                 </p>
               </div>
             )}
 
             {/* Fee Preview */}
             {finderFeeForm.purchaseAmount && selectedPartner && (
-              <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
-                <p className="text-sm text-green-400">
-                  <strong>Fee Preview:</strong> ${finderFeeAmount} ({finderFeePercentage}% of ${finderFeeForm.purchaseAmount})
+              <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-300">Partner Fee:</span>
+                  <span className="text-2xl font-bold text-green-400">${finderFeeAmount}</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {finderFeePercentage}% of ${finderFeeForm.purchaseAmount}
                 </p>
               </div>
             )}
 
             <button
               type="submit"
-              disabled={finderFeeLoading}
-              className="w-full py-3 px-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all disabled:opacity-50"
+              disabled={finderFeeLoading || !selectedPartner}
+              className="w-full py-3 px-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {finderFeeLoading ? 'Creating...' : 'Create Finder Fee'}
+              {finderFeeLoading ? 'Creating...' : 'Create Finder Fee Record'}
             </button>
           </form>
 
           {finderFeeResult && (
-            <div className={`mt-4 p-3 rounded-lg ${finderFeeResult.success ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
+            <div className={`mt-4 p-4 rounded-xl ${finderFeeResult.success ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
               <div className="flex items-center gap-2">
                 {finderFeeResult.success ? (
-                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <CheckCircle className="w-5 h-5 text-green-400" />
                 ) : (
-                  <AlertCircle className="w-4 h-4 text-red-400" />
+                  <AlertCircle className="w-5 h-5 text-red-400" />
                 )}
-                <p className={`text-sm ${finderFeeResult.success ? 'text-green-400' : 'text-red-400'}`}>
+                <p className={`text-sm font-medium ${finderFeeResult.success ? 'text-green-400' : 'text-red-400'}`}>
                   {finderFeeResult.message}
                 </p>
               </div>
+              {finderFeeResult.success && (
+                <p className="text-xs text-gray-400 mt-2">
+                  Fee record created with status &quot;pending&quot;. Go to Transactions tab to approve and mark as paid.
+                </p>
+              )}
             </div>
           )}
         </div>
 
-        {/* Tolt Partner Program Form */}
-        <div className="bg-green-500/5 border border-green-500/20 rounded-xl p-6">
-          <div className="flex items-center gap-2 mb-4">
-            <Users className="w-5 h-5 text-green-400" />
-            <h3 className="text-lg font-semibold text-green-400">Partner Program (Tolt)</h3>
+        {/* Tolt Partner Program */}
+        <div className="bg-gradient-to-br from-green-500/10 to-green-500/5 border border-green-500/20 rounded-2xl p-6">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center border border-green-500/30">
+              <Users className="w-5 h-5 text-green-400" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-green-400">Partner Program (Tolt)</h3>
+              <p className="text-xs text-green-400/60">Self-Service Affiliates</p>
+            </div>
           </div>
-          <p className="text-sm text-gray-400 mb-4">
-            For self-service affiliate partners (10-15% recurring via Tolt)
-          </p>
+
+          <div className="bg-green-500/10 rounded-lg p-3 mb-5 text-xs text-gray-300">
+            <strong className="text-green-400">How it works:</strong> Partners sign up at /partner-program and get their own referral link from Tolt.
+            When customers click and purchase, Tolt tracks it automatically. Use this only when tracking failed.
+          </div>
+
+          {/* Warning about needing partner code */}
+          <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 mb-5">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />
+              <div className="text-xs">
+                <p className="text-yellow-400 font-medium">You need the partner&apos;s referral code</p>
+                <p className="text-gray-400 mt-1">
+                  Look it up in <a href="https://app.tolt.io" target="_blank" rel="noopener noreferrer" className="text-green-400 hover:underline">Tolt Dashboard</a> → Partners → find partner → copy their code
+                </p>
+              </div>
+            </div>
+          </div>
 
           <form onSubmit={handleToltSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Partner Referral Code
+                1. Partner&apos;s Tolt Code
               </label>
               <input
                 type="text"
                 required
                 value={toltForm.referralCode}
-                onChange={(e) => setToltForm({ ...toltForm, referralCode: e.target.value.toUpperCase() })}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500/50"
-                placeholder="e.g., COACH123"
+                onChange={(e) => setToltForm({ ...toltForm, referralCode: e.target.value })}
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500/50 font-mono"
+                placeholder="e.g., john-smith-abc123"
               />
               <p className="text-xs text-gray-500 mt-1">
-                The partner&apos;s Tolt referral code (from their dashboard)
+                The partner&apos;s unique Tolt referral code (from their Tolt dashboard)
               </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Customer Email
+                2. Customer Email <span className="text-gray-500 font-normal">(who purchased)</span>
               </label>
               <input
                 type="email"
@@ -1332,28 +1432,32 @@ function ManualAttributionTab({ onSuccess }: { onSuccess: () => void }) {
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Purchase Amount ($)
+                3. Purchase Amount <span className="text-gray-500 font-normal">(from Stripe)</span>
               </label>
-              <input
-                type="number"
-                required
-                min="0"
-                step="0.01"
-                value={toltForm.amount}
-                onChange={(e) => setToltForm({ ...toltForm, amount: e.target.value })}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500/50"
-                placeholder="1284.00"
-              />
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  step="0.01"
+                  value={toltForm.amount}
+                  onChange={(e) => setToltForm({ ...toltForm, amount: e.target.value })}
+                  className="w-full pl-8 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500/50"
+                  placeholder="1284.00"
+                />
+              </div>
             </div>
 
             {/* Tolt Commission Preview */}
             {toltForm.amount && (
-              <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
-                <p className="text-sm text-green-400">
-                  <strong>Commission Preview:</strong> ${(parseFloat(toltForm.amount) * 0.10).toFixed(2)} (10% of ${toltForm.amount})
-                </p>
+              <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-300">Estimated Commission:</span>
+                  <span className="text-2xl font-bold text-green-400">${(parseFloat(toltForm.amount) * 0.10).toFixed(2)}</span>
+                </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  Actual % depends on partner tier in Tolt
+                  ~10% of ${toltForm.amount} (actual % depends on partner tier)
                 </p>
               </div>
             )}
@@ -1361,41 +1465,64 @@ function ManualAttributionTab({ onSuccess }: { onSuccess: () => void }) {
             <button
               type="submit"
               disabled={toltLoading}
-              className="w-full py-3 px-6 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-green-700 transition-all disabled:opacity-50"
+              className="w-full py-3 px-6 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-green-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {toltLoading ? 'Creating...' : 'Create Tolt Conversion'}
             </button>
           </form>
 
           {toltResult && (
-            <div className={`mt-4 p-3 rounded-lg ${toltResult.success ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
+            <div className={`mt-4 p-4 rounded-xl ${toltResult.success ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
               <div className="flex items-center gap-2">
                 {toltResult.success ? (
-                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <CheckCircle className="w-5 h-5 text-green-400" />
                 ) : (
-                  <AlertCircle className="w-4 h-4 text-red-400" />
+                  <AlertCircle className="w-5 h-5 text-red-400" />
                 )}
-                <p className={`text-sm ${toltResult.success ? 'text-green-400' : 'text-red-400'}`}>
+                <p className={`text-sm font-medium ${toltResult.success ? 'text-green-400' : 'text-red-400'}`}>
                   {toltResult.message}
                 </p>
               </div>
+              {toltResult.success && (
+                <p className="text-xs text-gray-400 mt-2">
+                  Conversion sent to Tolt. Partner will see it in their dashboard and get paid via Tolt&apos;s payout system.
+                </p>
+              )}
             </div>
           )}
 
-          {/* Tolt Dashboard Link */}
-          <div className="mt-4 pt-4 border-t border-green-500/20">
-            <p className="text-xs text-gray-400 mb-2">
-              Or create directly in Tolt dashboard:
-            </p>
-            <a
-              href="https://app.tolt.io"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm text-green-400 hover:text-green-300"
-            >
-              <ExternalLink className="w-4 h-4" />
-              Open Tolt Dashboard → Conversions → Create
-            </a>
+          {/* Quick Links */}
+          <div className="mt-6 pt-4 border-t border-green-500/20 space-y-2">
+            <p className="text-xs text-gray-400 font-medium">Quick Links:</p>
+            <div className="flex flex-wrap gap-2">
+              <a
+                href="https://app.tolt.io"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 text-green-400 rounded-lg text-xs hover:bg-green-500/20 transition-colors"
+              >
+                <ExternalLink className="w-3 h-3" />
+                Tolt Dashboard
+              </a>
+              <a
+                href="https://app.tolt.io/partners"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 text-green-400 rounded-lg text-xs hover:bg-green-500/20 transition-colors"
+              >
+                <Users className="w-3 h-3" />
+                View Partners
+              </a>
+              <a
+                href="https://app.tolt.io/conversions"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 text-green-400 rounded-lg text-xs hover:bg-green-500/20 transition-colors"
+              >
+                <DollarSign className="w-3 h-3" />
+                View Conversions
+              </a>
+            </div>
           </div>
         </div>
       </div>
