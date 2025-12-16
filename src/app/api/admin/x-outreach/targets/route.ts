@@ -74,6 +74,7 @@ export async function POST(request: NextRequest) {
       bio,
       priority_score,
       notes,
+      contact_email,
     } = body;
 
     if (!handle) {
@@ -121,6 +122,7 @@ export async function POST(request: NextRequest) {
         bio: bio || null,
         priority_score: priority_score || calculatePriority(follower_count),
         notes: notes || null,
+        contact_email: contact_email || null,
         outreach_status: 'not_started',
         response_status: 'no_response',
       })

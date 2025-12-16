@@ -7,7 +7,7 @@ import {
   CheckCircle, Clock, XCircle, Send, FileText, ChevronDown, ChevronUp,
   Copy, Filter, BarChart3, Calendar, Trash2, UserPlus, AlertCircle, Bell,
   Pencil, X, QrCode, Link2, DollarSign, TrendingUp, UserCheck, Image,
-  CalendarClock, Handshake
+  CalendarClock, Handshake, Gift, Loader2
 } from 'lucide-react';
 
 type Tab = 'add' | 'pipeline' | 'follow-up' | 'partners' | 'templates';
@@ -46,6 +46,10 @@ interface FBPageAdmin {
   // Partner link
   finder_fee_partner_id: string | null;
   finder_fee_partner: FinderFeePartner | null;
+  // Trial tracking
+  trial_granted_at: string | null;
+  trial_granted_to_email: string | null;
+  trial_expires_at: string | null;
 }
 
 // Response type configuration
@@ -1184,6 +1188,16 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
                   </span>
                 </p>
               </div>
+
+              {/* Trial Grant Section */}
+              <TrialGrantSection
+                admin={editingAdmin.admin}
+                email={adminForm.email || editingAdmin.admin.admin_email || ''}
+                onTrialGranted={() => {
+                  fetchPages();
+                  setEditingAdmin(null);
+                }}
+              />
             </div>
 
             <div className="flex gap-3 mt-6 pt-4 border-t border-white/[0.06]">
@@ -1597,6 +1611,144 @@ function PartnersTab({ onUpdate }: { onUpdate: () => void }) {
               </Card>
             );
           })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Trial Grant Section Component for FB Admins
+function TrialGrantSection({
+  admin,
+  email,
+  onTrialGranted,
+}: {
+  admin: FBPageAdmin;
+  email: string;
+  onTrialGranted: () => void;
+}) {
+  const [grantingTrial, setGrantingTrial] = useState(false);
+  const [trialMessage, setTrialMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
+
+  const handleGrantTrial = async () => {
+    if (!email.trim()) {
+      setTrialMessage({ type: 'error', text: 'Please enter an email address first' });
+      return;
+    }
+
+    setGrantingTrial(true);
+    setTrialMessage(null);
+
+    try {
+      const response = await fetch('/api/admin/grant-trial', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': adminPassword,
+        },
+        body: JSON.stringify({
+          email: email,
+          source: 'fb_outreach',
+          source_record_id: admin.id,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setTrialMessage({ type: 'success', text: data.message });
+        setTimeout(() => onTrialGranted(), 1500);
+      } else {
+        setTrialMessage({ type: 'error', text: data.message });
+      }
+    } catch (error) {
+      setTrialMessage({ type: 'error', text: 'Failed to grant trial' });
+    } finally {
+      setGrantingTrial(false);
+    }
+  };
+
+  const getTrialStatusBadge = () => {
+    if (admin.trial_granted_at && admin.trial_expires_at) {
+      const expiresAt = new Date(admin.trial_expires_at);
+      const now = new Date();
+      if (expiresAt > now) {
+        const daysLeft = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        return (
+          <span className="px-2 py-1 rounded-lg text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+            <Gift className="w-3 h-3" />
+            Trial Active ({daysLeft}d left)
+          </span>
+        );
+      } else {
+        return (
+          <span className="px-2 py-1 rounded-lg text-xs bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center gap-1">
+            <Gift className="w-3 h-3" />
+            Trial Expired
+          </span>
+        );
+      }
+    }
+    return null;
+  };
+
+  const trialBadge = getTrialStatusBadge();
+
+  return (
+    <div className="pt-4 border-t border-white/[0.06]">
+      <label className="block text-sm font-medium text-white/70 mb-2 flex items-center gap-2">
+        <Gift className="w-4 h-4 text-emerald-400" />
+        30-Day Pro Trial
+      </label>
+
+      {trialBadge && (
+        <div className="mb-3">
+          {trialBadge}
+          {admin.trial_granted_to_email && (
+            <p className="text-xs text-white/40 mt-1">
+              Granted to {admin.trial_granted_to_email} on {new Date(admin.trial_granted_at!).toLocaleDateString()}
+            </p>
+          )}
+        </div>
+      )}
+
+      {!admin.trial_granted_at && (
+        <>
+          <button
+            onClick={handleGrantTrial}
+            disabled={grantingTrial || !email.trim()}
+            className={`w-full px-4 py-2.5 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-all ${
+              !email.trim()
+                ? 'bg-white/5 text-white/30 cursor-not-allowed'
+                : grantingTrial
+                ? 'bg-emerald-500/20 text-emerald-400'
+                : 'bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:opacity-90'
+            }`}
+          >
+            {grantingTrial ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Granting...
+              </>
+            ) : (
+              <>
+                <Gift className="w-4 h-4" />
+                Grant 30-Day Pro Trial
+              </>
+            )}
+          </button>
+          {!email.trim() && (
+            <p className="text-xs text-yellow-400/70 mt-2">
+              Add email above to enable trial grant
+            </p>
+          )}
+        </>
+      )}
+
+      {trialMessage && (
+        <div className={`mt-2 text-sm ${trialMessage.type === 'success' ? 'text-emerald-400' : 'text-red-400'}`}>
+          {trialMessage.text}
         </div>
       )}
     </div>
