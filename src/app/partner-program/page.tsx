@@ -962,32 +962,15 @@ export default function PartnerProgramPage() {
         </p>
 
         <LiquidGlass variant="orange" glow={true} className="p-8">
-          {/* Example Banner Placeholder */}
-          <div className="rounded-xl overflow-hidden mb-8 bg-gradient-to-br from-[#0A0B14] to-[#1B1F39] border border-white/10">
-            <div className="aspect-[2/1] flex items-center justify-center bg-gradient-to-br from-solar-surge-orange/10 to-neon-cortex-blue/10">
-              <div className="text-center p-8">
-                <div className="w-16 h-16 bg-solar-surge-orange/20 rounded-xl flex items-center justify-center mx-auto mb-4 border border-solar-surge-orange/30">
-                  <Image
-                    src="/assets/images/logo.png"
-                    alt="Mind & Muscle"
-                    width={48}
-                    height={48}
-                    className="object-contain"
-                  />
-                </div>
-                <h3 className="text-2xl font-black text-white mb-2">Your Organization + Mind & Muscle</h3>
-                <p className="text-text-secondary">Professional co-branded banner with your logo</p>
-                <div className="mt-4 flex items-center justify-center gap-4">
-                  <div className="px-4 py-2 bg-solar-surge-orange/20 border border-solar-surge-orange/30 rounded-lg text-sm text-solar-surge-orange font-semibold">
-                    Your Logo Here
-                  </div>
-                  <span className="text-gray-500">+</span>
-                  <div className="px-4 py-2 bg-neon-cortex-blue/20 border border-neon-cortex-blue/30 rounded-lg text-sm text-neon-cortex-blue font-semibold">
-                    Powered by Mind & Muscle
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* Example Partner Banner */}
+          <div className="rounded-xl overflow-hidden mb-8 border border-white/10">
+            <Image
+              src="/assets/images/example-partner-banner.png"
+              alt="Example Co-Branded Partner Banner"
+              width={1600}
+              height={900}
+              className="w-full h-auto"
+            />
           </div>
 
           {/* Use Cases */}
