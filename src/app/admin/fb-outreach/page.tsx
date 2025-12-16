@@ -940,13 +940,57 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
                             {page.member_count.toLocaleString()}
                           </span>
                         )}
-                        {admins.length > 0 && (
-                          <span>{admins.length} admin{admins.length > 1 ? 's' : ''}</span>
+                        {admins.length > 0 ? (
+                          <span className="text-emerald-400/70">{admins.length} admin{admins.length > 1 ? 's' : ''}</span>
+                        ) : (
+                          <span className="text-yellow-400/70">No admins</span>
                         )}
                         {urgency && (
                           <span className={`text-${urgency.color}-400`}>{urgency.label}</span>
                         )}
                       </div>
+                    </div>
+
+                    {/* Status Badges */}
+                    <div className="hidden sm:flex items-center gap-2">
+                      {/* Trial Status Badge */}
+                      {(() => {
+                        const hasActiveTrial = admins.some(a =>
+                          a.trial_granted_at && a.trial_expires_at && new Date(a.trial_expires_at) > new Date()
+                        );
+                        const hasAnyTrial = admins.some(a => a.trial_granted_at);
+
+                        if (hasActiveTrial) {
+                          return (
+                            <span className="p-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/30" title="Active Trial">
+                              <Gift className="w-4 h-4 text-emerald-400 animate-pulse" />
+                            </span>
+                          );
+                        } else if (hasAnyTrial) {
+                          return (
+                            <span className="p-1.5 rounded-lg bg-orange-500/20 border border-orange-500/30" title="Trial Expired">
+                              <Gift className="w-4 h-4 text-orange-400" />
+                            </span>
+                          );
+                        } else {
+                          return (
+                            <span className="p-1.5 rounded-lg bg-white/5 border border-white/10" title="No Trial">
+                              <Gift className="w-4 h-4 text-white/20" />
+                            </span>
+                          );
+                        }
+                      })()}
+
+                      {/* Admin Status Badge */}
+                      {admins.length > 0 ? (
+                        <span className="p-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/30" title={`${admins.length} Admin${admins.length > 1 ? 's' : ''}`}>
+                          <UserCheck className="w-4 h-4 text-emerald-400" />
+                        </span>
+                      ) : (
+                        <span className="p-1.5 rounded-lg bg-yellow-500/20 border border-yellow-500/30" title="No Admins">
+                          <Users className="w-4 h-4 text-yellow-400/50" />
+                        </span>
+                      )}
                     </div>
 
                     {/* Status & Actions */}
