@@ -934,60 +934,6 @@ export default function BannerGeneratorPage() {
                 }}
               />
 
-              {/* TOP BAR: Partner Logo + "Powered by Mind & Muscle" */}
-              <div
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  height: '80px',
-                  background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.4) 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  paddingLeft: '140px',
-                  paddingRight: '140px',
-                  gap: '16px',
-                }}
-              >
-                {partnerLogo ? (
-                  <img
-                    src={partnerLogo}
-                    alt="Partner"
-                    style={{
-                      height: '60px',
-                      maxWidth: '200px',
-                      objectFit: 'contain',
-                    }}
-                  />
-                ) : (
-                  <div
-                    style={{
-                      height: '60px',
-                      width: '120px',
-                      backgroundColor: 'rgba(255,255,255,0.1)',
-                      borderRadius: '8px',
-                      border: '2px dashed rgba(255,255,255,0.3)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                    }}
-                  >
-                    <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Partner Logo</span>
-                  </div>
-                )}
-                <span
-                  style={{
-                    fontSize: '18px',
-                    fontWeight: 500,
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    textShadow: '0 2px 8px rgba(0,0,0,0.5)',
-                  }}
-                >
-                  Powered by Mind & Muscle
-                </span>
-              </div>
-
               {/* SAFE ZONE CONTAINER: 1320x720px centered (140px L/R, 90px T/B) */}
               <div
                 style={{
@@ -1009,7 +955,55 @@ export default function BannerGeneratorPage() {
                     paddingRight: '40px',
                   }}
                 >
-                  {/* Headline - Left aligned, vertically centered */}
+                  {/* Partner Logo + "Powered by Mind & Muscle" - Above headline */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '14px',
+                      marginBottom: '24px',
+                    }}
+                  >
+                    {partnerLogo ? (
+                      <img
+                        src={partnerLogo}
+                        alt="Partner"
+                        style={{
+                          height: '60px',
+                          maxWidth: '180px',
+                          objectFit: 'contain',
+                          filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))',
+                        }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          height: '60px',
+                          width: '100px',
+                          backgroundColor: 'rgba(255,255,255,0.1)',
+                          borderRadius: '8px',
+                          border: '2px dashed rgba(255,255,255,0.3)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>Partner Logo</span>
+                      </div>
+                    )}
+                    <span
+                      style={{
+                        fontSize: '18px',
+                        fontWeight: 500,
+                        color: 'rgba(255, 255, 255, 0.9)',
+                        textShadow: '0 2px 8px rgba(0,0,0,0.6)',
+                      }}
+                    >
+                      Powered by Mind & Muscle
+                    </span>
+                  </div>
+
+                  {/* Headline - Left aligned */}
                   <h1
                     style={{
                       margin: 0,
@@ -1037,25 +1031,10 @@ export default function BannerGeneratorPage() {
                     </span>
                   </h1>
 
-                  {/* M&M Logo - Center aligned with "Dominate the Game" */}
-                  <img
-                    src="/assets/images/logo.png"
-                    alt="Mind & Muscle"
-                    style={{
-                      width: '100px',
-                      height: '100px',
-                      marginTop: '20px',
-                      marginBottom: '16px',
-                      alignSelf: 'flex-start',
-                      marginLeft: '180px', // Roughly center-aligned with "Dominate the Game"
-                      filter: 'drop-shadow(0 5px 16px rgba(0,0,0,0.15))',
-                    }}
-                  />
-
                   {/* Subhead */}
                   <p
                     style={{
-                      margin: 0,
+                      margin: '28px 0 0 0',
                       fontSize: '22px',
                       color: 'rgba(255, 255, 255, 0.9)',
                       fontWeight: 500,
@@ -1065,6 +1044,20 @@ export default function BannerGeneratorPage() {
                   >
                     AI Training for Baseball & Softball Athletes
                   </p>
+
+                  {/* M&M Logo - Below subhead, center-aligned with "Dominate the Game" */}
+                  <img
+                    src="/assets/images/logo.png"
+                    alt="Mind & Muscle"
+                    style={{
+                      width: '100px',
+                      height: '100px',
+                      marginTop: '20px',
+                      alignSelf: 'flex-start',
+                      marginLeft: '180px', // Roughly center-aligned with "Dominate the Game"
+                      filter: 'drop-shadow(0 5px 16px rgba(0,0,0,0.15))',
+                    }}
+                  />
                 </div>
 
                 {/* RIGHT SIDE - 35% width - QR Code Block (no logo - moved to left side) */}
