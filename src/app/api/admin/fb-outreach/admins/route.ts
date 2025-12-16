@@ -1,0 +1,112 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
+
+function verifyAdmin(request: NextRequest): boolean {
+  const password = request.headers.get('X-Admin-Password');
+  return password === ADMIN_PASSWORD;
+}
+
+// PATCH - Update admin status (dm_sent_at, response_status)
+export async function PATCH(request: NextRequest) {
+  if (!verifyAdmin(request)) {
+    return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json();
+    const { admin_id, response_status, dm_sent_at, notes } = body;
+
+    if (!admin_id) {
+      return NextResponse.json({ success: false, message: 'Admin ID is required' }, { status: 400 });
+    }
+
+    const updates: Record<string, unknown> = {};
+    if (response_status) updates.response_status = response_status;
+    if (dm_sent_at) updates.dm_sent_at = dm_sent_at;
+    if (notes !== undefined) updates.notes = notes;
+
+    const { data, error } = await supabase
+      .from('fb_page_admins')
+      .update(updates)
+      .eq('id', admin_id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true, message: 'Admin updated successfully!', admin: data });
+  } catch (error) {
+    console.error('Error updating admin:', error);
+    return NextResponse.json({ success: false, message: 'Failed to update admin' }, { status: 500 });
+  }
+}
+
+// POST - Add new admin to existing page
+export async function POST(request: NextRequest) {
+  if (!verifyAdmin(request)) {
+    return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const body = await request.json();
+    const { page_id, admin_name, admin_profile_url } = body;
+
+    if (!page_id || !admin_name) {
+      return NextResponse.json({ success: false, message: 'Page ID and admin name are required' }, { status: 400 });
+    }
+
+    const { data, error } = await supabase
+      .from('fb_page_admins')
+      .insert({
+        page_id,
+        admin_name,
+        admin_profile_url: admin_profile_url || null,
+        is_primary: false,
+        response_status: 'not_contacted',
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true, message: 'Admin added successfully!', admin: data });
+  } catch (error) {
+    console.error('Error adding admin:', error);
+    return NextResponse.json({ success: false, message: 'Failed to add admin' }, { status: 500 });
+  }
+}
+
+// DELETE - Remove admin
+export async function DELETE(request: NextRequest) {
+  if (!verifyAdmin(request)) {
+    return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
+    const { searchParams } = new URL(request.url);
+    const admin_id = searchParams.get('admin_id');
+
+    if (!admin_id) {
+      return NextResponse.json({ success: false, message: 'Admin ID is required' }, { status: 400 });
+    }
+
+    const { error } = await supabase
+      .from('fb_page_admins')
+      .delete()
+      .eq('id', admin_id);
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true, message: 'Admin deleted successfully!' });
+  } catch (error) {
+    console.error('Error deleting admin:', error);
+    return NextResponse.json({ success: false, message: 'Failed to delete admin' }, { status: 500 });
+  }
+}

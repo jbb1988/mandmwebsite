@@ -7,7 +7,7 @@ import { LiquidButton } from '@/components/LiquidButton';
 import {
   Users, Plus, RefreshCw, Search, MapPin, ExternalLink, MessageCircle,
   CheckCircle, Clock, XCircle, Send, FileText, ChevronDown, ChevronUp,
-  Copy, Filter, BarChart3, Calendar, Trash2, UserPlus
+  Copy, Filter, BarChart3, Calendar, Trash2, UserPlus, AlertCircle, Bell
 } from 'lucide-react';
 
 type Tab = 'add' | 'pipeline' | 'templates';
@@ -54,6 +54,8 @@ interface Stats {
   total: number;
   byStatus: Record<OutreachStatus, number>;
   byState: Record<string, number>;
+  needsFollowUp?: number;
+  readyToPost?: number;
 }
 
 const STATUS_CONFIG: Record<OutreachStatus, { label: string; color: string; icon: typeof Clock }> = {
@@ -73,6 +75,34 @@ const US_STATES = [
   'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
   'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'
 ];
+
+// Helper function to calculate days since a date
+function daysSince(date: string | null): number | null {
+  if (!date) return null;
+  const sent = new Date(date);
+  const now = new Date();
+  const diff = now.getTime() - sent.getTime();
+  return Math.floor(diff / (1000 * 60 * 60 * 24));
+}
+
+// Get follow-up urgency based on days since DM
+function getFollowUpUrgency(days: number | null): { label: string; color: string; urgent: boolean } | null {
+  if (days === null) return null;
+  if (days >= 7) return { label: `${days}d - Follow up!`, color: 'red', urgent: true };
+  if (days >= 3) return { label: `${days}d - Consider follow-up`, color: 'yellow', urgent: false };
+  if (days >= 1) return { label: `${days}d ago`, color: 'gray', urgent: false };
+  return { label: 'Today', color: 'green', urgent: false };
+}
+
+// Admin response status options
+const ADMIN_RESPONSE_STATUS = {
+  not_contacted: { label: 'Not Contacted', color: 'gray' },
+  dm_sent: { label: 'DM Sent', color: 'blue' },
+  responded: { label: 'Responded', color: 'cyan' },
+  approved: { label: 'Approved', color: 'green' },
+  declined: { label: 'Declined', color: 'red' },
+  no_response: { label: 'No Response', color: 'orange' },
+};
 
 export default function AdminFBOutreachPage() {
   const [activeTab, setActiveTab] = useState<Tab>('pipeline');
@@ -119,7 +149,7 @@ export default function AdminFBOutreachPage() {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 mb-8">
               <LiquidGlass className="p-4">
                 <div className="text-center">
                   <p className="text-2xl font-bold text-white">{stats.total}</p>
@@ -128,20 +158,34 @@ export default function AdminFBOutreachPage() {
               </LiquidGlass>
               <LiquidGlass className="p-4">
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-blue-400">{stats.byStatus?.dm_sent || 0}</p>
-                  <p className="text-xs text-gray-400">DMs Sent</p>
+                  <p className="text-2xl font-bold text-gray-400">{stats.byStatus?.not_started || 0}</p>
+                  <p className="text-xs text-gray-400">Not Started</p>
                 </div>
               </LiquidGlass>
               <LiquidGlass className="p-4">
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-yellow-400">{stats.byStatus?.awaiting_response || 0}</p>
-                  <p className="text-xs text-gray-400">Awaiting</p>
+                  <p className="text-2xl font-bold text-blue-400">{stats.byStatus?.dm_sent || 0}</p>
+                  <p className="text-xs text-gray-400">DMs Sent</p>
+                </div>
+              </LiquidGlass>
+              <LiquidGlass className="p-4 border-2 border-red-500/30">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-red-400">{stats.needsFollowUp || 0}</p>
+                  <p className="text-xs text-red-400 flex items-center justify-center gap-1">
+                    <Bell className="w-3 h-3" /> Follow Up!
+                  </p>
                 </div>
               </LiquidGlass>
               <LiquidGlass className="p-4">
                 <div className="text-center">
                   <p className="text-2xl font-bold text-green-400">{stats.byStatus?.approved || 0}</p>
                   <p className="text-xs text-gray-400">Approved</p>
+                </div>
+              </LiquidGlass>
+              <LiquidGlass className="p-4 border-2 border-green-500/30">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-green-400">{stats.readyToPost || 0}</p>
+                  <p className="text-xs text-green-400">Ready to Post</p>
                 </div>
               </LiquidGlass>
               <LiquidGlass className="p-4">
@@ -210,7 +254,7 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
     member_count: '',
     group_type: 'travel_ball' as GroupType,
     sport: 'baseball' as 'baseball' | 'softball' | 'both',
-    priority_score: '70',
+    priority_score: '3',
     notes: '',
   });
   const [admins, setAdmins] = useState([{ name: '', profile_url: '' }]);
@@ -265,7 +309,7 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
           member_count: '',
           group_type: 'travel_ball',
           sport: 'baseball',
-          priority_score: '70',
+          priority_score: '3',
           notes: '',
         });
         setAdmins([{ name: '', profile_url: '' }]);
@@ -383,7 +427,16 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
             <input
               type="number"
               value={formData.member_count}
-              onChange={(e) => setFormData({ ...formData, member_count: e.target.value })}
+              onChange={(e) => {
+                const members = parseInt(e.target.value) || 0;
+                // Auto-calculate priority based on member count
+                let priority = '1';
+                if (members >= 10000) priority = '5';
+                else if (members >= 5000) priority = '4';
+                else if (members >= 1000) priority = '3';
+                else if (members >= 500) priority = '2';
+                setFormData({ ...formData, member_count: e.target.value, priority_score: priority });
+              }}
               className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500/50"
               placeholder="e.g., 5000"
             />
@@ -421,16 +474,27 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Priority (1-100)</label>
-            <input
-              type="number"
-              min="1"
-              max="100"
-              value={formData.priority_score}
-              onChange={(e) => setFormData({ ...formData, priority_score: e.target.value })}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500/50"
-            />
-            <p className="mt-1 text-xs text-gray-500">Higher = work on first (90-100 for large/active groups)</p>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Priority (1-5)</label>
+            <div className="flex items-center gap-2">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, priority_score: String(star) })}
+                  className={`text-2xl transition-colors ${
+                    parseInt(formData.priority_score) >= star ? 'text-orange-400' : 'text-gray-600'
+                  }`}
+                >
+                  ★
+                </button>
+              ))}
+              <span className="ml-2 text-sm text-gray-400">
+                {formData.priority_score}/5
+              </span>
+            </div>
+            <p className="mt-2 text-xs text-gray-500">
+              Auto-set by members: &lt;500=1, &lt;1K=2, &lt;5K=3, &lt;10K=4, 10K+=5
+            </p>
           </div>
 
           <div className="md:col-span-2">
@@ -496,6 +560,58 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
   useEffect(() => {
     fetchPages();
   }, [filters]);
+
+  // DM Template - personalized for each group
+  const getDMTemplate = (page: FBPage, adminName?: string) => {
+    const name = adminName || page.fb_page_admins?.[0]?.admin_name || 'there';
+    const firstName = name.split(' ')[0];
+    return `Hey ${firstName} - love what you're doing with ${page.page_name}.
+
+Quick question: Are most teams in your group juggling GroupMe + GameChanger + random text threads for schedules?
+
+We built Mind & Muscle specifically for travel ball - FREE team chat, scheduling, and uniform coordination in one app. Parents get access without paying.
+
+Would you be open to me sharing a post with your group? Happy to create a custom QR code for ${page.page_name} so you can see if anyone signs up through you.
+
+No pressure either way - just thought it might help some teams simplify.`;
+  };
+
+  const [copiedDmId, setCopiedDmId] = useState<string | null>(null);
+  const [updatingAdminId, setUpdatingAdminId] = useState<string | null>(null);
+
+  const updateAdminStatus = async (adminId: string, status: string) => {
+    setUpdatingAdminId(adminId);
+    try {
+      const response = await fetch('/api/admin/fb-outreach/admins', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': adminPassword,
+        },
+        body: JSON.stringify({
+          admin_id: adminId,
+          response_status: status,
+          ...(status === 'dm_sent' && { dm_sent_at: new Date().toISOString() }),
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        fetchPages();
+        onUpdate();
+      }
+    } catch (error) {
+      console.error('Failed to update admin status:', error);
+    } finally {
+      setUpdatingAdminId(null);
+    }
+  };
+
+  const copyDMTemplate = (page: FBPage, adminName?: string) => {
+    const template = getDMTemplate(page, adminName);
+    navigator.clipboard.writeText(template);
+    setCopiedDmId(adminName ? `${page.id}-${adminName}` : page.id);
+    setTimeout(() => setCopiedDmId(null), 2000);
+  };
 
   const handleStatusUpdate = async (pageId: string, newStatus: OutreachStatus, postTemplate?: string) => {
     setUpdatingId(pageId);
@@ -616,16 +732,38 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
         </div>
       ) : (
         <div className="space-y-4">
-          {pages.map((page) => (
+          {pages.map((page) => {
+            const dmDays = daysSince(page.dm_sent_at);
+            const followUp = getFollowUpUrgency(dmDays);
+            const showFollowUp = followUp && ['dm_sent', 'awaiting_response'].includes(page.outreach_status);
+
+            return (
             <div
               key={page.id}
-              className="p-4 rounded-xl border bg-white/5 border-white/10 hover:bg-white/[0.07] transition-colors"
+              className={`p-4 rounded-xl border transition-colors ${
+                showFollowUp && followUp.urgent
+                  ? 'bg-red-500/5 border-red-500/30 hover:bg-red-500/10'
+                  : 'bg-white/5 border-white/10 hover:bg-white/[0.07]'
+              }`}
             >
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
                     <span className="font-semibold text-white">{page.page_name}</span>
                     <StatusBadge status={page.outreach_status} />
+                    {/* Follow-up badge */}
+                    {showFollowUp && (
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                        followUp.urgent
+                          ? 'bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse'
+                          : followUp.color === 'yellow'
+                            ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                            : 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+                      }`}>
+                        <Bell className="w-3 h-3" />
+                        {followUp.label}
+                      </span>
+                    )}
                     {page.member_count && (
                       <span className="text-xs text-gray-500">
                         <Users className="w-3 h-3 inline mr-1" />
@@ -650,7 +788,9 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
                         {page.admin_name}
                       </span>
                     )}
-                    <span className="text-gray-600">Priority: {page.priority_score}</span>
+                    <span className="text-orange-400">
+                      {'★'.repeat(page.priority_score || 0)}{'☆'.repeat(5 - (page.priority_score || 0))}
+                    </span>
                   </div>
                 </div>
 
@@ -771,30 +911,133 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
                       </button>
                     )}
                   </div>
-                  {/* Show all admins in expanded view */}
+                  {/* Show all admins in expanded view with status tracking */}
                   {page.fb_page_admins?.length > 0 && (
                     <div className="mt-4 pt-3 border-t border-white/5">
-                      <p className="text-xs text-gray-500 mb-2">Admins:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {page.fb_page_admins.map((admin) => (
-                          <div key={admin.id} className="flex items-center gap-2 px-3 py-1.5 bg-white/5 rounded-lg text-sm">
-                            <span className="text-gray-300">{admin.admin_name}</span>
-                            {admin.is_primary && (
-                              <span className="text-xs text-yellow-500">(Primary)</span>
-                            )}
-                            {admin.admin_profile_url && (
-                              <a
-                                href={admin.admin_profile_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-400 hover:text-blue-300"
+                      <p className="text-xs text-gray-500 mb-3">Admin Outreach Status:</p>
+                      <div className="space-y-2">
+                        {page.fb_page_admins.map((admin) => {
+                          const adminDays = daysSince(admin.dm_sent_at);
+                          const adminFollowUp = getFollowUpUrgency(adminDays);
+                          const statusConfig = ADMIN_RESPONSE_STATUS[admin.response_status as keyof typeof ADMIN_RESPONSE_STATUS] || ADMIN_RESPONSE_STATUS.not_contacted;
+
+                          return (
+                          <div key={admin.id} className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 bg-white/5 rounded-lg">
+                            <div className="flex items-center gap-2 flex-1 min-w-0">
+                              <span className="font-medium text-white truncate">{admin.admin_name}</span>
+                              {admin.is_primary && (
+                                <span className="text-xs text-yellow-500 shrink-0">(Primary)</span>
+                              )}
+                              <span className={`text-xs px-2 py-0.5 rounded-full bg-${statusConfig.color}-500/20 text-${statusConfig.color}-400 shrink-0`}>
+                                {statusConfig.label}
+                              </span>
+                              {adminFollowUp && admin.response_status === 'dm_sent' && (
+                                <span className={`text-xs px-2 py-0.5 rounded-full shrink-0 ${
+                                  adminFollowUp.urgent ? 'bg-red-500/20 text-red-400' : 'bg-gray-500/20 text-gray-400'
+                                }`}>
+                                  {adminFollowUp.label}
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1 flex-wrap">
+                              {/* Copy DM */}
+                              <button
+                                onClick={() => copyDMTemplate(page, admin.admin_name)}
+                                className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${
+                                  copiedDmId === `${page.id}-${admin.admin_name}`
+                                    ? 'bg-green-500/20 text-green-400'
+                                    : 'bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30'
+                                }`}
+                                title="Copy personalized DM"
                               >
-                                <ExternalLink className="w-3 h-3" />
-                              </a>
-                            )}
+                                {copiedDmId === `${page.id}-${admin.admin_name}` ? <CheckCircle className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                                Copy DM
+                              </button>
+                              {/* Open Profile */}
+                              {admin.admin_profile_url && (
+                                <a
+                                  href={admin.admin_profile_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-1 px-2 py-1 rounded text-xs bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+                                >
+                                  <ExternalLink className="w-3 h-3" /> Profile
+                                </a>
+                              )}
+                              {/* Status buttons based on current status */}
+                              {admin.response_status === 'not_contacted' && (
+                                <button
+                                  onClick={() => updateAdminStatus(admin.id, 'dm_sent')}
+                                  disabled={updatingAdminId === admin.id}
+                                  className="flex items-center gap-1 px-2 py-1 rounded text-xs bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 disabled:opacity-50"
+                                >
+                                  <Send className="w-3 h-3" /> Mark DM Sent
+                                </button>
+                              )}
+                              {admin.response_status === 'dm_sent' && (
+                                <>
+                                  <button
+                                    onClick={() => updateAdminStatus(admin.id, 'responded')}
+                                    disabled={updatingAdminId === admin.id}
+                                    className="px-2 py-1 rounded text-xs bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 disabled:opacity-50"
+                                  >
+                                    Responded
+                                  </button>
+                                  <button
+                                    onClick={() => updateAdminStatus(admin.id, 'no_response')}
+                                    disabled={updatingAdminId === admin.id}
+                                    className="px-2 py-1 rounded text-xs bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 disabled:opacity-50"
+                                  >
+                                    No Response
+                                  </button>
+                                </>
+                              )}
+                              {(admin.response_status === 'responded' || admin.response_status === 'dm_sent') && (
+                                <>
+                                  <button
+                                    onClick={() => updateAdminStatus(admin.id, 'approved')}
+                                    disabled={updatingAdminId === admin.id}
+                                    className="px-2 py-1 rounded text-xs bg-green-500/20 text-green-400 hover:bg-green-500/30 disabled:opacity-50"
+                                  >
+                                    Approved
+                                  </button>
+                                  <button
+                                    onClick={() => updateAdminStatus(admin.id, 'declined')}
+                                    disabled={updatingAdminId === admin.id}
+                                    className="px-2 py-1 rounded text-xs bg-red-500/20 text-red-400 hover:bg-red-500/30 disabled:opacity-50"
+                                  >
+                                    Declined
+                                  </button>
+                                </>
+                              )}
+                            </div>
                           </div>
-                        ))}
+                        );
+                        })}
                       </div>
+                    </div>
+                  )}
+                  {/* Quick copy DM if no admins listed */}
+                  {(!page.fb_page_admins || page.fb_page_admins.length === 0) && (
+                    <div className="mt-4 pt-3 border-t border-white/5">
+                      <button
+                        onClick={() => copyDMTemplate(page)}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                          copiedDmId === page.id
+                            ? 'bg-green-500/20 text-green-400'
+                            : 'bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30'
+                        }`}
+                      >
+                        {copiedDmId === page.id ? (
+                          <>
+                            <CheckCircle className="w-3 h-3" /> Copied!
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-3 h-3" /> Copy DM Template
+                          </>
+                        )}
+                      </button>
                     </div>
                   )}
                   {page.notes && (
@@ -815,7 +1058,8 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
                 </div>
               )}
             </div>
-          ))}
+          );
+          })}
         </div>
       )}
     </div>

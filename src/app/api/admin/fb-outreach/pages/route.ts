@@ -98,6 +98,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, message: 'Page name and URL are required' }, { status: 400 });
     }
 
+    // Auto-calculate priority (1-5) based on member count if not provided
+    function calculatePriority(members: number | null): number {
+      if (!members || members < 500) return 1;
+      if (members < 1000) return 2;
+      if (members < 5000) return 3;
+      if (members < 10000) return 4;
+      return 5; // 10K+ members
+    }
+
+    const calculatedPriority = priority_score || calculatePriority(member_count);
+
     // Normalize the URL to prevent duplicates with variations
     const normalizedUrl = normalizeFacebookUrl(page_url);
 
@@ -131,7 +142,7 @@ export async function POST(request: NextRequest) {
         state: state || null,
         member_count: member_count || null,
         group_type: group_type || null,
-        priority_score: priority_score || 50,
+        priority_score: calculatedPriority,
         notes: notes || null,
         outreach_status: 'not_started',
       })

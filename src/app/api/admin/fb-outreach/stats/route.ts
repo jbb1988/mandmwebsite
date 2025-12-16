@@ -19,16 +19,19 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Get all pages
+    // Get all pages with dm_sent_at for follow-up calculation
     const { data: pages, error } = await supabase
       .from('fb_page_outreach')
-      .select('outreach_status, state');
+      .select('outreach_status, state, dm_sent_at');
 
     if (error) throw error;
 
     // Calculate stats
     const byStatus: Record<string, number> = {};
     const byState: Record<string, number> = {};
+    let needsFollowUp = 0;
+    let readyToPost = 0;
+    const now = new Date();
 
     pages?.forEach((page) => {
       // Count by status
@@ -39,6 +42,20 @@ export async function GET(request: NextRequest) {
       if (page.state) {
         byState[page.state] = (byState[page.state] || 0) + 1;
       }
+
+      // Count pages needing follow-up (DM sent 3+ days ago, not yet approved/declined/posted)
+      if (page.dm_sent_at && ['dm_sent', 'awaiting_response'].includes(status)) {
+        const dmSentDate = new Date(page.dm_sent_at);
+        const daysSinceDm = Math.floor((now.getTime() - dmSentDate.getTime()) / (1000 * 60 * 60 * 24));
+        if (daysSinceDm >= 3) {
+          needsFollowUp++;
+        }
+      }
+
+      // Count pages ready to post (approved but not yet posted)
+      if (status === 'approved') {
+        readyToPost++;
+      }
     });
 
     return NextResponse.json({
@@ -47,6 +64,8 @@ export async function GET(request: NextRequest) {
         total: pages?.length || 0,
         byStatus,
         byState,
+        needsFollowUp,
+        readyToPost,
       },
     });
   } catch (error) {
