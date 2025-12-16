@@ -2059,7 +2059,9 @@ function TemplatesTab() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [filter, setFilter] = useState<'all' | 'initial' | 'post' | 'follow_up'>('all');
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [categoryFilter, setCategoryFilter] = useState<'all' | 'fb_group' | 'x_influencer'>('all');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'initial' | 'post' | 'follow_up'>('all');
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   useEffect(() => {
@@ -2087,9 +2089,12 @@ function TemplatesTab() {
   };
 
   const filteredTemplates = templates.filter((t) => {
-    if (filter === 'initial') return t.template_type === 'initial';
-    if (filter === 'post') return t.template_type === 'post';
-    if (filter === 'follow_up') return t.template_type === 'follow_up';
+    // Category filter
+    if (categoryFilter !== 'all' && t.target_category !== categoryFilter) return false;
+    // Type filter
+    if (typeFilter === 'initial') return t.template_type === 'initial';
+    if (typeFilter === 'post') return t.template_type === 'post';
+    if (typeFilter === 'follow_up') return t.template_type === 'follow_up';
     return true;
   });
 
@@ -2106,20 +2111,39 @@ function TemplatesTab() {
           </div>
         </div>
 
-        <div className="flex gap-2 flex-wrap">
-          {(['all', 'initial', 'post', 'follow_up'] as const).map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                filter === f
-                  ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
-                  : 'bg-white/[0.03] text-white/50 border border-white/[0.08] hover:bg-white/[0.06]'
-              }`}
-            >
-              {f === 'all' ? 'All' : f === 'initial' ? 'DM Templates' : f === 'post' ? 'Post Templates' : 'Follow-up'}
-            </button>
-          ))}
+        <div className="flex flex-col gap-2">
+          {/* Category Filter */}
+          <div className="flex gap-2 flex-wrap">
+            {(['all', 'fb_group', 'x_influencer'] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setCategoryFilter(f)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  categoryFilter === f
+                    ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                    : 'bg-white/[0.03] text-white/50 border border-white/[0.08] hover:bg-white/[0.06]'
+                }`}
+              >
+                {f === 'all' ? '📋 All' : f === 'fb_group' ? '👥 FB Groups' : '🐦 X/Twitter'}
+              </button>
+            ))}
+          </div>
+          {/* Type Filter */}
+          <div className="flex gap-2 flex-wrap">
+            {(['all', 'initial', 'post', 'follow_up'] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setTypeFilter(f)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  typeFilter === f
+                    ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
+                    : 'bg-white/[0.03] text-white/50 border border-white/[0.08] hover:bg-white/[0.06]'
+                }`}
+              >
+                {f === 'all' ? 'All Types' : f === 'initial' ? 'DM' : f === 'post' ? 'Post' : 'Follow-up'}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -2138,15 +2162,24 @@ function TemplatesTab() {
                   <h3 className="font-medium text-white capitalize">
                     {template.template_name.replace(/_/g, ' ')}
                   </h3>
-                  <span className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${
-                    template.template_type === 'initial'
-                      ? 'bg-blue-500/20 text-blue-400'
-                      : template.template_type === 'post'
-                      ? 'bg-purple-500/20 text-purple-400'
-                      : 'bg-green-500/20 text-green-400'
-                  }`}>
-                    {template.template_type === 'initial' ? 'DM Template' : template.template_type === 'post' ? 'Post Template' : 'Follow-up'}
-                  </span>
+                  <div className="flex gap-2 mt-1 flex-wrap">
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      template.target_category === 'x_influencer'
+                        ? 'bg-sky-500/20 text-sky-400'
+                        : 'bg-indigo-500/20 text-indigo-400'
+                    }`}>
+                      {template.target_category === 'x_influencer' ? '🐦 X/Twitter' : '👥 FB Group'}
+                    </span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      template.template_type === 'initial'
+                        ? 'bg-blue-500/20 text-blue-400'
+                        : template.template_type === 'post'
+                        ? 'bg-purple-500/20 text-purple-400'
+                        : 'bg-green-500/20 text-green-400'
+                    }`}>
+                      {template.template_type === 'initial' ? 'DM' : template.template_type === 'post' ? 'Post' : 'Follow-up'}
+                    </span>
+                  </div>
                 </div>
                 <Button
                   variant={copiedId === template.id ? 'primary' : 'secondary'}
@@ -2157,7 +2190,13 @@ function TemplatesTab() {
                   {copiedId === template.id ? 'Copied!' : 'Copy'}
                 </Button>
               </div>
-              <p className="text-sm text-white/60 whitespace-pre-wrap line-clamp-6">{template.body}</p>
+              <p className={`text-sm text-white/60 whitespace-pre-wrap ${expandedId === template.id ? '' : 'line-clamp-6'}`}>{template.body}</p>
+              <button
+                onClick={() => setExpandedId(expandedId === template.id ? null : template.id)}
+                className="mt-3 text-xs text-orange-400 hover:text-orange-300 transition-colors"
+              >
+                {expandedId === template.id ? '▲ Show less' : '▼ Show full template'}
+              </button>
             </Card>
           ))}
         </div>
