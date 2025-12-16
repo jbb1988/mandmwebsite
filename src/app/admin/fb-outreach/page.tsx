@@ -2156,58 +2156,59 @@ function TemplatesTab() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {filteredTemplates.map((template) => (
-            <Card
+            <div
               key={template.id}
-              variant="default"
-              className={`p-5 cursor-pointer transition-all hover:bg-white/[0.04] ${expandedId === template.id ? 'ring-1 ring-orange-500/30' : ''}`}
               onClick={() => setExpandedId(expandedId === template.id ? null : template.id)}
+              className={`cursor-pointer transition-all rounded-2xl ${expandedId === template.id ? 'ring-1 ring-orange-500/30' : ''}`}
             >
-              <div className="flex items-start justify-between gap-3 mb-3">
-                <div>
-                  <h3 className="font-medium text-white capitalize">
-                    {template.template_name.replace(/_/g, ' ')}
-                  </h3>
-                  <div className="flex gap-2 mt-1 flex-wrap">
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${
-                      template.target_category === 'x_influencer'
-                        ? 'bg-sky-500/20 text-sky-400'
-                        : 'bg-indigo-500/20 text-indigo-400'
-                    }`}>
-                      {template.target_category === 'x_influencer' ? '🐦 X/Twitter' : '👥 FB Group'}
-                    </span>
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${
-                      template.template_type === 'initial'
-                        ? 'bg-blue-500/20 text-blue-400'
-                        : template.template_type === 'post'
-                        ? 'bg-purple-500/20 text-purple-400'
-                        : 'bg-green-500/20 text-green-400'
-                    }`}>
-                      {template.template_type === 'initial' ? 'DM' : template.template_type === 'post' ? 'Post' : 'Follow-up'}
-                    </span>
+              <Card variant="default" className="p-5 hover:bg-white/[0.04] transition-colors">
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div>
+                    <h3 className="font-medium text-white capitalize">
+                      {template.template_name.replace(/_/g, ' ')}
+                    </h3>
+                    <div className="flex gap-2 mt-1 flex-wrap">
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        template.target_category === 'x_influencer'
+                          ? 'bg-sky-500/20 text-sky-400'
+                          : 'bg-indigo-500/20 text-indigo-400'
+                      }`}>
+                        {template.target_category === 'x_influencer' ? '🐦 X/Twitter' : '👥 FB Group'}
+                      </span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        template.template_type === 'initial'
+                          ? 'bg-blue-500/20 text-blue-400'
+                          : template.template_type === 'post'
+                          ? 'bg-purple-500/20 text-purple-400'
+                          : 'bg-green-500/20 text-green-400'
+                      }`}>
+                        {template.template_type === 'initial' ? 'DM' : template.template_type === 'post' ? 'Post' : 'Follow-up'}
+                      </span>
+                    </div>
                   </div>
+                  <Button
+                    variant={copiedId === template.id ? 'primary' : 'secondary'}
+                    size="sm"
+                    icon={copiedId === template.id ? CheckCircle : Copy}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      copyTemplate(template);
+                    }}
+                  >
+                    {copiedId === template.id ? 'Copied!' : 'Copy'}
+                  </Button>
                 </div>
-                <Button
-                  variant={copiedId === template.id ? 'primary' : 'secondary'}
-                  size="sm"
-                  icon={copiedId === template.id ? CheckCircle : Copy}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    copyTemplate(template);
-                  }}
-                >
-                  {copiedId === template.id ? 'Copied!' : 'Copy'}
-                </Button>
-              </div>
-              <p className={`text-sm text-white/60 whitespace-pre-wrap ${expandedId === template.id ? '' : 'line-clamp-4'}`}>{template.body}</p>
-              <div className="mt-3 flex items-center justify-between">
-                <span className="text-xs text-orange-400">
-                  {expandedId === template.id ? '▲ Tap to collapse' : '▼ Tap to expand'}
-                </span>
-                {expandedId !== template.id && (
-                  <span className="text-xs text-white/30">Preview</span>
-                )}
-              </div>
-            </Card>
+                <p className={`text-sm text-white/60 whitespace-pre-wrap ${expandedId === template.id ? '' : 'line-clamp-4'}`}>{template.body}</p>
+                <div className="mt-3 flex items-center justify-between">
+                  <span className="text-xs text-orange-400">
+                    {expandedId === template.id ? '▲ Tap to collapse' : '▼ Tap to expand'}
+                  </span>
+                  {expandedId !== template.id && (
+                    <span className="text-xs text-white/30">Preview</span>
+                  )}
+                </div>
+              </Card>
+            </div>
           ))}
         </div>
       )}
