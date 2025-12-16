@@ -72,7 +72,15 @@ export async function POST(request: NextRequest) {
   try {
     // Validate admin password
     const adminPassword = request.headers.get('X-Admin-Password');
-    if (adminPassword !== process.env.ADMIN_DASHBOARD_PASSWORD) {
+    const expectedPassword = process.env.ADMIN_DASHBOARD_PASSWORD;
+
+    // Debug logging (remove in production after debugging)
+    console.log('[DEBUG partner-banners POST] Password received length:', adminPassword?.length || 0);
+    console.log('[DEBUG partner-banners POST] Expected password length:', expectedPassword?.length || 0);
+    console.log('[DEBUG partner-banners POST] Match:', adminPassword === expectedPassword);
+
+    if (adminPassword !== expectedPassword) {
+      console.error('[DEBUG partner-banners POST] Password mismatch - received:', adminPassword?.substring(0, 3) + '...', 'expected:', expectedPassword?.substring(0, 3) + '...');
       return NextResponse.json(
         { success: false, message: 'Unauthorized' },
         { status: 401 }

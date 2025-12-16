@@ -366,10 +366,13 @@ export default function BannerGeneratorPage() {
         formData.append('qrCode', qrBlob, 'qrcode.png');
       }
 
+      const password = getPassword();
+      console.log('[DEBUG] Sending save request with password length:', password?.length || 0);
+
       const response = await fetch('/api/admin/partner-banners', {
         method: 'POST',
         headers: {
-          'X-Admin-Password': getPassword(),
+          'X-Admin-Password': password,
         },
         body: formData,
       });
@@ -380,7 +383,13 @@ export default function BannerGeneratorPage() {
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 3000);
       } else {
-        alert(`Failed to save: ${result.message}`);
+        // More detailed error for 401
+        if (response.status === 401) {
+          console.error('[DEBUG] 401 Unauthorized - password sent:', password?.substring(0, 3) + '...');
+          alert('Session expired. Please log out from the admin panel and log back in, then try again.');
+        } else {
+          alert(`Failed to save: ${result.message}`);
+        }
       }
     } catch (error) {
       console.error('Error saving banner:', error);
