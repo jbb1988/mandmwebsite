@@ -712,7 +712,10 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ state: 'all', status: 'all', search: '' });
   const [expandedPage, setExpandedPage] = useState<string | null>(null);
-  const [editingPage, setEditingPage] = useState<string | null>(null);
+  const [editingAdmin, setEditingAdmin] = useState<{ admin: FBPageAdmin; pageId: string } | null>(null);
+  const [adminForm, setAdminForm] = useState({ name: '', profile_url: '', email: '' });
+  const [addingAdminToPage, setAddingAdminToPage] = useState<string | null>(null);
+  const [newAdminForm, setNewAdminForm] = useState({ name: '', profile_url: '', email: '' });
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   const fetchPages = async () => {
@@ -766,6 +769,61 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
       onUpdate();
     } catch (error) {
       console.error('Error deleting page:', error);
+    }
+  };
+
+  const updateAdmin = async () => {
+    if (!editingAdmin) return;
+    try {
+      await fetch('/api/admin/fb-outreach/admins', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+        body: JSON.stringify({
+          admin_id: editingAdmin.admin.id,
+          admin_email: adminForm.email || null,
+        }),
+      });
+      setEditingAdmin(null);
+      fetchPages();
+      onUpdate();
+    } catch (error) {
+      console.error('Error updating admin:', error);
+    }
+  };
+
+  const addNewAdmin = async (pageId: string) => {
+    if (!newAdminForm.name.trim()) return;
+    try {
+      await fetch('/api/admin/fb-outreach/admins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+        body: JSON.stringify({
+          page_id: pageId,
+          admin_name: newAdminForm.name.trim(),
+          admin_profile_url: newAdminForm.profile_url.trim() || null,
+          admin_email: newAdminForm.email.trim() || null,
+        }),
+      });
+      setAddingAdminToPage(null);
+      setNewAdminForm({ name: '', profile_url: '', email: '' });
+      fetchPages();
+      onUpdate();
+    } catch (error) {
+      console.error('Error adding admin:', error);
+    }
+  };
+
+  const deleteAdmin = async (adminId: string) => {
+    if (!confirm('Delete this admin?')) return;
+    try {
+      await fetch(`/api/admin/fb-outreach/admins?admin_id=${adminId}`, {
+        method: 'DELETE',
+        headers: { 'X-Admin-Password': adminPassword },
+      });
+      fetchPages();
+      onUpdate();
+    } catch (error) {
+      console.error('Error deleting admin:', error);
     }
   };
 
@@ -939,51 +997,85 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
 
                       {/* Right: Admins */}
                       <div>
-                        <label className="text-xs text-white/40 uppercase tracking-wide mb-3 block">
-                          Admins ({admins.length})
-                        </label>
+                        <div className="flex items-center justify-between mb-3">
+                          <label className="text-xs text-white/40 uppercase tracking-wide">
+                            Admins ({admins.length})
+                          </label>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            icon={UserPlus}
+                            onClick={() => setAddingAdminToPage(page.id)}
+                          >
+                            Add
+                          </Button>
+                        </div>
+
+                        {/* Add Admin Form */}
+                        {addingAdminToPage === page.id && (
+                          <div className="mb-3 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl space-y-2">
+                            <input
+                              type="text"
+                              placeholder="Admin name *"
+                              value={newAdminForm.name}
+                              onChange={(e) => setNewAdminForm({ ...newAdminForm, name: e.target.value })}
+                              className="w-full px-3 py-2 bg-white/[0.05] border border-white/[0.1] rounded-lg text-white text-sm placeholder-white/30 focus:outline-none focus:border-emerald-500/50"
+                            />
+                            <input
+                              type="url"
+                              placeholder="Profile URL (optional)"
+                              value={newAdminForm.profile_url}
+                              onChange={(e) => setNewAdminForm({ ...newAdminForm, profile_url: e.target.value })}
+                              className="w-full px-3 py-2 bg-white/[0.05] border border-white/[0.1] rounded-lg text-white text-sm placeholder-white/30 focus:outline-none focus:border-emerald-500/50"
+                            />
+                            <input
+                              type="email"
+                              placeholder="Email (for partner sync)"
+                              value={newAdminForm.email}
+                              onChange={(e) => setNewAdminForm({ ...newAdminForm, email: e.target.value })}
+                              className="w-full px-3 py-2 bg-white/[0.05] border border-white/[0.1] rounded-lg text-white text-sm placeholder-white/30 focus:outline-none focus:border-emerald-500/50"
+                            />
+                            <div className="flex gap-2">
+                              <Button variant="primary" size="sm" onClick={() => addNewAdmin(page.id)}>Save</Button>
+                              <Button variant="ghost" size="sm" onClick={() => { setAddingAdminToPage(null); setNewAdminForm({ name: '', profile_url: '', email: '' }); }}>Cancel</Button>
+                            </div>
+                          </div>
+                        )}
+
                         {admins.length > 0 ? (
                           <div className="space-y-2">
                             {admins.map((admin) => (
                               <div key={admin.id} className="flex items-center justify-between p-3 bg-white/[0.03] rounded-xl border border-white/[0.06]">
                                 <div className="flex items-center gap-3">
-                                  <div className={`w-8 h-8 ${admin.finder_fee_partner ? 'bg-emerald-500/20 border-emerald-500/30' : 'bg-blue-500/20 border-blue-500/30'} rounded-full flex items-center justify-center border`}>
-                                    {admin.finder_fee_partner ? (
-                                      <Handshake className="w-4 h-4 text-emerald-400" />
-                                    ) : (
-                                      <Users className="w-4 h-4 text-blue-400" />
-                                    )}
+                                  <div className={`w-8 h-8 ${admin.admin_email ? 'bg-emerald-500/20 border-emerald-500/30' : 'bg-blue-500/20 border-blue-500/30'} rounded-full flex items-center justify-center border`}>
+                                    <Users className="w-4 h-4 text-blue-400" />
                                   </div>
                                   <div>
                                     <div className="flex items-center gap-2">
                                       <p className="text-sm font-medium text-white">{admin.admin_name}</p>
-                                      {admin.finder_fee_partner && (
-                                        <span className="px-1.5 py-0.5 text-[10px] bg-emerald-500/20 text-emerald-400 rounded border border-emerald-500/30">
-                                          Partner
-                                        </span>
-                                      )}
                                     </div>
                                     <p className="text-xs text-white/40">
-                                      {admin.admin_email && <span className="text-white/50">{admin.admin_email} • </span>}
+                                      {admin.admin_email ? (
+                                        <span className="text-emerald-400/70">{admin.admin_email}</span>
+                                      ) : (
+                                        <span className="text-yellow-400/70">No email - add for partner sync</span>
+                                      )}
+                                      {' • '}
                                       {ADMIN_RESPONSE_STATUS[admin.response_status as keyof typeof ADMIN_RESPONSE_STATUS]?.label || 'Not Contacted'}
                                     </p>
-                                    {admin.finder_fee_partner && (
-                                      <p className="text-xs text-emerald-400/70 mt-0.5">
-                                        Code: {admin.finder_fee_partner.partner_code} {admin.finder_fee_partner.is_recurring && '(VIP)'}
-                                      </p>
-                                    )}
                                   </div>
                                 </div>
                                 <div className="flex items-center gap-1">
-                                  {admin.finder_fee_partner && (
-                                    <a
-                                      href={`/admin/finder-fees?partner=${admin.finder_fee_partner.partner_code}`}
-                                      className="p-2 text-emerald-400/60 hover:text-emerald-400 hover:bg-emerald-500/10 rounded-lg transition-colors"
-                                      title="View Partner"
-                                    >
-                                      <DollarSign className="w-4 h-4" />
-                                    </a>
-                                  )}
+                                  <button
+                                    onClick={() => {
+                                      setEditingAdmin({ admin, pageId: page.id });
+                                      setAdminForm({ name: admin.admin_name, profile_url: admin.admin_profile_url || '', email: admin.admin_email || '' });
+                                    }}
+                                    className="p-2 text-white/40 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+                                    title="Edit Admin"
+                                  >
+                                    <Pencil className="w-4 h-4" />
+                                  </button>
                                   {admin.admin_profile_url && (
                                     <a
                                       href={admin.admin_profile_url}
@@ -994,6 +1086,13 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
                                       <ExternalLink className="w-4 h-4" />
                                     </a>
                                   )}
+                                  <button
+                                    onClick={() => deleteAdmin(admin.id)}
+                                    className="p-2 text-white/40 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                                    title="Delete Admin"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
                                 </div>
                               </div>
                             ))}
@@ -1015,6 +1114,87 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
               </Card>
             );
           })}
+        </div>
+      )}
+
+      {/* Admin Edit Modal */}
+      {editingAdmin && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+          <Card variant="elevated" className="w-full max-w-md p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-white">Edit Admin</h3>
+              <button
+                onClick={() => setEditingAdmin(null)}
+                className="p-2 text-white/40 hover:text-white rounded-lg hover:bg-white/[0.05]"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-white/70 mb-2">Name</label>
+                <p className="text-white">{editingAdmin.admin.admin_name}</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white/70 mb-2">Profile URL</label>
+                {editingAdmin.admin.admin_profile_url ? (
+                  <a
+                    href={editingAdmin.admin.admin_profile_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-2"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    View Profile
+                  </a>
+                ) : (
+                  <p className="text-white/40 text-sm">No profile URL</p>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white/70 mb-2">
+                  Email <span className="text-emerald-400/70">(for partner sync)</span>
+                </label>
+                <input
+                  type="email"
+                  value={adminForm.email}
+                  onChange={(e) => setAdminForm({ ...adminForm, email: e.target.value })}
+                  placeholder="Enter email for partner auto-link"
+                  className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.1] rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-emerald-500/50 transition-all"
+                />
+                <p className="text-xs text-white/40 mt-2">
+                  When this email matches a Partner Program signup, they'll be automatically linked.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-white/70 mb-2">Status</label>
+                <p className="text-sm">
+                  <span className={`px-2 py-1 rounded-lg text-xs ${
+                    ADMIN_RESPONSE_STATUS[editingAdmin.admin.response_status as keyof typeof ADMIN_RESPONSE_STATUS]?.color === 'green'
+                      ? 'bg-emerald-500/20 text-emerald-400'
+                      : ADMIN_RESPONSE_STATUS[editingAdmin.admin.response_status as keyof typeof ADMIN_RESPONSE_STATUS]?.color === 'blue'
+                      ? 'bg-blue-500/20 text-blue-400'
+                      : 'bg-gray-500/20 text-gray-400'
+                  }`}>
+                    {ADMIN_RESPONSE_STATUS[editingAdmin.admin.response_status as keyof typeof ADMIN_RESPONSE_STATUS]?.label || 'Not Contacted'}
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6 pt-4 border-t border-white/[0.06]">
+              <Button variant="primary" className="flex-1" onClick={updateAdmin}>
+                Save Changes
+              </Button>
+              <Button variant="ghost" onClick={() => setEditingAdmin(null)}>
+                Cancel
+              </Button>
+            </div>
+          </Card>
         </div>
       )}
     </div>
