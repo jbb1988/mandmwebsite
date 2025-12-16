@@ -207,14 +207,41 @@ export async function POST(request: NextRequest) {
       if (!toltResponse.ok) {
         const errorData = await toltResponse.json().catch(() => ({ message: 'Unknown error' }));
         console.error('❌ Tolt API Error Response:', JSON.stringify(errorData, null, 2));
+
+        // If partner already exists, try to fetch their ID
+        if (errorData.message?.includes('already exists') || errorData.error?.includes('already exists') || toltResponse.status === 409) {
+          console.log('Partner may already exist, fetching existing partner...');
+          try {
+            const searchResponse = await fetch(`https://api.tolt.com/v1/partners?email=${encodeURIComponent(email)}`, {
+              method: 'GET',
+              headers: {
+                'Authorization': `Bearer ${toltApiKey}`,
+                'Content-Type': 'application/json',
+              },
+            });
+            if (searchResponse.ok) {
+              const searchData = await searchResponse.json();
+              console.log('Search response:', JSON.stringify(searchData, null, 2));
+              if (searchData.data && searchData.data.length > 0) {
+                toltPartnerId = searchData.data[0].id;
+                toltCreationSucceeded = true;
+                console.log('✅ Found existing partner ID:', toltPartnerId);
+              }
+            }
+          } catch (searchErr) {
+            console.error('Error searching for existing partner:', searchErr);
+          }
+        }
       } else {
         const toltData = await toltResponse.json();
         console.log('✅ Partner created in Tolt successfully!');
-        toltPartnerId = toltData.data?.id || null;
+        console.log('Tolt response:', JSON.stringify(toltData, null, 2));
+        toltPartnerId = toltData.data?.id || toltData.id || null;
         toltCreationSucceeded = true;
+      }
 
-        // Step 2: Create referral link for the partner
-        if (toltPartnerId) {
+      // Step 2: Create referral link for the partner
+      if (toltPartnerId) {
           // Generate slug from name (e.g., "John Smith" -> "john-smith")
           let baseSlug = name.toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
@@ -262,7 +289,6 @@ export async function POST(request: NextRequest) {
             console.error('❌ Failed to create referral link after all attempts');
           }
         }
-      }
     } catch (toltError: any) {
       console.error('❌ Exception calling Tolt API:', toltError.message);
       // Don't fail the whole request - still send notification email
