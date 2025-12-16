@@ -70,6 +70,7 @@ export async function POST(request: NextRequest) {
       state,
       member_count,
       group_type,
+      sport,
       priority_score,
       notes,
     } = body;
@@ -79,11 +80,16 @@ export async function POST(request: NextRequest) {
     }
 
     // Check for duplicate
-    const { data: existing } = await supabase
+    const { data: existing, error: checkError } = await supabase
       .from('fb_page_outreach')
       .select('id')
       .eq('page_url', page_url)
-      .single();
+      .maybeSingle();
+
+    if (checkError) {
+      console.error('Error checking duplicate:', checkError);
+      return NextResponse.json({ success: false, message: `Database error: ${checkError.message}` }, { status: 500 });
+    }
 
     if (existing) {
       return NextResponse.json({ success: false, message: 'This page URL already exists' }, { status: 400 });
@@ -94,6 +100,8 @@ export async function POST(request: NextRequest) {
       .insert({
         page_name,
         page_url,
+        page_type: 'group', // Required field - default to 'group'
+        sport: sport || 'baseball', // Required field - accept from body or default to 'baseball'
         admin_name: admin_name || null,
         admin_profile_url: admin_profile_url || null,
         state: state || null,
@@ -106,12 +114,16 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error inserting page:', error);
+      return NextResponse.json({ success: false, message: `Insert error: ${error.message}` }, { status: 500 });
+    }
 
     return NextResponse.json({ success: true, message: 'Page added successfully!', page: data });
   } catch (error) {
     console.error('Error adding page:', error);
-    return NextResponse.json({ success: false, message: 'Failed to add page' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Failed to add page';
+    return NextResponse.json({ success: false, message }, { status: 500 });
   }
 }
 

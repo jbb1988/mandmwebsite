@@ -201,6 +201,7 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
     state: 'FL',
     member_count: '',
     group_type: 'travel_ball' as GroupType,
+    sport: 'baseball' as 'baseball' | 'softball' | 'both',
     priority_score: '70',
     notes: '',
   });
@@ -239,6 +240,7 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
           state: 'FL',
           member_count: '',
           group_type: 'travel_ball',
+          sport: 'baseball',
           priority_score: '70',
           notes: '',
         });
@@ -351,6 +353,19 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
               <option value="parents">Parents</option>
               <option value="equipment">Equipment</option>
               <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Sport</label>
+            <select
+              value={formData.sport}
+              onChange={(e) => setFormData({ ...formData, sport: e.target.value as 'baseball' | 'softball' | 'both' })}
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-green-500/50"
+            >
+              <option value="baseball">Baseball</option>
+              <option value="softball">Softball</option>
+              <option value="both">Both</option>
             </select>
           </div>
 
