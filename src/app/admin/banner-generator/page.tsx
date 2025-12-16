@@ -955,13 +955,17 @@ export default function BannerGeneratorPage() {
                     paddingRight: '40px',
                   }}
                 >
-                  {/* Partner Logo + "Powered by Mind & Muscle" - Above headline */}
+                  {/* Partner Badge - Logo prominent, "Powered by" secondary */}
                   <div
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '14px',
-                      marginBottom: '24px',
+                      gap: '16px',
+                      marginBottom: '28px',
+                      padding: '12px 20px 12px 14px',
+                      backgroundColor: 'rgba(15, 23, 42, 0.5)',
+                      borderRadius: '12px',
+                      width: 'fit-content',
                     }}
                   >
                     {partnerLogo ? (
@@ -969,38 +973,52 @@ export default function BannerGeneratorPage() {
                         src={partnerLogo}
                         alt="Partner"
                         style={{
-                          height: '60px',
-                          maxWidth: '180px',
+                          height: '95px',
+                          maxWidth: '240px',
                           objectFit: 'contain',
-                          filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))',
+                          filter: 'drop-shadow(0 2px 10px rgba(0,0,0,0.4))',
                         }}
                       />
                     ) : (
                       <div
                         style={{
-                          height: '60px',
-                          width: '100px',
-                          backgroundColor: 'rgba(255,255,255,0.1)',
+                          height: '95px',
+                          width: '140px',
+                          backgroundColor: 'rgba(255,255,255,0.08)',
                           borderRadius: '8px',
-                          border: '2px dashed rgba(255,255,255,0.3)',
+                          border: '2px dashed rgba(255,255,255,0.25)',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
                         }}
                       >
-                        <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>Partner Logo</span>
+                        <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Partner Logo</span>
                       </div>
                     )}
-                    <span
-                      style={{
-                        fontSize: '18px',
-                        fontWeight: 500,
-                        color: 'rgba(255, 255, 255, 0.9)',
-                        textShadow: '0 2px 8px rgba(0,0,0,0.6)',
-                      }}
-                    >
-                      Powered by Mind & Muscle
-                    </span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <span
+                        style={{
+                          fontSize: '15px',
+                          fontWeight: 500,
+                          color: 'rgba(255, 255, 255, 0.75)',
+                          textShadow: '0 2px 6px rgba(0,0,0,0.5)',
+                        }}
+                      >
+                        Powered by Mind & Muscle
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: '#10B981',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px',
+                          textShadow: '0 2px 6px rgba(0,0,0,0.5)',
+                        }}
+                      >
+                        Official Team Partner
+                      </span>
+                    </div>
                   </div>
 
                   {/* Headline - Left aligned */}
@@ -1044,20 +1062,6 @@ export default function BannerGeneratorPage() {
                   >
                     AI Training for Baseball & Softball Athletes
                   </p>
-
-                  {/* M&M Logo - Below subhead, center-aligned with "Dominate the Game" */}
-                  <img
-                    src="/assets/images/logo.png"
-                    alt="Mind & Muscle"
-                    style={{
-                      width: '100px',
-                      height: '100px',
-                      marginTop: '20px',
-                      alignSelf: 'flex-start',
-                      marginLeft: '180px', // Roughly center-aligned with "Dominate the Game"
-                      filter: 'drop-shadow(0 5px 16px rgba(0,0,0,0.15))',
-                    }}
-                  />
                 </div>
 
                 {/* RIGHT SIDE - 35% width - QR Code Block (no logo - moved to left side) */}
@@ -1106,10 +1110,10 @@ export default function BannerGeneratorPage() {
                           letterSpacing: '0.2px',
                         }}
                       >
-                        Scan to Get Started
+                        Scan to Join
                       </p>
 
-                      {/* CTA: "Get Started FREE" */}
+                      {/* CTA: "Teams Start FREE" */}
                       <div
                         style={{
                           marginTop: '5px',
@@ -1126,7 +1130,7 @@ export default function BannerGeneratorPage() {
                             textShadow: '0 2px 8px rgba(0,0,0,0.6)',
                           }}
                         >
-                          Get Started
+                          Teams Start
                         </span>
                         <span
                           style={{
@@ -1174,7 +1178,7 @@ export default function BannerGeneratorPage() {
                           textAlign: 'center',
                         }}
                       >
-                        Scan to Get Started
+                        Scan to Join
                       </p>
                     </>
                   )}
