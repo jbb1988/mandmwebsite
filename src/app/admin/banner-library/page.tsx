@@ -15,11 +15,35 @@ interface Banner {
   partner_email: string;
   partner_logo_url: string | null;
   qr_code_url: string | null;
-  banner_url: string;
+  banner_partner_url: string | null;
+  banner_facebook_url: string | null;
+  banner_facebook_cobranded_url: string | null;
+  banner_twitter_url: string | null;
+  banner_twitter_cobranded_url: string | null;
   notes: string | null;
   created_at: string;
   updated_at: string;
 }
+
+// Helper to get primary thumbnail for a banner
+const getPrimaryBannerUrl = (banner: Banner): string | null => {
+  return banner.banner_partner_url
+    || banner.banner_facebook_cobranded_url
+    || banner.banner_facebook_url
+    || banner.banner_twitter_cobranded_url
+    || banner.banner_twitter_url;
+};
+
+// Asset type definitions for display
+const ASSET_TYPES = [
+  { key: 'partner_logo_url', label: 'Logo', icon: 'logo' },
+  { key: 'qr_code_url', label: 'QR Code', icon: 'qr' },
+  { key: 'banner_partner_url', label: 'Partner Banner', icon: 'banner' },
+  { key: 'banner_facebook_url', label: 'Facebook Standard', icon: 'banner' },
+  { key: 'banner_facebook_cobranded_url', label: 'Facebook Co-Branded', icon: 'banner' },
+  { key: 'banner_twitter_url', label: 'X/Twitter Standard', icon: 'banner' },
+  { key: 'banner_twitter_cobranded_url', label: 'X/Twitter Co-Branded', icon: 'banner' },
+] as const;
 
 function Card({ children, className = '', variant = 'default' }: {
   children: React.ReactNode;
@@ -117,21 +141,34 @@ export default function BannerLibraryPage() {
     }
   };
 
-  const handleDownload = async (banner: Banner) => {
+  const handleDownload = async (url: string, filename: string) => {
     try {
-      const response = await fetch(banner.banner_url);
+      const response = await fetch(url);
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
+      const blobUrl = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
-      a.href = url;
-      a.download = `${banner.partner_name.toLowerCase().replace(/[^a-z0-9]/g, '-')}-banner.png`;
+      a.href = blobUrl;
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
-      window.URL.revokeObjectURL(url);
+      window.URL.revokeObjectURL(blobUrl);
       document.body.removeChild(a);
     } catch {
       // Fallback: open in new tab
-      window.open(banner.banner_url, '_blank');
+      window.open(url, '_blank');
+    }
+  };
+
+  const handleDownloadAll = async (banner: Banner) => {
+    const sanitizedName = banner.partner_name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+
+    for (const asset of ASSET_TYPES) {
+      const url = banner[asset.key as keyof Banner] as string | null;
+      if (url) {
+        await handleDownload(url, `${sanitizedName}-${asset.key.replace(/_url$/, '').replace(/_/g, '-')}.png`);
+        // Small delay between downloads
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
     }
   };
 
@@ -215,65 +252,80 @@ export default function BannerLibraryPage() {
               ) : (
                 <>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {banners.map((banner) => (
-                      <div
-                        key={banner.id}
-                        className="group bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-blue-500/30 transition-all"
-                      >
-                        {/* Banner Thumbnail */}
+                    {banners.map((banner) => {
+                      const thumbnailUrl = getPrimaryBannerUrl(banner);
+                      const assetCount = ASSET_TYPES.filter(a => banner[a.key as keyof Banner]).length;
+
+                      return (
                         <div
-                          className="aspect-[2/1] bg-gray-900 relative cursor-pointer"
-                          onClick={() => setSelectedBanner(banner)}
+                          key={banner.id}
+                          className="group bg-white/5 border border-white/10 rounded-xl overflow-hidden hover:border-blue-500/30 transition-all"
                         >
-                          <img
-                            src={banner.banner_url}
-                            alt={`${banner.partner_name} banner`}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <Eye className="w-8 h-8 text-white" />
+                          {/* Banner Thumbnail */}
+                          <div
+                            className="aspect-[2/1] bg-gray-900 relative cursor-pointer"
+                            onClick={() => setSelectedBanner(banner)}
+                          >
+                            {thumbnailUrl ? (
+                              <img
+                                src={thumbnailUrl}
+                                alt={`${banner.partner_name} banner`}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-gray-600">
+                                <FolderOpen className="w-8 h-8" />
+                              </div>
+                            )}
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <Eye className="w-8 h-8 text-white" />
+                            </div>
+                            {/* Asset count badge */}
+                            <div className="absolute top-2 right-2 px-2 py-0.5 bg-black/60 rounded-full text-xs text-white">
+                              {assetCount} assets
+                            </div>
+                          </div>
+
+                          {/* Banner Info */}
+                          <div className="p-3">
+                            <h3 className="font-semibold text-white truncate">{banner.partner_name}</h3>
+                            <p className="text-xs text-gray-400 truncate flex items-center gap-1 mt-1">
+                              <Mail className="w-3 h-3" />
+                              {banner.partner_email}
+                            </p>
+                            <p className="text-xs text-gray-500 flex items-center gap-1 mt-1">
+                              <Calendar className="w-3 h-3" />
+                              {formatDate(banner.created_at)}
+                            </p>
+                            {banner.notes && (
+                              <p className="text-xs text-gray-400 mt-2 line-clamp-2">{banner.notes}</p>
+                            )}
+
+                            {/* Actions */}
+                            <div className="flex gap-2 mt-3">
+                              <button
+                                onClick={() => handleDownloadAll(banner)}
+                                className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 text-xs font-medium transition-colors"
+                              >
+                                <Download className="w-3 h-3" />
+                                Download All
+                              </button>
+                              <button
+                                onClick={() => handleDelete(banner.id)}
+                                disabled={deleting === banner.id}
+                                className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-xs font-medium disabled:opacity-50 transition-colors"
+                              >
+                                {deleting === banner.id ? (
+                                  <RefreshCw className="w-3 h-3 animate-spin" />
+                                ) : (
+                                  <Trash2 className="w-3 h-3" />
+                                )}
+                              </button>
+                            </div>
                           </div>
                         </div>
-
-                        {/* Banner Info */}
-                        <div className="p-3">
-                          <h3 className="font-semibold text-white truncate">{banner.partner_name}</h3>
-                          <p className="text-xs text-gray-400 truncate flex items-center gap-1 mt-1">
-                            <Mail className="w-3 h-3" />
-                            {banner.partner_email}
-                          </p>
-                          <p className="text-xs text-gray-500 flex items-center gap-1 mt-1">
-                            <Calendar className="w-3 h-3" />
-                            {formatDate(banner.created_at)}
-                          </p>
-                          {banner.notes && (
-                            <p className="text-xs text-gray-400 mt-2 line-clamp-2">{banner.notes}</p>
-                          )}
-
-                          {/* Actions */}
-                          <div className="flex gap-2 mt-3">
-                            <button
-                              onClick={() => handleDownload(banner)}
-                              className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 text-xs font-medium transition-colors"
-                            >
-                              <Download className="w-3 h-3" />
-                              Download
-                            </button>
-                            <button
-                              onClick={() => handleDelete(banner.id)}
-                              disabled={deleting === banner.id}
-                              className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-xs font-medium disabled:opacity-50 transition-colors"
-                            >
-                              {deleting === banner.id ? (
-                                <RefreshCw className="w-3 h-3 animate-spin" />
-                              ) : (
-                                <Trash2 className="w-3 h-3" />
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
 
                   {/* Pagination */}
@@ -315,11 +367,11 @@ export default function BannerLibraryPage() {
             onClick={() => setSelectedBanner(null)}
           >
             <div
-              className="bg-[#0F1123] border border-white/10 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-auto"
+              className="bg-[#0F1123] border border-white/10 rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-auto"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-4 border-b border-white/10">
+              <div className="flex items-center justify-between p-4 border-b border-white/10 sticky top-0 bg-[#0F1123] z-10">
                 <div>
                   <h2 className="text-xl font-bold text-white">{selectedBanner.partner_name}</h2>
                   <p className="text-sm text-gray-400">{selectedBanner.partner_email}</p>
@@ -332,80 +384,104 @@ export default function BannerLibraryPage() {
                 </button>
               </div>
 
-              {/* Banner Preview */}
-              <div className="p-4">
-                <img
-                  src={selectedBanner.banner_url}
-                  alt={`${selectedBanner.partner_name} banner`}
-                  className="w-full rounded-lg"
-                />
-              </div>
-
-              {/* Banner Details */}
-              <div className="px-4 pb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Info */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm">
+              {/* Partner Info */}
+              <div className="p-4 border-b border-white/10">
+                <div className="flex flex-wrap gap-4 text-sm">
+                  <div className="flex items-center gap-2">
                     <User className="w-4 h-4 text-gray-500" />
                     <span className="text-gray-400">Partner:</span>
                     <span className="text-white">{selectedBanner.partner_name}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2">
                     <Mail className="w-4 h-4 text-gray-500" />
                     <span className="text-gray-400">Email:</span>
                     <span className="text-white">{selectedBanner.partner_email}</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
+                  <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-gray-500" />
                     <span className="text-gray-400">Created:</span>
                     <span className="text-white">{formatDate(selectedBanner.created_at)}</span>
                   </div>
-                  {selectedBanner.notes && (
-                    <div className="text-sm">
-                      <span className="text-gray-400">Notes:</span>
-                      <p className="text-white mt-1">{selectedBanner.notes}</p>
-                    </div>
-                  )}
+                </div>
+                {selectedBanner.notes && (
+                  <p className="text-sm text-gray-400 mt-2">{selectedBanner.notes}</p>
+                )}
+              </div>
+
+              {/* All Assets Grid */}
+              <div className="p-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-white">Assets</h3>
+                  <button
+                    onClick={() => handleDownloadAll(selectedBanner)}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 text-blue-400 rounded-xl hover:bg-blue-500/30 font-medium transition-colors"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download All
+                  </button>
                 </div>
 
-                {/* Actions */}
-                <div className="space-y-3">
-                  <button
-                    onClick={() => handleDownload(selectedBanner)}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-500/20 text-blue-400 rounded-xl hover:bg-blue-500/30 font-medium transition-colors"
-                  >
-                    <Download className="w-5 h-5" />
-                    Download Banner
-                  </button>
-                  <a
-                    href={selectedBanner.banner_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white/5 text-gray-300 rounded-xl hover:bg-white/10 font-medium transition-colors"
-                  >
-                    <ExternalLink className="w-5 h-5" />
-                    Open Full Size
-                  </a>
-                  <button
-                    onClick={() => {
-                      handleDelete(selectedBanner.id);
-                    }}
-                    disabled={deleting === selectedBanner.id}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 font-medium transition-colors disabled:opacity-50"
-                  >
-                    {deleting === selectedBanner.id ? (
-                      <>
-                        <RefreshCw className="w-5 h-5 animate-spin" />
-                        Deleting...
-                      </>
-                    ) : (
-                      <>
-                        <Trash2 className="w-5 h-5" />
-                        Delete Banner
-                      </>
-                    )}
-                  </button>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {ASSET_TYPES.map((asset) => {
+                    const url = selectedBanner[asset.key as keyof Banner] as string | null;
+                    if (!url) return null;
+
+                    const sanitizedName = selectedBanner.partner_name.toLowerCase().replace(/[^a-z0-9]/g, '-');
+                    const filename = `${sanitizedName}-${asset.key.replace(/_url$/, '').replace(/_/g, '-')}.png`;
+
+                    return (
+                      <div key={asset.key} className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+                        <div className="aspect-[16/9] bg-gray-900 relative">
+                          <img
+                            src={url}
+                            alt={asset.label}
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                        <div className="p-3 flex items-center justify-between">
+                          <span className="text-sm font-medium text-white">{asset.label}</span>
+                          <div className="flex gap-2">
+                            <a
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="p-2 bg-white/5 text-gray-400 rounded-lg hover:bg-white/10 transition-colors"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                            </a>
+                            <button
+                              onClick={() => handleDownload(url, filename)}
+                              className="p-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 transition-colors"
+                            >
+                              <Download className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
+              </div>
+
+              {/* Delete Action */}
+              <div className="p-4 border-t border-white/10">
+                <button
+                  onClick={() => handleDelete(selectedBanner.id)}
+                  disabled={deleting === selectedBanner.id}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500/20 text-red-400 rounded-xl hover:bg-red-500/30 font-medium transition-colors disabled:opacity-50"
+                >
+                  {deleting === selectedBanner.id ? (
+                    <>
+                      <RefreshCw className="w-5 h-5 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="w-5 h-5" />
+                      Delete All Assets
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>

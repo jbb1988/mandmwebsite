@@ -319,10 +319,36 @@ export default function BannerGeneratorPage() {
     }
   };
 
-  // Save banner to library
+  // Helper to convert a ref element to blob
+  const elementToBlob = async (
+    ref: React.RefObject<HTMLDivElement>,
+    width: number,
+    height: number,
+    html2canvas: typeof import('html2canvas').default
+  ): Promise<Blob | null> => {
+    if (!ref.current) return null;
+    const canvas = await html2canvas(ref.current, {
+      scale: 1,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#0f172a',
+      width,
+      height,
+    });
+    return new Promise<Blob>((resolve) => {
+      canvas.toBlob((blob) => resolve(blob!), 'image/png');
+    });
+  };
+
+  // Save all banners and assets to library
   const saveBannerToLibrary = async () => {
-    if (!partnerBannerRef.current || !partnerName || !partnerEmail) {
+    if (!partnerName || !partnerEmail) {
       alert('Please fill in partner name and email to save to library.');
+      return;
+    }
+
+    if (!qrCodeImage) {
+      alert('Please upload a QR code first.');
       return;
     }
 
@@ -331,35 +357,43 @@ export default function BannerGeneratorPage() {
 
     try {
       const html2canvas = (await import('html2canvas')).default;
-      const canvas = await html2canvas(partnerBannerRef.current, {
-        scale: 1,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#0f172a',
-        width: 1600,
-        height: 900,
-      });
 
-      // Convert canvas to blob
-      const bannerBlob = await new Promise<Blob>((resolve) => {
-        canvas.toBlob((blob) => resolve(blob!), 'image/png');
-      });
+      // Generate all banners in parallel
+      const [
+        bannerPartnerBlob,
+        bannerFacebookBlob,
+        bannerFacebookCoBrandedBlob,
+        bannerTwitterBlob,
+        bannerTwitterCoBrandedBlob,
+      ] = await Promise.all([
+        partnerLogo ? elementToBlob(partnerBannerRef, 1600, 900, html2canvas) : null,
+        elementToBlob(facebookBannerRef, 1080, 1080, html2canvas),
+        partnerLogo ? elementToBlob(facebookCoBrandedRef, 1080, 1080, html2canvas) : null,
+        elementToBlob(twitterBannerRef, 1600, 900, html2canvas),
+        partnerLogo ? elementToBlob(twitterCoBrandedRef, 1600, 900, html2canvas) : null,
+      ]);
 
       // Prepare form data
       const formData = new FormData();
       formData.append('partnerName', partnerName);
       formData.append('partnerEmail', partnerEmail);
       formData.append('notes', partnerNotes);
-      formData.append('banner', bannerBlob, 'banner.png');
 
-      // Add logo if available
+      // Add all banners
+      if (bannerPartnerBlob) formData.append('bannerPartner', bannerPartnerBlob, 'banner-partner.png');
+      if (bannerFacebookBlob) formData.append('bannerFacebook', bannerFacebookBlob, 'banner-facebook.png');
+      if (bannerFacebookCoBrandedBlob) formData.append('bannerFacebookCoBranded', bannerFacebookCoBrandedBlob, 'banner-facebook-cobranded.png');
+      if (bannerTwitterBlob) formData.append('bannerTwitter', bannerTwitterBlob, 'banner-twitter.png');
+      if (bannerTwitterCoBrandedBlob) formData.append('bannerTwitterCoBranded', bannerTwitterCoBrandedBlob, 'banner-twitter-cobranded.png');
+
+      // Add original logo if available
       if (partnerLogo) {
         const logoResponse = await fetch(partnerLogo);
         const logoBlob = await logoResponse.blob();
         formData.append('logo', logoBlob, 'logo.png');
       }
 
-      // Add QR code if available
+      // Add original QR code
       if (qrCodeImage) {
         const qrResponse = await fetch(qrCodeImage);
         const qrBlob = await qrResponse.blob();
@@ -367,7 +401,6 @@ export default function BannerGeneratorPage() {
       }
 
       const password = getPassword();
-      console.log('[DEBUG] Sending save request with password length:', password?.length || 0);
 
       const response = await fetch('/api/admin/partner-banners', {
         method: 'POST',
@@ -383,17 +416,15 @@ export default function BannerGeneratorPage() {
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 3000);
       } else {
-        // More detailed error for 401
         if (response.status === 401) {
-          console.error('[DEBUG] 401 Unauthorized - password sent:', password?.substring(0, 3) + '...');
           alert('Session expired. Please log out from the admin panel and log back in, then try again.');
         } else {
           alert(`Failed to save: ${result.message}`);
         }
       }
     } catch (error) {
-      console.error('Error saving banner:', error);
-      alert('Error saving banner. Please try again.');
+      console.error('Error saving banners:', error);
+      alert('Error saving banners. Please try again.');
     } finally {
       setIsSaving(false);
     }
