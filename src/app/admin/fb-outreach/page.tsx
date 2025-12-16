@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import AdminGate from '@/components/AdminGate';
+import AdminNav from '@/components/AdminNav';
 import {
   Users, Plus, RefreshCw, Search, MapPin, ExternalLink, MessageCircle,
   CheckCircle, Clock, XCircle, Send, FileText, ChevronDown, ChevronUp,
   Copy, Filter, BarChart3, Calendar, Trash2, UserPlus, AlertCircle, Bell,
   Pencil, X, QrCode, Link2, DollarSign, TrendingUp, UserCheck, Image,
-  CalendarClock, Handshake, Gift, Loader2
+  CalendarClock, Handshake, Gift, Loader2, Mail
 } from 'lucide-react';
 
 type Tab = 'add' | 'pipeline' | 'follow-up' | 'partners' | 'templates';
@@ -366,7 +367,7 @@ export default function AdminFBOutreachPage() {
         <div className="relative z-10 pt-28 pb-12 px-4 sm:px-6">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
-            <div className="text-center mb-10">
+            <div className="text-center mb-6">
               <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 tracking-tight">
                 Facebook Outreach Pipeline
               </h1>
@@ -374,6 +375,9 @@ export default function AdminFBOutreachPage() {
                 Track admin DMs and group posts — Starting with Florida
               </p>
             </div>
+
+            {/* Admin Navigation */}
+            <AdminNav />
 
             {/* Stats Grid - Row 1 */}
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 mb-3">
@@ -1049,56 +1053,19 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
                         {admins.length > 0 ? (
                           <div className="space-y-2">
                             {admins.map((admin) => (
-                              <div key={admin.id} className="flex items-center justify-between p-3 bg-white/[0.03] rounded-xl border border-white/[0.06]">
-                                <div className="flex items-center gap-3">
-                                  <div className={`w-8 h-8 ${admin.admin_email ? 'bg-emerald-500/20 border-emerald-500/30' : 'bg-blue-500/20 border-blue-500/30'} rounded-full flex items-center justify-center border`}>
-                                    <Users className="w-4 h-4 text-blue-400" />
-                                  </div>
-                                  <div>
-                                    <div className="flex items-center gap-2">
-                                      <p className="text-sm font-medium text-white">{admin.admin_name}</p>
-                                    </div>
-                                    <p className="text-xs text-white/40">
-                                      {admin.admin_email ? (
-                                        <span className="text-emerald-400/70">{admin.admin_email}</span>
-                                      ) : (
-                                        <span className="text-yellow-400/70">No email - add for partner sync</span>
-                                      )}
-                                      {' • '}
-                                      {ADMIN_RESPONSE_STATUS[admin.response_status as keyof typeof ADMIN_RESPONSE_STATUS]?.label || 'Not Contacted'}
-                                    </p>
-                                  </div>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                  <button
-                                    onClick={() => {
-                                      setEditingAdmin({ admin, pageId: page.id });
-                                      setAdminForm({ name: admin.admin_name, profile_url: admin.admin_profile_url || '', email: admin.admin_email || '' });
-                                    }}
-                                    className="p-2 text-white/40 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
-                                    title="Edit Admin"
-                                  >
-                                    <Pencil className="w-4 h-4" />
-                                  </button>
-                                  {admin.admin_profile_url && (
-                                    <a
-                                      href={admin.admin_profile_url}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="p-2 text-white/40 hover:text-white hover:bg-white/[0.05] rounded-lg transition-colors"
-                                    >
-                                      <ExternalLink className="w-4 h-4" />
-                                    </a>
-                                  )}
-                                  <button
-                                    onClick={() => deleteAdmin(admin.id)}
-                                    className="p-2 text-white/40 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                                    title="Delete Admin"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </button>
-                                </div>
-                              </div>
+                              <AdminCard
+                                key={admin.id}
+                                admin={admin}
+                                onEdit={() => {
+                                  setEditingAdmin({ admin, pageId: page.id });
+                                  setAdminForm({ name: admin.admin_name, profile_url: admin.admin_profile_url || '', email: admin.admin_email || '' });
+                                }}
+                                onDelete={() => deleteAdmin(admin.id)}
+                                onTrialGranted={() => {
+                                  fetchPages();
+                                  onUpdate();
+                                }}
+                              />
                             ))}
                           </div>
                         ) : (
@@ -1611,6 +1578,219 @@ function PartnersTab({ onUpdate }: { onUpdate: () => void }) {
               </Card>
             );
           })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Admin Card Component with Gift Button (similar to X outreach TargetCard)
+function AdminCard({
+  admin,
+  onEdit,
+  onDelete,
+  onTrialGranted,
+}: {
+  admin: FBPageAdmin;
+  onEdit: () => void;
+  onDelete: () => void;
+  onTrialGranted: () => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [trialEmail, setTrialEmail] = useState(admin.admin_email || '');
+  const [grantingTrial, setGrantingTrial] = useState(false);
+  const [trialMessage, setTrialMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
+
+  const handleGrantTrial = async () => {
+    if (!trialEmail.trim()) {
+      setTrialMessage({ type: 'error', text: 'Please enter an email address' });
+      return;
+    }
+
+    setGrantingTrial(true);
+    setTrialMessage(null);
+
+    try {
+      // First save the email if changed
+      if (trialEmail !== admin.admin_email) {
+        await fetch('/api/admin/fb-outreach/admins', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Admin-Password': adminPassword,
+          },
+          body: JSON.stringify({ admin_id: admin.id, admin_email: trialEmail }),
+        });
+      }
+
+      // Grant trial
+      const response = await fetch('/api/admin/grant-trial', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': adminPassword,
+        },
+        body: JSON.stringify({
+          email: trialEmail,
+          source: 'fb_outreach',
+          source_record_id: admin.id,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setTrialMessage({ type: 'success', text: data.message });
+        onTrialGranted();
+      } else {
+        setTrialMessage({ type: 'error', text: data.message });
+      }
+    } catch (error) {
+      setTrialMessage({ type: 'error', text: 'Failed to grant trial' });
+    } finally {
+      setGrantingTrial(false);
+    }
+  };
+
+  const getTrialStatusBadge = () => {
+    if (admin.trial_granted_at && admin.trial_expires_at) {
+      const expiresAt = new Date(admin.trial_expires_at);
+      const now = new Date();
+      if (expiresAt > now) {
+        const daysLeft = Math.ceil((expiresAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        return (
+          <span className="px-2 py-1 rounded-lg text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+            <Gift className="w-3 h-3" />
+            Trial ({daysLeft}d)
+          </span>
+        );
+      } else {
+        return (
+          <span className="px-2 py-1 rounded-lg text-xs bg-orange-500/20 text-orange-400 border border-orange-500/30 flex items-center gap-1">
+            <Gift className="w-3 h-3" />
+            Expired
+          </span>
+        );
+      }
+    }
+    return null;
+  };
+
+  const trialBadge = getTrialStatusBadge();
+
+  return (
+    <div className="p-3 bg-white/[0.03] rounded-xl border border-white/[0.06]">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className={`w-8 h-8 ${admin.admin_email ? 'bg-emerald-500/20 border-emerald-500/30' : 'bg-blue-500/20 border-blue-500/30'} rounded-full flex items-center justify-center border`}>
+            <Users className="w-4 h-4 text-blue-400" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-sm font-medium text-white">{admin.admin_name}</p>
+              {trialBadge}
+            </div>
+            <p className="text-xs text-white/40">
+              {admin.admin_email ? (
+                <span className="text-emerald-400/70">{admin.admin_email}</span>
+              ) : (
+                <span className="text-yellow-400/70">No email</span>
+              )}
+              {' • '}
+              {ADMIN_RESPONSE_STATUS[admin.response_status as keyof typeof ADMIN_RESPONSE_STATUS]?.label || 'Not Contacted'}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setExpanded(!expanded)}
+            className={`p-2 rounded-lg transition-colors ${expanded ? 'bg-emerald-500/20 text-emerald-400' : 'hover:bg-white/10 text-white/50'}`}
+            title="Trial & Email"
+          >
+            <Gift className="w-4 h-4" />
+          </button>
+          <button
+            onClick={onEdit}
+            className="p-2 text-white/40 hover:text-blue-400 hover:bg-blue-500/10 rounded-lg transition-colors"
+            title="Edit Admin"
+          >
+            <Pencil className="w-4 h-4" />
+          </button>
+          {admin.admin_profile_url && (
+            <a
+              href={admin.admin_profile_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 text-white/40 hover:text-white hover:bg-white/[0.05] rounded-lg transition-colors"
+            >
+              <ExternalLink className="w-4 h-4" />
+            </a>
+          )}
+          <button
+            onClick={onDelete}
+            className="p-2 text-white/40 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+            title="Delete Admin"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Expanded Trial Section */}
+      {expanded && (
+        <div className="mt-3 pt-3 border-t border-white/10">
+          <div className="flex items-center gap-2 mb-3">
+            <Mail className="w-4 h-4 text-emerald-400" />
+            <span className="text-sm text-white/60">Contact Email & Trial</span>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="email"
+              placeholder="user@example.com"
+              value={trialEmail}
+              onChange={(e) => setTrialEmail(e.target.value)}
+              className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/30 text-sm focus:outline-none focus:border-emerald-500/50"
+            />
+            <button
+              onClick={handleGrantTrial}
+              disabled={grantingTrial || !trialEmail.trim() || !!admin.trial_granted_at}
+              className={`px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-all ${
+                admin.trial_granted_at
+                  ? 'bg-white/5 text-white/30 cursor-not-allowed'
+                  : grantingTrial
+                  ? 'bg-emerald-500/20 text-emerald-400'
+                  : 'bg-gradient-to-r from-emerald-500 to-green-500 text-white hover:opacity-90'
+              }`}
+            >
+              {grantingTrial ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Granting...
+                </>
+              ) : admin.trial_granted_at ? (
+                <>
+                  <CheckCircle className="w-4 h-4" />
+                  Granted
+                </>
+              ) : (
+                <>
+                  <Gift className="w-4 h-4" />
+                  Grant Trial
+                </>
+              )}
+            </button>
+          </div>
+          {trialMessage && (
+            <div className={`mt-2 text-sm ${trialMessage.type === 'success' ? 'text-emerald-400' : 'text-red-400'}`}>
+              {trialMessage.text}
+            </div>
+          )}
+          {admin.trial_granted_at && admin.trial_granted_to_email && (
+            <div className="mt-2 text-xs text-white/40">
+              Granted to {admin.trial_granted_to_email} on {new Date(admin.trial_granted_at).toLocaleDateString()}
+            </div>
+          )}
         </div>
       )}
     </div>

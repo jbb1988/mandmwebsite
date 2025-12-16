@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import AdminGate from '@/components/AdminGate';
+import AdminNav from '@/components/AdminNav';
 import {
   Twitter, BarChart3, Plus, Search, Users, MessageCircle,
   Handshake, TrendingUp, ExternalLink, Pencil, Trash2, X, Check,
@@ -353,7 +354,7 @@ export default function XOutreachPage() {
         <div className="relative z-10 pt-28 pb-12 px-4 sm:px-6">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
-            <div className="text-center mb-10">
+            <div className="text-center mb-6">
               <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 tracking-tight">
                 X/Twitter Outreach Pipeline
               </h1>
@@ -361,6 +362,9 @@ export default function XOutreachPage() {
                 Track influencer DMs and partnerships
               </p>
             </div>
+
+            {/* Admin Navigation */}
+            <AdminNav />
 
             {/* Message Toast */}
             {message && (

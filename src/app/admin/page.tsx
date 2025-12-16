@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import AdminGate from '@/components/AdminGate';
+import AdminNav from '@/components/AdminNav';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import Link from 'next/link';
 import {
@@ -229,6 +230,9 @@ export default function AdminHubPage() {
                 Logout
               </button>
             </div>
+
+            {/* Admin Navigation */}
+            <AdminNav />
 
             {/* Quick Stats Row */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">

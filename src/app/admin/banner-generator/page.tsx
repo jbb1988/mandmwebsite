@@ -3,6 +3,7 @@
 import React, { useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import AdminGate from '@/components/AdminGate';
+import AdminNav from '@/components/AdminNav';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
 import { GradientTextReveal } from '@/components/animations';
@@ -119,7 +120,7 @@ export default function BannerGeneratorPage() {
 
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <GradientTextReveal
             text="Partner Banner Generator"
             className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-4 leading-relaxed"
@@ -131,6 +132,9 @@ export default function BannerGeneratorPage() {
             Upload a partner's QR code to generate a professional marketing banner.
           </p>
         </div>
+
+        {/* Admin Navigation */}
+        <AdminNav />
 
         {/* Instructions */}
         <LiquidGlass variant="blue" className="p-6 mb-8">
