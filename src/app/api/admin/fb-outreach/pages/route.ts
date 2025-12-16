@@ -71,42 +71,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ success: false, message: error.message }, { status: 500 });
     }
 
-    // Then get admins for these pages with their linked partner data
+    // Then get admins for these pages
     if (pages && pages.length > 0) {
       const pageIds = pages.map(p => p.id);
 
-      // Try to fetch with partner join first
-      let admins = null;
-      let adminsError = null;
-
-      try {
-        const result = await supabase
-          .from('fb_page_admins')
-          .select(`
-            *,
-            finder_fee_partner:finder_fee_partner_id (
-              id,
-              partner_code,
-              partner_email,
-              partner_name,
-              enabled,
-              is_recurring
-            )
-          `)
-          .in('page_id', pageIds);
-
-        admins = result.data;
-        adminsError = result.error;
-      } catch (e) {
-        console.error('Error with partner join, falling back:', e);
-        // Fallback to simple query without join
-        const result = await supabase
-          .from('fb_page_admins')
-          .select('*')
-          .in('page_id', pageIds);
-        admins = result.data;
-        adminsError = result.error;
-      }
+      const { data: admins, error: adminsError } = await supabase
+        .from('fb_page_admins')
+        .select('*')
+        .in('page_id', pageIds);
 
       if (adminsError) {
         console.error('Error fetching admins:', adminsError);
