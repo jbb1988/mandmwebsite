@@ -7,9 +7,11 @@ import AdminNav from '@/components/AdminNav';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
 import { GradientTextReveal } from '@/components/animations';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import { Upload, Download, RefreshCw, Image as ImageIcon, Smartphone, Save, CheckCircle } from 'lucide-react';
 
 export default function BannerGeneratorPage() {
+  const { getPassword } = useAdminAuth();
   const [qrCodeImage, setQrCodeImage] = useState<string | null>(null);
   const [partnerLogo, setPartnerLogo] = useState<string | null>(null);
   const [isGeneratingFacebook, setIsGeneratingFacebook] = useState(false);
@@ -214,13 +216,10 @@ export default function BannerGeneratorPage() {
         formData.append('qrCode', qrBlob, 'qrcode.png');
       }
 
-      // Get admin password from session storage
-      const adminPassword = sessionStorage.getItem('adminPassword') || '';
-
       const response = await fetch('/api/admin/partner-banners', {
         method: 'POST',
         headers: {
-          'X-Admin-Password': adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: formData,
       });

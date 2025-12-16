@@ -6,12 +6,14 @@ interface AdminAuthContextType {
   isAuthenticated: boolean;
   login: (password: string) => boolean;
   logout: () => void;
+  getPassword: () => string;
 }
 
 const AdminAuthContext = createContext<AdminAuthContextType | undefined>(undefined);
 
 const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 const STORAGE_KEY = 'mm_admin_auth';
+const PASSWORD_KEY = 'adminPassword';
 
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -30,6 +32,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
     if (password === ADMIN_PASSWORD) {
       setIsAuthenticated(true);
       sessionStorage.setItem(STORAGE_KEY, 'true');
+      sessionStorage.setItem(PASSWORD_KEY, password);
       return true;
     }
     return false;
@@ -38,6 +41,12 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setIsAuthenticated(false);
     sessionStorage.removeItem(STORAGE_KEY);
+    sessionStorage.removeItem(PASSWORD_KEY);
+  };
+
+  const getPassword = (): string => {
+    // Return stored password, or fall back to env var for users authenticated before this change
+    return sessionStorage.getItem(PASSWORD_KEY) || ADMIN_PASSWORD;
   };
 
   // Don't render children until we've checked session storage
@@ -46,7 +55,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AdminAuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AdminAuthContext.Provider value={{ isAuthenticated, login, logout, getPassword }}>
       {children}
     </AdminAuthContext.Provider>
   );

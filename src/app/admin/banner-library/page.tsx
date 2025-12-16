@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import AdminGate from '@/components/AdminGate';
 import AdminNav from '@/components/AdminNav';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import {
   FolderOpen, Search, RefreshCw, Download, Trash2, Eye, X,
   Calendar, Mail, User, ChevronLeft, ChevronRight, ExternalLink
@@ -40,6 +41,7 @@ function Card({ children, className = '', variant = 'default' }: {
 }
 
 export default function BannerLibraryPage() {
+  const { getPassword } = useAdminAuth();
   const [banners, setBanners] = useState<Banner[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
@@ -49,7 +51,6 @@ export default function BannerLibraryPage() {
   const [total, setTotal] = useState(0);
   const [selectedBanner, setSelectedBanner] = useState<Banner | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
-  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   // Debounce search
   useEffect(() => {
@@ -70,7 +71,7 @@ export default function BannerLibraryPage() {
       });
 
       const response = await fetch(`/api/admin/partner-banners?${params}`, {
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
 
       const data = await response.json();
@@ -84,7 +85,7 @@ export default function BannerLibraryPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, debouncedSearch, adminPassword]);
+  }, [page, debouncedSearch, getPassword]);
 
   useEffect(() => {
     fetchBanners();
@@ -97,7 +98,7 @@ export default function BannerLibraryPage() {
     try {
       const response = await fetch(`/api/admin/partner-banners?id=${bannerId}`, {
         method: 'DELETE',
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
 
       const data = await response.json();
