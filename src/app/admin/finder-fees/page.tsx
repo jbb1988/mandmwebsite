@@ -2,13 +2,33 @@
 
 import { useState, useEffect } from 'react';
 import AdminGate from '@/components/AdminGate';
-import { LiquidGlass } from '@/components/LiquidGlass';
-import { LiquidButton } from '@/components/LiquidButton';
 import {
   Users, DollarSign, CheckCircle, Clock, Crown, RefreshCw, Copy, UserPlus, List,
   Mail, Info, ExternalLink, Search, ToggleLeft, ToggleRight, ChevronDown, ChevronUp,
   TrendingUp, Wallet, Calendar
 } from 'lucide-react';
+
+// Card component matching FB/X Outreach styling
+function Card({ children, className = '', variant = 'default', glow = false }: {
+  children: React.ReactNode;
+  className?: string;
+  variant?: 'default' | 'elevated' | 'bordered';
+  glow?: boolean;
+}) {
+  const baseClasses = 'rounded-2xl transition-all duration-200';
+  const variantClasses = {
+    default: 'bg-[#0F1123]/80 border border-white/[0.08]',
+    elevated: 'bg-gradient-to-br from-[#0F1123] to-[#1B1F39] border border-white/[0.12] shadow-xl',
+    bordered: 'bg-[#0A0B14]/60 border-2 border-white/[0.1]',
+  };
+  const glowClass = glow ? 'shadow-lg shadow-blue-500/10' : '';
+
+  return (
+    <div className={`${baseClasses} ${variantClasses[variant]} ${glowClass} ${className}`}>
+      {children}
+    </div>
+  );
+}
 
 type Tab = 'enable' | 'partners' | 'transactions';
 
@@ -109,74 +129,74 @@ export default function AdminFinderFeesPage() {
       title="Admin: Finder Fee Management"
       description="Enter admin password to access dashboard"
     >
-      <div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white">
-        {/* Background effects */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
-        </div>
+      <div className="min-h-screen bg-[#0A0B14] text-white">
+        {/* Subtle gradient overlay */}
+        <div className="fixed inset-0 bg-gradient-to-br from-orange-900/5 via-transparent to-blue-900/5 pointer-events-none" />
 
-        <div className="relative z-10 py-12 px-4">
+        <div className="relative z-10 pt-28 pb-12 px-4 sm:px-6">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold mb-2">Finder Fee Admin</h1>
-              <p className="text-gray-400">Manage partners and view transactions</p>
+            <div className="text-center mb-10">
+              <div className="w-16 h-16 bg-gradient-to-br from-orange-500/20 to-yellow-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/10">
+                <DollarSign className="w-8 h-8 text-orange-400" />
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 tracking-tight">Finder Fee Admin</h1>
+              <p className="text-white/50 text-sm sm:text-base">Manage partners and view transactions</p>
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              <LiquidGlass className="p-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">
+              <Card variant="elevated" className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center border border-blue-500/30">
                     <Users className="w-5 h-5 text-blue-400" />
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-white">{stats.totalPartners}</p>
-                    <p className="text-xs text-gray-400">Total Partners</p>
+                    <p className="text-xs text-white/50">Total Partners</p>
                   </div>
                 </div>
-              </LiquidGlass>
+              </Card>
 
-              <LiquidGlass className="p-4">
+              <Card variant="elevated" className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-yellow-500/20 rounded-full flex items-center justify-center border border-yellow-500/30">
                     <Clock className="w-5 h-5 text-yellow-400" />
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-yellow-400">${stats.pendingPayments.toFixed(0)}</p>
-                    <p className="text-xs text-gray-400">Pending</p>
+                    <p className="text-xs text-white/50">Pending</p>
                   </div>
                 </div>
-              </LiquidGlass>
+              </Card>
 
-              <LiquidGlass className="p-4">
+              <Card variant="elevated" className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center border border-green-500/30">
                     <Wallet className="w-5 h-5 text-green-400" />
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-green-400">${stats.totalPaidOut.toFixed(0)}</p>
-                    <p className="text-xs text-gray-400">Total Paid</p>
+                    <p className="text-xs text-white/50">Total Paid</p>
                   </div>
                 </div>
-              </LiquidGlass>
+              </Card>
 
-              <LiquidGlass className="p-4">
+              <Card variant="elevated" className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center border border-purple-500/30">
                     <TrendingUp className="w-5 h-5 text-purple-400" />
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-purple-400">${stats.thisMonthFees.toFixed(0)}</p>
-                    <p className="text-xs text-gray-400">This Month</p>
+                    <p className="text-xs text-white/50">This Month</p>
                   </div>
                 </div>
-              </LiquidGlass>
+              </Card>
             </div>
 
             {/* Comprehensive Cheat Sheet */}
-            <LiquidGlass className="p-4 mb-8">
+            <Card variant="default" className="p-5 mb-8">
               <button
                 onClick={() => setShowCheatSheet(!showCheatSheet)}
                 className="w-full flex items-center justify-between text-left"
@@ -184,9 +204,9 @@ export default function AdminFinderFeesPage() {
                 <div className="flex items-center gap-2">
                   <Info className="w-5 h-5 text-orange-400" />
                   <span className="font-semibold text-white">Referral Programs Cheat Sheet</span>
-                  <span className="text-xs text-gray-500">(Partner Program + Finder Fee)</span>
+                  <span className="text-xs text-white/30">(Partner Program + Finder Fee)</span>
                 </div>
-                {showCheatSheet ? <ChevronUp className="w-5 h-5 text-gray-400" /> : <ChevronDown className="w-5 h-5 text-gray-400" />}
+                {showCheatSheet ? <ChevronUp className="w-5 h-5 text-white/40" /> : <ChevronDown className="w-5 h-5 text-white/40" />}
               </button>
 
               {showCheatSheet && (
@@ -315,7 +335,7 @@ export default function AdminFinderFeesPage() {
                   </div>
                 </div>
               )}
-            </LiquidGlass>
+            </Card>
 
             {/* Tab Navigation */}
             <div className="flex justify-center gap-2 md:gap-4 mb-8 flex-wrap">
@@ -324,7 +344,7 @@ export default function AdminFinderFeesPage() {
                 className={`flex items-center gap-2 px-4 md:px-6 py-3 rounded-xl font-medium transition-all text-sm md:text-base ${
                   activeTab === 'enable'
                     ? 'bg-orange-500/20 border border-orange-500/30 text-orange-400'
-                    : 'bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10'
+                    : 'bg-white/[0.03] border border-white/[0.08] text-white/40 hover:bg-white/[0.08] hover:text-white/60'
                 }`}
               >
                 <UserPlus className="w-5 h-5" />
@@ -335,7 +355,7 @@ export default function AdminFinderFeesPage() {
                 className={`flex items-center gap-2 px-4 md:px-6 py-3 rounded-xl font-medium transition-all text-sm md:text-base ${
                   activeTab === 'partners'
                     ? 'bg-green-500/20 border border-green-500/30 text-green-400'
-                    : 'bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10'
+                    : 'bg-white/[0.03] border border-white/[0.08] text-white/40 hover:bg-white/[0.08] hover:text-white/60'
                 }`}
               >
                 <Users className="w-5 h-5" />
@@ -346,7 +366,7 @@ export default function AdminFinderFeesPage() {
                 className={`flex items-center gap-2 px-4 md:px-6 py-3 rounded-xl font-medium transition-all text-sm md:text-base ${
                   activeTab === 'transactions'
                     ? 'bg-blue-500/20 border border-blue-500/30 text-blue-400'
-                    : 'bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10'
+                    : 'bg-white/[0.03] border border-white/[0.08] text-white/40 hover:bg-white/[0.08] hover:text-white/60'
                 }`}
               >
                 <List className="w-5 h-5" />
@@ -355,11 +375,11 @@ export default function AdminFinderFeesPage() {
             </div>
 
             {/* Tab Content */}
-            <LiquidGlass className="p-6 md:p-8">
+            <Card variant="elevated" className="p-6 md:p-8">
               {activeTab === 'enable' && <EnablePartnerTab onSuccess={fetchStats} />}
               {activeTab === 'partners' && <PartnersTab />}
               {activeTab === 'transactions' && <TransactionsTab onStatusChange={fetchStats} />}
-            </LiquidGlass>
+            </Card>
           </div>
         </div>
       </div>
@@ -423,7 +443,7 @@ function EnablePartnerTab({ onSuccess }: { onSuccess: () => void }) {
         </div>
         <div>
           <h2 className="text-2xl font-bold text-white">Add New Finder Partner</h2>
-          <p className="text-gray-400">Create a partner - welcome email sends automatically</p>
+          <p className="text-white/50">Create a partner - welcome email sends automatically</p>
         </div>
       </div>
 
@@ -494,14 +514,13 @@ function EnablePartnerTab({ onSuccess }: { onSuccess: () => void }) {
           </p>
         </div>
 
-        <LiquidButton
+        <button
           type="submit"
           disabled={loading}
-          variant="orange"
-          fullWidth
+          className="w-full py-3 px-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? 'Creating Partner...' : 'Create Partner & Send Email'}
-        </LiquidButton>
+        </button>
       </form>
 
       {result && (
@@ -642,7 +661,7 @@ function PartnersTab() {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-white">Finder Partners</h2>
-            <p className="text-gray-400">View and manage all partners</p>
+            <p className="text-white/50">View and manage all partners</p>
           </div>
         </div>
 
@@ -829,7 +848,7 @@ function TransactionsTab({ onStatusChange }: { onStatusChange: () => void }) {
           </div>
           <div>
             <h2 className="text-2xl font-bold text-white">Finder Fee Transactions</h2>
-            <p className="text-gray-400">View and manage all finder fee payments</p>
+            <p className="text-white/50">View and manage all finder fee payments</p>
           </div>
         </div>
         <button
