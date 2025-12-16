@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
+import { createClient } from '@supabase/supabase-js';
 import { partnerApplicationSchema, escapeHtml } from '@/lib/validation';
 import { partnerApplicationRateLimit, getClientIp, checkRateLimit } from '@/lib/rate-limit';
+
+// Supabase client for storing partner data
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 // Verify Cloudflare Turnstile token
 async function verifyTurnstileToken(token: string, ip: string): Promise<boolean> {
@@ -158,6 +165,34 @@ export async function POST(request: NextRequest) {
       console.error('❌ Exception calling Tolt API:', toltError.message);
       console.error('Full error:', toltError);
       // Don't fail the whole request - still send notification email
+    }
+
+    // Save partner to Supabase (for FB outreach tracking and local analytics)
+    try {
+      const { error: supabaseError } = await supabase
+        .from('partners')
+        .upsert({
+          email: email,
+          name: name,
+          first_name: firstName,
+          last_name: lastName,
+          organization: organization || null,
+          network_size: networkSize || null,
+          promotion_channel: promotionChannel || null,
+          why_excited: whyExcited || null,
+          audience: audience || null,
+        }, {
+          onConflict: 'email',
+        });
+
+      if (supabaseError) {
+        console.error('Error saving partner to Supabase:', supabaseError);
+      } else {
+        console.log('✅ Partner saved to Supabase');
+      }
+    } catch (supabaseErr) {
+      console.error('Exception saving to Supabase:', supabaseErr);
+      // Don't fail the request - Tolt is primary source of truth
     }
 
     // Send internal notification email
