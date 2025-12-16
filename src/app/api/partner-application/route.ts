@@ -236,7 +236,8 @@ export async function POST(request: NextRequest) {
         const toltData = await toltResponse.json();
         console.log('✅ Partner created in Tolt successfully!');
         console.log('Tolt response:', JSON.stringify(toltData, null, 2));
-        toltPartnerId = toltData.data?.id || toltData.id || null;
+        // Tolt returns data as an array
+        toltPartnerId = toltData.data?.[0]?.id || toltData.data?.id || toltData.id || null;
         toltCreationSucceeded = true;
       }
 
