@@ -95,6 +95,14 @@ const ADMIN_TOOLS: AdminTool[] = [
     category: 'finance',
   },
   {
+    name: 'Partner Attribution',
+    description: 'Manually attribute sales to Tolt partners',
+    href: '/admin/partner-attribution',
+    icon: Handshake,
+    color: 'green',
+    category: 'finance',
+  },
+  {
     name: 'Partner Banner Generator',
     description: 'Create custom QR banners for partners',
     href: '/admin/banner-generator',
