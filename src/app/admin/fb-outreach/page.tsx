@@ -2156,7 +2156,12 @@ function TemplatesTab() {
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {filteredTemplates.map((template) => (
-            <Card key={template.id} variant="default" className="p-5">
+            <Card
+              key={template.id}
+              variant="default"
+              className={`p-5 cursor-pointer transition-all hover:bg-white/[0.04] ${expandedId === template.id ? 'ring-1 ring-orange-500/30' : ''}`}
+              onClick={() => setExpandedId(expandedId === template.id ? null : template.id)}
+            >
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div>
                   <h3 className="font-medium text-white capitalize">
@@ -2185,18 +2190,23 @@ function TemplatesTab() {
                   variant={copiedId === template.id ? 'primary' : 'secondary'}
                   size="sm"
                   icon={copiedId === template.id ? CheckCircle : Copy}
-                  onClick={() => copyTemplate(template)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    copyTemplate(template);
+                  }}
                 >
                   {copiedId === template.id ? 'Copied!' : 'Copy'}
                 </Button>
               </div>
-              <p className={`text-sm text-white/60 whitespace-pre-wrap ${expandedId === template.id ? '' : 'line-clamp-6'}`}>{template.body}</p>
-              <button
-                onClick={() => setExpandedId(expandedId === template.id ? null : template.id)}
-                className="mt-3 text-xs text-orange-400 hover:text-orange-300 transition-colors"
-              >
-                {expandedId === template.id ? '▲ Show less' : '▼ Show full template'}
-              </button>
+              <p className={`text-sm text-white/60 whitespace-pre-wrap ${expandedId === template.id ? '' : 'line-clamp-4'}`}>{template.body}</p>
+              <div className="mt-3 flex items-center justify-between">
+                <span className="text-xs text-orange-400">
+                  {expandedId === template.id ? '▲ Tap to collapse' : '▼ Tap to expand'}
+                </span>
+                {expandedId !== template.id && (
+                  <span className="text-xs text-white/30">Preview</span>
+                )}
+              </div>
             </Card>
           ))}
         </div>
