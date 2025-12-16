@@ -2059,7 +2059,7 @@ function TemplatesTab() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [filter, setFilter] = useState<'all' | 'initial' | 'post'>('all');
+  const [filter, setFilter] = useState<'all' | 'initial' | 'post' | 'follow_up'>('all');
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   useEffect(() => {
@@ -2089,6 +2089,7 @@ function TemplatesTab() {
   const filteredTemplates = templates.filter((t) => {
     if (filter === 'initial') return t.template_type === 'initial';
     if (filter === 'post') return t.template_type === 'post';
+    if (filter === 'follow_up') return t.template_type === 'follow_up';
     return true;
   });
 
@@ -2105,8 +2106,8 @@ function TemplatesTab() {
           </div>
         </div>
 
-        <div className="flex gap-2">
-          {(['all', 'initial', 'post'] as const).map((f) => (
+        <div className="flex gap-2 flex-wrap">
+          {(['all', 'initial', 'post', 'follow_up'] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
@@ -2116,7 +2117,7 @@ function TemplatesTab() {
                   : 'bg-white/[0.03] text-white/50 border border-white/[0.08] hover:bg-white/[0.06]'
               }`}
             >
-              {f === 'all' ? 'All' : f === 'initial' ? 'DM Templates' : 'Post Templates'}
+              {f === 'all' ? 'All' : f === 'initial' ? 'DM Templates' : f === 'post' ? 'Post Templates' : 'Follow-up'}
             </button>
           ))}
         </div>
@@ -2140,9 +2141,11 @@ function TemplatesTab() {
                   <span className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${
                     template.template_type === 'initial'
                       ? 'bg-blue-500/20 text-blue-400'
-                      : 'bg-purple-500/20 text-purple-400'
+                      : template.template_type === 'post'
+                      ? 'bg-purple-500/20 text-purple-400'
+                      : 'bg-green-500/20 text-green-400'
                   }`}>
-                    {template.template_type === 'initial' ? 'DM Template' : 'Post Template'}
+                    {template.template_type === 'initial' ? 'DM Template' : template.template_type === 'post' ? 'Post Template' : 'Follow-up'}
                   </span>
                 </div>
                 <Button
