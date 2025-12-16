@@ -545,6 +545,7 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
     notes: '',
   });
   const [editLoading, setEditLoading] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
@@ -574,19 +575,57 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
     fetchPages();
   }, [filters]);
 
-  // DM Template - personalized for each group
-  const getDMTemplate = (page: FBPage, adminName?: string) => {
-    const name = adminName || page.fb_page_admins?.[0]?.admin_name || 'there';
-    const firstName = name.split(' ')[0];
-    return `Hey ${firstName} - love what you're doing with ${page.page_name}.
+  // DM Templates - multiple options
+  const DM_TEMPLATES = {
+    direct_value: {
+      name: 'Direct Value',
+      getText: (pageName: string, firstName: string) => `Hey ${firstName} - love what you're doing with ${pageName}.
 
 Quick question: Are most teams in your group juggling GroupMe + GameChanger + random text threads for schedules?
 
 We built Mind & Muscle specifically for travel ball - FREE team chat, scheduling, and uniform coordination in one app. Parents get access without paying.
 
-Would you be open to me sharing a post with your group? Happy to create a custom QR code for ${page.page_name} so you can see if anyone signs up through you.
+Would you be open to me sharing a post with your group? Happy to create a custom QR code for ${pageName} so you can see if anyone signs up through you.
 
-No pressure either way - just thought it might help some teams simplify.`;
+No pressure either way - just thought it might help some teams simplify.`
+    },
+    curiosity: {
+      name: 'Curiosity',
+      getText: (pageName: string, firstName: string) => `Hey ${firstName} - saw your group has a lot of teams. Quick question:
+
+What apps are most coaches using for team communication? We keep hearing GroupMe + GameChanger + a million text threads.
+
+We made something that replaces all of that (free version) - curious if that would land with your members or if I'm off base.
+
+Either way, appreciate what you're doing for the baseball/softball community here.`
+    },
+    partner: {
+      name: 'Partner',
+      getText: (pageName: string, firstName: string) => `Hey ${firstName} - I run Mind & Muscle, an app built specifically for baseball/softball teams.
+
+We're looking for Facebook group partners who want to help their community while earning a small commission on any paid upgrades.
+
+The FREE version alone replaces GroupMe + GameChanger for team communication. Coaches love it.
+
+Would you be open to a quick chat about how it works? Or I can just send details if that's easier.`
+    },
+    short: {
+      name: 'Short & Sweet',
+      getText: (pageName: string, firstName: string) => `Hey ${firstName}! Mind if I share a free app for travel ball teams in ${pageName}?
+
+It's called Mind & Muscle - replaces GroupMe + GameChanger in one place. Parents get free access too.
+
+Let me know if you'd like to see it first!`
+    }
+  };
+
+  const [selectedDmTemplate, setSelectedDmTemplate] = useState<string>('direct_value');
+
+  const getDMTemplate = (page: FBPage, adminName?: string) => {
+    const name = adminName || page.fb_page_admins?.[0]?.admin_name || 'there';
+    const firstName = name.split(' ')[0];
+    const template = DM_TEMPLATES[selectedDmTemplate as keyof typeof DM_TEMPLATES] || DM_TEMPLATES.direct_value;
+    return template.getText(page.page_name, firstName);
   };
 
   const [copiedDmId, setCopiedDmId] = useState<string | null>(null);
@@ -656,6 +695,7 @@ No pressure either way - just thought it might help some teams simplify.`;
 
   const openEditModal = (page: FBPage) => {
     setEditingPage(page);
+    setEditError(null);
     setEditForm({
       page_name: page.page_name || '',
       page_url: page.page_url || '',
@@ -667,9 +707,15 @@ No pressure either way - just thought it might help some teams simplify.`;
     });
   };
 
+  const closeEditModal = () => {
+    setEditingPage(null);
+    setEditError(null);
+  };
+
   const handleEditSave = async () => {
     if (!editingPage) return;
     setEditLoading(true);
+    setEditError(null);
     try {
       const response = await fetch('/api/admin/fb-outreach/pages', {
         method: 'PATCH',
@@ -690,12 +736,15 @@ No pressure either way - just thought it might help some teams simplify.`;
       });
       const data = await response.json();
       if (data.success) {
-        setEditingPage(null);
+        closeEditModal();
         fetchPages();
         onUpdate();
+      } else {
+        setEditError(data.message || 'Failed to save changes');
       }
     } catch (error) {
       console.error('Failed to update page:', error);
+      setEditError('Network error - please try again');
     } finally {
       setEditLoading(false);
     }
@@ -796,6 +845,19 @@ No pressure either way - just thought it might help some teams simplify.`;
               className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500/50"
             />
           </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-400 mb-1">DM Template</label>
+          <select
+            value={selectedDmTemplate}
+            onChange={(e) => setSelectedDmTemplate(e.target.value)}
+            className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-blue-500/50"
+          >
+            {Object.entries(DM_TEMPLATES).map(([key, template]) => (
+              <option key={key} value={key}>{template.name}</option>
+            ))}
+          </select>
         </div>
       </div>
 
@@ -1162,12 +1224,17 @@ No pressure either way - just thought it might help some teams simplify.`;
 
       {/* Edit Modal */}
       {editingPage && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div
+          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) closeEditModal();
+          }}
+        >
           <div className="bg-gray-900 border border-white/10 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-4 border-b border-white/10">
               <h3 className="text-lg font-semibold text-white">Edit Entry</h3>
               <button
-                onClick={() => setEditingPage(null)}
+                onClick={closeEditModal}
                 className="p-2 hover:bg-white/10 rounded-lg transition-colors"
               >
                 <X className="w-5 h-5 text-gray-400" />
@@ -1273,9 +1340,14 @@ No pressure either way - just thought it might help some teams simplify.`;
                 />
               </div>
             </div>
+            {editError && (
+              <div className="mx-4 mb-2 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                <p className="text-red-400 text-sm">{editError}</p>
+              </div>
+            )}
             <div className="flex gap-3 p-4 border-t border-white/10">
               <button
-                onClick={() => setEditingPage(null)}
+                onClick={closeEditModal}
                 className="flex-1 px-4 py-2 bg-white/10 text-gray-300 rounded-xl hover:bg-white/20"
               >
                 Cancel
