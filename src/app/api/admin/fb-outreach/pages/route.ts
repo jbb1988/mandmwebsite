@@ -45,9 +45,10 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status') || 'all';
     const search = searchParams.get('search') || '';
 
+    // First get pages
     let query = supabase
       .from('fb_page_outreach')
-      .select('*, fb_page_admins(*)')
+      .select('*')
       .order('priority_score', { ascending: false })
       .order('member_count', { ascending: false, nullsFirst: false });
 
@@ -65,12 +66,40 @@ export async function GET(request: NextRequest) {
 
     const { data: pages, error } = await query.limit(100);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching pages:', error);
+      return NextResponse.json({ success: false, message: error.message }, { status: 500 });
+    }
+
+    // Then get admins for these pages
+    if (pages && pages.length > 0) {
+      const pageIds = pages.map(p => p.id);
+      const { data: admins, error: adminsError } = await supabase
+        .from('fb_page_admins')
+        .select('*')
+        .in('page_id', pageIds);
+
+      if (!adminsError && admins) {
+        // Attach admins to their pages
+        const adminsByPage: Record<string, typeof admins> = {};
+        admins.forEach(admin => {
+          if (!adminsByPage[admin.page_id]) {
+            adminsByPage[admin.page_id] = [];
+          }
+          adminsByPage[admin.page_id].push(admin);
+        });
+
+        pages.forEach(page => {
+          (page as typeof page & { fb_page_admins: typeof admins }).fb_page_admins = adminsByPage[page.id] || [];
+        });
+      }
+    }
 
     return NextResponse.json({ success: true, pages });
   } catch (error) {
     console.error('Error fetching pages:', error);
-    return NextResponse.json({ success: false, message: 'Failed to fetch pages' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Failed to fetch pages';
+    return NextResponse.json({ success: false, message }, { status: 500 });
   }
 }
 
