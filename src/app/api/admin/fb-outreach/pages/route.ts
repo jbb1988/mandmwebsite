@@ -250,7 +250,7 @@ export async function PATCH(request: NextRequest) {
   }
 }
 
-// DELETE - Remove page
+// DELETE - Remove page(s) - supports single id or multiple ids (comma-separated)
 export async function DELETE(request: NextRequest) {
   if (!verifyAdmin(request)) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
@@ -259,7 +259,26 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const id = searchParams.get('id');
+    const ids = searchParams.get('ids');
 
+    // Handle bulk delete
+    if (ids) {
+      const idArray = ids.split(',').filter(Boolean);
+      if (idArray.length === 0) {
+        return NextResponse.json({ success: false, message: 'No valid IDs provided' }, { status: 400 });
+      }
+
+      const { error } = await supabase
+        .from('fb_page_outreach')
+        .delete()
+        .in('id', idArray);
+
+      if (error) throw error;
+
+      return NextResponse.json({ success: true, message: `${idArray.length} page(s) deleted successfully!` });
+    }
+
+    // Handle single delete
     if (!id) {
       return NextResponse.json({ success: false, message: 'Page ID is required' }, { status: 400 });
     }

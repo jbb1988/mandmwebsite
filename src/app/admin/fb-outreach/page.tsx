@@ -725,6 +725,8 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
   const [addingAdminToPage, setAddingAdminToPage] = useState<string | null>(null);
   const [newAdminForm, setNewAdminForm] = useState({ name: '', profile_url: '', email: '' });
   const [templates, setTemplates] = useState<Template[]>([]);
+  const [selectedPages, setSelectedPages] = useState<Set<string>>(new Set());
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   // Fetch DM templates for quick access in Pipeline view
@@ -795,6 +797,48 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
       onUpdate();
     } catch (error) {
       console.error('Error deleting page:', error);
+    }
+  };
+
+  const bulkDeletePages = async () => {
+    if (selectedPages.size === 0) return;
+    if (!confirm(`Are you sure you want to delete ${selectedPages.size} selected page${selectedPages.size > 1 ? 's' : ''}?`)) return;
+
+    setBulkDeleting(true);
+    try {
+      const ids = Array.from(selectedPages);
+      await fetch(`/api/admin/fb-outreach/pages?ids=${ids.join(',')}`, {
+        method: 'DELETE',
+        headers: { 'X-Admin-Password': adminPassword },
+      });
+      setSelectedPages(new Set());
+      fetchPages();
+      onUpdate();
+    } catch (error) {
+      console.error('Error bulk deleting pages:', error);
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
+
+  const togglePageSelection = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedPages(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedPages.size === pages.length) {
+      setSelectedPages(new Set());
+    } else {
+      setSelectedPages(new Set(pages.map(p => p.id)));
     }
   };
 
@@ -908,8 +952,43 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
         </Button>
       </div>
 
-      {/* Results count */}
-      <p className="text-sm text-white/40 mb-4">{pages.length} groups found</p>
+      {/* Results count & Bulk Actions */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-4">
+          <p className="text-sm text-white/40">{pages.length} groups found</p>
+          {pages.length > 0 && (
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={selectedPages.size === pages.length && pages.length > 0}
+                onChange={toggleSelectAll}
+                className="w-4 h-4 rounded border-white/20 bg-white/5 text-orange-500 focus:ring-orange-500/50"
+              />
+              <span className="text-xs text-white/50">Select All</span>
+            </label>
+          )}
+        </div>
+        {selectedPages.size > 0 && (
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-white/60">{selectedPages.size} selected</span>
+            <Button
+              variant="danger"
+              size="sm"
+              icon={bulkDeleting ? Loader2 : Trash2}
+              onClick={bulkDeletePages}
+              disabled={bulkDeleting}
+            >
+              {bulkDeleting ? 'Deleting...' : `Delete ${selectedPages.size}`}
+            </Button>
+            <button
+              onClick={() => setSelectedPages(new Set())}
+              className="text-xs text-white/40 hover:text-white/60"
+            >
+              Clear
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Pages List */}
       {loading ? (
@@ -927,13 +1006,26 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
             const admins = page.fb_page_admins || [];
 
             return (
-              <Card key={page.id} variant="default" className="overflow-hidden">
+              <Card key={page.id} variant="default" className={`overflow-hidden ${selectedPages.has(page.id) ? 'ring-1 ring-orange-500/50' : ''}`}>
                 {/* Header Row */}
                 <div
                   className="p-4 cursor-pointer hover:bg-white/[0.02] transition-colors"
                   onClick={() => setExpandedPage(isExpanded ? null : page.id)}
                 >
                   <div className="flex items-center gap-4">
+                    {/* Checkbox for selection */}
+                    <div
+                      onClick={(e) => togglePageSelection(page.id, e)}
+                      className="flex items-center justify-center"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedPages.has(page.id)}
+                        onChange={() => {}}
+                        className="w-4 h-4 rounded border-white/20 bg-white/5 text-orange-500 focus:ring-orange-500/50 cursor-pointer"
+                      />
+                    </div>
+
                     {/* Priority Stars */}
                     <div className="hidden sm:flex flex-col items-center w-10">
                       <span className="text-orange-400 text-xs tracking-tight">
