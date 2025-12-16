@@ -3,6 +3,7 @@ import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
 import { escapeHtml } from '@/lib/validation';
 import { partnerApplicationRateLimit, getClientIp, checkRateLimit } from '@/lib/rate-limit';
+import { generatePartnerBanners } from '@/lib/banner-generator';
 
 // Supabase client for storing partner data
 const supabase = createClient(
@@ -166,6 +167,9 @@ export async function POST(request: NextRequest) {
     }
 
     let toltCreationSucceeded = false;
+    let toltPartnerId: string | null = null;
+    let referralSlug: string | null = null;
+    let referralUrl: string | null = null;
 
     try {
       // Prepare the request body with required program_id
@@ -187,10 +191,8 @@ export async function POST(request: NextRequest) {
       // Set payout method to none by default (partner can configure later in dashboard)
       toltRequestBody.payout_method = "none";
 
-      console.log('=== TOLT API REQUEST ===');
+      console.log('=== TOLT API REQUEST (Create Partner) ===');
       console.log('Endpoint:', 'https://api.tolt.com/v1/partners');
-      console.log('API Key (first 20 chars):', toltApiKey.substring(0, 20) + '...');
-      console.log('Request Body:', JSON.stringify(toltRequestBody, null, 2));
 
       // Create partner in Tolt via API
       const toltResponse = await fetch('https://api.tolt.com/v1/partners', {
@@ -202,23 +204,67 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify(toltRequestBody),
       });
 
-      console.log('=== TOLT API RESPONSE ===');
-      console.log('Status Code:', toltResponse.status);
-      console.log('Status Text:', toltResponse.statusText);
-
       if (!toltResponse.ok) {
         const errorData = await toltResponse.json().catch(() => ({ message: 'Unknown error' }));
         console.error('❌ Tolt API Error Response:', JSON.stringify(errorData, null, 2));
-        console.error('Full error details:', { status: toltResponse.status, statusText: toltResponse.statusText, body: errorData });
       } else {
         const toltData = await toltResponse.json();
         console.log('✅ Partner created in Tolt successfully!');
-        console.log('Response Data:', JSON.stringify(toltData, null, 2));
+        toltPartnerId = toltData.data?.id || null;
         toltCreationSucceeded = true;
+
+        // Step 2: Create referral link for the partner
+        if (toltPartnerId) {
+          // Generate slug from name (e.g., "John Smith" -> "john-smith")
+          let baseSlug = name.toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
+
+          // Try to create the link, add random suffix if slug collision
+          let linkCreated = false;
+          let attempts = 0;
+          const maxAttempts = 3;
+
+          while (!linkCreated && attempts < maxAttempts) {
+            const slugToTry = attempts === 0 ? baseSlug : `${baseSlug}-${Math.random().toString(36).substring(2, 6)}`;
+
+            console.log(`=== TOLT API REQUEST (Create Link, attempt ${attempts + 1}) ===`);
+            console.log('Slug:', slugToTry);
+
+            const linkResponse = await fetch('https://api.tolt.com/v1/links', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${toltApiKey}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                param: 'ref',
+                value: slugToTry,
+                partner_id: toltPartnerId,
+              }),
+            });
+
+            if (linkResponse.ok) {
+              const linkData = await linkResponse.json();
+              console.log('✅ Referral link created successfully!');
+              referralSlug = slugToTry;
+              referralUrl = `https://mindandmuscle.ai/?ref=${slugToTry}`;
+              linkCreated = true;
+            } else {
+              const linkError = await linkResponse.json().catch(() => ({ message: 'Unknown error' }));
+              console.error(`❌ Link creation attempt ${attempts + 1} failed:`, linkError);
+              attempts++;
+            }
+          }
+
+          if (!linkCreated) {
+            console.error('❌ Failed to create referral link after all attempts');
+          }
+        }
       }
     } catch (toltError: any) {
       console.error('❌ Exception calling Tolt API:', toltError.message);
-      console.error('Full error:', toltError);
       // Don't fail the whole request - still send notification email
     }
 
@@ -270,6 +316,9 @@ export async function POST(request: NextRequest) {
           why_excited: whyExcited || null,
           audience: audience || null,
           logo_url: logoUrl,
+          referral_slug: referralSlug,
+          referral_url: referralUrl,
+          tolt_partner_id: toltPartnerId,
         }, {
           onConflict: 'email',
         });
@@ -282,6 +331,55 @@ export async function POST(request: NextRequest) {
     } catch (supabaseErr) {
       console.error('Exception saving to Supabase:', supabaseErr);
       // Don't fail the request - Tolt is primary source of truth
+    }
+
+    // Generate banners if logo is provided and referral URL is available
+    let bannerUrls: {
+      qrCodeUrl: string | null;
+      bannerPartnerUrl: string | null;
+      bannerFacebookUrl: string | null;
+      bannerFacebookCoBrandedUrl: string | null;
+      bannerTwitterUrl: string | null;
+      bannerTwitterCoBrandedUrl: string | null;
+    } | null = null;
+
+    if (logoUrl && referralUrl) {
+      try {
+        console.log('🎨 Generating banners for partner...');
+        bannerUrls = await generatePartnerBanners({
+          partnerName: name,
+          partnerEmail: email,
+          partnerLogoUrl: logoUrl,
+          referralUrl: referralUrl,
+        });
+
+        // Save to partner_banners table
+        if (bannerUrls) {
+          const { error: bannerDbError } = await supabase
+            .from('partner_banners')
+            .insert({
+              partner_name: name,
+              partner_email: email,
+              partner_logo_url: logoUrl,
+              qr_code_url: bannerUrls.qrCodeUrl,
+              banner_partner_url: bannerUrls.bannerPartnerUrl,
+              banner_facebook_url: bannerUrls.bannerFacebookUrl,
+              banner_facebook_cobranded_url: bannerUrls.bannerFacebookCoBrandedUrl,
+              banner_twitter_url: bannerUrls.bannerTwitterUrl,
+              banner_twitter_cobranded_url: bannerUrls.bannerTwitterCoBrandedUrl,
+              notes: 'Auto-generated on partner signup',
+            });
+
+          if (bannerDbError) {
+            console.error('Error saving banners to database:', bannerDbError);
+          } else {
+            console.log('✅ Banners saved to partner_banners table');
+          }
+        }
+      } catch (bannerErr) {
+        console.error('Error generating banners:', bannerErr);
+        // Don't fail - banners are nice-to-have
+      }
     }
 
     // Send internal notification email
@@ -312,12 +410,32 @@ export async function POST(request: NextRequest) {
         <img src="${logoUrl}" alt="Partner logo" style="max-width: 200px; max-height: 200px; border: 1px solid #eee; border-radius: 8px; padding: 10px;" />
         ` : ''}
 
+        ${referralUrl ? `
+        <h3>Referral Link:</h3>
+        <p><a href="${referralUrl}" target="_blank">${referralUrl}</a></p>
+        <p style="color: #666; font-size: 12px;">Slug: <code>${referralSlug}</code></p>
+        ` : ''}
+
+        ${bannerUrls ? `
+        <h3>Auto-Generated Banners:</h3>
+        <ul style="font-size: 14px;">
+          ${bannerUrls.bannerFacebookUrl ? `<li><a href="${bannerUrls.bannerFacebookUrl}">Facebook Standard (1080x1080)</a></li>` : ''}
+          ${bannerUrls.bannerFacebookCoBrandedUrl ? `<li><a href="${bannerUrls.bannerFacebookCoBrandedUrl}">Facebook Co-Branded (1080x1080)</a></li>` : ''}
+          ${bannerUrls.bannerTwitterUrl ? `<li><a href="${bannerUrls.bannerTwitterUrl}">X/Twitter Standard (1600x900)</a></li>` : ''}
+          ${bannerUrls.bannerTwitterCoBrandedUrl ? `<li><a href="${bannerUrls.bannerTwitterCoBrandedUrl}">X/Twitter Co-Branded (1600x900)</a></li>` : ''}
+          ${bannerUrls.bannerPartnerUrl ? `<li><a href="${bannerUrls.bannerPartnerUrl}">Partner Banner (1600x900)</a></li>` : ''}
+          ${bannerUrls.qrCodeUrl ? `<li><a href="${bannerUrls.qrCodeUrl}">QR Code</a></li>` : ''}
+        </ul>
+        <p style="color: #28a745; font-size: 12px;">✅ Banners were emailed to partner as attachments</p>
+        ` : ''}
+
         <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;" />
 
         ${toltCreationSucceeded
           ? `<p style="color: #28a745; font-weight: bold;">✅ Partner automatically created in Tolt!</p>
              <p style="color: #666; font-size: 12px;">
                The partner has been added to Tolt and will receive their onboarding email with dashboard access.<br />
+               ${referralUrl ? `Referral link auto-created: <strong>${referralUrl}</strong><br />` : ''}
                View them in your <a href="https://app.tolt.io">Tolt dashboard</a> → Partners.<br /><br />
                If needed, you can remove or block the partner in the dashboard.
              </p>`
@@ -331,12 +449,87 @@ export async function POST(request: NextRequest) {
       `,
     });
 
-    // Send welcome email to partner with resources link
-    await resend.emails.send({
-      from: 'Mind & Muscle Partners <partners@mindandmuscle.ai>',
-      to: email,
-      subject: 'Welcome to the Mind & Muscle Partner Program! 🎉',
-      html: `
+    // Prepare email attachments if banners were generated
+    const emailAttachments: { filename: string; content: Buffer }[] = [];
+
+    if (bannerUrls) {
+      try {
+        // Fetch all banner images and add as attachments
+        const bannerFetchPromises: Promise<{ filename: string; buffer: Buffer } | null>[] = [];
+
+        if (bannerUrls.qrCodeUrl) {
+          bannerFetchPromises.push(
+            fetch(bannerUrls.qrCodeUrl)
+              .then(r => r.arrayBuffer())
+              .then(ab => ({ filename: 'qr-code.png', buffer: Buffer.from(ab) }))
+              .catch(() => null)
+          );
+        }
+
+        if (bannerUrls.bannerFacebookUrl) {
+          bannerFetchPromises.push(
+            fetch(bannerUrls.bannerFacebookUrl)
+              .then(r => r.arrayBuffer())
+              .then(ab => ({ filename: 'facebook-banner-1080x1080.png', buffer: Buffer.from(ab) }))
+              .catch(() => null)
+          );
+        }
+
+        if (bannerUrls.bannerFacebookCoBrandedUrl) {
+          bannerFetchPromises.push(
+            fetch(bannerUrls.bannerFacebookCoBrandedUrl)
+              .then(r => r.arrayBuffer())
+              .then(ab => ({ filename: 'facebook-cobranded-1080x1080.png', buffer: Buffer.from(ab) }))
+              .catch(() => null)
+          );
+        }
+
+        if (bannerUrls.bannerTwitterUrl) {
+          bannerFetchPromises.push(
+            fetch(bannerUrls.bannerTwitterUrl)
+              .then(r => r.arrayBuffer())
+              .then(ab => ({ filename: 'twitter-banner-1600x900.png', buffer: Buffer.from(ab) }))
+              .catch(() => null)
+          );
+        }
+
+        if (bannerUrls.bannerTwitterCoBrandedUrl) {
+          bannerFetchPromises.push(
+            fetch(bannerUrls.bannerTwitterCoBrandedUrl)
+              .then(r => r.arrayBuffer())
+              .then(ab => ({ filename: 'twitter-cobranded-1600x900.png', buffer: Buffer.from(ab) }))
+              .catch(() => null)
+          );
+        }
+
+        if (bannerUrls.bannerPartnerUrl) {
+          bannerFetchPromises.push(
+            fetch(bannerUrls.bannerPartnerUrl)
+              .then(r => r.arrayBuffer())
+              .then(ab => ({ filename: 'partner-banner-1600x900.png', buffer: Buffer.from(ab) }))
+              .catch(() => null)
+          );
+        }
+
+        const fetchedBanners = await Promise.all(bannerFetchPromises);
+        for (const banner of fetchedBanners) {
+          if (banner) {
+            emailAttachments.push({ filename: banner.filename, content: banner.buffer });
+          }
+        }
+
+        console.log(`📎 Prepared ${emailAttachments.length} banner attachments for email`);
+      } catch (attachErr) {
+        console.error('Error preparing email attachments:', attachErr);
+        // Don't fail - send email without attachments
+      }
+    }
+
+    // Build the welcome email content - varies based on whether banners were generated
+    const hasBanners = bannerUrls && emailAttachments.length > 0;
+    const hasReferralLink = referralUrl && referralSlug;
+
+    const welcomeEmailHtml = `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
           <div style="background: linear-gradient(135deg, #fb923c 0%, #3b82f6 100%); padding: 40px 20px; text-align: center; border-radius: 12px 12px 0 0;">
             <img src="https://mindandmuscle.ai/assets/images/logo.png" alt="Mind & Muscle Logo" style="max-width: 180px; height: auto; margin-bottom: 20px;" />
@@ -350,8 +543,42 @@ export async function POST(request: NextRequest) {
               Thanks for joining the Mind & Muscle Partner Program! You've been automatically set up in our system and your partner dashboard is ready to go.
             </p>
 
+            ${hasReferralLink ? `
+            <div style="background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 2px solid #22c55e; padding: 25px; margin: 30px 0; border-radius: 12px; text-align: center;">
+              <h2 style="margin: 0 0 15px 0; font-size: 22px; color: #16a34a;">🎉 Your Referral Link is Ready!</h2>
+              <p style="font-size: 14px; color: #555; margin-bottom: 15px;">Share this link to earn <strong>10% base commission</strong> (+ 15% bonus at 100+ users):</p>
+              <div style="background: white; border: 2px dashed #22c55e; padding: 15px 20px; border-radius: 8px; margin-bottom: 15px;">
+                <a href="${referralUrl}" style="font-size: 18px; font-weight: 700; color: #16a34a; text-decoration: none; word-break: break-all;">${referralUrl}</a>
+              </div>
+              <p style="font-size: 12px; color: #666; margin: 0;">Your unique partner code: <code style="background: #e5e7eb; padding: 2px 8px; border-radius: 4px; font-weight: 600;">${referralSlug}</code></p>
+            </div>
+            ` : ''}
+
+            ${hasBanners ? `
+            <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid #f59e0b; padding: 25px; margin: 30px 0; border-radius: 12px;">
+              <h2 style="margin: 0 0 15px 0; font-size: 20px; color: #d97706;">🎨 Your Custom Marketing Banners</h2>
+              <p style="font-size: 15px; line-height: 1.6; color: #555; margin-bottom: 15px;">
+                We've created personalized banners featuring your logo and a QR code linked to your referral URL. <strong>Check the attachments in this email!</strong>
+              </p>
+              <div style="background: white; border-radius: 8px; padding: 15px;">
+                <p style="font-size: 14px; color: #666; margin: 0 0 10px 0;"><strong>Included banners:</strong></p>
+                <ul style="font-size: 13px; color: #555; margin: 0; padding-left: 20px; line-height: 1.8;">
+                  <li><strong>Facebook (1080x1080)</strong> - Perfect for posts and ads</li>
+                  <li><strong>Facebook Co-Branded (1080x1080)</strong> - Features your logo</li>
+                  <li><strong>X/Twitter (1600x900)</strong> - Ideal for tweets and headers</li>
+                  <li><strong>X/Twitter Co-Branded (1600x900)</strong> - Features your logo</li>
+                  <li><strong>Partner Banner (1600x900)</strong> - For your website/email</li>
+                  <li><strong>QR Code</strong> - Links directly to your referral URL</li>
+                </ul>
+              </div>
+              <p style="font-size: 13px; color: #666; margin-top: 15px; font-style: italic;">
+                💡 Tip: Use the co-branded banners to build trust with your audience!
+              </p>
+            </div>
+            ` : ''}
+
             <div style="background: #fff3e0; border-left: 4px solid #fb923c; padding: 20px; margin: 30px 0; border-radius: 4px;">
-              <h2 style="margin: 0 0 15px 0; font-size: 20px; color: #fb923c;">🚀 Access Your Partner Dashboard Now</h2>
+              <h2 style="margin: 0 0 15px 0; font-size: 20px; color: #fb923c;">🚀 Access Your Partner Dashboard</h2>
               <p style="font-size: 15px; line-height: 1.6; color: #555; margin-bottom: 20px;">
                 Your partner account has been created! Here's how to access your dashboard:
               </p>
@@ -385,7 +612,7 @@ export async function POST(request: NextRequest) {
             <div style="background: #f8fafc; border-left: 4px solid #fb923c; padding: 20px; margin: 30px 0; border-radius: 4px;">
               <h2 style="margin: 0 0 15px 0; font-size: 20px; color: #fb923c;">📚 What You'll Find in Your Dashboard</h2>
               <ul style="font-size: 15px; line-height: 1.8; color: #555; margin: 10px 0;">
-                <li>🔗 Create custom referral links (track performance per link)</li>
+                <li>🔗 Create additional referral links (track performance per link)</li>
                 <li>✉️ Email templates and social media copy</li>
                 <li>🎨 Logos, screenshots, and brand assets</li>
                 <li>📊 Real-time click and commission tracking</li>
@@ -396,13 +623,28 @@ export async function POST(request: NextRequest) {
             <div style="background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 30px 0; border-radius: 4px;">
               <h2 style="margin: 0 0 15px 0; font-size: 20px; color: #3b82f6;">💰 Commission Structure</h2>
               <ul style="font-size: 15px; line-height: 1.8; color: #555; margin: 10px 0;">
-                <li><strong>10% lifetime recurring commission</strong> on all sales</li>
+                <li><strong>10% base commission</strong> on all referrals (lifetime recurring!)</li>
+                <li><strong>15% bonus commission</strong> on organizations with 100+ users</li>
                 <li><strong>90-day cookie window</strong> for attribution</li>
                 <li><strong>$50 minimum payout</strong> threshold</li>
                 <li><strong>Monthly PayPal payouts</strong> (NET-60 terms)</li>
               </ul>
             </div>
 
+            ${hasReferralLink ? `
+            <div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 20px; margin: 30px 0; border-radius: 4px;">
+              <h2 style="margin: 0 0 15px 0; font-size: 20px; color: #22c55e;">🎯 Start Earning Now!</h2>
+              <p style="font-size: 15px; line-height: 1.6; color: #555; margin-bottom: 15px;">
+                Your referral link is already active. Here's how to maximize your earnings:
+              </p>
+              <ol style="font-size: 15px; line-height: 1.8; color: #555; margin: 10px 0; padding-left: 20px;">
+                <li><strong>Share your link</strong> - Post on social media, add to your website, or send to your network</li>
+                <li><strong>Use the banners</strong> - ${hasBanners ? 'Check the attachments for ready-to-use marketing materials' : 'Visit your dashboard for marketing materials'}</li>
+                <li><strong>Track your performance</strong> - Monitor clicks and conversions in your dashboard</li>
+                <li><strong>Get paid</strong> - Earn 10% base + 15% bonus at 100+ users!</li>
+              </ol>
+            </div>
+            ` : `
             <div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 20px; margin: 30px 0; border-radius: 4px;">
               <h2 style="margin: 0 0 15px 0; font-size: 20px; color: #22c55e;">🎯 Next Steps to Start Earning</h2>
               <ol style="font-size: 15px; line-height: 1.8; color: #555; margin: 10px 0; padding-left: 20px;">
@@ -411,12 +653,13 @@ export async function POST(request: NextRequest) {
                 <li><strong>Check your email for auth code</strong> - Tolt will send you an authentication code (check spam if needed)</li>
                 <li><strong>Enter the code</strong> - Input the authentication code in the Tolt portal to access your dashboard</li>
                 <li><strong>Create your referral link</strong> - On the main dashboard, click "Create Link" in the Links section. In the popup, enter a custom value for your link (e.g., "john", "wildcats", or "dinger")</li>
-                <li><strong>Share your link</strong> - This is your unique referral link! Share it to earn 10% lifetime commission. You can also generate a QR code for it on our <a href="https://mindandmuscle.ai/partner-program" style="color: #fb923c;">partner program page</a></li>
+                <li><strong>Share your link</strong> - This is your unique referral link! Share it to earn 10% base + 15% bonus at 100+ users. You can also generate a QR code for it on our <a href="https://mindandmuscle.ai/partner-program" style="color: #fb923c;">partner program page</a></li>
               </ol>
               <p style="font-size: 14px; line-height: 1.6; color: #666; margin-top: 15px; font-style: italic;">
                 💡 Tip: Your referral link works immediately - no approval needed! Start earning as soon as you share it.
               </p>
             </div>
+            `}
 
             <p style="font-size: 16px; line-height: 1.6; color: #555; margin: 30px 0 20px 0;">
               Questions? Just reply to this email or reach out to <a href="mailto:partners@mindandmuscle.ai" style="color: #fb923c; text-decoration: none; font-weight: 600;">partners@mindandmuscle.ai</a>
@@ -435,7 +678,7 @@ export async function POST(request: NextRequest) {
             <p style="margin: 0; font-weight: 600;">Mind and Muscle</p>
             <p style="margin: 5px 0; font-style: italic;">Discipline the Mind. Dominate the Game.</p>
             <p style="margin: 10px 0 5px 0; font-size: 12px;">
-              <strong>Partner Program:</strong> Earn 10% lifetime commission
+              <strong>Partner Program:</strong> Earn 10% base + 15% bonus at 100+ users
             </p>
             <p style="margin: 5px 0 0 0;">
               <a href="https://mindandmuscle.ai/partner-program" style="color: #fb923c; text-decoration: none;">Learn More</a> |
@@ -443,7 +686,17 @@ export async function POST(request: NextRequest) {
             </p>
           </div>
         </div>
-      `,
+      `;
+
+    // Send welcome email to partner with resources link (and attachments if available)
+    await resend.emails.send({
+      from: 'Mind & Muscle Partners <partners@mindandmuscle.ai>',
+      to: email,
+      subject: hasBanners
+        ? 'Welcome to Mind & Muscle! 🎉 Your Custom Banners Are Attached'
+        : 'Welcome to the Mind & Muscle Partner Program! 🎉',
+      html: welcomeEmailHtml,
+      ...(emailAttachments.length > 0 && { attachments: emailAttachments }),
     });
 
     console.log('Partner Application:', { name, email, organization, networkSize });

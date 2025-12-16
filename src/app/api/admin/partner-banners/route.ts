@@ -68,8 +68,9 @@ export async function GET(request: NextRequest) {
 }
 
 // Helper function to upload a file to storage
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function uploadToStorage(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   blob: Blob,
   path: string
 ): Promise<string | null> {

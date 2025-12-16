@@ -8,7 +8,7 @@ import { LiquidButton } from '@/components/LiquidButton';
 import { GradientTextReveal } from '@/components/animations';
 import { EnhancedEarningsCalculator } from '@/components/partner/EnhancedEarningsCalculator';
 import { ScenarioCard } from '@/components/partner/ScenarioCard';
-import { QRCodeGenerator } from '@/components/partner/QRCodeGenerator';
+// QR Code Generator moved to admin/banner-generator
 import { DollarSign, TrendingUp, Users, Gift, BarChart, Rocket, Check, Link2, Star, Zap, Target, Award, BookOpen, Sparkles, Clock, Trophy, ChevronDown, GraduationCap, Briefcase, UserPlus, Building2, Upload, X } from 'lucide-react';
 
 export default function PartnerProgramPage() {
@@ -203,7 +203,7 @@ export default function PartnerProgramPage() {
     },
     {
       question: 'How does the referral tracking work?',
-      answer: 'We use Tolt, a professional affiliate tracking platform, to manage your referral link and commissions. To access your dashboard: 1) Go to mind-and-muscle.tolt.io, 2) Enter your registered email, 3) Check your email for an authentication code from Tolt, 4) Enter the code to access your dashboard, 5) Click "Create Link" to create your custom referral link (enter a value like "john" or "wildcats"). When someone clicks your unique tracking link, Tolt sets a 90-day cookie to track the conversion. Your dashboard shows real-time stats: every click, signup, conversion, and commission earned. All commission calculations are automatic, and payouts go directly to your PayPal account 60 days after payment clears.'
+      answer: 'We use Tolt, a professional affiliate tracking platform, to manage your referral link and commissions. When you sign up, we automatically create your unique referral link (based on your name) and send it to you via email along with a QR code and co-branded marketing banners. When someone clicks your unique tracking link, Tolt sets a 90-day cookie to track the conversion. Your dashboard shows real-time stats: every click, signup, conversion, and commission earned. To access your dashboard: Go to mind-and-muscle.tolt.io, enter your email, check for an authentication code from Tolt, and enter the code. All commission calculations are automatic, and payouts go directly to your PayPal account 60 days after payment clears.'
     },
     {
       question: 'What if I know facility owners or league directors?',
@@ -223,7 +223,7 @@ export default function PartnerProgramPage() {
     },
     {
       question: 'How long does approval take?',
-      answer: 'We review applications within 24 hours. Our goal is same-day approval for qualified partners. You\'ll receive your tracking link and partner portal access immediately upon approval.'
+      answer: 'Instant! When you submit your application, you\'re automatically approved and your referral link is created immediately. Check your email for your unique referral link, QR code, and co-branded marketing banners (if you uploaded a logo). You can start sharing right away!'
     },
     {
       question: 'Do I need to be a coach to join?',
@@ -255,18 +255,18 @@ export default function PartnerProgramPage() {
     },
     {
       number: '2',
-      title: 'Get Approved',
-      description: 'We\'ll review your application within 24 hours',
+      title: 'Instantly Approved',
+      description: 'Your referral link and marketing banners are created automatically',
     },
     {
       number: '3',
-      title: 'Get Your Link',
-      description: 'Receive your unique tracking link and partner portal access',
+      title: 'Check Your Email',
+      description: 'Receive your unique referral link, QR code, and co-branded banners',
     },
     {
       number: '4',
       title: 'Start Earning',
-      description: 'Share your link and earn 10% commission on every referral payment',
+      description: 'Share your link and earn 10% base + 15% bonus at 100+ users',
     },
   ];
 
@@ -371,7 +371,7 @@ export default function PartnerProgramPage() {
             delay={0.2}
           />
           <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
-            Apply below. Most applications are approved within 24 hours.
+            Apply below and start earning immediately. Instant approval!
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -569,7 +569,7 @@ export default function PartnerProgramPage() {
             </LiquidButton>
 
             <p className="text-xs text-text-secondary text-center">
-              Most applications are reviewed within 24 hours. You'll receive your tracking link immediately upon approval.
+              Instant approval! Your referral link, QR code, and marketing banners will be emailed to you immediately.
             </p>
           </form>
         </LiquidGlass>
@@ -1010,24 +1010,6 @@ export default function PartnerProgramPage() {
         </LiquidGlass>
       </div>
 
-      {/* QR Code Generator Section */}
-      <div className="max-w-6xl mx-auto mb-20">
-        <GradientTextReveal
-          text="Create Your Partner QR Code"
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
-          gradientFrom="#F97316"
-          gradientTo="#0EA5E9"
-          delay={0.2}
-        />
-        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-8 text-center">
-          Generate branded QR codes to promote your referral link at facilities, tournaments, and events.
-        </p>
-        <p className="text-base text-gray-400 max-w-3xl mx-auto font-medium leading-relaxed mb-12 text-center">
-          Once you create your custom referral link in the Tolt dashboard (e.g., mindandmuscle.ai/?via=john), paste it below to generate a QR code you can print and share.
-        </p>
-
-        <QRCodeGenerator />
-      </div>
 
       {/* How It Works */}
       <div className="max-w-6xl mx-auto mb-20">
@@ -1062,7 +1044,7 @@ export default function PartnerProgramPage() {
           delay={0.2}
         />
         <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
-          Follow these steps to log in and create your referral link.
+          Track your commissions, view click analytics, and access marketing resources.
         </p>
 
         <LiquidGlass variant="blue" glow={true} className="p-8">
@@ -1089,27 +1071,19 @@ export default function PartnerProgramPage() {
               </div>
             </li>
             <li className="flex items-start gap-4">
-              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-solar-surge-orange flex items-center justify-center text-sm font-black">4</span>
+              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-neon-cortex-green flex items-center justify-center text-sm font-black">4</span>
               <div>
-                <h4 className="font-bold text-lg mb-1">Enter the Code</h4>
-                <p className="text-text-secondary">Input the authentication code in the Tolt portal to access your dashboard</p>
-              </div>
-            </li>
-            <li className="flex items-start gap-4">
-              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-solar-surge-orange flex items-center justify-center text-sm font-black">5</span>
-              <div>
-                <h4 className="font-bold text-lg mb-1">Create Your Referral Link</h4>
-                <p className="text-text-secondary">On the main dashboard, click <strong>"Create Link"</strong> in the Links section. A popup will appear - enter a custom value in the "Link Value" field (e.g., "john", "wildcats", or "dinger"). This becomes your unique referral URL.</p>
-              </div>
-            </li>
-            <li className="flex items-start gap-4">
-              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-neon-cortex-green flex items-center justify-center text-sm font-black">6</span>
-              <div>
-                <h4 className="font-bold text-lg mb-1">Share Your Link & Create QR Codes</h4>
-                <p className="text-text-secondary">Your referral link is ready to share! Use the QR Code Generator above to create printable QR codes for tournaments, facilities, and events.</p>
+                <h4 className="font-bold text-lg mb-1">Access Your Dashboard</h4>
+                <p className="text-text-secondary">View your referral link, track clicks and conversions, monitor commissions, and access all marketing resources.</p>
               </div>
             </li>
           </ol>
+
+          <div className="mt-6 p-4 bg-neon-cortex-green/10 border border-neon-cortex-green/30 rounded-lg">
+            <p className="text-sm text-center text-gray-300">
+              <strong className="text-neon-cortex-green">Note:</strong> Your referral link was automatically created when you signed up. Check your welcome email for the link and co-branded marketing banners!
+            </p>
+          </div>
 
           <div className="mt-8 text-center">
             <a
@@ -1177,7 +1151,7 @@ export default function PartnerProgramPage() {
 
               {/* Message */}
               <p className="text-lg sm:text-xl text-gray-300 mb-6 leading-relaxed">
-                Your partner application has been submitted and you've been automatically approved!
+                You're in! Your referral link and marketing materials are ready.
               </p>
 
               {/* Info Cards */}
@@ -1186,9 +1160,9 @@ export default function PartnerProgramPage() {
                   <div className="flex items-start gap-3">
                     <Check className="w-5 h-5 text-neon-cortex-green flex-shrink-0 mt-0.5" />
                     <div>
-                      <h3 className="font-bold text-sm mb-1">Check Your Email</h3>
+                      <h3 className="font-bold text-sm mb-1">Your Referral Link is Ready</h3>
                       <p className="text-xs text-text-secondary">
-                        We sent two emails: one from Mind & Muscle and one from Tolt with your dashboard login link.
+                        We've automatically created your unique referral link. Check your email!
                       </p>
                     </div>
                   </div>
@@ -1198,53 +1172,63 @@ export default function PartnerProgramPage() {
                   <div className="flex items-start gap-3">
                     <Rocket className="w-5 h-5 text-solar-surge-orange flex-shrink-0 mt-0.5" />
                     <div>
-                      <h3 className="font-bold text-sm mb-1">Access Your Dashboard</h3>
+                      <h3 className="font-bold text-sm mb-1">Marketing Banners Attached</h3>
                       <p className="text-xs text-text-secondary">
-                        Click the link in your Tolt email to access your partner dashboard and get your referral link.
+                        {logoFile ? 'Your co-branded banners with QR code are attached to your welcome email!' : 'Check your email for your QR code and referral link.'}
                       </p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Next Steps */}
+              {/* What's in Your Email */}
               <div className="bg-neon-cortex-blue/10 border border-neon-cortex-blue/30 rounded-lg p-6 mb-8 text-left">
                 <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
                   <Trophy className="w-5 h-5 text-neon-cortex-blue" />
-                  Next Steps to Start Earning
+                  What's in Your Welcome Email
                 </h3>
-                <ol className="space-y-3 text-sm text-text-secondary">
+                <ul className="space-y-3 text-sm text-text-secondary">
                   <li className="flex items-start gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-solar-surge-orange/20 flex items-center justify-center text-xs font-bold">1</span>
-                    <span><strong>Go to the partner portal</strong> - Visit <a href="https://mind-and-muscle.tolt.io" target="_blank" className="text-solar-surge-orange hover:underline">mind-and-muscle.tolt.io</a></span>
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-neon-cortex-green/20 flex items-center justify-center">
+                      <Check className="w-3 h-3 text-neon-cortex-green" />
+                    </span>
+                    <span><strong>Your unique referral link</strong> - Ready to share immediately</span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-solar-surge-orange/20 flex items-center justify-center text-xs font-bold">2</span>
-                    <span><strong>Enter your email</strong> - Use the email you registered with</span>
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-neon-cortex-green/20 flex items-center justify-center">
+                      <Check className="w-3 h-3 text-neon-cortex-green" />
+                    </span>
+                    <span><strong>QR code</strong> - Links directly to your referral URL</span>
                   </li>
+                  {logoFile && (
+                    <>
+                      <li className="flex items-start gap-3">
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-neon-cortex-green/20 flex items-center justify-center">
+                          <Check className="w-3 h-3 text-neon-cortex-green" />
+                        </span>
+                        <span><strong>Facebook banners</strong> - Standard + co-branded with your logo</span>
+                      </li>
+                      <li className="flex items-start gap-3">
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-neon-cortex-green/20 flex items-center justify-center">
+                          <Check className="w-3 h-3 text-neon-cortex-green" />
+                        </span>
+                        <span><strong>X/Twitter banners</strong> - Standard + co-branded with your logo</span>
+                      </li>
+                    </>
+                  )}
                   <li className="flex items-start gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-solar-surge-orange/20 flex items-center justify-center text-xs font-bold">3</span>
-                    <span><strong>Check your email for auth code</strong> - Tolt will send you an authentication code (check spam if needed)</span>
+                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-neon-cortex-green/20 flex items-center justify-center">
+                      <Check className="w-3 h-3 text-neon-cortex-green" />
+                    </span>
+                    <span><strong>Dashboard access</strong> - Track clicks, conversions, and commissions</span>
                   </li>
-                  <li className="flex items-start gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-solar-surge-orange/20 flex items-center justify-center text-xs font-bold">4</span>
-                    <span><strong>Enter the code</strong> - Input the authentication code in the Tolt portal to access your dashboard</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-solar-surge-orange/20 flex items-center justify-center text-xs font-bold">5</span>
-                    <span><strong>Create your referral link</strong> - Click "Create Link" in the Links section, then enter a custom value (e.g., "john", "wildcats", or "dinger")</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-solar-surge-orange/20 flex items-center justify-center text-xs font-bold">6</span>
-                    <span><strong>Share your link</strong> - This is your unique referral link! Share it to earn 10% lifetime commission. You can also create a QR code below!</span>
-                  </li>
-                </ol>
+                </ul>
               </div>
 
               {/* Warning about spam */}
               <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 mb-8">
                 <p className="text-xs text-yellow-200">
-                  ⚠️ <strong>Important:</strong> The Tolt email might land in your spam folder. Please check spam and mark it as "Not Spam" to receive future updates.
+                  ⚠️ <strong>Important:</strong> Check your spam folder! The welcome email contains your referral link and all your marketing materials.
                 </p>
               </div>
 
