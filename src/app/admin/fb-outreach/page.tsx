@@ -12,8 +12,9 @@ import {
   CalendarClock, Handshake
 } from 'lucide-react';
 
-type Tab = 'add' | 'pipeline' | 'partners' | 'templates';
+type Tab = 'add' | 'pipeline' | 'follow-up' | 'partners' | 'templates';
 type OutreachStatus = 'not_started' | 'dm_sent' | 'awaiting_response' | 'approved' | 'posted' | 'declined' | 'no_response';
+type ResponseType = 'interested' | 'maybe_later' | 'not_interested' | 'posted' | 'no_response';
 type GroupType = 'travel_ball' | 'rec_league' | 'showcase' | 'tournament' | 'coaching' | 'parents' | 'equipment' | 'other';
 
 interface FBPageAdmin {
@@ -23,6 +24,10 @@ interface FBPageAdmin {
   is_primary: boolean;
   dm_sent_at: string | null;
   response_status: string;
+  response_type: ResponseType | null;
+  response_notes: string | null;
+  next_follow_up: string | null;
+  follow_up_count: number;
   // Conversion tracking
   partner_signed_up: boolean;
   partner_signed_up_at: string | null;
@@ -31,6 +36,15 @@ interface FBPageAdmin {
   referral_count: number;
   referral_revenue: number;
 }
+
+// Response type configuration
+const RESPONSE_TYPES: Record<ResponseType, { label: string; color: string; icon: string; nextAction: string }> = {
+  interested: { label: 'Interested!', color: 'green', icon: '🎯', nextAction: 'Send assets & post copy' },
+  maybe_later: { label: 'Maybe Later', color: 'yellow', icon: '⏳', nextAction: 'Follow up in 1 week' },
+  not_interested: { label: 'Not Interested', color: 'red', icon: '❌', nextAction: 'Move on' },
+  posted: { label: 'Posted!', color: 'purple', icon: '🎉', nextAction: 'Track conversions' },
+  no_response: { label: 'No Response', color: 'orange', icon: '😶', nextAction: 'Follow up in 3 days' },
+};
 
 interface FBPage {
   id: string;
@@ -164,7 +178,7 @@ export default function AdminFBOutreachPage() {
           <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-500/10 rounded-full blur-3xl" />
         </div>
 
-        <div className="relative z-10 py-12 px-4">
+        <div className="relative z-10 pt-32 pb-12 px-4">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
             <div className="text-center mb-8">
@@ -266,6 +280,22 @@ export default function AdminFBOutreachPage() {
                 <span className="hidden sm:inline">Pipeline</span>
               </button>
               <button
+                onClick={() => setActiveTab('follow-up')}
+                className={`flex items-center gap-2 px-4 md:px-6 py-3 rounded-xl font-medium transition-all text-sm md:text-base relative ${
+                  activeTab === 'follow-up'
+                    ? 'bg-red-500/20 border border-red-500/30 text-red-400'
+                    : 'bg-white/5 border border-white/10 text-gray-400 hover:bg-white/10'
+                }`}
+              >
+                <Bell className="w-5 h-5" />
+                <span className="hidden sm:inline">Follow-Up</span>
+                {(stats.needsFollowUp || 0) > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center animate-pulse">
+                    {stats.needsFollowUp}
+                  </span>
+                )}
+              </button>
+              <button
                 onClick={() => setActiveTab('partners')}
                 className={`flex items-center gap-2 px-4 md:px-6 py-3 rounded-xl font-medium transition-all text-sm md:text-base ${
                   activeTab === 'partners'
@@ -303,6 +333,7 @@ export default function AdminFBOutreachPage() {
             {/* Tab Content */}
             <LiquidGlass className="p-6 md:p-8">
               {activeTab === 'pipeline' && <PipelineTab onUpdate={fetchStats} />}
+              {activeTab === 'follow-up' && <FollowUpTab onUpdate={fetchStats} />}
               {activeTab === 'partners' && <PartnersTab onUpdate={fetchStats} />}
               {activeTab === 'add' && <AddPageTab onSuccess={fetchStats} />}
               {activeTab === 'templates' && <TemplatesTab />}
@@ -2049,6 +2080,436 @@ function PartnersTab({ onUpdate }: { onUpdate: () => void }) {
                 className="flex-1 px-4 py-2 bg-cyan-500 text-white rounded-xl hover:bg-cyan-600 disabled:opacity-50"
               >
                 {savingPartner ? 'Saving...' : 'Save Assets'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Follow-Up Tab - Track all admins who need follow-up
+function FollowUpTab({ onUpdate }: { onUpdate: () => void }) {
+  const [pages, setPages] = useState<FBPage[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [responseModal, setResponseModal] = useState<{ admin: FBPageAdmin; page: FBPage } | null>(null);
+  const [responseForm, setResponseForm] = useState({
+    response_type: '' as ResponseType | '',
+    response_notes: '',
+    next_follow_up: '',
+  });
+  const [savingResponse, setSavingResponse] = useState(false);
+  const [copiedDmId, setCopiedDmId] = useState<string | null>(null);
+  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
+
+  // DM Templates for quick copy
+  const FOLLOW_UP_TEMPLATES = {
+    first_follow_up: (name: string, groupName: string) => `Hey ${name}! Just wanted to follow up on my message about Mind & Muscle.
+
+I know you're busy running ${groupName} - just wanted to make sure my message didn't get lost in the shuffle.
+
+Would love to share the app with your community if you're open to it. Let me know!`,
+    second_follow_up: (name: string) => `Hey ${name}! One last quick follow-up.
+
+If now isn't the right time, totally understand. Just didn't want to leave you hanging without the info if you were interested.
+
+Either way, have a great season! 🙌`,
+    post_approved: (name: string, groupName: string) => `Hey ${name}! Thanks for approving the post for ${groupName}!
+
+Here's the post copy and QR code image ready to go. Let me know if you need anything adjusted.
+
+Really appreciate you helping get the word out to your community! 🙏`,
+  };
+
+  const fetchFollowUps = async () => {
+    setLoading(true);
+    try {
+      // Fetch pages that need follow-up (DM sent but no response 3+ days ago)
+      const params = new URLSearchParams({ status: 'all' });
+      const response = await fetch(`/api/admin/fb-outreach/pages?${params}`, {
+        headers: { 'X-Admin-Password': adminPassword },
+      });
+      const data = await response.json();
+      if (data.pages) {
+        // Filter to show pages needing follow-up
+        const now = new Date();
+        const followUpPages = data.pages.filter((p: FBPage) => {
+          // Check if any admin needs follow-up
+          if (p.fb_page_admins?.length) {
+            return p.fb_page_admins.some(admin => {
+              if (!admin.dm_sent_at) return false;
+              if (['approved', 'declined', 'posted'].includes(admin.response_status)) return false;
+              const dmDate = new Date(admin.dm_sent_at);
+              const daysSince = Math.floor((now.getTime() - dmDate.getTime()) / (1000 * 60 * 60 * 24));
+              return daysSince >= 3;
+            });
+          }
+          // Legacy check for page-level dm_sent_at
+          if (p.dm_sent_at && ['dm_sent', 'awaiting_response'].includes(p.outreach_status)) {
+            const dmDate = new Date(p.dm_sent_at);
+            const daysSince = Math.floor((now.getTime() - dmDate.getTime()) / (1000 * 60 * 60 * 24));
+            return daysSince >= 3;
+          }
+          return false;
+        });
+        // Sort by oldest DM first (most urgent)
+        followUpPages.sort((a: FBPage, b: FBPage) => {
+          const aDate = a.fb_page_admins?.[0]?.dm_sent_at || a.dm_sent_at || '';
+          const bDate = b.fb_page_admins?.[0]?.dm_sent_at || b.dm_sent_at || '';
+          return new Date(aDate).getTime() - new Date(bDate).getTime();
+        });
+        setPages(followUpPages);
+      }
+    } catch (error) {
+      console.error('Failed to fetch follow-ups:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFollowUps();
+  }, []);
+
+  const copyFollowUpDM = (admin: FBPageAdmin, page: FBPage, templateKey: keyof typeof FOLLOW_UP_TEMPLATES) => {
+    const firstName = admin.admin_name.split(' ')[0];
+    const template = FOLLOW_UP_TEMPLATES[templateKey](firstName, page.page_name);
+    navigator.clipboard.writeText(template);
+    setCopiedDmId(`${admin.id}-${templateKey}`);
+    setTimeout(() => setCopiedDmId(null), 2000);
+  };
+
+  const openResponseModal = (admin: FBPageAdmin, page: FBPage) => {
+    setResponseModal({ admin, page });
+    setResponseForm({
+      response_type: admin.response_type || '',
+      response_notes: admin.response_notes || '',
+      next_follow_up: admin.next_follow_up || '',
+    });
+  };
+
+  const saveResponse = async () => {
+    if (!responseModal) return;
+    setSavingResponse(true);
+    try {
+      // Calculate next follow-up based on response type
+      let nextFollowUp = responseForm.next_follow_up;
+      if (!nextFollowUp && responseForm.response_type) {
+        const now = new Date();
+        if (responseForm.response_type === 'maybe_later') {
+          now.setDate(now.getDate() + 7); // 1 week
+          nextFollowUp = now.toISOString().split('T')[0];
+        } else if (responseForm.response_type === 'no_response') {
+          now.setDate(now.getDate() + 3); // 3 days
+          nextFollowUp = now.toISOString().split('T')[0];
+        }
+      }
+
+      // Map response type to response status
+      let newStatus = responseModal.admin.response_status;
+      if (responseForm.response_type === 'interested') newStatus = 'approved';
+      else if (responseForm.response_type === 'posted') newStatus = 'approved';
+      else if (responseForm.response_type === 'not_interested') newStatus = 'declined';
+      else if (responseForm.response_type === 'maybe_later') newStatus = 'responded';
+      else if (responseForm.response_type === 'no_response') newStatus = 'no_response';
+
+      const response = await fetch('/api/admin/fb-outreach/admins', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': adminPassword,
+        },
+        body: JSON.stringify({
+          admin_id: responseModal.admin.id,
+          response_status: newStatus,
+          response_type: responseForm.response_type || null,
+          response_notes: responseForm.response_notes || null,
+          next_follow_up: nextFollowUp || null,
+          follow_up_count: (responseModal.admin.follow_up_count || 0) + 1,
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setResponseModal(null);
+        fetchFollowUps();
+        onUpdate();
+      }
+    } catch (error) {
+      console.error('Failed to save response:', error);
+    } finally {
+      setSavingResponse(false);
+    }
+  };
+
+  const markFollowedUp = async (adminId: string, currentCount: number) => {
+    try {
+      const nextDate = new Date();
+      nextDate.setDate(nextDate.getDate() + 3);
+
+      await fetch('/api/admin/fb-outreach/admins', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': adminPassword,
+        },
+        body: JSON.stringify({
+          admin_id: adminId,
+          follow_up_count: currentCount + 1,
+          next_follow_up: nextDate.toISOString().split('T')[0],
+        }),
+      });
+      fetchFollowUps();
+      onUpdate();
+    } catch (error) {
+      console.error('Failed to mark followed up:', error);
+    }
+  };
+
+  // Get admins that need follow-up with their pages
+  const followUpItems: { admin: FBPageAdmin; page: FBPage; daysSince: number }[] = [];
+  const now = new Date();
+  pages.forEach(page => {
+    page.fb_page_admins?.forEach(admin => {
+      if (!admin.dm_sent_at) return;
+      if (['approved', 'declined', 'posted'].includes(admin.response_status)) return;
+      const dmDate = new Date(admin.dm_sent_at);
+      const daysSince = Math.floor((now.getTime() - dmDate.getTime()) / (1000 * 60 * 60 * 24));
+      if (daysSince >= 3) {
+        followUpItems.push({ admin, page, daysSince });
+      }
+    });
+  });
+  // Sort by days since DM (most urgent first)
+  followUpItems.sort((a, b) => b.daysSince - a.daysSince);
+
+  return (
+    <div>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center border border-red-500/30">
+            <Bell className="w-6 h-6 text-red-400" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-white">Follow-Up Queue</h2>
+            <p className="text-gray-400">Admins who need a follow-up (3+ days since DM)</p>
+          </div>
+        </div>
+        <button
+          onClick={fetchFollowUps}
+          className="flex items-center gap-2 px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-xl text-red-400 hover:bg-red-500/30"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          Refresh
+        </button>
+      </div>
+
+      {/* Summary */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-center">
+          <p className="text-3xl font-bold text-red-400">{followUpItems.filter(i => i.daysSince >= 7).length}</p>
+          <p className="text-xs text-gray-400">Urgent (7+ days)</p>
+        </div>
+        <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-xl p-4 text-center">
+          <p className="text-3xl font-bold text-yellow-400">{followUpItems.filter(i => i.daysSince >= 3 && i.daysSince < 7).length}</p>
+          <p className="text-xs text-gray-400">Due (3-6 days)</p>
+        </div>
+        <div className="bg-gray-500/10 border border-gray-500/20 rounded-xl p-4 text-center">
+          <p className="text-3xl font-bold text-gray-400">{followUpItems.length}</p>
+          <p className="text-xs text-gray-400">Total Pending</p>
+        </div>
+      </div>
+
+      {/* Follow-Up List */}
+      {loading ? (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-red-400"></div>
+          <p className="mt-2 text-gray-400">Loading follow-ups...</p>
+        </div>
+      ) : followUpItems.length === 0 ? (
+        <div className="text-center py-12 bg-green-500/5 border border-green-500/20 rounded-xl">
+          <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-3" />
+          <p className="text-green-400 font-medium">All caught up!</p>
+          <p className="text-gray-500 text-sm">No admins need follow-up right now.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {followUpItems.map(({ admin, page, daysSince }) => {
+            const isUrgent = daysSince >= 7;
+            const followUpCount = admin.follow_up_count || 0;
+
+            return (
+              <div
+                key={admin.id}
+                className={`p-4 rounded-xl border transition-colors ${
+                  isUrgent
+                    ? 'bg-red-500/10 border-red-500/30'
+                    : 'bg-yellow-500/5 border-yellow-500/20'
+                }`}
+              >
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <span className="font-semibold text-white">{admin.admin_name}</span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        isUrgent ? 'bg-red-500/20 text-red-400 animate-pulse' : 'bg-yellow-500/20 text-yellow-400'
+                      }`}>
+                        {daysSince} days ago
+                      </span>
+                      {followUpCount > 0 && (
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-gray-500/20 text-gray-400">
+                          {followUpCount} follow-up{followUpCount > 1 ? 's' : ''} sent
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 text-sm text-gray-400">
+                      <span className="flex items-center gap-1">
+                        <Users className="w-3 h-3" />
+                        {page.page_name}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        {page.state || 'N/A'}
+                      </span>
+                      {page.member_count && (
+                        <span>{page.member_count.toLocaleString()} members</span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {/* Copy follow-up DM */}
+                    <button
+                      onClick={() => copyFollowUpDM(admin, page, followUpCount === 0 ? 'first_follow_up' : 'second_follow_up')}
+                      className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm ${
+                        copiedDmId === `${admin.id}-${followUpCount === 0 ? 'first_follow_up' : 'second_follow_up'}`
+                          ? 'bg-green-500/20 text-green-400'
+                          : 'bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30'
+                      }`}
+                    >
+                      {copiedDmId?.startsWith(admin.id) ? <CheckCircle className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                      Copy Follow-Up
+                    </button>
+                    {/* Open profile */}
+                    {admin.admin_profile_url && (
+                      <a
+                        href={admin.admin_profile_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 px-3 py-1.5 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 text-sm"
+                      >
+                        <ExternalLink className="w-3 h-3" /> Profile
+                      </a>
+                    )}
+                    {/* Log Response */}
+                    <button
+                      onClick={() => openResponseModal(admin, page)}
+                      className="flex items-center gap-1 px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 text-sm"
+                    >
+                      <MessageCircle className="w-3 h-3" /> Log Response
+                    </button>
+                    {/* Quick mark as followed up */}
+                    <button
+                      onClick={() => markFollowedUp(admin.id, followUpCount)}
+                      className="flex items-center gap-1 px-3 py-1.5 bg-orange-500/20 text-orange-400 rounded-lg hover:bg-orange-500/30 text-sm"
+                    >
+                      <Send className="w-3 h-3" /> Sent Follow-Up
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Response Modal */}
+      {responseModal && (
+        <div
+          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setResponseModal(null);
+          }}
+        >
+          <div className="bg-gray-900 border border-white/10 rounded-2xl w-full max-w-md">
+            <div className="flex items-center justify-between p-4 border-b border-white/10">
+              <h3 className="text-lg font-semibold text-white">Log Response: {responseModal.admin.admin_name}</h3>
+              <button
+                onClick={() => setResponseModal(null)}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              {/* Response Type */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">What did they say?</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {(Object.keys(RESPONSE_TYPES) as ResponseType[]).map((type) => {
+                    const config = RESPONSE_TYPES[type];
+                    return (
+                      <button
+                        key={type}
+                        onClick={() => setResponseForm({ ...responseForm, response_type: type })}
+                        className={`p-3 rounded-xl text-left text-sm transition-colors ${
+                          responseForm.response_type === type
+                            ? `bg-${config.color}-500/20 border-2 border-${config.color}-500/50`
+                            : 'bg-white/5 border border-white/10 hover:bg-white/10'
+                        }`}
+                      >
+                        <span className="text-lg mr-2">{config.icon}</span>
+                        <span className={responseForm.response_type === type ? `text-${config.color}-400` : 'text-white'}>
+                          {config.label}
+                        </span>
+                        <p className="text-xs text-gray-500 mt-1">{config.nextAction}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Notes (what exactly did they say?)</label>
+                <textarea
+                  value={responseForm.response_notes}
+                  onChange={(e) => setResponseForm({ ...responseForm, response_notes: e.target.value })}
+                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500"
+                  rows={3}
+                  placeholder="e.g., 'Said they'll look at it this weekend'"
+                />
+              </div>
+
+              {/* Next Follow-Up Date */}
+              {(responseForm.response_type === 'maybe_later' || responseForm.response_type === 'no_response') && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Next Follow-Up Date</label>
+                  <input
+                    type="date"
+                    value={responseForm.next_follow_up}
+                    onChange={(e) => setResponseForm({ ...responseForm, next_follow_up: e.target.value })}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Auto-set: {responseForm.response_type === 'maybe_later' ? '1 week' : '3 days'} from now if left empty
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="flex gap-3 p-4 border-t border-white/10">
+              <button
+                onClick={() => setResponseModal(null)}
+                className="flex-1 px-4 py-2 bg-white/10 text-gray-300 rounded-xl hover:bg-white/20"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveResponse}
+                disabled={savingResponse || !responseForm.response_type}
+                className="flex-1 px-4 py-2 bg-green-500 text-white rounded-xl hover:bg-green-600 disabled:opacity-50"
+              >
+                {savingResponse ? 'Saving...' : 'Save Response'}
               </button>
             </div>
           </div>

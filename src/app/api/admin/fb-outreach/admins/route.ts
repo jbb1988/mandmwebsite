@@ -26,6 +26,11 @@ export async function PATCH(request: NextRequest) {
       response_status,
       dm_sent_at,
       notes,
+      // Response tracking fields
+      response_type,
+      response_notes,
+      next_follow_up,
+      follow_up_count,
       // Partner conversion fields
       partner_signed_up,
       partner_signed_up_at,
@@ -43,6 +48,12 @@ export async function PATCH(request: NextRequest) {
     if (response_status) updates.response_status = response_status;
     if (dm_sent_at) updates.dm_sent_at = dm_sent_at;
     if (notes !== undefined) updates.notes = notes;
+
+    // Response tracking fields
+    if (response_type !== undefined) updates.response_type = response_type;
+    if (response_notes !== undefined) updates.response_notes = response_notes;
+    if (next_follow_up !== undefined) updates.next_follow_up = next_follow_up;
+    if (follow_up_count !== undefined) updates.follow_up_count = follow_up_count;
 
     // Partner conversion fields
     if (partner_signed_up !== undefined) updates.partner_signed_up = partner_signed_up;
