@@ -8,22 +8,28 @@ import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
 import { GradientTextReveal } from '@/components/animations';
 import { useAdminAuth } from '@/context/AdminAuthContext';
-import { Upload, Download, RefreshCw, Image as ImageIcon, Smartphone, Save, CheckCircle } from 'lucide-react';
+import { Upload, Download, RefreshCw, Image as ImageIcon, Smartphone, Save, CheckCircle, Package } from 'lucide-react';
 
 export default function BannerGeneratorPage() {
   const { getPassword } = useAdminAuth();
   const [qrCodeImage, setQrCodeImage] = useState<string | null>(null);
   const [partnerLogo, setPartnerLogo] = useState<string | null>(null);
   const [isGeneratingFacebook, setIsGeneratingFacebook] = useState(false);
+  const [isGeneratingFacebookCoBranded, setIsGeneratingFacebookCoBranded] = useState(false);
   const [isGeneratingTwitter, setIsGeneratingTwitter] = useState(false);
+  const [isGeneratingTwitterCoBranded, setIsGeneratingTwitterCoBranded] = useState(false);
   const [isGeneratingPartner, setIsGeneratingPartner] = useState(false);
+  const [isDownloadingAllFacebook, setIsDownloadingAllFacebook] = useState(false);
+  const [isDownloadingAllTwitter, setIsDownloadingAllTwitter] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [partnerName, setPartnerName] = useState('');
   const [partnerEmail, setPartnerEmail] = useState('');
   const [partnerNotes, setPartnerNotes] = useState('');
   const facebookBannerRef = useRef<HTMLDivElement>(null);
+  const facebookCoBrandedRef = useRef<HTMLDivElement>(null);
   const twitterBannerRef = useRef<HTMLDivElement>(null);
+  const twitterCoBrandedRef = useRef<HTMLDivElement>(null);
   const partnerBannerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const partnerLogoInputRef = useRef<HTMLInputElement>(null);
@@ -102,6 +108,150 @@ export default function BannerGeneratorPage() {
       alert('Error generating banner. Please try again.');
     } finally {
       setIsGeneratingTwitter(false);
+    }
+  };
+
+  // Co-branded Facebook banner (with partner logo badge)
+  const downloadFacebookCoBranded = async () => {
+    if (!facebookCoBrandedRef.current) return;
+    setIsGeneratingFacebookCoBranded(true);
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      const canvas = await html2canvas(facebookCoBrandedRef.current, {
+        scale: 1,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#0f172a',
+        width: 1080,
+        height: 1080,
+      });
+      const link = document.createElement('a');
+      link.download = `mind-muscle-facebook-cobranded-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (error) {
+      console.error('Error generating Facebook co-branded banner:', error);
+      alert('Error generating banner. Please try again.');
+    } finally {
+      setIsGeneratingFacebookCoBranded(false);
+    }
+  };
+
+  // Co-branded Twitter banner (with partner logo badge)
+  const downloadTwitterCoBranded = async () => {
+    if (!twitterCoBrandedRef.current) return;
+    setIsGeneratingTwitterCoBranded(true);
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      const canvas = await html2canvas(twitterCoBrandedRef.current, {
+        scale: 1,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#0f172a',
+        width: 1600,
+        height: 900,
+      });
+      const link = document.createElement('a');
+      link.download = `mind-muscle-twitter-cobranded-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (error) {
+      console.error('Error generating Twitter co-branded banner:', error);
+      alert('Error generating banner. Please try again.');
+    } finally {
+      setIsGeneratingTwitterCoBranded(false);
+    }
+  };
+
+  // Download all Facebook banners
+  const downloadAllFacebookBanners = async () => {
+    if (!facebookBannerRef.current) return;
+    setIsDownloadingAllFacebook(true);
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      const timestamp = Date.now();
+
+      // Download standard Facebook banner
+      const canvas1 = await html2canvas(facebookBannerRef.current, {
+        scale: 1,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#0f172a',
+        width: 1080,
+        height: 1080,
+      });
+      const link1 = document.createElement('a');
+      link1.download = `mind-muscle-facebook-standard-${timestamp}.png`;
+      link1.href = canvas1.toDataURL('image/png');
+      link1.click();
+
+      // Download co-branded Facebook banner if available
+      if (facebookCoBrandedRef.current && partnerLogo) {
+        await new Promise(resolve => setTimeout(resolve, 500)); // Small delay between downloads
+        const canvas2 = await html2canvas(facebookCoBrandedRef.current, {
+          scale: 1,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#0f172a',
+          width: 1080,
+          height: 1080,
+        });
+        const link2 = document.createElement('a');
+        link2.download = `mind-muscle-facebook-cobranded-${timestamp}.png`;
+        link2.href = canvas2.toDataURL('image/png');
+        link2.click();
+      }
+    } catch (error) {
+      console.error('Error downloading all Facebook banners:', error);
+      alert('Error downloading banners. Please try again.');
+    } finally {
+      setIsDownloadingAllFacebook(false);
+    }
+  };
+
+  // Download all Twitter banners
+  const downloadAllTwitterBanners = async () => {
+    if (!twitterBannerRef.current) return;
+    setIsDownloadingAllTwitter(true);
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      const timestamp = Date.now();
+
+      // Download standard Twitter banner
+      const canvas1 = await html2canvas(twitterBannerRef.current, {
+        scale: 1,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#0f172a',
+        width: 1600,
+        height: 900,
+      });
+      const link1 = document.createElement('a');
+      link1.download = `mind-muscle-twitter-standard-${timestamp}.png`;
+      link1.href = canvas1.toDataURL('image/png');
+      link1.click();
+
+      // Download co-branded Twitter banner if available
+      if (twitterCoBrandedRef.current && partnerLogo) {
+        await new Promise(resolve => setTimeout(resolve, 500)); // Small delay between downloads
+        const canvas2 = await html2canvas(twitterCoBrandedRef.current, {
+          scale: 1,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#0f172a',
+          width: 1600,
+          height: 900,
+        });
+        const link2 = document.createElement('a');
+        link2.download = `mind-muscle-twitter-cobranded-${timestamp}.png`;
+        link2.href = canvas2.toDataURL('image/png');
+        link2.click();
+      }
+    } catch (error) {
+      console.error('Error downloading all Twitter banners:', error);
+      alert('Error downloading banners. Please try again.');
+    } finally {
+      setIsDownloadingAllTwitter(false);
     }
   };
 
@@ -704,8 +854,8 @@ export default function BannerGeneratorPage() {
             </div>
           </div>
 
-          {/* Facebook Download Button */}
-          <div className="flex justify-center mt-4">
+          {/* Facebook Download Buttons */}
+          <div className="flex flex-col sm:flex-row justify-center gap-3 mt-4">
             <LiquidButton
               onClick={downloadFacebookBanner}
               variant="blue"
@@ -720,11 +870,355 @@ export default function BannerGeneratorPage() {
               ) : (
                 <>
                   <Download className="w-4 h-4 mr-2" />
-                  Download Facebook PNG
+                  Download Standard
+                </>
+              )}
+            </LiquidButton>
+            <LiquidButton
+              onClick={downloadAllFacebookBanners}
+              variant="orange"
+              size="md"
+              disabled={!qrCodeImage || isDownloadingAllFacebook}
+            >
+              {isDownloadingAllFacebook ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+                  Downloading...
+                </>
+              ) : (
+                <>
+                  <Package className="w-4 h-4 mr-2" />
+                  Download All Facebook
                 </>
               )}
             </LiquidButton>
           </div>
+        </div>
+
+        {/* ================================================================== */}
+        {/* FACEBOOK CO-BRANDED BANNER - 1080x1080px (1:1) with Partner Badge */}
+        {/* ================================================================== */}
+        <div className="mb-8">
+          <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+            <ImageIcon className="w-5 h-5 text-solar-surge-orange" />
+            Facebook Co-Branded (1080x1080px Square)
+            {partnerLogo && <span className="text-xs text-neon-cortex-green bg-neon-cortex-green/10 px-2 py-1 rounded-full">Partner Logo Added</span>}
+          </h3>
+
+          <div className="overflow-auto rounded-xl border border-white/10">
+            <div
+              ref={facebookCoBrandedRef}
+              style={{
+                width: '1080px',
+                height: '1080px',
+                position: 'relative',
+                overflow: 'hidden',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              }}
+            >
+              {/* Background Image */}
+              <img
+                src="/assets/images/baseball_field_dusk.png"
+                alt=""
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                }}
+              />
+
+              {/* Gradient overlay */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: `
+                    linear-gradient(to right, rgba(15, 23, 42, 0.55) 0%, rgba(15, 23, 42, 0.35) 55%, rgba(15, 23, 42, 0.25) 100%)
+                  `,
+                }}
+              />
+
+              {/* SAFE ZONE CONTAINER: 860x860px centered (110px padding all sides) */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '110px',
+                  left: '110px',
+                  width: '860px',
+                  height: '860px',
+                  display: 'flex',
+                }}
+              >
+                {/* LEFT SIDE - 60% width - Primary Message Block */}
+                <div
+                  style={{
+                    width: '60%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    paddingRight: '30px',
+                  }}
+                >
+                  {/* Partner Badge */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      marginBottom: '24px',
+                      padding: '10px 16px 10px 12px',
+                      backgroundColor: 'rgba(15, 23, 42, 0.5)',
+                      borderRadius: '10px',
+                      width: 'fit-content',
+                    }}
+                  >
+                    {partnerLogo ? (
+                      <img
+                        src={partnerLogo}
+                        alt="Partner"
+                        style={{
+                          height: '70px',
+                          maxWidth: '180px',
+                          objectFit: 'contain',
+                          filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.4))',
+                        }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          height: '70px',
+                          width: '100px',
+                          backgroundColor: 'rgba(255,255,255,0.08)',
+                          borderRadius: '6px',
+                          border: '2px dashed rgba(255,255,255,0.25)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '10px' }}>Partner Logo</span>
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+                      <span
+                        style={{
+                          fontSize: '13px',
+                          fontWeight: 500,
+                          color: 'rgba(255, 255, 255, 0.75)',
+                          textShadow: '0 2px 6px rgba(0,0,0,0.5)',
+                        }}
+                      >
+                        Powered by Mind & Muscle
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: 600,
+                          color: '#10B981',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px',
+                          textShadow: '0 2px 6px rgba(0,0,0,0.5)',
+                        }}
+                      >
+                        Official Team Partner
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Headline */}
+                  <h1
+                    style={{
+                      margin: 0,
+                      fontSize: '48px',
+                      fontWeight: 900,
+                      fontStyle: 'italic',
+                      lineHeight: 1.15,
+                      letterSpacing: '-1.5px',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    <span style={{
+                      color: '#0EA5E9',
+                      display: 'block',
+                      textShadow: '0 2px 12px rgba(0,0,0,0.7)'
+                    }}>
+                      Discipline the Mind.
+                    </span>
+                    <span style={{
+                      color: '#F97316',
+                      display: 'block',
+                      textShadow: '0 2px 12px rgba(0,0,0,0.7)'
+                    }}>
+                      Dominate the Game.
+                    </span>
+                  </h1>
+
+                  {/* Subhead */}
+                  <p
+                    style={{
+                      margin: '20px 0 0 0',
+                      fontSize: '18px',
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      fontWeight: 500,
+                      letterSpacing: '0.3px',
+                      textShadow: '0 2px 8px rgba(0,0,0,0.7)',
+                    }}
+                  >
+                    AI Training for Baseball & Softball Athletes
+                  </p>
+                </div>
+
+                {/* RIGHT SIDE - 40% width - QR Code Block */}
+                <div
+                  style={{
+                    width: '40%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {qrCodeImage ? (
+                    <>
+                      <div
+                        style={{
+                          backgroundColor: '#FFFFFF',
+                          borderRadius: '12px',
+                          padding: '16px',
+                          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+                        }}
+                      >
+                        <img
+                          src={qrCodeImage}
+                          alt="Partner QR Code"
+                          style={{
+                            width: '260px',
+                            height: '260px',
+                            objectFit: 'contain',
+                            display: 'block',
+                          }}
+                        />
+                      </div>
+
+                      <p
+                        style={{
+                          margin: '14px 0 0 0',
+                          fontSize: '16px',
+                          fontWeight: 600,
+                          color: 'white',
+                          textAlign: 'center',
+                          textShadow: '0 2px 8px rgba(0,0,0,0.7)',
+                          letterSpacing: '0.2px',
+                        }}
+                      >
+                        Scan to Join
+                      </p>
+
+                      <div
+                        style={{
+                          marginTop: '5px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '6px',
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: '18px',
+                            fontWeight: 700,
+                            color: 'white',
+                            textShadow: '0 2px 8px rgba(0,0,0,0.6)',
+                          }}
+                        >
+                          Teams Start
+                        </span>
+                        <span
+                          style={{
+                            fontSize: '18px',
+                            fontWeight: 800,
+                            color: '#22C55E',
+                            textShadow: '0 2px 8px rgba(0,0,0,0.6)',
+                          }}
+                        >
+                          FREE
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div
+                        style={{
+                          width: '292px',
+                          height: '292px',
+                          backgroundColor: 'rgba(255,255,255,0.1)',
+                          borderRadius: '12px',
+                          border: '2px dashed rgba(255,255,255,0.3)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <p
+                          style={{
+                            color: 'rgba(255,255,255,0.5)',
+                            fontSize: '14px',
+                            textAlign: 'center',
+                          }}
+                        >
+                          QR Code<br />260x260px
+                        </p>
+                      </div>
+                      <p
+                        style={{
+                          margin: '14px 0 0 0',
+                          fontSize: '16px',
+                          fontWeight: 600,
+                          color: 'rgba(255,255,255,0.4)',
+                          textAlign: 'center',
+                        }}
+                      >
+                        Scan to Join
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Facebook Co-Branded Download Button */}
+          <div className="flex justify-center mt-4">
+            <LiquidButton
+              onClick={downloadFacebookCoBranded}
+              variant="blue"
+              size="md"
+              disabled={!qrCodeImage || !partnerLogo || isGeneratingFacebookCoBranded}
+            >
+              {isGeneratingFacebookCoBranded ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Co-Branded Facebook PNG
+                </>
+              )}
+            </LiquidButton>
+          </div>
+          {!partnerLogo && (
+            <p className="text-center text-sm text-gray-500 mt-2">
+              Upload a partner logo to enable co-branded download
+            </p>
+          )}
         </div>
 
         {/* ================================================================== */}
@@ -984,8 +1478,8 @@ export default function BannerGeneratorPage() {
             </div>
           </div>
 
-          {/* Twitter Download Button */}
-          <div className="flex justify-center mt-4">
+          {/* Twitter Download Buttons */}
+          <div className="flex flex-col sm:flex-row justify-center gap-3 mt-4">
             <LiquidButton
               onClick={downloadTwitterBanner}
               variant="orange"
@@ -1000,11 +1494,355 @@ export default function BannerGeneratorPage() {
               ) : (
                 <>
                   <Download className="w-4 h-4 mr-2" />
-                  Download X/Twitter PNG
+                  Download Standard
+                </>
+              )}
+            </LiquidButton>
+            <LiquidButton
+              onClick={downloadAllTwitterBanners}
+              variant="blue"
+              size="md"
+              disabled={!qrCodeImage || isDownloadingAllTwitter}
+            >
+              {isDownloadingAllTwitter ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+                  Downloading...
+                </>
+              ) : (
+                <>
+                  <Package className="w-4 h-4 mr-2" />
+                  Download All X/Twitter
                 </>
               )}
             </LiquidButton>
           </div>
+        </div>
+
+        {/* ================================================================== */}
+        {/* X/TWITTER CO-BRANDED BANNER - 1600x900px (16:9) with Partner Badge */}
+        {/* ================================================================== */}
+        <div className="mb-8">
+          <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+            <ImageIcon className="w-5 h-5 text-neon-cortex-blue" />
+            X (Twitter) Co-Branded (1600x900px - 16:9)
+            {partnerLogo && <span className="text-xs text-neon-cortex-green bg-neon-cortex-green/10 px-2 py-1 rounded-full">Partner Logo Added</span>}
+          </h3>
+
+          <div className="overflow-auto rounded-xl border border-white/10">
+            <div
+              ref={twitterCoBrandedRef}
+              style={{
+                width: '1600px',
+                height: '900px',
+                position: 'relative',
+                overflow: 'hidden',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              }}
+            >
+              {/* Background Image */}
+              <img
+                src="/assets/images/baseball_field_dusk.png"
+                alt=""
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                }}
+              />
+
+              {/* Gradient overlay */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: `
+                    radial-gradient(ellipse at 35% 50%, rgba(15, 23, 42, 0.7) 0%, transparent 65%),
+                    linear-gradient(to right, rgba(15, 23, 42, 0.65) 0%, rgba(15, 23, 42, 0.35) 55%, rgba(15, 23, 42, 0.45) 100%)
+                  `,
+                }}
+              />
+
+              {/* SAFE ZONE CONTAINER: 1320x720px centered (140px L/R, 90px T/B) */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '90px',
+                  left: '140px',
+                  width: '1320px',
+                  height: '720px',
+                  display: 'flex',
+                }}
+              >
+                {/* LEFT SIDE - 65% width - Primary Message Block */}
+                <div
+                  style={{
+                    width: '65%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    paddingRight: '40px',
+                  }}
+                >
+                  {/* Partner Badge */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '16px',
+                      marginBottom: '28px',
+                      padding: '12px 20px 12px 14px',
+                      backgroundColor: 'rgba(15, 23, 42, 0.5)',
+                      borderRadius: '12px',
+                      width: 'fit-content',
+                    }}
+                  >
+                    {partnerLogo ? (
+                      <img
+                        src={partnerLogo}
+                        alt="Partner"
+                        style={{
+                          height: '95px',
+                          maxWidth: '240px',
+                          objectFit: 'contain',
+                          filter: 'drop-shadow(0 2px 10px rgba(0,0,0,0.4))',
+                        }}
+                      />
+                    ) : (
+                      <div
+                        style={{
+                          height: '95px',
+                          width: '140px',
+                          backgroundColor: 'rgba(255,255,255,0.08)',
+                          borderRadius: '8px',
+                          border: '2px dashed rgba(255,255,255,0.25)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Partner Logo</span>
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <span
+                        style={{
+                          fontSize: '15px',
+                          fontWeight: 500,
+                          color: 'rgba(255, 255, 255, 0.75)',
+                          textShadow: '0 2px 6px rgba(0,0,0,0.5)',
+                        }}
+                      >
+                        Powered by Mind & Muscle
+                      </span>
+                      <span
+                        style={{
+                          fontSize: '13px',
+                          fontWeight: 600,
+                          color: '#10B981',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px',
+                          textShadow: '0 2px 6px rgba(0,0,0,0.5)',
+                        }}
+                      >
+                        Official Team Partner
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Headline */}
+                  <h1
+                    style={{
+                      margin: 0,
+                      fontSize: '64px',
+                      fontWeight: 900,
+                      fontStyle: 'italic',
+                      lineHeight: 1.12,
+                      letterSpacing: '-1px',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    <span style={{
+                      color: '#0EA5E9',
+                      display: 'block',
+                      textShadow: '0 2px 20px rgba(0,0,0,0.85), 0 4px 40px rgba(14, 165, 233, 0.3)'
+                    }}>
+                      Discipline the Mind.
+                    </span>
+                    <span style={{
+                      color: '#F97316',
+                      display: 'block',
+                      textShadow: '0 2px 20px rgba(0,0,0,0.85), 0 4px 40px rgba(249, 115, 22, 0.3)'
+                    }}>
+                      Dominate the Game.
+                    </span>
+                  </h1>
+
+                  {/* Subhead */}
+                  <p
+                    style={{
+                      margin: '28px 0 0 0',
+                      fontSize: '22px',
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      fontWeight: 500,
+                      letterSpacing: '0.3px',
+                      textShadow: '0 2px 10px rgba(0,0,0,0.8)',
+                    }}
+                  >
+                    AI Training for Baseball & Softball Athletes
+                  </p>
+                </div>
+
+                {/* RIGHT SIDE - 35% width - QR Code Block */}
+                <div
+                  style={{
+                    width: '35%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {qrCodeImage ? (
+                    <>
+                      <div
+                        style={{
+                          backgroundColor: '#FFFFFF',
+                          borderRadius: '10px',
+                          padding: '14px',
+                          boxShadow: '0 6px 28px rgba(0, 0, 0, 0.4)',
+                        }}
+                      >
+                        <img
+                          src={qrCodeImage}
+                          alt="Partner QR Code"
+                          style={{
+                            width: '240px',
+                            height: '240px',
+                            objectFit: 'contain',
+                            display: 'block',
+                          }}
+                        />
+                      </div>
+
+                      <p
+                        style={{
+                          margin: '12px 0 0 0',
+                          fontSize: '16px',
+                          fontWeight: 600,
+                          color: 'white',
+                          textAlign: 'center',
+                          textShadow: '0 2px 8px rgba(0,0,0,0.7)',
+                          letterSpacing: '0.2px',
+                        }}
+                      >
+                        Scan to Join
+                      </p>
+
+                      <div
+                        style={{
+                          marginTop: '5px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: '18px',
+                            fontWeight: 700,
+                            color: 'white',
+                            textShadow: '0 2px 8px rgba(0,0,0,0.6)',
+                          }}
+                        >
+                          Teams Start
+                        </span>
+                        <span
+                          style={{
+                            fontSize: '18px',
+                            fontWeight: 800,
+                            color: '#22C55E',
+                            textShadow: '0 2px 8px rgba(0,0,0,0.6)',
+                          }}
+                        >
+                          FREE
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div
+                        style={{
+                          width: '268px',
+                          height: '268px',
+                          backgroundColor: 'rgba(255,255,255,0.1)',
+                          borderRadius: '10px',
+                          border: '2px dashed rgba(255,255,255,0.3)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <p
+                          style={{
+                            color: 'rgba(255,255,255,0.5)',
+                            fontSize: '13px',
+                            textAlign: 'center',
+                          }}
+                        >
+                          QR Code<br />240x240px min
+                        </p>
+                      </div>
+                      <p
+                        style={{
+                          margin: '12px 0 0 0',
+                          fontSize: '16px',
+                          fontWeight: 600,
+                          color: 'rgba(255,255,255,0.4)',
+                          textAlign: 'center',
+                        }}
+                      >
+                        Scan to Join
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Twitter Co-Branded Download Button */}
+          <div className="flex justify-center mt-4">
+            <LiquidButton
+              onClick={downloadTwitterCoBranded}
+              variant="orange"
+              size="md"
+              disabled={!qrCodeImage || !partnerLogo || isGeneratingTwitterCoBranded}
+            >
+              {isGeneratingTwitterCoBranded ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Co-Branded X/Twitter PNG
+                </>
+              )}
+            </LiquidButton>
+          </div>
+          {!partnerLogo && (
+            <p className="text-center text-sm text-gray-500 mt-2">
+              Upload a partner logo to enable co-branded download
+            </p>
+          )}
         </div>
 
         {/* ================================================================== */}
