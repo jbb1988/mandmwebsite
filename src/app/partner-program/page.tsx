@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import Image from 'next/image';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { LiquidGlass } from '@/components/LiquidGlass';
@@ -9,7 +9,7 @@ import { GradientTextReveal } from '@/components/animations';
 import { EnhancedEarningsCalculator } from '@/components/partner/EnhancedEarningsCalculator';
 import { ScenarioCard } from '@/components/partner/ScenarioCard';
 import { QRCodeGenerator } from '@/components/partner/QRCodeGenerator';
-import { DollarSign, TrendingUp, Users, Gift, BarChart, Rocket, Check, Link2, Star, Zap, Target, Award, BookOpen, Sparkles, Clock, Trophy, ChevronDown, GraduationCap, Briefcase, UserPlus, Building2 } from 'lucide-react';
+import { DollarSign, TrendingUp, Users, Gift, BarChart, Rocket, Check, Link2, Star, Zap, Target, Award, BookOpen, Sparkles, Clock, Trophy, ChevronDown, GraduationCap, Briefcase, UserPlus, Building2, Upload, X } from 'lucide-react';
 
 export default function PartnerProgramPage() {
   const [formData, setFormData] = useState({
@@ -26,6 +26,38 @@ export default function PartnerProgramPage() {
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please upload an image file (PNG, JPG, SVG)');
+        return;
+      }
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Logo file must be less than 5MB');
+        return;
+      }
+      setLogoFile(file);
+      setLogoPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const removeLogo = () => {
+    setLogoFile(null);
+    if (logoPreview) {
+      URL.revokeObjectURL(logoPreview);
+      setLogoPreview(null);
+    }
+    if (logoInputRef.current) {
+      logoInputRef.current.value = '';
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,19 +70,31 @@ export default function PartnerProgramPage() {
     setIsSubmitting(true);
 
     try {
+      // Use FormData to support file upload
+      const submitData = new FormData();
+      submitData.append('name', formData.name);
+      submitData.append('email', formData.email);
+      submitData.append('organization', formData.organization);
+      submitData.append('audience', formData.audience);
+      submitData.append('networkSize', formData.networkSize);
+      submitData.append('promotionChannel', formData.promotionChannel);
+      submitData.append('whyExcited', formData.whyExcited);
+      submitData.append('turnstileToken', captchaToken);
+
+      if (logoFile) {
+        submitData.append('logo', logoFile);
+      }
+
       const response = await fetch('/api/partner-application', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...formData,
-          turnstileToken: captchaToken,
-        }),
+        body: submitData,
       });
 
       if (response.ok) {
         setShowSuccessModal(true);
         setFormData({ name: '', email: '', organization: '', audience: '', networkSize: '', promotionChannel: '', whyExcited: '' });
         setCaptchaToken('');
+        removeLogo();
       } else {
         const data = await response.json();
         alert(data.error || 'There was an error submitting your application. Please try again.');
@@ -373,6 +417,52 @@ export default function PartnerProgramPage() {
                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors backdrop-blur-md"
                 placeholder="Your organization or website"
               />
+            </div>
+
+            {/* Logo Upload */}
+            <div>
+              <label className="block text-sm font-semibold mb-2">
+                Your Logo (Optional)
+              </label>
+              <p className="text-xs text-text-secondary mb-3">
+                Upload your logo and we'll create co-branded marketing materials for you
+              </p>
+
+              {logoPreview ? (
+                <div className="relative inline-block">
+                  <div className="w-32 h-32 rounded-xl border border-white/20 overflow-hidden bg-white/5">
+                    <img
+                      src={logoPreview}
+                      alt="Logo preview"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={removeLogo}
+                    className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 transition-colors"
+                  >
+                    <X className="w-4 h-4 text-white" />
+                  </button>
+                </div>
+              ) : (
+                <label
+                  htmlFor="logo-upload"
+                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/20 rounded-xl cursor-pointer hover:border-neon-cortex-blue/50 hover:bg-white/5 transition-colors"
+                >
+                  <Upload className="w-8 h-8 text-gray-400 mb-2" />
+                  <span className="text-sm text-gray-400">Click to upload</span>
+                  <span className="text-xs text-gray-500 mt-1">PNG, JPG, SVG (max 5MB)</span>
+                  <input
+                    ref={logoInputRef}
+                    type="file"
+                    id="logo-upload"
+                    accept="image/*"
+                    onChange={handleLogoChange}
+                    className="hidden"
+                  />
+                </label>
+              )}
             </div>
 
             <div>
@@ -856,6 +946,85 @@ export default function PartnerProgramPage() {
             </ul>
           </LiquidGlass>
         </div>
+      </div>
+
+      {/* Co-Branded Marketing Materials Section */}
+      <div className="max-w-6xl mx-auto mb-20">
+        <GradientTextReveal
+          text="Your Co-Branded Marketing Materials"
+          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
+          gradientFrom="#F97316"
+          gradientTo="#0EA5E9"
+          delay={0.2}
+        />
+        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
+          When you join our Partner Program, we create professional co-branded banners featuring your organization's logo.
+        </p>
+
+        <LiquidGlass variant="orange" glow={true} className="p-8">
+          {/* Example Banner Placeholder */}
+          <div className="rounded-xl overflow-hidden mb-8 bg-gradient-to-br from-[#0A0B14] to-[#1B1F39] border border-white/10">
+            <div className="aspect-[2/1] flex items-center justify-center bg-gradient-to-br from-solar-surge-orange/10 to-neon-cortex-blue/10">
+              <div className="text-center p-8">
+                <div className="w-16 h-16 bg-solar-surge-orange/20 rounded-xl flex items-center justify-center mx-auto mb-4 border border-solar-surge-orange/30">
+                  <Image
+                    src="/assets/images/logo.png"
+                    alt="Mind & Muscle"
+                    width={48}
+                    height={48}
+                    className="object-contain"
+                  />
+                </div>
+                <h3 className="text-2xl font-black text-white mb-2">Your Organization + Mind & Muscle</h3>
+                <p className="text-text-secondary">Professional co-branded banner with your logo</p>
+                <div className="mt-4 flex items-center justify-center gap-4">
+                  <div className="px-4 py-2 bg-solar-surge-orange/20 border border-solar-surge-orange/30 rounded-lg text-sm text-solar-surge-orange font-semibold">
+                    Your Logo Here
+                  </div>
+                  <span className="text-gray-500">+</span>
+                  <div className="px-4 py-2 bg-neon-cortex-blue/20 border border-neon-cortex-blue/30 rounded-lg text-sm text-neon-cortex-blue font-semibold">
+                    Powered by Mind & Muscle
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Use Cases */}
+          <h3 className="text-xl font-bold mb-4 text-center">Perfect For:</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center p-4 bg-white/5 border border-white/10 rounded-xl">
+              <div className="w-12 h-12 bg-solar-surge-orange/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                <span className="text-2xl">📱</span>
+              </div>
+              <p className="text-sm font-medium">Social Media Posts</p>
+            </div>
+            <div className="text-center p-4 bg-white/5 border border-white/10 rounded-xl">
+              <div className="w-12 h-12 bg-neon-cortex-blue/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                <span className="text-2xl">📧</span>
+              </div>
+              <p className="text-sm font-medium">Email Newsletters</p>
+            </div>
+            <div className="text-center p-4 bg-white/5 border border-white/10 rounded-xl">
+              <div className="w-12 h-12 bg-solar-surge-orange/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                <span className="text-2xl">🌐</span>
+              </div>
+              <p className="text-sm font-medium">Team Websites</p>
+            </div>
+            <div className="text-center p-4 bg-white/5 border border-white/10 rounded-xl">
+              <div className="w-12 h-12 bg-neon-cortex-blue/20 rounded-full flex items-center justify-center mx-auto mb-2">
+                <span className="text-2xl">🎪</span>
+              </div>
+              <p className="text-sm font-medium">Event Promotions</p>
+            </div>
+          </div>
+
+          <div className="mt-6 p-4 bg-neon-cortex-green/10 border border-neon-cortex-green/30 rounded-lg">
+            <p className="text-sm text-center text-gray-300">
+              <strong className="text-neon-cortex-green">Pro tip:</strong> Upload your logo when applying above, and we'll create your custom banner within 24 hours of approval!
+            </p>
+          </div>
+        </LiquidGlass>
       </div>
 
       {/* QR Code Generator Section */}

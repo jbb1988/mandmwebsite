@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { createClient } from '@supabase/supabase-js';
-import { partnerApplicationSchema, escapeHtml } from '@/lib/validation';
+import { escapeHtml } from '@/lib/validation';
 import { partnerApplicationRateLimit, getClientIp, checkRateLimit } from '@/lib/rate-limit';
 
 // Supabase client for storing partner data
@@ -9,6 +9,27 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
+
+// Helper function to validate form data fields
+function validateFormData(data: {
+  name: string;
+  email: string;
+  turnstileToken: string;
+  networkSize?: string;
+  promotionChannel?: string;
+  whyExcited?: string;
+}): { valid: boolean; error?: string } {
+  if (!data.name || data.name.trim().length < 2) {
+    return { valid: false, error: 'Name is required and must be at least 2 characters' };
+  }
+  if (!data.email || !data.email.includes('@')) {
+    return { valid: false, error: 'Valid email is required' };
+  }
+  if (!data.turnstileToken) {
+    return { valid: false, error: 'Security verification is required' };
+  }
+  return { valid: true };
+}
 
 // Verify Cloudflare Turnstile token
 async function verifyTurnstileToken(token: string, ip: string): Promise<boolean> {
@@ -64,19 +85,53 @@ export async function POST(request: NextRequest) {
     }
 
     const resend = new Resend(process.env.RESEND_API_KEY);
-    const body = await request.json();
 
-    // Validate and sanitize input
-    const validationResult = partnerApplicationSchema.safeParse(body);
+    // Parse FormData (supports both FormData and JSON for backwards compatibility)
+    let name: string;
+    let email: string;
+    let organization: string | undefined;
+    let audience: string | undefined;
+    let networkSize: string | undefined;
+    let promotionChannel: string | undefined;
+    let whyExcited: string | undefined;
+    let turnstileToken: string;
+    let logoFile: File | null = null;
 
-    if (!validationResult.success) {
+    const contentType = request.headers.get('content-type') || '';
+
+    if (contentType.includes('multipart/form-data')) {
+      // Handle FormData submission
+      const formData = await request.formData();
+      name = formData.get('name') as string || '';
+      email = formData.get('email') as string || '';
+      organization = formData.get('organization') as string || undefined;
+      audience = formData.get('audience') as string || undefined;
+      networkSize = formData.get('networkSize') as string || undefined;
+      promotionChannel = formData.get('promotionChannel') as string || undefined;
+      whyExcited = formData.get('whyExcited') as string || undefined;
+      turnstileToken = formData.get('turnstileToken') as string || '';
+      logoFile = formData.get('logo') as File | null;
+    } else {
+      // Handle JSON submission (backwards compatibility)
+      const body = await request.json();
+      name = body.name || '';
+      email = body.email || '';
+      organization = body.organization;
+      audience = body.audience;
+      networkSize = body.networkSize;
+      promotionChannel = body.promotionChannel;
+      whyExcited = body.whyExcited;
+      turnstileToken = body.turnstileToken || '';
+    }
+
+    // Validate input
+    const validation = validateFormData({ name, email, turnstileToken, networkSize, promotionChannel, whyExcited });
+    if (!validation.valid) {
       return NextResponse.json(
-        { error: 'Invalid input', details: validationResult.error.issues },
+        { error: validation.error },
         { status: 400 }
       );
     }
-
-    const { name, email, organization, audience, networkSize, promotionChannel, whyExcited, turnstileToken } = validationResult.data;
 
     // Verify Turnstile CAPTCHA token
     const isCaptchaValid = await verifyTurnstileToken(turnstileToken, ip);
@@ -167,6 +222,39 @@ export async function POST(request: NextRequest) {
       // Don't fail the whole request - still send notification email
     }
 
+    // Upload logo to Supabase Storage if provided
+    let logoUrl: string | null = null;
+    if (logoFile && logoFile.size > 0) {
+      try {
+        const timestamp = Date.now();
+        const sanitizedEmail = email.toLowerCase().replace(/[^a-z0-9]/g, '-');
+        const fileExt = logoFile.name.split('.').pop() || 'png';
+        const logoPath = `partner-logos/${sanitizedEmail}-${timestamp}.${fileExt}`;
+
+        const logoBuffer = Buffer.from(await logoFile.arrayBuffer());
+
+        const { error: uploadError } = await supabase.storage
+          .from('partner-logos')
+          .upload(logoPath, logoBuffer, {
+            contentType: logoFile.type,
+            upsert: true,
+          });
+
+        if (uploadError) {
+          console.error('Error uploading partner logo:', uploadError);
+        } else {
+          const { data: urlData } = supabase.storage
+            .from('partner-logos')
+            .getPublicUrl(logoPath);
+          logoUrl = urlData.publicUrl;
+          console.log('✅ Partner logo uploaded:', logoUrl);
+        }
+      } catch (uploadErr) {
+        console.error('Exception uploading logo:', uploadErr);
+        // Don't fail - logo is optional
+      }
+    }
+
     // Save partner to Supabase (for FB outreach tracking and local analytics)
     try {
       const { error: supabaseError } = await supabase
@@ -181,6 +269,7 @@ export async function POST(request: NextRequest) {
           promotion_channel: promotionChannel || null,
           why_excited: whyExcited || null,
           audience: audience || null,
+          logo_url: logoUrl,
         }, {
           onConflict: 'email',
         });
@@ -216,6 +305,12 @@ export async function POST(request: NextRequest) {
 
         <h3>Audience Information:</h3>
         <p>${safeAudience}</p>
+
+        ${logoUrl ? `
+        <h3>Partner Logo:</h3>
+        <p><a href="${logoUrl}" target="_blank">View uploaded logo</a></p>
+        <img src="${logoUrl}" alt="Partner logo" style="max-width: 200px; max-height: 200px; border: 1px solid #eee; border-radius: 8px; padding: 10px;" />
+        ` : ''}
 
         <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;" />
 

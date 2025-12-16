@@ -7,7 +7,7 @@ import AdminNav from '@/components/AdminNav';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
 import { GradientTextReveal } from '@/components/animations';
-import { Upload, Download, RefreshCw, Image as ImageIcon, Smartphone } from 'lucide-react';
+import { Upload, Download, RefreshCw, Image as ImageIcon, Smartphone, Save, CheckCircle } from 'lucide-react';
 
 export default function BannerGeneratorPage() {
   const [qrCodeImage, setQrCodeImage] = useState<string | null>(null);
@@ -15,6 +15,11 @@ export default function BannerGeneratorPage() {
   const [isGeneratingFacebook, setIsGeneratingFacebook] = useState(false);
   const [isGeneratingTwitter, setIsGeneratingTwitter] = useState(false);
   const [isGeneratingPartner, setIsGeneratingPartner] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [partnerName, setPartnerName] = useState('');
+  const [partnerEmail, setPartnerEmail] = useState('');
+  const [partnerNotes, setPartnerNotes] = useState('');
   const facebookBannerRef = useRef<HTMLDivElement>(null);
   const twitterBannerRef = useRef<HTMLDivElement>(null);
   const partnerBannerRef = useRef<HTMLDivElement>(null);
@@ -162,6 +167,80 @@ export default function BannerGeneratorPage() {
     }
   };
 
+  // Save banner to library
+  const saveBannerToLibrary = async () => {
+    if (!partnerBannerRef.current || !partnerName || !partnerEmail) {
+      alert('Please fill in partner name and email to save to library.');
+      return;
+    }
+
+    setIsSaving(true);
+    setSaveSuccess(false);
+
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      const canvas = await html2canvas(partnerBannerRef.current, {
+        scale: 1,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#0f172a',
+        width: 1600,
+        height: 900,
+      });
+
+      // Convert canvas to blob
+      const bannerBlob = await new Promise<Blob>((resolve) => {
+        canvas.toBlob((blob) => resolve(blob!), 'image/png');
+      });
+
+      // Prepare form data
+      const formData = new FormData();
+      formData.append('partnerName', partnerName);
+      formData.append('partnerEmail', partnerEmail);
+      formData.append('notes', partnerNotes);
+      formData.append('banner', bannerBlob, 'banner.png');
+
+      // Add logo if available
+      if (partnerLogo) {
+        const logoResponse = await fetch(partnerLogo);
+        const logoBlob = await logoResponse.blob();
+        formData.append('logo', logoBlob, 'logo.png');
+      }
+
+      // Add QR code if available
+      if (qrCodeImage) {
+        const qrResponse = await fetch(qrCodeImage);
+        const qrBlob = await qrResponse.blob();
+        formData.append('qrCode', qrBlob, 'qrcode.png');
+      }
+
+      // Get admin password from session storage
+      const adminPassword = sessionStorage.getItem('adminPassword') || '';
+
+      const response = await fetch('/api/admin/partner-banners', {
+        method: 'POST',
+        headers: {
+          'X-Admin-Password': adminPassword,
+        },
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 3000);
+      } else {
+        alert(`Failed to save: ${result.message}`);
+      }
+    } catch (error) {
+      console.error('Error saving banner:', error);
+      alert('Error saving banner. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <AdminGate
       title="Partner Banner Generator"
@@ -223,54 +302,152 @@ export default function BannerGeneratorPage() {
           </ol>
         </LiquidGlass>
 
-        {/* QR Code Upload */}
-        <div className="mb-8">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleFileUpload}
-            className="hidden"
-          />
+        {/* Side-by-Side Upload Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+          {/* QR Code Upload */}
+          <div>
+            <h4 className="font-semibold text-sm text-gray-300 mb-2 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-neon-cortex-blue/20 flex items-center justify-center text-xs text-neon-cortex-blue font-bold">1</span>
+              QR Code
+            </h4>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              onDrop={handleDrop}
+              onDragOver={handleDragOver}
+              className="border-2 border-dashed border-white/20 rounded-xl p-8 text-center cursor-pointer hover:border-neon-cortex-blue/50 transition-colors bg-white/5 h-48 flex items-center justify-center"
+            >
+              {qrCodeImage ? (
+                <div className="flex flex-col items-center gap-3">
+                  <img
+                    src={qrCodeImage}
+                    alt="Uploaded QR Code"
+                    className="w-24 h-24 object-contain rounded-lg"
+                  />
+                  <p className="text-xs text-neon-cortex-green">QR Code uploaded!</p>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      resetQrCode();
+                    }}
+                    className="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition-colors"
+                  >
+                    <RefreshCw className="w-3 h-3" />
+                    Change
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-neon-cortex-blue/20 flex items-center justify-center">
+                    <Upload className="w-6 h-6 text-neon-cortex-blue" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Drop QR code here</p>
+                    <p className="text-xs text-gray-400">or click to browse</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
 
-          <div
-            onClick={() => fileInputRef.current?.click()}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            className="border-2 border-dashed border-white/20 rounded-xl p-12 text-center cursor-pointer hover:border-neon-cortex-blue/50 transition-colors bg-white/5"
-          >
-            {qrCodeImage ? (
-              <div className="flex flex-col items-center gap-4">
-                <img
-                  src={qrCodeImage}
-                  alt="Uploaded QR Code"
-                  className="w-32 h-32 object-contain rounded-lg"
-                />
-                <p className="text-sm text-neon-cortex-green">QR Code uploaded! Preview below.</p>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    resetQrCode();
-                  }}
-                  className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
-                >
-                  <RefreshCw className="w-4 h-4" />
-                  Upload different QR code
-                </button>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-4">
-                <div className="w-16 h-16 rounded-full bg-neon-cortex-blue/20 flex items-center justify-center">
-                  <Upload className="w-8 h-8 text-neon-cortex-blue" />
+          {/* Partner Logo Upload */}
+          <div>
+            <h4 className="font-semibold text-sm text-gray-300 mb-2 flex items-center gap-2">
+              <span className="w-6 h-6 rounded-full bg-neon-cortex-green/20 flex items-center justify-center text-xs text-neon-cortex-green font-bold">2</span>
+              Partner Logo
+            </h4>
+            <input
+              ref={partnerLogoInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handlePartnerLogoUpload}
+              className="hidden"
+            />
+            <div
+              onClick={() => partnerLogoInputRef.current?.click()}
+              onDrop={handlePartnerLogoDrop}
+              onDragOver={handleDragOver}
+              className="border-2 border-dashed border-white/20 rounded-xl p-8 text-center cursor-pointer hover:border-neon-cortex-green/50 transition-colors bg-white/5 h-48 flex items-center justify-center"
+            >
+              {partnerLogo ? (
+                <div className="flex flex-col items-center gap-3">
+                  <img
+                    src={partnerLogo}
+                    alt="Partner Logo"
+                    className="h-20 max-w-full object-contain rounded-lg"
+                  />
+                  <p className="text-xs text-neon-cortex-green">Logo uploaded!</p>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      resetPartnerLogo();
+                    }}
+                    className="flex items-center gap-1 text-xs text-gray-400 hover:text-white transition-colors"
+                  >
+                    <RefreshCw className="w-3 h-3" />
+                    Change
+                  </button>
                 </div>
-                <div>
-                  <p className="font-semibold text-lg">Drop QR code image here</p>
-                  <p className="text-sm text-gray-400">or click to browse</p>
+              ) : (
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-neon-cortex-green/20 flex items-center justify-center">
+                    <Upload className="w-6 h-6 text-neon-cortex-green" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Drop partner logo here</p>
+                    <p className="text-xs text-gray-400">or click to browse</p>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
+
+        {/* Partner Info Fields */}
+        <LiquidGlass variant="neutral" className="p-6 mb-8">
+          <h4 className="font-semibold text-sm text-gray-300 mb-4 flex items-center gap-2">
+            <Save className="w-4 h-4 text-neon-cortex-green" />
+            Partner Info (for saving to library)
+          </h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Partner Name *</label>
+              <input
+                type="text"
+                value={partnerName}
+                onChange={(e) => setPartnerName(e.target.value)}
+                placeholder="e.g., ABC Sports Academy"
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:border-neon-cortex-blue/50 focus:outline-none text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs text-gray-400 mb-1">Partner Email *</label>
+              <input
+                type="email"
+                value={partnerEmail}
+                onChange={(e) => setPartnerEmail(e.target.value)}
+                placeholder="e.g., coach@abcsports.com"
+                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:border-neon-cortex-blue/50 focus:outline-none text-sm"
+              />
+            </div>
+          </div>
+          <div className="mt-4">
+            <label className="block text-xs text-gray-400 mb-1">Notes (optional)</label>
+            <textarea
+              value={partnerNotes}
+              onChange={(e) => setPartnerNotes(e.target.value)}
+              placeholder="Any additional notes about this partner..."
+              rows={2}
+              className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:border-neon-cortex-blue/50 focus:outline-none text-sm resize-none"
+            />
+          </div>
+        </LiquidGlass>
 
         {/* Banner Preview */}
         <div className="mb-8">
@@ -387,10 +564,24 @@ export default function BannerGeneratorPage() {
                   >
                     AI Training for Baseball & Softball Athletes
                   </p>
+
+                  {/* Brand name - under subhead, left-aligned */}
+                  <p
+                    style={{
+                      margin: '8px 0 0 0',
+                      fontSize: '15px',
+                      color: 'rgba(255, 255, 255, 0.85)',
+                      fontWeight: 500,
+                      letterSpacing: '0.2px',
+                      textShadow: '0 2px 8px rgba(0,0,0,0.7)',
+                    }}
+                  >
+                    Mind & Muscle
+                  </p>
                 </div>
 
-                {/* RIGHT SIDE - 40% width - ONE UNIFIED VERTICAL BLOCK */}
-                {/* Stack: LOGO → QR → "Scan to Get Started" → "Get Started FREE" */}
+                {/* RIGHT SIDE - 40% width - QR Code Block */}
+                {/* QR code already contains M&M logo - no duplicate needed */}
                 <div
                   style={{
                     width: '40%',
@@ -400,19 +591,6 @@ export default function BannerGeneratorPage() {
                     justifyContent: 'center',
                   }}
                 >
-                  {/* LOGO: 95px width, centered above QR, 14px spacing to QR */}
-                  {/* NO glow, NO outline, soft shadow only (10-15% opacity) */}
-                  <img
-                    src="/assets/images/logo.png"
-                    alt="Mind & Muscle"
-                    style={{
-                      width: '95px',
-                      height: '95px',
-                      marginBottom: '14px',
-                      filter: 'drop-shadow(0 4px 12px rgba(0,0,0,0.12))',
-                    }}
-                  />
-
                   {/* QR CODE: 280x280px on solid white card */}
                   {qrCodeImage ? (
                     <>
@@ -667,10 +845,24 @@ export default function BannerGeneratorPage() {
                   >
                     AI Training for Baseball & Softball Athletes
                   </p>
+
+                  {/* Brand name - under subhead, left-aligned */}
+                  <p
+                    style={{
+                      margin: '8px 0 0 0',
+                      fontSize: '16px',
+                      color: 'rgba(255, 255, 255, 0.85)',
+                      fontWeight: 500,
+                      letterSpacing: '0.2px',
+                      textShadow: '0 2px 10px rgba(0,0,0,0.8)',
+                    }}
+                  >
+                    Mind & Muscle
+                  </p>
                 </div>
 
-                {/* RIGHT SIDE - 35% width - Brand + Action Block */}
-                {/* Logo + QR as ONE unified vertical unit */}
+                {/* RIGHT SIDE - 35% width - QR Code Block */}
+                {/* QR code already contains M&M logo - no duplicate needed */}
                 <div
                   style={{
                     width: '35%',
@@ -680,20 +872,6 @@ export default function BannerGeneratorPage() {
                     justifyContent: 'center',
                   }}
                 >
-                  {/* Logo: 120px, nudged down 12px, reduced shadow (7% opacity) */}
-                  {/* Aligns logo center with QR card's top edge */}
-                  <img
-                    src="/assets/images/logo.png"
-                    alt="Mind & Muscle"
-                    style={{
-                      width: '120px',
-                      height: '120px',
-                      marginTop: '12px',
-                      marginBottom: '12px',
-                      filter: 'drop-shadow(0 5px 16px rgba(0,0,0,0.07))',
-                    }}
-                  />
-
                   {/* QR Code Section */}
                   {qrCodeImage ? (
                     <>
@@ -838,55 +1016,6 @@ export default function BannerGeneratorPage() {
             <ImageIcon className="w-5 h-5 text-neon-cortex-green" />
             Partner Co-Branded Banner (1600x900px - 16:9)
           </h3>
-
-          {/* Partner Logo Upload */}
-          <div className="mb-4">
-            <input
-              ref={partnerLogoInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handlePartnerLogoUpload}
-              className="hidden"
-            />
-
-            <div
-              onClick={() => partnerLogoInputRef.current?.click()}
-              onDrop={handlePartnerLogoDrop}
-              onDragOver={handleDragOver}
-              className="border-2 border-dashed border-white/20 rounded-xl p-6 text-center cursor-pointer hover:border-neon-cortex-green/50 transition-colors bg-white/5"
-            >
-              {partnerLogo ? (
-                <div className="flex flex-col items-center gap-3">
-                  <img
-                    src={partnerLogo}
-                    alt="Partner Logo"
-                    className="h-16 object-contain rounded-lg"
-                  />
-                  <p className="text-sm text-neon-cortex-green">Partner logo uploaded!</p>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      resetPartnerLogo();
-                    }}
-                    className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
-                  >
-                    <RefreshCw className="w-4 h-4" />
-                    Upload different logo
-                  </button>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-neon-cortex-green/20 flex items-center justify-center">
-                    <Upload className="w-6 h-6 text-neon-cortex-green" />
-                  </div>
-                  <div>
-                    <p className="font-semibold">Drop partner logo here</p>
-                    <p className="text-sm text-gray-400">or click to browse (60px height recommended)</p>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
 
           <div className="overflow-auto rounded-xl border border-white/10">
             {/*
@@ -1187,8 +1316,8 @@ export default function BannerGeneratorPage() {
             </div>
           </div>
 
-          {/* Partner Banner Download Button */}
-          <div className="flex justify-center mt-4">
+          {/* Partner Banner Download & Save Buttons */}
+          <div className="flex flex-col sm:flex-row justify-center gap-3 mt-4">
             <LiquidButton
               onClick={downloadPartnerBanner}
               variant="green"
@@ -1207,6 +1336,30 @@ export default function BannerGeneratorPage() {
                 </>
               )}
             </LiquidButton>
+
+            <LiquidButton
+              onClick={saveBannerToLibrary}
+              variant="blue"
+              size="md"
+              disabled={!qrCodeImage || !partnerLogo || !partnerName || !partnerEmail || isSaving}
+            >
+              {isSaving ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+                  Saving...
+                </>
+              ) : saveSuccess ? (
+                <>
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Saved to Library!
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Save to Library
+                </>
+              )}
+            </LiquidButton>
           </div>
 
           {(!qrCodeImage || !partnerLogo) && (
@@ -1216,6 +1369,12 @@ export default function BannerGeneratorPage() {
                 : !partnerLogo
                 ? 'Upload a partner logo above to enable download'
                 : 'Upload a QR code at the top of the page to enable download'}
+            </p>
+          )}
+
+          {(qrCodeImage && partnerLogo && (!partnerName || !partnerEmail)) && (
+            <p className="text-center text-sm text-gray-500 mt-2">
+              Fill in partner name and email above to save to library
             </p>
           )}
         </div>

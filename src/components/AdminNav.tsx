@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Facebook, Twitter, Users, DollarSign,
-  Image, Megaphone, Settings
+  Image, Megaphone, Settings, FolderOpen
 } from 'lucide-react';
 
 const adminLinks = [
@@ -13,6 +13,7 @@ const adminLinks = [
   { href: '/admin/x-outreach', label: 'X Outreach', icon: Twitter },
   { href: '/admin/finder-fees', label: 'Finder Fees', icon: DollarSign },
   { href: '/admin/banner-generator', label: 'Banners', icon: Image },
+  { href: '/admin/banner-library', label: 'Library', icon: FolderOpen },
 ];
 
 export default function AdminNav() {
