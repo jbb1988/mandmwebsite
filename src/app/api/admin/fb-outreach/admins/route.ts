@@ -13,7 +13,7 @@ function verifyAdmin(request: NextRequest): boolean {
   return password === ADMIN_PASSWORD;
 }
 
-// PATCH - Update admin status (dm_sent_at, response_status)
+// PATCH - Update admin status (dm_sent_at, response_status, partner conversion fields)
 export async function PATCH(request: NextRequest) {
   if (!verifyAdmin(request)) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
@@ -21,7 +21,19 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { admin_id, response_status, dm_sent_at, notes } = body;
+    const {
+      admin_id,
+      response_status,
+      dm_sent_at,
+      notes,
+      // Partner conversion fields
+      partner_signed_up,
+      partner_signed_up_at,
+      app_user_id,
+      app_signed_up_at,
+      referral_count,
+      referral_revenue,
+    } = body;
 
     if (!admin_id) {
       return NextResponse.json({ success: false, message: 'Admin ID is required' }, { status: 400 });
@@ -31,6 +43,14 @@ export async function PATCH(request: NextRequest) {
     if (response_status) updates.response_status = response_status;
     if (dm_sent_at) updates.dm_sent_at = dm_sent_at;
     if (notes !== undefined) updates.notes = notes;
+
+    // Partner conversion fields
+    if (partner_signed_up !== undefined) updates.partner_signed_up = partner_signed_up;
+    if (partner_signed_up_at) updates.partner_signed_up_at = partner_signed_up_at;
+    if (app_user_id !== undefined) updates.app_user_id = app_user_id;
+    if (app_signed_up_at) updates.app_signed_up_at = app_signed_up_at;
+    if (referral_count !== undefined) updates.referral_count = referral_count;
+    if (referral_revenue !== undefined) updates.referral_revenue = referral_revenue;
 
     const { data, error } = await supabase
       .from('fb_page_admins')

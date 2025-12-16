@@ -26,6 +26,15 @@ export async function GET(request: NextRequest) {
 
     if (error) throw error;
 
+    // Get conversion stats from admins
+    const { data: admins, error: adminsError } = await supabase
+      .from('fb_page_admins')
+      .select('partner_signed_up, app_user_id, referral_count, referral_revenue');
+
+    if (adminsError) {
+      console.error('Error fetching admin stats:', adminsError);
+    }
+
     // Calculate stats
     const byStatus: Record<string, number> = {};
     const byState: Record<string, number> = {};
@@ -58,6 +67,19 @@ export async function GET(request: NextRequest) {
       }
     });
 
+    // Calculate conversion stats
+    let partnersSignedUp = 0;
+    let appUsersConverted = 0;
+    let totalReferrals = 0;
+    let totalRevenue = 0;
+
+    admins?.forEach((admin) => {
+      if (admin.partner_signed_up) partnersSignedUp++;
+      if (admin.app_user_id) appUsersConverted++;
+      totalReferrals += admin.referral_count || 0;
+      totalRevenue += parseFloat(admin.referral_revenue) || 0;
+    });
+
     return NextResponse.json({
       success: true,
       stats: {
@@ -66,6 +88,11 @@ export async function GET(request: NextRequest) {
         byState,
         needsFollowUp,
         readyToPost,
+        // Conversion funnel
+        partnersSignedUp,
+        appUsersConverted,
+        totalReferrals,
+        totalRevenue,
       },
     });
   } catch (error) {
