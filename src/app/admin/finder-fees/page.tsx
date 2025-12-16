@@ -6,7 +6,7 @@ import AdminNav from '@/components/AdminNav';
 import {
   Users, DollarSign, CheckCircle, Clock, Crown, RefreshCw, Copy, UserPlus, List,
   Mail, Info, ExternalLink, Search, ToggleLeft, ToggleRight, ChevronDown, ChevronUp,
-  TrendingUp, Wallet, Calendar
+  TrendingUp, Wallet, Calendar, PlusCircle, AlertCircle
 } from 'lucide-react';
 
 // Card component matching FB/X Outreach styling
@@ -31,7 +31,7 @@ function Card({ children, className = '', variant = 'default', glow = false }: {
   );
 }
 
-type Tab = 'enable' | 'partners' | 'transactions';
+type Tab = 'enable' | 'partners' | 'transactions' | 'manual';
 
 interface Partner {
   id: string;
@@ -376,6 +376,17 @@ export default function AdminFinderFeesPage() {
                 <List className="w-5 h-5" />
                 <span className="hidden sm:inline">Transactions</span>
               </button>
+              <button
+                onClick={() => setActiveTab('manual')}
+                className={`flex items-center gap-2 px-4 md:px-6 py-3 rounded-xl font-medium transition-all text-sm md:text-base ${
+                  activeTab === 'manual'
+                    ? 'bg-purple-500/20 border border-purple-500/30 text-purple-400'
+                    : 'bg-white/[0.03] border border-white/[0.08] text-white/40 hover:bg-white/[0.08] hover:text-white/60'
+                }`}
+              >
+                <PlusCircle className="w-5 h-5" />
+                <span className="hidden sm:inline">Manual</span>
+              </button>
             </div>
 
             {/* Tab Content */}
@@ -383,6 +394,7 @@ export default function AdminFinderFeesPage() {
               {activeTab === 'enable' && <EnablePartnerTab onSuccess={fetchStats} />}
               {activeTab === 'partners' && <PartnersTab />}
               {activeTab === 'transactions' && <TransactionsTab onStatusChange={fetchStats} />}
+              {activeTab === 'manual' && <ManualAttributionTab onSuccess={fetchStats} />}
             </Card>
           </div>
         </div>
@@ -1016,6 +1028,377 @@ function TransactionsTab({ onStatusChange }: { onStatusChange: () => void }) {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+function ManualAttributionTab({ onSuccess }: { onSuccess: () => void }) {
+  const [partners, setPartners] = useState<Partner[]>([]);
+  const [loadingPartners, setLoadingPartners] = useState(false);
+  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
+
+  // Finder Fee Form State
+  const [finderFeeForm, setFinderFeeForm] = useState({
+    finderCode: '',
+    referredOrgEmail: '',
+    purchaseAmount: '',
+    isFirstPurchase: true,
+  });
+  const [finderFeeLoading, setFinderFeeLoading] = useState(false);
+  const [finderFeeResult, setFinderFeeResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  // Tolt Form State
+  const [toltForm, setToltForm] = useState({
+    referralCode: '',
+    customerEmail: '',
+    amount: '',
+  });
+  const [toltLoading, setToltLoading] = useState(false);
+  const [toltResult, setToltResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  // Fetch enabled partners for dropdown
+  useEffect(() => {
+    const fetchPartners = async () => {
+      setLoadingPartners(true);
+      try {
+        const response = await fetch('/api/admin/finder-fees/partners', {
+          headers: { 'X-Admin-Password': adminPassword },
+        });
+        const data = await response.json();
+        if (data.partners) {
+          setPartners(data.partners.filter((p: Partner) => p.enabled));
+        }
+      } catch (error) {
+        console.error('Failed to fetch partners:', error);
+      } finally {
+        setLoadingPartners(false);
+      }
+    };
+    fetchPartners();
+  }, []);
+
+  // Calculate Finder Fee preview
+  const selectedPartner = partners.find(p => p.partner_code === finderFeeForm.finderCode);
+  const finderFeePercentage = selectedPartner?.is_recurring
+    ? (finderFeeForm.isFirstPurchase ? 10 : 5)
+    : 10;
+  const finderFeeAmount = finderFeeForm.purchaseAmount
+    ? (parseFloat(finderFeeForm.purchaseAmount) * finderFeePercentage / 100).toFixed(2)
+    : '0.00';
+
+  // Handle Finder Fee Submit
+  const handleFinderFeeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFinderFeeLoading(true);
+    setFinderFeeResult(null);
+
+    try {
+      const response = await fetch('/api/admin/finder-fees/transactions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': adminPassword,
+        },
+        body: JSON.stringify(finderFeeForm),
+      });
+
+      const data = await response.json();
+      setFinderFeeResult(data);
+
+      if (data.success) {
+        setFinderFeeForm({
+          finderCode: '',
+          referredOrgEmail: '',
+          purchaseAmount: '',
+          isFirstPurchase: true,
+        });
+        onSuccess();
+      }
+    } catch {
+      setFinderFeeResult({
+        success: false,
+        message: 'Failed to create finder fee. Please try again.',
+      });
+    } finally {
+      setFinderFeeLoading(false);
+    }
+  };
+
+  // Handle Tolt Submit
+  const handleToltSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setToltLoading(true);
+    setToltResult(null);
+
+    try {
+      const response = await fetch('/api/admin/partner-attribution', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': adminPassword,
+        },
+        body: JSON.stringify(toltForm),
+      });
+
+      const data = await response.json();
+      setToltResult(data);
+
+      if (data.success) {
+        setToltForm({
+          referralCode: '',
+          customerEmail: '',
+          amount: '',
+        });
+      }
+    } catch {
+      setToltResult({
+        success: false,
+        message: 'Failed to create Tolt conversion. Please try again.',
+      });
+    } finally {
+      setToltLoading(false);
+    }
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto">
+      <div className="flex items-center gap-3 mb-8">
+        <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center border border-purple-500/30">
+          <PlusCircle className="w-6 h-6 text-purple-400" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-bold text-white">Manual Attribution</h2>
+          <p className="text-white/50">Credit partners when automatic link tracking fails</p>
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Finder Fee Form */}
+        <div className="bg-orange-500/5 border border-orange-500/20 rounded-xl p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <DollarSign className="w-5 h-5 text-orange-400" />
+            <h3 className="text-lg font-semibold text-orange-400">Finder Fee Attribution</h3>
+          </div>
+          <p className="text-sm text-gray-400 mb-4">
+            For manual/invite-only finder partners (10% one-time or VIP recurring)
+          </p>
+
+          <form onSubmit={handleFinderFeeSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Select Finder Partner
+              </label>
+              <select
+                required
+                value={finderFeeForm.finderCode}
+                onChange={(e) => setFinderFeeForm({ ...finderFeeForm, finderCode: e.target.value })}
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:ring-2 focus:ring-orange-500/50"
+                disabled={loadingPartners}
+              >
+                <option value="">-- Select Partner --</option>
+                {partners.map((partner) => (
+                  <option key={partner.id} value={partner.partner_code}>
+                    {partner.partner_name} ({partner.partner_code}) {partner.is_recurring ? '⭐ VIP' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Organization Email
+              </label>
+              <input
+                type="email"
+                required
+                value={finderFeeForm.referredOrgEmail}
+                onChange={(e) => setFinderFeeForm({ ...finderFeeForm, referredOrgEmail: e.target.value })}
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500/50"
+                placeholder="org@example.com"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Purchase Amount ($)
+              </label>
+              <input
+                type="number"
+                required
+                min="0"
+                step="0.01"
+                value={finderFeeForm.purchaseAmount}
+                onChange={(e) => setFinderFeeForm({ ...finderFeeForm, purchaseAmount: e.target.value })}
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-orange-500/50"
+                placeholder="1284.00"
+              />
+            </div>
+
+            {selectedPartner?.is_recurring && (
+              <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-3">
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    id="isFirstPurchase"
+                    checked={finderFeeForm.isFirstPurchase}
+                    onChange={(e) => setFinderFeeForm({ ...finderFeeForm, isFirstPurchase: e.target.checked })}
+                    className="h-4 w-4 text-purple-500 focus:ring-purple-500 border-gray-600 rounded bg-gray-700"
+                  />
+                  <label htmlFor="isFirstPurchase" className="ml-2 text-sm text-gray-300">
+                    First purchase (10%)
+                  </label>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {finderFeeForm.isFirstPurchase ? 'Partner gets 10%' : 'Renewal: Partner gets 5%'}
+                </p>
+              </div>
+            )}
+
+            {/* Fee Preview */}
+            {finderFeeForm.purchaseAmount && selectedPartner && (
+              <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
+                <p className="text-sm text-green-400">
+                  <strong>Fee Preview:</strong> ${finderFeeAmount} ({finderFeePercentage}% of ${finderFeeForm.purchaseAmount})
+                </p>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={finderFeeLoading}
+              className="w-full py-3 px-6 bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all disabled:opacity-50"
+            >
+              {finderFeeLoading ? 'Creating...' : 'Create Finder Fee'}
+            </button>
+          </form>
+
+          {finderFeeResult && (
+            <div className={`mt-4 p-3 rounded-lg ${finderFeeResult.success ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
+              <div className="flex items-center gap-2">
+                {finderFeeResult.success ? (
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-red-400" />
+                )}
+                <p className={`text-sm ${finderFeeResult.success ? 'text-green-400' : 'text-red-400'}`}>
+                  {finderFeeResult.message}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Tolt Partner Program Form */}
+        <div className="bg-green-500/5 border border-green-500/20 rounded-xl p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Users className="w-5 h-5 text-green-400" />
+            <h3 className="text-lg font-semibold text-green-400">Partner Program (Tolt)</h3>
+          </div>
+          <p className="text-sm text-gray-400 mb-4">
+            For self-service affiliate partners (10-15% recurring via Tolt)
+          </p>
+
+          <form onSubmit={handleToltSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Partner Referral Code
+              </label>
+              <input
+                type="text"
+                required
+                value={toltForm.referralCode}
+                onChange={(e) => setToltForm({ ...toltForm, referralCode: e.target.value.toUpperCase() })}
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500/50"
+                placeholder="e.g., COACH123"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                The partner&apos;s Tolt referral code (from their dashboard)
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Customer Email
+              </label>
+              <input
+                type="email"
+                required
+                value={toltForm.customerEmail}
+                onChange={(e) => setToltForm({ ...toltForm, customerEmail: e.target.value })}
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500/50"
+                placeholder="customer@example.com"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Purchase Amount ($)
+              </label>
+              <input
+                type="number"
+                required
+                min="0"
+                step="0.01"
+                value={toltForm.amount}
+                onChange={(e) => setToltForm({ ...toltForm, amount: e.target.value })}
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:ring-2 focus:ring-green-500/50"
+                placeholder="1284.00"
+              />
+            </div>
+
+            {/* Tolt Commission Preview */}
+            {toltForm.amount && (
+              <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3">
+                <p className="text-sm text-green-400">
+                  <strong>Commission Preview:</strong> ${(parseFloat(toltForm.amount) * 0.10).toFixed(2)} (10% of ${toltForm.amount})
+                </p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Actual % depends on partner tier in Tolt
+                </p>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={toltLoading}
+              className="w-full py-3 px-6 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold rounded-xl hover:from-green-600 hover:to-green-700 transition-all disabled:opacity-50"
+            >
+              {toltLoading ? 'Creating...' : 'Create Tolt Conversion'}
+            </button>
+          </form>
+
+          {toltResult && (
+            <div className={`mt-4 p-3 rounded-lg ${toltResult.success ? 'bg-green-500/10 border border-green-500/20' : 'bg-red-500/10 border border-red-500/20'}`}>
+              <div className="flex items-center gap-2">
+                {toltResult.success ? (
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 text-red-400" />
+                )}
+                <p className={`text-sm ${toltResult.success ? 'text-green-400' : 'text-red-400'}`}>
+                  {toltResult.message}
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Tolt Dashboard Link */}
+          <div className="mt-4 pt-4 border-t border-green-500/20">
+            <p className="text-xs text-gray-400 mb-2">
+              Or create directly in Tolt dashboard:
+            </p>
+            <a
+              href="https://app.tolt.io"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-green-400 hover:text-green-300"
+            >
+              <ExternalLink className="w-4 h-4" />
+              Open Tolt Dashboard → Conversions → Create
+            </a>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

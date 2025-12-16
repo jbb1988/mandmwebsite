@@ -97,3 +97,132 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
+// POST - Create manual finder fee record
+export async function POST(request: NextRequest) {
+  try {
+    // Validate admin password
+    const adminPassword = request.headers.get('X-Admin-Password');
+    if (adminPassword !== process.env.ADMIN_DASHBOARD_PASSWORD) {
+      return NextResponse.json(
+        { success: false, message: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    const body = await request.json();
+    const { finderCode, referredOrgEmail, purchaseAmount, isFirstPurchase = true } = body;
+
+    // Validate required fields
+    if (!finderCode || !referredOrgEmail || !purchaseAmount) {
+      return NextResponse.json(
+        { success: false, message: 'Missing required fields: finderCode, referredOrgEmail, purchaseAmount' },
+        { status: 400 }
+      );
+    }
+
+    // Validate purchase amount
+    const amount = parseFloat(purchaseAmount);
+    if (isNaN(amount) || amount <= 0) {
+      return NextResponse.json(
+        { success: false, message: 'Purchase amount must be a positive number' },
+        { status: 400 }
+      );
+    }
+
+    // Create Supabase client
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Look up the partner
+    const { data: partner, error: partnerError } = await supabase
+      .from('finder_fee_partners')
+      .select('*')
+      .eq('partner_code', finderCode.toUpperCase())
+      .single();
+
+    if (partnerError || !partner) {
+      return NextResponse.json(
+        { success: false, message: `Partner with code "${finderCode}" not found` },
+        { status: 404 }
+      );
+    }
+
+    if (!partner.enabled) {
+      return NextResponse.json(
+        { success: false, message: `Partner "${partner.partner_name}" is disabled` },
+        { status: 400 }
+      );
+    }
+
+    // Check for duplicate (same org email for standard partners)
+    if (!partner.is_recurring) {
+      const { data: existing } = await supabase
+        .from('finder_fees')
+        .select('id')
+        .eq('finder_code', partner.partner_code)
+        .eq('referred_org_email', referredOrgEmail.toLowerCase())
+        .single();
+
+      if (existing) {
+        return NextResponse.json(
+          { success: false, message: `A finder fee already exists for this org email with partner ${partner.partner_name}` },
+          { status: 409 }
+        );
+      }
+    }
+
+    // Calculate fee percentage and amount
+    // Standard: 10% always
+    // VIP: 10% first purchase, 5% renewals
+    let feePercentage: number;
+    if (partner.is_recurring) {
+      feePercentage = isFirstPurchase ? 10 : 5;
+    } else {
+      feePercentage = 10;
+    }
+    const feeAmount = (amount * feePercentage) / 100;
+
+    // Create the finder fee record
+    const { data: newFee, error: insertError } = await supabase
+      .from('finder_fees')
+      .insert({
+        finder_code: partner.partner_code,
+        finder_email: partner.partner_email,
+        referred_org_email: referredOrgEmail.toLowerCase(),
+        purchase_amount: amount,
+        fee_amount: feeAmount,
+        fee_percentage: feePercentage,
+        is_first_purchase: isFirstPurchase,
+        is_recurring: partner.is_recurring,
+        status: 'pending',
+        admin_notes: 'Manually created via admin dashboard',
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      console.error('Error creating finder fee:', insertError);
+      return NextResponse.json(
+        { success: false, message: `Failed to create finder fee: ${insertError.message}` },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: `Finder fee created for ${partner.partner_name}`,
+      transaction: {
+        id: newFee.id,
+        fee_amount: feeAmount,
+        fee_percentage: feePercentage,
+        partner_name: partner.partner_name,
+      },
+    });
+  } catch (error) {
+    console.error('Error creating manual finder fee:', error);
+    return NextResponse.json(
+      { success: false, message: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
