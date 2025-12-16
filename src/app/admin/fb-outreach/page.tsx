@@ -7,7 +7,8 @@ import { LiquidButton } from '@/components/LiquidButton';
 import {
   Users, Plus, RefreshCw, Search, MapPin, ExternalLink, MessageCircle,
   CheckCircle, Clock, XCircle, Send, FileText, ChevronDown, ChevronUp,
-  Copy, Filter, BarChart3, Calendar, Trash2, UserPlus, AlertCircle, Bell
+  Copy, Filter, BarChart3, Calendar, Trash2, UserPlus, AlertCircle, Bell,
+  Pencil, X
 } from 'lucide-react';
 
 type Tab = 'add' | 'pipeline' | 'templates';
@@ -533,6 +534,18 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
   });
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [editingPage, setEditingPage] = useState<FBPage | null>(null);
+  const [editForm, setEditForm] = useState({
+    page_name: '',
+    page_url: '',
+    state: '',
+    member_count: '',
+    group_type: '',
+    priority_score: '',
+    notes: '',
+  });
+  const [editLoading, setEditLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   const fetchPages = async () => {
@@ -638,6 +651,73 @@ No pressure either way - just thought it might help some teams simplify.`;
       console.error('Failed to update status:', error);
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const openEditModal = (page: FBPage) => {
+    setEditingPage(page);
+    setEditForm({
+      page_name: page.page_name || '',
+      page_url: page.page_url || '',
+      state: page.state || '',
+      member_count: page.member_count?.toString() || '',
+      group_type: page.group_type || '',
+      priority_score: page.priority_score?.toString() || '3',
+      notes: page.notes || '',
+    });
+  };
+
+  const handleEditSave = async () => {
+    if (!editingPage) return;
+    setEditLoading(true);
+    try {
+      const response = await fetch('/api/admin/fb-outreach/pages', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': adminPassword,
+        },
+        body: JSON.stringify({
+          id: editingPage.id,
+          page_name: editForm.page_name,
+          page_url: editForm.page_url,
+          state: editForm.state || null,
+          member_count: editForm.member_count ? parseInt(editForm.member_count) : null,
+          group_type: editForm.group_type || null,
+          priority_score: parseInt(editForm.priority_score) || 3,
+          notes: editForm.notes || null,
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setEditingPage(null);
+        fetchPages();
+        onUpdate();
+      }
+    } catch (error) {
+      console.error('Failed to update page:', error);
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  const handleDelete = async (pageId: string) => {
+    if (!confirm('Are you sure you want to delete this entry? This cannot be undone.')) return;
+    setDeletingId(pageId);
+    try {
+      const response = await fetch(`/api/admin/fb-outreach/pages?id=${pageId}`, {
+        method: 'DELETE',
+        headers: { 'X-Admin-Password': adminPassword },
+      });
+      const data = await response.json();
+      if (data.success) {
+        fetchPages();
+        onUpdate();
+      }
+    } catch (error) {
+      console.error('Failed to delete page:', error);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -827,6 +907,12 @@ No pressure either way - just thought it might help some teams simplify.`;
                       <MessageCircle className="w-3 h-3" /> DM Admin
                     </a>
                   )}
+                  <button
+                    onClick={() => openEditModal(page)}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-yellow-500/20 text-yellow-400 rounded-lg hover:bg-yellow-500/30 text-sm"
+                  >
+                    <Pencil className="w-3 h-3" /> Edit
+                  </button>
                   <button
                     onClick={() => setExpandedId(expandedId === page.id ? null : page.id)}
                     className="flex items-center gap-1 px-3 py-1.5 bg-white/10 text-gray-300 rounded-lg hover:bg-white/20 text-sm"
@@ -1055,11 +1141,154 @@ No pressure either way - just thought it might help some teams simplify.`;
                       Posted: {new Date(page.posted_at).toLocaleDateString()}
                     </p>
                   )}
+                  {/* Delete Button */}
+                  <div className="mt-4 pt-3 border-t border-white/5">
+                    <button
+                      onClick={() => handleDelete(page.id)}
+                      disabled={deletingId === page.id}
+                      className="flex items-center gap-1 px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 text-sm disabled:opacity-50"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      {deletingId === page.id ? 'Deleting...' : 'Delete Entry'}
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
           );
           })}
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editingPage && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-gray-900 border border-white/10 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b border-white/10">
+              <h3 className="text-lg font-semibold text-white">Edit Entry</h3>
+              <button
+                onClick={() => setEditingPage(null)}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Group Name *</label>
+                <input
+                  type="text"
+                  value={editForm.page_name}
+                  onChange={(e) => setEditForm({ ...editForm, page_name: e.target.value })}
+                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Group URL *</label>
+                <input
+                  type="url"
+                  value={editForm.page_url}
+                  onChange={(e) => setEditForm({ ...editForm, page_url: e.target.value })}
+                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500"
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">State</label>
+                  <select
+                    value={editForm.state}
+                    onChange={(e) => setEditForm({ ...editForm, state: e.target.value })}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                  >
+                    <option value="">-- Select --</option>
+                    {US_STATES.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Members</label>
+                  <input
+                    type="number"
+                    value={editForm.member_count}
+                    onChange={(e) => {
+                      const members = parseInt(e.target.value) || 0;
+                      let priority = '1';
+                      if (members >= 10000) priority = '5';
+                      else if (members >= 5000) priority = '4';
+                      else if (members >= 1000) priority = '3';
+                      else if (members >= 500) priority = '2';
+                      setEditForm({ ...editForm, member_count: e.target.value, priority_score: priority });
+                    }}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500"
+                    placeholder="e.g., 5000"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Group Type</label>
+                  <select
+                    value={editForm.group_type}
+                    onChange={(e) => setEditForm({ ...editForm, group_type: e.target.value })}
+                    className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white"
+                  >
+                    <option value="">-- Select --</option>
+                    <option value="travel_ball">Travel Ball</option>
+                    <option value="rec_league">Rec League</option>
+                    <option value="showcase">Showcase</option>
+                    <option value="tournament">Tournament</option>
+                    <option value="coaching">Coaching</option>
+                    <option value="parents">Parents</option>
+                    <option value="equipment">Equipment</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Priority (1-5)</label>
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setEditForm({ ...editForm, priority_score: String(star) })}
+                        className={`text-xl transition-colors ${
+                          parseInt(editForm.priority_score) >= star ? 'text-orange-400' : 'text-gray-600'
+                        }`}
+                      >
+                        ★
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Notes</label>
+                <textarea
+                  value={editForm.notes}
+                  onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
+                  className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500"
+                  rows={3}
+                  placeholder="Any notes about this group..."
+                />
+              </div>
+            </div>
+            <div className="flex gap-3 p-4 border-t border-white/10">
+              <button
+                onClick={() => setEditingPage(null)}
+                className="flex-1 px-4 py-2 bg-white/10 text-gray-300 rounded-xl hover:bg-white/20"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleEditSave}
+                disabled={editLoading || !editForm.page_name || !editForm.page_url}
+                className="flex-1 px-4 py-2 bg-orange-500 text-white rounded-xl hover:bg-orange-600 disabled:opacity-50"
+              >
+                {editLoading ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
