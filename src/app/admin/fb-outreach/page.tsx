@@ -724,7 +724,24 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
   const [adminForm, setAdminForm] = useState({ name: '', profile_url: '', email: '' });
   const [addingAdminToPage, setAddingAdminToPage] = useState<string | null>(null);
   const [newAdminForm, setNewAdminForm] = useState({ name: '', profile_url: '', email: '' });
+  const [templates, setTemplates] = useState<Template[]>([]);
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
+
+  // Fetch DM templates for quick access in Pipeline view
+  const fetchTemplates = async () => {
+    try {
+      const response = await fetch('/api/admin/fb-outreach/templates', {
+        headers: { 'X-Admin-Password': adminPassword },
+      });
+      const data = await response.json();
+      if (data.templates) {
+        // Only keep DM (initial) templates
+        setTemplates(data.templates.filter((t: Template) => t.template_type === 'initial'));
+      }
+    } catch (error) {
+      console.error('Error fetching templates:', error);
+    }
+  };
 
   const fetchPages = async () => {
     setLoading(true);
@@ -747,6 +764,7 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
   };
 
   useEffect(() => { fetchPages(); }, [filters]);
+  useEffect(() => { fetchTemplates(); }, []);
 
   const updateStatus = async (id: string, status: OutreachStatus) => {
     try {
@@ -1100,6 +1118,7 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
                               <AdminCard
                                 key={admin.id}
                                 admin={admin}
+                                templates={templates}
                                 onEdit={() => {
                                   setEditingAdmin({ admin, pageId: page.id });
                                   setAdminForm({ name: admin.admin_name, profile_url: admin.admin_profile_url || '', email: admin.admin_email || '' });
@@ -1628,23 +1647,39 @@ function PartnersTab({ onUpdate }: { onUpdate: () => void }) {
   );
 }
 
-// Admin Card Component with Gift Button (similar to X outreach TargetCard)
+// Admin Card Component with Gift Button and DM Template Selector
 function AdminCard({
   admin,
+  templates,
   onEdit,
   onDelete,
   onTrialGranted,
 }: {
   admin: FBPageAdmin;
+  templates: Template[];
   onEdit: () => void;
   onDelete: () => void;
   onTrialGranted: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [copiedTemplateId, setCopiedTemplateId] = useState<string | null>(null);
   const [trialEmail, setTrialEmail] = useState(admin.admin_email || '');
   const [grantingTrial, setGrantingTrial] = useState(false);
   const [trialMessage, setTrialMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
+
+  // Copy template with admin name filled in
+  const copyTemplateWithName = (template: Template) => {
+    const firstName = admin.admin_name.split(' ')[0];
+    const filledBody = template.body
+      .replace(/\{\{name\}\}/gi, firstName)
+      .replace(/\{\{admin_name\}\}/gi, firstName);
+    navigator.clipboard.writeText(filledBody);
+    setCopiedTemplateId(template.id);
+    setTimeout(() => setCopiedTemplateId(null), 2000);
+    setShowTemplates(false);
+  };
 
   const handleGrantTrial = async () => {
     if (!trialEmail.trim()) {
@@ -1746,7 +1781,48 @@ function AdminCard({
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 relative">
+          {/* Send DM Button with Template Dropdown */}
+          <div className="relative">
+            <button
+              onClick={() => setShowTemplates(!showTemplates)}
+              className={`p-2 rounded-lg transition-colors ${
+                showTemplates || copiedTemplateId
+                  ? 'bg-blue-500/20 text-blue-400'
+                  : 'hover:bg-blue-500/10 text-white/50 hover:text-blue-400'
+              }`}
+              title="Send DM - Select Template"
+            >
+              {copiedTemplateId ? (
+                <CheckCircle className="w-4 h-4 text-emerald-400" />
+              ) : (
+                <MessageCircle className="w-4 h-4" />
+              )}
+            </button>
+
+            {/* Template Dropdown */}
+            {showTemplates && templates.length > 0 && (
+              <div className="absolute right-0 top-full mt-1 w-80 bg-[#1B1F39] border border-white/10 rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto">
+                <div className="p-2 text-xs text-white/50 border-b border-white/10 sticky top-0 bg-[#1B1F39]">
+                  Select DM Template for {admin.admin_name.split(' ')[0]}
+                </div>
+                {templates.map(template => (
+                  <button
+                    key={template.id}
+                    onClick={() => copyTemplateWithName(template)}
+                    className="w-full p-3 text-left hover:bg-white/5 border-b border-white/5 last:border-0 transition-colors"
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="font-medium text-white text-sm">{template.template_name.replace(/_/g, ' ')}</p>
+                      <Copy className="w-3 h-3 text-white/30" />
+                    </div>
+                    <p className="text-xs text-white/40 line-clamp-2">{template.body.slice(0, 100)}...</p>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <button
             onClick={() => setExpanded(!expanded)}
             className={`p-2 rounded-lg transition-colors ${expanded ? 'bg-emerald-500/20 text-emerald-400' : 'hover:bg-white/10 text-white/50'}`}
