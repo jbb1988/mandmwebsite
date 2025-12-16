@@ -4,7 +4,7 @@ import { clsx } from 'clsx';
 interface LiquidButtonProps {
   children: React.ReactNode;
   onClick?: () => void;
-  variant?: 'blue' | 'orange' | 'neutral';
+  variant?: 'blue' | 'orange' | 'green' | 'neutral';
   size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
   disabled?: boolean;
@@ -44,6 +44,13 @@ export const LiquidButton: React.FC<LiquidButtonProps> = ({
       'hover:from-solar-surge-orange/30 hover:to-solar-surge-orange/15',
       'hover:shadow-liquid-glow-orange',
       'hover:border-solar-surge-orange/50'
+    ),
+    green: clsx(
+      'bg-gradient-to-br from-neon-cortex-green/20 to-neon-cortex-green/10',
+      'border-neon-cortex-green/30',
+      'hover:from-neon-cortex-green/30 hover:to-neon-cortex-green/15',
+      'hover:shadow-[0_0_30px_rgba(16,185,129,0.3)]',
+      'hover:border-neon-cortex-green/50'
     ),
     neutral: clsx(
       'bg-white/5',

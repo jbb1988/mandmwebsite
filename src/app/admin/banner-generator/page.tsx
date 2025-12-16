@@ -11,11 +11,15 @@ import { Upload, Download, RefreshCw, Image as ImageIcon, Smartphone } from 'luc
 
 export default function BannerGeneratorPage() {
   const [qrCodeImage, setQrCodeImage] = useState<string | null>(null);
+  const [partnerLogo, setPartnerLogo] = useState<string | null>(null);
   const [isGeneratingFacebook, setIsGeneratingFacebook] = useState(false);
   const [isGeneratingTwitter, setIsGeneratingTwitter] = useState(false);
+  const [isGeneratingPartner, setIsGeneratingPartner] = useState(false);
   const facebookBannerRef = useRef<HTMLDivElement>(null);
   const twitterBannerRef = useRef<HTMLDivElement>(null);
+  const partnerBannerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const partnerLogoInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -98,6 +102,63 @@ export default function BannerGeneratorPage() {
     setQrCodeImage(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  };
+
+  // Partner Logo Upload Handlers
+  const handlePartnerLogoUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPartnerLogo(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  }, []);
+
+  const handlePartnerLogoDrop = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const file = event.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPartnerLogo(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  }, []);
+
+  const resetPartnerLogo = () => {
+    setPartnerLogo(null);
+    if (partnerLogoInputRef.current) {
+      partnerLogoInputRef.current.value = '';
+    }
+  };
+
+  // Partner Banner Generation
+  const downloadPartnerBanner = async () => {
+    if (!partnerBannerRef.current) return;
+    setIsGeneratingPartner(true);
+    try {
+      const html2canvas = (await import('html2canvas')).default;
+      const canvas = await html2canvas(partnerBannerRef.current, {
+        scale: 1,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#0f172a',
+        width: 1600,
+        height: 900,
+      });
+      const link = document.createElement('a');
+      link.download = `mind-muscle-partner-${Date.now()}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    } catch (error) {
+      console.error('Error generating Partner banner:', error);
+      alert('Error generating banner. Please try again.');
+    } finally {
+      setIsGeneratingPartner(false);
     }
   };
 
@@ -767,6 +828,399 @@ export default function BannerGeneratorPage() {
               )}
             </LiquidButton>
           </div>
+        </div>
+
+        {/* ================================================================== */}
+        {/* PARTNER BANNER PREVIEW - 1600x900px (16:9) with Partner Branding */}
+        {/* ================================================================== */}
+        <div className="mb-8">
+          <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
+            <ImageIcon className="w-5 h-5 text-neon-cortex-green" />
+            Partner Co-Branded Banner (1600x900px - 16:9)
+          </h3>
+
+          {/* Partner Logo Upload */}
+          <div className="mb-4">
+            <input
+              ref={partnerLogoInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handlePartnerLogoUpload}
+              className="hidden"
+            />
+
+            <div
+              onClick={() => partnerLogoInputRef.current?.click()}
+              onDrop={handlePartnerLogoDrop}
+              onDragOver={handleDragOver}
+              className="border-2 border-dashed border-white/20 rounded-xl p-6 text-center cursor-pointer hover:border-neon-cortex-green/50 transition-colors bg-white/5"
+            >
+              {partnerLogo ? (
+                <div className="flex flex-col items-center gap-3">
+                  <img
+                    src={partnerLogo}
+                    alt="Partner Logo"
+                    className="h-16 object-contain rounded-lg"
+                  />
+                  <p className="text-sm text-neon-cortex-green">Partner logo uploaded!</p>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      resetPartnerLogo();
+                    }}
+                    className="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                    Upload different logo
+                  </button>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-neon-cortex-green/20 flex items-center justify-center">
+                    <Upload className="w-6 h-6 text-neon-cortex-green" />
+                  </div>
+                  <div>
+                    <p className="font-semibold">Drop partner logo here</p>
+                    <p className="text-sm text-gray-400">or click to browse (60px height recommended)</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="overflow-auto rounded-xl border border-white/10">
+            {/*
+              PARTNER CO-BRANDED BANNER - LOCKED SPECS
+              Canvas: 1600x900px (16:9)
+              Safe Zone: 1320x720px (140px L/R, 90px T/B)
+              Export: PNG, sRGB
+            */}
+            <div
+              ref={partnerBannerRef}
+              style={{
+                width: '1600px',
+                height: '900px',
+                position: 'relative',
+                overflow: 'hidden',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              }}
+            >
+              {/* Background Image */}
+              <img
+                src="/assets/images/baseball_field_dusk.png"
+                alt=""
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                }}
+              />
+
+              {/* Gradient overlay - soft vignette behind headline */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  background: `
+                    radial-gradient(ellipse at 35% 50%, rgba(15, 23, 42, 0.7) 0%, transparent 65%),
+                    linear-gradient(to right, rgba(15, 23, 42, 0.65) 0%, rgba(15, 23, 42, 0.35) 55%, rgba(15, 23, 42, 0.45) 100%)
+                  `,
+                }}
+              />
+
+              {/* TOP BAR: Partner Logo + "Powered by Mind & Muscle" */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  height: '80px',
+                  background: 'linear-gradient(to bottom, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.4) 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  paddingLeft: '140px',
+                  paddingRight: '140px',
+                  gap: '16px',
+                }}
+              >
+                {partnerLogo ? (
+                  <img
+                    src={partnerLogo}
+                    alt="Partner"
+                    style={{
+                      height: '60px',
+                      maxWidth: '200px',
+                      objectFit: 'contain',
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      height: '60px',
+                      width: '120px',
+                      backgroundColor: 'rgba(255,255,255,0.1)',
+                      borderRadius: '8px',
+                      border: '2px dashed rgba(255,255,255,0.3)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                    }}
+                  >
+                    <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>Partner Logo</span>
+                  </div>
+                )}
+                <span
+                  style={{
+                    fontSize: '18px',
+                    fontWeight: 500,
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    textShadow: '0 2px 8px rgba(0,0,0,0.5)',
+                  }}
+                >
+                  Powered by Mind & Muscle
+                </span>
+              </div>
+
+              {/* SAFE ZONE CONTAINER: 1320x720px centered (140px L/R, 90px T/B) */}
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '90px',
+                  left: '140px',
+                  width: '1320px',
+                  height: '720px',
+                  display: 'flex',
+                }}
+              >
+                {/* LEFT SIDE - 65% width - Primary Message Block */}
+                <div
+                  style={{
+                    width: '65%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    paddingRight: '40px',
+                  }}
+                >
+                  {/* Headline - Left aligned, vertically centered */}
+                  <h1
+                    style={{
+                      margin: 0,
+                      fontSize: '64px',
+                      fontWeight: 900,
+                      fontStyle: 'italic',
+                      lineHeight: 1.12,
+                      letterSpacing: '-1px',
+                      textTransform: 'uppercase',
+                    }}
+                  >
+                    <span style={{
+                      color: '#0EA5E9',
+                      display: 'block',
+                      textShadow: '0 2px 20px rgba(0,0,0,0.85), 0 4px 40px rgba(14, 165, 233, 0.3)'
+                    }}>
+                      Discipline the Mind.
+                    </span>
+                    <span style={{
+                      color: '#F97316',
+                      display: 'block',
+                      textShadow: '0 2px 20px rgba(0,0,0,0.85), 0 4px 40px rgba(249, 115, 22, 0.3)'
+                    }}>
+                      Dominate the Game.
+                    </span>
+                  </h1>
+
+                  {/* M&M Logo - Center aligned with "Dominate the Game" */}
+                  <img
+                    src="/assets/images/logo.png"
+                    alt="Mind & Muscle"
+                    style={{
+                      width: '100px',
+                      height: '100px',
+                      marginTop: '20px',
+                      marginBottom: '16px',
+                      alignSelf: 'flex-start',
+                      marginLeft: '180px', // Roughly center-aligned with "Dominate the Game"
+                      filter: 'drop-shadow(0 5px 16px rgba(0,0,0,0.15))',
+                    }}
+                  />
+
+                  {/* Subhead */}
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: '22px',
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      fontWeight: 500,
+                      letterSpacing: '0.3px',
+                      textShadow: '0 2px 10px rgba(0,0,0,0.8)',
+                    }}
+                  >
+                    AI Training for Baseball & Softball Athletes
+                  </p>
+                </div>
+
+                {/* RIGHT SIDE - 35% width - QR Code Block (no logo - moved to left side) */}
+                <div
+                  style={{
+                    width: '35%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {/* QR Code Section */}
+                  {qrCodeImage ? (
+                    <>
+                      {/* QR Code on white card - 240x240px */}
+                      <div
+                        style={{
+                          backgroundColor: '#FFFFFF',
+                          borderRadius: '10px',
+                          padding: '14px',
+                          boxShadow: '0 6px 28px rgba(0, 0, 0, 0.4)',
+                        }}
+                      >
+                        <img
+                          src={qrCodeImage}
+                          alt="Partner QR Code"
+                          style={{
+                            width: '240px',
+                            height: '240px',
+                            objectFit: 'contain',
+                            display: 'block',
+                          }}
+                        />
+                      </div>
+
+                      {/* Label below QR */}
+                      <p
+                        style={{
+                          margin: '12px 0 0 0',
+                          fontSize: '16px',
+                          fontWeight: 600,
+                          color: 'white',
+                          textAlign: 'center',
+                          textShadow: '0 2px 8px rgba(0,0,0,0.7)',
+                          letterSpacing: '0.2px',
+                        }}
+                      >
+                        Scan to Get Started
+                      </p>
+
+                      {/* CTA: "Get Started FREE" */}
+                      <div
+                        style={{
+                          marginTop: '5px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                        }}
+                      >
+                        <span
+                          style={{
+                            fontSize: '18px',
+                            fontWeight: 700,
+                            color: 'white',
+                            textShadow: '0 2px 8px rgba(0,0,0,0.6)',
+                          }}
+                        >
+                          Get Started
+                        </span>
+                        <span
+                          style={{
+                            fontSize: '18px',
+                            fontWeight: 800,
+                            color: '#22C55E',
+                            textShadow: '0 2px 8px rgba(0,0,0,0.6)',
+                          }}
+                        >
+                          FREE
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    /* Placeholder when no QR uploaded */
+                    <>
+                      <div
+                        style={{
+                          width: '268px',
+                          height: '268px',
+                          backgroundColor: 'rgba(255,255,255,0.1)',
+                          borderRadius: '10px',
+                          border: '2px dashed rgba(255,255,255,0.3)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                        }}
+                      >
+                        <p
+                          style={{
+                            color: 'rgba(255,255,255,0.5)',
+                            fontSize: '13px',
+                            textAlign: 'center',
+                          }}
+                        >
+                          QR Code<br />240x240px min
+                        </p>
+                      </div>
+                      <p
+                        style={{
+                          margin: '12px 0 0 0',
+                          fontSize: '16px',
+                          fontWeight: 600,
+                          color: 'rgba(255,255,255,0.4)',
+                          textAlign: 'center',
+                        }}
+                      >
+                        Scan to Get Started
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Partner Banner Download Button */}
+          <div className="flex justify-center mt-4">
+            <LiquidButton
+              onClick={downloadPartnerBanner}
+              variant="green"
+              size="md"
+              disabled={!qrCodeImage || !partnerLogo || isGeneratingPartner}
+            >
+              {isGeneratingPartner ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin mr-2" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4 mr-2" />
+                  Download Partner Banner PNG
+                </>
+              )}
+            </LiquidButton>
+          </div>
+
+          {(!qrCodeImage || !partnerLogo) && (
+            <p className="text-center text-sm text-gray-500 mt-2">
+              {!partnerLogo && !qrCodeImage
+                ? 'Upload both a partner logo and QR code to enable download'
+                : !partnerLogo
+                ? 'Upload a partner logo above to enable download'
+                : 'Upload a QR code at the top of the page to enable download'}
+            </p>
+          )}
         </div>
 
         {!qrCodeImage && (
