@@ -61,6 +61,7 @@ interface SyncDetails {
   toltError?: string;
   debug?: {
     apiKeyPresent?: boolean;
+    programIdPresent?: boolean;
     toltPartnersCount: number;
     toltPartnerEmails: string[];
     dbPartnerEmails: string[];
@@ -594,6 +595,7 @@ export default function AdminPartnersPage() {
                     <h3 className="text-purple-400 font-semibold mb-2">🔍 Debug Info</h3>
                     <div className="bg-purple-500/10 rounded-lg p-3 text-xs space-y-2">
                       <p><span className="text-white/50">API Key Present:</span> <span className={syncDetails.debug.apiKeyPresent ? 'text-green-400' : 'text-red-400'}>{syncDetails.debug.apiKeyPresent ? 'Yes' : 'No'}</span></p>
+                      <p><span className="text-white/50">Program ID Present:</span> <span className={syncDetails.debug.programIdPresent ? 'text-green-400' : 'text-red-400'}>{syncDetails.debug.programIdPresent ? 'Yes' : 'No (add TOLT_PROGRAM_ID env var)'}</span></p>
                       <p><span className="text-white/50">Tolt Partners Found:</span> <span className="text-white">{syncDetails.debug.toltPartnersCount}</span></p>
                       <p><span className="text-white/50">Tolt Emails:</span> <span className="text-purple-300">{syncDetails.debug.toltPartnerEmails.length > 0 ? syncDetails.debug.toltPartnerEmails.join(', ') : '(none)'}</span></p>
                       <p><span className="text-white/50">DB Emails:</span> <span className="text-blue-300">{syncDetails.debug.dbPartnerEmails.join(', ')}</span></p>

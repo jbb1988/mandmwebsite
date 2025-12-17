@@ -7,6 +7,7 @@ const supabase = createClient(
 );
 
 const TOLT_API_KEY = process.env.TOLT_API_KEY;
+const TOLT_PROGRAM_ID = process.env.TOLT_PROGRAM_ID;
 const TOLT_API_BASE = 'https://api.tolt.com/v1';
 
 // Helper to verify admin password
@@ -56,16 +57,21 @@ async function getToltPartnerStatus(
 }
 
 // Fetch all partners from Tolt
-async function getAllToltPartners(): Promise<{ partners: Array<{ id: string; email: string; name: string; status: string }>; error?: string; rawResponse?: string; apiKeyPresent?: boolean }> {
+async function getAllToltPartners(): Promise<{ partners: Array<{ id: string; email: string; name: string; status: string }>; error?: string; rawResponse?: string; apiKeyPresent?: boolean; programIdPresent?: boolean }> {
   if (!TOLT_API_KEY) {
-    return { partners: [], error: 'No Tolt API key configured', apiKeyPresent: false };
+    return { partners: [], error: 'No Tolt API key configured', apiKeyPresent: false, programIdPresent: !!TOLT_PROGRAM_ID };
+  }
+
+  if (!TOLT_PROGRAM_ID) {
+    return { partners: [], error: 'No Tolt Program ID configured (TOLT_PROGRAM_ID env var)', apiKeyPresent: true, programIdPresent: false };
   }
 
   try {
-    console.log('Calling Tolt API:', `${TOLT_API_BASE}/partners?limit=100`);
+    const url = `${TOLT_API_BASE}/partners?program_id=${TOLT_PROGRAM_ID}&limit=100`;
+    console.log('Calling Tolt API:', url);
     console.log('API Key present:', !!TOLT_API_KEY, 'Key prefix:', TOLT_API_KEY.substring(0, 10) + '...');
 
-    const response = await fetch(`${TOLT_API_BASE}/partners?limit=100`, {
+    const response = await fetch(url, {
       headers: {
         'Authorization': `Bearer ${TOLT_API_KEY}`,
         'Content-Type': 'application/json',
@@ -81,6 +87,7 @@ async function getAllToltPartners(): Promise<{ partners: Array<{ id: string; ema
         partners: [],
         error: `API error ${response.status}: ${responseText}`,
         apiKeyPresent: true,
+        programIdPresent: true,
         rawResponse: responseText.substring(0, 500)
       };
     }
@@ -89,7 +96,7 @@ async function getAllToltPartners(): Promise<{ partners: Array<{ id: string; ema
     try {
       data = JSON.parse(responseText);
     } catch {
-      return { partners: [], error: 'Invalid JSON response', rawResponse: responseText.substring(0, 500), apiKeyPresent: true };
+      return { partners: [], error: 'Invalid JSON response', rawResponse: responseText.substring(0, 500), apiKeyPresent: true, programIdPresent: true };
     }
 
     // Tolt API may return partners in different structures
@@ -103,10 +110,11 @@ async function getAllToltPartners(): Promise<{ partners: Array<{ id: string; ema
         status: p.status,
       })),
       apiKeyPresent: true,
+      programIdPresent: true,
       rawResponse: JSON.stringify(data).substring(0, 500)
     };
   } catch (error) {
-    return { partners: [], error: error instanceof Error ? error.message : 'Unknown error', apiKeyPresent: !!TOLT_API_KEY };
+    return { partners: [], error: error instanceof Error ? error.message : 'Unknown error', apiKeyPresent: !!TOLT_API_KEY, programIdPresent: !!TOLT_PROGRAM_ID };
   }
 }
 
@@ -298,7 +306,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Fetch all partners from Tolt first - this is the source of truth
-      const { partners: toltPartners, error: toltError, rawResponse: toltRawResponse, apiKeyPresent } = await getAllToltPartners();
+      const { partners: toltPartners, error: toltError, rawResponse: toltRawResponse, apiKeyPresent, programIdPresent } = await getAllToltPartners();
 
       // Create a map of Tolt partners by email for quick lookup
       const toltByEmail = new Map(toltPartners.map(tp => [tp.email?.toLowerCase(), tp]));
@@ -371,6 +379,7 @@ export async function POST(request: NextRequest) {
         toltError,
         debug: {
           apiKeyPresent,
+          programIdPresent,
           toltPartnersCount: toltPartners.length,
           toltPartnerEmails: toltPartners.map(p => p.email),
           dbPartnerEmails: (partners || []).map(p => p.email),
