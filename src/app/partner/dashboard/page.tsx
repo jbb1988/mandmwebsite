@@ -1,9 +1,20 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, Suspense } from 'react';
+import React, { useState, useEffect, useCallback, Suspense, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+} from 'recharts';
 import {
   Home,
   Mail,
@@ -20,6 +31,7 @@ import {
   Users,
   QrCode,
   FileText,
+  FileCode,
   Palette,
   Share2,
   Building2,
@@ -30,7 +42,10 @@ import {
   User,
   Briefcase,
   MapPin,
-  Globe
+  Globe,
+  TrendingUp,
+  BarChart3,
+  Award
 } from 'lucide-react';
 
 // Types
@@ -43,6 +58,10 @@ interface Partner {
   toltPartnerId: string | null;
   qrCodeUrl: string | null;
   bannerUrl: string | null;
+  bannerFacebookUrl: string | null;
+  bannerFacebookCobrandedUrl: string | null;
+  bannerTwitterUrl: string | null;
+  bannerTwitterCobrandedUrl: string | null;
 }
 
 interface Metrics {
@@ -162,6 +181,7 @@ function StatCard({ label, value, icon, color = 'blue' }: {
 const TABS = [
   { id: 'overview', label: 'Overview', icon: Home },
   { id: 'templates', label: 'Email Templates', icon: Mail },
+  { id: 'social', label: 'Social Media', icon: Share2 },
   { id: 'resources', label: 'Resources', icon: FolderOpen },
   { id: 'assets', label: 'Your Assets', icon: ImageIcon },
 ];
@@ -219,87 +239,141 @@ const STATIC_RESOURCES: Resource[] = [
   },
 ];
 
-// Social Media Post Templates
+// Social Media Post Templates - Accurate Mind & Muscle Features
 const SOCIAL_TEMPLATES: SocialTemplate[] = [
-  // Feature Highlights
+  // FEATURE HIGHLIGHTS - Specific Modules
   {
     id: 'f1',
-    title: 'Plate IQ - AI Hitting Analysis',
+    title: 'Swing Lab - AI Video Analysis',
     category: 'feature',
     platform: 'all',
-    body: `Every swing tells a story.
+    body: `Upload your swing. Get instant AI coaching.
 
-Mind & Muscle's Plate IQ uses AI to analyze hitting mechanics and identify what's working—and what needs work.
+Mind & Muscle's Swing Lab analyzes your video and gives you real feedback on:
+- Bat path & mechanics
+- Timing issues
+- Load & weight transfer
+- What's actually working
 
-It's like having a hitting coach in your pocket.
+It's like having a hitting coach who watches every rep.
 
 Try it free: {referral_link}`,
-    hashtags: ['BaseballTraining', 'HittingMechanics', 'YouthBaseball', 'SoftballTraining'],
+    hashtags: ['BaseballTraining', 'SwingAnalysis', 'HittingCoach', 'YouthBaseball'],
   },
   {
     id: 'f2',
-    title: 'Skill Assessments',
+    title: 'Plate IQ - Pitch Anticipation',
     category: 'feature',
     platform: 'all',
-    body: `How do you know if your training is working?
+    body: `Great hitters know what's coming before it's thrown.
 
-Mind & Muscle tracks progress with skill assessments that measure what matters:
-- Pitch recognition speed
-- Decision making accuracy
-- Timing consistency
-- Mental focus
+Mind & Muscle's Plate IQ trains pitch anticipation with:
+- 20+ game scenarios
+- Hunt Mode & Battle Mode
+- 13-zone recognition system
+- Real pitch sequences
 
-See your improvement over time: {referral_link}`,
-    hashtags: ['BaseballDevelopment', 'PlayerDevelopment', 'YouthSports', 'TrainingProgress'],
+Train your brain to read pitchers: {referral_link}`,
+    hashtags: ['PlateIQ', 'PitchRecognition', 'HitterTraining', 'BaseballIQ'],
   },
   {
     id: 'f3',
-    title: 'Mental Game Training',
+    title: 'Pitch Lab - For Pitchers',
     category: 'feature',
     platform: 'all',
-    body: `The mental game isn't talked about enough.
+    body: `Pitchers need video analysis too.
 
-Mind & Muscle trains what most coaches skip:
-- Pre-at-bat routines that build focus
-- Visualization techniques used by pros
-- Strategies to bounce back after mistakes
+Mind & Muscle's Pitch Lab breaks down your delivery:
+- 8-component mechanical analysis
+- Arm health assessment
+- Release point consistency
+- Movement patterns
 
-Train the mind, dominate the game: {referral_link}`,
-    hashtags: ['MentalGame', 'SportsPerformance', 'BaseballMindset', 'AthletesMindset'],
+Upload a video, get coaching: {referral_link}`,
+    hashtags: ['PitchingCoach', 'PitcherDevelopment', 'ArmCare', 'BaseballPitcher'],
   },
   {
     id: 'f4',
-    title: 'Training Programs',
+    title: 'Game Lab - Baseball IQ',
     category: 'feature',
     platform: 'all',
-    body: `Want structured training that actually develops hitters?
+    body: `How's your baseball IQ?
 
-Mind & Muscle's programs combine:
-- AI-powered swing analysis
-- Mental performance drills
-- Progressive skill challenges
-- Real-time feedback
+Mind & Muscle's Game Lab has 186 scenarios covering:
+- Every position on the field
+- Situational decisions
+- Game management
+- XP & badges to track progress
 
-Start the journey: {referral_link}`,
-    hashtags: ['BaseballTraining', 'HitterDevelopment', 'YouthBaseball', 'SoftballPlayer'],
+Know what to do before the ball is hit: {referral_link}`,
+    hashtags: ['BaseballIQ', 'GameSmart', 'PlayerDevelopment', 'YouthBaseball'],
   },
-  // Benefit-Focused
   {
-    id: 'b1',
-    title: 'Mental Edge',
-    category: 'benefit',
+    id: 'f5',
+    title: 'Mind Coach AI - Mental Training',
+    category: 'feature',
     platform: 'all',
-    body: `The best hitters don't just have great swings.
+    body: `The mental game separates good from great.
 
-They have great MINDS.
-
-Mind & Muscle trains the mental game most coaches skip:
-- Pre-at-bat routines
-- Visualization techniques
+Mind Coach AI trains:
+- Focus under pressure
+- Confidence building
+- Pre-game visualization
 - Bounce-back strategies
 
-Your athlete's next level starts here: {referral_link}`,
-    hashtags: ['MentalToughness', 'CompetitiveEdge', 'BaseballMindset', 'WinningMentality'],
+Your mind is a muscle. Train it: {referral_link}`,
+    hashtags: ['MentalGame', 'SportsPerformance', 'MindCoach', 'AthletesMindset'],
+  },
+  {
+    id: 'f6',
+    title: 'Sound Lab - Pre-Game Focus',
+    category: 'feature',
+    platform: 'all',
+    body: `Pro athletes use this. Now you can too.
+
+Mind & Muscle's Sound Lab uses binaural beats for:
+- Alpha waves (calm focus)
+- Beta waves (high energy)
+- Gamma waves (peak performance)
+
+Perfect pre-game mental prep: {referral_link}`,
+    hashtags: ['SoundLab', 'BinauralBeats', 'PreGameRoutine', 'MentalPrep'],
+  },
+  {
+    id: 'f7',
+    title: 'Arm Builder - FREE Arm Care',
+    category: 'feature',
+    platform: 'all',
+    body: `Arm Builder is 100% FREE inside Mind & Muscle.
+
+Get:
+- Throwing development programs
+- Arm care routines
+- Warmup protocols
+- Injury prevention
+
+Protect your arm. Build velocity: {referral_link}`,
+    hashtags: ['ArmCare', 'ThrowingProgram', 'VelocityTraining', 'FreeApp'],
+  },
+  // BENEFIT-FOCUSED
+  {
+    id: 'b1',
+    title: 'Train the Complete Player',
+    category: 'benefit',
+    platform: 'all',
+    body: `One app. Every skill.
+
+Mind & Muscle covers:
+- Hitting (Swing Lab AI analysis)
+- Pitching (Pitch Lab breakdown)
+- Mental game (Mind Coach AI)
+- Baseball IQ (186 scenarios)
+- Nutrition (Fuel AI)
+- Strength (Muscle Coach AI)
+- Arm care (FREE)
+
+Stop juggling 5 different apps: {referral_link}`,
+    hashtags: ['CompletePlayer', 'AllInOne', 'BaseballApp', 'PlayerDevelopment'],
   },
   {
     id: 'b2',
@@ -310,134 +384,154 @@ Your athlete's next level starts here: {referral_link}`,
 
 Some players shrink. Others step up.
 
-The difference? Mental preparation.
+Mind & Muscle trains the mental side:
+- Visualization before at-bats
+- Focus techniques during pressure
+- Recovery strategies after mistakes
 
-Mind & Muscle trains athletes to perform when it matters most: {referral_link}`,
+Perform when it matters: {referral_link}`,
     hashtags: ['ClutchPerformance', 'PressurePlayers', 'BigMoments', 'GameReady'],
   },
   {
     id: 'b3',
-    title: 'Visible Improvement',
+    title: 'Weekly Progress Reports',
     category: 'benefit',
     platform: 'all',
-    body: `Stop guessing if your training is working.
+    body: `Stop guessing if training is working.
 
-Mind & Muscle shows you exactly where you're improving:
-- Reaction time getting faster
-- Decision accuracy going up
-- Mental focus staying sharp
+Mind & Muscle sends weekly reports showing:
+- Skills improving
+- Areas to focus on
+- Training consistency
+- Comparison to benchmarks
 
-Track your progress: {referral_link}`,
-    hashtags: ['TrackYourProgress', 'GetBetter', 'MeasurableResults', 'PlayerDevelopment'],
+Data-driven development: {referral_link}`,
+    hashtags: ['TrackProgress', 'WeeklyReports', 'PlayerDevelopment', 'DataDriven'],
   },
   {
     id: 'b4',
-    title: 'Competitive Advantage',
+    title: 'AI Coaches for Everything',
     category: 'benefit',
     platform: 'all',
-    body: `Everyone's doing cage work.
-Everyone's taking ground balls.
-Everyone's running sprints.
+    body: `Mind & Muscle has AI coaches for:
+- Hitting (Swing Lab)
+- Pitching (Pitch Lab)
+- Mental game (Mind Coach AI)
+- Workouts (Muscle Coach AI)
+- Nutrition (Fuel AI)
+- Practice planning (AI Assistant)
 
-Few are training their MIND.
-
-That's your edge: {referral_link}`,
-    hashtags: ['CompetitiveAdvantage', 'StandOut', 'EliteTraining', 'NextLevel'],
+Elite coaching on your phone: {referral_link}`,
+    hashtags: ['AICoach', 'PersonalTraining', 'BaseballTech', 'FutureOfTraining'],
   },
-  // Social Proof
+  // SOCIAL PROOF
   {
     id: 's1',
     title: 'Partner Recommendation',
     category: 'social_proof',
     platform: 'all',
-    body: `I've been recommending Mind & Muscle to my athletes for months now.
+    body: `I've been recommending Mind & Muscle because the features actually work:
 
-The difference? Players who used to crumble under pressure are now stepping up in big moments.
+Swing Lab catches things I miss on video.
+Plate IQ improves pitch recognition fast.
+Mind Coach builds mental toughness.
 
-That's the mental game advantage.
-
-Check it out: {referral_link}`,
-    hashtags: ['CoachApproved', 'AthleteSuccess', 'MentalGameTraining', 'ProvenResults'],
+Players are showing up more prepared: {referral_link}`,
+    hashtags: ['CoachApproved', 'ProvenResults', 'BaseballCoach', 'AthleteSuccess'],
   },
   {
     id: 's2',
-    title: 'What I\'ve Noticed',
+    title: 'Player Transformation',
     category: 'social_proof',
     platform: 'all',
-    body: `Something I've noticed with players using Mind & Muscle:
+    body: `What I've noticed with players using Mind & Muscle:
 
-They're more LOCKED IN at the plate.
-They recover faster from strikeouts.
-They trust their preparation.
+They're reading pitchers better (Plate IQ works).
+They're more locked in at the plate (mental training).
+They're recovering faster from bad at-bats.
 
-Mental training makes a visible difference: {referral_link}`,
-    hashtags: ['PlayerTransformation', 'MentalStrength', 'CoachInsights', 'GameChanger'],
+The combination of physical + mental training shows: {referral_link}`,
+    hashtags: ['PlayerTransformation', 'ResultsThatShow', 'BaseballDevelopment', 'GameChanger'],
   },
   {
     id: 's3',
-    title: 'The Difference Maker',
+    title: 'Parent Question',
     category: 'social_proof',
     platform: 'all',
-    body: `Had a parent ask me: "What's different about the players who are thriving?"
+    body: `Parent asked: "What can my kid do at home to get better?"
 
-My answer: They're training their mental game, not just their physical skills.
+My answer: Mind & Muscle.
 
-Mind & Muscle makes that easy: {referral_link}`,
-    hashtags: ['ParentTips', 'PlayerSuccess', 'MentalGameMatters', 'CompletePlayer'],
+They can work on pitch recognition (Plate IQ), review swings (Swing Lab), train their mental game (Mind Coach AI), and do arm care (Arm Builder).
+
+All from their phone: {referral_link}`,
+    hashtags: ['AtHomeTraining', 'ParentTips', 'YouthBaseball', 'GetBetter'],
   },
-  // Call-to-Action
+  // CALL-TO-ACTION
   {
     id: 'c1',
-    title: 'Direct CTA',
+    title: 'All-In-One Value',
     category: 'cta',
     platform: 'all',
-    body: `Ready to take your game to the next level?
+    body: `What Mind & Muscle includes:
 
-Mind & Muscle combines AI-powered hitting analysis with mental performance training.
+- Swing Lab (AI video analysis)
+- Pitch Lab (pitching breakdown)
+- Plate IQ (pitch anticipation)
+- Game Lab (186 baseball IQ scenarios)
+- Mind Coach AI (mental training)
+- Sound Lab (focus audio)
+- Arm Builder (FREE arm care)
+- Weekly Reports
+- And more...
 
-Start your free trial today: {referral_link}`,
-    hashtags: ['TryItFree', 'LevelUp', 'BaseballApp', 'SoftballApp'],
+One subscription. Everything: {referral_link}`,
+    hashtags: ['AllInOne', 'BaseballApp', 'ValueForMoney', 'TryItFree'],
   },
   {
     id: 'c2',
-    title: 'Question Hook',
+    title: 'Question Hook - Parents',
     category: 'cta',
     platform: 'all',
-    body: `Quick question for baseball/softball parents:
+    body: `Baseball & softball parents:
 
-What if your player could train their mental game at home, with just their phone?
+What if your player could:
+- Get AI swing analysis anytime
+- Train pitch recognition
+- Build mental toughness
+- Track weekly progress
 
-That's exactly what Mind & Muscle does.
+All from their phone?
 
-See how it works: {referral_link}`,
+That's Mind & Muscle: {referral_link}`,
     hashtags: ['BaseballParents', 'SoftballMom', 'SoftballDad', 'YouthSportsParent'],
   },
   {
     id: 'c3',
-    title: 'The Complete Player',
-    category: 'cta',
-    platform: 'all',
-    body: `Physical skills only take you so far.
-
-The complete player trains:
-- Technical skills
-- Physical conditioning
-- AND mental performance
-
-Mind & Muscle handles the mental game: {referral_link}`,
-    hashtags: ['CompleteAthlete', 'MindAndBody', 'EliteTraining', 'PlayerDevelopment'],
-  },
-  {
-    id: 'c4',
     title: 'Short & Punchy',
     category: 'cta',
     platform: 'twitter',
     body: `Discipline the Mind. Dominate the Game.
 
-Mind & Muscle: AI hitting analysis + mental performance training for baseball & softball players.
+Mind & Muscle: AI swing analysis + pitch anticipation + mental training for baseball & softball.
 
-Try it: {referral_link}`,
+14 training modules. One app: {referral_link}`,
     hashtags: ['BaseballTraining', 'MentalGame'],
+  },
+  {
+    id: 'c4',
+    title: 'The Edge',
+    category: 'cta',
+    platform: 'all',
+    body: `Everyone's doing cage work.
+Everyone's taking ground balls.
+
+Few are training pitch anticipation (Plate IQ).
+Few are doing AI swing analysis (Swing Lab).
+Few are building mental toughness (Mind Coach AI).
+
+That's your edge: {referral_link}`,
+    hashtags: ['CompetitiveEdge', 'TrainDifferent', 'NextLevel', 'BaseballTraining'],
   },
 ];
 
@@ -480,11 +574,15 @@ function DashboardContent() {
     platform: '',
   });
   const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
+  const [emailFormat, setEmailFormat] = useState<'html' | 'plain'>('html');
 
   // Social templates state
   const [socialPlatformFilter, setSocialPlatformFilter] = useState<string>('all');
   const [socialCategoryFilter, setSocialCategoryFilter] = useState<string | null>(null);
   const [expandedSocialPost, setExpandedSocialPost] = useState<string | null>(null);
+
+  // PDF preview state
+  const [previewPdf, setPreviewPdf] = useState<Resource | null>(null);
 
   // Check auth and verify magic link token if present
   useEffect(() => {
@@ -681,19 +779,25 @@ function DashboardContent() {
       .trim();
   };
 
-  // Copy template content
+  // Copy template content - respects emailFormat preference
   const copyTemplateContent = async (template: Template, type: 'subject' | 'body' | 'both') => {
     const processedSubject = replaceAllPlaceholders(template.subject_line);
     const processedBody = replaceAllPlaceholders(template.body_template);
+    const plainBody = getCleanTextFromHtml(processedBody);
 
     if (type === 'subject') {
       await copyToClipboard(processedSubject, `subject-${template.segment}-${template.sequence_step}`);
     } else if (type === 'body') {
       const isHtml = template.body_template.includes('<html') || template.body_template.includes('<!DOCTYPE');
-      if (isHtml) {
+
+      // If plain text mode is selected, always copy plain text
+      if (emailFormat === 'plain') {
+        await copyToClipboard(plainBody, `body-${template.segment}-${template.sequence_step}`);
+      } else if (isHtml) {
+        // HTML mode with HTML template
         try {
           const blob = new Blob([processedBody], { type: 'text/html' });
-          const plainBlob = new Blob([getCleanTextFromHtml(processedBody)], { type: 'text/plain' });
+          const plainBlob = new Blob([plainBody], { type: 'text/plain' });
           await navigator.clipboard.write([
             new ClipboardItem({
               'text/html': blob,
@@ -703,13 +807,13 @@ function DashboardContent() {
           setCopiedId(`body-${template.segment}-${template.sequence_step}`);
           setTimeout(() => setCopiedId(null), 2000);
         } catch {
-          await copyToClipboard(getCleanTextFromHtml(processedBody), `body-${template.segment}-${template.sequence_step}`);
+          await copyToClipboard(plainBody, `body-${template.segment}-${template.sequence_step}`);
         }
       } else {
         await copyToClipboard(processedBody, `body-${template.segment}-${template.sequence_step}`);
       }
     } else {
-      await copyToClipboard(`Subject: ${processedSubject}\n\n${getCleanTextFromHtml(processedBody)}`, `both-${template.segment}-${template.sequence_step}`);
+      await copyToClipboard(`Subject: ${processedSubject}\n\n${plainBody}`, `both-${template.segment}-${template.sequence_step}`);
     }
   };
 
@@ -822,6 +926,15 @@ function DashboardContent() {
             <span className="text-sm text-white/50 hidden sm:block">
               Welcome, <span className="text-white font-medium">{partner.firstName || partner.name}</span>
             </span>
+            <a
+              href="https://mindandmuscle.ai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 text-sm text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              <Globe className="w-4 h-4" />
+              <span className="hidden sm:inline">Website</span>
+            </a>
             <button
               onClick={handleLogout}
               className="flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors"
@@ -858,6 +971,52 @@ function DashboardContent() {
         {/* Overview Tab */}
         {activeTab === 'overview' && (
           <div className="space-y-8">
+            {/* Welcome Section */}
+            <Card variant="elevated" className="p-6">
+              <div className="flex flex-col md:flex-row md:items-start gap-6">
+                <div className="flex-1">
+                  <h2 className="text-xl font-bold mb-2">
+                    Welcome{partner.firstName ? `, ${partner.firstName}` : ''}! 👋
+                  </h2>
+                  <p className="text-white/70 mb-4">
+                    This is your Partner Dashboard - your central hub for all partner resources, marketing materials, and performance tracking.
+                  </p>
+
+                  <div className="bg-white/5 rounded-lg p-4 mb-4">
+                    <h3 className="text-sm font-semibold text-cyan-400 mb-2 flex items-center gap-2">
+                      <BarChart3 className="w-4 h-4" />
+                      About Your Analytics
+                    </h3>
+                    <p className="text-sm text-white/60">
+                      Your referral tracking is powered by <span className="text-white font-medium">Tolt</span>, our affiliate management platform.
+                      The earnings, referrals, and payout information you see here are synced from Tolt. For detailed analytics including
+                      <span className="text-white"> click tracking</span>, conversion rates, and payout history, visit your{' '}
+                      <a
+                        href="https://mind-and-muscle.tolt.io"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-400 hover:text-blue-300 underline"
+                      >
+                        Tolt Dashboard
+                      </a>.
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-4 text-sm">
+                    <a
+                      href="mailto:partners@mindandmuscle.ai"
+                      className="flex items-center gap-2 text-blue-400 hover:text-blue-300 transition-colors"
+                    >
+                      <Mail className="w-4 h-4" />
+                      partners@mindandmuscle.ai
+                    </a>
+                    <span className="text-white/30">|</span>
+                    <span className="text-white/50">Need help? We&apos;re here for you!</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
             {/* Stats Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <StatCard
@@ -1043,6 +1202,237 @@ function DashboardContent() {
                 </div>
               </Card>
             </div>
+
+            {/* Performance Analytics Section */}
+            <Card variant="elevated" className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-sm font-semibold text-white/50 uppercase tracking-wide flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4" />
+                  Performance Overview
+                </h3>
+                <span className="text-xs text-white/40">
+                  {metrics?.lastUpdated && `Updated ${new Date(metrics.lastUpdated).toLocaleDateString()}`}
+                </span>
+              </div>
+
+              {metrics && (metrics.totalReferrals > 0 || metrics.totalEarnings > 0) ? (
+                <div className="grid lg:grid-cols-2 gap-6">
+                  {/* Earnings Chart */}
+                  <div className="bg-white/5 rounded-xl p-4">
+                    <h4 className="text-sm font-medium mb-4 flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-emerald-400" />
+                      Earnings Summary
+                    </h4>
+                    <div className="h-48">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={[
+                          { name: 'Approved', value: metrics.totalEarnings, fill: '#10b981' },
+                          { name: 'Pending', value: metrics.pendingPayout, fill: '#f59e0b' },
+                        ]}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                          <XAxis dataKey="name" tick={{ fill: '#ffffff80', fontSize: 12 }} />
+                          <YAxis tick={{ fill: '#ffffff80', fontSize: 12 }} tickFormatter={(v) => `$${v}`} />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: '#0F1123',
+                              border: '1px solid rgba(255,255,255,0.1)',
+                              borderRadius: '8px',
+                            }}
+                            labelStyle={{ color: '#fff' }}
+                            formatter={(value) => [`$${Number(value || 0).toFixed(2)}`, 'Amount']}
+                          />
+                          <Bar dataKey="value" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="mt-4 flex items-center justify-between text-xs text-white/50">
+                      <span>Total: <span className="text-emerald-400 font-medium">${(metrics.totalEarnings + metrics.pendingPayout).toFixed(2)}</span></span>
+                      <span className="text-white/30">30% commission rate</span>
+                    </div>
+                  </div>
+
+                  {/* Referrals Chart */}
+                  <div className="bg-white/5 rounded-xl p-4">
+                    <h4 className="text-sm font-medium mb-4 flex items-center gap-2">
+                      <Users className="w-4 h-4 text-blue-400" />
+                      Referral Activity
+                    </h4>
+                    <div className="h-48">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={[
+                          { month: 'Start', referrals: 0 },
+                          { month: 'Now', referrals: metrics.totalReferrals },
+                        ]}>
+                          <defs>
+                            <linearGradient id="colorReferrals" x1="0" y1="0" x2="0" y2="1">
+                              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                            </linearGradient>
+                          </defs>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                          <XAxis dataKey="month" tick={{ fill: '#ffffff80', fontSize: 12 }} />
+                          <YAxis tick={{ fill: '#ffffff80', fontSize: 12 }} />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: '#0F1123',
+                              border: '1px solid rgba(255,255,255,0.1)',
+                              borderRadius: '8px',
+                            }}
+                            labelStyle={{ color: '#fff' }}
+                          />
+                          <Area type="monotone" dataKey="referrals" stroke="#3b82f6" fillOpacity={1} fill="url(#colorReferrals)" />
+                        </AreaChart>
+                      </ResponsiveContainer>
+                    </div>
+                    <div className="mt-4 text-center">
+                      <span className="text-2xl font-bold text-blue-400">{metrics.totalReferrals}</span>
+                      <span className="text-xs text-white/50 ml-2">total referrals</span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-white/5 rounded-xl p-8 text-center">
+                  <TrendingUp className="w-12 h-12 text-white/20 mx-auto mb-4" />
+                  <h4 className="font-medium mb-2">No Activity Yet</h4>
+                  <p className="text-sm text-white/50 mb-4 max-w-md mx-auto">
+                    Start sharing your referral link to see your performance analytics here.
+                    Charts will show your earnings and referral growth over time.
+                  </p>
+                  <button
+                    onClick={() => copyToClipboard(partner.referralUrl, 'referral-link')}
+                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors text-sm font-medium"
+                  >
+                    Copy Your Referral Link
+                  </button>
+                </div>
+              )}
+            </Card>
+
+            {/* Partner Tier & Achievements Section */}
+            <Card variant="elevated" className="p-6">
+              <h3 className="text-sm font-semibold text-white/50 uppercase tracking-wide mb-6 flex items-center gap-2">
+                <Award className="w-4 h-4" />
+                Partner Status & Achievements
+              </h3>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Tier Progress */}
+                <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-xl p-5 border border-white/10">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <p className="text-xs text-white/50 mb-1">Current Tier</p>
+                      <p className="text-xl font-bold text-blue-400">
+                        {(metrics?.totalReferrals || 0) >= 50 ? 'Elite' :
+                         (metrics?.totalReferrals || 0) >= 20 ? 'Pro' :
+                         (metrics?.totalReferrals || 0) >= 5 ? 'Rising Star' : 'Starter'}
+                      </p>
+                    </div>
+                    <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center">
+                      <Star className="w-7 h-7 text-white" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-white/50">Progress to next tier</span>
+                      <span className="text-white/70">
+                        {metrics?.totalReferrals || 0} / {
+                          (metrics?.totalReferrals || 0) >= 50 ? '50' :
+                          (metrics?.totalReferrals || 0) >= 20 ? '50' :
+                          (metrics?.totalReferrals || 0) >= 5 ? '20' : '5'
+                        } referrals
+                      </span>
+                    </div>
+                    <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all"
+                        style={{
+                          width: `${Math.min(100, ((metrics?.totalReferrals || 0) /
+                            ((metrics?.totalReferrals || 0) >= 50 ? 50 :
+                             (metrics?.totalReferrals || 0) >= 20 ? 50 :
+                             (metrics?.totalReferrals || 0) >= 5 ? 20 : 5)
+                          ) * 100)}%`
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4 pt-4 border-t border-white/10">
+                    <p className="text-xs text-white/40">
+                      {(metrics?.totalReferrals || 0) >= 50
+                        ? 'You\'ve reached the highest tier! Thank you for your partnership.'
+                        : `${
+                            (metrics?.totalReferrals || 0) >= 20 ? 50 - (metrics?.totalReferrals || 0) :
+                            (metrics?.totalReferrals || 0) >= 5 ? 20 - (metrics?.totalReferrals || 0) :
+                            5 - (metrics?.totalReferrals || 0)
+                          } more referrals to unlock ${
+                            (metrics?.totalReferrals || 0) >= 20 ? 'Elite' :
+                            (metrics?.totalReferrals || 0) >= 5 ? 'Pro' : 'Rising Star'
+                          } status`
+                      }
+                    </p>
+                  </div>
+                </div>
+
+                {/* Achievements */}
+                <div className="bg-white/5 rounded-xl p-5">
+                  <h4 className="text-sm font-medium mb-4">Achievements</h4>
+                  <div className="space-y-3">
+                    {/* First Referral Badge */}
+                    <div className={`flex items-center gap-3 p-3 rounded-lg ${
+                      (metrics?.totalReferrals || 0) >= 1 ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-white/5 opacity-50'
+                    }`}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        (metrics?.totalReferrals || 0) >= 1 ? 'bg-emerald-500' : 'bg-white/10'
+                      }`}>
+                        <Users className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">First Referral</p>
+                        <p className="text-xs text-white/50">Get your first customer sign-up</p>
+                      </div>
+                      {(metrics?.totalReferrals || 0) >= 1 && (
+                        <Check className="w-5 h-5 text-emerald-400 ml-auto" />
+                      )}
+                    </div>
+
+                    {/* First $100 Badge */}
+                    <div className={`flex items-center gap-3 p-3 rounded-lg ${
+                      (metrics?.totalEarnings || 0) >= 100 ? 'bg-amber-500/10 border border-amber-500/20' : 'bg-white/5 opacity-50'
+                    }`}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        (metrics?.totalEarnings || 0) >= 100 ? 'bg-amber-500' : 'bg-white/10'
+                      }`}>
+                        <DollarSign className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Century Club</p>
+                        <p className="text-xs text-white/50">Earn $100 in commissions</p>
+                      </div>
+                      {(metrics?.totalEarnings || 0) >= 100 && (
+                        <Check className="w-5 h-5 text-amber-400 ml-auto" />
+                      )}
+                    </div>
+
+                    {/* 10 Referrals Badge */}
+                    <div className={`flex items-center gap-3 p-3 rounded-lg ${
+                      (metrics?.totalReferrals || 0) >= 10 ? 'bg-blue-500/10 border border-blue-500/20' : 'bg-white/5 opacity-50'
+                    }`}>
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        (metrics?.totalReferrals || 0) >= 10 ? 'bg-blue-500' : 'bg-white/10'
+                      }`}>
+                        <Star className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Top Performer</p>
+                        <p className="text-xs text-white/50">Refer 10+ customers</p>
+                      </div>
+                      {(metrics?.totalReferrals || 0) >= 10 && (
+                        <Check className="w-5 h-5 text-blue-400 ml-auto" />
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
           </div>
         )}
 
@@ -1056,7 +1446,7 @@ function DashboardContent() {
                 Recipient Info (Optional)
               </h2>
               <p className="text-xs text-white/40 mb-4">Fill in recipient details to auto-populate placeholders in templates</p>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div>
                   <label className="text-xs text-white/40 mb-1 block">First Name</label>
                   <div className="relative">
@@ -1096,24 +1486,37 @@ function DashboardContent() {
                     />
                   </div>
                 </div>
-                <div>
-                  <label className="text-xs text-white/40 mb-1 block">Platform</label>
-                  <div className="relative">
-                    <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
-                    <select
-                      value={recipientInfo.platform}
-                      onChange={(e) => setRecipientInfo(prev => ({ ...prev, platform: e.target.value }))}
-                      className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 pl-9 text-sm text-white appearance-none focus:outline-none focus:ring-1 focus:ring-blue-500/50"
-                    >
-                      <option value="" className="bg-[#0F1123]">Select platform</option>
-                      {PLATFORMS.map(p => (
-                        <option key={p} value={p} className="bg-[#0F1123]">{p}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
               </div>
             </Card>
+
+            {/* Email Format Toggle */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-semibold">Email Templates</h2>
+              <div className="flex items-center gap-2 bg-white/5 p-1 rounded-lg">
+                <button
+                  onClick={() => setEmailFormat('html')}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                    emailFormat === 'html'
+                      ? 'bg-blue-500 text-white'
+                      : 'text-white/50 hover:text-white'
+                  }`}
+                >
+                  <FileCode className="w-4 h-4" />
+                  HTML
+                </button>
+                <button
+                  onClick={() => setEmailFormat('plain')}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                    emailFormat === 'plain'
+                      ? 'bg-blue-500 text-white'
+                      : 'text-white/50 hover:text-white'
+                  }`}
+                >
+                  <FileText className="w-4 h-4" />
+                  Plain Text
+                </button>
+              </div>
+            </div>
 
             {/* Segment Filters */}
             <div className="flex flex-wrap gap-2">
@@ -1162,7 +1565,16 @@ function DashboardContent() {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-2">
                                 <span className="text-xs bg-white/10 px-2 py-0.5 rounded">Email {template.sequence_step}</span>
-                                {isHtml && <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">HTML</span>}
+                                {isHtml && emailFormat === 'html' && (
+                                  <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded flex items-center gap-1">
+                                    <FileCode className="w-3 h-3" /> HTML
+                                  </span>
+                                )}
+                                {emailFormat === 'plain' && (
+                                  <span className="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded flex items-center gap-1">
+                                    <FileText className="w-3 h-3" /> Plain Text
+                                  </span>
+                                )}
                               </div>
                               <h4 className="font-medium mb-2 truncate">{replaceAllPlaceholders(template.subject_line)}</h4>
                               <p className="text-sm text-white/50 line-clamp-2">{previewText}...</p>
@@ -1188,12 +1600,16 @@ function DashboardContent() {
                               </button>
                               <button
                                 onClick={() => copyTemplateContent(template, 'body')}
-                                className="px-3 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors text-sm font-medium"
+                                className={`px-3 py-2 rounded-lg transition-colors text-sm font-medium ${
+                                  emailFormat === 'plain'
+                                    ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400'
+                                    : 'bg-blue-500/20 hover:bg-blue-500/30 text-blue-400'
+                                }`}
                               >
                                 {copiedId === `body-${template.segment}-${template.sequence_step}` ? (
                                   <span className="flex items-center gap-1"><Check className="w-4 h-4" /> Copied</span>
                                 ) : (
-                                  'Copy Email'
+                                  emailFormat === 'plain' ? 'Copy Plain Text' : 'Copy Email'
                                 )}
                               </button>
                             </div>
@@ -1205,6 +1621,162 @@ function DashboardContent() {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Social Media Tab */}
+        {activeTab === 'social' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-semibold">Social Media Posts</h2>
+                <p className="text-sm text-white/50 mt-1">Ready-to-use posts for your social media channels</p>
+              </div>
+            </div>
+
+            {/* Platform Filter */}
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(SOCIAL_PLATFORM_INFO).map(([key, info]) => (
+                <button
+                  key={key}
+                  onClick={() => setSocialPlatformFilter(key)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                    socialPlatformFilter === key
+                      ? 'bg-cyan-500 text-white'
+                      : 'bg-white/5 text-white/70 hover:bg-white/10'
+                  }`}
+                >
+                  {info.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Category Filter */}
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setSocialCategoryFilter(null)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                  !socialCategoryFilter
+                    ? 'bg-white/20 text-white'
+                    : 'bg-white/5 text-white/70 hover:bg-white/10'
+                }`}
+              >
+                All Categories
+              </button>
+              {Object.entries(SOCIAL_CATEGORY_INFO).map(([key, info]) => (
+                <button
+                  key={key}
+                  onClick={() => setSocialCategoryFilter(key)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                    socialCategoryFilter === key
+                      ? `bg-${info.color}-500/30 text-${info.color}-400 border border-${info.color}-500/30`
+                      : 'bg-white/5 text-white/70 hover:bg-white/10'
+                  }`}
+                >
+                  {info.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Templates Grid */}
+            <div className="grid gap-4">
+              {filteredSocialTemplates.map(template => {
+                const charCount = getSocialPostCharCount(template);
+                const isOverTwitterLimit = charCount > 280;
+                const categoryInfo = SOCIAL_CATEGORY_INFO[template.category];
+                const isExpanded = expandedSocialPost === template.id;
+                const previewText = template.body.replace(/\{referral_link\}/g, partner?.referralUrl || '[your-link]');
+
+                return (
+                  <Card key={template.id} variant="default" className="p-4 hover:border-cyan-500/30 transition-colors">
+                    <div className="flex flex-col gap-3">
+                      {/* Header */}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <h3 className="font-medium text-sm">{template.title}</h3>
+                            <span className={`text-xs px-2 py-0.5 rounded bg-${categoryInfo.color}-500/20 text-${categoryInfo.color}-400`}>
+                              {categoryInfo.label}
+                            </span>
+                            {template.platform !== 'all' && (
+                              <span className="text-xs px-2 py-0.5 rounded bg-white/10 text-white/60">
+                                {SOCIAL_PLATFORM_INFO[template.platform]?.label}
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 text-xs text-white/40">
+                            <span>{charCount} characters</span>
+                            {isOverTwitterLimit && (
+                              <span className="text-orange-400 flex items-center gap-1">
+                                (exceeds Twitter limit)
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Preview / Full Content */}
+                      <div
+                        className={`text-sm text-white/70 whitespace-pre-wrap ${!isExpanded ? 'line-clamp-3' : ''}`}
+                      >
+                        {previewText}
+                      </div>
+
+                      {/* Hashtags */}
+                      {template.hashtags && template.hashtags.length > 0 && isExpanded && (
+                        <div className="flex flex-wrap gap-1">
+                          {template.hashtags.map(tag => (
+                            <span key={tag} className="text-xs text-cyan-400">
+                              #{tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Actions */}
+                      <div className="flex items-center justify-between gap-2 pt-2 border-t border-white/5">
+                        <button
+                          onClick={() => setExpandedSocialPost(isExpanded ? null : template.id)}
+                          className="text-xs text-white/50 hover:text-white/70 transition-colors"
+                        >
+                          {isExpanded ? 'Show less' : 'Show full post'}
+                        </button>
+                        <div className="flex items-center gap-2">
+                          {template.hashtags && template.hashtags.length > 0 && (
+                            <button
+                              onClick={() => copySocialTemplate(template, true)}
+                              className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white/70 rounded-lg transition-colors text-xs font-medium"
+                            >
+                              {copiedId === `social-${template.id}-hashtags` ? (
+                                <span className="flex items-center gap-1 text-green-400"><Check className="w-3 h-3" /> Copied</span>
+                              ) : (
+                                '+ Hashtags'
+                              )}
+                            </button>
+                          )}
+                          <button
+                            onClick={() => copySocialTemplate(template, false)}
+                            className="px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg transition-colors text-xs font-medium"
+                          >
+                            {copiedId === `social-${template.id}` ? (
+                              <span className="flex items-center gap-1"><Check className="w-3 h-3" /> Copied</span>
+                            ) : (
+                              <span className="flex items-center gap-1"><Copy className="w-3 h-3" /> Copy Post</span>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+
+            {filteredSocialTemplates.length === 0 && (
+              <Card variant="bordered" className="p-6 text-center">
+                <p className="text-white/50">No templates match your filters</p>
+              </Card>
+            )}
           </div>
         )}
 
@@ -1229,12 +1801,20 @@ function DashboardContent() {
                         {resource.description && (
                           <p className="text-xs text-white/50 mb-3">{resource.description}</p>
                         )}
-                        <button
-                          onClick={() => downloadFile(resource.fileUrl, `${resource.title}.pdf`)}
-                          className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300"
-                        >
-                          <Download className="w-3 h-3" /> Download PDF
-                        </button>
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => setPreviewPdf(resource)}
+                            className="flex items-center gap-1 text-xs text-blue-400 hover:text-blue-300"
+                          >
+                            <Eye className="w-3 h-3" /> Preview
+                          </button>
+                          <button
+                            onClick={() => downloadFile(resource.fileUrl, `${resource.title}.pdf`)}
+                            className="flex items-center gap-1 text-xs text-white/50 hover:text-white/70"
+                          >
+                            <Download className="w-3 h-3" /> Download
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </Card>
@@ -1272,170 +1852,47 @@ function DashboardContent() {
                 ))}
               </div>
             </div>
-
-            {/* Social Media Posts */}
-            <div>
-              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <Share2 className="w-5 h-5 text-cyan-400" />
-                Social Media Posts
-              </h2>
-
-              {/* Platform Filter */}
-              <div className="flex flex-wrap gap-2 mb-4">
-                {Object.entries(SOCIAL_PLATFORM_INFO).map(([key, info]) => (
-                  <button
-                    key={key}
-                    onClick={() => setSocialPlatformFilter(key)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                      socialPlatformFilter === key
-                        ? 'bg-cyan-500 text-white'
-                        : 'bg-white/5 text-white/70 hover:bg-white/10'
-                    }`}
-                  >
-                    {info.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Category Filter */}
-              <div className="flex flex-wrap gap-2 mb-6">
-                <button
-                  onClick={() => setSocialCategoryFilter(null)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                    !socialCategoryFilter
-                      ? 'bg-white/20 text-white'
-                      : 'bg-white/5 text-white/70 hover:bg-white/10'
-                  }`}
-                >
-                  All Categories
-                </button>
-                {Object.entries(SOCIAL_CATEGORY_INFO).map(([key, info]) => (
-                  <button
-                    key={key}
-                    onClick={() => setSocialCategoryFilter(key)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                      socialCategoryFilter === key
-                        ? `bg-${info.color}-500/30 text-${info.color}-400 border border-${info.color}-500/30`
-                        : 'bg-white/5 text-white/70 hover:bg-white/10'
-                    }`}
-                  >
-                    {info.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Templates Grid */}
-              <div className="grid gap-4">
-                {filteredSocialTemplates.map(template => {
-                  const charCount = getSocialPostCharCount(template);
-                  const isOverTwitterLimit = charCount > 280;
-                  const categoryInfo = SOCIAL_CATEGORY_INFO[template.category];
-                  const isExpanded = expandedSocialPost === template.id;
-                  const previewText = template.body.replace(/\{referral_link\}/g, partner?.referralUrl || '[your-link]');
-
-                  return (
-                    <Card key={template.id} variant="default" className="p-4 hover:border-cyan-500/30 transition-colors">
-                      <div className="flex flex-col gap-3">
-                        {/* Header */}
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1 flex-wrap">
-                              <h3 className="font-medium text-sm">{template.title}</h3>
-                              <span className={`text-xs px-2 py-0.5 rounded bg-${categoryInfo.color}-500/20 text-${categoryInfo.color}-400`}>
-                                {categoryInfo.label}
-                              </span>
-                              {template.platform !== 'all' && (
-                                <span className="text-xs px-2 py-0.5 rounded bg-white/10 text-white/60">
-                                  {SOCIAL_PLATFORM_INFO[template.platform]?.label}
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2 text-xs text-white/40">
-                              <span>{charCount} characters</span>
-                              {isOverTwitterLimit && (
-                                <span className="text-orange-400 flex items-center gap-1">
-                                  (exceeds Twitter limit)
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Preview / Full Content */}
-                        <div
-                          className={`text-sm text-white/70 whitespace-pre-wrap ${!isExpanded ? 'line-clamp-3' : ''}`}
-                        >
-                          {previewText}
-                        </div>
-
-                        {/* Hashtags */}
-                        {template.hashtags && template.hashtags.length > 0 && isExpanded && (
-                          <div className="flex flex-wrap gap-1">
-                            {template.hashtags.map(tag => (
-                              <span key={tag} className="text-xs text-cyan-400">
-                                #{tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-
-                        {/* Actions */}
-                        <div className="flex items-center justify-between gap-2 pt-2 border-t border-white/5">
-                          <button
-                            onClick={() => setExpandedSocialPost(isExpanded ? null : template.id)}
-                            className="text-xs text-white/50 hover:text-white/70 transition-colors"
-                          >
-                            {isExpanded ? 'Show less' : 'Show full post'}
-                          </button>
-                          <div className="flex items-center gap-2">
-                            {template.hashtags && template.hashtags.length > 0 && (
-                              <button
-                                onClick={() => copySocialTemplate(template, true)}
-                                className="px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white/70 rounded-lg transition-colors text-xs font-medium"
-                              >
-                                {copiedId === `social-${template.id}-hashtags` ? (
-                                  <span className="flex items-center gap-1 text-green-400"><Check className="w-3 h-3" /> Copied</span>
-                                ) : (
-                                  '+ Hashtags'
-                                )}
-                              </button>
-                            )}
-                            <button
-                              onClick={() => copySocialTemplate(template, false)}
-                              className="px-3 py-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg transition-colors text-xs font-medium"
-                            >
-                              {copiedId === `social-${template.id}` ? (
-                                <span className="flex items-center gap-1"><Check className="w-3 h-3" /> Copied</span>
-                              ) : (
-                                <span className="flex items-center gap-1"><Copy className="w-3 h-3" /> Copy Post</span>
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </Card>
-                  );
-                })}
-              </div>
-
-              {filteredSocialTemplates.length === 0 && (
-                <Card variant="bordered" className="p-6 text-center">
-                  <p className="text-white/50">No templates match your filters</p>
-                </Card>
-              )}
-            </div>
           </div>
         )}
 
         {/* Your Assets Tab */}
         {activeTab === 'assets' && (
           <div className="space-y-6">
+            {/* Referral Link */}
+            <Card variant="elevated" className="p-6">
+              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <ExternalLink className="w-5 h-5 text-blue-400" />
+                Your Referral Link
+              </h2>
+              <div className="flex items-center gap-3">
+                <code className="flex-1 bg-white/5 px-4 py-3 rounded-lg text-cyan-400 text-sm overflow-x-auto">
+                  {partner.referralUrl}
+                </code>
+                <button
+                  onClick={() => copyToClipboard(partner.referralUrl, 'assets-referral-link')}
+                  className="shrink-0 flex items-center gap-2 px-4 py-3 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors font-medium"
+                >
+                  {copiedId === 'assets-referral-link' ? (
+                    <>
+                      <Check className="w-5 h-5" />
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-5 h-5" />
+                      Copy Link
+                    </>
+                  )}
+                </button>
+              </div>
+            </Card>
+
             <div className="grid lg:grid-cols-2 gap-6">
-              {/* Custom Banner */}
+              {/* Partner Banner */}
               <Card variant="elevated" className="p-6">
                 <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                   <ImageIcon className="w-5 h-5 text-purple-400" />
-                  Your Custom Banner
+                  Partner Banner
                 </h2>
                 {partner.bannerUrl ? (
                   <div>
@@ -1458,7 +1915,7 @@ function DashboardContent() {
                 ) : (
                   <div className="text-center py-8 text-white/40">
                     <ImageIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p>No custom banner available yet</p>
+                    <p>No partner banner available yet</p>
                   </div>
                 )}
               </Card>
@@ -1502,45 +1959,138 @@ function DashboardContent() {
               </Card>
             </div>
 
-            {/* Referral Link */}
-            <Card variant="elevated" className="p-6">
+            {/* Social Media Banners */}
+            <div>
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <ExternalLink className="w-5 h-5 text-blue-400" />
-                Your Referral Link
+                <Share2 className="w-5 h-5 text-cyan-400" />
+                Social Media Banners
               </h2>
-              <div className="flex items-center gap-3">
-                <code className="flex-1 bg-white/5 px-4 py-3 rounded-lg text-cyan-400 text-sm overflow-x-auto">
-                  {partner.referralUrl}
-                </code>
-                <button
-                  onClick={() => copyToClipboard(partner.referralUrl, 'assets-referral-link')}
-                  className="shrink-0 flex items-center gap-2 px-4 py-3 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors font-medium"
-                >
-                  {copiedId === 'assets-referral-link' ? (
-                    <>
-                      <Check className="w-5 h-5" />
-                      Copied!
-                    </>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Facebook Banner */}
+                <Card variant="default" className="p-4">
+                  <h3 className="font-medium text-sm mb-3 text-blue-400">Facebook</h3>
+                  {partner.bannerFacebookUrl ? (
+                    <div>
+                      <div className="relative aspect-video bg-white/5 rounded-lg overflow-hidden mb-3">
+                        <Image
+                          src={partner.bannerFacebookUrl}
+                          alt="Facebook Banner"
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                      <button
+                        onClick={() => downloadFile(partner.bannerFacebookUrl!, `${partner.referralSlug}-facebook.png`)}
+                        className="flex items-center justify-center gap-1 w-full py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors text-xs font-medium"
+                      >
+                        <Download className="w-3 h-3" /> Download
+                      </button>
+                    </div>
                   ) : (
-                    <>
-                      <Copy className="w-5 h-5" />
-                      Copy Link
-                    </>
+                    <div className="text-center py-4 text-white/30 text-xs">Not available</div>
                   )}
-                </button>
+                </Card>
+
+                {/* Facebook Co-branded */}
+                <Card variant="default" className="p-4">
+                  <h3 className="font-medium text-sm mb-3 text-blue-400">Facebook (Co-branded)</h3>
+                  {partner.bannerFacebookCobrandedUrl ? (
+                    <div>
+                      <div className="relative aspect-video bg-white/5 rounded-lg overflow-hidden mb-3">
+                        <Image
+                          src={partner.bannerFacebookCobrandedUrl}
+                          alt="Facebook Co-branded Banner"
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                      <button
+                        onClick={() => downloadFile(partner.bannerFacebookCobrandedUrl!, `${partner.referralSlug}-facebook-cobranded.png`)}
+                        className="flex items-center justify-center gap-1 w-full py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg transition-colors text-xs font-medium"
+                      >
+                        <Download className="w-3 h-3" /> Download
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 text-white/30 text-xs">Not available</div>
+                  )}
+                </Card>
+
+                {/* Twitter Banner */}
+                <Card variant="default" className="p-4">
+                  <h3 className="font-medium text-sm mb-3 text-cyan-400">Twitter/X</h3>
+                  {partner.bannerTwitterUrl ? (
+                    <div>
+                      <div className="relative aspect-video bg-white/5 rounded-lg overflow-hidden mb-3">
+                        <Image
+                          src={partner.bannerTwitterUrl}
+                          alt="Twitter Banner"
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                      <button
+                        onClick={() => downloadFile(partner.bannerTwitterUrl!, `${partner.referralSlug}-twitter.png`)}
+                        className="flex items-center justify-center gap-1 w-full py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg transition-colors text-xs font-medium"
+                      >
+                        <Download className="w-3 h-3" /> Download
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 text-white/30 text-xs">Not available</div>
+                  )}
+                </Card>
+
+                {/* Twitter Co-branded */}
+                <Card variant="default" className="p-4">
+                  <h3 className="font-medium text-sm mb-3 text-cyan-400">Twitter/X (Co-branded)</h3>
+                  {partner.bannerTwitterCobrandedUrl ? (
+                    <div>
+                      <div className="relative aspect-video bg-white/5 rounded-lg overflow-hidden mb-3">
+                        <Image
+                          src={partner.bannerTwitterCobrandedUrl}
+                          alt="Twitter Co-branded Banner"
+                          fill
+                          className="object-contain"
+                        />
+                      </div>
+                      <button
+                        onClick={() => downloadFile(partner.bannerTwitterCobrandedUrl!, `${partner.referralSlug}-twitter-cobranded.png`)}
+                        className="flex items-center justify-center gap-1 w-full py-2 bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 rounded-lg transition-colors text-xs font-medium"
+                      >
+                        <Download className="w-3 h-3" /> Download
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="text-center py-4 text-white/30 text-xs">Not available</div>
+                  )}
+                </Card>
               </div>
-            </Card>
+            </div>
           </div>
         )}
       </main>
 
-      {/* Preview Modal */}
+      {/* Email Preview Modal */}
       {previewTemplate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
           <div className="relative w-full max-w-3xl max-h-[90vh] bg-[#0F1123] border border-white/10 rounded-2xl overflow-hidden flex flex-col">
             {/* Modal Header */}
             <div className="flex items-center justify-between p-4 border-b border-white/10">
-              <h3 className="font-semibold">Email Preview</h3>
+              <div className="flex items-center gap-3">
+                <h3 className="font-semibold">Email Preview</h3>
+                <span className={`text-xs px-2 py-0.5 rounded flex items-center gap-1 ${
+                  emailFormat === 'plain'
+                    ? 'bg-emerald-500/20 text-emerald-400'
+                    : 'bg-blue-500/20 text-blue-400'
+                }`}>
+                  {emailFormat === 'plain' ? (
+                    <><FileText className="w-3 h-3" /> Plain Text</>
+                  ) : (
+                    <><FileCode className="w-3 h-3" /> HTML</>
+                  )}
+                </span>
+              </div>
               <button
                 onClick={() => setPreviewTemplate(null)}
                 className="p-2 hover:bg-white/10 rounded-lg transition-colors"
@@ -1557,7 +2107,11 @@ function DashboardContent() {
 
             {/* Body */}
             <div className="flex-1 overflow-auto p-4">
-              {previewTemplate.body_template.includes('<html') || previewTemplate.body_template.includes('<!DOCTYPE') ? (
+              {emailFormat === 'plain' ? (
+                <div className="whitespace-pre-wrap text-white/80 font-mono text-sm bg-white/5 p-4 rounded-lg">
+                  {getCleanTextFromHtml(replaceAllPlaceholders(previewTemplate.body_template))}
+                </div>
+              ) : previewTemplate.body_template.includes('<html') || previewTemplate.body_template.includes('<!DOCTYPE') ? (
                 <iframe
                   srcDoc={replaceAllPlaceholders(previewTemplate.body_template)}
                   className="w-full h-full min-h-[500px] bg-white rounded-lg"
@@ -1580,16 +2134,81 @@ function DashboardContent() {
               </button>
               <button
                 onClick={() => copyTemplateContent(previewTemplate, 'body')}
-                className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors text-sm"
+                className={`px-4 py-2 rounded-lg transition-colors text-sm ${
+                  emailFormat === 'plain'
+                    ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400'
+                    : 'bg-white/5 hover:bg-white/10'
+                }`}
               >
-                {copiedId === `body-${previewTemplate.segment}-${previewTemplate.sequence_step}` ? 'Copied!' : 'Copy Body'}
+                {copiedId === `body-${previewTemplate.segment}-${previewTemplate.sequence_step}`
+                  ? 'Copied!'
+                  : emailFormat === 'plain' ? 'Copy Plain Text' : 'Copy Body'}
               </button>
               <button
                 onClick={() => copyTemplateContent(previewTemplate, 'both')}
-                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors text-sm font-medium"
+                className={`px-4 py-2 rounded-lg transition-colors text-sm font-medium ${
+                  emailFormat === 'plain'
+                    ? 'bg-emerald-500 hover:bg-emerald-600'
+                    : 'bg-blue-500 hover:bg-blue-600'
+                }`}
               >
                 {copiedId === `both-${previewTemplate.segment}-${previewTemplate.sequence_step}` ? 'Copied!' : 'Copy Both'}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* PDF Preview Modal */}
+      {previewPdf && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="relative w-full max-w-5xl max-h-[95vh] bg-[#0F1123] border border-white/10 rounded-2xl overflow-hidden flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <FileText className="w-5 h-5 text-blue-400" />
+                <h3 className="font-semibold">{previewPdf.title}</h3>
+              </div>
+              <button
+                onClick={() => setPreviewPdf(null)}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* PDF Viewer */}
+            <div className="flex-1 overflow-auto bg-white/5">
+              <iframe
+                src={`${previewPdf.fileUrl}#toolbar=1&navpanes=0`}
+                className="w-full h-full min-h-[70vh]"
+                title={previewPdf.title}
+              />
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-between p-4 border-t border-white/10">
+              <p className="text-xs text-white/40">
+                Having trouble viewing? Click download to save the PDF.
+              </p>
+              <div className="flex items-center gap-3">
+                <a
+                  href={previewPdf.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors text-sm"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Open in New Tab
+                </a>
+                <button
+                  onClick={() => downloadFile(previewPdf.fileUrl, `${previewPdf.title}.pdf`)}
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors text-sm font-medium"
+                >
+                  <Download className="w-4 h-4" />
+                  Download PDF
+                </button>
+              </div>
             </div>
           </div>
         </div>

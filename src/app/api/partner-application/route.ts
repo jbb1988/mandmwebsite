@@ -657,8 +657,8 @@ export async function POST(request: NextRequest) {
                 We've created professionally written email templates you can use to promote Mind & Muscle to your network. Just copy, personalize, and send!
               </p>
               <div style="text-align: center; margin: 20px 0;">
-                <a href="https://mindandmuscle.ai/partner/email-templates" style="display: inline-block; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);">
-                  Browse Email Templates →
+                <a href="https://mindandmuscle.ai/partner/login" style="display: inline-block; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);">
+                  Open Partner Dashboard →
                 </a>
               </div>
               <div style="background: white; border-radius: 8px; padding: 15px; margin-top: 15px;">
@@ -673,45 +673,43 @@ export async function POST(request: NextRequest) {
             <div style="background: #fff3e0; border-left: 4px solid #fb923c; padding: 20px; margin: 30px 0; border-radius: 4px;">
               <h2 style="margin: 0 0 15px 0; font-size: 20px; color: #fb923c;">🚀 Access Your Partner Dashboard</h2>
               <p style="font-size: 15px; line-height: 1.6; color: #555; margin-bottom: 20px;">
-                Your partner account has been created! Here's how to access your dashboard:
+                Your partner account has been created! Access your dashboard with a simple login link:
               </p>
 
               <div style="background: #f0fdf4; border: 2px solid #22c55e; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
                 <p style="font-size: 16px; line-height: 1.6; color: #555; margin: 0 0 10px 0;">
-                  <strong style="color: #22c55e;">Step 1:</strong> Go to <a href="https://mind-and-muscle.tolt.io" style="color: #fb923c; text-decoration: none; font-weight: 600;">mind-and-muscle.tolt.io</a>
+                  <strong style="color: #22c55e;">Step 1:</strong> Go to <a href="https://mindandmuscle.ai/partner/login" style="color: #fb923c; text-decoration: none; font-weight: 600;">mindandmuscle.ai/partner/login</a>
                 </p>
                 <p style="font-size: 16px; line-height: 1.6; color: #555; margin: 0 0 10px 0;">
                   <strong style="color: #22c55e;">Step 2:</strong> Enter your email: <strong>${safeEmail}</strong>
                 </p>
-                <p style="font-size: 16px; line-height: 1.6; color: #555; margin: 0 0 10px 0;">
-                  <strong style="color: #22c55e;">Step 3:</strong> Check your email for an <strong>authentication code</strong> from Tolt
-                </p>
                 <p style="font-size: 16px; line-height: 1.6; color: #555; margin: 0;">
-                  <strong style="color: #22c55e;">Step 4:</strong> Enter the code in the Tolt portal to access your dashboard
+                  <strong style="color: #22c55e;">Step 3:</strong> Check your email for a <strong>magic login link</strong> and click it!
                 </p>
               </div>
 
               <div style="text-align: center; margin: 20px 0;">
-                <a href="https://mind-and-muscle.tolt.io" style="display: inline-block; background: linear-gradient(135deg, #fb923c 0%, #f97316 100%); color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; box-shadow: 0 4px 12px rgba(251, 146, 60, 0.4);">
+                <a href="https://mindandmuscle.ai/partner/login" style="display: inline-block; background: linear-gradient(135deg, #fb923c 0%, #f97316 100%); color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; box-shadow: 0 4px 12px rgba(251, 146, 60, 0.4);">
                   Access Partner Dashboard →
                 </a>
               </div>
 
               <p style="font-size: 14px; line-height: 1.6; color: #666; margin-top: 15px; font-style: italic; text-align: center;">
-                💡 No password needed - Tolt uses secure authentication codes for easy login!
+                💡 No password needed - we use secure magic links for easy login!
               </p>
             </div>
 
             <div style="background: #f8fafc; border-left: 4px solid #fb923c; padding: 20px; margin: 30px 0; border-radius: 4px;">
               <h2 style="margin: 0 0 15px 0; font-size: 20px; color: #fb923c;">📚 What You'll Find in Your Dashboard</h2>
               <ul style="font-size: 15px; line-height: 1.8; color: #555; margin: 10px 0;">
-                <li>🔗 Create additional referral links (track performance per link)</li>
-                <li>🎨 Logos, screenshots, and brand assets</li>
-                <li>📊 Real-time click and commission tracking</li>
-                <li>💰 Earnings and payout history</li>
+                <li>📊 <strong>Performance Overview</strong> - Earnings, referrals, and pending payouts</li>
+                <li>✉️ <strong>Email Templates</strong> - Ready-to-send outreach emails for every audience</li>
+                <li>📱 <strong>Social Media Posts</strong> - Copy-paste content for Instagram, X, TikTok & more</li>
+                <li>📂 <strong>Resources</strong> - PDFs, brand assets, and program guides</li>
+                <li>🎨 <strong>Your Assets</strong> - Custom banners, QR codes, and marketing materials</li>
               </ul>
               <p style="font-size: 14px; color: #666; margin-top: 15px; font-style: italic;">
-                💡 For email templates, use our <a href="https://mindandmuscle.ai/partner/email-templates" style="color: #8b5cf6; font-weight: 600;">dedicated templates page</a> with one-click copy!
+                💡 For detailed click tracking and payout history, you can also access your <a href="https://mind-and-muscle.tolt.io" style="color: #8b5cf6; font-weight: 600;">Tolt Dashboard</a>.
               </p>
             </div>
 
@@ -742,13 +740,14 @@ export async function POST(request: NextRequest) {
             ` : `
             <div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 20px; margin: 30px 0; border-radius: 4px;">
               <h2 style="margin: 0 0 15px 0; font-size: 20px; color: #22c55e;">🎯 Next Steps to Start Earning</h2>
+              <p style="font-size: 15px; line-height: 1.6; color: #555; margin-bottom: 15px;">
+                Your partner account is ready! Here's how to get started:
+              </p>
               <ol style="font-size: 15px; line-height: 1.8; color: #555; margin: 10px 0; padding-left: 20px;">
-                <li><strong>Go to the partner portal</strong> - Visit <a href="https://mind-and-muscle.tolt.io" style="color: #fb923c;">mind-and-muscle.tolt.io</a></li>
-                <li><strong>Enter your email</strong> - Use ${safeEmail} (the email you registered with)</li>
-                <li><strong>Check your email for auth code</strong> - Tolt will send you an authentication code (check spam if needed)</li>
-                <li><strong>Enter the code</strong> - Input the authentication code in the Tolt portal to access your dashboard</li>
-                <li><strong>Create your referral link</strong> - On the main dashboard, click "Create Link" in the Links section. In the popup, enter a custom value for your link (e.g., "john", "wildcats", or "dinger")</li>
-                <li><strong>Share your link</strong> - This is your unique referral link! Share it to earn 10% base + 15% bonus at 100+ users. You can also generate a QR code for it on our <a href="https://mindandmuscle.ai/partner-program" style="color: #fb923c;">partner program page</a></li>
+                <li><strong>Access your Partner Dashboard</strong> - Visit <a href="https://mindandmuscle.ai/partner/login" style="color: #fb923c;">mindandmuscle.ai/partner/login</a> to see your resources, email templates, and marketing materials</li>
+                <li><strong>Create your referral link</strong> - Go to your <a href="https://mind-and-muscle.tolt.io" style="color: #fb923c;">Tolt Dashboard</a>, click "Create Link" and enter a custom value (e.g., "john", "wildcats")</li>
+                <li><strong>Share your link</strong> - Post on social media, email your network, or add to your website</li>
+                <li><strong>Start earning</strong> - Earn 10% base + 15% bonus at 100+ users!</li>
               </ol>
               <p style="font-size: 14px; line-height: 1.6; color: #666; margin-top: 15px; font-style: italic;">
                 💡 Tip: Your referral link works immediately - no approval needed! Start earning as soon as you share it.

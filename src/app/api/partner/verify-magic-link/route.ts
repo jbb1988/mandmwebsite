@@ -92,10 +92,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Fetch partner's QR code from partner_banners
+    // Fetch partner's banners and QR code from partner_banners
     const { data: banners } = await supabase
       .from('partner_banners')
-      .select('qr_code_url, banner_url')
+      .select('qr_code_url, banner_partner_url, banner_facebook_url, banner_facebook_cobranded_url, banner_twitter_url, banner_twitter_cobranded_url')
       .eq('partner_email', session.partner_email)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -115,7 +115,11 @@ export async function POST(request: NextRequest) {
         referralSlug: partner.referral_slug,
         toltPartnerId: partner.tolt_partner_id,
         qrCodeUrl: banners?.qr_code_url || null,
-        bannerUrl: banners?.banner_url || null
+        bannerUrl: banners?.banner_partner_url || null,
+        bannerFacebookUrl: banners?.banner_facebook_url || null,
+        bannerFacebookCobrandedUrl: banners?.banner_facebook_cobranded_url || null,
+        bannerTwitterUrl: banners?.banner_twitter_url || null,
+        bannerTwitterCobrandedUrl: banners?.banner_twitter_cobranded_url || null
       }
     });
 
@@ -174,10 +178,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Fetch partner's QR code
+    // Fetch partner's banners and QR code
     const { data: banners } = await supabase
       .from('partner_banners')
-      .select('qr_code_url, banner_url')
+      .select('qr_code_url, banner_partner_url, banner_facebook_url, banner_facebook_cobranded_url, banner_twitter_url, banner_twitter_cobranded_url')
       .eq('partner_email', email)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -193,7 +197,11 @@ export async function GET(request: NextRequest) {
         referralSlug: partner.referral_slug,
         toltPartnerId: partner.tolt_partner_id,
         qrCodeUrl: banners?.qr_code_url || null,
-        bannerUrl: banners?.banner_url || null
+        bannerUrl: banners?.banner_partner_url || null,
+        bannerFacebookUrl: banners?.banner_facebook_url || null,
+        bannerFacebookCobrandedUrl: banners?.banner_facebook_cobranded_url || null,
+        bannerTwitterUrl: banners?.banner_twitter_url || null,
+        bannerTwitterCobrandedUrl: banners?.banner_twitter_cobranded_url || null
       }
     });
 

@@ -1151,7 +1151,7 @@ export default function PartnerProgramPage() {
 
               {/* Message */}
               <p className="text-lg sm:text-xl text-gray-300 mb-6 leading-relaxed">
-                You're in! Your referral link and marketing materials are ready.
+                You&apos;re in! Your Partner Dashboard is ready with all your marketing materials.
               </p>
 
               {/* Info Cards */}
@@ -1160,9 +1160,9 @@ export default function PartnerProgramPage() {
                   <div className="flex items-start gap-3">
                     <Check className="w-5 h-5 text-neon-cortex-green flex-shrink-0 mt-0.5" />
                     <div>
-                      <h3 className="font-bold text-sm mb-1">Your Referral Link is Ready</h3>
+                      <h3 className="font-bold text-sm mb-1">Partner Dashboard Ready</h3>
                       <p className="text-xs text-text-secondary">
-                        We've automatically created your unique referral link. Check your email!
+                        Access email templates, social posts, banners, and track your earnings at <strong>mindandmuscle.ai/partner/login</strong>
                       </p>
                     </div>
                   </div>
@@ -1220,7 +1220,7 @@ export default function PartnerProgramPage() {
                     <span className="flex-shrink-0 w-6 h-6 rounded-full bg-neon-cortex-green/20 flex items-center justify-center">
                       <Check className="w-3 h-3 text-neon-cortex-green" />
                     </span>
-                    <span><strong>Dashboard access</strong> - Track clicks, conversions, and commissions</span>
+                    <span><strong>Partner Dashboard login</strong> - All your resources, templates, and earnings in one place</span>
                   </li>
                 </ul>
               </div>
@@ -1232,16 +1232,23 @@ export default function PartnerProgramPage() {
                 </p>
               </div>
 
-              {/* CTA Button */}
-              <LiquidButton
-                onClick={() => setShowSuccessModal(false)}
-                variant="orange"
-                size="lg"
-                fullWidth={true}
-                className="!bg-gradient-to-r !from-solar-surge-orange !to-muscle-primary"
-              >
-                Got It - Check My Email
-              </LiquidButton>
+              {/* CTA Buttons */}
+              <div className="space-y-3">
+                <a
+                  href="https://mindandmuscle.ai/partner/login"
+                  className="block w-full py-4 px-6 bg-gradient-to-r from-solar-surge-orange to-muscle-primary hover:from-solar-surge-orange/90 hover:to-muscle-primary/90 text-white font-bold text-lg rounded-xl transition-all text-center"
+                >
+                  Go to Partner Dashboard →
+                </a>
+                <LiquidButton
+                  onClick={() => setShowSuccessModal(false)}
+                  variant="blue"
+                  size="lg"
+                  fullWidth={true}
+                >
+                  Close & Check My Email
+                </LiquidButton>
+              </div>
             </div>
           </LiquidGlass>
         </div>
