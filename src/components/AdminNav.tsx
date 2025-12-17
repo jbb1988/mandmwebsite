@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Facebook, Twitter, Users, DollarSign,
-  Image, FolderOpen, Tag, Clock, Mail
+  Image, FolderOpen, Tag, Clock, Mail, UserCircle
 } from 'lucide-react';
 
 const adminLinks = [
@@ -14,6 +14,7 @@ const adminLinks = [
   { href: '/admin/x-outreach', label: 'X Outreach', icon: Twitter },
   { href: '/admin/finder-fees', label: 'Finder Fees', icon: DollarSign },
   { href: '/admin/partners', label: 'Partners', icon: Users },
+  { href: '/admin/users', label: 'Users', icon: UserCircle },
   { href: '/admin/promo-codes', label: 'Promo Codes', icon: Tag },
   { href: '/admin/trials', label: 'Trials', icon: Clock },
   { href: '/admin/banner-generator', label: 'Banners', icon: Image },

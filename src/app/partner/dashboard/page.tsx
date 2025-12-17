@@ -52,7 +52,9 @@ import {
   Grid3X3,
   ChevronDown,
   Upload,
-  MousePointerClick
+  MousePointerClick,
+  Wallet,
+  FileDown
 } from 'lucide-react';
 
 // Types
@@ -78,6 +80,15 @@ interface Metrics {
   totalReferrals: number;
   totalClicks: number;
   lastUpdated: string;
+}
+
+interface EarningsTransaction {
+  id: string;
+  date: string;
+  amount: number;
+  status: 'pending' | 'approved' | 'paid' | 'rejected';
+  customerEmail?: string;
+  paidAt?: string;
 }
 
 interface Template {
@@ -212,6 +223,7 @@ function StatCard({ label, value, icon, color = 'blue' }: {
 // Tab definitions
 const TABS = [
   { id: 'overview', label: 'Overview', icon: Home },
+  { id: 'earnings', label: 'Earnings', icon: Wallet },
   { id: 'templates', label: 'Email Templates', icon: Mail },
   { id: 'social', label: 'Social Media', icon: Share2 },
   { id: 'images', label: 'Social Images', icon: Sparkles },
@@ -628,6 +640,11 @@ function DashboardContent() {
   const [isRegeneratingBanners, setIsRegeneratingBanners] = useState(false);
   const [bannerRegenerateMessage, setBannerRegenerateMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  // Earnings history state
+  const [earningsHistory, setEarningsHistory] = useState<EarningsTransaction[]>([]);
+  const [earningsLoading, setEarningsLoading] = useState(false);
+  const [earningsFilter, setEarningsFilter] = useState<'all' | 'pending' | 'approved' | 'paid'>('all');
+
   // Check auth and verify magic link token if present
   useEffect(() => {
     const checkAuthAndVerifyToken = async () => {
@@ -914,6 +931,61 @@ function DashboardContent() {
       fetchSocialImageTemplates();
     }
   }, [activeTab, socialImageTemplates.length]);
+
+  // Fetch earnings history when tab is active
+  useEffect(() => {
+    if (activeTab === 'earnings' && earningsHistory.length === 0 && partner?.email) {
+      fetchEarningsHistory();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, partner?.email]);
+
+  // Fetch earnings history
+  const fetchEarningsHistory = async () => {
+    if (!partner?.email) return;
+    setEarningsLoading(true);
+    try {
+      const response = await fetch('/api/partner/metrics', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: partner.email, includeTransactions: true }),
+      });
+      const data = await response.json();
+      if (response.ok && data.earningsHistory) {
+        setEarningsHistory(data.earningsHistory);
+      }
+    } catch (err) {
+      console.error('Failed to fetch earnings history:', err);
+    } finally {
+      setEarningsLoading(false);
+    }
+  };
+
+  // Export earnings to CSV
+  const exportEarningsCSV = () => {
+    const filteredTransactions = earningsFilter === 'all'
+      ? earningsHistory
+      : earningsHistory.filter(t => t.status === earningsFilter);
+
+    const csvContent = [
+      ['Date', 'Amount', 'Status', 'Customer', 'Paid Date'].join(','),
+      ...filteredTransactions.map(t => [
+        new Date(t.date).toLocaleDateString(),
+        `$${t.amount.toFixed(2)}`,
+        t.status.charAt(0).toUpperCase() + t.status.slice(1),
+        t.customerEmail || 'N/A',
+        t.paidAt ? new Date(t.paidAt).toLocaleDateString() : 'N/A',
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `earnings-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   // Fetch social image templates
   const fetchSocialImageTemplates = async () => {
@@ -1611,6 +1683,160 @@ function DashboardContent() {
                     </div>
                   </div>
                 </div>
+              </div>
+            </Card>
+          </div>
+        )}
+
+        {/* Earnings Tab */}
+        {activeTab === 'earnings' && (
+          <div className="space-y-6">
+            {/* Header with Summary */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <Wallet className="w-5 h-5 text-emerald-400" />
+                  Earnings History
+                </h2>
+                <p className="text-sm text-white/50 mt-1">
+                  Track your commissions and payment status
+                </p>
+              </div>
+              <button
+                onClick={exportEarningsCSV}
+                disabled={earningsHistory.length === 0}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <FileDown className="w-4 h-4" />
+                Export CSV
+              </button>
+            </div>
+
+            {/* Quick Stats */}
+            <div className="grid grid-cols-3 gap-4">
+              <Card variant="elevated" className="p-4 text-center">
+                <DollarSign className="w-5 h-5 text-emerald-400 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-white">${(metrics?.totalEarnings || 0).toFixed(2)}</p>
+                <p className="text-xs text-white/50">Total Earned</p>
+              </Card>
+              <Card variant="elevated" className="p-4 text-center">
+                <Clock className="w-5 h-5 text-amber-400 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-amber-400">${(metrics?.pendingPayout || 0).toFixed(2)}</p>
+                <p className="text-xs text-white/50">Pending</p>
+              </Card>
+              <Card variant="elevated" className="p-4 text-center">
+                <Users className="w-5 h-5 text-blue-400 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-white">{metrics?.totalReferrals || 0}</p>
+                <p className="text-xs text-white/50">Referrals</p>
+              </Card>
+            </div>
+
+            {/* Filter Buttons */}
+            <div className="flex gap-2 flex-wrap">
+              {(['all', 'pending', 'approved', 'paid'] as const).map(status => (
+                <button
+                  key={status}
+                  onClick={() => setEarningsFilter(status)}
+                  className={`px-3 py-1.5 text-sm rounded-lg border transition-colors ${
+                    earningsFilter === status
+                      ? 'bg-white/10 border-white/20 text-white'
+                      : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
+                  }`}
+                >
+                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                </button>
+              ))}
+            </div>
+
+            {/* Transactions Table */}
+            <Card variant="bordered" className="overflow-hidden">
+              {earningsLoading ? (
+                <div className="p-12 text-center">
+                  <Loader2 className="w-8 h-8 text-white/40 animate-spin mx-auto" />
+                  <p className="text-white/50 mt-3">Loading earnings history...</p>
+                </div>
+              ) : earningsHistory.length === 0 ? (
+                <div className="p-12 text-center">
+                  <Wallet className="w-12 h-12 text-white/20 mx-auto mb-4" />
+                  <p className="text-white/50">No earnings yet</p>
+                  <p className="text-sm text-white/30 mt-1">
+                    Start sharing your referral link to earn commissions!
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-white/5">
+                      <tr className="text-left text-white/50">
+                        <th className="px-4 py-3 font-medium">Date</th>
+                        <th className="px-4 py-3 font-medium">Amount</th>
+                        <th className="px-4 py-3 font-medium">Status</th>
+                        <th className="px-4 py-3 font-medium hidden sm:table-cell">Customer</th>
+                        <th className="px-4 py-3 font-medium hidden md:table-cell">Paid Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {(earningsFilter === 'all'
+                        ? earningsHistory
+                        : earningsHistory.filter(t => t.status === earningsFilter)
+                      ).map(transaction => (
+                        <tr key={transaction.id} className="hover:bg-white/[0.02] transition-colors">
+                          <td className="px-4 py-3 text-white">
+                            {new Date(transaction.date).toLocaleDateString()}
+                          </td>
+                          <td className="px-4 py-3 font-medium text-white">
+                            ${transaction.amount.toFixed(2)}
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-medium ${
+                              transaction.status === 'paid'
+                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                                : transaction.status === 'approved'
+                                ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                                : transaction.status === 'pending'
+                                ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                                : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                            }`}>
+                              <span className={`w-1.5 h-1.5 rounded-full ${
+                                transaction.status === 'paid'
+                                  ? 'bg-emerald-400'
+                                  : transaction.status === 'approved'
+                                  ? 'bg-blue-400'
+                                  : transaction.status === 'pending'
+                                  ? 'bg-amber-400'
+                                  : 'bg-red-400'
+                              }`} />
+                              {transaction.status.charAt(0).toUpperCase() + transaction.status.slice(1)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-white/50 hidden sm:table-cell">
+                            {transaction.customerEmail || '—'}
+                          </td>
+                          <td className="px-4 py-3 text-white/50 hidden md:table-cell">
+                            {transaction.paidAt ? new Date(transaction.paidAt).toLocaleDateString() : '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {(earningsFilter !== 'all' &&
+                    earningsHistory.filter(t => t.status === earningsFilter).length === 0) && (
+                    <div className="p-8 text-center">
+                      <p className="text-white/50">No {earningsFilter} transactions</p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </Card>
+
+            {/* Payout Info */}
+            <Card variant="bordered" className="p-5">
+              <h3 className="text-sm font-semibold text-white mb-3">Payout Information</h3>
+              <div className="space-y-2 text-sm text-white/60">
+                <p>• Commissions are tracked automatically through your referral link</p>
+                <p>• Pending commissions become approved after the customer&apos;s refund period expires</p>
+                <p>• Payouts are processed monthly via PayPal or bank transfer</p>
+                <p>• Minimum payout threshold: $50</p>
               </div>
             </Card>
           </div>

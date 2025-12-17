@@ -27,6 +27,20 @@ interface ToltCommission {
   partner_id: string;
   transaction_id: string;
   created_at: string;
+  paid_at?: string;
+  customer?: {
+    email?: string;
+    name?: string;
+  };
+}
+
+interface EarningsTransaction {
+  id: string;
+  date: string;
+  amount: number;
+  status: 'pending' | 'approved' | 'paid' | 'rejected';
+  customerEmail?: string;
+  paidAt?: string;
 }
 
 interface ToltClick {
@@ -56,7 +70,7 @@ async function fetchFromTolt(endpoint: string, params: Record<string, string> = 
 
 export async function POST(request: NextRequest) {
   try {
-    const { email } = await request.json();
+    const { email, includeTransactions } = await request.json();
 
     if (!email) {
       return NextResponse.json(
@@ -113,6 +127,7 @@ export async function POST(request: NextRequest) {
     let pendingPayout = 0;
     let totalReferrals = 0;
     let totalClicks = 0;
+    let earningsHistory: EarningsTransaction[] = [];
 
     try {
       // Fetch commissions
@@ -122,15 +137,41 @@ export async function POST(request: NextRequest) {
 
       const commissions: ToltCommission[] = commissionsData.data || commissionsData || [];
 
-      // Calculate earnings
+      // Calculate earnings and build transaction history
       commissions.forEach((commission: ToltCommission) => {
         const amount = commission.amount / 100; // Convert cents to dollars
+        let status: EarningsTransaction['status'] = 'pending';
+
         if (commission.status === 'Approved') {
           totalEarnings += amount;
+          status = 'approved';
         } else if (commission.status === 'Pending') {
           pendingPayout += amount;
+          status = 'pending';
+        } else if (commission.status === 'Paid') {
+          totalEarnings += amount;
+          status = 'paid';
+        } else if (commission.status === 'Rejected') {
+          status = 'rejected';
+        }
+
+        // Build transaction record for history
+        if (includeTransactions) {
+          earningsHistory.push({
+            id: commission.id,
+            date: commission.created_at,
+            amount,
+            status,
+            customerEmail: commission.customer?.email,
+            paidAt: commission.paid_at,
+          });
         }
       });
+
+      // Sort transactions by date (newest first)
+      if (includeTransactions) {
+        earningsHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      }
 
       // Fetch transactions to count referrals
       const transactionsData = await fetchFromTolt('/transactions', {
@@ -184,13 +225,27 @@ export async function POST(request: NextRequest) {
         onConflict: 'partner_email',
       });
 
-    return NextResponse.json({
+    const response: {
+      totalEarnings: number;
+      pendingPayout: number;
+      totalReferrals: number;
+      totalClicks: number;
+      lastUpdated: string;
+      earningsHistory?: EarningsTransaction[];
+    } = {
       totalEarnings,
       pendingPayout,
       totalReferrals,
       totalClicks,
       lastUpdated: new Date().toISOString(),
-    });
+    };
+
+    // Include transaction history if requested
+    if (includeTransactions) {
+      response.earningsHistory = earningsHistory;
+    }
+
+    return NextResponse.json(response);
 
   } catch (error) {
     console.error('Error in partner metrics:', error);
