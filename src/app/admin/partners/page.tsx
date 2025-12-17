@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import AdminGate from '@/components/AdminGate';
 import AdminNav from '@/components/AdminNav';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import {
   Users, RefreshCw, Trash2, Search, ExternalLink, CheckCircle, XCircle,
   AlertTriangle, Mail, Calendar, Link2, Image, ChevronDown, ChevronUp
@@ -54,7 +55,8 @@ export default function AdminPartnersPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [expandedPartner, setExpandedPartner] = useState<string | null>(null);
 
-  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || '';
+  const { getPassword } = useAdminAuth();
+  const adminPassword = getPassword();
 
   useEffect(() => {
     fetchPartners();
@@ -174,7 +176,7 @@ export default function AdminPartnersPage() {
 
   return (
     <AdminGate>
-      <div className="min-h-screen bg-[#0A0B14] pt-20">
+      <div className="min-h-screen bg-[#0A0B14] pt-28">
         <AdminNav />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
