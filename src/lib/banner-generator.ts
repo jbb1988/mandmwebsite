@@ -10,10 +10,10 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Load font for satori
+// Load font for satori (must be TTF/OTF, not WOFF/WOFF2)
 async function loadFont(): Promise<ArrayBuffer> {
-  // Use Inter font from Google Fonts CDN
-  const fontUrl = 'https://fonts.gstatic.com/s/inter/v13/UcC73FwrK3iLTeHuS_fvQtMwCp50KnMa1ZL7.woff2';
+  // Use Inter font TTF from GitHub (satori doesn't support WOFF2)
+  const fontUrl = 'https://github.com/rsms/inter/raw/master/docs/font-files/Inter-Bold.otf';
   const response = await fetch(fontUrl);
   return await response.arrayBuffer();
 }
