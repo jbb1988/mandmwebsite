@@ -373,7 +373,7 @@ export default function PartnerEmailTemplatesPage() {
         </div>
       </header>
 
-      <main className="relative z-10 max-w-6xl mx-auto px-4 py-8">
+      <main className="relative z-10 max-w-6xl mx-auto px-4 pt-24 pb-8">
         {/* Partner Info + Recipient Info Row */}
         <div className="grid md:grid-cols-2 gap-4 mb-8">
           {/* Your Info */}
