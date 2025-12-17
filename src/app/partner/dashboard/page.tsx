@@ -186,55 +186,55 @@ const TABS = [
   { id: 'assets', label: 'Your Assets', icon: ImageIcon },
 ];
 
-// Static resources (will be dynamic from Supabase later)
+// Static resources from Supabase storage
 const STATIC_RESOURCES: Resource[] = [
   {
     id: '1',
     title: 'Pro Tips & Usage Guidelines',
     category: 'pdf',
-    fileUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/partner-resources/pdfs/pro-tips-usage-guidelines.pdf',
+    fileUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/partner-resources/Pro_Tips___Usage_Guidelines.pdf',
     description: 'Best practices for promoting Mind & Muscle',
   },
   {
     id: '2',
     title: 'Partner Program Overview',
     category: 'pdf',
-    fileUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/partner-resources/pdfs/partner-program-overview.pdf',
+    fileUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/partner-resources/Partner_Program_Overview.pdf',
     description: 'Complete guide to the partner program',
   },
   {
     id: '3',
     title: 'Community Support Program',
     category: 'pdf',
-    fileUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/partner-resources/pdfs/community-support-program.pdf',
+    fileUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/partner-resources/Community-Support-Program..pdf',
     description: 'How to leverage community partnerships',
   },
   {
     id: '4',
     title: 'League Partnership Program',
     category: 'pdf',
-    fileUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/partner-resources/pdfs/league-partnership-program.pdf',
+    fileUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/partner-resources/League-Partnership-Program.pdf',
     description: 'Guide for league-level partnerships',
   },
   {
     id: '5',
     title: 'Scholarship Athlete Program',
     category: 'pdf',
-    fileUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/partner-resources/pdfs/scholarship-athlete-program.pdf',
+    fileUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/partner-resources/Scholarship-Athlete-Program.pdf',
     description: 'Supporting athletes through scholarships',
   },
   {
     id: '6',
     title: 'Mind & Muscle Logo',
     category: 'brand',
-    fileUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/media-thumbnails/New%20MM%20Logo-transparent%20(1).png',
+    fileUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/partner-resources/Mind_and_Muscle_Logo.png',
     description: 'Official logo (PNG, transparent)',
   },
   {
     id: '7',
     title: 'Brand Colors',
     category: 'brand',
-    fileUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/partner-resources/brand/brand-colors.png',
+    fileUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/partner-resources/1760027339403-Brand_Colors.png',
     description: 'Official brand color palette',
   },
 ];
@@ -257,7 +257,7 @@ Mind & Muscle's Swing Lab analyzes your video and gives you real feedback on:
 
 It's like having a hitting coach who watches every rep.
 
-Try it free: {referral_link}`,
+Check it out: {referral_link}`,
     hashtags: ['BaseballTraining', 'SwingAnalysis', 'HittingCoach', 'YouthBaseball'],
   },
   {
@@ -486,7 +486,7 @@ All from their phone: {referral_link}`,
 - And more...
 
 One subscription. Everything: {referral_link}`,
-    hashtags: ['AllInOne', 'BaseballApp', 'ValueForMoney', 'TryItFree'],
+    hashtags: ['AllInOne', 'BaseballApp', 'ValueForMoney', 'GetStarted'],
   },
   {
     id: 'c2',
@@ -1134,6 +1134,7 @@ function DashboardContent() {
                           width={100}
                           height={100}
                           className="w-24 h-24"
+                          unoptimized
                         />
                       </div>
                       <button
@@ -1153,6 +1154,7 @@ function DashboardContent() {
                           alt="Partner Banner"
                           fill
                           className="object-cover"
+                          unoptimized
                         />
                       </div>
                       <button
@@ -1490,31 +1492,34 @@ function DashboardContent() {
             </Card>
 
             {/* Email Format Toggle */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <h2 className="text-lg font-semibold">Email Templates</h2>
-              <div className="flex items-center gap-2 bg-white/5 p-1 rounded-lg">
-                <button
-                  onClick={() => setEmailFormat('html')}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                    emailFormat === 'html'
-                      ? 'bg-blue-500 text-white'
-                      : 'text-white/50 hover:text-white'
-                  }`}
-                >
-                  <FileCode className="w-4 h-4" />
-                  HTML
-                </button>
-                <button
-                  onClick={() => setEmailFormat('plain')}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                    emailFormat === 'plain'
-                      ? 'bg-blue-500 text-white'
-                      : 'text-white/50 hover:text-white'
-                  }`}
-                >
-                  <FileText className="w-4 h-4" />
-                  Plain Text
-                </button>
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-white/50">Format:</span>
+                <div className="flex items-center gap-1 bg-white/10 p-1.5 rounded-xl border border-white/10">
+                  <button
+                    onClick={() => setEmailFormat('html')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      emailFormat === 'html'
+                        ? 'bg-blue-500 text-white shadow-lg shadow-blue-500/30'
+                        : 'text-white/60 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <FileCode className="w-4 h-4" />
+                    HTML
+                  </button>
+                  <button
+                    onClick={() => setEmailFormat('plain')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                      emailFormat === 'plain'
+                        ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30'
+                        : 'text-white/60 hover:text-white hover:bg-white/5'
+                    }`}
+                  >
+                    <FileText className="w-4 h-4" />
+                    Plain Text
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -1902,6 +1907,7 @@ function DashboardContent() {
                         alt="Partner Banner"
                         fill
                         className="object-contain"
+                        unoptimized
                       />
                     </div>
                     <button
@@ -1936,6 +1942,7 @@ function DashboardContent() {
                           width={200}
                           height={200}
                           className="w-48 h-48"
+                          unoptimized
                         />
                       </div>
                     </div>
@@ -1977,6 +1984,7 @@ function DashboardContent() {
                           alt="Facebook Banner"
                           fill
                           className="object-contain"
+                          unoptimized
                         />
                       </div>
                       <button
@@ -2002,6 +2010,7 @@ function DashboardContent() {
                           alt="Facebook Co-branded Banner"
                           fill
                           className="object-contain"
+                          unoptimized
                         />
                       </div>
                       <button
@@ -2027,6 +2036,7 @@ function DashboardContent() {
                           alt="Twitter Banner"
                           fill
                           className="object-contain"
+                          unoptimized
                         />
                       </div>
                       <button
@@ -2052,6 +2062,7 @@ function DashboardContent() {
                           alt="Twitter Co-branded Banner"
                           fill
                           className="object-contain"
+                          unoptimized
                         />
                       </div>
                       <button
