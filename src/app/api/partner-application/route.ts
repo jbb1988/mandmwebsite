@@ -624,16 +624,29 @@ export async function POST(request: NextRequest) {
               </div>
 
               <div style="background: #f0f9ff; border: 2px dashed #3b82f6; padding: 20px; margin-top: 20px; border-radius: 8px;">
-                <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #3b82f6;">🌟 Want Co-Branded Banners?</h3>
+                <h3 style="margin: 0 0 15px 0; font-size: 18px; color: #3b82f6;">🌟 Want Co-Branded Banners With YOUR Logo?</h3>
                 <p style="font-size: 14px; line-height: 1.6; color: #555; margin-bottom: 15px;">
-                  Send us your logo and we'll create personalized co-branded banners featuring YOUR branding alongside Mind & Muscle. Here's an example:
+                  We can create personalized <strong>co-branded banners</strong> featuring YOUR organization's logo alongside Mind & Muscle! These are perfect for building trust with your audience.
+                </p>
+                <p style="font-size: 14px; line-height: 1.6; color: #555; margin-bottom: 15px;">
+                  <strong>Here's an example of what your co-branded banner could look like:</strong>
                 </p>
                 <div style="text-align: center; margin-bottom: 15px;">
-                  <img src="${sampleCoBrandedBannerUrl}" alt="Sample Co-Branded Banner" style="max-width: 100%; border-radius: 8px; border: 1px solid #e5e7eb;" />
+                  <a href="${sampleCoBrandedBannerUrl}" target="_blank" style="display: inline-block;">
+                    <img src="${sampleCoBrandedBannerUrl}" alt="Click to view sample co-branded banner with partner logo" style="max-width: 100%; height: auto; border-radius: 8px; border: 2px solid #3b82f6;" />
+                  </a>
                 </div>
-                <p style="font-size: 13px; color: #666; margin: 0; text-align: center;">
-                  📧 Reply to this email with your logo (PNG or JPG, at least 200x200px) and we'll create your custom banners!
+                <p style="font-size: 12px; color: #888; margin-bottom: 15px; text-align: center; font-style: italic;">
+                  (If the image doesn't load, <a href="${sampleCoBrandedBannerUrl}" target="_blank" style="color: #3b82f6;">click here to view the sample</a>)
                 </p>
+                <div style="background: #dbeafe; padding: 15px; border-radius: 8px; text-align: center;">
+                  <p style="font-size: 15px; color: #1e40af; margin: 0; font-weight: 600;">
+                    📧 Just reply to this email with your logo!
+                  </p>
+                  <p style="font-size: 13px; color: #3b82f6; margin: 10px 0 0 0;">
+                    Send us a PNG or JPG (at least 200x200px) and we'll create your custom co-branded banners for Facebook, X/Twitter, and more!
+                  </p>
+                </div>
               </div>
             </div>
             ` : ''}
