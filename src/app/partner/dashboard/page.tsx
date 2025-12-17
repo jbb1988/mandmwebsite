@@ -50,7 +50,8 @@ import {
   RefreshCw,
   Filter,
   Grid3X3,
-  ChevronDown
+  ChevronDown,
+  Upload
 } from 'lucide-react';
 
 // Types
@@ -61,6 +62,7 @@ interface Partner {
   referralUrl: string;
   referralSlug: string;
   toltPartnerId: string | null;
+  logoUrl: string | null;
   qrCodeUrl: string | null;
   bannerUrl: string | null;
   bannerFacebookUrl: string | null;
@@ -615,12 +617,14 @@ function DashboardContent() {
 
   // Social Images state
   const [socialImageTemplates, setSocialImageTemplates] = useState<SocialImageTemplate[]>([]);
-  const [generatedImages, setGeneratedImages] = useState<GeneratedSocialImage[]>([]);
-  const [isGeneratingImages, setIsGeneratingImages] = useState(false);
   const [imagesCategoryFilter, setImagesCategoryFilter] = useState<string | null>(null);
   const [selectedImageTemplate, setSelectedImageTemplate] = useState<SocialImageTemplate | null>(null);
-  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
   const [downloadFormat, setDownloadFormat] = useState<string>('feed_square');
+
+  // Logo upload and banner regeneration state
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [isRegeneratingBanners, setIsRegeneratingBanners] = useState(false);
+  const [bannerRegenerateMessage, setBannerRegenerateMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // Check auth and verify magic link token if present
   useEffect(() => {
@@ -915,52 +919,9 @@ function DashboardContent() {
       if (response.ok) {
         const data = await response.json();
         setSocialImageTemplates(data.templates || []);
-        setGeneratedImages(data.existingImages || []);
       }
     } catch (err) {
       console.error('Error fetching social image templates:', err);
-    }
-  };
-
-  // Generate social images
-  const generateSocialImages = async (templateIds?: string[]) => {
-    setIsGeneratingImages(true);
-    try {
-      const response = await fetch('/api/partner/generate-social-images', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          templateIds,
-          formats: ['feed_square', 'feed_portrait', 'story', 'twitter', 'linkedin'],
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setGeneratedImages(data.images || []);
-      }
-    } catch (err) {
-      console.error('Error generating social images:', err);
-    } finally {
-      setIsGeneratingImages(false);
-    }
-  };
-
-  // Generate preview image
-  const generatePreview = async (templateId: string, format: string = 'feed_square') => {
-    try {
-      const response = await fetch('/api/partner/generate-social-images', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ templateId, format }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setImagePreviewUrl(data.preview);
-      }
-    } catch (err) {
-      console.error('Error generating preview:', err);
     }
   };
 
@@ -970,12 +931,85 @@ function DashboardContent() {
     return template.category === imagesCategoryFilter;
   });
 
-  // Get existing generated image URL for a template
-  const getGeneratedImageUrl = (templateId: string, format: string): string | null => {
-    const image = generatedImages.find(
-      img => img.templateId === templateId && img.format === format
-    );
-    return image?.url || null;
+  // Get static image URL for a template (all images are pre-generated)
+  const getStaticImageUrl = (templateId: string, format: string): string => {
+    return `https://kuswlvbjplkgrqlmqtok.supabase.co/storage/v1/object/public/social-images/${templateId}-${format}.png`;
+  };
+
+  // Handle logo file selection
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setBannerRegenerateMessage({ type: 'error', text: 'Please select an image file (PNG, JPG, etc.)' });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setBannerRegenerateMessage({ type: 'error', text: 'Image must be less than 5MB' });
+      return;
+    }
+
+    // Read file as data URL
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setLogoPreview(e.target?.result as string);
+      setBannerRegenerateMessage(null);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Regenerate banners with logo
+  const regenerateBanners = async () => {
+    if (!logoPreview && !partner?.logoUrl) {
+      setBannerRegenerateMessage({ type: 'error', text: 'Please upload a logo first' });
+      return;
+    }
+
+    setIsRegeneratingBanners(true);
+    setBannerRegenerateMessage(null);
+
+    try {
+      const response = await fetch('/api/partner/regenerate-banners', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ logoDataUrl: logoPreview }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to regenerate banners');
+      }
+
+      // Update partner state with new banner URLs
+      if (partner) {
+        setPartner({
+          ...partner,
+          logoUrl: data.logoUrl,
+          qrCodeUrl: data.banners.qrCodeUrl,
+          bannerUrl: data.banners.bannerUrl,
+          bannerFacebookUrl: data.banners.bannerFacebookUrl,
+          bannerFacebookCobrandedUrl: data.banners.bannerFacebookCobrandedUrl,
+          bannerTwitterUrl: data.banners.bannerTwitterUrl,
+          bannerTwitterCobrandedUrl: data.banners.bannerTwitterCobrandedUrl,
+        });
+      }
+
+      setLogoPreview(null);
+      setBannerRegenerateMessage({ type: 'success', text: 'Banners generated successfully! Scroll down to see your new co-branded banners.' });
+    } catch (err) {
+      console.error('Error regenerating banners:', err);
+      setBannerRegenerateMessage({
+        type: 'error',
+        text: err instanceof Error ? err.message : 'Failed to regenerate banners. Please try again.'
+      });
+    } finally {
+      setIsRegeneratingBanners(false);
+    }
   };
 
   // Image category info
@@ -1922,33 +1956,14 @@ function DashboardContent() {
         {activeTab === 'images' && (
           <div className="space-y-6">
             {/* Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-purple-400" />
-                  Professional Social Images
-                </h2>
-                <p className="text-sm text-white/50 mt-1">
-                  Agency-quality graphics for your social media. No visible links - just scan the QR code.
-                </p>
-              </div>
-              <button
-                onClick={() => generateSocialImages()}
-                disabled={isGeneratingImages}
-                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isGeneratingImages ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="w-4 h-4" />
-                    Generate All Images
-                  </>
-                )}
-              </button>
+            <div>
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-purple-400" />
+                Professional Social Images
+              </h2>
+              <p className="text-sm text-white/50 mt-1">
+                Agency-quality graphics ready to download. Post to social media and add your referral link.
+              </p>
             </div>
 
             {/* Info Banner */}
@@ -1958,10 +1973,12 @@ function DashboardContent() {
                   <Sparkles className="w-5 h-5 text-purple-400" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-sm text-purple-300">Why Images Work Better</h3>
+                  <h3 className="font-medium text-sm text-purple-300">How to Use These Images</h3>
                   <p className="text-xs text-white/60 mt-1">
-                    Text referral links trigger sales resistance. These professional images with embedded QR codes
-                    get 2-3x more engagement and feel like content, not advertising.
+                    <strong className="text-white/80">1. Download</strong> - Choose a template and select your platform size.{' '}
+                    <strong className="text-white/80">2. Post</strong> - Share to Instagram, Facebook, Twitter, or LinkedIn.{' '}
+                    <strong className="text-white/80">3. Add your link</strong> - Put your referral URL in the post caption or bio.
+                    Images get 2-3x more engagement than text links!
                   </p>
                 </div>
               </div>
@@ -1998,7 +2015,6 @@ function DashboardContent() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredImageTemplates.map(template => {
                 const categoryInfo = IMAGE_CATEGORY_INFO[template.category];
-                const hasGeneratedImages = generatedImages.some(img => img.templateId === template.id);
 
                 return (
                   <Card
@@ -2008,32 +2024,13 @@ function DashboardContent() {
                   >
                     {/* Preview Area */}
                     <div className="relative aspect-square bg-gradient-to-br from-slate-800 to-slate-900">
-                      {hasGeneratedImages ? (
-                        <Image
-                          src={getGeneratedImageUrl(template.id, 'feed_square') || ''}
-                          alt={template.name}
-                          fill
-                          className="object-cover"
-                          unoptimized
-                        />
-                      ) : (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-                          <div
-                            className="w-16 h-16 rounded-full mb-3 flex items-center justify-center"
-                            style={{ backgroundColor: `${template.primaryColor}20` }}
-                          >
-                            <Grid3X3 className="w-8 h-8" style={{ color: template.primaryColor }} />
-                          </div>
-                          <p className="text-sm font-medium text-white/80 line-clamp-2">
-                            {template.headline.replace('\n', ' ')}
-                          </p>
-                          {template.subheadline && (
-                            <p className="text-xs text-white/50 mt-1 line-clamp-1">
-                              {template.subheadline}
-                            </p>
-                          )}
-                        </div>
-                      )}
+                      <Image
+                        src={getStaticImageUrl(template.id, 'feed_square')}
+                        alt={template.name}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
 
                       {/* Badge */}
                       {template.badgeText && (
@@ -2046,35 +2043,18 @@ function DashboardContent() {
 
                       {/* Hover Overlay */}
                       <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        {hasGeneratedImages ? (
-                          <>
-                            <button
-                              onClick={() => {
-                                setSelectedImageTemplate(template);
-                              }}
-                              className="px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-white text-sm font-medium transition-colors"
-                            >
-                              <Eye className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => {
-                                const url = getGeneratedImageUrl(template.id, downloadFormat);
-                                if (url) downloadFile(url, `${template.id}-${downloadFormat}.png`);
-                              }}
-                              className="px-3 py-2 bg-purple-500 hover:bg-purple-600 rounded-lg text-white text-sm font-medium transition-colors"
-                            >
-                              <Download className="w-4 h-4" />
-                            </button>
-                          </>
-                        ) : (
-                          <button
-                            onClick={() => generateSocialImages([template.id])}
-                            disabled={isGeneratingImages}
-                            className="px-4 py-2 bg-purple-500 hover:bg-purple-600 rounded-lg text-white text-sm font-medium transition-colors disabled:opacity-50"
-                          >
-                            Generate
-                          </button>
-                        )}
+                        <button
+                          onClick={() => setSelectedImageTemplate(template)}
+                          className="px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-white text-sm font-medium transition-colors"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => downloadFile(getStaticImageUrl(template.id, downloadFormat), `${template.id}-${downloadFormat}.png`)}
+                          className="px-3 py-2 bg-purple-500 hover:bg-purple-600 rounded-lg text-white text-sm font-medium transition-colors"
+                        >
+                          <Download className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
 
@@ -2099,32 +2079,27 @@ function DashboardContent() {
                         )}
                       </div>
 
-                      {/* Download dropdown if generated */}
-                      {hasGeneratedImages && (
-                        <div className="flex items-center gap-2">
-                          <select
-                            value={downloadFormat}
-                            onChange={(e) => setDownloadFormat(e.target.value)}
-                            className="flex-1 px-2 py-1.5 bg-white/5 border border-white/10 rounded text-xs text-white/70"
-                          >
-                            {Object.entries(PLATFORM_FORMAT_INFO).map(([key, info]) => (
-                              <option key={key} value={key} className="bg-slate-900">
-                                {info.label}
-                              </option>
-                            ))}
-                          </select>
-                          <button
-                            onClick={() => {
-                              const url = getGeneratedImageUrl(template.id, downloadFormat);
-                              if (url) downloadFile(url, `${template.id}-${downloadFormat}.png`);
-                            }}
-                            className="px-3 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded text-xs font-medium transition-colors flex items-center gap-1"
-                          >
-                            <Download className="w-3 h-3" />
-                            Download
-                          </button>
-                        </div>
-                      )}
+                      {/* Download dropdown - always show */}
+                      <div className="flex items-center gap-2">
+                        <select
+                          value={downloadFormat}
+                          onChange={(e) => setDownloadFormat(e.target.value)}
+                          className="flex-1 px-2 py-1.5 bg-white/5 border border-white/10 rounded text-xs text-white/70"
+                        >
+                          {Object.entries(PLATFORM_FORMAT_INFO).map(([key, info]) => (
+                            <option key={key} value={key} className="bg-slate-900">
+                              {info.label}
+                            </option>
+                          ))}
+                        </select>
+                        <button
+                          onClick={() => downloadFile(getStaticImageUrl(template.id, downloadFormat), `${template.id}-${downloadFormat}.png`)}
+                          className="px-3 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded text-xs font-medium transition-colors flex items-center gap-1"
+                        >
+                          <Download className="w-3 h-3" />
+                          Download
+                        </button>
+                      </div>
                     </div>
                   </Card>
                 );
@@ -2143,22 +2118,6 @@ function DashboardContent() {
                   Clear filter
                 </button>
               </Card>
-            )}
-
-            {/* Loading State */}
-            {isGeneratingImages && (
-              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                <Card variant="elevated" className="p-8 text-center max-w-sm mx-4">
-                  <Loader2 className="w-12 h-12 text-purple-400 animate-spin mx-auto mb-4" />
-                  <h3 className="font-semibold text-lg mb-2">Generating Your Images</h3>
-                  <p className="text-sm text-white/50">
-                    Creating {filteredImageTemplates.length} professional graphics in 5 different formats...
-                  </p>
-                  <p className="text-xs text-white/30 mt-4">
-                    This may take a minute
-                  </p>
-                </Card>
-              </div>
             )}
 
             {/* Image Preview Modal */}
@@ -2188,19 +2147,13 @@ function DashboardContent() {
                   {/* Image Preview */}
                   <div className="p-4">
                     <div className="relative aspect-square max-w-xl mx-auto bg-slate-800 rounded-lg overflow-hidden">
-                      {getGeneratedImageUrl(selectedImageTemplate.id, downloadFormat) ? (
-                        <Image
-                          src={getGeneratedImageUrl(selectedImageTemplate.id, downloadFormat) || ''}
-                          alt={selectedImageTemplate.name}
-                          fill
-                          className="object-contain"
-                          unoptimized
-                        />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <p className="text-white/50">Image not generated yet</p>
-                        </div>
-                      )}
+                      <Image
+                        src={getStaticImageUrl(selectedImageTemplate.id, downloadFormat)}
+                        alt={selectedImageTemplate.name}
+                        fill
+                        className="object-contain"
+                        unoptimized
+                      />
                     </div>
                   </div>
 
@@ -2222,10 +2175,7 @@ function DashboardContent() {
                     </div>
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => {
-                          const url = getGeneratedImageUrl(selectedImageTemplate.id, downloadFormat);
-                          if (url) downloadFile(url, `${selectedImageTemplate.id}-${downloadFormat}.png`);
-                        }}
+                        onClick={() => downloadFile(getStaticImageUrl(selectedImageTemplate.id, downloadFormat), `${selectedImageTemplate.id}-${downloadFormat}.png`)}
                         className="flex-1 sm:flex-none px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                       >
                         <Download className="w-4 h-4" />
@@ -2345,6 +2295,179 @@ function DashboardContent() {
                 </button>
               </div>
             </Card>
+
+            {/* Logo Upload Section - Show if partner doesn't have co-branded banners */}
+            {!partner.bannerFacebookCobrandedUrl && (
+              <Card variant="bordered" className="p-6 bg-gradient-to-br from-amber-500/10 to-orange-500/10 border-amber-500/30">
+                <div className="flex flex-col lg:flex-row gap-6">
+                  {/* Left side - Info and Upload */}
+                  <div className="flex-1">
+                    <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                      <Palette className="w-5 h-5 text-amber-400" />
+                      Get Custom Co-Branded Banners
+                    </h2>
+                    <p className="text-sm text-white/70 mb-4">
+                      Upload your organization&apos;s logo to get personalized banners featuring both your brand and Mind &amp; Muscle.
+                      Co-branded banners build trust and help your audience recognize you!
+                    </p>
+
+                    {/* Message display */}
+                    {bannerRegenerateMessage && (
+                      <div className={`p-3 rounded-lg mb-4 text-sm ${
+                        bannerRegenerateMessage.type === 'success'
+                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                          : 'bg-red-500/20 text-red-400 border border-red-500/30'
+                      }`}>
+                        {bannerRegenerateMessage.text}
+                      </div>
+                    )}
+
+                    {/* Logo preview */}
+                    {(logoPreview || partner.logoUrl) && (
+                      <div className="mb-4">
+                        <p className="text-xs text-white/50 mb-2">Your logo:</p>
+                        <div className="inline-flex items-center gap-3 bg-white/5 p-3 rounded-lg">
+                          <div className="w-16 h-16 bg-white rounded-lg overflow-hidden flex items-center justify-center">
+                            <Image
+                              src={logoPreview || partner.logoUrl!}
+                              alt="Your logo"
+                              width={64}
+                              height={64}
+                              className="object-contain"
+                              unoptimized
+                            />
+                          </div>
+                          {logoPreview && (
+                            <button
+                              onClick={() => setLogoPreview(null)}
+                              className="text-xs text-white/50 hover:text-white/70"
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Upload and generate buttons */}
+                    <div className="flex flex-wrap items-center gap-3">
+                      <label className="cursor-pointer">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLogoUpload}
+                          className="hidden"
+                        />
+                        <span className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-medium transition-colors">
+                          <Upload className="w-4 h-4" />
+                          {logoPreview || partner.logoUrl ? 'Change Logo' : 'Upload Logo'}
+                        </span>
+                      </label>
+
+                      <button
+                        onClick={regenerateBanners}
+                        disabled={isRegeneratingBanners || (!logoPreview && !partner.logoUrl)}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-500/50 disabled:cursor-not-allowed rounded-lg text-sm font-medium text-white transition-colors"
+                      >
+                        {isRegeneratingBanners ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            Generating...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="w-4 h-4" />
+                            Generate My Banners
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    <p className="text-xs text-white/40 mt-3">
+                      Recommended: Square logo (at least 200x200px), PNG or JPG format
+                    </p>
+                  </div>
+
+                  {/* Right side - Example banner */}
+                  <div className="lg:w-80 shrink-0">
+                    <p className="text-xs text-white/50 mb-2 text-center lg:text-left">Example co-branded banner:</p>
+                    <div className="relative aspect-video bg-slate-800 rounded-lg overflow-hidden border border-white/10">
+                      <Image
+                        src="https://api.mindandmuscle.ai/storage/v1/object/public/partner-banners/samples/sample-cobranded-banner.png"
+                        alt="Example co-branded banner with partner logo"
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                    </div>
+                    <p className="text-xs text-white/40 mt-2 text-center">
+                      Your logo appears in the corner with your QR code
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            )}
+
+            {/* Option to regenerate banners if they already have a logo */}
+            {partner.bannerFacebookCobrandedUrl && partner.logoUrl && (
+              <Card variant="default" className="p-4">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-white rounded-lg overflow-hidden flex items-center justify-center">
+                      <Image
+                        src={partner.logoUrl}
+                        alt="Your logo"
+                        width={40}
+                        height={40}
+                        className="object-contain"
+                        unoptimized
+                      />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">Your banners include your logo</p>
+                      <p className="text-xs text-white/50">Want to update your logo? Upload a new one and regenerate.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <label className="cursor-pointer">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="hidden"
+                      />
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-medium transition-colors">
+                        <Upload className="w-3 h-3" />
+                        New Logo
+                      </span>
+                    </label>
+                    {logoPreview && (
+                      <button
+                        onClick={regenerateBanners}
+                        disabled={isRegeneratingBanners}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 disabled:bg-amber-500/50 rounded-lg text-xs font-medium text-white transition-colors"
+                      >
+                        {isRegeneratingBanners ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : (
+                          <RefreshCw className="w-3 h-3" />
+                        )}
+                        Regenerate
+                      </button>
+                    )}
+                  </div>
+                </div>
+                {bannerRegenerateMessage && (
+                  <div className={`mt-3 p-2 rounded-lg text-xs ${
+                    bannerRegenerateMessage.type === 'success'
+                      ? 'bg-emerald-500/20 text-emerald-400'
+                      : 'bg-red-500/20 text-red-400'
+                  }`}>
+                    {bannerRegenerateMessage.text}
+                  </div>
+                )}
+              </Card>
+            )}
 
             <div className="grid lg:grid-cols-2 gap-6">
               {/* Partner Banner */}

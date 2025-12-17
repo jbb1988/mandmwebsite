@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     // Fetch partner data
     const { data: partner, error: partnerError } = await supabase
       .from('partners')
-      .select('name, first_name, email, referral_url, referral_slug, tolt_partner_id')
+      .select('name, first_name, email, referral_url, referral_slug, tolt_partner_id, logo_url')
       .eq('email', session.partner_email)
       .single();
 
@@ -114,6 +114,7 @@ export async function POST(request: NextRequest) {
         referralUrl: partner.referral_url,
         referralSlug: partner.referral_slug,
         toltPartnerId: partner.tolt_partner_id,
+        logoUrl: partner.logo_url || null,
         qrCodeUrl: banners?.qr_code_url || null,
         bannerUrl: banners?.banner_partner_url || null,
         bannerFacebookUrl: banners?.banner_facebook_url || null,
@@ -167,7 +168,7 @@ export async function GET(request: NextRequest) {
     // Fetch partner data
     const { data: partner, error: partnerError } = await supabase
       .from('partners')
-      .select('name, first_name, email, referral_url, referral_slug, tolt_partner_id')
+      .select('name, first_name, email, referral_url, referral_slug, tolt_partner_id, logo_url')
       .eq('email', email)
       .single();
 
@@ -196,6 +197,7 @@ export async function GET(request: NextRequest) {
         referralUrl: partner.referral_url,
         referralSlug: partner.referral_slug,
         toltPartnerId: partner.tolt_partner_id,
+        logoUrl: partner.logo_url || null,
         qrCodeUrl: banners?.qr_code_url || null,
         bannerUrl: banners?.banner_partner_url || null,
         bannerFacebookUrl: banners?.banner_facebook_url || null,

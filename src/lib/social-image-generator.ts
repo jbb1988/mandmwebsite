@@ -1,6 +1,5 @@
 import satori from 'satori';
 import sharp from 'sharp';
-import QRCode from 'qrcode';
 import { createClient } from '@supabase/supabase-js';
 import {
   SOCIAL_IMAGE_TEMPLATES,
@@ -217,49 +216,22 @@ function createFontConfig(fonts: LoadedFonts) {
 }
 
 // =============================================================================
-// QR CODE GENERATION
+// LOGO LOADING
 // =============================================================================
 
-async function generateQRCode(url: string, size: number = 300): Promise<string> {
-  const qrBuffer = await QRCode.toBuffer(url, {
-    width: size,
-    margin: 1,
-    errorCorrectionLevel: 'H',
-    color: { dark: '#000000', light: '#ffffff' },
-  });
-
-  // Add M&M logo to center
+async function fetchLogoDataUrl(): Promise<string> {
   const logoUrl = 'https://mindandmuscle.ai/assets/images/icon-192.png';
   try {
     const logoResponse = await fetch(logoUrl);
     if (logoResponse.ok) {
       const logoBuffer = Buffer.from(await logoResponse.arrayBuffer());
-      const logoSize = Math.floor(size * 0.25);
-      const resizedLogo = await sharp(logoBuffer)
-        .resize(logoSize, logoSize, { fit: 'contain', background: { r: 255, g: 255, b: 255, alpha: 1 } })
-        .png()
-        .toBuffer();
-
-      const circleSize = logoSize + 10;
-      const circleSvg = `<svg width="${circleSize}" height="${circleSize}">
-        <circle cx="${circleSize/2}" cy="${circleSize/2}" r="${circleSize/2}" fill="white"/>
-      </svg>`;
-
-      const qrWithLogo = await sharp(qrBuffer)
-        .composite([
-          { input: Buffer.from(circleSvg), top: Math.floor((size - circleSize) / 2), left: Math.floor((size - circleSize) / 2) },
-          { input: resizedLogo, top: Math.floor((size - logoSize) / 2), left: Math.floor((size - logoSize) / 2) },
-        ])
-        .png()
-        .toBuffer();
-
-      return `data:image/png;base64,${qrWithLogo.toString('base64')}`;
+      return `data:image/png;base64,${logoBuffer.toString('base64')}`;
     }
   } catch (err) {
-    console.error('Error adding logo to QR code:', err);
+    console.error('Error fetching logo:', err);
   }
-
-  return `data:image/png;base64,${qrBuffer.toString('base64')}`;
+  // Fallback - return empty string, layouts will handle gracefully
+  return '';
 }
 
 // =============================================================================
@@ -331,15 +303,14 @@ function createPhotoOverlaySvg(width: number, height: number): string {
 
 interface LayoutParams {
   template: SocialImageTemplate;
-  qrCodeDataUrl: string;
-  partnerName: string;
+  logoDataUrl: string;
   dims: PlatformDimensions;
   format: PlatformFormat;
 }
 
 // Style A: Bold Impact - Large headline dominates
 function createBoldImpactLayout(params: LayoutParams): object {
-  const { template, qrCodeDataUrl, partnerName, dims, format } = params;
+  const { template, logoDataUrl, dims, format } = params;
   const { width, height, safeZone } = dims;
   const safeWidth = width - safeZone.left - safeZone.right;
   const safeHeight = height - safeZone.top - safeZone.bottom;
@@ -347,7 +318,7 @@ function createBoldImpactLayout(params: LayoutParams): object {
   const isVertical = format === 'story' || format === 'feed_portrait';
   const headlineSize = isVertical ? Math.floor(width * 0.065) : Math.floor(width * 0.045);
   const subheadSize = isVertical ? Math.floor(width * 0.022) : Math.floor(width * 0.018);
-  const qrSize = isVertical ? Math.floor(width * 0.28) : Math.floor(width * 0.22);
+  const logoSize = isVertical ? Math.floor(width * 0.18) : Math.floor(width * 0.14);
 
   return {
     type: 'div',
@@ -389,37 +360,6 @@ function createBoldImpactLayout(params: LayoutParams): object {
                     paddingRight: isVertical ? 0 : 40,
                   },
                   children: [
-                    // Partner badge
-                    {
-                      type: 'div',
-                      props: {
-                        style: {
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: 8,
-                          marginBottom: 24,
-                          padding: '8px 16px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                          borderRadius: 8,
-                          border: '1px solid rgba(255, 255, 255, 0.15)',
-                        },
-                        children: [
-                          {
-                            type: 'span',
-                            props: {
-                              style: {
-                                fontSize: Math.floor(subheadSize * 0.9),
-                                fontWeight: 600,
-                                color: BRAND_COLORS.successGreen,
-                                textTransform: 'uppercase',
-                                letterSpacing: 1,
-                              },
-                              children: `Partner: ${partnerName}`,
-                            },
-                          },
-                        ],
-                      },
-                    },
                     // Main headline
                     {
                       type: 'div',
@@ -465,7 +405,7 @@ function createBoldImpactLayout(params: LayoutParams): object {
                   ].filter(Boolean),
                 },
               },
-              // QR code section
+              // Logo and CTA section
               {
                 type: 'div',
                 props: {
@@ -476,31 +416,31 @@ function createBoldImpactLayout(params: LayoutParams): object {
                     marginTop: isVertical ? 40 : 0,
                   },
                   children: [
-                    // QR code on white card
+                    // M&M Logo
                     {
-                      type: 'div',
+                      type: 'img',
                       props: {
+                        src: logoDataUrl,
                         style: {
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          backgroundColor: BRAND_COLORS.white,
-                          borderRadius: 16,
-                          padding: 16,
+                          width: logoSize,
+                          height: logoSize,
+                          borderRadius: logoSize * 0.2,
                           boxShadow: '0 12px 40px rgba(0, 0, 0, 0.4)',
                         },
-                        children: [
-                          {
-                            type: 'img',
-                            props: {
-                              src: qrCodeDataUrl,
-                              style: {
-                                width: qrSize,
-                                height: qrSize,
-                              },
-                            },
-                          },
-                        ],
+                      },
+                    },
+                    // Brand name
+                    {
+                      type: 'p',
+                      props: {
+                        style: {
+                          marginTop: 12,
+                          fontSize: Math.floor(subheadSize * 1.2),
+                          fontWeight: 700,
+                          color: BRAND_COLORS.white,
+                          textShadow: '0 2px 8px rgba(0, 0, 0, 0.5)',
+                        },
+                        children: 'Mind & Muscle',
                       },
                     },
                     // CTA text
@@ -508,13 +448,13 @@ function createBoldImpactLayout(params: LayoutParams): object {
                       type: 'p',
                       props: {
                         style: {
-                          marginTop: 16,
-                          fontSize: Math.floor(subheadSize * 1.1),
-                          fontWeight: 700,
-                          color: BRAND_COLORS.white,
+                          marginTop: 8,
+                          fontSize: Math.floor(subheadSize * 1.0),
+                          fontWeight: 600,
+                          color: template.accentColor,
                           textShadow: '0 2px 8px rgba(0, 0, 0, 0.5)',
                         },
-                        children: template.ctaText || 'Scan to Get Started',
+                        children: 'Link in bio',
                       },
                     },
                   ],
@@ -530,7 +470,7 @@ function createBoldImpactLayout(params: LayoutParams): object {
 
 // Style B: Clean Minimal - Centered, generous whitespace
 function createCleanMinimalLayout(params: LayoutParams): object {
-  const { template, qrCodeDataUrl, partnerName, dims, format } = params;
+  const { template, logoDataUrl, dims, format } = params;
   const { width, height, safeZone } = dims;
   const safeWidth = width - safeZone.left - safeZone.right;
   const safeHeight = height - safeZone.top - safeZone.bottom;
@@ -538,7 +478,7 @@ function createCleanMinimalLayout(params: LayoutParams): object {
   const isVertical = format === 'story' || format === 'feed_portrait';
   const headlineSize = isVertical ? Math.floor(width * 0.055) : Math.floor(width * 0.04);
   const subheadSize = isVertical ? Math.floor(width * 0.024) : Math.floor(width * 0.018);
-  const qrSize = isVertical ? Math.floor(width * 0.32) : Math.floor(width * 0.2);
+  const logoSize = isVertical ? Math.floor(width * 0.2) : Math.floor(width * 0.12);
 
   return {
     type: 'div',
@@ -567,35 +507,6 @@ function createCleanMinimalLayout(params: LayoutParams): object {
               textAlign: 'center',
             },
             children: [
-              // Partner badge at top
-              {
-                type: 'div',
-                props: {
-                  style: {
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 8,
-                    marginBottom: 32,
-                    padding: '10px 20px',
-                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                    borderRadius: 50,
-                    border: '1px solid rgba(255, 255, 255, 0.12)',
-                  },
-                  children: [
-                    {
-                      type: 'span',
-                      props: {
-                        style: {
-                          fontSize: Math.floor(subheadSize * 0.85),
-                          fontWeight: 600,
-                          color: 'rgba(255, 255, 255, 0.8)',
-                        },
-                        children: `Recommended by ${partnerName}`,
-                      },
-                    },
-                  ],
-                },
-              },
               // Headline
               {
                 type: 'div',
@@ -638,7 +549,7 @@ function createCleanMinimalLayout(params: LayoutParams): object {
                   children: template.subheadline,
                 },
               },
-              // QR code
+              // Logo and CTA
               {
                 type: 'div',
                 props: {
@@ -649,38 +560,39 @@ function createCleanMinimalLayout(params: LayoutParams): object {
                   },
                   children: [
                     {
-                      type: 'div',
+                      type: 'img',
                       props: {
+                        src: logoDataUrl,
                         style: {
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          backgroundColor: BRAND_COLORS.white,
-                          borderRadius: 20,
-                          padding: 20,
+                          width: logoSize,
+                          height: logoSize,
+                          borderRadius: logoSize * 0.2,
                           boxShadow: '0 16px 48px rgba(0, 0, 0, 0.3)',
                         },
-                        children: [
-                          {
-                            type: 'img',
-                            props: {
-                              src: qrCodeDataUrl,
-                              style: { width: qrSize, height: qrSize },
-                            },
-                          },
-                        ],
                       },
                     },
                     {
                       type: 'p',
                       props: {
                         style: {
-                          marginTop: 20,
-                          fontSize: Math.floor(subheadSize * 1.1),
+                          marginTop: 16,
+                          fontSize: Math.floor(subheadSize * 1.2),
+                          fontWeight: 700,
+                          color: BRAND_COLORS.white,
+                        },
+                        children: 'Mind & Muscle',
+                      },
+                    },
+                    {
+                      type: 'p',
+                      props: {
+                        style: {
+                          marginTop: 8,
+                          fontSize: Math.floor(subheadSize * 1.0),
                           fontWeight: 600,
                           color: template.accentColor,
                         },
-                        children: template.ctaText || 'Scan to Learn More',
+                        children: 'Link in bio',
                       },
                     },
                   ],
@@ -696,7 +608,7 @@ function createCleanMinimalLayout(params: LayoutParams): object {
 
 // Style C: Split Layout - 50/50 with photo
 function createSplitLayout(params: LayoutParams): object {
-  const { template, qrCodeDataUrl, partnerName, dims, format } = params;
+  const { template, logoDataUrl, dims, format } = params;
   const { width, height, safeZone } = dims;
   const safeWidth = width - safeZone.left - safeZone.right;
   const safeHeight = height - safeZone.top - safeZone.bottom;
@@ -704,7 +616,7 @@ function createSplitLayout(params: LayoutParams): object {
   const isVertical = format === 'story' || format === 'feed_portrait';
   const headlineSize = Math.floor(width * (isVertical ? 0.05 : 0.035));
   const subheadSize = Math.floor(width * (isVertical ? 0.022 : 0.016));
-  const qrSize = Math.floor(width * (isVertical ? 0.25 : 0.18));
+  const logoSize = Math.floor(width * (isVertical ? 0.16 : 0.12));
 
   return {
     type: 'div',
@@ -743,32 +655,6 @@ function createSplitLayout(params: LayoutParams): object {
                     paddingRight: isVertical ? 0 : 32,
                   },
                   children: [
-                    // Partner badge
-                    {
-                      type: 'div',
-                      props: {
-                        style: {
-                          display: 'flex',
-                          alignItems: 'center',
-                          marginBottom: 20,
-                        },
-                        children: [
-                          {
-                            type: 'span',
-                            props: {
-                              style: {
-                                fontSize: Math.floor(subheadSize * 0.9),
-                                fontWeight: 600,
-                                color: BRAND_COLORS.successGreen,
-                                textTransform: 'uppercase',
-                                letterSpacing: 0.5,
-                              },
-                              children: partnerName,
-                            },
-                          },
-                        ],
-                      },
-                    },
                     // Headlines
                     {
                       type: 'div',
@@ -837,38 +723,39 @@ function createSplitLayout(params: LayoutParams): object {
                   },
                   children: [
                     {
-                      type: 'div',
+                      type: 'img',
                       props: {
+                        src: logoDataUrl,
                         style: {
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          backgroundColor: BRAND_COLORS.white,
-                          borderRadius: 16,
-                          padding: 16,
+                          width: logoSize,
+                          height: logoSize,
+                          borderRadius: logoSize * 0.2,
                           boxShadow: '0 12px 40px rgba(0, 0, 0, 0.35)',
                         },
-                        children: [
-                          {
-                            type: 'img',
-                            props: {
-                              src: qrCodeDataUrl,
-                              style: { width: qrSize, height: qrSize },
-                            },
-                          },
-                        ],
                       },
                     },
                     {
                       type: 'p',
                       props: {
                         style: {
-                          marginTop: 16,
-                          fontSize: Math.floor(subheadSize * 1.1),
+                          marginTop: 12,
+                          fontSize: Math.floor(subheadSize * 1.2),
                           fontWeight: 700,
                           color: BRAND_COLORS.white,
                         },
-                        children: template.ctaText || 'Scan to Start',
+                        children: 'Mind & Muscle',
+                      },
+                    },
+                    {
+                      type: 'p',
+                      props: {
+                        style: {
+                          marginTop: 8,
+                          fontSize: Math.floor(subheadSize * 1.0),
+                          fontWeight: 600,
+                          color: template.accentColor,
+                        },
+                        children: 'Link in bio',
                       },
                     },
                   ],
@@ -884,14 +771,14 @@ function createSplitLayout(params: LayoutParams): object {
 
 // Style D: Story Format - Optimized for 9:16
 function createStoryLayout(params: LayoutParams): object {
-  const { template, qrCodeDataUrl, partnerName, dims } = params;
+  const { template, logoDataUrl, dims } = params;
   const { width, height, safeZone } = dims;
   const safeWidth = width - safeZone.left - safeZone.right;
   const safeHeight = height - safeZone.top - safeZone.bottom;
 
   const headlineSize = Math.floor(width * 0.065);
   const subheadSize = Math.floor(width * 0.028);
-  const qrSize = Math.floor(width * 0.35);
+  const logoSize = Math.floor(width * 0.22);
 
   return {
     type: 'div',
@@ -919,44 +806,15 @@ function createStoryLayout(params: LayoutParams): object {
               alignItems: 'center',
             },
             children: [
-              // Top section: Partner badge
+              // Top section: Spacer
               {
                 type: 'div',
                 props: {
                   style: {
                     display: 'flex',
-                    justifyContent: 'center',
-                    paddingTop: 20,
+                    height: 40,
                   },
-                  children: [
-                    {
-                      type: 'div',
-                      props: {
-                        style: {
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          padding: '12px 24px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
-                          borderRadius: 50,
-                          border: '1px solid rgba(255, 255, 255, 0.15)',
-                        },
-                        children: [
-                          {
-                            type: 'span',
-                            props: {
-                              style: {
-                                fontSize: Math.floor(subheadSize * 0.85),
-                                fontWeight: 600,
-                                color: BRAND_COLORS.successGreen,
-                              },
-                              children: partnerName,
-                            },
-                          },
-                        ],
-                      },
-                    },
-                  ],
+                  children: [],
                 },
               },
               // Middle section: Headlines
@@ -1010,7 +868,7 @@ function createStoryLayout(params: LayoutParams): object {
                   ].filter(Boolean),
                 },
               },
-              // Bottom section: QR code
+              // Bottom section: Logo and CTA
               {
                 type: 'div',
                 props: {
@@ -1022,39 +880,41 @@ function createStoryLayout(params: LayoutParams): object {
                   },
                   children: [
                     {
-                      type: 'div',
+                      type: 'img',
                       props: {
+                        src: logoDataUrl,
                         style: {
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          backgroundColor: BRAND_COLORS.white,
-                          borderRadius: 20,
-                          padding: 20,
+                          width: logoSize,
+                          height: logoSize,
+                          borderRadius: logoSize * 0.2,
                           boxShadow: '0 16px 48px rgba(0, 0, 0, 0.4)',
                         },
-                        children: [
-                          {
-                            type: 'img',
-                            props: {
-                              src: qrCodeDataUrl,
-                              style: { width: qrSize, height: qrSize },
-                            },
-                          },
-                        ],
                       },
                     },
                     {
                       type: 'p',
                       props: {
                         style: {
-                          marginTop: 20,
-                          fontSize: Math.floor(subheadSize * 1.2),
+                          marginTop: 16,
+                          fontSize: Math.floor(subheadSize * 1.3),
                           fontWeight: 700,
                           color: BRAND_COLORS.white,
                           textShadow: '0 2px 8px rgba(0, 0, 0, 0.5)',
                         },
-                        children: template.ctaText || 'Tap Link in Bio',
+                        children: 'Mind & Muscle',
+                      },
+                    },
+                    {
+                      type: 'p',
+                      props: {
+                        style: {
+                          marginTop: 8,
+                          fontSize: Math.floor(subheadSize * 1.1),
+                          fontWeight: 600,
+                          color: template.accentColor,
+                          textShadow: '0 2px 8px rgba(0, 0, 0, 0.5)',
+                        },
+                        children: 'Tap link in bio',
                       },
                     },
                   ],
@@ -1070,7 +930,7 @@ function createStoryLayout(params: LayoutParams): object {
 
 // Style E: Data/Stats - Infographic style
 function createDataStatsLayout(params: LayoutParams): object {
-  const { template, qrCodeDataUrl, partnerName, dims, format } = params;
+  const { template, logoDataUrl, dims, format } = params;
   const { width, height, safeZone } = dims;
   const safeWidth = width - safeZone.left - safeZone.right;
   const safeHeight = height - safeZone.top - safeZone.bottom;
@@ -1079,7 +939,7 @@ function createDataStatsLayout(params: LayoutParams): object {
   const headlineSize = Math.floor(width * (isVertical ? 0.048 : 0.032));
   const statSize = Math.floor(width * (isVertical ? 0.08 : 0.055));
   const subheadSize = Math.floor(width * (isVertical ? 0.022 : 0.016));
-  const qrSize = Math.floor(width * (isVertical ? 0.22 : 0.16));
+  const logoSize = Math.floor(width * (isVertical ? 0.14 : 0.1));
 
   // Example stats - these would come from template in real implementation
   const stats = [
@@ -1125,18 +985,6 @@ function createDataStatsLayout(params: LayoutParams): object {
                     textAlign: 'center',
                   },
                   children: [
-                    {
-                      type: 'span',
-                      props: {
-                        style: {
-                          fontSize: Math.floor(subheadSize * 0.9),
-                          fontWeight: 600,
-                          color: BRAND_COLORS.successGreen,
-                          marginBottom: 16,
-                        },
-                        children: partnerName,
-                      },
-                    },
                     {
                       type: 'div',
                       props: {
@@ -1212,7 +1060,7 @@ function createDataStatsLayout(params: LayoutParams): object {
                   })),
                 },
               },
-              // Bottom: QR code
+              // Bottom: Logo and CTA
               {
                 type: 'div',
                 props: {
@@ -1223,38 +1071,39 @@ function createDataStatsLayout(params: LayoutParams): object {
                   },
                   children: [
                     {
-                      type: 'div',
+                      type: 'img',
                       props: {
+                        src: logoDataUrl,
                         style: {
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          backgroundColor: BRAND_COLORS.white,
-                          borderRadius: 12,
-                          padding: 12,
+                          width: logoSize,
+                          height: logoSize,
+                          borderRadius: logoSize * 0.2,
                           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
                         },
-                        children: [
-                          {
-                            type: 'img',
-                            props: {
-                              src: qrCodeDataUrl,
-                              style: { width: qrSize, height: qrSize },
-                            },
-                          },
-                        ],
                       },
                     },
                     {
                       type: 'p',
                       props: {
                         style: {
-                          marginTop: 12,
-                          fontSize: subheadSize,
-                          fontWeight: 600,
+                          marginTop: 10,
+                          fontSize: Math.floor(subheadSize * 1.1),
+                          fontWeight: 700,
                           color: BRAND_COLORS.white,
                         },
-                        children: template.ctaText || 'Learn More',
+                        children: 'Mind & Muscle',
+                      },
+                    },
+                    {
+                      type: 'p',
+                      props: {
+                        style: {
+                          marginTop: 4,
+                          fontSize: subheadSize,
+                          fontWeight: 600,
+                          color: template.accentColor,
+                        },
+                        children: 'Link in bio',
                       },
                     },
                   ],
@@ -1364,27 +1213,20 @@ async function uploadToStorage(
 }
 
 // =============================================================================
-// MAIN GENERATION FUNCTION
+// STATIC IMAGE GENERATION (Admin use - generates all images once)
 // =============================================================================
 
-export async function generateSocialImages(params: {
-  partnerName: string;
-  partnerEmail: string;
-  referralUrl: string;
-  templateIds?: string[]; // Optional: generate specific templates only
-  formats?: PlatformFormat[]; // Optional: generate specific formats only
+// Static storage bucket and base path for all social images
+const STATIC_BUCKET = 'social-images';
+
+export async function generateAllStaticImages(params?: {
+  templateIds?: string[];
+  formats?: PlatformFormat[];
 }): Promise<GenerationResult> {
   const {
-    partnerName,
-    partnerEmail,
-    referralUrl,
     templateIds,
     formats = ['feed_square', 'feed_portrait', 'story', 'twitter', 'linkedin'],
-  } = params;
-
-  const timestamp = Date.now();
-  const sanitizedName = partnerName.toLowerCase().replace(/[^a-z0-9]/g, '-');
-  const baseFolder = `${sanitizedName}-${timestamp}`;
+  } = params || {};
 
   const results: GeneratedImage[] = [];
 
@@ -1393,8 +1235,8 @@ export async function generateSocialImages(params: {
     const loadedFonts = await loadFonts();
     const fonts = createFontConfig(loadedFonts);
 
-    // Generate QR code
-    const qrCodeDataUrl = await generateQRCode(referralUrl);
+    // Fetch logo
+    const logoDataUrl = await fetchLogoDataUrl();
 
     // Fetch background image
     const backgroundBuffer = await fetchBackgroundImage();
@@ -1413,8 +1255,7 @@ export async function generateSocialImages(params: {
           const dims = PLATFORM_DIMENSIONS[format];
           const layoutParams: LayoutParams = {
             template,
-            qrCodeDataUrl,
-            partnerName,
+            logoDataUrl,
             dims,
             format,
           };
@@ -1439,9 +1280,9 @@ export async function generateSocialImages(params: {
             template.backgroundType === 'photo' ? backgroundBuffer : null
           );
 
-          // Upload to storage
-          const storagePath = `${baseFolder}/${template.id}-${format}.png`;
-          const url = await uploadToStorage(imageBuffer, storagePath);
+          // Upload to static storage path
+          const storagePath = `${template.id}-${format}.png`;
+          const url = await uploadToStaticStorage(imageBuffer, storagePath);
 
           if (url) {
             results.push({
@@ -1454,21 +1295,20 @@ export async function generateSocialImages(params: {
           }
         } catch (err) {
           console.error(`❌ Error generating ${template.id} (${template.style}) - ${format}:`, err);
-          // Continue with next format/template instead of failing entirely
         }
       }
 
       console.log(`✅ Generated all formats for template: ${template.name}`);
     }
 
-    console.log(`🎉 Generated ${results.length} images for ${partnerName}`);
+    console.log(`🎉 Generated ${results.length} static images`);
 
     return {
       success: true,
       images: results,
     };
   } catch (error) {
-    console.error('Error generating social images:', error);
+    console.error('Error generating static images:', error);
     return {
       success: false,
       images: [],
@@ -1477,60 +1317,39 @@ export async function generateSocialImages(params: {
   }
 }
 
-// =============================================================================
-// SINGLE IMAGE GENERATION (for preview)
-// =============================================================================
-
-export async function generateSingleImage(params: {
-  templateId: string;
-  partnerName: string;
-  referralUrl: string;
-  format: PlatformFormat;
-}): Promise<{ success: boolean; buffer?: Buffer; error?: string }> {
-  const { templateId, partnerName, referralUrl, format } = params;
-
-  const template = SOCIAL_IMAGE_TEMPLATES.find(t => t.id === templateId);
-  if (!template) {
-    return { success: false, error: 'Template not found' };
-  }
-
-  try {
-    const loadedFonts = await loadFonts();
-    const fonts = createFontConfig(loadedFonts);
-    const qrCodeDataUrl = await generateQRCode(referralUrl);
-    const backgroundBuffer = await fetchBackgroundImage();
-
-    const dims = PLATFORM_DIMENSIONS[format];
-    const layoutParams: LayoutParams = {
-      template,
-      qrCodeDataUrl,
-      partnerName,
-      dims,
-      format,
-    };
-
-    const layoutComponent = getLayoutComponent(template.style, layoutParams);
-    const svgString = await satori(layoutComponent as any, {
-      width: dims.width,
-      height: dims.height,
-      fonts,
+async function uploadToStaticStorage(buffer: Buffer, storagePath: string): Promise<string | null> {
+  const { error } = await supabase.storage
+    .from(STATIC_BUCKET)
+    .upload(storagePath, buffer, {
+      contentType: 'image/png',
+      upsert: true,
     });
 
-    const imageBuffer = await compositeImage(
-      template,
-      svgString,
-      dims.width,
-      dims.height,
-      template.backgroundType === 'photo' ? backgroundBuffer : null
-    );
-
-    return { success: true, buffer: imageBuffer };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    };
+  if (error) {
+    console.error(`Error uploading ${storagePath}:`, error);
+    return null;
   }
+
+  const { data } = supabase.storage.from(STATIC_BUCKET).getPublicUrl(storagePath);
+  return data.publicUrl;
+}
+
+// Get static image URL (for partner dashboard)
+export function getStaticImageUrl(templateId: string, format: PlatformFormat): string {
+  const { data } = supabase.storage.from(STATIC_BUCKET).getPublicUrl(`${templateId}-${format}.png`);
+  return data.publicUrl;
+}
+
+// Get all static image URLs for a template
+export function getStaticImageUrls(templateId: string): Record<PlatformFormat, string> {
+  const formats: PlatformFormat[] = ['feed_square', 'feed_portrait', 'story', 'twitter', 'linkedin'];
+  const urls: Record<string, string> = {};
+
+  for (const format of formats) {
+    urls[format] = getStaticImageUrl(templateId, format);
+  }
+
+  return urls as Record<PlatformFormat, string>;
 }
 
 // =============================================================================
