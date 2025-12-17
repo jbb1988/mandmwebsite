@@ -58,10 +58,13 @@ interface SyncDetails {
   notInTolt: Array<{ email: string; name: string }>;
   emailMismatch: Array<{ email: string; name: string; toltEmail?: string }>;
   inToltNotInDb: ToltOnlyPartner[];
+  toltError?: string;
   debug?: {
+    apiKeyPresent?: boolean;
     toltPartnersCount: number;
     toltPartnerEmails: string[];
     dbPartnerEmails: string[];
+    toltRawResponse?: string;
   };
 }
 
@@ -120,7 +123,7 @@ export default function AdminPartnersPage() {
 
       if (data.success) {
         // Store detailed sync results including debug info
-        setSyncDetails({ ...data.details, debug: data.debug });
+        setSyncDetails({ ...data.details, debug: data.debug, toltError: data.toltError });
 
         // Build summary message
         const issues = [];
@@ -590,9 +593,19 @@ export default function AdminPartnersPage() {
                   <div className="mt-4 pt-4 border-t border-white/10">
                     <h3 className="text-purple-400 font-semibold mb-2">🔍 Debug Info</h3>
                     <div className="bg-purple-500/10 rounded-lg p-3 text-xs space-y-2">
+                      <p><span className="text-white/50">API Key Present:</span> <span className={syncDetails.debug.apiKeyPresent ? 'text-green-400' : 'text-red-400'}>{syncDetails.debug.apiKeyPresent ? 'Yes' : 'No'}</span></p>
                       <p><span className="text-white/50">Tolt Partners Found:</span> <span className="text-white">{syncDetails.debug.toltPartnersCount}</span></p>
                       <p><span className="text-white/50">Tolt Emails:</span> <span className="text-purple-300">{syncDetails.debug.toltPartnerEmails.length > 0 ? syncDetails.debug.toltPartnerEmails.join(', ') : '(none)'}</span></p>
                       <p><span className="text-white/50">DB Emails:</span> <span className="text-blue-300">{syncDetails.debug.dbPartnerEmails.join(', ')}</span></p>
+                      {syncDetails.toltError && (
+                        <p><span className="text-white/50">Tolt Error:</span> <span className="text-red-400">{syncDetails.toltError}</span></p>
+                      )}
+                      {syncDetails.debug.toltRawResponse && (
+                        <div>
+                          <p className="text-white/50 mb-1">Raw Tolt Response:</p>
+                          <pre className="bg-black/30 p-2 rounded text-[10px] overflow-x-auto text-yellow-300">{syncDetails.debug.toltRawResponse}</pre>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

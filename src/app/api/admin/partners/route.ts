@@ -56,12 +56,15 @@ async function getToltPartnerStatus(
 }
 
 // Fetch all partners from Tolt
-async function getAllToltPartners(): Promise<{ partners: Array<{ id: string; email: string; name: string; status: string }>; error?: string }> {
+async function getAllToltPartners(): Promise<{ partners: Array<{ id: string; email: string; name: string; status: string }>; error?: string; rawResponse?: string; apiKeyPresent?: boolean }> {
   if (!TOLT_API_KEY) {
-    return { partners: [], error: 'No Tolt API key' };
+    return { partners: [], error: 'No Tolt API key configured', apiKeyPresent: false };
   }
 
   try {
+    console.log('Calling Tolt API:', `${TOLT_API_BASE}/partners?limit=100`);
+    console.log('API Key present:', !!TOLT_API_KEY, 'Key prefix:', TOLT_API_KEY.substring(0, 10) + '...');
+
     const response = await fetch(`${TOLT_API_BASE}/partners?limit=100`, {
       headers: {
         'Authorization': `Bearer ${TOLT_API_KEY}`,
@@ -69,12 +72,25 @@ async function getAllToltPartners(): Promise<{ partners: Array<{ id: string; ema
       },
     });
 
+    const responseText = await response.text();
+    console.log('Tolt API status:', response.status);
+    console.log('Tolt API raw response:', responseText);
+
     if (!response.ok) {
-      return { partners: [], error: `API error: ${response.status}` };
+      return {
+        partners: [],
+        error: `API error ${response.status}: ${responseText}`,
+        apiKeyPresent: true,
+        rawResponse: responseText.substring(0, 500)
+      };
     }
 
-    const data = await response.json();
-    console.log('Tolt API response:', JSON.stringify(data, null, 2));
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch {
+      return { partners: [], error: 'Invalid JSON response', rawResponse: responseText.substring(0, 500), apiKeyPresent: true };
+    }
 
     // Tolt API may return partners in different structures
     const partnersArray = data.data || data.partners || data || [];
@@ -85,10 +101,12 @@ async function getAllToltPartners(): Promise<{ partners: Array<{ id: string; ema
         email: p.email?.toLowerCase(),
         name: p.name,
         status: p.status,
-      }))
+      })),
+      apiKeyPresent: true,
+      rawResponse: JSON.stringify(data).substring(0, 500)
     };
   } catch (error) {
-    return { partners: [], error: error instanceof Error ? error.message : 'Unknown error' };
+    return { partners: [], error: error instanceof Error ? error.message : 'Unknown error', apiKeyPresent: !!TOLT_API_KEY };
   }
 }
 
@@ -280,7 +298,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Fetch all partners from Tolt first - this is the source of truth
-      const { partners: toltPartners, error: toltError } = await getAllToltPartners();
+      const { partners: toltPartners, error: toltError, rawResponse: toltRawResponse, apiKeyPresent } = await getAllToltPartners();
 
       // Create a map of Tolt partners by email for quick lookup
       const toltByEmail = new Map(toltPartners.map(tp => [tp.email?.toLowerCase(), tp]));
@@ -352,9 +370,11 @@ export async function POST(request: NextRequest) {
         },
         toltError,
         debug: {
+          apiKeyPresent,
           toltPartnersCount: toltPartners.length,
           toltPartnerEmails: toltPartners.map(p => p.email),
           dbPartnerEmails: (partners || []).map(p => p.email),
+          toltRawResponse,
         },
       });
     }
