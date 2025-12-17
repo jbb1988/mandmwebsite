@@ -1395,7 +1395,7 @@ async function compositeBanner(
 export async function generatePartnerBanners(params: {
   partnerName: string;
   partnerEmail: string;
-  partnerLogoUrl: string;
+  partnerLogoUrl?: string | null; // Optional - co-branded banners only generated if provided
   referralUrl: string;
 }): Promise<{
   qrCodeUrl: string | null;
@@ -1500,15 +1500,20 @@ export async function generatePartnerBanners(params: {
   // Generate QR code
   const qrCodeDataUrl = await generateQRCode(referralUrl);
 
-  // Fetch partner logo as data URL
-  let partnerLogoDataUrl: string;
-  try {
-    partnerLogoDataUrl = await fetchImageAsDataUrl(partnerLogoUrl);
-    console.log('✅ Fetched partner logo');
-  } catch (err) {
-    console.error('Error fetching partner logo:', err);
-    // Use a placeholder
-    partnerLogoDataUrl = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+  // Fetch partner logo as data URL (only if provided)
+  let partnerLogoDataUrl: string | null = null;
+  const hasLogo = partnerLogoUrl && partnerLogoUrl.length > 0;
+
+  if (hasLogo) {
+    try {
+      partnerLogoDataUrl = await fetchImageAsDataUrl(partnerLogoUrl);
+      console.log('✅ Fetched partner logo');
+    } catch (err) {
+      console.error('Error fetching partner logo:', err);
+      partnerLogoDataUrl = null;
+    }
+  } else {
+    console.log('ℹ️ No partner logo provided - will generate standard banners only');
   }
 
   // Results object
@@ -1529,13 +1534,13 @@ export async function generatePartnerBanners(params: {
   };
 
   try {
-    // Upload QR code
+    // Upload QR code (always generated)
     const qrBase64 = qrCodeDataUrl.replace(/^data:image\/png;base64,/, '');
     const qrBuffer = Buffer.from(qrBase64, 'base64');
     results.qrCodeUrl = await uploadToStorage(qrBuffer, `${baseFolder}/qr-code.png`);
     console.log('✅ Uploaded QR code');
 
-    // Generate Facebook Standard banner
+    // Generate Facebook Standard banner (always generated)
     const fbStandardSvg = await satori(
       createFacebookStandardBanner(qrCodeDataUrl) as any,
       { width: 1080, height: 1080, fonts }
@@ -1544,16 +1549,7 @@ export async function generatePartnerBanners(params: {
     results.bannerFacebookUrl = await uploadToStorage(fbStandardPng, `${baseFolder}/banner-facebook.png`);
     console.log('✅ Generated Facebook standard banner');
 
-    // Generate Facebook Co-Branded banner
-    const fbCoBrandedSvg = await satori(
-      createFacebookCoBrandedBanner(qrCodeDataUrl, partnerLogoDataUrl) as any,
-      { width: 1080, height: 1080, fonts }
-    );
-    const fbCoBrandedPng = await compositeBanner(backgroundBuffer, fbCoBrandedSvg, 1080, 1080, 'facebook');
-    results.bannerFacebookCoBrandedUrl = await uploadToStorage(fbCoBrandedPng, `${baseFolder}/banner-facebook-cobranded.png`);
-    console.log('✅ Generated Facebook co-branded banner');
-
-    // Generate Twitter Standard banner
+    // Generate Twitter Standard banner (always generated)
     const twStandardSvg = await satori(
       createTwitterStandardBanner(qrCodeDataUrl) as any,
       { width: 1600, height: 900, fonts }
@@ -1562,23 +1558,37 @@ export async function generatePartnerBanners(params: {
     results.bannerTwitterUrl = await uploadToStorage(twStandardPng, `${baseFolder}/banner-twitter.png`);
     console.log('✅ Generated Twitter standard banner');
 
-    // Generate Twitter Co-Branded banner
-    const twCoBrandedSvg = await satori(
-      createTwitterCoBrandedBanner(qrCodeDataUrl, partnerLogoDataUrl) as any,
-      { width: 1600, height: 900, fonts }
-    );
-    const twCoBrandedPng = await compositeBanner(backgroundBuffer, twCoBrandedSvg, 1600, 900, 'twitter');
-    results.bannerTwitterCoBrandedUrl = await uploadToStorage(twCoBrandedPng, `${baseFolder}/banner-twitter-cobranded.png`);
-    console.log('✅ Generated Twitter co-branded banner');
+    // Only generate co-branded banners if partner logo is available
+    if (partnerLogoDataUrl) {
+      // Generate Facebook Co-Branded banner
+      const fbCoBrandedSvg = await satori(
+        createFacebookCoBrandedBanner(qrCodeDataUrl, partnerLogoDataUrl) as any,
+        { width: 1080, height: 1080, fonts }
+      );
+      const fbCoBrandedPng = await compositeBanner(backgroundBuffer, fbCoBrandedSvg, 1080, 1080, 'facebook');
+      results.bannerFacebookCoBrandedUrl = await uploadToStorage(fbCoBrandedPng, `${baseFolder}/banner-facebook-cobranded.png`);
+      console.log('✅ Generated Facebook co-branded banner');
 
-    // Generate Partner banner
-    const partnerSvg = await satori(
-      createPartnerBanner(qrCodeDataUrl, partnerLogoDataUrl) as any,
-      { width: 1600, height: 900, fonts }
-    );
-    const partnerPng = await compositeBanner(backgroundBuffer, partnerSvg, 1600, 900, 'twitter');
-    results.bannerPartnerUrl = await uploadToStorage(partnerPng, `${baseFolder}/banner-partner.png`);
-    console.log('✅ Generated Partner banner');
+      // Generate Twitter Co-Branded banner
+      const twCoBrandedSvg = await satori(
+        createTwitterCoBrandedBanner(qrCodeDataUrl, partnerLogoDataUrl) as any,
+        { width: 1600, height: 900, fonts }
+      );
+      const twCoBrandedPng = await compositeBanner(backgroundBuffer, twCoBrandedSvg, 1600, 900, 'twitter');
+      results.bannerTwitterCoBrandedUrl = await uploadToStorage(twCoBrandedPng, `${baseFolder}/banner-twitter-cobranded.png`);
+      console.log('✅ Generated Twitter co-branded banner');
+
+      // Generate Partner banner
+      const partnerSvg = await satori(
+        createPartnerBanner(qrCodeDataUrl, partnerLogoDataUrl) as any,
+        { width: 1600, height: 900, fonts }
+      );
+      const partnerPng = await compositeBanner(backgroundBuffer, partnerSvg, 1600, 900, 'twitter');
+      results.bannerPartnerUrl = await uploadToStorage(partnerPng, `${baseFolder}/banner-partner.png`);
+      console.log('✅ Generated Partner banner');
+    } else {
+      console.log('ℹ️ Skipped co-branded banners (no logo)');
+    }
 
     console.log(`🎉 Generated ${Object.values(results).filter(Boolean).length} banner assets for ${partnerName}`);
   } catch (error) {

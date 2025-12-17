@@ -360,7 +360,7 @@ export async function POST(request: NextRequest) {
       // Don't fail the request - Tolt is primary source of truth
     }
 
-    // Generate banners if logo is provided and referral URL is available
+    // Generate banners if referral URL is available (logo is optional - determines which banners are made)
     let bannerUrls: {
       qrCodeUrl: string | null;
       bannerPartnerUrl: string | null;
@@ -370,13 +370,14 @@ export async function POST(request: NextRequest) {
       bannerTwitterCoBrandedUrl: string | null;
     } | null = null;
 
-    if (logoUrl && referralUrl) {
+    if (referralUrl) {
       try {
         console.log('🎨 Generating banners for partner...');
+        console.log(logoUrl ? '📷 Partner has logo - will generate all banners' : '⚠️ No logo - will generate standard banners only');
         bannerUrls = await generatePartnerBanners({
           partnerName: name,
           partnerEmail: email,
-          partnerLogoUrl: logoUrl,
+          partnerLogoUrl: logoUrl || null, // Pass null if no logo
           referralUrl: referralUrl,
         });
 
@@ -387,14 +388,14 @@ export async function POST(request: NextRequest) {
             .insert({
               partner_name: name,
               partner_email: email,
-              partner_logo_url: logoUrl,
+              partner_logo_url: logoUrl || null,
               qr_code_url: bannerUrls.qrCodeUrl,
               banner_partner_url: bannerUrls.bannerPartnerUrl,
               banner_facebook_url: bannerUrls.bannerFacebookUrl,
               banner_facebook_cobranded_url: bannerUrls.bannerFacebookCoBrandedUrl,
               banner_twitter_url: bannerUrls.bannerTwitterUrl,
               banner_twitter_cobranded_url: bannerUrls.bannerTwitterCoBrandedUrl,
-              notes: 'Auto-generated on partner signup',
+              notes: logoUrl ? 'Auto-generated on partner signup' : 'Auto-generated (standard only - no logo provided)',
             });
 
           if (bannerDbError) {
@@ -555,6 +556,11 @@ export async function POST(request: NextRequest) {
     // Build the welcome email content - varies based on whether banners were generated
     const hasBanners = bannerUrls && emailAttachments.length > 0;
     const hasReferralLink = referralUrl && referralSlug;
+    const hasLogo = Boolean(logoUrl);
+    const hasCoBrandedBanners = hasLogo && bannerUrls?.bannerFacebookCoBrandedUrl;
+
+    // Sample co-branded banner URL for partners without logos
+    const sampleCoBrandedBannerUrl = 'https://api.mindandmuscle.ai/storage/v1/object/public/partner-banners/samples/sample-cobranded-banner.png';
 
     const welcomeEmailHtml = `
         <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
@@ -581,7 +587,7 @@ export async function POST(request: NextRequest) {
             </div>
             ` : ''}
 
-            ${hasBanners ? `
+            ${hasBanners && hasCoBrandedBanners ? `
             <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid #f59e0b; padding: 25px; margin: 30px 0; border-radius: 12px;">
               <h2 style="margin: 0 0 15px 0; font-size: 20px; color: #d97706;">🎨 Your Custom Marketing Banners</h2>
               <p style="font-size: 15px; line-height: 1.6; color: #555; margin-bottom: 15px;">
@@ -601,6 +607,34 @@ export async function POST(request: NextRequest) {
               <p style="font-size: 13px; color: #666; margin-top: 15px; font-style: italic;">
                 💡 Tip: Use the co-branded banners to build trust with your audience!
               </p>
+            </div>
+            ` : hasBanners ? `
+            <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 2px solid #f59e0b; padding: 25px; margin: 30px 0; border-radius: 12px;">
+              <h2 style="margin: 0 0 15px 0; font-size: 20px; color: #d97706;">🎨 Your Marketing Banners</h2>
+              <p style="font-size: 15px; line-height: 1.6; color: #555; margin-bottom: 15px;">
+                We've created banners with a QR code linked to your referral URL. <strong>Check the attachments in this email!</strong>
+              </p>
+              <div style="background: white; border-radius: 8px; padding: 15px;">
+                <p style="font-size: 14px; color: #666; margin: 0 0 10px 0;"><strong>Included banners:</strong></p>
+                <ul style="font-size: 13px; color: #555; margin: 0; padding-left: 20px; line-height: 1.8;">
+                  <li><strong>Facebook (1080x1080)</strong> - Perfect for posts and ads</li>
+                  <li><strong>X/Twitter (1600x900)</strong> - Ideal for tweets and headers</li>
+                  <li><strong>QR Code</strong> - Links directly to your referral URL</li>
+                </ul>
+              </div>
+
+              <div style="background: #f0f9ff; border: 2px dashed #3b82f6; padding: 20px; margin-top: 20px; border-radius: 8px;">
+                <h3 style="margin: 0 0 10px 0; font-size: 16px; color: #3b82f6;">🌟 Want Co-Branded Banners?</h3>
+                <p style="font-size: 14px; line-height: 1.6; color: #555; margin-bottom: 15px;">
+                  Send us your logo and we'll create personalized co-branded banners featuring YOUR branding alongside Mind & Muscle. Here's an example:
+                </p>
+                <div style="text-align: center; margin-bottom: 15px;">
+                  <img src="${sampleCoBrandedBannerUrl}" alt="Sample Co-Branded Banner" style="max-width: 100%; border-radius: 8px; border: 1px solid #e5e7eb;" />
+                </div>
+                <p style="font-size: 13px; color: #666; margin: 0; text-align: center;">
+                  📧 Reply to this email with your logo (PNG or JPG, at least 200x200px) and we'll create your custom banners!
+                </p>
+              </div>
             </div>
             ` : ''}
 

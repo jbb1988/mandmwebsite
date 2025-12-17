@@ -1,0 +1,214 @@
+================================================================================
+                        MIND & MUSCLE - DM TEMPLATES
+                           Founder Voice v3 (Optimized)
+================================================================================
+
+KEY CHANGES IN V3:
+- Added permission ask to all FB templates ("Would you be open to...")
+- Offer done-for-you post ("I can send a post you can drop in")
+- Softened competitive language ("most team apps" vs "every other app")
+- Tightened X templates - removed hedging, more confident
+- No link in FB first touch - ask permission first
+
+================================================================================
+                         FACEBOOK GROUP DM TEMPLATES
+================================================================================
+
+--------------------------------------------------------------------------------
+1. dm_founder_master (Default - Use for most groups)
+--------------------------------------------------------------------------------
+
+Hey {name} - I'm Jeff, founder of Mind & Muscle.
+
+Saw your group and figured I'd reach out directly. Been thinking a lot lately about how we spend thousands on lessons and travel ball but never really address the mental side - you know, when a kid strikes out and you can just see them checking out for the rest of the game.
+
+Built a free app for exactly that. Does the team communication stuff you'd expect, but also has mental game content built in - the piece most team apps don't really address.
+
+Would you be open to me sharing this as a free resource for your members? If helpful, I can send a short post you can drop straight into the group.
+
+Either way, thanks for running that community.
+
+- Jeff
+
+
+--------------------------------------------------------------------------------
+2. dm_founder_big_group (For groups with 5K+ members)
+--------------------------------------------------------------------------------
+
+Hey {name} - I'm Jeff, founder of Mind & Muscle.
+
+[X members] is a lot of families. You've probably seen it all at this point - the kid with tons of talent who falls apart after one bad at-bat, parents who don't know what to say on the car ride home.
+
+Built something to help with that. Free app that handles team communication like you'd expect, but also includes mental game training - pre-game focus, confidence reset, handling pressure. The stuff most team apps don't really address.
+
+Would you be open to me sharing this as a free resource for your members? I can send a short post you can drop straight into the group if that helps.
+
+Totally fine if it's not a fit. Appreciate what you do for that community.
+
+- Jeff
+
+
+--------------------------------------------------------------------------------
+3. dm_founder_mental_game (Lead with mental game angle)
+--------------------------------------------------------------------------------
+
+Hey {name} - I'm Jeff, founder of Mind & Muscle.
+
+The thing that got me building this app - watching kids who have the talent but can't get out of their own head. One bad play and they're done mentally. Parents try everything, coaches say "shake it off," but nothing really sticks.
+
+So I built something specifically for that. Free team app that does the usual stuff - communication, events, all that - but also has mental game content baked in. Kids learning how to reset after a bad inning, pre-game focus routines, handling failure. The piece most team apps don't really address.
+
+Would you be open to me sharing this as a free resource for your members? Happy to send a post you can drop straight into the group.
+
+- Jeff
+
+
+--------------------------------------------------------------------------------
+4. dm_founder_tryout_season (Aug-Sept, Jan-Feb)
+--------------------------------------------------------------------------------
+
+Hey {name} - I'm Jeff, founder of Mind & Muscle.
+
+Tryout season always reminds me why I built this - kids who crush it in practice but freeze up when it matters. The talent is there, the mental game isn't.
+
+Put together a free team app that handles communication and scheduling, but also includes mental game content - focus, confidence, handling pressure. Everything in one place, including the stuff most team apps don't really address.
+
+Would you be open to me sharing this with your group? I can send a ready-to-post blurb if that helps.
+
+- Jeff
+
+
+--------------------------------------------------------------------------------
+5. dm_founder_short (Quick/Brief - best as follow-up or 2nd touch)
+--------------------------------------------------------------------------------
+
+Hey {name} - Jeff here, founder of Mind & Muscle.
+
+Quick intro - built a free team app for baseball/softball. Does the communication and scheduling stuff, but also includes mental game content - the stuff most team apps don't really address.
+
+Would it be okay to share this with your group? Happy to send a post you can drop in.
+
+Thanks for running that community.
+
+- Jeff
+
+
+================================================================================
+                        X/TWITTER DM TEMPLATES
+================================================================================
+
+--------------------------------------------------------------------------------
+1. x_dm_founder_master (Default for X influencers)
+--------------------------------------------------------------------------------
+
+Hey {name} - I'm Jeff, founder of Mind & Muscle.
+
+Been following your content for a bit. You actually know what you're talking about - which is rare.
+
+Built a baseball/softball app focused on mental game - the piece most content creators don't touch. Confidence, pre-game focus, bouncing back after bad games.
+
+We run a clean affiliate program for creators. Happy to give you 30-day Pro access to check it out first.
+
+mindandmuscle.ai/partner-program
+
+- Jeff
+
+
+--------------------------------------------------------------------------------
+2. x_dm_affiliate (Lead with affiliate opportunity)
+--------------------------------------------------------------------------------
+
+Hey {name} - I'm Jeff, founder of Mind & Muscle.
+
+Quick question: do you do affiliate stuff?
+
+We have a baseball/softball mental game app. Coaches and creators who share it are pulling $300-500/mo in side income.
+
+Your content is legit - thought it might be a fit.
+
+mindandmuscle.ai/partner-program has the details.
+
+- Jeff
+
+
+--------------------------------------------------------------------------------
+3. x_dm_content_collab (Content collaboration angle)
+--------------------------------------------------------------------------------
+
+Hey {name} - Jeff here, founder of Mind & Muscle.
+
+Idea for you:
+
+We have a feature called "Daily Hit" - bite-sized mental game content. Pre-game focus, confidence building, bounce-back stuff. Some coaches use it for their own content ideas.
+
+Free to check out at mindandmuscle.ai. We also run an affiliate program for creators.
+
+- Jeff
+
+
+--------------------------------------------------------------------------------
+4. x_dm_content_gap (90% physical content angle)
+--------------------------------------------------------------------------------
+
+Hey {name} - Jeff here, founder of Mind & Muscle.
+
+Your content on [mechanics/drills] is solid. Here's something I've noticed:
+
+90% of baseball/softball content is physical. The mental side gets maybe one "stay confident" post a month.
+
+Built an app that fills that gap - actual mental game training. Some creators use our content for post ideas, others run affiliate. Either way, figured you'd find it useful.
+
+mindandmuscle.ai/partner-program
+
+- Jeff
+
+
+--------------------------------------------------------------------------------
+5. x_dm_short (Super brief)
+--------------------------------------------------------------------------------
+
+Hey {name} - Jeff, founder of Mind & Muscle.
+
+Baseball/softball mental game app. Affiliate program for creators. 30-day Pro trial to test it.
+
+mindandmuscle.ai/partner-program
+
+Keep putting out solid content.
+
+- Jeff
+
+
+================================================================================
+                              TEMPLATE VARIABLES
+================================================================================
+
+{name}              = Admin's/Creator's first name
+[X members]         = Replace with actual member count (e.g., "15K members")
+[mechanics/drills]  = Replace with their specific content focus
+
+
+================================================================================
+                              STRATEGY NOTES
+================================================================================
+
+FB FIRST TOUCH:
+- No link in initial DM - ask permission first
+- Offer done-for-you post to remove friction
+- Permission frame increases reply rate
+
+FB SECOND TOUCH (after they reply yes):
+- Send link + copy-paste post they can use
+- mindandmuscle.ai (casual, not partner-program)
+
+FB FOLLOW-UP (5-7 days, no reply):
+- Use followup_light_bump template
+- Give them an exit, removes urgency
+
+X/TWITTER:
+- Link in first touch is fine (different platform psychology)
+- Confidence converts on X - no hedging
+- Best performers: x_dm_content_gap, x_dm_content_collab
+- Affiliate-first DMs work better as 2nd touch unless creator is monetization-heavy
+
+
+================================================================================
