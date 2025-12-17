@@ -140,10 +140,33 @@ export default function PartnerEmailTemplatesPage() {
     }
   };
 
+  // Strip out the "Book a Call" CTA section and replace with partner referral link
+  const transformForPartner = (content: string): string => {
+    if (!partner) return content;
+
+    // Pattern to match the "Book a Call" CTA table section
+    // This matches the full CTA block with schedule link
+    const ctaPattern = /<tr><td align="center" style="padding:24px 40px">[\s\S]*?mindandmuscle\.ai\/schedule[\s\S]*?<\/td><\/tr>/gi;
+
+    // Replace with partner referral CTA
+    const partnerCta = `<tr><td align="center" style="padding:24px 40px">
+  <table cellpadding="0" cellspacing="0" border="0" style="margin:0 auto;width:100%">
+    <tr><td align="center" style="background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%);border-radius:12px;padding:32px;box-shadow:0 8px 24px rgba(59,130,246,0.35)">
+      <p style="margin:0 0 12px;font-size:18px;font-weight:700;color:#fff">Ready to take your mental game to the next level?</p>
+      <p style="margin:0 0 20px;font-size:15px;color:rgba(255,255,255,0.9)">Get started with Mind & Muscle today.</p>
+      <a href="${partner.referralUrl || 'https://mindandmuscle.ai'}" style="display:inline-block;background:#fff;color:#2563eb;padding:18px 48px;border-radius:10px;text-decoration:none;font-weight:700;font-size:18px;box-shadow:0 6px 16px rgba(0,0,0,0.2)">Get Started →</a>
+    </td></tr>
+  </table>
+</td></tr>`;
+
+    return content.replace(ctaPattern, partnerCta);
+  };
+
   const replaceAllPlaceholders = (content: string): string => {
     if (!partner) return content;
 
-    let result = content;
+    // First transform for partner (replace booking CTA with referral link)
+    let result = transformForPartner(content);
 
     // Partner info (auto-filled)
     result = result.replace(/\[Your Name\]/g, partner.firstName || partner.name);
