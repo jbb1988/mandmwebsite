@@ -12,7 +12,8 @@ function verifyAdmin(request: NextRequest): boolean {
   return authHeader === process.env.ADMIN_DASHBOARD_PASSWORD;
 }
 
-interface UserProfile {
+// Basic user fields returned in list query
+interface UserListItem {
   id: string;
   email: string;
   name: string | null;
@@ -24,6 +25,37 @@ interface UserProfile {
   organization_id: string | null;
   position: string | null;
   sport: string | null;
+}
+
+// Full user profile with all fields
+interface UserProfile extends UserListItem {
+  app_version: string | null;
+  app_metadata: Record<string, unknown> | null;
+  affiliate_code: string | null;
+  referred_at: string | null;
+}
+
+interface TrialGrant {
+  id: string;
+  user_email: string;
+  granted_by_admin: string;
+  granted_at: string;
+  expires_at: string;
+  reminder_7_day_sent: boolean;
+  reminder_3_day_sent: boolean;
+  reminder_1_day_sent: boolean;
+}
+
+interface PromoRedemption {
+  id: string;
+  user_email: string;
+  promo_code_id: string;
+  redeemed_at: string;
+  promo_codes?: {
+    code: string;
+    discount_percent: number | null;
+    tier_duration_days: number | null;
+  };
 }
 
 // GET: List all users with pagination, search, and filters
@@ -73,7 +105,7 @@ export async function GET(request: NextRequest) {
 
     // Process users to add computed status and real last_sign_in_at
     const now = new Date();
-    const processedUsers = (users || []).map((user: UserProfile) => {
+    const processedUsers = (users || []).map((user: UserListItem) => {
       let computedStatus = 'free';
 
       if (user.tier === 'pro') {
@@ -159,10 +191,10 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { action, userId, tier, expiresAt } = await request.json();
+    const { action, userId, userEmail, tier, expiresAt, days } = await request.json();
 
     if (action === 'get-details') {
-      // Get detailed user info
+      // Get detailed user info including app_version, app_metadata
       const { data: user, error } = await supabase
         .from('profiles')
         .select('*')
@@ -173,11 +205,148 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
 
-      return NextResponse.json({ success: true, user });
+      // Get last_sign_in_at from auth.users
+      const { data: authData } = await supabase.auth.admin.getUserById(userId);
+      const lastSignInAt = authData?.user?.last_sign_in_at || null;
+
+      // Fetch trial grants for this user
+      const { data: trialGrants } = await supabase
+        .from('trial_grants')
+        .select('id, user_email, granted_by_admin, granted_at, expires_at, reminder_7_day_sent, reminder_3_day_sent, reminder_1_day_sent')
+        .eq('user_email', user.email)
+        .order('granted_at', { ascending: false });
+
+      // Fetch promo code redemptions for this user
+      const { data: promoRedemptions } = await supabase
+        .from('promo_code_redemptions')
+        .select('id, user_email, promo_code_id, redeemed_at, promo_codes(code, discount_percent, tier_duration_days)')
+        .eq('user_email', user.email)
+        .order('redeemed_at', { ascending: false });
+
+      return NextResponse.json({
+        success: true,
+        user: {
+          ...user,
+          last_sign_in_at: lastSignInAt,
+        },
+        trialGrants: trialGrants || [],
+        promoRedemptions: promoRedemptions || [],
+      });
+    }
+
+    if (action === 'extend-trial') {
+      // Extend trial by adding days to promo_tier_expires_at
+      if (!userId || !days) {
+        return NextResponse.json({ error: 'userId and days are required' }, { status: 400 });
+      }
+
+      // Get current expiration
+      const { data: user, error: fetchError } = await supabase
+        .from('profiles')
+        .select('promo_tier_expires_at, tier')
+        .eq('id', userId)
+        .single();
+
+      if (fetchError) {
+        return NextResponse.json({ error: fetchError.message }, { status: 500 });
+      }
+
+      // Calculate new expiration
+      let newExpiration: Date;
+      if (user.promo_tier_expires_at && new Date(user.promo_tier_expires_at) > new Date()) {
+        // Extend from current expiration
+        newExpiration = new Date(user.promo_tier_expires_at);
+      } else {
+        // Start from now
+        newExpiration = new Date();
+      }
+      newExpiration.setDate(newExpiration.getDate() + parseInt(days));
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          tier: 'pro',
+          promo_tier_expires_at: newExpiration.toISOString(),
+        })
+        .eq('id', userId);
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: `Trial extended by ${days} days`,
+        newExpiration: newExpiration.toISOString(),
+      });
+    }
+
+    if (action === 'revoke-trial') {
+      // Revoke trial - set tier to core and clear expiration
+      if (!userId) {
+        return NextResponse.json({ error: 'userId is required' }, { status: 400 });
+      }
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          tier: 'core',
+          promo_tier_expires_at: null,
+        })
+        .eq('id', userId);
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ success: true, message: 'Trial revoked, user set to free tier' });
+    }
+
+    if (action === 'grant-trial') {
+      // Grant a new trial
+      if (!userId || !days) {
+        return NextResponse.json({ error: 'userId and days are required' }, { status: 400 });
+      }
+
+      const expirationDate = new Date();
+      expirationDate.setDate(expirationDate.getDate() + parseInt(days));
+
+      // Update profile
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          tier: 'pro',
+          promo_tier_expires_at: expirationDate.toISOString(),
+        })
+        .eq('id', userId);
+
+      if (updateError) {
+        return NextResponse.json({ error: updateError.message }, { status: 500 });
+      }
+
+      // Create trial_grant record if email provided
+      if (userEmail) {
+        await supabase
+          .from('trial_grants')
+          .insert({
+            user_email: userEmail,
+            user_profile_id: userId,
+            granted_by_admin: 'Manual Grant (Admin)',
+            granted_at: new Date().toISOString(),
+            expires_at: expirationDate.toISOString(),
+            grace_period_ends_at: new Date(expirationDate.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          });
+      }
+
+      return NextResponse.json({
+        success: true,
+        message: `${days}-day trial granted`,
+        expiresAt: expirationDate.toISOString(),
+      });
     }
 
     if (action === 'update-tier') {
-      // Update user tier
+      // Update user tier (legacy action)
       const updateData: { tier: string; promo_tier_expires_at?: string | null } = { tier };
 
       if (expiresAt) {

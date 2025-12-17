@@ -51,6 +51,8 @@ interface FBPageAdmin {
   trial_granted_at: string | null;
   trial_granted_to_email: string | null;
   trial_expires_at: string | null;
+  // Template tracking
+  template_used: string | null;
 }
 
 // Response type configuration
@@ -95,6 +97,7 @@ interface Template {
   template_type: string;
   target_category: string;
   body: string;
+  context_note: string | null;
 }
 
 interface Stats {
@@ -1220,6 +1223,10 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
                                   fetchPages();
                                   onUpdate();
                                 }}
+                                onAdminUpdated={() => {
+                                  fetchPages();
+                                  onUpdate();
+                                }}
                               />
                             ))}
                           </div>
@@ -1746,12 +1753,14 @@ function AdminCard({
   onEdit,
   onDelete,
   onTrialGranted,
+  onAdminUpdated,
 }: {
   admin: FBPageAdmin;
   templates: Template[];
   onEdit: () => void;
   onDelete: () => void;
   onTrialGranted: () => void;
+  onAdminUpdated?: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
@@ -1761,16 +1770,43 @@ function AdminCard({
   const [trialMessage, setTrialMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
-  // Copy template with admin name filled in
-  const copyTemplateWithName = (template: Template) => {
+  // Calculate follow-up date and urgency
+  const dmSentDaysAgo = admin.dm_sent_at ? daysSince(admin.dm_sent_at) : null;
+  const shouldFollowUp = dmSentDaysAgo !== null && dmSentDaysAgo >= 5 && admin.response_status !== 'responded' && admin.response_status !== 'approved';
+  const followUpUrgent = dmSentDaysAgo !== null && dmSentDaysAgo >= 7;
+
+  // Copy template with admin name filled in AND mark DM as sent
+  const copyTemplateWithName = async (template: Template) => {
     const firstName = admin.admin_name.split(' ')[0];
     const filledBody = template.body
+      .replace(/\{name\}/gi, firstName)
       .replace(/\{\{name\}\}/gi, firstName)
       .replace(/\{\{admin_name\}\}/gi, firstName);
     navigator.clipboard.writeText(filledBody);
     setCopiedTemplateId(template.id);
     setTimeout(() => setCopiedTemplateId(null), 2000);
     setShowTemplates(false);
+
+    // Mark DM as sent with template tracking
+    try {
+      await fetch('/api/admin/fb-outreach/admins', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': adminPassword,
+        },
+        body: JSON.stringify({
+          admin_id: admin.id,
+          dm_sent_at: new Date().toISOString(),
+          response_status: 'dm_sent',
+          template_used: template.template_name,
+          next_follow_up: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 5 days from now
+        }),
+      });
+      onAdminUpdated?.();
+    } catch (error) {
+      console.error('Error marking DM as sent:', error);
+    }
   };
 
   const handleGrantTrial = async () => {
@@ -1857,10 +1893,15 @@ function AdminCard({
           <div className={`w-8 h-8 ${admin.admin_email ? 'bg-emerald-500/20 border-emerald-500/30' : 'bg-blue-500/20 border-blue-500/30'} rounded-full flex items-center justify-center border`}>
             <Users className="w-4 h-4 text-blue-400" />
           </div>
-          <div>
+          <div className="flex-1">
             <div className="flex items-center gap-2 flex-wrap">
               <p className="text-sm font-medium text-white">{admin.admin_name}</p>
               {trialBadge}
+              {shouldFollowUp && (
+                <span className={`px-2 py-0.5 rounded text-xs ${followUpUrgent ? 'bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse' : 'bg-amber-500/20 text-amber-400 border border-amber-500/30'}`}>
+                  {followUpUrgent ? 'Follow up now!' : 'Follow up soon'}
+                </span>
+              )}
             </div>
             <p className="text-xs text-white/40">
               {admin.admin_email ? (
@@ -1871,6 +1912,24 @@ function AdminCard({
               {' • '}
               {ADMIN_RESPONSE_STATUS[admin.response_status as keyof typeof ADMIN_RESPONSE_STATUS]?.label || 'Not Contacted'}
             </p>
+            {/* DM Tracking Info */}
+            {admin.dm_sent_at && (
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
+                <span className="text-blue-400/70">
+                  DM sent {dmSentDaysAgo === 0 ? 'today' : `${dmSentDaysAgo}d ago`}
+                </span>
+                {admin.template_used && (
+                  <span className="text-white/30">
+                    • {admin.template_used.replace(/_/g, ' ')}
+                  </span>
+                )}
+                {admin.next_follow_up && (
+                  <span className={`${new Date(admin.next_follow_up) <= new Date() ? 'text-amber-400' : 'text-white/30'}`}>
+                    • Follow-up: {new Date(admin.next_follow_up).toLocaleDateString()}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-1 relative">
@@ -1894,9 +1953,10 @@ function AdminCard({
 
             {/* Template Dropdown */}
             {showTemplates && templates.length > 0 && (
-              <div className="absolute right-0 top-full mt-1 w-80 bg-[#1B1F39] border border-white/10 rounded-xl shadow-xl z-50 max-h-96 overflow-y-auto">
-                <div className="p-2 text-xs text-white/50 border-b border-white/10 sticky top-0 bg-[#1B1F39]">
-                  Select DM Template for {admin.admin_name.split(' ')[0]}
+              <div className="absolute right-0 top-full mt-1 w-96 bg-[#1B1F39] border border-white/10 rounded-xl shadow-xl z-50 max-h-[500px] overflow-y-auto">
+                <div className="p-3 text-xs text-white/50 border-b border-white/10 sticky top-0 bg-[#1B1F39]">
+                  <div className="font-medium text-white mb-1">Select DM Template for {admin.admin_name.split(' ')[0]}</div>
+                  <div className="text-white/40">Copying will also mark DM as sent</div>
                 </div>
                 {templates.map(template => (
                   <button
@@ -1905,10 +1965,16 @@ function AdminCard({
                     className="w-full p-3 text-left hover:bg-white/5 border-b border-white/5 last:border-0 transition-colors"
                   >
                     <div className="flex items-center justify-between mb-1">
-                      <p className="font-medium text-white text-sm">{template.template_name.replace(/_/g, ' ')}</p>
+                      <p className="font-medium text-white text-sm capitalize">{template.template_name.replace(/_/g, ' ')}</p>
                       <Copy className="w-3 h-3 text-white/30" />
                     </div>
-                    <p className="text-xs text-white/40 line-clamp-2">{template.body.slice(0, 100)}...</p>
+                    {/* Context Note */}
+                    {template.context_note && (
+                      <div className="mb-2 p-2 rounded bg-amber-500/10 border border-amber-500/20">
+                        <p className="text-xs text-amber-400/90">{template.context_note}</p>
+                      </div>
+                    )}
+                    <p className="text-xs text-white/40 line-clamp-2">{template.body.slice(0, 120)}...</p>
                   </button>
                 ))}
               </div>
@@ -2154,6 +2220,7 @@ function TemplatesTab() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'fb_group' | 'x_influencer'>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | 'initial' | 'post' | 'follow_up'>('all');
+  const [showTips, setShowTips] = useState(false);
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   useEffect(() => {
@@ -2239,6 +2306,139 @@ function TemplatesTab() {
         </div>
       </div>
 
+      {/* Strategy Tips - Collapsible */}
+      <div className="mb-6">
+        <button
+          onClick={() => setShowTips(!showTips)}
+          className="w-full flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/20 hover:border-emerald-500/30 transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-xl">🎯</span>
+            <span className="font-medium text-emerald-400">Outreach Strategy Tips</span>
+            <span className="text-xs text-white/40 hidden sm:inline">Copy/paste ready • Execution checklist</span>
+          </div>
+          {showTips ? <ChevronUp className="w-5 h-5 text-emerald-400" /> : <ChevronDown className="w-5 h-5 text-emerald-400" />}
+        </button>
+
+        {showTips && (
+          <div className="mt-3 p-5 rounded-xl bg-white/[0.02] border border-white/[0.06] space-y-6">
+            {/* Send Times */}
+            <div>
+              <h4 className="text-sm font-semibold text-emerald-400 mb-2">1️⃣ Send Times (Matters More Than You Think)</h4>
+              <div className="grid grid-cols-2 gap-3 text-sm">
+                <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
+                  <p className="text-green-400 font-medium mb-1">✅ Best</p>
+                  <p className="text-white/70">Tue–Thu</p>
+                  <p className="text-white/70">8:30–10:30am or 7:30–9:00pm</p>
+                </div>
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                  <p className="text-red-400 font-medium mb-1">❌ Avoid</p>
+                  <p className="text-white/70">Midday, Late night</p>
+                  <p className="text-white/70">Weekends (admins are buried)</p>
+                </div>
+              </div>
+            </div>
+
+            {/* One Message Rule */}
+            <div>
+              <h4 className="text-sm font-semibold text-emerald-400 mb-2">2️⃣ One Message. One Follow-Up. Stop.</h4>
+              <div className="p-3 rounded-lg bg-white/[0.03] border border-white/[0.08] text-sm text-white/70">
+                <p>• DM once</p>
+                <p>• Follow up once after 5–7 days</p>
+                <p>• If no response → <span className="text-amber-400">do not chase</span></p>
+                <p className="mt-2 text-white/50 italic">Admins remember restraint.</p>
+              </div>
+            </div>
+
+            {/* No Links Rule */}
+            <div>
+              <h4 className="text-sm font-semibold text-emerald-400 mb-2">3️⃣ Do NOT Paste Links in First DM</h4>
+              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-sm">
+                <p className="text-amber-400 mb-2">Wait until they say:</p>
+                <p className="text-white/70">• &quot;sure&quot; • &quot;what is it?&quot; • &quot;send info&quot;</p>
+                <p className="mt-2 text-white/50 italic">This alone increases reply rate.</p>
+              </div>
+            </div>
+
+            {/* Don&apos;t Over-Customize */}
+            <div>
+              <h4 className="text-sm font-semibold text-emerald-400 mb-2">4️⃣ Do NOT Customize Too Much</h4>
+              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-sm text-white/70">
+                <p className="text-red-400 mb-1">❌ No:</p>
+                <p>• Over-personalization</p>
+                <p>• Name-dropping kids/teams</p>
+                <p>• Long Florida backstory</p>
+                <p className="mt-2 text-green-400">✅ One optional line max:</p>
+                <p className="text-white/50 italic">&quot;Especially with how competitive Florida travel ball is…&quot;</p>
+              </div>
+            </div>
+
+            {/* If They Say Sure */}
+            <div>
+              <h4 className="text-sm font-semibold text-emerald-400 mb-2">5️⃣ If They Say &quot;Sure&quot; — Reply Like This</h4>
+              <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-sm">
+                <p className="text-white/80 whitespace-pre-line">{`Appreciate it — thank you.
+
+Here's a short post you can drop into the group as-is.
+If you want anything tweaked for your audience, happy to adjust.
+
+[PASTE POST]`}</p>
+                <p className="mt-2 text-white/50 italic">No selling. No extra explanation.</p>
+              </div>
+            </div>
+
+            {/* Follow-Up Template */}
+            <div>
+              <h4 className="text-sm font-semibold text-emerald-400 mb-2">6️⃣ If No Reply — Your Follow-Up (ONLY ONE)</h4>
+              <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/20 text-sm">
+                <p className="text-white/80 whitespace-pre-line">{`Hey {name} — just bubbling this once in case it got buried.
+
+If you've ever seen a talented kid tighten up or spiral during tryouts,
+that's the exact gap we built this for.
+
+Either way, appreciate you taking a look.
+— Jeff`}</p>
+                <p className="mt-2 text-amber-400 font-medium">Then stop.</p>
+              </div>
+            </div>
+
+            {/* Pushback Response */}
+            <div>
+              <h4 className="text-sm font-semibold text-emerald-400 mb-2">7️⃣ If They Push Back</h4>
+              <div className="p-3 rounded-lg bg-white/[0.03] border border-white/[0.08] text-sm">
+                <p className="text-white/50 mb-2">If they say: &quot;We don&apos;t allow promotion&quot; / &quot;No apps&quot; / &quot;Not interested&quot;</p>
+                <p className="text-white/80 whitespace-pre-line">{`Totally understand — appreciate you letting me know.
+Thanks for running the group.
+— Jeff`}</p>
+                <p className="mt-2 text-green-400 italic">That response gets remembered.</p>
+              </div>
+            </div>
+
+            {/* Mindset */}
+            <div className="p-4 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/20">
+              <h4 className="text-sm font-semibold text-indigo-400 mb-2">🧠 MINDSET</h4>
+              <p className="text-sm text-white/70 mb-2">This is not marketing. This is founder outreach offering a resource during a real pain point.</p>
+              <p className="text-sm text-white/70">You&apos;re not asking for money, endorsement, or time. <span className="text-indigo-400 font-medium">You&apos;re asking for permission.</span></p>
+            </div>
+
+            {/* Daily Targets */}
+            <div className="flex flex-wrap gap-3 pt-2 border-t border-white/[0.06]">
+              <div className="px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                <p className="text-xs text-emerald-400 font-medium">Daily Target</p>
+                <p className="text-lg text-white font-bold">10–15 DMs</p>
+              </div>
+              <div className="px-3 py-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                <p className="text-xs text-amber-400 font-medium">Before Refining</p>
+                <p className="text-lg text-white font-bold">30+ sent</p>
+              </div>
+              <div className="flex-1 flex items-center justify-end">
+                <p className="text-sm text-white/40 italic">Track who replies. Refine nothing until you&apos;ve sent 30+ messages.</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <RefreshCw className="w-6 h-6 text-white/30 animate-spin" />
@@ -2290,6 +2490,14 @@ function TemplatesTab() {
                     {copiedId === template.id ? 'Copied!' : 'Copy'}
                   </Button>
                 </div>
+                {/* Context Note - When to use this template */}
+                {template.context_note && (
+                  <div className="mb-3 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                    <p className="text-xs text-amber-400 leading-relaxed">
+                      <span className="font-semibold">When to use:</span> {template.context_note}
+                    </p>
+                  </div>
+                )}
                 <p className={`text-sm text-white/60 whitespace-pre-wrap ${expandedId === template.id ? '' : 'line-clamp-4'}`}>{template.body}</p>
                 <div className="mt-3 flex items-center justify-between">
                   <span className="text-xs text-orange-400">

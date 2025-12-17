@@ -40,6 +40,8 @@ export async function PATCH(request: NextRequest) {
       referral_revenue,
       // Email for partner matching
       admin_email,
+      // Template tracking
+      template_used,
     } = body;
 
     if (!admin_id) {
@@ -67,6 +69,9 @@ export async function PATCH(request: NextRequest) {
 
     // Email for partner auto-matching (trigger will link to finder_fee_partners)
     if (admin_email !== undefined) updates.admin_email = admin_email;
+
+    // Template tracking
+    if (template_used !== undefined) updates.template_used = template_used;
 
     const { data, error } = await supabase
       .from('fb_page_admins')
