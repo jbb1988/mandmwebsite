@@ -1,0 +1,177 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+const TOLT_API_KEY = process.env.TOLT_API_KEY;
+const TOLT_API_BASE = 'https://api.tolt.com/v1';
+
+interface ToltTransaction {
+  id: string;
+  amount: number;
+  currency: string;
+  status: string;
+  partner_id: string;
+  customer_id: string;
+  created_at: string;
+}
+
+interface ToltCommission {
+  id: string;
+  amount: number;
+  currency: string;
+  status: string; // 'Approved', 'Pending', 'Rejected'
+  partner_id: string;
+  transaction_id: string;
+  created_at: string;
+}
+
+async function fetchFromTolt(endpoint: string, params: Record<string, string> = {}) {
+  const url = new URL(`${TOLT_API_BASE}${endpoint}`);
+  Object.entries(params).forEach(([key, value]) => url.searchParams.append(key, value));
+
+  const response = await fetch(url.toString(), {
+    headers: {
+      'Authorization': `Bearer ${TOLT_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error(`Tolt API error: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const { email } = await request.json();
+
+    if (!email) {
+      return NextResponse.json(
+        { error: 'Email is required' },
+        { status: 400 }
+      );
+    }
+
+    // Get partner's Tolt ID from our database
+    const { data: partner, error: partnerError } = await supabase
+      .from('partners')
+      .select('tolt_partner_id, email')
+      .eq('email', email.toLowerCase().trim())
+      .single();
+
+    if (partnerError || !partner) {
+      return NextResponse.json(
+        { error: 'Partner not found' },
+        { status: 404 }
+      );
+    }
+
+    // If no Tolt partner ID, return zeros
+    if (!partner.tolt_partner_id) {
+      return NextResponse.json({
+        totalEarnings: 0,
+        pendingPayout: 0,
+        totalReferrals: 0,
+        lastUpdated: new Date().toISOString(),
+      });
+    }
+
+    // Check if we have cached metrics (less than 5 minutes old)
+    const { data: cachedMetrics } = await supabase
+      .from('partner_metrics_cache')
+      .select('*')
+      .eq('partner_email', email.toLowerCase().trim())
+      .single();
+
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    if (cachedMetrics && new Date(cachedMetrics.updated_at) > fiveMinutesAgo) {
+      return NextResponse.json({
+        totalEarnings: cachedMetrics.total_earnings,
+        pendingPayout: cachedMetrics.pending_payout,
+        totalReferrals: cachedMetrics.total_referrals,
+        lastUpdated: cachedMetrics.updated_at,
+      });
+    }
+
+    // Fetch fresh data from Tolt
+    let totalEarnings = 0;
+    let pendingPayout = 0;
+    let totalReferrals = 0;
+
+    try {
+      // Fetch commissions
+      const commissionsData = await fetchFromTolt('/commissions', {
+        partner_id: partner.tolt_partner_id,
+      });
+
+      const commissions: ToltCommission[] = commissionsData.data || commissionsData || [];
+
+      // Calculate earnings
+      commissions.forEach((commission: ToltCommission) => {
+        const amount = commission.amount / 100; // Convert cents to dollars
+        if (commission.status === 'Approved') {
+          totalEarnings += amount;
+        } else if (commission.status === 'Pending') {
+          pendingPayout += amount;
+        }
+      });
+
+      // Fetch transactions to count referrals
+      const transactionsData = await fetchFromTolt('/transactions', {
+        partner_id: partner.tolt_partner_id,
+      });
+
+      const transactions: ToltTransaction[] = transactionsData.data || transactionsData || [];
+
+      // Count unique customers as referrals
+      const uniqueCustomers = new Set(transactions.map((t: ToltTransaction) => t.customer_id));
+      totalReferrals = uniqueCustomers.size;
+
+    } catch (toltError) {
+      console.error('Error fetching from Tolt:', toltError);
+      // Return cached data if available, otherwise zeros
+      if (cachedMetrics) {
+        return NextResponse.json({
+          totalEarnings: cachedMetrics.total_earnings,
+          pendingPayout: cachedMetrics.pending_payout,
+          totalReferrals: cachedMetrics.total_referrals,
+          lastUpdated: cachedMetrics.updated_at,
+          error: 'Using cached data',
+        });
+      }
+    }
+
+    // Cache the metrics (upsert)
+    await supabase
+      .from('partner_metrics_cache')
+      .upsert({
+        partner_email: email.toLowerCase().trim(),
+        total_earnings: totalEarnings,
+        pending_payout: pendingPayout,
+        total_referrals: totalReferrals,
+        updated_at: new Date().toISOString(),
+      }, {
+        onConflict: 'partner_email',
+      });
+
+    return NextResponse.json({
+      totalEarnings,
+      pendingPayout,
+      totalReferrals,
+      lastUpdated: new Date().toISOString(),
+    });
+
+  } catch (error) {
+    console.error('Error in partner metrics:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
