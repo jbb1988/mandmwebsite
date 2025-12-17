@@ -52,10 +52,12 @@ async function generateQRCode(url: string): Promise<string> {
     },
   });
 
-  // Fetch M&M logo
+  // Fetch M&M logo for QR code center
   const logoUrl = 'https://api.mindandmuscle.ai/storage/v1/object/public/assets/app-icon.png';
+  console.log('Fetching M&M logo for QR code from:', logoUrl);
   try {
     const logoResponse = await fetch(logoUrl);
+    console.log('Logo fetch response:', logoResponse.status, logoResponse.ok);
     if (logoResponse.ok) {
       const logoBuffer = Buffer.from(await logoResponse.arrayBuffer());
 
@@ -255,6 +257,9 @@ function createFacebookStandardBanner(qrCodeDataUrl: string) {
                           borderRadius: 12,
                           padding: 16,
                           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                         },
                         children: [
                           {
@@ -513,6 +518,9 @@ function createFacebookCoBrandedBanner(qrCodeDataUrl: string, partnerLogoDataUrl
                           borderRadius: 12,
                           padding: 16,
                           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                         },
                         children: [
                           {
