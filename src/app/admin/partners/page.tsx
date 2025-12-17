@@ -163,7 +163,8 @@ export default function AdminPartnersPage() {
     }
   };
 
-  const deletePartner = async (email: string) => {
+  const deletePartner = async (email: string, alsoDeleteFromTolt?: boolean) => {
+    const shouldDeleteFromTolt = alsoDeleteFromTolt !== undefined ? alsoDeleteFromTolt : deleteFromTolt;
     try {
       const res = await fetch('/api/admin/partners', {
         method: 'DELETE',
@@ -171,7 +172,7 @@ export default function AdminPartnersPage() {
           'Content-Type': 'application/json',
           'X-Admin-Password': adminPassword,
         },
-        body: JSON.stringify({ email, deleteFromTolt }),
+        body: JSON.stringify({ email, deleteFromTolt: shouldDeleteFromTolt }),
       });
       const data = await res.json();
 
