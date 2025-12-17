@@ -351,6 +351,11 @@ export async function POST(request: NextRequest) {
           inToltNotInDb,
         },
         toltError,
+        debug: {
+          toltPartnersCount: toltPartners.length,
+          toltPartnerEmails: toltPartners.map(p => p.email),
+          dbPartnerEmails: (partners || []).map(p => p.email),
+        },
       });
     }
 

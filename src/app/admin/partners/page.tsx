@@ -58,6 +58,11 @@ interface SyncDetails {
   notInTolt: Array<{ email: string; name: string }>;
   emailMismatch: Array<{ email: string; name: string; toltEmail?: string }>;
   inToltNotInDb: ToltOnlyPartner[];
+  debug?: {
+    toltPartnersCount: number;
+    toltPartnerEmails: string[];
+    dbPartnerEmails: string[];
+  };
 }
 
 export default function AdminPartnersPage() {
@@ -114,8 +119,8 @@ export default function AdminPartnersPage() {
       const data = await res.json();
 
       if (data.success) {
-        // Store detailed sync results
-        setSyncDetails(data.details);
+        // Store detailed sync results including debug info
+        setSyncDetails({ ...data.details, debug: data.debug });
 
         // Build summary message
         const issues = [];
@@ -576,6 +581,18 @@ export default function AdminPartnersPage() {
                       <div className="text-sm text-white/60">
                         {syncDetails.synced.map(p => p.name).join(', ')}
                       </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Debug Info */}
+                {syncDetails.debug && (
+                  <div className="mt-4 pt-4 border-t border-white/10">
+                    <h3 className="text-purple-400 font-semibold mb-2">🔍 Debug Info</h3>
+                    <div className="bg-purple-500/10 rounded-lg p-3 text-xs space-y-2">
+                      <p><span className="text-white/50">Tolt Partners Found:</span> <span className="text-white">{syncDetails.debug.toltPartnersCount}</span></p>
+                      <p><span className="text-white/50">Tolt Emails:</span> <span className="text-purple-300">{syncDetails.debug.toltPartnerEmails.length > 0 ? syncDetails.debug.toltPartnerEmails.join(', ') : '(none)'}</span></p>
+                      <p><span className="text-white/50">DB Emails:</span> <span className="text-blue-300">{syncDetails.debug.dbPartnerEmails.join(', ')}</span></p>
                     </div>
                   </div>
                 )}
