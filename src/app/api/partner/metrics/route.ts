@@ -29,6 +29,13 @@ interface ToltCommission {
   created_at: string;
 }
 
+interface ToltClick {
+  id: string;
+  partner_id: string;
+  link_id?: string;
+  created_at: string;
+}
+
 async function fetchFromTolt(endpoint: string, params: Record<string, string> = {}) {
   const url = new URL(`${TOLT_API_BASE}${endpoint}`);
   Object.entries(params).forEach(([key, value]) => url.searchParams.append(key, value));
@@ -78,6 +85,7 @@ export async function POST(request: NextRequest) {
         totalEarnings: 0,
         pendingPayout: 0,
         totalReferrals: 0,
+        totalClicks: 0,
         lastUpdated: new Date().toISOString(),
       });
     }
@@ -95,6 +103,7 @@ export async function POST(request: NextRequest) {
         totalEarnings: cachedMetrics.total_earnings,
         pendingPayout: cachedMetrics.pending_payout,
         totalReferrals: cachedMetrics.total_referrals,
+        totalClicks: cachedMetrics.total_clicks || 0,
         lastUpdated: cachedMetrics.updated_at,
       });
     }
@@ -103,6 +112,7 @@ export async function POST(request: NextRequest) {
     let totalEarnings = 0;
     let pendingPayout = 0;
     let totalReferrals = 0;
+    let totalClicks = 0;
 
     try {
       // Fetch commissions
@@ -133,6 +143,18 @@ export async function POST(request: NextRequest) {
       const uniqueCustomers = new Set(transactions.map((t: ToltTransaction) => t.customer_id));
       totalReferrals = uniqueCustomers.size;
 
+      // Fetch clicks
+      try {
+        const clicksData = await fetchFromTolt('/clicks', {
+          partner_id: partner.tolt_partner_id,
+        });
+        const clicks: ToltClick[] = clicksData.data || clicksData || [];
+        totalClicks = clicks.length;
+      } catch (clicksError) {
+        console.error('Error fetching clicks from Tolt:', clicksError);
+        // Don't fail - clicks are nice-to-have
+      }
+
     } catch (toltError) {
       console.error('Error fetching from Tolt:', toltError);
       // Return cached data if available, otherwise zeros
@@ -141,6 +163,7 @@ export async function POST(request: NextRequest) {
           totalEarnings: cachedMetrics.total_earnings,
           pendingPayout: cachedMetrics.pending_payout,
           totalReferrals: cachedMetrics.total_referrals,
+          totalClicks: cachedMetrics.total_clicks || 0,
           lastUpdated: cachedMetrics.updated_at,
           error: 'Using cached data',
         });
@@ -155,6 +178,7 @@ export async function POST(request: NextRequest) {
         total_earnings: totalEarnings,
         pending_payout: pendingPayout,
         total_referrals: totalReferrals,
+        total_clicks: totalClicks,
         updated_at: new Date().toISOString(),
       }, {
         onConflict: 'partner_email',
@@ -164,6 +188,7 @@ export async function POST(request: NextRequest) {
       totalEarnings,
       pendingPayout,
       totalReferrals,
+      totalClicks,
       lastUpdated: new Date().toISOString(),
     });
 

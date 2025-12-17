@@ -51,7 +51,8 @@ import {
   Filter,
   Grid3X3,
   ChevronDown,
-  Upload
+  Upload,
+  MousePointerClick
 } from 'lucide-react';
 
 // Types
@@ -75,6 +76,7 @@ interface Metrics {
   totalEarnings: number;
   pendingPayout: number;
   totalReferrals: number;
+  totalClicks: number;
   lastUpdated: string;
 }
 
@@ -730,6 +732,7 @@ function DashboardContent() {
           totalEarnings: 0,
           pendingPayout: 0,
           totalReferrals: 0,
+          totalClicks: 0,
           lastUpdated: new Date().toISOString(),
         });
       }
@@ -1204,7 +1207,15 @@ function DashboardContent() {
                 icon={<Users className="w-5 h-5" />}
                 color="blue"
               />
-              <Card variant="elevated" className="p-4">
+              <StatCard
+                label="Link Clicks"
+                value={metrics?.totalClicks || 0}
+                icon={<MousePointerClick className="w-5 h-5" />}
+                color="cyan"
+              />
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+              <Card variant="elevated" className="p-4 lg:col-span-2">
                 <p className="text-xs text-white/50 uppercase tracking-wide mb-2">Your Referral Link</p>
                 <div className="flex items-center gap-2">
                   <code className="flex-1 text-xs bg-white/5 px-2 py-1 rounded text-cyan-400 truncate">
@@ -2408,21 +2419,27 @@ function DashboardContent() {
               </Card>
             )}
 
-            {/* Option to regenerate banners if they already have a logo */}
-            {partner.bannerFacebookCobrandedUrl && partner.logoUrl && (
+            {/* Option to regenerate banners if they already have co-branded banners */}
+            {partner.bannerFacebookCobrandedUrl && (
               <Card variant="default" className="p-4">
                 <div className="flex flex-wrap items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-white rounded-lg overflow-hidden flex items-center justify-center">
-                      <Image
-                        src={partner.logoUrl}
-                        alt="Your logo"
-                        width={40}
-                        height={40}
-                        className="object-contain"
-                        unoptimized
-                      />
-                    </div>
+                    {partner.logoUrl ? (
+                      <div className="w-10 h-10 bg-white rounded-lg overflow-hidden flex items-center justify-center">
+                        <Image
+                          src={partner.logoUrl}
+                          alt="Your logo"
+                          width={40}
+                          height={40}
+                          className="object-contain"
+                          unoptimized
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-10 h-10 bg-amber-500/20 rounded-lg flex items-center justify-center">
+                        <Palette className="w-5 h-5 text-amber-400" />
+                      </div>
+                    )}
                     <div>
                       <p className="text-sm font-medium">Your banners include your logo</p>
                       <p className="text-xs text-white/50">Want to update your logo? Upload a new one and regenerate.</p>
@@ -2438,7 +2455,7 @@ function DashboardContent() {
                       />
                       <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-medium transition-colors">
                         <Upload className="w-3 h-3" />
-                        New Logo
+                        {partner.logoUrl ? 'New Logo' : 'Upload Logo'}
                       </span>
                     </label>
                     {logoPreview && (
