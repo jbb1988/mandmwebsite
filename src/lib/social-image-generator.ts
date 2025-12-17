@@ -933,6 +933,9 @@ function createStoryLayout(params: LayoutParams): object {
                       type: 'div',
                       props: {
                         style: {
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                           padding: '12px 24px',
                           backgroundColor: 'rgba(255, 255, 255, 0.1)',
                           borderRadius: 50,
@@ -1406,46 +1409,52 @@ export async function generateSocialImages(params: {
     // Generate each template in each format
     for (const template of templatesToGenerate) {
       for (const format of formats) {
-        const dims = PLATFORM_DIMENSIONS[format];
-        const layoutParams: LayoutParams = {
-          template,
-          qrCodeDataUrl,
-          partnerName,
-          dims,
-          format,
-        };
-
-        // Get layout component
-        const layoutComponent = getLayoutComponent(template.style, layoutParams);
-
-        // Render to SVG
-        const svgString = await satori(layoutComponent as any, {
-          width: dims.width,
-          height: dims.height,
-          fonts,
-        });
-
-        // Composite final image
-        const imageBuffer = await compositeImage(
-          template,
-          svgString,
-          dims.width,
-          dims.height,
-          template.backgroundType === 'photo' ? backgroundBuffer : null
-        );
-
-        // Upload to storage
-        const storagePath = `${baseFolder}/${template.id}-${format}.png`;
-        const url = await uploadToStorage(imageBuffer, storagePath);
-
-        if (url) {
-          results.push({
-            templateId: template.id,
+        try {
+          const dims = PLATFORM_DIMENSIONS[format];
+          const layoutParams: LayoutParams = {
+            template,
+            qrCodeDataUrl,
+            partnerName,
+            dims,
             format,
-            url,
+          };
+
+          // Get layout component
+          const layoutComponent = getLayoutComponent(template.style, layoutParams);
+
+          // Render to SVG
+          console.log(`Rendering: ${template.id} (${template.style}) - ${format}`);
+          const svgString = await satori(layoutComponent as any, {
             width: dims.width,
             height: dims.height,
+            fonts,
           });
+
+          // Composite final image
+          const imageBuffer = await compositeImage(
+            template,
+            svgString,
+            dims.width,
+            dims.height,
+            template.backgroundType === 'photo' ? backgroundBuffer : null
+          );
+
+          // Upload to storage
+          const storagePath = `${baseFolder}/${template.id}-${format}.png`;
+          const url = await uploadToStorage(imageBuffer, storagePath);
+
+          if (url) {
+            results.push({
+              templateId: template.id,
+              format,
+              url,
+              width: dims.width,
+              height: dims.height,
+            });
+          }
+        } catch (err) {
+          console.error(`❌ Error generating ${template.id} (${template.style}) - ${format}:`, err);
+          // Continue with next format/template instead of failing entirely
         }
       }
 

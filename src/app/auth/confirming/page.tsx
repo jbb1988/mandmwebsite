@@ -2,28 +2,50 @@
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { CheckCircle, Loader2 } from 'lucide-react';
+import { CheckCircle, Loader2, Smartphone, Monitor } from 'lucide-react';
 import { LiquidGlass } from '@/components/LiquidGlass';
 
 /**
- * Confirming page - Shows loading state during email confirmation
- * This prevents users from seeing a blank white screen during the redirect
+ * Confirming page - Shows success state after email confirmation
+ * Attempts to open the app on mobile, or shows web welcome page on desktop
  */
 export default function ConfirmingPage() {
   const router = useRouter();
   const [showSuccess, setShowSuccess] = React.useState(false);
+  const [isMobile, setIsMobile] = React.useState(false);
+  const [appOpened, setAppOpened] = React.useState(false);
 
   useEffect(() => {
-    // Show loading animation for at least 1 second for better UX
+    // Detect if on mobile device
+    const userAgent = navigator.userAgent || navigator.vendor;
+    const mobile = /android|iphone|ipad|ipod/i.test(userAgent.toLowerCase());
+    setIsMobile(mobile);
+
+    // Show success immediately since email is already confirmed at this point
     const timer = setTimeout(() => {
       setShowSuccess(true);
 
-      // Then redirect to welcome page after another second
-      const redirectTimer = setTimeout(() => {
-        router.push('/welcome');
-      }, 1000);
+      if (mobile) {
+        // Try to open the app with a deep link
+        // Use mindmuscle://login to signal the app that email is confirmed
+        const appUrl = 'mindmuscle://email-confirmed';
 
-      return () => clearTimeout(redirectTimer);
+        // Try to open the app
+        window.location.href = appUrl;
+
+        // Set a fallback timeout - if app doesn't open, show instructions
+        setTimeout(() => {
+          // If we're still here after 2 seconds, app probably didn't open
+          setAppOpened(false);
+        }, 2000);
+      } else {
+        // Desktop - redirect to welcome page after delay
+        const redirectTimer = setTimeout(() => {
+          router.push('/welcome');
+        }, 2000);
+
+        return () => clearTimeout(redirectTimer);
+      }
     }, 1000);
 
     return () => clearTimeout(timer);
@@ -50,11 +72,45 @@ export default function ConfirmingPage() {
               <h1 className="text-3xl font-bold">
                 {showSuccess ? 'Email Confirmed!' : 'Confirming Your Email...'}
               </h1>
-              <p className="text-lg text-text-secondary">
-                {showSuccess
-                  ? 'Redirecting you to your welcome page'
-                  : 'Please wait a moment while we verify your account'}
-              </p>
+
+              {showSuccess ? (
+                isMobile ? (
+                  <div className="space-y-4">
+                    <p className="text-lg text-text-secondary">
+                      Your account is ready!
+                    </p>
+                    <div className="flex items-center justify-center gap-2 text-neon-cortex-blue">
+                      <Smartphone className="w-5 h-5" />
+                      <span>Opening Mind & Muscle app...</span>
+                    </div>
+                    <div className="mt-6 p-4 bg-white/5 rounded-xl border border-white/10">
+                      <p className="text-sm text-text-secondary mb-3">
+                        App didn&apos;t open? Open the app manually and log in with your email and password.
+                      </p>
+                      <a
+                        href="mindmuscle://login"
+                        className="inline-block px-6 py-3 bg-gradient-to-r from-neon-cortex-blue to-mind-primary text-white font-semibold rounded-xl hover:opacity-90 transition-opacity"
+                      >
+                        Open App
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <p className="text-lg text-text-secondary">
+                      Redirecting you to your welcome page...
+                    </p>
+                    <div className="flex items-center justify-center gap-2 text-text-secondary">
+                      <Monitor className="w-5 h-5" />
+                      <span>Continue on the web or open the app on your phone</span>
+                    </div>
+                  </div>
+                )
+              ) : (
+                <p className="text-lg text-text-secondary">
+                  Please wait a moment while we verify your account
+                </p>
+              )}
             </div>
 
             {/* Loading Progress Bar */}
@@ -66,10 +122,35 @@ export default function ConfirmingPage() {
           </div>
         </LiquidGlass>
 
+        {/* Download links for mobile users who don't have the app */}
+        {showSuccess && isMobile && (
+          <div className="mt-6 text-center">
+            <p className="text-sm text-text-secondary mb-3">
+              Don&apos;t have the app yet?
+            </p>
+            <div className="flex justify-center gap-4">
+              <a
+                href="https://apps.apple.com/us/app/mind-muscle/id6740032386"
+                className="text-neon-cortex-blue hover:underline text-sm"
+              >
+                App Store
+              </a>
+              <a
+                href="https://play.google.com/store/apps/details?id=com.exceptionalhabit.mind_and_muscle"
+                className="text-neon-cortex-blue hover:underline text-sm"
+              >
+                Google Play
+              </a>
+            </div>
+          </div>
+        )}
+
         {/* Subtle hint */}
-        <p className="text-center text-sm text-text-secondary mt-6 opacity-60">
-          This should only take a few seconds
-        </p>
+        {!showSuccess && (
+          <p className="text-center text-sm text-text-secondary mt-6 opacity-60">
+            This should only take a few seconds
+          </p>
+        )}
       </div>
     </div>
   );
