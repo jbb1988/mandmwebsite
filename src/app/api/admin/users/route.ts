@@ -41,6 +41,12 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50');
     const offset = (page - 1) * limit;
 
+    // Fetch last_sign_in_at from auth.users (Supabase tracks this automatically)
+    const { data: authUsers } = await supabase.auth.admin.listUsers({ perPage: 1000 });
+    const authUserMap = new Map(
+      (authUsers?.users || []).map(u => [u.id, u.last_sign_in_at])
+    );
+
     // Build query
     let query = supabase
       .from('profiles')
@@ -65,7 +71,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Process users to add computed status
+    // Process users to add computed status and real last_sign_in_at
     const now = new Date();
     const processedUsers = (users || []).map((user: UserProfile) => {
       let computedStatus = 'free';
@@ -86,8 +92,12 @@ export async function GET(request: NextRequest) {
         computedStatus = 'free';
       }
 
+      // Get last_sign_in_at from auth.users map
+      const lastSignInAt = authUserMap.get(user.id) || null;
+
       return {
         ...user,
+        last_login_at: lastSignInAt,
         computedStatus,
       };
     });
