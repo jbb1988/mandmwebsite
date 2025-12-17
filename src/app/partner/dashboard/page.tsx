@@ -45,7 +45,12 @@ import {
   Globe,
   TrendingUp,
   BarChart3,
-  Award
+  Award,
+  Sparkles,
+  RefreshCw,
+  Filter,
+  Grid3X3,
+  ChevronDown
 } from 'lucide-react';
 
 // Types
@@ -101,6 +106,29 @@ interface SocialTemplate {
   platform: 'all' | 'instagram' | 'facebook' | 'twitter' | 'tiktok';
   body: string;
   hashtags?: string[];
+}
+
+interface SocialImageTemplate {
+  id: string;
+  name: string;
+  category: 'feature' | 'benefit' | 'social_proof' | 'cta' | 'seasonal';
+  style: string;
+  headline: string;
+  subheadline?: string;
+  primaryColor: string;
+  accentColor: string;
+  bestFor: string[];
+  badgeText?: string;
+  seasonal?: boolean;
+  activeMonths?: number[];
+}
+
+interface GeneratedSocialImage {
+  templateId: string;
+  format: string;
+  url: string;
+  width: number;
+  height: number;
 }
 
 // Segment info for email templates
@@ -182,6 +210,7 @@ const TABS = [
   { id: 'overview', label: 'Overview', icon: Home },
   { id: 'templates', label: 'Email Templates', icon: Mail },
   { id: 'social', label: 'Social Media', icon: Share2 },
+  { id: 'images', label: 'Social Images', icon: Sparkles },
   { id: 'resources', label: 'Resources', icon: FolderOpen },
   { id: 'assets', label: 'Your Assets', icon: ImageIcon },
 ];
@@ -584,6 +613,15 @@ function DashboardContent() {
   // PDF preview state
   const [previewPdf, setPreviewPdf] = useState<Resource | null>(null);
 
+  // Social Images state
+  const [socialImageTemplates, setSocialImageTemplates] = useState<SocialImageTemplate[]>([]);
+  const [generatedImages, setGeneratedImages] = useState<GeneratedSocialImage[]>([]);
+  const [isGeneratingImages, setIsGeneratingImages] = useState(false);
+  const [imagesCategoryFilter, setImagesCategoryFilter] = useState<string | null>(null);
+  const [selectedImageTemplate, setSelectedImageTemplate] = useState<SocialImageTemplate | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [downloadFormat, setDownloadFormat] = useState<string>('feed_square');
+
   // Check auth and verify magic link token if present
   useEffect(() => {
     const checkAuthAndVerifyToken = async () => {
@@ -861,6 +899,101 @@ function DashboardContent() {
     if (!partner) return template.body.length;
     const content = template.body.replace(/\{referral_link\}/g, partner.referralUrl || 'https://mindandmuscle.ai');
     return content.length;
+  };
+
+  // Fetch social image templates when tab is active
+  useEffect(() => {
+    if (activeTab === 'images' && socialImageTemplates.length === 0) {
+      fetchSocialImageTemplates();
+    }
+  }, [activeTab, socialImageTemplates.length]);
+
+  // Fetch social image templates
+  const fetchSocialImageTemplates = async () => {
+    try {
+      const response = await fetch('/api/partner/generate-social-images');
+      if (response.ok) {
+        const data = await response.json();
+        setSocialImageTemplates(data.templates || []);
+        setGeneratedImages(data.existingImages || []);
+      }
+    } catch (err) {
+      console.error('Error fetching social image templates:', err);
+    }
+  };
+
+  // Generate social images
+  const generateSocialImages = async (templateIds?: string[]) => {
+    setIsGeneratingImages(true);
+    try {
+      const response = await fetch('/api/partner/generate-social-images', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          templateIds,
+          formats: ['feed_square', 'feed_portrait', 'story', 'twitter', 'linkedin'],
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setGeneratedImages(data.images || []);
+      }
+    } catch (err) {
+      console.error('Error generating social images:', err);
+    } finally {
+      setIsGeneratingImages(false);
+    }
+  };
+
+  // Generate preview image
+  const generatePreview = async (templateId: string, format: string = 'feed_square') => {
+    try {
+      const response = await fetch('/api/partner/generate-social-images', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ templateId, format }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setImagePreviewUrl(data.preview);
+      }
+    } catch (err) {
+      console.error('Error generating preview:', err);
+    }
+  };
+
+  // Filter social image templates
+  const filteredImageTemplates = socialImageTemplates.filter(template => {
+    if (!imagesCategoryFilter) return true;
+    return template.category === imagesCategoryFilter;
+  });
+
+  // Get existing generated image URL for a template
+  const getGeneratedImageUrl = (templateId: string, format: string): string | null => {
+    const image = generatedImages.find(
+      img => img.templateId === templateId && img.format === format
+    );
+    return image?.url || null;
+  };
+
+  // Image category info
+  const IMAGE_CATEGORY_INFO: Record<string, { label: string; color: string }> = {
+    feature: { label: 'Features', color: 'blue' },
+    benefit: { label: 'Benefits', color: 'cyan' },
+    social_proof: { label: 'Social Proof', color: 'green' },
+    cta: { label: 'Call to Action', color: 'orange' },
+    seasonal: { label: 'Seasonal', color: 'purple' },
+  };
+
+  // Platform format info
+  const PLATFORM_FORMAT_INFO: Record<string, { label: string; desc: string }> = {
+    feed_square: { label: 'Square (1:1)', desc: 'Instagram & Facebook Feed' },
+    feed_portrait: { label: 'Portrait (4:5)', desc: 'Instagram Optimal' },
+    story: { label: 'Story (9:16)', desc: 'IG/TikTok Stories' },
+    twitter: { label: 'Twitter (16:9)', desc: 'Twitter/X Posts' },
+    linkedin: { label: 'LinkedIn', desc: 'LinkedIn Posts' },
   };
 
   // Filter templates by segment
@@ -1781,6 +1914,327 @@ function DashboardContent() {
               <Card variant="bordered" className="p-6 text-center">
                 <p className="text-white/50">No templates match your filters</p>
               </Card>
+            )}
+          </div>
+        )}
+
+        {/* Social Images Tab */}
+        {activeTab === 'images' && (
+          <div className="space-y-6">
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h2 className="text-lg font-semibold flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-purple-400" />
+                  Professional Social Images
+                </h2>
+                <p className="text-sm text-white/50 mt-1">
+                  Agency-quality graphics for your social media. No visible links - just scan the QR code.
+                </p>
+              </div>
+              <button
+                onClick={() => generateSocialImages()}
+                disabled={isGeneratingImages}
+                className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 text-white rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isGeneratingImages ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-4 h-4" />
+                    Generate All Images
+                  </>
+                )}
+              </button>
+            </div>
+
+            {/* Info Banner */}
+            <Card variant="bordered" className="p-4 bg-purple-500/10 border-purple-500/20">
+              <div className="flex items-start gap-3">
+                <div className="p-2 bg-purple-500/20 rounded-lg shrink-0">
+                  <Sparkles className="w-5 h-5 text-purple-400" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-sm text-purple-300">Why Images Work Better</h3>
+                  <p className="text-xs text-white/60 mt-1">
+                    Text referral links trigger sales resistance. These professional images with embedded QR codes
+                    get 2-3x more engagement and feel like content, not advertising.
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            {/* Category Filter */}
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setImagesCategoryFilter(null)}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                  !imagesCategoryFilter
+                    ? 'bg-white/20 text-white'
+                    : 'bg-white/5 text-white/70 hover:bg-white/10'
+                }`}
+              >
+                All Categories
+              </button>
+              {Object.entries(IMAGE_CATEGORY_INFO).map(([key, info]) => (
+                <button
+                  key={key}
+                  onClick={() => setImagesCategoryFilter(key)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                    imagesCategoryFilter === key
+                      ? `bg-${info.color}-500/30 text-${info.color}-400 border border-${info.color}-500/30`
+                      : 'bg-white/5 text-white/70 hover:bg-white/10'
+                  }`}
+                >
+                  {info.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Templates Grid */}
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredImageTemplates.map(template => {
+                const categoryInfo = IMAGE_CATEGORY_INFO[template.category];
+                const hasGeneratedImages = generatedImages.some(img => img.templateId === template.id);
+
+                return (
+                  <Card
+                    key={template.id}
+                    variant="default"
+                    className="overflow-hidden hover:border-purple-500/30 transition-colors group"
+                  >
+                    {/* Preview Area */}
+                    <div className="relative aspect-square bg-gradient-to-br from-slate-800 to-slate-900">
+                      {hasGeneratedImages ? (
+                        <Image
+                          src={getGeneratedImageUrl(template.id, 'feed_square') || ''}
+                          alt={template.name}
+                          fill
+                          className="object-cover"
+                          unoptimized
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+                          <div
+                            className="w-16 h-16 rounded-full mb-3 flex items-center justify-center"
+                            style={{ backgroundColor: `${template.primaryColor}20` }}
+                          >
+                            <Grid3X3 className="w-8 h-8" style={{ color: template.primaryColor }} />
+                          </div>
+                          <p className="text-sm font-medium text-white/80 line-clamp-2">
+                            {template.headline.replace('\n', ' ')}
+                          </p>
+                          {template.subheadline && (
+                            <p className="text-xs text-white/50 mt-1 line-clamp-1">
+                              {template.subheadline}
+                            </p>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Badge */}
+                      {template.badgeText && (
+                        <div className="absolute top-2 left-2">
+                          <span className={`text-xs px-2 py-0.5 rounded bg-${categoryInfo.color}-500/80 text-white font-medium`}>
+                            {template.badgeText}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Hover Overlay */}
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        {hasGeneratedImages ? (
+                          <>
+                            <button
+                              onClick={() => {
+                                setSelectedImageTemplate(template);
+                              }}
+                              className="px-3 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-white text-sm font-medium transition-colors"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                const url = getGeneratedImageUrl(template.id, downloadFormat);
+                                if (url) downloadFile(url, `${template.id}-${downloadFormat}.png`);
+                              }}
+                              className="px-3 py-2 bg-purple-500 hover:bg-purple-600 rounded-lg text-white text-sm font-medium transition-colors"
+                            >
+                              <Download className="w-4 h-4" />
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={() => generateSocialImages([template.id])}
+                            disabled={isGeneratingImages}
+                            className="px-4 py-2 bg-purple-500 hover:bg-purple-600 rounded-lg text-white text-sm font-medium transition-colors disabled:opacity-50"
+                          >
+                            Generate
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Info */}
+                    <div className="p-3">
+                      <div className="flex items-start justify-between gap-2 mb-2">
+                        <h3 className="font-medium text-sm line-clamp-1">{template.name}</h3>
+                        <span className={`text-xs px-2 py-0.5 rounded bg-${categoryInfo.color}-500/20 text-${categoryInfo.color}-400 shrink-0`}>
+                          {categoryInfo.label}
+                        </span>
+                      </div>
+
+                      {/* Platform badges */}
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {template.bestFor.slice(0, 3).map(platform => (
+                          <span key={platform} className="text-xs px-1.5 py-0.5 bg-white/5 text-white/50 rounded">
+                            {platform}
+                          </span>
+                        ))}
+                        {template.bestFor.length > 3 && (
+                          <span className="text-xs text-white/40">+{template.bestFor.length - 3}</span>
+                        )}
+                      </div>
+
+                      {/* Download dropdown if generated */}
+                      {hasGeneratedImages && (
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={downloadFormat}
+                            onChange={(e) => setDownloadFormat(e.target.value)}
+                            className="flex-1 px-2 py-1.5 bg-white/5 border border-white/10 rounded text-xs text-white/70"
+                          >
+                            {Object.entries(PLATFORM_FORMAT_INFO).map(([key, info]) => (
+                              <option key={key} value={key} className="bg-slate-900">
+                                {info.label}
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            onClick={() => {
+                              const url = getGeneratedImageUrl(template.id, downloadFormat);
+                              if (url) downloadFile(url, `${template.id}-${downloadFormat}.png`);
+                            }}
+                            className="px-3 py-1.5 bg-purple-500/20 hover:bg-purple-500/30 text-purple-400 rounded text-xs font-medium transition-colors flex items-center gap-1"
+                          >
+                            <Download className="w-3 h-3" />
+                            Download
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+
+            {/* Empty State */}
+            {filteredImageTemplates.length === 0 && (
+              <Card variant="bordered" className="p-8 text-center">
+                <Sparkles className="w-12 h-12 text-white/20 mx-auto mb-4" />
+                <p className="text-white/50 mb-2">No templates match your filter</p>
+                <button
+                  onClick={() => setImagesCategoryFilter(null)}
+                  className="text-sm text-purple-400 hover:text-purple-300"
+                >
+                  Clear filter
+                </button>
+              </Card>
+            )}
+
+            {/* Loading State */}
+            {isGeneratingImages && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                <Card variant="elevated" className="p-8 text-center max-w-sm mx-4">
+                  <Loader2 className="w-12 h-12 text-purple-400 animate-spin mx-auto mb-4" />
+                  <h3 className="font-semibold text-lg mb-2">Generating Your Images</h3>
+                  <p className="text-sm text-white/50">
+                    Creating {filteredImageTemplates.length} professional graphics in 5 different formats...
+                  </p>
+                  <p className="text-xs text-white/30 mt-4">
+                    This may take a minute
+                  </p>
+                </Card>
+              </div>
+            )}
+
+            {/* Image Preview Modal */}
+            {selectedImageTemplate && (
+              <div
+                className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+                onClick={() => setSelectedImageTemplate(null)}
+              >
+                <div
+                  className="bg-[#0F1123] rounded-xl max-w-4xl w-full max-h-[90vh] overflow-hidden"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Modal Header */}
+                  <div className="flex items-center justify-between p-4 border-b border-white/10">
+                    <div>
+                      <h3 className="font-semibold">{selectedImageTemplate.name}</h3>
+                      <p className="text-sm text-white/50">{selectedImageTemplate.headline.replace('\n', ' ')}</p>
+                    </div>
+                    <button
+                      onClick={() => setSelectedImageTemplate(null)}
+                      className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  {/* Image Preview */}
+                  <div className="p-4">
+                    <div className="relative aspect-square max-w-xl mx-auto bg-slate-800 rounded-lg overflow-hidden">
+                      {getGeneratedImageUrl(selectedImageTemplate.id, downloadFormat) ? (
+                        <Image
+                          src={getGeneratedImageUrl(selectedImageTemplate.id, downloadFormat) || ''}
+                          alt={selectedImageTemplate.name}
+                          fill
+                          className="object-contain"
+                          unoptimized
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <p className="text-white/50">Image not generated yet</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Modal Footer */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 border-t border-white/10 bg-white/5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm text-white/50">Format:</span>
+                      <select
+                        value={downloadFormat}
+                        onChange={(e) => setDownloadFormat(e.target.value)}
+                        className="px-3 py-2 bg-white/10 border border-white/10 rounded-lg text-sm"
+                      >
+                        {Object.entries(PLATFORM_FORMAT_INFO).map(([key, info]) => (
+                          <option key={key} value={key} className="bg-slate-900">
+                            {info.label} - {info.desc}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          const url = getGeneratedImageUrl(selectedImageTemplate.id, downloadFormat);
+                          if (url) downloadFile(url, `${selectedImageTemplate.id}-${downloadFormat}.png`);
+                        }}
+                        className="flex-1 sm:flex-none px-4 py-2 bg-purple-500 hover:bg-purple-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Download className="w-4 h-4" />
+                        Download
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         )}
