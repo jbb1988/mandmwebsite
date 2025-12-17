@@ -17,6 +17,10 @@ export default function HomePage() {
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
 
+  // Daily Hit video player state
+  const [isDailyHitPlaying, setIsDailyHitPlaying] = useState(false);
+  const dailyHitVideoRef = useRef<HTMLVideoElement>(null);
+
   // Handle auth redirects from Supabase
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -447,7 +451,7 @@ export default function HomePage() {
               Every tool an athlete needs — mental toughness, physical mastery, precision coaching, and intelligent recovery — all connected in one seamless system.
             </p>
             <p className="text-base sm:text-lg text-text-secondary max-w-3xl mx-auto">
-              <span className="text-neon-cortex-blue font-semibold">Pro features shown below.</span> Free tier also includes Chatter (team communication), Events (scheduling), Daily Hit (motivation), Dugout Talk (journal), and Game Lab Level 1.
+              <span className="text-neon-cortex-blue font-semibold">Free & Pro features below.</span> Free tier includes Chatter, Events, Daily Hit, Dugout Talk, and Game Lab Level 1. <span className="text-solar-surge-orange font-semibold">Pro</span> unlocks AI coaching, video analysis, and advanced training.
             </p>
           </FadeInWhenVisible>
 
@@ -1145,6 +1149,141 @@ export default function HomePage() {
             </div>
           </div>
         )}
+      </section>
+
+      {/* Mind & Muscle Daily Hit - FREE Feature Showcase */}
+      <section className="relative py-16 sm:py-24 lg:py-32 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Deep Navy Background with Orange Accent */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0F1123] via-[#14182E] to-[#0F1123]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(249,115,22,0.12)_0%,transparent_60%)]" />
+
+        {/* Subtle animated glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-solar-surge-orange/10 rounded-full blur-[120px] animate-pulse" />
+
+        <div className="max-w-6xl mx-auto relative z-10">
+          {/* Header */}
+          <FadeInWhenVisible delay={0} direction="up" className="text-center mb-12">
+            <div className="inline-block mb-6">
+              <div className="px-6 py-2 backdrop-blur-sm bg-solar-surge-orange/15 border-2 border-solar-surge-orange/50 rounded-lg shadow-[0_0_20px_rgba(249,115,22,0.3)]">
+                <span className="text-solar-surge-orange font-black text-sm tracking-widest drop-shadow-[0_0_8px_rgba(249,115,22,0.8)]">
+                  🔥 FREE FEATURE • DAILY MOTIVATION
+                </span>
+              </div>
+            </div>
+            <GradientTextReveal
+              text="Mind & Muscle Daily Hit"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-relaxed"
+              gradientFrom="#F97316"
+              gradientTo="#0EA5E9"
+              delay={0.2}
+            />
+            <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto font-medium leading-relaxed">
+              Your daily dose of mental toughness that builds champions. Fresh content every morning. Streak tracking to keep you accountable. <span className="text-solar-surge-orange font-bold">Always free.</span>
+            </p>
+          </FadeInWhenVisible>
+
+          {/* Video Player */}
+          <FadeInWhenVisible delay={0.3} direction="up" className="mb-16">
+            <div className="max-w-md mx-auto">
+              <div
+                className="relative aspect-[9/16] rounded-3xl overflow-hidden cursor-pointer group
+                  border-2 border-solar-surge-orange/40
+                  shadow-[0_0_60px_rgba(249,115,22,0.25)]
+                  hover:shadow-[0_0_80px_rgba(249,115,22,0.4)]
+                  transition-shadow duration-500"
+                onClick={() => {
+                  if (dailyHitVideoRef.current) {
+                    if (isDailyHitPlaying) {
+                      dailyHitVideoRef.current.pause();
+                    } else {
+                      dailyHitVideoRef.current.play();
+                    }
+                    setIsDailyHitPlaying(!isDailyHitPlaying);
+                  }
+                }}
+              >
+                {/* Video */}
+                <video
+                  ref={dailyHitVideoRef}
+                  src="/assets/videos/daily_hit_example.mp4"
+                  className="w-full h-full object-cover"
+                  playsInline
+                  onEnded={() => setIsDailyHitPlaying(false)}
+                />
+
+                {/* Play/Pause Overlay */}
+                <div className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-opacity duration-300 ${isDailyHitPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'}`}>
+                  <div className={`w-24 h-24 rounded-full bg-gradient-to-br from-solar-surge-orange to-solar-surge-orange/80
+                    flex items-center justify-center
+                    hover:scale-110 transition-all duration-300
+                    shadow-[0_0_40px_rgba(249,115,22,0.6)]
+                    ${!isDailyHitPlaying ? 'animate-pulse' : ''}`}>
+                    {isDailyHitPlaying ? (
+                      <Pause className="w-12 h-12 text-white" />
+                    ) : (
+                      <Play className="w-12 h-12 text-white ml-1" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Corner Badge */}
+                <div className="absolute top-4 left-4 px-4 py-2 bg-black/60 backdrop-blur-sm rounded-lg border border-solar-surge-orange/40">
+                  <span className="text-sm font-bold text-solar-surge-orange">🔥 Daily Hit Example</span>
+                </div>
+              </div>
+            </div>
+          </FadeInWhenVisible>
+
+          {/* Feature Cards */}
+          <StaggerChildren staggerDelay={0.1} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+            {/* Fresh Every Day */}
+            <motion.div variants={staggerItemVariants}>
+              <LiquidGlass variant="orange" glow={true} className="p-6 h-full text-center">
+                <div className="text-4xl mb-4">🌅</div>
+                <h3 className="text-xl font-black text-white mb-2">Fresh Every Day</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  New motivational content delivered daily at 8 AM in your timezone. Never the same message twice.
+                </p>
+              </LiquidGlass>
+            </motion.div>
+
+            {/* Build Your Streak */}
+            <motion.div variants={staggerItemVariants}>
+              <LiquidGlass variant="orange" glow={true} className="p-6 h-full text-center">
+                <div className="text-4xl mb-4">🔥</div>
+                <h3 className="text-xl font-black text-white mb-2">Build Your Streak</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  Track your consecutive days. Watch your mental toughness compound. Champions don't skip days.
+                </p>
+              </LiquidGlass>
+            </motion.div>
+
+            {/* Mental Reps */}
+            <motion.div variants={staggerItemVariants}>
+              <LiquidGlass variant="orange" glow={true} className="p-6 h-full text-center">
+                <div className="text-4xl mb-4">🧠</div>
+                <h3 className="text-xl font-black text-white mb-2">Mental Reps</h3>
+                <p className="text-gray-300 leading-relaxed">
+                  2 minutes a day that separates good athletes from great ones. Train your mind like you train your body.
+                </p>
+              </LiquidGlass>
+            </motion.div>
+          </StaggerChildren>
+
+          {/* Bottom Callout */}
+          <FadeInWhenVisible delay={0.6} direction="up" className="text-center">
+            <div className="inline-block">
+              <div className="px-8 py-6 bg-gradient-to-r from-solar-surge-orange/20 via-neon-cortex-blue/10 to-solar-surge-orange/20 backdrop-blur-md border-2 border-solar-surge-orange/40 rounded-2xl shadow-[0_0_30px_rgba(249,115,22,0.2)]">
+                <p className="text-xl sm:text-2xl md:text-3xl font-black text-white leading-tight">
+                  The best athletes train their minds every single day.<br />
+                  <span className="bg-gradient-to-r from-solar-surge-orange to-neon-cortex-blue bg-clip-text text-transparent">
+                    This is where that starts.
+                  </span>
+                </p>
+              </div>
+            </div>
+          </FadeInWhenVisible>
+        </div>
       </section>
 
       {/* The Secret Weapon - AI Learning Section */}
