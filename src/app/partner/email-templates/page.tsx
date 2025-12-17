@@ -7,16 +7,21 @@ import {
   Mail,
   Copy,
   Check,
-  ChevronDown,
   ArrowRight,
   Building2,
   Users,
   Dumbbell,
   Star,
-  Sparkles,
-  ExternalLink
+  ExternalLink,
+  Eye,
+  X,
+  Download,
+  QrCode,
+  User,
+  Briefcase,
+  MapPin,
+  Globe
 } from 'lucide-react';
-import { LiquidGlass } from '@/components/LiquidGlass';
 
 interface Template {
   segment: string;
@@ -30,30 +35,66 @@ interface Partner {
   firstName: string;
   referralUrl: string;
   referralSlug: string;
+  qrCodeUrl: string | null;
 }
 
-const SEGMENT_INFO: Record<string, { label: string; icon: React.ReactNode; description: string }> = {
+interface RecipientInfo {
+  firstName: string;
+  organizationName: string;
+  facilityName: string;
+  platform: string;
+}
+
+const SEGMENT_INFO: Record<string, { label: string; icon: React.ReactNode; description: string; color: string }> = {
   national_org: {
     label: 'National Organizations',
     icon: <Building2 className="w-5 h-5" />,
     description: 'For reaching out to national baseball/softball organizations',
+    color: 'blue',
   },
   travel_org: {
     label: 'Travel Teams',
     icon: <Users className="w-5 h-5" />,
     description: 'For travel ball teams and competitive organizations',
+    color: 'cyan',
   },
   facility: {
     label: 'Training Facilities',
     icon: <Dumbbell className="w-5 h-5" />,
     description: 'For batting cages, academies, and training centers',
+    color: 'orange',
   },
   influencer: {
     label: 'Influencers',
     icon: <Star className="w-5 h-5" />,
     description: 'For social media influencers and content creators',
+    color: 'purple',
   },
 };
+
+const PLATFORMS = ['Instagram', 'TikTok', 'YouTube', 'Twitter/X', 'Facebook', 'Other'];
+
+// Card component matching admin style
+function Card({ children, className = '', variant = 'default', glow = false }: {
+  children: React.ReactNode;
+  className?: string;
+  variant?: 'default' | 'elevated' | 'bordered';
+  glow?: boolean;
+}) {
+  const baseClasses = 'rounded-2xl transition-all duration-200';
+  const variantClasses = {
+    default: 'bg-[#0F1123]/80 border border-white/[0.08]',
+    elevated: 'bg-gradient-to-br from-[#0F1123] to-[#1B1F39] border border-white/[0.12] shadow-xl',
+    bordered: 'bg-[#0A0B14]/60 border-2 border-white/[0.1]',
+  };
+  const glowClass = glow ? 'shadow-lg shadow-blue-500/10' : '';
+
+  return (
+    <div className={`${baseClasses} ${variantClasses[variant]} ${glowClass} ${className}`}>
+      {children}
+    </div>
+  );
+}
 
 export default function PartnerEmailTemplatesPage() {
   const [email, setEmail] = useState('');
@@ -63,7 +104,13 @@ export default function PartnerEmailTemplatesPage() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedSegment, setSelectedSegment] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [expandedTemplate, setExpandedTemplate] = useState<string | null>(null);
+  const [previewTemplate, setPreviewTemplate] = useState<Template | null>(null);
+  const [recipientInfo, setRecipientInfo] = useState<RecipientInfo>({
+    firstName: '',
+    organizationName: '',
+    facilityName: '',
+    platform: '',
+  });
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,35 +140,59 @@ export default function PartnerEmailTemplatesPage() {
     }
   };
 
-  const replacePartnerPlaceholders = (content: string): string => {
+  const replaceAllPlaceholders = (content: string): string => {
     if (!partner) return content;
 
-    return content
-      .replace(/\[Your Name\]/g, partner.firstName || partner.name)
-      .replace(/\{\{your_name\}\}/g, partner.firstName || partner.name)
-      .replace(/\[link\]/g, partner.referralUrl || '[Your Referral Link]')
-      .replace(/\[Get Started\]/g, partner.referralUrl || '[Your Referral Link]');
+    let result = content;
+
+    // Partner info (auto-filled)
+    result = result.replace(/\[Your Name\]/g, partner.firstName || partner.name);
+    result = result.replace(/\{\{your_name\}\}/g, partner.firstName || partner.name);
+    result = result.replace(/\[link\]/g, partner.referralUrl || '[Your Referral Link]');
+    result = result.replace(/\[Get Started\]/g, partner.referralUrl || '[Your Referral Link]');
+
+    // Recipient info (from form)
+    if (recipientInfo.firstName) {
+      result = result.replace(/\{\{first_name\}\}/g, recipientInfo.firstName);
+    }
+    if (recipientInfo.organizationName) {
+      result = result.replace(/\{\{organization_name\}\}/g, recipientInfo.organizationName);
+      result = result.replace(/\{\{company_name\}\}/g, recipientInfo.organizationName);
+    }
+    if (recipientInfo.facilityName) {
+      result = result.replace(/\{\{facility_name\}\}/g, recipientInfo.facilityName);
+    }
+    if (recipientInfo.platform) {
+      result = result.replace(/\{\{platform\}\}/g, recipientInfo.platform);
+    }
+
+    return result;
   };
 
-  const getPlainTextFromHtml = (html: string): string => {
-    // Check if it's HTML
-    if (html.includes('<html') || html.includes('<!DOCTYPE')) {
-      // Create a temporary element to extract text
-      const temp = document.createElement('div');
-      temp.innerHTML = html;
-      return temp.textContent || temp.innerText || '';
+  const getCleanTextFromHtml = (html: string): string => {
+    if (!html.includes('<html') && !html.includes('<!DOCTYPE')) {
+      return html;
     }
-    return html;
+    const temp = document.createElement('div');
+    temp.innerHTML = html;
+    const text = temp.textContent || temp.innerText || '';
+    // Clean up whitespace aggressively
+    return text
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0)
+      .join('\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
   };
 
   const copyToClipboard = async (text: string, id: string, isHtml: boolean = false) => {
     try {
-      const processedText = replacePartnerPlaceholders(text);
+      const processedText = replaceAllPlaceholders(text);
 
       if (isHtml && (text.includes('<html') || text.includes('<!DOCTYPE'))) {
-        // For HTML templates, copy as rich text
         const blob = new Blob([processedText], { type: 'text/html' });
-        const plainBlob = new Blob([getPlainTextFromHtml(processedText)], { type: 'text/plain' });
+        const plainBlob = new Blob([getCleanTextFromHtml(processedText)], { type: 'text/plain' });
 
         await navigator.clipboard.write([
           new ClipboardItem({
@@ -130,22 +201,39 @@ export default function PartnerEmailTemplatesPage() {
           }),
         ]);
       } else {
-        // For plain text, just copy as-is
         await navigator.clipboard.writeText(processedText);
       }
 
       setCopiedId(id);
       setTimeout(() => setCopiedId(null), 2000);
     } catch (err) {
-      // Fallback for browsers that don't support clipboard API
       const textarea = document.createElement('textarea');
-      textarea.value = replacePartnerPlaceholders(text);
+      textarea.value = replaceAllPlaceholders(text);
       document.body.appendChild(textarea);
       textarea.select();
       document.execCommand('copy');
       document.body.removeChild(textarea);
       setCopiedId(id);
       setTimeout(() => setCopiedId(null), 2000);
+    }
+  };
+
+  const downloadQrCode = async () => {
+    if (!partner?.qrCodeUrl) return;
+
+    try {
+      const response = await fetch(partner.qrCodeUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `mind-muscle-qr-${partner.referralSlug || 'code'}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      window.open(partner.qrCodeUrl, '_blank');
     }
   };
 
@@ -161,47 +249,47 @@ export default function PartnerEmailTemplatesPage() {
     return acc;
   }, {} as Record<string, Template[]>);
 
-  // Show verification form if not verified
+  const colorMap: Record<string, { bg: string; border: string; text: string }> = {
+    blue: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-400' },
+    orange: { bg: 'bg-orange-500/10', border: 'border-orange-500/30', text: 'text-orange-400' },
+    purple: { bg: 'bg-purple-500/10', border: 'border-purple-500/30', text: 'text-purple-400' },
+    cyan: { bg: 'bg-cyan-500/10', border: 'border-cyan-500/30', text: 'text-cyan-400' },
+    green: { bg: 'bg-emerald-500/10', border: 'border-emerald-500/30', text: 'text-emerald-400' },
+  };
+
+  // Verification page
   if (!partner) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background-primary via-background-secondary to-background-primary">
-        {/* Header */}
-        <header className="border-b border-white/10 backdrop-blur-md bg-background-primary/80 sticky top-0 z-50">
+      <div className="min-h-screen bg-[#0A0B14] text-white">
+        <div className="fixed inset-0 bg-gradient-to-br from-blue-900/5 via-transparent to-purple-900/5 pointer-events-none" />
+
+        <header className="border-b border-white/[0.08] backdrop-blur-md bg-[#0A0B14]/80 sticky top-0 z-50">
           <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3">
-              <Image
-                src="/assets/images/logo.png"
-                alt="Mind & Muscle"
-                width={40}
-                height={40}
-                className="w-10 h-10"
-              />
+              <Image src="/assets/images/logo.png" alt="Mind & Muscle" width={40} height={40} className="w-10 h-10" />
               <span className="text-lg font-bold">Mind & Muscle</span>
             </Link>
-            <Link
-              href="/partner-program"
-              className="text-sm text-text-secondary hover:text-white transition-colors"
-            >
+            <Link href="/partner-program" className="text-sm text-white/50 hover:text-white transition-colors">
               Partner Program
             </Link>
           </div>
         </header>
 
-        <main className="max-w-lg mx-auto px-4 py-16">
+        <main className="relative z-10 max-w-lg mx-auto px-4 py-16">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-neon-cortex-blue/20 to-solar-surge-orange/20 mb-6">
-              <Mail className="w-8 h-8 text-neon-cortex-blue" />
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-white/10">
+              <Mail className="w-8 h-8 text-blue-400" />
             </div>
             <h1 className="text-3xl font-bold mb-3">Partner Email Templates</h1>
-            <p className="text-text-secondary">
+            <p className="text-white/50">
               Access professionally written email templates to promote Mind & Muscle to your network.
             </p>
           </div>
 
-          <LiquidGlass variant="blue" glow>
+          <Card variant="elevated" className="p-6">
             <form onSubmit={handleVerify} className="space-y-6">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium mb-2">
+                <label htmlFor="email" className="block text-sm font-medium mb-2 text-white/70">
                   Partner Email Address
                 </label>
                 <input
@@ -210,16 +298,16 @@ export default function PartnerEmailTemplatesPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your partner email"
-                  className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-neon-cortex-blue/50 focus:border-neon-cortex-blue transition-all"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all text-white placeholder-white/30"
                   required
                 />
-                <p className="text-xs text-text-secondary mt-2">
+                <p className="text-xs text-white/30 mt-2">
                   Use the email you registered with for the partner program
                 </p>
               </div>
 
               {error && (
-                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
+                <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
                   {error}
                 </div>
               )}
@@ -227,7 +315,7 @@ export default function PartnerEmailTemplatesPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 px-6 bg-gradient-to-r from-neon-cortex-blue to-mind-primary rounded-lg font-semibold text-white hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full py-3 px-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl font-semibold text-white hover:from-blue-600 hover:to-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-blue-500/25"
               >
                 {isLoading ? (
                   <>
@@ -242,12 +330,12 @@ export default function PartnerEmailTemplatesPage() {
                 )}
               </button>
             </form>
-          </LiquidGlass>
+          </Card>
 
           <div className="mt-8 text-center">
-            <p className="text-text-secondary text-sm">
+            <p className="text-white/40 text-sm">
               Not a partner yet?{' '}
-              <Link href="/partner-program" className="text-neon-cortex-blue hover:underline">
+              <Link href="/partner-program" className="text-blue-400 hover:underline">
                 Join the Partner Program
               </Link>
             </p>
@@ -257,31 +345,27 @@ export default function PartnerEmailTemplatesPage() {
     );
   }
 
-  // Show templates after verification
+  // Main templates page
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background-primary via-background-secondary to-background-primary">
+    <div className="min-h-screen bg-[#0A0B14] text-white">
+      <div className="fixed inset-0 bg-gradient-to-br from-blue-900/5 via-transparent to-purple-900/5 pointer-events-none" />
+
       {/* Header */}
-      <header className="border-b border-white/10 backdrop-blur-md bg-background-primary/80 sticky top-0 z-50">
+      <header className="border-b border-white/[0.08] backdrop-blur-md bg-[#0A0B14]/80 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <Image
-              src="/assets/images/logo.png"
-              alt="Mind & Muscle"
-              width={40}
-              height={40}
-              className="w-10 h-10"
-            />
-            <span className="text-lg font-bold">Mind & Muscle</span>
+            <Image src="/assets/images/logo.png" alt="Mind & Muscle" width={40} height={40} className="w-10 h-10" />
+            <span className="text-lg font-bold hidden sm:block">Mind & Muscle</span>
           </Link>
           <div className="flex items-center gap-4">
-            <span className="text-sm text-text-secondary">
+            <span className="text-sm text-white/50 hidden sm:block">
               Welcome, <span className="text-white font-medium">{partner.firstName || partner.name}</span>
             </span>
             <a
               href="https://mind-and-muscle.tolt.io"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm text-neon-cortex-blue hover:underline flex items-center gap-1"
+              className="text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1"
             >
               Dashboard <ExternalLink className="w-3 h-3" />
             </a>
@@ -289,119 +373,214 @@ export default function PartnerEmailTemplatesPage() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
-        {/* Partner Info Banner */}
-        <LiquidGlass variant="blue" className="mb-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="w-5 h-5 text-solar-surge-orange" />
-                <span className="text-sm font-medium text-solar-surge-orange">Your Referral Link</span>
+      <main className="relative z-10 max-w-6xl mx-auto px-4 py-8">
+        {/* Partner Info + Recipient Info Row */}
+        <div className="grid md:grid-cols-2 gap-4 mb-8">
+          {/* Your Info */}
+          <Card variant="elevated" className="p-5">
+            <h2 className="text-sm font-semibold text-white/50 uppercase tracking-wide mb-4 flex items-center gap-2">
+              <QrCode className="w-4 h-4" />
+              Your Partner Info
+            </h2>
+            <div className="space-y-4">
+              {/* Referral Link */}
+              <div>
+                <label className="text-xs text-white/40 mb-1 block">Referral Link</label>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 text-sm bg-white/5 px-3 py-2 rounded-lg text-cyan-400 truncate">
+                    {partner.referralUrl || 'Not set up'}
+                  </code>
+                  <button
+                    onClick={() => copyToClipboard(partner.referralUrl || '', 'referral-link')}
+                    className="p-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors"
+                  >
+                    {copiedId === 'referral-link' ? (
+                      <Check className="w-4 h-4 text-green-400" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-white/50" />
+                    )}
+                  </button>
+                </div>
               </div>
-              <p className="text-lg font-mono bg-white/10 px-4 py-2 rounded-lg">
-                {partner.referralUrl || 'Not set up yet'}
-              </p>
-            </div>
-            <button
-              onClick={() => copyToClipboard(partner.referralUrl || '', 'referral-link')}
-              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
-            >
-              {copiedId === 'referral-link' ? (
-                <>
-                  <Check className="w-4 h-4 text-green-400" />
-                  <span className="text-green-400">Copied!</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-4 h-4" />
-                  <span>Copy Link</span>
-                </>
+
+              {/* QR Code */}
+              {partner.qrCodeUrl && (
+                <div className="flex items-center gap-4">
+                  <Image
+                    src={partner.qrCodeUrl}
+                    alt="Your QR Code"
+                    width={80}
+                    height={80}
+                    className="rounded-lg bg-white p-1"
+                  />
+                  <button
+                    onClick={downloadQrCode}
+                    className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 rounded-lg transition-colors text-sm"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download QR
+                  </button>
+                </div>
               )}
-            </button>
-          </div>
-        </LiquidGlass>
+            </div>
+          </Card>
+
+          {/* Recipient Info Form */}
+          <Card variant="elevated" className="p-5">
+            <h2 className="text-sm font-semibold text-white/50 uppercase tracking-wide mb-4 flex items-center gap-2">
+              <User className="w-4 h-4" />
+              Recipient Info (Optional)
+            </h2>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-white/40 mb-1 block">First Name</label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                  <input
+                    type="text"
+                    value={recipientInfo.firstName}
+                    onChange={(e) => setRecipientInfo(prev => ({ ...prev, firstName: e.target.value }))}
+                    placeholder="John"
+                    className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-white placeholder-white/20"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-white/40 mb-1 block">Organization</label>
+                <div className="relative">
+                  <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                  <input
+                    type="text"
+                    value={recipientInfo.organizationName}
+                    onChange={(e) => setRecipientInfo(prev => ({ ...prev, organizationName: e.target.value }))}
+                    placeholder="Wildcats Baseball"
+                    className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-white placeholder-white/20"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-white/40 mb-1 block">Facility Name</label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                  <input
+                    type="text"
+                    value={recipientInfo.facilityName}
+                    onChange={(e) => setRecipientInfo(prev => ({ ...prev, facilityName: e.target.value }))}
+                    placeholder="Elite Training Center"
+                    className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-white placeholder-white/20"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-white/40 mb-1 block">Platform</label>
+                <div className="relative">
+                  <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                  <select
+                    value={recipientInfo.platform}
+                    onChange={(e) => setRecipientInfo(prev => ({ ...prev, platform: e.target.value }))}
+                    className="w-full pl-9 pr-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500/50 text-white appearance-none cursor-pointer"
+                  >
+                    <option value="" className="bg-[#0F1123]">Select platform</option>
+                    {PLATFORMS.map(p => (
+                      <option key={p} value={p} className="bg-[#0F1123]">{p}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-white/30 mt-3">
+              Fill in recipient details to auto-populate placeholders in templates
+            </p>
+          </Card>
+        </div>
 
         {/* Page Title */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Email Templates</h1>
-          <p className="text-text-secondary">
-            {templates.length} ready-to-use templates. Your name and referral link are pre-filled where applicable.
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold mb-1">Email Templates</h1>
+          <p className="text-white/50 text-sm">
+            {templates.length} ready-to-use templates • Click preview to see the full email
           </p>
         </div>
 
         {/* Segment Filter */}
-        <div className="flex flex-wrap gap-2 mb-8">
+        <div className="flex flex-wrap gap-2 mb-6">
           <button
             onClick={() => setSelectedSegment(null)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
               selectedSegment === null
-                ? 'bg-neon-cortex-blue text-white'
-                : 'bg-white/10 hover:bg-white/20 text-text-secondary'
+                ? 'bg-blue-500 text-white'
+                : 'bg-white/5 hover:bg-white/10 text-white/60 border border-white/[0.08]'
             }`}
           >
             All Templates
           </button>
-          {Object.entries(SEGMENT_INFO).map(([key, info]) => (
-            <button
-              key={key}
-              onClick={() => setSelectedSegment(key)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
-                selectedSegment === key
-                  ? 'bg-neon-cortex-blue text-white'
-                  : 'bg-white/10 hover:bg-white/20 text-text-secondary'
-              }`}
-            >
-              {info.icon}
-              {info.label}
-            </button>
-          ))}
+          {Object.entries(SEGMENT_INFO).map(([key, info]) => {
+            const colors = colorMap[info.color] || colorMap.blue;
+            return (
+              <button
+                key={key}
+                onClick={() => setSelectedSegment(key)}
+                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
+                  selectedSegment === key
+                    ? `${colors.bg} ${colors.text} border ${colors.border}`
+                    : 'bg-white/5 hover:bg-white/10 text-white/60 border border-white/[0.08]'
+                }`}
+              >
+                {info.icon}
+                <span className="hidden sm:inline">{info.label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Templates Grid */}
         <div className="space-y-8">
-          {Object.entries(groupedTemplates).map(([segment, segmentTemplates]) => (
-            <div key={segment}>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 rounded-lg bg-white/10">
-                  {SEGMENT_INFO[segment]?.icon}
-                </div>
-                <div>
-                  <h2 className="text-xl font-semibold">{SEGMENT_INFO[segment]?.label || segment}</h2>
-                  <p className="text-sm text-text-secondary">{SEGMENT_INFO[segment]?.description}</p>
-                </div>
-              </div>
+          {Object.entries(groupedTemplates).map(([segment, segmentTemplates]) => {
+            const info = SEGMENT_INFO[segment];
+            const colors = colorMap[info?.color || 'blue'];
 
-              <div className="grid gap-4">
-                {segmentTemplates
-                  .sort((a, b) => a.sequence_step - b.sequence_step)
-                  .map((template) => {
-                    const templateId = `${template.segment}-${template.sequence_step}`;
-                    const isExpanded = expandedTemplate === templateId;
-                    const isHtml = template.body_template.includes('<html') || template.body_template.includes('<!DOCTYPE');
+            return (
+              <div key={segment}>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`w-10 h-10 ${colors.bg} rounded-xl flex items-center justify-center border ${colors.border}`}>
+                    <span className={colors.text}>{info?.icon}</span>
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold">{info?.label || segment}</h2>
+                    <p className="text-xs text-white/40">{info?.description}</p>
+                  </div>
+                </div>
 
-                    return (
-                      <LiquidGlass key={templateId} variant="neutral" padding="none">
-                        <div className="p-4">
+                <div className="grid gap-3">
+                  {segmentTemplates
+                    .sort((a, b) => a.sequence_step - b.sequence_step)
+                    .map((template) => {
+                      const templateId = `${template.segment}-${template.sequence_step}`;
+                      const isHtml = template.body_template.includes('<html') || template.body_template.includes('<!DOCTYPE');
+                      const previewText = getCleanTextFromHtml(replaceAllPlaceholders(template.body_template));
+
+                      return (
+                        <Card key={templateId} variant="default" className="p-4 hover:border-white/20 transition-all">
                           {/* Header */}
                           <div className="flex items-start justify-between gap-4 mb-3">
-                            <div className="flex-1">
+                            <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1">
-                                <span className="text-xs font-medium px-2 py-0.5 bg-white/10 rounded">
+                                <span className="text-xs font-medium px-2 py-0.5 bg-white/10 rounded text-white/60">
                                   Email {template.sequence_step}
                                 </span>
                                 {isHtml && (
-                                  <span className="text-xs font-medium px-2 py-0.5 bg-neon-cortex-blue/20 text-neon-cortex-blue rounded">
+                                  <span className={`text-xs font-medium px-2 py-0.5 ${colors.bg} ${colors.text} rounded`}>
                                     HTML
                                   </span>
                                 )}
                               </div>
-                              <h3 className="font-semibold text-lg">
-                                {replacePartnerPlaceholders(template.subject_line)}
+                              <h3 className="font-semibold text-white truncate">
+                                {replaceAllPlaceholders(template.subject_line)}
                               </h3>
                             </div>
                             <button
                               onClick={() => copyToClipboard(template.subject_line, `${templateId}-subject`)}
-                              className="flex items-center gap-1 px-3 py-1.5 text-sm bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+                              className="flex items-center gap-1 px-3 py-1.5 text-xs bg-white/5 hover:bg-white/10 rounded-lg transition-colors text-white/60 hover:text-white"
                             >
                               {copiedId === `${templateId}-subject` ? (
                                 <>
@@ -417,37 +596,27 @@ export default function PartnerEmailTemplatesPage() {
                             </button>
                           </div>
 
-                          {/* Body Preview / Expanded */}
-                          <div
-                            className={`relative overflow-hidden transition-all duration-300 ${
-                              isExpanded ? 'max-h-[600px]' : 'max-h-32'
-                            }`}
-                          >
-                            <div className="bg-white/5 rounded-lg p-4 text-sm text-text-secondary whitespace-pre-wrap font-mono">
-                              {isHtml
-                                ? getPlainTextFromHtml(replacePartnerPlaceholders(template.body_template)).slice(0, isExpanded ? undefined : 300)
-                                : replacePartnerPlaceholders(template.body_template).slice(0, isExpanded ? undefined : 300)}
-                              {!isExpanded && template.body_template.length > 300 && '...'}
-                            </div>
-                            {!isExpanded && template.body_template.length > 300 && (
-                              <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-background-secondary to-transparent pointer-events-none" />
-                            )}
+                          {/* Preview */}
+                          <div className="bg-white/[0.03] rounded-xl p-3 mb-3 max-h-24 overflow-hidden relative">
+                            <p className="text-sm text-white/50 whitespace-pre-wrap line-clamp-3">
+                              {previewText.slice(0, 250)}
+                              {previewText.length > 250 && '...'}
+                            </p>
+                            <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-[#0F1123] to-transparent" />
                           </div>
 
                           {/* Actions */}
-                          <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
+                          <div className="flex items-center justify-between">
                             <button
-                              onClick={() => setExpandedTemplate(isExpanded ? null : templateId)}
-                              className="flex items-center gap-1 text-sm text-text-secondary hover:text-white transition-colors"
+                              onClick={() => setPreviewTemplate(template)}
+                              className="flex items-center gap-2 px-4 py-2 text-sm text-white/60 hover:text-white transition-colors"
                             >
-                              <ChevronDown
-                                className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
-                              />
-                              {isExpanded ? 'Show Less' : 'Show Full Email'}
+                              <Eye className="w-4 h-4" />
+                              Preview
                             </button>
                             <button
                               onClick={() => copyToClipboard(template.body_template, `${templateId}-body`, isHtml)}
-                              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-neon-cortex-blue to-mind-primary rounded-lg font-medium text-white hover:opacity-90 transition-opacity"
+                              className={`flex items-center gap-2 px-4 py-2 ${colors.bg} border ${colors.border} rounded-xl font-medium ${colors.text} hover:opacity-80 transition-opacity text-sm`}
                             >
                               {copiedId === `${templateId}-body` ? (
                                 <>
@@ -457,68 +626,129 @@ export default function PartnerEmailTemplatesPage() {
                               ) : (
                                 <>
                                   <Copy className="w-4 h-4" />
-                                  Copy Email Body
+                                  Copy Email
                                 </>
                               )}
                             </button>
                           </div>
-                        </div>
-                      </LiquidGlass>
-                    );
-                  })}
+                        </Card>
+                      );
+                    })}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Placeholder Help */}
-        <LiquidGlass variant="orange" className="mt-12">
-          <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-            <span className="text-2xl">💡</span>
-            Placeholder Guide
+        <Card variant="bordered" className="mt-10 p-5">
+          <h3 className="text-sm font-semibold text-white/50 uppercase tracking-wide mb-3">
+            Unfilled Placeholders
           </h3>
-          <p className="text-text-secondary mb-4">
-            Some templates have placeholders you&apos;ll need to fill in before sending:
+          <p className="text-sm text-white/40 mb-3">
+            If you see any of these in your copied email, replace them manually:
           </p>
-          <div className="grid sm:grid-cols-2 gap-3 text-sm">
-            <div className="flex items-center gap-2">
-              <code className="px-2 py-1 bg-white/10 rounded font-mono text-xs">{'{{first_name}}'}</code>
-              <span className="text-text-secondary">→ Recipient&apos;s first name</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <code className="px-2 py-1 bg-white/10 rounded font-mono text-xs">{'{{organization_name}}'}</code>
-              <span className="text-text-secondary">→ Their organization</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <code className="px-2 py-1 bg-white/10 rounded font-mono text-xs">{'{{facility_name}}'}</code>
-              <span className="text-text-secondary">→ Their facility name</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <code className="px-2 py-1 bg-white/10 rounded font-mono text-xs">{'{{platform}}'}</code>
-              <span className="text-text-secondary">→ Social platform (Instagram, etc.)</span>
-            </div>
+          <div className="flex flex-wrap gap-2">
+            {!recipientInfo.firstName && (
+              <span className="text-xs px-2 py-1 bg-orange-500/10 border border-orange-500/30 rounded text-orange-400">
+                {'{{first_name}}'} → Recipient&apos;s name
+              </span>
+            )}
+            {!recipientInfo.organizationName && (
+              <span className="text-xs px-2 py-1 bg-orange-500/10 border border-orange-500/30 rounded text-orange-400">
+                {'{{organization_name}}'} → Their org
+              </span>
+            )}
+            {!recipientInfo.facilityName && (
+              <span className="text-xs px-2 py-1 bg-orange-500/10 border border-orange-500/30 rounded text-orange-400">
+                {'{{facility_name}}'} → Facility name
+              </span>
+            )}
+            {!recipientInfo.platform && (
+              <span className="text-xs px-2 py-1 bg-orange-500/10 border border-orange-500/30 rounded text-orange-400">
+                {'{{platform}}'} → Social platform
+              </span>
+            )}
           </div>
-          <p className="text-xs text-text-secondary mt-4">
-            Your name and referral link have already been filled in automatically!
-          </p>
-        </LiquidGlass>
-
-        {/* Footer CTA */}
-        <div className="mt-12 text-center">
-          <p className="text-text-secondary mb-4">
-            Need more marketing materials?
-          </p>
-          <a
-            href="https://mind-and-muscle.tolt.io"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg font-medium transition-colors"
-          >
-            Visit Partner Dashboard
-            <ExternalLink className="w-4 h-4" />
-          </a>
-        </div>
+        </Card>
       </main>
+
+      {/* Preview Modal */}
+      {previewTemplate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <Card variant="elevated" className="w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b border-white/[0.08]">
+              <div className="flex items-center gap-3">
+                <Mail className="w-5 h-5 text-blue-400" />
+                <span className="font-semibold">Email Preview</span>
+              </div>
+              <button
+                onClick={() => setPreviewTemplate(null)}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Email Header */}
+            <div className="p-4 bg-white/[0.02] border-b border-white/[0.08]">
+              <div className="space-y-2 text-sm">
+                <div className="flex items-center gap-2">
+                  <span className="text-white/40 w-16">From:</span>
+                  <span className="text-white/70">you@email.com</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-white/40 w-16">To:</span>
+                  <span className="text-white/70">
+                    {recipientInfo.firstName || 'recipient'}@{recipientInfo.organizationName?.toLowerCase().replace(/\s+/g, '') || 'company'}.com
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-white/40 w-16">Subject:</span>
+                  <span className="text-white font-medium">
+                    {replaceAllPlaceholders(previewTemplate.subject_line)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Email Body */}
+            <div className="flex-1 overflow-auto p-4">
+              {previewTemplate.body_template.includes('<html') || previewTemplate.body_template.includes('<!DOCTYPE') ? (
+                <div
+                  className="bg-white rounded-lg p-4"
+                  dangerouslySetInnerHTML={{
+                    __html: replaceAllPlaceholders(previewTemplate.body_template)
+                  }}
+                />
+              ) : (
+                <div className="bg-white/5 rounded-xl p-4 whitespace-pre-wrap text-white/80 text-sm">
+                  {replaceAllPlaceholders(previewTemplate.body_template)}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="flex items-center justify-end gap-3 p-4 border-t border-white/[0.08]">
+              <button
+                onClick={() => copyToClipboard(previewTemplate.subject_line, 'modal-subject')}
+                className="px-4 py-2 text-sm bg-white/5 hover:bg-white/10 rounded-lg transition-colors flex items-center gap-2"
+              >
+                {copiedId === 'modal-subject' ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                Copy Subject
+              </button>
+              <button
+                onClick={() => copyToClipboard(previewTemplate.body_template, 'modal-body', true)}
+                className="px-4 py-2 text-sm bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors flex items-center gap-2 font-medium"
+              >
+                {copiedId === 'modal-body' ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                Copy Email Body
+              </button>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

@@ -31,6 +31,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Fetch partner's QR code from partner_banners table
+    const { data: banners } = await supabase
+      .from('partner_banners')
+      .select('qr_code_url')
+      .eq('partner_email', email.toLowerCase().trim())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    const qrCodeUrl = banners?.qr_code_url || null;
+
     // Fetch email templates
     const { data: templates, error: templatesError } = await supabase
       .from('marketing_email_templates')
@@ -53,6 +64,7 @@ export async function POST(request: NextRequest) {
         firstName: partner.first_name,
         referralUrl: partner.referral_url,
         referralSlug: partner.referral_slug,
+        qrCodeUrl: qrCodeUrl,
       },
       templates: templates || [],
     });
