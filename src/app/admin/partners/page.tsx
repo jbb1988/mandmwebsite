@@ -65,7 +65,7 @@ export default function AdminPartnersPage() {
       setLoading(true);
       const url = checkTolt ? '/api/admin/partners?checkTolt=true' : '/api/admin/partners';
       const res = await fetch(url, {
-        headers: { 'x-admin-password': adminPassword },
+        headers: { 'X-Admin-Password': adminPassword },
       });
       const data = await res.json();
 
@@ -88,7 +88,7 @@ export default function AdminPartnersPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-password': adminPassword,
+          'X-Admin-Password': adminPassword,
         },
         body: JSON.stringify({ action: 'sync-all' }),
       });
@@ -117,7 +117,7 @@ export default function AdminPartnersPage() {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-password': adminPassword,
+          'X-Admin-Password': adminPassword,
         },
         body: JSON.stringify({ email, deleteFromTolt }),
       });
@@ -174,7 +174,7 @@ export default function AdminPartnersPage() {
 
   return (
     <AdminGate>
-      <div className="min-h-screen bg-[#0A0B14]">
+      <div className="min-h-screen bg-[#0A0B14] pt-20">
         <AdminNav />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

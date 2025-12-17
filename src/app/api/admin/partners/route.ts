@@ -11,7 +11,7 @@ const TOLT_API_BASE = 'https://api.tolt.io/v1';
 
 // Helper to verify admin password
 function verifyAdmin(request: NextRequest): boolean {
-  const authHeader = request.headers.get('x-admin-password');
+  const authHeader = request.headers.get('X-Admin-Password');
   return authHeader === process.env.ADMIN_DASHBOARD_PASSWORD;
 }
 
