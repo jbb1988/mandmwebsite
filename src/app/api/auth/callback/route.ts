@@ -96,11 +96,23 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(resetUrl);
     }
 
-    // Handle email confirmation
-    // Note: When user clicks the email link, Supabase automatically confirms the email
-    // BEFORE redirecting to this callback. So we just need to redirect to confirming page.
+    // Handle email confirmation (PKCE flow)
+    // The code MUST be exchanged to confirm the email - this is required for PKCE
     console.log('Email confirmation flow detected');
-    console.log('Supabase has already confirmed the email before redirecting here');
+    console.log('Exchanging code to confirm email...');
+
+    const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (exchangeError) {
+      console.error('Email confirmation code exchange failed:', exchangeError.message);
+      // Redirect to homepage with error - user will need to request a new confirmation email
+      const errorUrl = new URL('/', requestUrl.origin);
+      errorUrl.searchParams.set('error', 'email_confirmation_failed');
+      errorUrl.searchParams.set('error_description', exchangeError.message || 'Failed to confirm email');
+      return NextResponse.redirect(errorUrl);
+    }
+
+    console.log('Email confirmed successfully for user:', data.user?.email);
     console.log('Redirecting to confirming page with loading animation');
 
     // Redirect to confirming page which shows loading animation before welcome page

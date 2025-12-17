@@ -651,6 +651,25 @@ export async function POST(request: NextRequest) {
             </div>
             ` : ''}
 
+            <div style="background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%); border: 2px solid #8b5cf6; padding: 25px; margin: 30px 0; border-radius: 12px;">
+              <h2 style="margin: 0 0 15px 0; font-size: 20px; color: #7c3aed;">📧 Ready-to-Use Email Templates</h2>
+              <p style="font-size: 15px; line-height: 1.6; color: #555; margin-bottom: 20px;">
+                We've created professionally written email templates you can use to promote Mind & Muscle to your network. Just copy, personalize, and send!
+              </p>
+              <div style="text-align: center; margin: 20px 0;">
+                <a href="https://mindandmuscle.ai/partner/email-templates" style="display: inline-block; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 16px; box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);">
+                  Browse Email Templates →
+                </a>
+              </div>
+              <div style="background: white; border-radius: 8px; padding: 15px; margin-top: 15px;">
+                <ul style="font-size: 13px; color: #555; margin: 0; padding-left: 20px; line-height: 1.8;">
+                  <li><strong>16 proven templates</strong> for different audiences</li>
+                  <li><strong>One-click copy</strong> with your referral link pre-filled</li>
+                  <li><strong>Works perfectly</strong> in Gmail, Outlook, and any email client</li>
+                </ul>
+              </div>
+            </div>
+
             <div style="background: #fff3e0; border-left: 4px solid #fb923c; padding: 20px; margin: 30px 0; border-radius: 4px;">
               <h2 style="margin: 0 0 15px 0; font-size: 20px; color: #fb923c;">🚀 Access Your Partner Dashboard</h2>
               <p style="font-size: 15px; line-height: 1.6; color: #555; margin-bottom: 20px;">
@@ -687,11 +706,13 @@ export async function POST(request: NextRequest) {
               <h2 style="margin: 0 0 15px 0; font-size: 20px; color: #fb923c;">📚 What You'll Find in Your Dashboard</h2>
               <ul style="font-size: 15px; line-height: 1.8; color: #555; margin: 10px 0;">
                 <li>🔗 Create additional referral links (track performance per link)</li>
-                <li>✉️ Email templates and social media copy</li>
                 <li>🎨 Logos, screenshots, and brand assets</li>
                 <li>📊 Real-time click and commission tracking</li>
                 <li>💰 Earnings and payout history</li>
               </ul>
+              <p style="font-size: 14px; color: #666; margin-top: 15px; font-style: italic;">
+                💡 For email templates, use our <a href="https://mindandmuscle.ai/partner/email-templates" style="color: #8b5cf6; font-weight: 600;">dedicated templates page</a> with one-click copy!
+              </p>
             </div>
 
             <div style="background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 20px; margin: 30px 0; border-radius: 4px;">
