@@ -12,9 +12,18 @@ const supabase = createClient(
 
 // Load font for satori (must be TTF/OTF, not WOFF/WOFF2)
 async function loadFont(): Promise<ArrayBuffer> {
-  // Use Inter font TTF from GitHub (satori doesn't support WOFF2)
-  const fontUrl = 'https://github.com/rsms/inter/raw/master/docs/font-files/Inter-Bold.otf';
+  // Use Roboto Bold TTF from Google Fonts GitHub (reliable TTF source)
+  const fontUrl = 'https://raw.githubusercontent.com/google/fonts/main/apache/roboto/Roboto%5Bwdth%2Cwght%5D.ttf';
   const response = await fetch(fontUrl);
+  if (!response.ok) {
+    // Fallback to another source
+    const fallbackUrl = 'https://cdn.jsdelivr.net/gh/nicololucioni/Roboto@master/Roboto-Bold.ttf';
+    const fallbackResponse = await fetch(fallbackUrl);
+    if (!fallbackResponse.ok) {
+      throw new Error(`Failed to fetch font from both sources`);
+    }
+    return await fallbackResponse.arrayBuffer();
+  }
   return await response.arrayBuffer();
 }
 
@@ -27,16 +36,66 @@ async function fetchImageAsDataUrl(url: string): Promise<string> {
   return `data:${contentType};base64,${base64}`;
 }
 
-// Generate QR code as data URL
+// Generate QR code with M&M logo in center
 async function generateQRCode(url: string): Promise<string> {
-  return await QRCode.toDataURL(url, {
+  // Generate base QR code with higher error correction to allow for logo overlay
+  const qrBuffer = await QRCode.toBuffer(url, {
     width: 300,
     margin: 1,
+    errorCorrectionLevel: 'H', // High error correction (30%) allows logo overlay
     color: {
       dark: '#000000',
       light: '#ffffff',
     },
   });
+
+  // Fetch M&M logo
+  const logoUrl = 'https://api.mindandmuscle.ai/storage/v1/object/public/assets/app-icon.png';
+  try {
+    const logoResponse = await fetch(logoUrl);
+    if (logoResponse.ok) {
+      const logoBuffer = Buffer.from(await logoResponse.arrayBuffer());
+
+      // Resize logo to fit in center (about 25% of QR code size)
+      const logoSize = 75; // 75px for 300px QR code
+      const resizedLogo = await sharp(logoBuffer)
+        .resize(logoSize, logoSize, { fit: 'contain', background: { r: 255, g: 255, b: 255, alpha: 1 } })
+        .png()
+        .toBuffer();
+
+      // Create white background circle for logo
+      const circleSize = logoSize + 10;
+      const circleSvg = `<svg width="${circleSize}" height="${circleSize}">
+        <circle cx="${circleSize/2}" cy="${circleSize/2}" r="${circleSize/2}" fill="white"/>
+      </svg>`;
+      const circleBuffer = Buffer.from(circleSvg);
+
+      // Composite: QR code + white circle + logo
+      const qrWithLogo = await sharp(qrBuffer)
+        .composite([
+          {
+            input: circleBuffer,
+            top: Math.floor((300 - circleSize) / 2),
+            left: Math.floor((300 - circleSize) / 2),
+          },
+          {
+            input: resizedLogo,
+            top: Math.floor((300 - logoSize) / 2),
+            left: Math.floor((300 - logoSize) / 2),
+          },
+        ])
+        .png()
+        .toBuffer();
+
+      // Convert to data URL
+      return `data:image/png;base64,${qrWithLogo.toString('base64')}`;
+    }
+  } catch (logoError) {
+    console.error('Error adding logo to QR code, using plain QR:', logoError);
+  }
+
+  // Fallback to plain QR code
+  return `data:image/png;base64,${qrBuffer.toString('base64')}`;
 }
 
 // Upload image to Supabase Storage
