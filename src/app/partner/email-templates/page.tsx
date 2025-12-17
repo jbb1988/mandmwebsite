@@ -370,11 +370,11 @@ export default function PartnerEmailTemplatesPage() {
 
   // Main templates page
   return (
-    <div className="min-h-screen bg-[#0A0B14] text-white">
+    <div className="min-h-screen bg-[#0A0B14] text-white pt-16">
       <div className="fixed inset-0 bg-gradient-to-br from-blue-900/5 via-transparent to-purple-900/5 pointer-events-none" />
 
       {/* Header */}
-      <header className="border-b border-white/[0.08] backdrop-blur-md bg-[#0A0B14]/80 sticky top-0 z-50">
+      <header className="border-b border-white/[0.08] backdrop-blur-md bg-[#0A0B14]/80 sticky top-16 z-50">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
             <Image src="/assets/images/logo.png" alt="Mind & Muscle" width={40} height={40} className="w-10 h-10" />
@@ -396,7 +396,7 @@ export default function PartnerEmailTemplatesPage() {
         </div>
       </header>
 
-      <main className="relative z-10 max-w-6xl mx-auto px-4 pt-24 pb-8">
+      <main className="relative z-10 max-w-6xl mx-auto px-4 pt-8 pb-8">
         {/* Partner Info + Recipient Info Row */}
         <div className="grid md:grid-cols-2 gap-4 mb-8">
           {/* Your Info */}
