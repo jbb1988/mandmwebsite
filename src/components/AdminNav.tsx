@@ -12,6 +12,7 @@ const adminLinks = [
   { href: '/admin/fb-outreach', label: 'FB Outreach', icon: Facebook },
   { href: '/admin/x-outreach', label: 'X Outreach', icon: Twitter },
   { href: '/admin/finder-fees', label: 'Finder Fees', icon: DollarSign },
+  { href: '/admin/partners', label: 'Partners', icon: Users },
   { href: '/admin/banner-generator', label: 'Banners', icon: Image },
   { href: '/admin/banner-library', label: 'Library', icon: FolderOpen },
 ];

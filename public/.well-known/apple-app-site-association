@@ -9,7 +9,11 @@
           "/settings",
           "/settings/",
           "/dugout-talk",
-          "/dugout-talk/"
+          "/dugout-talk/",
+          "/auth/callback",
+          "/auth/callback/*",
+          "/auth/confirming",
+          "/auth/confirming/"
         ]
       }
     ]
