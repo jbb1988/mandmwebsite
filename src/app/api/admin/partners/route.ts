@@ -7,7 +7,7 @@ const supabase = createClient(
 );
 
 const TOLT_API_KEY = process.env.TOLT_API_KEY;
-const TOLT_API_BASE = 'https://api.tolt.io/v1';
+const TOLT_API_BASE = 'https://api.tolt.com/v1';
 
 // Helper to verify admin password
 function verifyAdmin(request: NextRequest): boolean {
@@ -74,8 +74,13 @@ async function getAllToltPartners(): Promise<{ partners: Array<{ id: string; ema
     }
 
     const data = await response.json();
+    console.log('Tolt API response:', JSON.stringify(data, null, 2));
+
+    // Tolt API may return partners in different structures
+    const partnersArray = data.data || data.partners || data || [];
+
     return {
-      partners: (data.data || []).map((p: { id: string; email: string; name: string; status: string }) => ({
+      partners: (Array.isArray(partnersArray) ? partnersArray : []).map((p: { id: string; email: string; name: string; status: string }) => ({
         id: p.id,
         email: p.email?.toLowerCase(),
         name: p.name,
