@@ -1160,7 +1160,7 @@ function DashboardContent() {
                     <p className="text-sm text-white/60">
                       Your referral tracking is powered by <span className="text-white font-medium">Tolt</span>, our affiliate management platform.
                       The earnings, referrals, and payout information you see here are synced from Tolt. For detailed analytics including
-                      <span className="text-white"> click tracking</span>, conversion rates, and payout history, visit your{' '}
+                      conversion rates and payout history, visit your{' '}
                       <a
                         href="https://mind-and-muscle.tolt.io"
                         target="_blank"
