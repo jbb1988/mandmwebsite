@@ -2060,9 +2060,9 @@ function AdminCard({
               <CalendarClock className="w-4 h-4" />
             </button>
 
-            {/* Date Editor Dropdown */}
+            {/* Date Editor Dropdown - positioned above to avoid cutoff */}
             {showDateEditor && (
-              <div className="absolute right-0 top-full mt-1 w-72 bg-[#1B1F39] border border-white/10 rounded-xl shadow-xl z-50 p-4">
+              <div className="absolute right-0 bottom-full mb-1 w-72 bg-[#1B1F39] border border-white/10 rounded-xl shadow-xl z-[100] p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="text-sm font-medium text-white">Track DM Dates</h4>
                   <button onClick={() => setShowDateEditor(false)} className="text-white/40 hover:text-white">

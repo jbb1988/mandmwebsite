@@ -274,42 +274,61 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
 
-      // Also fetch all partners from Tolt
+      // Fetch all partners from Tolt first - this is the source of truth
       const { partners: toltPartners, error: toltError } = await getAllToltPartners();
 
-      // Check each DB partner against Tolt
-      const results = await Promise.all(
-        (partners || []).map(async (partner) => {
-          if (!partner.tolt_partner_id) {
-            return {
-              email: partner.email,
-              name: partner.name,
-              toltExists: false,
-              toltStatus: 'no_tolt_id',
-              emailMatch: false,
-            };
-          }
+      // Create a map of Tolt partners by email for quick lookup
+      const toltByEmail = new Map(toltPartners.map(tp => [tp.email?.toLowerCase(), tp]));
 
-          const toltStatus = await getToltPartnerStatus(partner.tolt_partner_id, partner.email);
+      // Check each DB partner against Tolt by email (more reliable than ID)
+      const results = (partners || []).map((partner) => {
+        const dbEmail = partner.email?.toLowerCase();
+        const toltPartner = toltByEmail.get(dbEmail);
+
+        if (toltPartner) {
+          // Found in Tolt by email - check if tolt_partner_id matches
+          const idMatches = partner.tolt_partner_id === toltPartner.id;
           return {
             email: partner.email,
             name: partner.name,
-            toltExists: toltStatus.exists,
-            toltStatus: toltStatus.exists
-              ? (toltStatus.emailMatch ? toltStatus.status : 'email_mismatch')
-              : 'not_found',
-            toltEmail: toltStatus.email,
-            emailMatch: toltStatus.emailMatch,
-            toltError: toltStatus.error,
+            toltExists: true,
+            toltStatus: idMatches ? (toltPartner.status || 'active') : 'id_mismatch',
+            toltEmail: toltPartner.email,
+            toltId: toltPartner.id,
+            emailMatch: true, // Email matches since we found by email
+            idMatch: idMatches,
           };
-        })
-      );
+        } else {
+          // Not found in Tolt by email - check if they have an ID that points elsewhere
+          if (partner.tolt_partner_id) {
+            // They have an ID but email doesn't match - this is an email mismatch
+            const toltById = toltPartners.find(tp => tp.id === partner.tolt_partner_id);
+            return {
+              email: partner.email,
+              name: partner.name,
+              toltExists: !!toltById,
+              toltStatus: toltById ? 'email_mismatch' : 'not_found',
+              toltEmail: toltById?.email || '',
+              toltId: partner.tolt_partner_id,
+              emailMatch: false,
+            };
+          }
+          return {
+            email: partner.email,
+            name: partner.name,
+            toltExists: false,
+            toltStatus: 'not_in_tolt',
+            toltEmail: '',
+            emailMatch: false,
+          };
+        }
+      });
 
       // Find Tolt partners not in our DB (by email)
       const dbEmails = new Set((partners || []).map(p => p.email?.toLowerCase()));
       const inToltNotInDb = toltPartners.filter(tp => !dbEmails.has(tp.email));
 
-      const notInTolt = results.filter(r => !r.toltExists || r.toltStatus === 'not_found');
+      const notInTolt = results.filter(r => r.toltStatus === 'not_in_tolt' || r.toltStatus === 'not_found');
       const emailMismatch = results.filter(r => r.toltStatus === 'email_mismatch');
       const synced = results.filter(r => r.toltExists && r.emailMatch);
 
