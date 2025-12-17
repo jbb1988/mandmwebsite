@@ -481,6 +481,9 @@ function createBoldImpactLayout(params: LayoutParams): object {
                       type: 'div',
                       props: {
                         style: {
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                           backgroundColor: BRAND_COLORS.white,
                           borderRadius: 16,
                           padding: 16,
@@ -649,6 +652,9 @@ function createCleanMinimalLayout(params: LayoutParams): object {
                       type: 'div',
                       props: {
                         style: {
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                           backgroundColor: BRAND_COLORS.white,
                           borderRadius: 20,
                           padding: 20,
@@ -834,6 +840,9 @@ function createSplitLayout(params: LayoutParams): object {
                       type: 'div',
                       props: {
                         style: {
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                           backgroundColor: BRAND_COLORS.white,
                           borderRadius: 16,
                           padding: 16,
@@ -1013,6 +1022,9 @@ function createStoryLayout(params: LayoutParams): object {
                       type: 'div',
                       props: {
                         style: {
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                           backgroundColor: BRAND_COLORS.white,
                           borderRadius: 20,
                           padding: 20,
@@ -1211,6 +1223,9 @@ function createDataStatsLayout(params: LayoutParams): object {
                       type: 'div',
                       props: {
                         style: {
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
                           backgroundColor: BRAND_COLORS.white,
                           borderRadius: 12,
                           padding: 12,
