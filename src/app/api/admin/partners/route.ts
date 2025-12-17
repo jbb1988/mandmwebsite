@@ -312,6 +312,9 @@ export async function POST(request: NextRequest) {
       const toltByEmail = new Map(toltPartners.map(tp => [tp.email?.toLowerCase(), tp]));
 
       // Check each DB partner against Tolt by email (more reliable than ID)
+      // Also fix any mismatched tolt_partner_ids
+      const idsToFix: Array<{ email: string; newToltId: string }> = [];
+
       const results = (partners || []).map((partner) => {
         const dbEmail = partner.email?.toLowerCase();
         const toltPartner = toltByEmail.get(dbEmail);
@@ -319,31 +322,25 @@ export async function POST(request: NextRequest) {
         if (toltPartner) {
           // Found in Tolt by email - check if tolt_partner_id matches
           const idMatches = partner.tolt_partner_id === toltPartner.id;
+
+          // If ID doesn't match, queue it for fixing
+          if (!idMatches) {
+            idsToFix.push({ email: partner.email, newToltId: toltPartner.id });
+          }
+
           return {
             email: partner.email,
             name: partner.name,
             toltExists: true,
-            toltStatus: idMatches ? (toltPartner.status || 'active') : 'id_mismatch',
+            toltStatus: toltPartner.status || 'active', // Always show as synced if email matches
             toltEmail: toltPartner.email,
             toltId: toltPartner.id,
-            emailMatch: true, // Email matches since we found by email
+            emailMatch: true,
             idMatch: idMatches,
+            idFixed: !idMatches, // Mark that we're fixing this
           };
         } else {
-          // Not found in Tolt by email - check if they have an ID that points elsewhere
-          if (partner.tolt_partner_id) {
-            // They have an ID but email doesn't match - this is an email mismatch
-            const toltById = toltPartners.find(tp => tp.id === partner.tolt_partner_id);
-            return {
-              email: partner.email,
-              name: partner.name,
-              toltExists: !!toltById,
-              toltStatus: toltById ? 'email_mismatch' : 'not_found',
-              toltEmail: toltById?.email || '',
-              toltId: partner.tolt_partner_id,
-              emailMatch: false,
-            };
-          }
+          // Not found in Tolt by email
           return {
             email: partner.email,
             name: partner.name,
@@ -355,12 +352,24 @@ export async function POST(request: NextRequest) {
         }
       });
 
+      // Fix mismatched tolt_partner_ids in the database
+      let idsFixed = 0;
+      for (const fix of idsToFix) {
+        const { error: updateError } = await supabase
+          .from('partners')
+          .update({ tolt_partner_id: fix.newToltId })
+          .eq('email', fix.email.toLowerCase());
+
+        if (!updateError) {
+          idsFixed++;
+        }
+      }
+
       // Find Tolt partners not in our DB (by email)
       const dbEmails = new Set((partners || []).map(p => p.email?.toLowerCase()));
       const inToltNotInDb = toltPartners.filter(tp => !dbEmails.has(tp.email));
 
-      const notInTolt = results.filter(r => r.toltStatus === 'not_in_tolt' || r.toltStatus === 'not_found');
-      const emailMismatch = results.filter(r => r.toltStatus === 'email_mismatch');
+      const notInTolt = results.filter(r => r.toltStatus === 'not_in_tolt');
       const synced = results.filter(r => r.toltExists && r.emailMatch);
 
       return NextResponse.json({
@@ -368,12 +377,11 @@ export async function POST(request: NextRequest) {
         total: results.length,
         synced: synced.length,
         notInTolt: notInTolt.length,
-        emailMismatch: emailMismatch.length,
         inToltNotInDb: inToltNotInDb.length,
+        idsFixed,
         details: {
           synced,
           notInTolt,
-          emailMismatch,
           inToltNotInDb,
         },
         toltError,
@@ -384,6 +392,7 @@ export async function POST(request: NextRequest) {
           toltPartnerEmails: toltPartners.map(p => p.email),
           dbPartnerEmails: (partners || []).map(p => p.email),
           toltRawResponse,
+          idsFixed,
         },
       });
     }
