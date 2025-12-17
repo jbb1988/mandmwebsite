@@ -12,19 +12,22 @@ const supabase = createClient(
 
 // Load font for satori (must be TTF/OTF, not WOFF/WOFF2)
 async function loadFont(): Promise<ArrayBuffer> {
-  // Use Roboto Bold TTF from Google Fonts GitHub (reliable TTF source)
-  const fontUrl = 'https://raw.githubusercontent.com/google/fonts/main/apache/roboto/Roboto%5Bwdth%2Cwght%5D.ttf';
+  // Load Inter Bold from local public/fonts directory
+  const fontUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL?.replace('api.mindandmuscle.ai', 'mindandmuscle.ai') || 'https://mindandmuscle.ai'}/fonts/Inter-Bold.otf`;
+
+  // Try local file first via URL (works in Vercel deployment)
   const response = await fetch(fontUrl);
-  if (!response.ok) {
-    // Fallback to another source
-    const fallbackUrl = 'https://cdn.jsdelivr.net/gh/nicololucioni/Roboto@master/Roboto-Bold.ttf';
-    const fallbackResponse = await fetch(fallbackUrl);
-    if (!fallbackResponse.ok) {
-      throw new Error(`Failed to fetch font from both sources`);
-    }
+  if (response.ok) {
+    return await response.arrayBuffer();
+  }
+
+  // Fallback: try fetching from the site directly
+  const fallbackResponse = await fetch('https://mindandmuscle.ai/fonts/Inter-Bold.otf');
+  if (fallbackResponse.ok) {
     return await fallbackResponse.arrayBuffer();
   }
-  return await response.arrayBuffer();
+
+  throw new Error(`Failed to load font from ${fontUrl}`);
 }
 
 // Fetch image as base64 data URL
