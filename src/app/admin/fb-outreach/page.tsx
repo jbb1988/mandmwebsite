@@ -1764,10 +1764,14 @@ function AdminCard({
 }) {
   const [expanded, setExpanded] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
+  const [showDateEditor, setShowDateEditor] = useState(false);
   const [copiedTemplateId, setCopiedTemplateId] = useState<string | null>(null);
   const [trialEmail, setTrialEmail] = useState(admin.admin_email || '');
   const [grantingTrial, setGrantingTrial] = useState(false);
   const [trialMessage, setTrialMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [dmSentDate, setDmSentDate] = useState(admin.dm_sent_at ? admin.dm_sent_at.split('T')[0] : '');
+  const [followUpDate, setFollowUpDate] = useState(admin.next_follow_up || '');
+  const [savingDates, setSavingDates] = useState(false);
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   // Calculate follow-up date and urgency
@@ -1806,6 +1810,67 @@ function AdminCard({
       onAdminUpdated?.();
     } catch (error) {
       console.error('Error marking DM as sent:', error);
+    }
+  };
+
+  // Save dates manually
+  const saveDates = async () => {
+    setSavingDates(true);
+    try {
+      const updates: Record<string, unknown> = { admin_id: admin.id };
+      if (dmSentDate) {
+        updates.dm_sent_at = new Date(dmSentDate).toISOString();
+        if (admin.response_status === 'not_contacted') {
+          updates.response_status = 'dm_sent';
+        }
+      }
+      if (followUpDate) {
+        updates.next_follow_up = followUpDate;
+      }
+      await fetch('/api/admin/fb-outreach/admins', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': adminPassword,
+        },
+        body: JSON.stringify(updates),
+      });
+      onAdminUpdated?.();
+      setShowDateEditor(false);
+    } catch (error) {
+      console.error('Error saving dates:', error);
+    } finally {
+      setSavingDates(false);
+    }
+  };
+
+  // Mark DM sent today
+  const markDmSentToday = async () => {
+    const today = new Date().toISOString().split('T')[0];
+    const followUp = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    setDmSentDate(today);
+    setFollowUpDate(followUp);
+    setSavingDates(true);
+    try {
+      await fetch('/api/admin/fb-outreach/admins', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': adminPassword,
+        },
+        body: JSON.stringify({
+          admin_id: admin.id,
+          dm_sent_at: new Date().toISOString(),
+          response_status: admin.response_status === 'not_contacted' ? 'dm_sent' : admin.response_status,
+          next_follow_up: followUp,
+        }),
+      });
+      onAdminUpdated?.();
+      setShowDateEditor(false);
+    } catch (error) {
+      console.error('Error marking DM as sent:', error);
+    } finally {
+      setSavingDates(false);
     }
   };
 
@@ -1977,6 +2042,85 @@ function AdminCard({
                     <p className="text-xs text-white/40 line-clamp-2">{template.body.slice(0, 120)}...</p>
                   </button>
                 ))}
+              </div>
+            )}
+          </div>
+
+          {/* Date Tracking Button */}
+          <div className="relative">
+            <button
+              onClick={() => setShowDateEditor(!showDateEditor)}
+              className={`p-2 rounded-lg transition-colors ${
+                showDateEditor || admin.dm_sent_at
+                  ? 'bg-purple-500/20 text-purple-400'
+                  : 'hover:bg-purple-500/10 text-white/50 hover:text-purple-400'
+              }`}
+              title="Track DM Dates"
+            >
+              <CalendarClock className="w-4 h-4" />
+            </button>
+
+            {/* Date Editor Dropdown */}
+            {showDateEditor && (
+              <div className="absolute right-0 top-full mt-1 w-72 bg-[#1B1F39] border border-white/10 rounded-xl shadow-xl z-50 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-medium text-white">Track DM Dates</h4>
+                  <button onClick={() => setShowDateEditor(false)} className="text-white/40 hover:text-white">
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Quick Action */}
+                <button
+                  onClick={markDmSentToday}
+                  disabled={savingDates}
+                  className="w-full mb-3 px-3 py-2 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-lg text-sm font-medium hover:bg-blue-500/30 transition-colors disabled:opacity-50"
+                >
+                  {savingDates ? 'Saving...' : '📤 Mark DM Sent Today'}
+                </button>
+
+                <div className="text-xs text-white/40 text-center mb-3">— or set custom dates —</div>
+
+                {/* DM Sent Date */}
+                <div className="mb-3">
+                  <label className="block text-xs text-white/50 mb-1">DM Sent Date</label>
+                  <input
+                    type="date"
+                    value={dmSentDate}
+                    onChange={(e) => setDmSentDate(e.target.value)}
+                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-purple-500/50"
+                  />
+                </div>
+
+                {/* Follow-up Date */}
+                <div className="mb-3">
+                  <label className="block text-xs text-white/50 mb-1">Follow-up Date</label>
+                  <input
+                    type="date"
+                    value={followUpDate}
+                    onChange={(e) => setFollowUpDate(e.target.value)}
+                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-purple-500/50"
+                  />
+                </div>
+
+                {/* Save Button */}
+                <button
+                  onClick={saveDates}
+                  disabled={savingDates || (!dmSentDate && !followUpDate)}
+                  className="w-full px-3 py-2 bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-lg text-sm font-medium hover:bg-purple-500/30 transition-colors disabled:opacity-50"
+                >
+                  {savingDates ? 'Saving...' : 'Save Dates'}
+                </button>
+
+                {/* Current Status */}
+                {admin.dm_sent_at && (
+                  <div className="mt-3 pt-3 border-t border-white/10 text-xs text-white/50">
+                    <p>Sent: {new Date(admin.dm_sent_at).toLocaleDateString()}</p>
+                    {admin.next_follow_up && (
+                      <p>Follow-up: {new Date(admin.next_follow_up).toLocaleDateString()}</p>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
