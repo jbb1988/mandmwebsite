@@ -4,11 +4,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Facebook, Twitter, Users, DollarSign,
-  Image, FolderOpen, Tag, Clock
+  Image, FolderOpen, Tag, Clock, Mail
 } from 'lucide-react';
 
 const adminLinks = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin/campaigns', label: 'Campaigns', icon: Mail },
   { href: '/admin/fb-outreach', label: 'FB Outreach', icon: Facebook },
   { href: '/admin/x-outreach', label: 'X Outreach', icon: Twitter },
   { href: '/admin/finder-fees', label: 'Finder Fees', icon: DollarSign },
