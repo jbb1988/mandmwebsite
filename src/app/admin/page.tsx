@@ -114,6 +114,11 @@ const ADMIN_TOOLS: AdminTool[] = [
 
 const QUICK_LINKS = [
   {
+    name: 'Partner Dashboard',
+    href: '/partner/dashboard',
+    description: 'Partner portal (view as partner)',
+  },
+  {
     name: 'Partner Program (Public)',
     href: '/partner-program',
     description: 'Public partner signup page',
