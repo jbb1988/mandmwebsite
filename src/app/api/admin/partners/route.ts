@@ -15,8 +15,11 @@ function verifyAdmin(request: NextRequest): boolean {
   return authHeader === process.env.ADMIN_DASHBOARD_PASSWORD;
 }
 
-// Fetch partner status from Tolt
-async function getToltPartnerStatus(toltPartnerId: string): Promise<{ exists: boolean; status?: string; error?: string }> {
+// Fetch partner status from Tolt with email verification
+async function getToltPartnerStatus(
+  toltPartnerId: string,
+  expectedEmail?: string
+): Promise<{ exists: boolean; status?: string; email?: string; emailMatch?: boolean; error?: string }> {
   if (!TOLT_API_KEY || !toltPartnerId) {
     return { exists: false, error: 'No Tolt ID' };
   }
@@ -38,9 +41,49 @@ async function getToltPartnerStatus(toltPartnerId: string): Promise<{ exists: bo
     }
 
     const data = await response.json();
-    return { exists: true, status: data.status || 'active' };
+    const toltEmail = data.email?.toLowerCase();
+    const emailMatch = expectedEmail ? toltEmail === expectedEmail.toLowerCase() : true;
+
+    return {
+      exists: true,
+      status: data.status || 'active',
+      email: toltEmail,
+      emailMatch,
+    };
   } catch (error) {
     return { exists: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
+
+// Fetch all partners from Tolt
+async function getAllToltPartners(): Promise<{ partners: Array<{ id: string; email: string; name: string; status: string }>; error?: string }> {
+  if (!TOLT_API_KEY) {
+    return { partners: [], error: 'No Tolt API key' };
+  }
+
+  try {
+    const response = await fetch(`${TOLT_API_BASE}/partners?limit=100`, {
+      headers: {
+        'Authorization': `Bearer ${TOLT_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      return { partners: [], error: `API error: ${response.status}` };
+    }
+
+    const data = await response.json();
+    return {
+      partners: (data.data || []).map((p: { id: string; email: string; name: string; status: string }) => ({
+        id: p.id,
+        email: p.email?.toLowerCase(),
+        name: p.name,
+        status: p.status,
+      }))
+    };
+  } catch (error) {
+    return { partners: [], error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
 
@@ -70,10 +113,21 @@ export async function GET(request: NextRequest) {
     if (checkTolt && partnersWithStatus.length > 0) {
       partnersWithStatus = await Promise.all(
         partnersWithStatus.map(async (partner) => {
-          const toltStatus = await getToltPartnerStatus(partner.tolt_partner_id);
+          const toltStatus = await getToltPartnerStatus(partner.tolt_partner_id, partner.email);
+
+          let computedStatus = 'not_found';
+          if (toltStatus.exists) {
+            if (toltStatus.emailMatch === false) {
+              computedStatus = 'email_mismatch';
+            } else {
+              computedStatus = toltStatus.status || 'active';
+            }
+          }
+
           return {
             ...partner,
-            toltStatus: toltStatus.exists ? toltStatus.status : 'not_found',
+            toltStatus: computedStatus,
+            toltEmail: toltStatus.email,
             toltError: toltStatus.error,
           };
         })
@@ -214,34 +268,65 @@ export async function POST(request: NextRequest) {
       // Sync all partners with Tolt
       const { data: partners, error } = await supabase
         .from('partners')
-        .select('id, email, name, tolt_partner_id')
-        .not('tolt_partner_id', 'is', null);
+        .select('id, email, name, tolt_partner_id');
 
       if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
 
+      // Also fetch all partners from Tolt
+      const { partners: toltPartners, error: toltError } = await getAllToltPartners();
+
+      // Check each DB partner against Tolt
       const results = await Promise.all(
         (partners || []).map(async (partner) => {
-          const toltStatus = await getToltPartnerStatus(partner.tolt_partner_id);
+          if (!partner.tolt_partner_id) {
+            return {
+              email: partner.email,
+              name: partner.name,
+              toltExists: false,
+              toltStatus: 'no_tolt_id',
+              emailMatch: false,
+            };
+          }
+
+          const toltStatus = await getToltPartnerStatus(partner.tolt_partner_id, partner.email);
           return {
             email: partner.email,
             name: partner.name,
             toltExists: toltStatus.exists,
-            toltStatus: toltStatus.status,
+            toltStatus: toltStatus.exists
+              ? (toltStatus.emailMatch ? toltStatus.status : 'email_mismatch')
+              : 'not_found',
+            toltEmail: toltStatus.email,
+            emailMatch: toltStatus.emailMatch,
             toltError: toltStatus.error,
           };
         })
       );
 
-      const notInTolt = results.filter(r => !r.toltExists);
+      // Find Tolt partners not in our DB (by email)
+      const dbEmails = new Set((partners || []).map(p => p.email?.toLowerCase()));
+      const inToltNotInDb = toltPartners.filter(tp => !dbEmails.has(tp.email));
+
+      const notInTolt = results.filter(r => !r.toltExists || r.toltStatus === 'not_found');
+      const emailMismatch = results.filter(r => r.toltStatus === 'email_mismatch');
+      const synced = results.filter(r => r.toltExists && r.emailMatch);
 
       return NextResponse.json({
         success: true,
         total: results.length,
-        inTolt: results.filter(r => r.toltExists).length,
+        synced: synced.length,
         notInTolt: notInTolt.length,
-        orphaned: notInTolt,
+        emailMismatch: emailMismatch.length,
+        inToltNotInDb: inToltNotInDb.length,
+        details: {
+          synced,
+          notInTolt,
+          emailMismatch,
+          inToltNotInDb,
+        },
+        toltError,
       });
     }
 

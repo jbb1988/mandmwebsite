@@ -42,7 +42,22 @@ interface Partner {
   logo_url: string | null;
   created_at: string;
   toltStatus?: string;
+  toltEmail?: string;
   toltError?: string;
+}
+
+interface ToltOnlyPartner {
+  id: string;
+  email: string;
+  name: string;
+  status: string;
+}
+
+interface SyncDetails {
+  synced: Array<{ email: string; name: string }>;
+  notInTolt: Array<{ email: string; name: string }>;
+  emailMismatch: Array<{ email: string; name: string; toltEmail?: string }>;
+  inToltNotInDb: ToltOnlyPartner[];
 }
 
 export default function AdminPartnersPage() {
@@ -54,6 +69,8 @@ export default function AdminPartnersPage() {
   const [deleteFromTolt, setDeleteFromTolt] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [expandedPartner, setExpandedPartner] = useState<string | null>(null);
+  const [syncDetails, setSyncDetails] = useState<SyncDetails | null>(null);
+  const [showSyncModal, setShowSyncModal] = useState(false);
 
   const { getPassword } = useAdminAuth();
   const adminPassword = getPassword();
@@ -97,10 +114,27 @@ export default function AdminPartnersPage() {
       const data = await res.json();
 
       if (data.success) {
-        setMessage({
-          type: 'success',
-          text: `Synced ${data.total} partners. ${data.notInTolt} not found in Tolt.`
-        });
+        // Store detailed sync results
+        setSyncDetails(data.details);
+
+        // Build summary message
+        const issues = [];
+        if (data.notInTolt > 0) issues.push(`${data.notInTolt} not in Tolt`);
+        if (data.emailMismatch > 0) issues.push(`${data.emailMismatch} email mismatch`);
+        if (data.inToltNotInDb > 0) issues.push(`${data.inToltNotInDb} in Tolt only`);
+
+        const msgType = issues.length > 0 ? 'error' : 'success';
+        const msgText = issues.length > 0
+          ? `Sync complete: ${data.synced}/${data.total} OK. Issues: ${issues.join(', ')}`
+          : `All ${data.synced} partners synced successfully!`;
+
+        setMessage({ type: msgType as 'success' | 'error', text: msgText });
+
+        // Show modal if there are issues
+        if (issues.length > 0) {
+          setShowSyncModal(true);
+        }
+
         // Refresh with Tolt status
         await fetchPartners(true);
       } else {
@@ -156,6 +190,22 @@ export default function AdminPartnersPage() {
         <span className="flex items-center gap-1 text-xs text-red-400">
           <XCircle className="w-3 h-3" />
           Not in Tolt
+        </span>
+      );
+    }
+    if (partner.toltStatus === 'email_mismatch') {
+      return (
+        <span className="flex items-center gap-1 text-xs text-orange-400" title={`Tolt email: ${partner.toltEmail}`}>
+          <AlertTriangle className="w-3 h-3" />
+          Email Mismatch
+        </span>
+      );
+    }
+    if (partner.toltStatus === 'active') {
+      return (
+        <span className="flex items-center gap-1 text-xs text-green-400">
+          <CheckCircle className="w-3 h-3" />
+          Synced
         </span>
       );
     }
@@ -228,22 +278,28 @@ export default function AdminPartnersPage() {
           )}
 
           {/* Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-8">
             <Card className="p-4">
               <div className="text-2xl font-bold text-white">{partners.length}</div>
               <div className="text-sm text-white/60">Total Partners</div>
             </Card>
             <Card className="p-4">
               <div className="text-2xl font-bold text-green-400">
-                {partners.filter(p => p.toltStatus === 'active' || (!p.toltStatus && p.tolt_partner_id)).length}
+                {partners.filter(p => p.toltStatus === 'active').length}
               </div>
-              <div className="text-sm text-white/60">With Tolt ID</div>
+              <div className="text-sm text-white/60">Synced</div>
             </Card>
             <Card className="p-4">
               <div className="text-2xl font-bold text-yellow-400">
                 {partners.filter(p => !p.tolt_partner_id).length}
               </div>
               <div className="text-sm text-white/60">No Tolt ID</div>
+            </Card>
+            <Card className="p-4">
+              <div className="text-2xl font-bold text-orange-400">
+                {partners.filter(p => p.toltStatus === 'email_mismatch').length}
+              </div>
+              <div className="text-sm text-white/60">Email Mismatch</div>
             </Card>
             <Card className="p-4">
               <div className="text-2xl font-bold text-red-400">
@@ -424,6 +480,118 @@ export default function AdminPartnersPage() {
             )}
           </Card>
         </div>
+
+        {/* Sync Details Modal */}
+        {showSyncModal && syncDetails && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-[#0F1123] border border-white/10 rounded-2xl w-full max-w-2xl shadow-2xl max-h-[80vh] overflow-hidden flex flex-col">
+              <div className="p-6 border-b border-white/10 flex justify-between items-center">
+                <h2 className="text-xl font-bold text-white">Sync Results</h2>
+                <button
+                  onClick={() => setShowSyncModal(false)}
+                  className="text-white/60 hover:text-white text-2xl"
+                >
+                  &times;
+                </button>
+              </div>
+
+              <div className="p-6 overflow-y-auto space-y-6">
+                {/* Not in Tolt */}
+                {syncDetails.notInTolt.length > 0 && (
+                  <div>
+                    <h3 className="text-red-400 font-semibold mb-2 flex items-center gap-2">
+                      <XCircle className="w-4 h-4" />
+                      Not Found in Tolt ({syncDetails.notInTolt.length})
+                    </h3>
+                    <div className="bg-red-500/10 rounded-lg p-3 space-y-1">
+                      {syncDetails.notInTolt.map((p, i) => (
+                        <div key={i} className="text-sm text-white/80">
+                          {p.name} - <span className="text-white/50">{p.email}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-white/40 mt-2">
+                      These partners have Tolt IDs in our DB but don&apos;t exist in Tolt
+                    </p>
+                  </div>
+                )}
+
+                {/* Email Mismatch */}
+                {syncDetails.emailMismatch.length > 0 && (
+                  <div>
+                    <h3 className="text-orange-400 font-semibold mb-2 flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4" />
+                      Email Mismatch ({syncDetails.emailMismatch.length})
+                    </h3>
+                    <div className="bg-orange-500/10 rounded-lg p-3 space-y-2">
+                      {syncDetails.emailMismatch.map((p, i) => (
+                        <div key={i} className="text-sm">
+                          <div className="text-white/80">{p.name}</div>
+                          <div className="text-xs">
+                            <span className="text-white/50">Our DB:</span>{' '}
+                            <span className="text-white/70">{p.email}</span>
+                          </div>
+                          <div className="text-xs">
+                            <span className="text-white/50">Tolt:</span>{' '}
+                            <span className="text-orange-300">{p.toltEmail}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-white/40 mt-2">
+                      The Tolt ID points to a different email in Tolt
+                    </p>
+                  </div>
+                )}
+
+                {/* In Tolt but not in our DB */}
+                {syncDetails.inToltNotInDb.length > 0 && (
+                  <div>
+                    <h3 className="text-yellow-400 font-semibold mb-2 flex items-center gap-2">
+                      <AlertTriangle className="w-4 h-4" />
+                      In Tolt Only ({syncDetails.inToltNotInDb.length})
+                    </h3>
+                    <div className="bg-yellow-500/10 rounded-lg p-3 space-y-1">
+                      {syncDetails.inToltNotInDb.map((p, i) => (
+                        <div key={i} className="text-sm text-white/80">
+                          {p.name} - <span className="text-white/50">{p.email}</span>
+                          <span className="text-xs text-yellow-400 ml-2">({p.status})</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-white/40 mt-2">
+                      These partners exist in Tolt but not in our database
+                    </p>
+                  </div>
+                )}
+
+                {/* Synced successfully */}
+                {syncDetails.synced.length > 0 && (
+                  <div>
+                    <h3 className="text-green-400 font-semibold mb-2 flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4" />
+                      Synced Successfully ({syncDetails.synced.length})
+                    </h3>
+                    <div className="bg-green-500/10 rounded-lg p-3">
+                      <div className="text-sm text-white/60">
+                        {syncDetails.synced.map(p => p.name).join(', ')}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="p-4 border-t border-white/10">
+                <button
+                  onClick={() => setShowSyncModal(false)}
+                  className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </AdminGate>
   );
