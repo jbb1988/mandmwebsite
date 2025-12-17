@@ -10,24 +10,27 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-// Load font for satori (must be TTF/OTF, not WOFF/WOFF2)
-async function loadFont(): Promise<ArrayBuffer> {
-  // Load Inter Bold from local public/fonts directory
-  const fontUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL?.replace('api.mindandmuscle.ai', 'mindandmuscle.ai') || 'https://mindandmuscle.ai'}/fonts/Inter-Bold.otf`;
+// Load fonts for satori (must be TTF/OTF, not WOFF/WOFF2)
+async function loadFonts(): Promise<{ bold: ArrayBuffer; boldItalic: ArrayBuffer }> {
+  const baseUrl = 'https://mindandmuscle.ai/fonts';
 
-  // Try local file first via URL (works in Vercel deployment)
-  const response = await fetch(fontUrl);
-  if (response.ok) {
-    return await response.arrayBuffer();
+  // Load both Bold and BoldItalic fonts
+  const [boldResponse, boldItalicResponse] = await Promise.all([
+    fetch(`${baseUrl}/Inter-Bold.otf`),
+    fetch(`${baseUrl}/Inter-BoldItalic.otf`),
+  ]);
+
+  if (!boldResponse.ok) {
+    throw new Error(`Failed to load Inter-Bold font: ${boldResponse.status}`);
+  }
+  if (!boldItalicResponse.ok) {
+    throw new Error(`Failed to load Inter-BoldItalic font: ${boldItalicResponse.status}`);
   }
 
-  // Fallback: try fetching from the site directly
-  const fallbackResponse = await fetch('https://mindandmuscle.ai/fonts/Inter-Bold.otf');
-  if (fallbackResponse.ok) {
-    return await fallbackResponse.arrayBuffer();
-  }
-
-  throw new Error(`Failed to load font from ${fontUrl}`);
+  return {
+    bold: await boldResponse.arrayBuffer(),
+    boldItalic: await boldItalicResponse.arrayBuffer(),
+  };
 }
 
 // Fetch image as base64 data URL
@@ -1408,9 +1411,10 @@ export async function generatePartnerBanners(params: {
   const sanitizedName = partnerName.toLowerCase().replace(/[^a-z0-9]/g, '-');
   const baseFolder = `${sanitizedName}-${timestamp}`;
 
-  // Load font for satori
-  const fontData = await loadFont();
+  // Load fonts for satori (bold + bold italic)
+  const { bold: fontData, boldItalic: fontDataItalic } = await loadFonts();
   const fonts = [
+    // Normal (non-italic) weights - using Bold font
     {
       name: 'Inter',
       data: fontData,
@@ -1446,6 +1450,25 @@ export async function generatePartnerBanners(params: {
       data: fontData,
       weight: 900 as const,
       style: 'normal' as const,
+    },
+    // Italic weights - using BoldItalic font
+    {
+      name: 'Inter',
+      data: fontDataItalic,
+      weight: 700 as const,
+      style: 'italic' as const,
+    },
+    {
+      name: 'Inter',
+      data: fontDataItalic,
+      weight: 800 as const,
+      style: 'italic' as const,
+    },
+    {
+      name: 'Inter',
+      data: fontDataItalic,
+      weight: 900 as const,
+      style: 'italic' as const,
     },
   ];
 
