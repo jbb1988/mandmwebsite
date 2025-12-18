@@ -89,6 +89,7 @@ interface FBPage {
   follow_up_date: string | null;
   follow_up_count: number;
   response_received_at: string | null;
+  is_member: boolean;
 }
 
 interface Template {
@@ -498,6 +499,7 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
     sport: 'baseball' as 'baseball' | 'softball' | 'both',
     priority_score: '3',
     notes: '',
+    is_member: false,
   });
   const [admins, setAdmins] = useState([{ name: '', profile_url: '', email: '' }]);
   const [loading, setLoading] = useState(false);
@@ -541,6 +543,7 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
         setFormData({
           page_name: '', page_url: '', state: 'FL', member_count: '',
           group_type: 'travel_ball', sport: 'baseball', priority_score: '3', notes: '',
+          is_member: false,
         });
         setAdmins([{ name: '', profile_url: '', email: '' }]);
         onSuccess();
@@ -700,6 +703,24 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
               placeholder="Any notes about this group..."
             />
           </div>
+
+          {/* Member Status */}
+          <div className="md:col-span-2">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formData.is_member}
+                onChange={(e) => setFormData({ ...formData, is_member: e.target.checked })}
+                className="w-5 h-5 rounded border-white/20 bg-white/5 text-emerald-500 focus:ring-emerald-500/50"
+              />
+              <span className="text-sm font-medium text-white/70">
+                I am a member of this group
+              </span>
+              <span className="text-xs text-white/40">
+                (You can only DM admins if you&apos;re a member)
+              </span>
+            </label>
+          </div>
         </div>
 
         <Button type="submit" variant="primary" size="lg" className="w-full" loading={loading} icon={Plus}>
@@ -786,6 +807,20 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
       onUpdate();
     } catch (error) {
       console.error('Error updating status:', error);
+    }
+  };
+
+  const updatePageStatus = async (id: string, updates: Record<string, unknown>) => {
+    try {
+      await fetch('/api/admin/fb-outreach/pages', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+        body: JSON.stringify({ id, ...updates }),
+      });
+      fetchPages();
+      onUpdate();
+    } catch (error) {
+      console.error('Error updating page:', error);
     }
   };
 
@@ -1009,7 +1044,7 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
             const admins = page.fb_page_admins || [];
 
             return (
-              <Card key={page.id} variant="default" className={`overflow-hidden ${selectedPages.has(page.id) ? 'ring-1 ring-orange-500/50' : ''}`}>
+              <Card key={page.id} variant="default" className={`${selectedPages.has(page.id) ? 'ring-1 ring-orange-500/50' : ''}`}>
                 {/* Header Row */}
                 <div
                   className="p-4 cursor-pointer hover:bg-white/[0.02] transition-colors"
@@ -1066,6 +1101,22 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
 
                     {/* Status Badges */}
                     <div className="hidden sm:flex items-center gap-2">
+                      {/* Member Status Badge - Clickable to toggle */}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          updatePageStatus(page.id, { is_member: !page.is_member });
+                        }}
+                        className={`p-1.5 rounded-lg border transition-all hover:scale-105 ${
+                          page.is_member
+                            ? 'bg-emerald-500/20 border-emerald-500/30'
+                            : 'bg-red-500/10 border-red-500/20 hover:bg-red-500/20'
+                        }`}
+                        title={page.is_member ? 'Member - Click to mark as not member' : 'Not a member - Click to mark as member'}
+                      >
+                        <Users className={`w-4 h-4 ${page.is_member ? 'text-emerald-400' : 'text-red-400/60'}`} />
+                      </button>
+
                       {/* Trial Status Badge */}
                       {(() => {
                         const hasActiveTrial = admins.some(a =>
