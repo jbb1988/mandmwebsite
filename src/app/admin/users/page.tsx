@@ -427,6 +427,14 @@ export default function UsersPage() {
                   +14 Days
                 </button>
                 <button
+                  onClick={() => handleTrialAction('extend-trial', 30)}
+                  disabled={actionLoading}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg text-sm transition-colors disabled:opacity-50"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  +30 Days
+                </button>
+                <button
                   onClick={() => handleTrialAction('revoke-trial')}
                   disabled={actionLoading}
                   className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm transition-colors disabled:opacity-50"
@@ -452,6 +460,14 @@ export default function UsersPage() {
                 >
                   <Gift className="w-3.5 h-3.5" />
                   Grant 14-Day Trial
+                </button>
+                <button
+                  onClick={() => handleTrialAction('grant-trial', 30)}
+                  disabled={actionLoading || isPaidPro}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-lg text-sm transition-colors disabled:opacity-50"
+                >
+                  <Gift className="w-3.5 h-3.5" />
+                  Grant 30-Day Trial
                 </button>
               </>
             )}
