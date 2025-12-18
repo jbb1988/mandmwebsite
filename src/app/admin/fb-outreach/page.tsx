@@ -1264,6 +1264,7 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
                               <AdminCard
                                 key={admin.id}
                                 admin={admin}
+                                pageId={page.id}
                                 templates={templates}
                                 onEdit={() => {
                                   setEditingAdmin({ admin, pageId: page.id });
@@ -1800,6 +1801,7 @@ function PartnersTab({ onUpdate }: { onUpdate: () => void }) {
 // Admin Card Component with Gift Button and DM Template Selector
 function AdminCard({
   admin,
+  pageId,
   templates,
   onEdit,
   onDelete,
@@ -1807,6 +1809,7 @@ function AdminCard({
   onAdminUpdated,
 }: {
   admin: FBPageAdmin;
+  pageId: string;
   templates: Template[];
   onEdit: () => void;
   onDelete: () => void;
@@ -1822,6 +1825,7 @@ function AdminCard({
   const [trialMessage, setTrialMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [dmSentDate, setDmSentDate] = useState(admin.dm_sent_at ? admin.dm_sent_at.split('T')[0] : '');
   const [followUpDate, setFollowUpDate] = useState(admin.next_follow_up || '');
+  const [notes, setNotes] = useState(admin.response_notes || '');
   const [savingDates, setSavingDates] = useState(false);
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
@@ -1869,14 +1873,19 @@ function AdminCard({
     setSavingDates(true);
     try {
       const updates: Record<string, unknown> = { admin_id: admin.id };
+      let shouldUpdatePageStatus = false;
       if (dmSentDate) {
         updates.dm_sent_at = new Date(dmSentDate).toISOString();
         if (admin.response_status === 'not_contacted') {
           updates.response_status = 'dm_sent';
         }
+        shouldUpdatePageStatus = true;
       }
       if (followUpDate) {
         updates.next_follow_up = followUpDate;
+      }
+      if (notes) {
+        updates.response_notes = notes;
       }
       await fetch('/api/admin/fb-outreach/admins', {
         method: 'PATCH',
@@ -1886,6 +1895,20 @@ function AdminCard({
         },
         body: JSON.stringify(updates),
       });
+      // Also update the page's outreach_status to dm_sent if DM date was set
+      if (shouldUpdatePageStatus) {
+        await fetch('/api/admin/fb-outreach/pages', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Admin-Password': adminPassword,
+          },
+          body: JSON.stringify({
+            id: pageId,
+            outreach_status: 'dm_sent',
+          }),
+        });
+      }
       onAdminUpdated?.();
       setShowDateEditor(false);
     } catch (error) {
@@ -1903,6 +1926,7 @@ function AdminCard({
     setFollowUpDate(followUp);
     setSavingDates(true);
     try {
+      // Update admin with DM sent date
       await fetch('/api/admin/fb-outreach/admins', {
         method: 'PATCH',
         headers: {
@@ -1914,6 +1938,19 @@ function AdminCard({
           dm_sent_at: new Date().toISOString(),
           response_status: admin.response_status === 'not_contacted' ? 'dm_sent' : admin.response_status,
           next_follow_up: followUp,
+          response_notes: notes || admin.response_notes,
+        }),
+      });
+      // Also update the page's outreach_status to dm_sent
+      await fetch('/api/admin/fb-outreach/pages', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': adminPassword,
+        },
+        body: JSON.stringify({
+          id: pageId,
+          outreach_status: 'dm_sent',
         }),
       });
       onAdminUpdated?.();
@@ -2154,13 +2191,25 @@ function AdminCard({
                   />
                 </div>
 
+                {/* Notes */}
+                <div className="mb-3">
+                  <label className="block text-xs text-white/50 mb-1">Notes</label>
+                  <textarea
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    placeholder="Add notes about this contact..."
+                    rows={2}
+                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-purple-500/50 resize-none"
+                  />
+                </div>
+
                 {/* Save Button */}
                 <button
                   onClick={saveDates}
-                  disabled={savingDates || (!dmSentDate && !followUpDate)}
+                  disabled={savingDates || (!dmSentDate && !followUpDate && !notes)}
                   className="w-full px-3 py-2 bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-lg text-sm font-medium hover:bg-purple-500/30 transition-colors disabled:opacity-50"
                 >
-                  {savingDates ? 'Saving...' : 'Save Dates'}
+                  {savingDates ? 'Saving...' : 'Save'}
                 </button>
 
                 {/* Current Status */}
