@@ -751,6 +751,9 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedPages, setSelectedPages] = useState<Set<string>>(new Set());
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [editingPageNotes, setEditingPageNotes] = useState<string | null>(null);
+  const [pageNotesValue, setPageNotesValue] = useState('');
+  const [savingPageNotes, setSavingPageNotes] = useState(false);
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   // Fetch DM templates for quick access in Pipeline view
@@ -821,6 +824,24 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
       onUpdate();
     } catch (error) {
       console.error('Error updating page:', error);
+    }
+  };
+
+  const savePageNotes = async (pageId: string) => {
+    setSavingPageNotes(true);
+    try {
+      await fetch('/api/admin/fb-outreach/pages', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+        body: JSON.stringify({ id: pageId, notes: pageNotesValue }),
+      });
+      setEditingPageNotes(null);
+      fetchPages();
+      onUpdate();
+    } catch (error) {
+      console.error('Error saving page notes:', error);
+    } finally {
+      setSavingPageNotes(false);
     }
   };
 
@@ -1203,12 +1224,51 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
                           </div>
                         </div>
 
-                        {page.notes && (
-                          <div>
-                            <label className="text-xs text-white/40 uppercase tracking-wide">Notes</label>
-                            <p className="text-sm text-white/70 mt-1">{page.notes}</p>
-                          </div>
-                        )}
+                        {/* Group Notes */}
+                        <div>
+                          <label className="text-xs text-white/40 uppercase tracking-wide">Group Notes</label>
+                          {editingPageNotes === page.id ? (
+                            <div className="mt-1 space-y-2">
+                              <textarea
+                                value={pageNotesValue}
+                                onChange={(e) => setPageNotesValue(e.target.value)}
+                                placeholder="Add notes about this group..."
+                                rows={3}
+                                className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-purple-500/50 resize-none"
+                                autoFocus
+                              />
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => savePageNotes(page.id)}
+                                  disabled={savingPageNotes}
+                                  className="px-3 py-1.5 bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-lg text-xs font-medium hover:bg-purple-500/30 transition-colors disabled:opacity-50"
+                                >
+                                  {savingPageNotes ? 'Saving...' : 'Save'}
+                                </button>
+                                <button
+                                  onClick={() => setEditingPageNotes(null)}
+                                  className="px-3 py-1.5 bg-white/5 text-white/50 border border-white/10 rounded-lg text-xs font-medium hover:bg-white/10 transition-colors"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div
+                              onClick={() => {
+                                setEditingPageNotes(page.id);
+                                setPageNotesValue(page.notes || '');
+                              }}
+                              className="mt-1 p-2 bg-white/[0.02] border border-white/[0.06] rounded-lg cursor-pointer hover:bg-white/[0.04] transition-colors min-h-[60px]"
+                            >
+                              {page.notes ? (
+                                <p className="text-sm text-white/70">{page.notes}</p>
+                              ) : (
+                                <p className="text-sm text-white/30 italic">Click to add notes...</p>
+                              )}
+                            </div>
+                          )}
+                        </div>
                       </div>
 
                       {/* Right: Admins */}
