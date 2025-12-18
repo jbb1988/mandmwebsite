@@ -1934,19 +1934,32 @@ function AdminCard({
     try {
       const updates: Record<string, unknown> = { admin_id: admin.id };
       let shouldUpdatePageStatus = false;
+
+      // Handle DM sent date - set or clear
       if (dmSentDate) {
         updates.dm_sent_at = new Date(dmSentDate).toISOString();
         if (admin.response_status === 'not_contacted') {
           updates.response_status = 'dm_sent';
         }
         shouldUpdatePageStatus = true;
+      } else if (admin.dm_sent_at && !dmSentDate) {
+        // Clear the date if it was set but now empty
+        updates.dm_sent_at = null;
       }
+
+      // Handle follow-up date - set or clear
       if (followUpDate) {
         updates.next_follow_up = followUpDate;
+      } else if (admin.next_follow_up && !followUpDate) {
+        // Clear the date if it was set but now empty
+        updates.next_follow_up = null;
       }
-      if (notes) {
-        updates.response_notes = notes;
+
+      // Handle notes
+      if (notes !== admin.response_notes) {
+        updates.response_notes = notes || null;
       }
+
       await fetch('/api/admin/fb-outreach/admins', {
         method: 'PATCH',
         headers: {
@@ -2232,23 +2245,45 @@ function AdminCard({
                 {/* DM Sent Date */}
                 <div className="mb-3">
                   <label className="block text-xs text-white/50 mb-1">DM Sent Date</label>
-                  <input
-                    type="date"
-                    value={dmSentDate}
-                    onChange={(e) => setDmSentDate(e.target.value)}
-                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-purple-500/50"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="date"
+                      value={dmSentDate}
+                      onChange={(e) => setDmSentDate(e.target.value)}
+                      className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-purple-500/50"
+                    />
+                    {dmSentDate && (
+                      <button
+                        onClick={() => setDmSentDate('')}
+                        className="px-2 py-2 bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg hover:bg-red-500/20 transition-colors"
+                        title="Clear date"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Follow-up Date */}
                 <div className="mb-3">
                   <label className="block text-xs text-white/50 mb-1">Follow-up Date</label>
-                  <input
-                    type="date"
-                    value={followUpDate}
-                    onChange={(e) => setFollowUpDate(e.target.value)}
-                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-purple-500/50"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="date"
+                      value={followUpDate}
+                      onChange={(e) => setFollowUpDate(e.target.value)}
+                      className="flex-1 px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-purple-500/50"
+                    />
+                    {followUpDate && (
+                      <button
+                        onClick={() => setFollowUpDate('')}
+                        className="px-2 py-2 bg-red-500/10 text-red-400 border border-red-500/20 rounded-lg hover:bg-red-500/20 transition-colors"
+                        title="Clear date"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* Notes */}
@@ -2266,7 +2301,10 @@ function AdminCard({
                 {/* Save Button */}
                 <button
                   onClick={saveDates}
-                  disabled={savingDates || (!dmSentDate && !followUpDate && !notes)}
+                  disabled={savingDates || (
+                    !dmSentDate && !followUpDate && !notes &&
+                    !admin.dm_sent_at && !admin.next_follow_up
+                  )}
                   className="w-full px-3 py-2 bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-lg text-sm font-medium hover:bg-purple-500/30 transition-colors disabled:opacity-50"
                 >
                   {savingDates ? 'Saving...' : 'Save'}
