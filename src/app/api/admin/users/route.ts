@@ -308,6 +308,19 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'userId and days are required' }, { status: 400 });
       }
 
+      // Always fetch user email from profile to ensure trial_grants record is created
+      const { data: userProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('id', userId)
+        .single();
+
+      if (profileError || !userProfile?.email) {
+        return NextResponse.json({ error: 'Could not find user email' }, { status: 500 });
+      }
+
+      const email = userEmail || userProfile.email;
+
       const expirationDate = new Date();
       expirationDate.setDate(expirationDate.getDate() + parseInt(days));
 
@@ -324,24 +337,29 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: updateError.message }, { status: 500 });
       }
 
-      // Create trial_grant record if email provided
-      if (userEmail) {
-        await supabase
-          .from('trial_grants')
-          .insert({
-            user_email: userEmail,
-            user_profile_id: userId,
-            granted_by_admin: 'Manual Grant (Admin)',
-            granted_at: new Date().toISOString(),
-            expires_at: expirationDate.toISOString(),
-            grace_period_ends_at: new Date(expirationDate.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-          });
+      // Always create trial_grant record - this triggers the trial gift email
+      const { error: grantError } = await supabase
+        .from('trial_grants')
+        .insert({
+          user_email: email,
+          user_profile_id: userId,
+          source_record_id: userId,
+          granted_by_admin: 'Manual Grant (Admin)',
+          granted_at: new Date().toISOString(),
+          expires_at: expirationDate.toISOString(),
+          grace_period_ends_at: new Date(expirationDate.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        });
+
+      if (grantError) {
+        console.error('Error creating trial_grant record:', grantError);
+        // Don't fail the request - profile was updated, email just won't be sent
       }
 
       return NextResponse.json({
         success: true,
         message: `${days}-day trial granted`,
         expiresAt: expirationDate.toISOString(),
+        emailTriggered: !grantError,
       });
     }
 
