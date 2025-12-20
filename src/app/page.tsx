@@ -1349,14 +1349,11 @@ export default function HomePage() {
             </div>
             <GradientTextReveal
               text="Mind & Muscle Daily Hit"
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-2 leading-relaxed"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-relaxed"
               gradientFrom="#F97316"
               gradientTo="#0EA5E9"
               delay={0.2}
             />
-            <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-neon-cortex-blue mb-6 drop-shadow-[0_0_12px_rgba(14,165,233,0.5)]">
-              &quot;Unbreakable Minds&quot;
-            </p>
             <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto font-medium leading-relaxed">
               Your daily dose of mental toughness that builds champions. Fresh content every morning. Streak tracking to keep you accountable. <span className="text-solar-surge-orange font-bold">Always free.</span>
             </p>
@@ -1408,7 +1405,7 @@ export default function HomePage() {
 
                 {/* Corner Badge */}
                 <div className="absolute top-4 left-4 px-4 py-2 bg-black/60 backdrop-blur-sm rounded-lg border border-solar-surge-orange/40">
-                  <span className="text-sm font-bold text-solar-surge-orange">🔥 Daily Hit Example</span>
+                  <span className="text-sm font-bold text-solar-surge-orange">🔥 Daily Hit Example: Unbreakable Minds</span>
                 </div>
               </div>
             </div>
@@ -2044,7 +2041,7 @@ export default function HomePage() {
                           { num: '15', name: "Coach's Corner" },
                           { num: '16', name: 'Parent Dashboard' },
                           { num: '17', name: 'Arm Builder (arm care & long toss)' },
-                          { num: '18', name: 'Speed Lab (sprint training)' },
+                          { num: '18', name: 'Speed Lab (baserunning intelligence)' },
                         ].map((item, i) => (
                           <div key={i} className="flex items-center gap-2">
                             <div className="w-5 h-5 rounded-full bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange flex items-center justify-center flex-shrink-0 shadow-[0_0_8px_rgba(14,165,233,0.4)]">
@@ -2260,7 +2257,7 @@ export default function HomePage() {
                   'Game Lab Level 1: Baseball IQ basics',
                   'Breathwork: Guided breathing exercises',
                   'Arm Builder: Arm care & throwing routines',
-                  'Speed Lab: Sprint training & speed drills',
+                  'Speed Lab: Baserunning intelligence',
                 ].map((feature, i) => (
                   <li key={i} className="flex items-center gap-3 text-base md:text-lg text-gray-300">
                     <div className="w-2 h-2 bg-neon-cortex-blue rounded-full flex-shrink-0" />
