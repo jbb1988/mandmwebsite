@@ -438,6 +438,25 @@ function OutreachCRMContent() {
     }
   };
 
+  // Inline action: Set Follow-up Date
+  const handleSetFollowUp = async (contact: UnifiedContact, date: string | null) => {
+    if (!password) return;
+
+    try {
+      await handleUpdateContact(contact.id, {
+        next_follow_up: date,
+      });
+      if (date) {
+        const formattedDate = new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+        setToast({ message: `Follow-up set for ${formattedDate}`, type: 'success' });
+      } else {
+        setToast({ message: 'Follow-up cleared', type: 'info' });
+      }
+    } catch {
+      setToast({ message: 'Failed to set follow-up', type: 'error' });
+    }
+  };
+
   // Selection handlers
   const toggleSelectContact = (contactId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -897,6 +916,7 @@ function OutreachCRMContent() {
                                   onMarkResponded={(e) => handleMarkResponded(contact, e)}
                                   onGrantTrial={(e) => handleGrantTrial(contact, e)}
                                   onMarkWon={(e) => handleMarkWon(contact, e)}
+                                  onSetFollowUp={(date) => handleSetFollowUp(contact, date)}
                                   hasTemplate={!!bestTemplate}
                                   selectionMode={selectionMode}
                                   isSelected={selectedIds.has(contact.id)}
@@ -927,6 +947,7 @@ function OutreachCRMContent() {
                               onMarkResponded={(e) => handleMarkResponded(contact, e)}
                               onGrantTrial={(e) => handleGrantTrial(contact, e)}
                               onMarkWon={(e) => handleMarkWon(contact, e)}
+                              onSetFollowUp={(date) => handleSetFollowUp(contact, date)}
                               hasTemplate={!!bestTemplate}
                               selectionMode={selectionMode}
                               isSelected={selectedIds.has(contact.id)}
@@ -955,6 +976,7 @@ function OutreachCRMContent() {
                     onMarkResponded={(e) => handleMarkResponded(contact, e)}
                     onGrantTrial={(e) => handleGrantTrial(contact, e)}
                     onMarkWon={(e) => handleMarkWon(contact, e)}
+                    onSetFollowUp={(date) => handleSetFollowUp(contact, date)}
                     hasTemplate={!!bestTemplate}
                     selectionMode={selectionMode}
                     isSelected={selectedIds.has(contact.id)}

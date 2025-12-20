@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Card } from './shared/Card';
+import { QuickDatePicker } from './shared/QuickDatePicker';
 import {
   Users,
   Twitter,
@@ -44,6 +45,7 @@ export interface ContactCardProps {
   onMarkResponded?: (e: React.MouseEvent) => void;
   onGrantTrial?: (e: React.MouseEvent) => void;
   onMarkWon?: (e: React.MouseEvent) => void;
+  onSetFollowUp?: (date: string | null) => void;
   hasTemplate?: boolean;
   // Selection mode
   selectionMode?: boolean;
@@ -75,6 +77,7 @@ export function ContactCard({
   member_count,
   stage,
   days_since_dm,
+  next_follow_up,
   follow_up_overdue,
   template_used,
   priority_score,
@@ -84,6 +87,7 @@ export function ContactCard({
   onMarkResponded,
   onGrantTrial,
   onMarkWon,
+  onSetFollowUp,
   hasTemplate,
   selectionMode,
   isSelected,
@@ -258,6 +262,12 @@ export function ContactCard({
               onClick={onGrantTrial}
               color="purple"
             />
+            {onSetFollowUp && (
+              <QuickDatePicker
+                value={next_follow_up}
+                onChange={onSetFollowUp}
+              />
+            )}
           </>
         )}
 
@@ -276,6 +286,12 @@ export function ContactCard({
               onClick={onMarkWon}
               color="amber"
             />
+            {onSetFollowUp && (
+              <QuickDatePicker
+                value={next_follow_up}
+                onChange={onSetFollowUp}
+              />
+            )}
           </>
         )}
 

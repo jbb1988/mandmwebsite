@@ -21,3 +21,5 @@ export type { SelectProps, SelectOption } from './Select';
 
 export { Input, Textarea } from './Input';
 export type { InputProps, TextareaProps } from './Input';
+
+export { QuickDatePicker } from './QuickDatePicker';
