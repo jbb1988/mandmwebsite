@@ -111,6 +111,7 @@ function OutreachCRMContent() {
   const [selectedContact, setSelectedContact] = useState<UnifiedContact | null>(null);
   const [stageFilter, setStageFilter] = useState<StageFilter>('all');
   const [sourceFilter, setSourceFilter] = useState<SourceFilter>('all');
+  const [followerFilter, setFollowerFilter] = useState<string>('all');
   const [sortField, setSortField] = useState<SortField>('priority');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -195,7 +196,7 @@ function OutreachCRMContent() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [stageFilter, sourceFilter, searchQuery]);
+  }, [stageFilter, sourceFilter, followerFilter, searchQuery]);
 
   const handleUpdateContact = async (id: string, updates: Record<string, unknown>) => {
     if (!password) return;
@@ -224,9 +225,25 @@ function OutreachCRMContent() {
     }
   };
 
+  // Helper to check follower count range
+  const matchesFollowerFilter = (contact: UnifiedContact) => {
+    if (followerFilter === 'all') return true;
+    const count = contact.follower_count || 0;
+    switch (followerFilter) {
+      case '0-1k': return count < 1000;
+      case '1k-5k': return count >= 1000 && count < 5000;
+      case '5k-10k': return count >= 5000 && count < 10000;
+      case '5k-20k': return count >= 5000 && count < 20000;
+      case '10k-50k': return count >= 10000 && count < 50000;
+      case '50k+': return count >= 50000;
+      default: return true;
+    }
+  };
+
   // Filter and sort contacts
   const filteredContacts = contacts
     .filter(c => stageFilter === 'all' || c.stage === stageFilter)
+    .filter(c => matchesFollowerFilter(c))
     .sort((a, b) => {
       switch (sortField) {
         case 'name':
@@ -758,6 +775,27 @@ function OutreachCRMContent() {
                     <option value="all">All Platforms</option>
                     <option value="facebook">Facebook Only</option>
                     <option value="twitter">X/Twitter Only</option>
+                  </select>
+                  <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Follower count filter */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-white/40">Followers:</span>
+                <div className="relative">
+                  <select
+                    value={followerFilter}
+                    onChange={(e) => setFollowerFilter(e.target.value)}
+                    className="appearance-none bg-white/5 border border-white/10 rounded-xl px-3 py-1.5 pr-8 text-sm text-white focus:outline-none focus:border-cyan-500/50"
+                  >
+                    <option value="all">Any</option>
+                    <option value="0-1k">&lt; 1K</option>
+                    <option value="1k-5k">1K - 5K</option>
+                    <option value="5k-10k">5K - 10K</option>
+                    <option value="5k-20k">5K - 20K</option>
+                    <option value="10k-50k">10K - 50K</option>
+                    <option value="50k+">50K+</option>
                   </select>
                   <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
                 </div>
