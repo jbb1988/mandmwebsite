@@ -126,6 +126,7 @@ export async function POST(request: NextRequest) {
       sport,
       priority_score,
       notes,
+      is_member,
     } = body;
 
     if (!page_name || !page_url) {
@@ -179,6 +180,7 @@ export async function POST(request: NextRequest) {
         priority_score: calculatedPriority,
         notes: notes || null,
         outreach_status: 'not_started',
+        is_member: is_member || false,
       })
       .select()
       .single();

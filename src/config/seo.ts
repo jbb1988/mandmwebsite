@@ -117,6 +117,38 @@ export const PAGE_SEO: Record<string, PageSEO> = {
     noindex: true, // Don't index success pages
   },
 
+  'dugout-talk': {
+    title: 'Dugout Talk | Baseball Mental Training Journal - Mind & Muscle',
+    description: 'Reflect on your baseball and softball training with Dugout Talk. Your personal journal for mental game development with AI-powered insights and coaching feedback.',
+    keywords: [
+      'baseball mental training journal',
+      'softball mental training journal',
+      'baseball player journal',
+      'sports psychology journal',
+      'athlete reflection app',
+      'mental game baseball',
+      'baseball journaling',
+    ],
+    ogTitle: 'Dugout Talk | Your Mental Training Journal',
+    ogDescription: 'Reflect on your Daily Hit sessions and get personalized insights from your AI coach in Dugout Talk.',
+    ogImage: `${SITE_CONFIG.url}/assets/images/og-image.png`,
+  },
+
+  feedback: {
+    title: 'Send Feedback | Help Us Improve - Mind & Muscle',
+    description: 'Share your feedback, bug reports, feature requests, or suggestions to help us improve Mind & Muscle baseball and softball training app.',
+    keywords: [
+      'mind and muscle feedback',
+      'baseball app feedback',
+      'feature request',
+      'bug report',
+      'app suggestions',
+    ],
+    ogTitle: 'Send Feedback | Mind & Muscle',
+    ogDescription: 'Share your ideas and help us improve Mind & Muscle.',
+    ogImage: `${SITE_CONFIG.url}/assets/images/og-image.png`,
+  },
+
   faq: {
     title: 'FAQ | Frequently Asked Questions - Mind & Muscle',
     description: 'Get answers about Mind & Muscle baseball and softball training app. Learn about features, pricing, team licensing, AI coaching, mental training, and more. Find solutions to common questions.',

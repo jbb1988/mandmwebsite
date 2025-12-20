@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Card } from './shared/Card';
-import { Users, Twitter, Calendar, MessageCircle, CheckCircle, AlertCircle, Clock, Star } from 'lucide-react';
+import { Users, Twitter, MessageCircle, CheckCircle, AlertCircle, Clock, Star, Copy } from 'lucide-react';
 
 export interface ContactCardProps {
   id: string;
@@ -23,6 +23,8 @@ export interface ContactCardProps {
   template_used: string | null;
   priority_score: number;
   onClick?: () => void;
+  onQuickCopy?: (e: React.MouseEvent) => void;
+  hasTemplate?: boolean;
 }
 
 const stageColors = {
@@ -52,6 +54,8 @@ export function ContactCard({
   template_used,
   priority_score,
   onClick,
+  onQuickCopy,
+  hasTemplate,
 }: ContactCardProps) {
   const badge = stageBadges[stage];
 
@@ -91,19 +95,31 @@ export function ContactCard({
           </div>
         </div>
 
-        {/* Right side - Stage badge */}
-        <div className="flex flex-col items-end gap-1 shrink-0">
-          <span className={`px-2 py-0.5 rounded-full text-xs ${badge.bg} ${badge.text}`}>
-            {badge.label}
-          </span>
-          {/* Priority stars */}
-          {priority_score >= 4 && (
-            <div className="flex items-center gap-0.5">
-              {Array.from({ length: Math.min(priority_score, 5) }).map((_, i) => (
-                <Star key={i} className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
-              ))}
-            </div>
+        {/* Right side - Stage badge and actions */}
+        <div className="flex items-center gap-2 shrink-0">
+          {/* Quick Copy button for not contacted */}
+          {stage === 'not_contacted' && onQuickCopy && hasTemplate && (
+            <button
+              onClick={onQuickCopy}
+              className="p-2 bg-cyan-500/20 hover:bg-cyan-500/30 rounded-xl transition-colors"
+              title="Copy template & mark as sent"
+            >
+              <Copy className="w-4 h-4 text-cyan-400" />
+            </button>
           )}
+          <div className="flex flex-col items-end gap-1">
+            <span className={`px-2 py-0.5 rounded-full text-xs ${badge.bg} ${badge.text}`}>
+              {badge.label}
+            </span>
+            {/* Priority stars */}
+            {priority_score >= 4 && (
+              <div className="flex items-center gap-0.5">
+                {Array.from({ length: Math.min(priority_score, 5) }).map((_, i) => (
+                  <Star key={i} className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

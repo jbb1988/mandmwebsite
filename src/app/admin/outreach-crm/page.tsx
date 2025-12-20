@@ -20,6 +20,11 @@ import {
   Target,
   ChevronLeft,
   ChevronRight,
+  Clock,
+  Copy,
+  TrendingUp,
+  BarChart3,
+  ChevronUp,
 } from 'lucide-react';
 
 // Types
@@ -69,6 +74,15 @@ interface Template {
   content: string;
 }
 
+interface TemplateStats {
+  name: string;
+  used: number;
+  responses: number;
+  conversions: number;
+  responseRate: number;
+  conversionRate: number;
+}
+
 type StageFilter = 'all' | 'not_contacted' | 'dm_sent' | 'responded' | 'won';
 type SourceFilter = 'all' | 'facebook' | 'twitter';
 type SortField = 'priority' | 'name' | 'dm_sent_at';
@@ -89,6 +103,8 @@ function OutreachCRMContent() {
   const [contacts, setContacts] = useState<UnifiedContact[]>([]);
   const [stats, setStats] = useState<PipelineStats | null>(null);
   const [templates, setTemplates] = useState<Template[]>([]);
+  const [templateStats, setTemplateStats] = useState<TemplateStats[]>([]);
+  const [showTemplateStats, setShowTemplateStats] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedContact, setSelectedContact] = useState<UnifiedContact | null>(null);
   const [stageFilter, setStageFilter] = useState<StageFilter>('all');
@@ -147,10 +163,28 @@ function OutreachCRMContent() {
     }
   }, [password]);
 
+  const fetchTemplateStats = useCallback(async () => {
+    if (!password) return;
+
+    try {
+      const response = await fetch('/api/admin/fb-outreach/template-stats', {
+        headers: { 'X-Admin-Password': password },
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setTemplateStats(data.stats);
+      }
+    } catch (error) {
+      console.error('Error fetching template stats:', error);
+    }
+  }, [password]);
+
   useEffect(() => {
     fetchPipeline();
     fetchTemplates();
-  }, [fetchPipeline, fetchTemplates]);
+    fetchTemplateStats();
+  }, [fetchPipeline, fetchTemplates, fetchTemplateStats]);
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -216,6 +250,46 @@ function OutreachCRMContent() {
     won: contacts.filter(c => c.stage === 'won').length,
   };
 
+  // Follow-up queue - contacts with overdue follow-ups
+  const followUpQueue = contacts
+    .filter(c => c.follow_up_overdue)
+    .sort((a, b) => {
+      // Sort by follow-up date (oldest first)
+      if (!a.next_follow_up && !b.next_follow_up) return 0;
+      if (!a.next_follow_up) return 1;
+      if (!b.next_follow_up) return -1;
+      return new Date(a.next_follow_up).getTime() - new Date(b.next_follow_up).getTime();
+    });
+
+  // Get best performing template for quick copy
+  const bestTemplate = templates.length > 0 ? templates[0] : null;
+
+  // Handle quick copy of template for a contact
+  const handleQuickCopy = async (contact: UnifiedContact, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!bestTemplate || !password) return;
+
+    // Replace placeholders
+    let text = bestTemplate.content;
+    text = text.replace(/{name}/g, contact.name.split(' ')[0]);
+    text = text.replace(/{group_name}/g, contact.group_name || '');
+
+    // Copy to clipboard
+    await navigator.clipboard.writeText(text);
+
+    // Update contact as DM sent with template
+    try {
+      await handleUpdateContact(contact.id, {
+        dm_sent_at: new Date().toISOString(),
+        response_status: 'dm_sent',
+        template_used: bestTemplate.name,
+      });
+      setToast({ message: `Template copied! "${bestTemplate.name}" marked as sent.`, type: 'success' });
+    } catch {
+      setToast({ message: 'Copied but failed to update status', type: 'error' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0A0B14] text-white">
       {/* Subtle gradient overlay */}
@@ -234,6 +308,141 @@ function OutreachCRMContent() {
 
           {/* Admin Navigation */}
           <AdminNav />
+
+          {/* Follow-up Queue Alert */}
+          {followUpQueue.length > 0 && (
+            <Card variant="bordered" glow glowColor="orange" className="p-4 mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-orange-500/20 rounded-xl">
+                    <Clock className="w-5 h-5 text-orange-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-white">Follow-up Queue</h3>
+                    <p className="text-xs text-orange-400">{followUpQueue.length} overdue follow-up{followUpQueue.length !== 1 ? 's' : ''}</p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
+                {followUpQueue.slice(0, 5).map((contact) => (
+                  <div
+                    key={contact.id}
+                    className="flex items-center justify-between p-2 bg-white/5 rounded-xl hover:bg-white/10 cursor-pointer transition-colors"
+                    onClick={() => setSelectedContact(contact)}
+                  >
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className={`p-1 rounded ${contact.source === 'facebook' ? 'bg-blue-500/20' : 'bg-sky-500/20'}`}>
+                        {contact.source === 'facebook' ? (
+                          <Users className="w-3 h-3 text-blue-400" />
+                        ) : (
+                          <Twitter className="w-3 h-3 text-sky-400" />
+                        )}
+                      </div>
+                      <span className="text-sm text-white truncate">{contact.name}</span>
+                      {contact.group_name && (
+                        <span className="text-xs text-white/40 truncate hidden sm:inline">({contact.group_name})</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-xs text-orange-400">
+                        {contact.next_follow_up
+                          ? new Date(contact.next_follow_up).toLocaleDateString()
+                          : 'Overdue'}
+                      </span>
+                      {contact.stage === 'not_contacted' && bestTemplate && (
+                        <button
+                          onClick={(e) => handleQuickCopy(contact, e)}
+                          className="p-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 rounded-lg transition-colors"
+                          title={`Copy "${bestTemplate.name}" template`}
+                        >
+                          <Copy className="w-3 h-3 text-cyan-400" />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {followUpQueue.length > 5 && (
+                  <p className="text-xs text-white/40 text-center py-1">
+                    +{followUpQueue.length - 5} more overdue
+                  </p>
+                )}
+              </div>
+            </Card>
+          )}
+
+          {/* Template Performance Stats */}
+          {templateStats.length > 0 && (
+            <Card variant="default" className="mb-6 overflow-hidden">
+              <button
+                onClick={() => setShowTemplateStats(!showTemplateStats)}
+                className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-purple-500/20 rounded-xl">
+                    <BarChart3 className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <div className="text-left">
+                    <h3 className="font-semibold text-white">Template Performance</h3>
+                    <p className="text-xs text-white/40">
+                      {templateStats.reduce((sum, t) => sum + t.used, 0)} total uses across {templateStats.length} templates
+                    </p>
+                  </div>
+                </div>
+                {showTemplateStats ? (
+                  <ChevronUp className="w-5 h-5 text-white/40" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-white/40" />
+                )}
+              </button>
+              {showTemplateStats && (
+                <div className="p-4 pt-0 space-y-3">
+                  {templateStats.map((template) => (
+                    <div key={template.name} className="p-3 bg-white/5 rounded-xl">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-white">{template.name}</span>
+                        <span className="text-xs text-white/40">{template.used} uses</span>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between text-xs mb-1">
+                            <span className="text-white/50">Response Rate</span>
+                            <span className={template.responseRate >= 20 ? 'text-emerald-400' : 'text-white/60'}>
+                              {template.responseRate}%
+                            </span>
+                          </div>
+                          <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${template.responseRate >= 20 ? 'bg-emerald-500' : 'bg-white/30'}`}
+                              style={{ width: `${Math.min(template.responseRate, 100)}%` }}
+                            />
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between text-xs mb-1">
+                            <span className="text-white/50">Conversion</span>
+                            <span className={template.conversionRate >= 5 ? 'text-amber-400' : 'text-white/60'}>
+                              {template.conversionRate}%
+                            </span>
+                          </div>
+                          <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full ${template.conversionRate >= 5 ? 'bg-amber-500' : 'bg-white/30'}`}
+                              style={{ width: `${Math.min(template.conversionRate * 2, 100)}%` }}
+                            />
+                          </div>
+                        </div>
+                        {template.responseRate > 0 && (
+                          <div className="flex items-center gap-1 text-emerald-400">
+                            <TrendingUp className="w-3 h-3" />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </Card>
+          )}
 
           {/* Stats Row */}
           {stats && (
@@ -351,6 +560,8 @@ function OutreachCRMContent() {
                     key={contact.id}
                     {...contact}
                     onClick={() => setSelectedContact(contact)}
+                    onQuickCopy={(e) => handleQuickCopy(contact, e)}
+                    hasTemplate={!!bestTemplate}
                   />
                 ))}
               </div>
