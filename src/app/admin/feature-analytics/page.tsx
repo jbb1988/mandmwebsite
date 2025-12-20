@@ -333,21 +333,25 @@ export default function FeatureAnalyticsPage() {
 
   return (
     <AdminGate>
-      <div className="min-h-screen bg-[#0A0B14] text-white pt-28">
-        <AdminNav />
+      <div className="min-h-screen bg-[#0A0B14] text-white">
+        <div className="fixed inset-0 bg-gradient-to-br from-blue-900/5 via-transparent to-purple-900/5 pointer-events-none" />
 
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header */}
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              <BarChart3 className="w-8 h-8 text-cyan-400" />
-              <div>
-                <h1 className="text-2xl font-bold">Feature Analytics</h1>
-                <p className="text-white/50 text-sm">Track feature usage and user engagement</p>
+        <div className="relative z-10 pt-28 pb-12 px-4 sm:px-6">
+          <div className="max-w-6xl mx-auto">
+            {/* Header */}
+            <div className="text-center mb-10">
+              <div className="w-16 h-16 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/10">
+                <BarChart3 className="w-8 h-8 text-cyan-400" />
               </div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 tracking-tight">Feature Analytics</h1>
+              <p className="text-white/50 text-sm sm:text-base">Track feature usage and user engagement</p>
             </div>
 
-            <div className="flex items-center gap-3">
+            {/* Admin Navigation */}
+            <AdminNav />
+
+            {/* Filters */}
+            <div className="flex flex-wrap justify-center items-center gap-3 mb-8">
               {/* Time Range Selector */}
               <select
                 value={timeRange}
@@ -386,7 +390,6 @@ export default function FeatureAnalyticsPage() {
                 Recalculate Scores
               </button>
             </div>
-          </div>
 
           {loading ? (
             <div className="flex items-center justify-center h-64">
@@ -771,7 +774,8 @@ export default function FeatureAnalyticsPage() {
               )}
             </>
           )}
-        </main>
+          </div>
+        </div>
       </div>
     </AdminGate>
   );

@@ -235,23 +235,25 @@ export default function AdminPartnersPage() {
 
   return (
     <AdminGate>
-      <div className="min-h-screen bg-[#0A0B14] pt-28">
-        <AdminNav />
+      <div className="min-h-screen bg-[#0A0B14] text-white">
+        <div className="fixed inset-0 bg-gradient-to-br from-blue-900/5 via-transparent to-purple-900/5 pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-            <div>
-              <h1 className="text-2xl font-bold text-white flex items-center gap-3">
-                <Users className="w-7 h-7 text-blue-400" />
-                Partner Management
-              </h1>
-              <p className="text-white/60 mt-1">
-                Manage affiliate partners and sync with Tolt
-              </p>
+        <div className="relative z-10 pt-28 pb-12 px-4 sm:px-6">
+          <div className="max-w-6xl mx-auto">
+            {/* Header */}
+            <div className="text-center mb-10">
+              <div className="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/10">
+                <Users className="w-8 h-8 text-blue-400" />
+              </div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 tracking-tight">Partner Management</h1>
+              <p className="text-white/50 text-sm sm:text-base">Manage affiliate partners and sync with Tolt</p>
             </div>
 
-            <div className="flex gap-3">
+            {/* Admin Navigation */}
+            <AdminNav />
+
+            {/* Action Buttons */}
+            <div className="flex justify-center gap-3 mb-8">
               <button
                 onClick={() => fetchPartners(true)}
                 disabled={loading}
@@ -269,7 +271,6 @@ export default function AdminPartnersPage() {
                 Sync with Tolt
               </button>
             </div>
-          </div>
 
           {/* Message */}
           {message && (
