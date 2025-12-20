@@ -134,7 +134,7 @@ export default function HomePage() {
       videoUrl: '/assets/videos/swing_lab.mp4',
       audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/swinglab_ob.mp3',
       tagline: 'AI Video Analysis For Your Swing.',
-      description: 'Upload your swing. Get elite coaching feedback.',
+      description: 'See it. Fix it. Hit tanks.',
       modalDescription: '**Upload your swing. Get elite coaching feedback. Fix what\'s holding you back.**\n\nSwing Lab delivers AI coaching analysis that breaks down your swing like a veteran MLB hitting coach—instant, actionable, precise.\n\n**Elite AI Coaching Analysis:**\n\n- **The Good Stuff** - Specific strengths to build on\n- **Power Opportunities** - The 1-2 changes that unlock explosive contact\n- **Your Practice Plan** - 2 precision drills targeting your exact issues\n- **Mental Game Strategy** - Situational hitting advice\n- **#1 Focus** - The most important thing to work on next\n\n**Analysis Features:**\n\n- Video thumbnails for visual reference\n- Complete analysis history for progress tracking\n- Shareable reports for coaches and teammates\n- Favorite your best analyses\n\nWhile other players guess what\'s wrong, you\'ll KNOW exactly what to fix.\n\n**This is swing analysis. Engineered for champions.**',
     },
     {
@@ -147,7 +147,7 @@ export default function HomePage() {
       videoUrl: '/assets/videos/pitch_lab.mp4',
       audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/pitchlab_ob.mp3',
       tagline: 'Design Filthy Pitches. Protect Your Arm.',
-      description: 'AI-powered pitching analysis with arm health insights.',
+      description: 'Design filthy pitches. Protect your arm.',
       modalDescription: '**Design filthy pitches. Protect your arm.**\n\nPitch Lab delivers AI coaching analysis that breaks down your delivery like a veteran pitching coach—instant, actionable, precise.\n\n**Elite AI Pitching Analysis:**\n\n- **8-Component Technical Breakdown** - Every phase of your delivery analyzed\n- **Arm Health Assessment** - Injury prevention insights to keep you on the mound\n- **Power Opportunities** - Unlock hidden velocity in your mechanics\n- **Custom Drill Recommendations** - Targeted fixes for your exact issues\n- **Progress Tracking** - Save and compare analyses over time\n\n**What You\'ll Get:**\n\n✅ Full mechanics breakdown (wind-up through follow-through)\n🩺 Arm health risk assessment\n🔥 Strengths to keep building\n⚠️ Areas for improvement\n🎯 Personalized drill recommendations\n\n**Works for Baseball & Softball**\n\nWhile other pitchers guess what\'s wrong, you\'ll KNOW exactly what to fix.\n\n**This is pitching analysis. Engineered for dominance.**',
     },
     {
@@ -160,7 +160,7 @@ export default function HomePage() {
       videoUrl: '/assets/videos/game_lab.mp4',
       audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/gamelab_ob.mp3',
       tagline: 'Play Smarter. Not Harder.',
-      description: 'Train Your Baseball IQ. Master Every Situation.',
+      description: 'Game IQ. No Excuses.',
       modalDescription: 'Game Lab isn\'t about guessing. It\'s about knowing.\n\n186 real game scenarios that force you to think faster, decide smarter, and play like you\'ve already seen every situation.\n\nYour Baseball IQ gets measured. Your mental batting average gets tracked. Every decision earns XP, builds streaks, and unlocks badges.\n\nWhile other players freeze under pressure, you\'ll already know the play.\n\n**This is your baseball brain. Fully trained.**',
     },
   ];
@@ -177,7 +177,7 @@ export default function HomePage() {
       videoUrl: '/assets/videos/sound_lab.1mp4.mp4',
       audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/soundlab_ob.mp3',
       tagline: 'Train Your Mind Through Sound.',
-      description: 'Engineer your mental state for peak performance',
+      description: 'Elite focus. Custom soundscapes.',
       modalDescription: 'Sound Lab isn\'t background music. It\'s a remote control for your mental state.\n\nBinaural beats sync your brainwaves. Alpha for laser focus. Beta for superhuman concentration. Gamma for explosive reactions.\n\nAncient Solfeggio frequencies meet athletic performance mixes. Pre-built combinations that pros use before competition.\n\nStart 10 minutes before training. Feel your brain lock in.\n\nWhile other athletes hope they\'ll be ready, you\'ll engineer your mental state.\n\n**This is sound. Weaponized for performance.**',
     },
     {
@@ -190,7 +190,7 @@ export default function HomePage() {
       videoUrl: '/assets/videos/plate_iq.mp4',
       audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/swinglab_ob.mp3',
       tagline: 'Anticipate. Adjust. Attack.',
-      description: 'Train your pitch anticipation like elite hitters.',
+      description: 'Anticipate. Adjust. Attack.',
       modalDescription: '**Anticipate. Adjust. Attack.**\n\nGreat hitters don\'t just react—they step in with a PLAN. Plate IQ trains the mental approach that separates good hitters from elite ones.\n\n**How It Works:**\n\n- Read the SITUATION (count, runners, outs, score)\n- Pick your MODE (Hunt with 0-1 strikes, Battle with 2 strikes)\n- Anticipate the ZONE (where will the pitcher throw?)\n- Lock in your approach and see if you read it right\n\n**Learn Situational Pitching:**\n\n- Why pitchers throw DOWN with runner on 3rd (prevent sac fly)\n- Why pitchers work AWAY with runner on 2nd (prevent pull-side damage)\n- How count changes pitcher aggression (2-0 vs 0-2)\n- How score affects location (nibbling when behind vs attacking when ahead)\n\n**Features:**\n\n- 20 real game scenarios with increasing difficulty\n- Heatmap visualization of pitcher tendencies by count\n- Streak tracking and accuracy stats\n- Explains the WHY behind every pitch location\n\nWhile other hitters guess, you\'ll KNOW what\'s coming.\n\n**This is pitch anticipation. Engineered for elite hitters.**',
     },
     {
@@ -291,6 +291,49 @@ export default function HomePage() {
       tagline: 'Precision Nutrition, No Guesswork.',
       description: 'AI-Powered Meal Plans That Turn Food Into Fuel.',
       modalDescription: 'Fuel AI turns your food preferences into performance-optimized meal plans.\n\nYour body is a high-performance machine. Stop guessing what to eat.\n\nAI-Powered Planning - Tell us what you love, what you avoid, how much time you have. The AI creates 7 days of personalized meals designed for peak performance.\n\nSmart Shopping Lists - Auto-generated from your weekly plan. Walk in with a list, walk out ready to fuel greatness.\n\nPerformance-Focused - Every meal targets training fuel and recovery. Real food that fits your lifestyle, not generic meal prep.\n\nLearns Your Preferences - Dietary restrictions, allergies, favorite foods, cooking time. Each week gets smarter.\n\nWhile other athletes count calories and hope, you\'ll eat with purpose.\n\n**This is nutrition. Engineered for champions.**',
+    },
+  ];
+
+  // Row 5: 3 cards - FREE Features: Arm Builder, Speed Lab, Coach's Corner
+  const row5Features = [
+    {
+      id: 'arm-builder',
+      title: 'Arm Builder',
+      icon: Dumbbell,
+      iconImage: '/assets/images/armcare_hero.png',
+      color: 'blue',
+      image: '/assets/images/armcare_hero.png',
+      videoUrl: '/assets/videos/armcare.mp4',
+      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/armbuilder_ob.mp3',
+      tagline: 'Protect Your Arm. Build Your Future.',
+      description: 'Build velocity. Prevent injury. Throw gas.',
+      modalDescription: '**Build velocity. Prevent injury. Throw gas.**\n\nArm Builder is your complete arm care system—designed to keep you healthy and throwing your hardest.\n\n**What\'s Inside:**\n\n🦾 **Daily Arm Check-In** - Rate how your arm feels. The system adapts to your condition.\n\n🔥 **Position-Specific Warmups** - Dynamic stretches and band work tailored to pitchers, catchers, and position players.\n\n📈 **Long Toss Programming** - Progressive distance protocols that build arm strength safely.\n\n🧊 **Recovery Routines** - Post-game and off-day protocols to keep your arm fresh.\n\n💡 **Pro Tips** - Coach-approved advice that builds elite arm care habits.\n\n**Track Your Progress:**\n\n- Daily streaks reward consistency\n- Log long toss distances and velocities\n- Visual progress over time\n\nWhile other players gamble with their arms, you\'ll build yours systematically.\n\n**This is arm care. Engineered for longevity.**',
+    },
+    {
+      id: 'speed-lab',
+      title: 'Speed Lab',
+      icon: Zap,
+      iconImage: '/assets/images/speed_lab_crop.png',
+      color: 'orange',
+      image: '/assets/images/speed_lab_crop.png',
+      videoUrl: '/assets/videos/speed_lab.mp4',
+      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/speedlab_ob.mp3',
+      tagline: 'Run Smarter. Score More.',
+      description: 'Run Smarter. Score More.',
+      modalDescription: '**Run Smarter. Score More.**\n\nSpeed Lab is your complete baserunning education—28 pro tips across 5 modules that transform you into a weapon on the basepaths.\n\n**5 Training Modules:**\n\n🧠 **Read the Play** - Situational awareness and decision-making\n\n📏 **Win the Jump** - Lead techniques and timing\n\n👁️ **Beat the Pitcher** - Reading delivery tells and pickoff moves\n\n🛝 **Perfect Your Slide** - Head-first, pop-up, and evasive slides\n\n🏃 **Take Extra Bases** - First-to-third, tagging up, scoring runs\n\n**Features:**\n\n- Interactive flip cards with detailed explanations\n- Audio narration for every tip\n- Situation IQ quiz to test your knowledge\n- Streak tracking rewards daily learning\n\nWhile other players run by instinct, you\'ll run with intelligence.\n\n**This is baserunning. Engineered for speed.**',
+    },
+    {
+      id: 'coachs-corner',
+      title: "Coach's Corner",
+      icon: Award,
+      iconImage: '/assets/images/coachs_corner.png',
+      color: 'blue',
+      image: '/assets/images/coachs_corner.png',
+      videoUrl: '/assets/videos/coachcorner.mp4',
+      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/coachscorner_ob.mp3',
+      tagline: 'Wisdom. Strategy. Results.',
+      description: 'Wisdom. Strategy. Results.',
+      modalDescription: '**Wisdom. Strategy. Results.**\n\nCoach\'s Corner is command central for coaches—everything you need to run elite programs and develop champions.\n\n**Coach Tools:**\n\n📊 **Team Dashboard** - See every athlete\'s progress at a glance\n\n🎯 **Goal Tracking** - Monitor athlete goals and approve new ones\n\n📈 **Weekly Insights** - AI-generated summaries of team performance\n\n💬 **Team Communication** - Chatter integration for direct messaging\n\n🗓️ **Event Management** - Practices, games, and tournaments organized\n\n**For Athletes:**\n\n- Access coaching insights and feedback\n- View team announcements\n- Track your standing within the team\n\nWhile other coaches drown in spreadsheets, you\'ll coach with clarity.\n\n**This is team management. Engineered for champions.**',
     },
   ];
 
@@ -451,7 +494,7 @@ export default function HomePage() {
               Every tool an athlete needs — mental toughness, physical mastery, precision coaching, and intelligent recovery — all connected in one seamless system.
             </p>
             <p className="text-base sm:text-lg text-text-secondary max-w-3xl mx-auto">
-              <span className="text-neon-cortex-blue font-semibold">Free & Pro features below.</span> Free tier includes Chatter, Events, Daily Hit, Dugout Talk, and Game Lab Level 1. <span className="text-solar-surge-orange font-semibold">Pro</span> unlocks AI coaching, video analysis, and advanced training.
+              <span className="text-neon-cortex-blue font-semibold">FREE features:</span> Chatter, Events, Daily Hit, Dugout Talk, Game Lab Level 1, Arm Builder, Speed Lab, Coach&apos;s Corner, Parent Dashboard, and Breathwork. <span className="text-solar-surge-orange font-semibold">PRO</span> unlocks AI coaching, video analysis, and advanced training tools.
             </p>
           </FadeInWhenVisible>
 
@@ -563,9 +606,10 @@ export default function HomePage() {
                     </div>
 
                     {/* Description */}
-                    <p className="text-sm text-gray-300 leading-relaxed pr-12 pb-2">
+                    <p className="text-sm text-gray-300 leading-relaxed pr-12 pb-1">
                       {feature.description}
                     </p>
+                    <p className="text-xs text-white/40 pb-2">Tap for audio overview</p>
 
                     {/* Click Icon */}
                     <button
@@ -573,7 +617,7 @@ export default function HomePage() {
                         e.stopPropagation();
                         handleOpenModal(feature);
                       }}
-                      className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white/10 border border-white/30 flex items-center justify-center transition-all cursor-pointer hover:bg-white/20 hover:border-white/50 active:scale-95"
+                      className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white/10 border border-white/30 flex items-center justify-center transition-all cursor-pointer hover:bg-white/20 hover:border-white/50 active:scale-95 animate-pulse"
                       aria-label={`View details for ${feature.title}`}
                     >
                       <MousePointerClick className="w-4 h-4 text-white" />
@@ -692,9 +736,10 @@ export default function HomePage() {
                     </div>
 
                     {/* Description */}
-                    <p className="text-sm text-gray-300 leading-relaxed pr-12 pb-2">
+                    <p className="text-sm text-gray-300 leading-relaxed pr-12 pb-1">
                       {feature.description}
                     </p>
+                    <p className="text-xs text-white/40 pb-2">Tap for audio overview</p>
 
                     {/* Click Icon */}
                     <button
@@ -702,7 +747,7 @@ export default function HomePage() {
                         e.stopPropagation();
                         handleOpenModal(feature);
                       }}
-                      className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white/10 border border-white/30 flex items-center justify-center transition-all cursor-pointer hover:bg-white/20 hover:border-white/50 active:scale-95"
+                      className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white/10 border border-white/30 flex items-center justify-center transition-all cursor-pointer hover:bg-white/20 hover:border-white/50 active:scale-95 animate-pulse"
                       aria-label={`View details for ${feature.title}`}
                     >
                       <MousePointerClick className="w-4 h-4 text-white" />
@@ -817,9 +862,10 @@ export default function HomePage() {
                     </div>
 
                     {/* Description */}
-                    <p className="text-sm text-gray-300 leading-relaxed pr-12 pb-2">
+                    <p className="text-sm text-gray-300 leading-relaxed pr-12 pb-1">
                       {feature.description}
                     </p>
+                    <p className="text-xs text-white/40 pb-2">Tap for audio overview</p>
 
                     {/* Click Icon */}
                     <button
@@ -827,7 +873,7 @@ export default function HomePage() {
                         e.stopPropagation();
                         handleOpenModal(feature);
                       }}
-                      className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white/10 border border-white/30 flex items-center justify-center transition-all cursor-pointer hover:bg-white/20 hover:border-white/50 active:scale-95"
+                      className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white/10 border border-white/30 flex items-center justify-center transition-all cursor-pointer hover:bg-white/20 hover:border-white/50 active:scale-95 animate-pulse"
                       aria-label={`View details for ${feature.title}`}
                     >
                       <MousePointerClick className="w-4 h-4 text-white" />
@@ -942,9 +988,10 @@ export default function HomePage() {
                     </div>
 
                     {/* Description */}
-                    <p className="text-sm text-gray-300 leading-relaxed pr-12 pb-2">
+                    <p className="text-sm text-gray-300 leading-relaxed pr-12 pb-1">
                       {feature.description}
                     </p>
+                    <p className="text-xs text-white/40 pb-2">Tap for audio overview</p>
 
                     {/* Click Icon */}
                     <button
@@ -952,7 +999,137 @@ export default function HomePage() {
                         e.stopPropagation();
                         handleOpenModal(feature);
                       }}
-                      className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white/10 border border-white/30 flex items-center justify-center transition-all cursor-pointer hover:bg-white/20 hover:border-white/50 active:scale-95"
+                      className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white/10 border border-white/30 flex items-center justify-center transition-all cursor-pointer hover:bg-white/20 hover:border-white/50 active:scale-95 animate-pulse"
+                      aria-label={`View details for ${feature.title}`}
+                    >
+                      <MousePointerClick className="w-4 h-4 text-white" />
+                    </button>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </StaggerChildren>
+
+          {/* Row 5 - 3 Cards: FREE Features - Arm Builder, Speed Lab, Coach's Corner */}
+          <StaggerChildren staggerDelay={0.12} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {row5Features.map((feature, i) => {
+              const Icon = feature.icon;
+              const isBlue = feature.color === 'blue';
+
+              return (
+                <motion.div
+                  key={feature.id}
+                  onClick={() => setActiveFeature(feature)}
+                  className="group relative cursor-pointer"
+                  variants={staggerItemVariants}
+                >
+                  {/* Glow Effect */}
+                  <div className={`absolute -inset-2 rounded-3xl blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500 ${
+                    isBlue ? 'bg-gradient-to-b from-neon-cortex-blue/30 to-mind-primary/10' : 'bg-gradient-to-b from-solar-surge-orange/30 to-muscle-primary/10'
+                  }`} />
+
+                  {/* Card */}
+                  <div className={`relative backdrop-blur-sm bg-white/[0.02] p-6 rounded-2xl border-2 transition-all duration-500 hover:scale-105 hover:bg-white/[0.05] h-full ${
+                    isBlue ? 'border-neon-cortex-blue/40 hover:border-neon-cortex-blue shadow-[0_0_20px_rgba(14,165,233,0.3)] hover:shadow-[0_0_40px_rgba(14,165,233,0.5)]' : 'border-solar-surge-orange/40 hover:border-solar-surge-orange shadow-[0_0_20px_rgba(249,115,22,0.3)] hover:shadow-[0_0_40px_rgba(249,115,22,0.5)]'
+                  }`}>
+                    {/* Video/Image */}
+                    <div
+                      className="relative aspect-video bg-gradient-to-br from-white/5 to-transparent rounded-xl mb-4 overflow-hidden group/image"
+                      ref={(node) => {
+                        if (node) {
+                          const video = node.querySelector('video');
+                          if (video) {
+                            // Intersection Observer for mobile auto-play on scroll
+                            const observer = new IntersectionObserver(
+                              (entries) => {
+                                entries.forEach((entry) => {
+                                  if (entry.isIntersecting) {
+                                    video.currentTime = 0;
+                                    video.play().catch(() => {});
+                                  } else {
+                                    video.pause();
+                                    video.currentTime = 0;
+                                  }
+                                });
+                              },
+                              { threshold: 0.5 }
+                            );
+                            observer.observe(node);
+                          }
+                        }
+                      }}
+                      onMouseEnter={(e) => {
+                        const video = e.currentTarget.querySelector('video');
+                        if (video) {
+                          video.currentTime = 0;
+                          video.play().catch(() => {/* Ignore autoplay errors */});
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        const video = e.currentTarget.querySelector('video');
+                        if (video) {
+                          video.pause();
+                          video.currentTime = 0;
+                        }
+                      }}
+                    >
+                      {feature.videoUrl ? (
+                        <video
+                          src={feature.videoUrl}
+                          poster={feature.image}
+                          className="w-full h-full object-cover opacity-95"
+                          muted
+                          loop
+                          playsInline
+                          autoPlay
+                          preload="auto"
+                        />
+                      ) : (
+                        <img
+                          src={feature.image}
+                          alt={feature.title}
+                          className="w-full h-full object-cover opacity-95"
+                        />
+                      )}
+                    </div>
+
+                    {/* Icon + Title */}
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${
+                        isBlue ? 'bg-neon-cortex-blue/10 border border-neon-cortex-blue/30' : 'bg-solar-surge-orange/10 border border-solar-surge-orange/30'
+                      }`}>
+                        {feature.iconImage ? (
+                          <img
+                            src={feature.iconImage}
+                            alt={`${feature.title} icon`}
+                            className="w-8 h-8 object-contain"
+                            style={{filter: `drop-shadow(0 0 10px ${isBlue ? 'rgba(14,165,233,0.8)' : 'rgba(249,115,22,0.8)'})`}}
+                          />
+                        ) : (
+                          <Icon className={`w-6 h-6 ${isBlue ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`}
+                                style={{filter: `drop-shadow(0 0 10px ${isBlue ? 'rgba(14,165,233,0.8)' : 'rgba(249,115,22,0.8)'})`}} />
+                        )}
+                      </div>
+
+                      {/* Title */}
+                      <h3 className={`text-xl font-black shimmer-text ${isBlue ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`}>
+                        {feature.title}
+                      </h3>
+                    </div>
+
+                    {/* Description */}
+                    <p className="text-sm text-gray-300 leading-relaxed pr-12 pb-1">
+                      {feature.description}
+                    </p>
+                    <p className="text-xs text-white/40 pb-2">Tap for audio overview</p>
+
+                    {/* Click Icon */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleOpenModal(feature);
+                      }}
+                      className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white/10 border border-white/30 flex items-center justify-center transition-all cursor-pointer hover:bg-white/20 hover:border-white/50 active:scale-95 animate-pulse"
                       aria-label={`View details for ${feature.title}`}
                     >
                       <MousePointerClick className="w-4 h-4 text-white" />
