@@ -24,7 +24,7 @@ export default function AdminNav() {
   const pathname = usePathname();
 
   return (
-    <div className="flex flex-wrap justify-center gap-2 mb-8 pt-24">
+    <div className="flex flex-wrap justify-center gap-2 mb-8">
       {adminLinks.map((link) => {
         const Icon = link.icon;
         const isActive = pathname === link.href;
