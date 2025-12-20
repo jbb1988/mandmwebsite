@@ -15,6 +15,8 @@ import {
   Gift,
   Trophy,
   ExternalLink,
+  Square,
+  CheckSquare,
 } from 'lucide-react';
 
 export interface ContactCardProps {
@@ -43,6 +45,10 @@ export interface ContactCardProps {
   onGrantTrial?: (e: React.MouseEvent) => void;
   onMarkWon?: (e: React.MouseEvent) => void;
   hasTemplate?: boolean;
+  // Selection mode
+  selectionMode?: boolean;
+  isSelected?: boolean;
+  onToggleSelect?: (e: React.MouseEvent) => void;
 }
 
 const stageColors = {
@@ -79,6 +85,9 @@ export function ContactCard({
   onGrantTrial,
   onMarkWon,
   hasTemplate,
+  selectionMode,
+  isSelected,
+  onToggleSelect,
 }: ContactCardProps) {
   const badge = stageBadges[stage];
 
@@ -120,15 +129,28 @@ export function ContactCard({
   return (
     <Card
       variant="default"
-      className={`p-3 hover:bg-white/5 transition-all border-l-2 ${stageColors[stage]}`}
+      className={`p-3 hover:bg-white/5 transition-all border-l-2 ${stageColors[stage]} ${isSelected ? 'bg-cyan-500/10 border-l-cyan-500' : ''}`}
     >
       {/* Main content row - clickable to open modal */}
       <div
         className="flex items-start justify-between gap-2 cursor-pointer"
         onClick={onClick}
       >
-        {/* Left side - Icon and info */}
+        {/* Left side - Checkbox (if selection mode), Icon and info */}
         <div className="flex items-start gap-2 min-w-0 flex-1">
+          {/* Selection checkbox */}
+          {selectionMode && (
+            <button
+              onClick={onToggleSelect}
+              className="p-1 shrink-0 -ml-1"
+            >
+              {isSelected ? (
+                <CheckSquare className="w-5 h-5 text-cyan-400" />
+              ) : (
+                <Square className="w-5 h-5 text-white/30 hover:text-white/50" />
+              )}
+            </button>
+          )}
           <div className={`p-1.5 rounded-lg shrink-0 ${source === 'facebook' ? 'bg-blue-500/20' : 'bg-sky-500/20'}`}>
             {source === 'facebook' ? (
               <Users className="w-4 h-4 text-blue-400" />

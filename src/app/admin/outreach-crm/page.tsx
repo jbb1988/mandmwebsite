@@ -7,6 +7,7 @@ import AdminNav from '@/components/AdminNav';
 import { Card, StatCard, SearchInput, Toast, ToastType } from '@/components/admin/shared';
 import ContactCard from '@/components/admin/ContactCard';
 import ContactDetailModal from '@/components/admin/ContactDetailModal';
+import BulkActionBar from '@/components/admin/BulkActionBar';
 import {
   Users,
   Twitter,
@@ -25,6 +26,7 @@ import {
   TrendingUp,
   BarChart3,
   ChevronUp,
+  CheckSquare,
 } from 'lucide-react';
 
 // Types
@@ -113,6 +115,10 @@ function OutreachCRMContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [toast, setToast] = useState<{ message: string; type: ToastType; action?: { label: string; onClick: () => void } } | null>(null);
+
+  // Selection mode state
+  const [selectionMode, setSelectionMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const fetchPipeline = useCallback(async () => {
     if (!password) return;
@@ -432,6 +438,97 @@ function OutreachCRMContent() {
     }
   };
 
+  // Selection handlers
+  const toggleSelectContact = (contactId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setSelectedIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(contactId)) {
+        newSet.delete(contactId);
+      } else {
+        newSet.add(contactId);
+      }
+      return newSet;
+    });
+  };
+
+  const selectAllVisible = () => {
+    const visibleIds = paginatedContacts.map(c => c.id);
+    setSelectedIds(new Set(visibleIds));
+  };
+
+  const clearSelection = () => {
+    setSelectedIds(new Set());
+    setSelectionMode(false);
+  };
+
+  // Bulk action handlers
+  const handleBulkMarkSent = async (templateName?: string) => {
+    if (!password || selectedIds.size === 0) return;
+
+    try {
+      const response = await fetch('/api/admin/outreach/bulk-update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': password,
+        },
+        body: JSON.stringify({
+          ids: Array.from(selectedIds),
+          updates: {
+            dm_sent_at: new Date().toISOString(),
+            response_status: 'dm_sent',
+            template_used: templateName || null,
+          },
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setToast({ message: data.message, type: 'success' });
+        fetchPipeline();
+        clearSelection();
+      } else {
+        setToast({ message: data.message || 'Bulk update failed', type: 'error' });
+      }
+    } catch (error) {
+      console.error('Bulk mark sent error:', error);
+      setToast({ message: 'Failed to update contacts', type: 'error' });
+    }
+  };
+
+  const handleBulkSetFollowUp = async (date: string) => {
+    if (!password || selectedIds.size === 0) return;
+
+    try {
+      const response = await fetch('/api/admin/outreach/bulk-update', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': password,
+        },
+        body: JSON.stringify({
+          ids: Array.from(selectedIds),
+          updates: {
+            next_follow_up: date,
+          },
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setToast({ message: `Follow-up set for ${selectedIds.size} contact${selectedIds.size !== 1 ? 's' : ''}`, type: 'success' });
+        fetchPipeline();
+        clearSelection();
+      } else {
+        setToast({ message: data.message || 'Bulk update failed', type: 'error' });
+      }
+    } catch (error) {
+      console.error('Bulk follow-up error:', error);
+      setToast({ message: 'Failed to set follow-up dates', type: 'error' });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0A0B14] text-white">
       {/* Subtle gradient overlay */}
@@ -674,6 +771,25 @@ function OutreachCRMContent() {
                 />
               </div>
 
+              {/* Selection Mode Toggle */}
+              <button
+                onClick={() => {
+                  setSelectionMode(!selectionMode);
+                  if (selectionMode) clearSelection();
+                }}
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-colors ${
+                  selectionMode
+                    ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30'
+                    : 'bg-white/5 hover:bg-white/10 text-white/60'
+                }`}
+                title={selectionMode ? 'Exit selection mode' : 'Enter selection mode'}
+              >
+                <CheckSquare className="w-4 h-4" />
+                <span className="text-sm hidden sm:inline">
+                  {selectionMode ? 'Cancel' : 'Select'}
+                </span>
+              </button>
+
               {/* Refresh */}
               <button
                 onClick={() => fetchPipeline()}
@@ -782,6 +898,9 @@ function OutreachCRMContent() {
                                   onGrantTrial={(e) => handleGrantTrial(contact, e)}
                                   onMarkWon={(e) => handleMarkWon(contact, e)}
                                   hasTemplate={!!bestTemplate}
+                                  selectionMode={selectionMode}
+                                  isSelected={selectedIds.has(contact.id)}
+                                  onToggleSelect={(e) => toggleSelectContact(contact.id, e)}
                                 />
                               ))}
                             </div>
@@ -809,6 +928,9 @@ function OutreachCRMContent() {
                               onGrantTrial={(e) => handleGrantTrial(contact, e)}
                               onMarkWon={(e) => handleMarkWon(contact, e)}
                               hasTemplate={!!bestTemplate}
+                              selectionMode={selectionMode}
+                              isSelected={selectedIds.has(contact.id)}
+                              onToggleSelect={(e) => toggleSelectContact(contact.id, e)}
                             />
                           ))}
                         </div>
@@ -834,6 +956,9 @@ function OutreachCRMContent() {
                     onGrantTrial={(e) => handleGrantTrial(contact, e)}
                     onMarkWon={(e) => handleMarkWon(contact, e)}
                     hasTemplate={!!bestTemplate}
+                    selectionMode={selectionMode}
+                    isSelected={selectedIds.has(contact.id)}
+                    onToggleSelect={(e) => toggleSelectContact(contact.id, e)}
                   />
                 ))}
               </div>
@@ -902,6 +1027,20 @@ function OutreachCRMContent() {
               contact={selectedContact}
               onClose={() => setSelectedContact(null)}
               onUpdate={handleUpdateContact}
+              templates={templates}
+            />
+          )}
+
+          {/* Bulk Action Bar */}
+          {selectionMode && (
+            <BulkActionBar
+              selectedCount={selectedIds.size}
+              totalCount={paginatedContacts.length}
+              onSelectAll={selectAllVisible}
+              onClearSelection={clearSelection}
+              onBulkMarkSent={handleBulkMarkSent}
+              onBulkSetFollowUp={handleBulkSetFollowUp}
+              isAllSelected={selectedIds.size === paginatedContacts.length && paginatedContacts.length > 0}
               templates={templates}
             />
           )}
