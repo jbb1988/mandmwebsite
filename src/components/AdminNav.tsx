@@ -3,15 +3,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  LayoutDashboard, Facebook, Twitter, Users, DollarSign,
-  Image, FolderOpen, Tag, Mail, UserCircle
+  LayoutDashboard, Users, DollarSign,
+  Image, FolderOpen, Tag, Mail, UserCircle, Target
 } from 'lucide-react';
 
 const adminLinks = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/campaigns', label: 'Campaigns', icon: Mail },
-  { href: '/admin/fb-outreach', label: 'FB Outreach', icon: Facebook },
-  { href: '/admin/x-outreach', label: 'X Outreach', icon: Twitter },
+  { href: '/admin/outreach-crm', label: 'Outreach CRM', icon: Target },
   { href: '/admin/finder-fees', label: 'Finder Fees', icon: DollarSign },
   { href: '/admin/partners', label: 'Partners', icon: Users },
   { href: '/admin/users', label: 'Users', icon: UserCircle },
