@@ -85,7 +85,7 @@ interface TemplateStats {
 
 type StageFilter = 'all' | 'not_contacted' | 'dm_sent' | 'responded' | 'won';
 type SourceFilter = 'all' | 'facebook' | 'twitter';
-type SortField = 'priority' | 'name' | 'dm_sent_at';
+type SortField = 'priority' | 'name' | 'dm_sent_at' | 'group_name';
 
 const ITEMS_PER_PAGE = 50;
 
@@ -230,11 +230,82 @@ function OutreachCRMContent() {
           if (!a.dm_sent_at) return 1;
           if (!b.dm_sent_at) return -1;
           return new Date(b.dm_sent_at).getTime() - new Date(a.dm_sent_at).getTime();
+        case 'group_name':
+          // Sort by group name, then by name within group
+          const groupA = a.group_name || 'zzz_no_group';
+          const groupB = b.group_name || 'zzz_no_group';
+          if (groupA !== groupB) return groupA.localeCompare(groupB);
+          return a.name.localeCompare(b.name);
         case 'priority':
         default:
           return (b.priority_score || 0) - (a.priority_score || 0);
       }
     });
+
+  // Group contacts by group_name when that sort is selected
+  interface GroupedContacts {
+    groupName: string;
+    contacts: UnifiedContact[];
+    stats: {
+      total: number;
+      not_contacted: number;
+      dm_sent: number;
+      responded: number;
+      won: number;
+    };
+  }
+
+  const groupedByGroup: GroupedContacts[] = React.useMemo(() => {
+    if (sortField !== 'group_name') return [];
+
+    // Only group Facebook contacts that have a group_name
+    const facebookWithGroup = filteredContacts.filter(c => c.source === 'facebook' && c.group_name);
+    const grouped = new Map<string, UnifiedContact[]>();
+
+    facebookWithGroup.forEach(contact => {
+      const key = contact.group_name!;
+      if (!grouped.has(key)) {
+        grouped.set(key, []);
+      }
+      grouped.get(key)!.push(contact);
+    });
+
+    // Convert to array and calculate stats for each group
+    return Array.from(grouped.entries())
+      .map(([groupName, groupContacts]) => ({
+        groupName,
+        contacts: groupContacts,
+        stats: {
+          total: groupContacts.length,
+          not_contacted: groupContacts.filter(c => c.stage === 'not_contacted').length,
+          dm_sent: groupContacts.filter(c => c.stage === 'dm_sent').length,
+          responded: groupContacts.filter(c => c.stage === 'responded').length,
+          won: groupContacts.filter(c => c.stage === 'won').length,
+        }
+      }))
+      .sort((a, b) => a.groupName.localeCompare(b.groupName));
+  }, [filteredContacts, sortField]);
+
+  // Contacts without groups (Twitter or FB without group)
+  const ungroupedContacts = React.useMemo(() => {
+    if (sortField !== 'group_name') return filteredContacts;
+    return filteredContacts.filter(c => c.source === 'twitter' || !c.group_name);
+  }, [filteredContacts, sortField]);
+
+  // Track expanded groups
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+
+  const toggleGroup = (groupName: string) => {
+    setExpandedGroups(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(groupName)) {
+        newSet.delete(groupName);
+      } else {
+        newSet.add(groupName);
+      }
+      return newSet;
+    });
+  };
 
   // Pagination
   const totalPages = Math.ceil(filteredContacts.length / ITEMS_PER_PAGE);
@@ -517,6 +588,7 @@ function OutreachCRMContent() {
                     <option value="priority">Priority</option>
                     <option value="name">Name</option>
                     <option value="dm_sent_at">Recent DM</option>
+                    <option value="group_name">By Group (FB)</option>
                   </select>
                   <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40 pointer-events-none" />
                 </div>
@@ -549,6 +621,123 @@ function OutreachCRMContent() {
               <div className="flex items-center justify-center h-32">
                 <RefreshCw className="w-5 h-5 text-white/30 animate-spin" />
               </div>
+            ) : sortField === 'group_name' ? (
+              /* Grouped by Facebook Group View */
+              <div className="space-y-4">
+                {groupedByGroup.length === 0 && ungroupedContacts.length === 0 ? (
+                  <div className="flex items-center justify-center h-32 text-white/30 text-sm">
+                    No contacts found
+                  </div>
+                ) : (
+                  <>
+                    {/* Facebook Groups */}
+                    {groupedByGroup.map((group) => {
+                      const isExpanded = expandedGroups.has(group.groupName);
+                      // Determine group status based on most advanced stage
+                      const groupStatus = group.stats.won > 0 ? 'won'
+                        : group.stats.responded > 0 ? 'responded'
+                        : group.stats.dm_sent > 0 ? 'dm_sent'
+                        : 'not_contacted';
+                      const statusColors = {
+                        not_contacted: 'bg-gray-500/20 border-gray-500/30',
+                        dm_sent: 'bg-cyan-500/20 border-cyan-500/30',
+                        responded: 'bg-emerald-500/20 border-emerald-500/30',
+                        won: 'bg-amber-500/20 border-amber-500/30',
+                      };
+                      const statusTextColors = {
+                        not_contacted: 'text-gray-400',
+                        dm_sent: 'text-cyan-400',
+                        responded: 'text-emerald-400',
+                        won: 'text-amber-400',
+                      };
+
+                      return (
+                        <div key={group.groupName} className={`rounded-xl border ${statusColors[groupStatus]} overflow-hidden`}>
+                          {/* Group Header */}
+                          <button
+                            onClick={() => toggleGroup(group.groupName)}
+                            className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="p-2 bg-blue-500/20 rounded-xl shrink-0">
+                                <Users className="w-5 h-5 text-blue-400" />
+                              </div>
+                              <div className="text-left min-w-0">
+                                <h3 className="font-semibold text-white truncate">{group.groupName}</h3>
+                                <p className="text-xs text-white/40">
+                                  {group.stats.total} admin{group.stats.total !== 1 ? 's' : ''}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-3 shrink-0">
+                              {/* Status badges */}
+                              <div className="flex items-center gap-1">
+                                {group.stats.won > 0 && (
+                                  <span className="px-2 py-0.5 text-xs bg-amber-500/20 text-amber-400 rounded-full">{group.stats.won} won</span>
+                                )}
+                                {group.stats.responded > 0 && (
+                                  <span className="px-2 py-0.5 text-xs bg-emerald-500/20 text-emerald-400 rounded-full">{group.stats.responded} responded</span>
+                                )}
+                                {group.stats.dm_sent > 0 && (
+                                  <span className="px-2 py-0.5 text-xs bg-cyan-500/20 text-cyan-400 rounded-full">{group.stats.dm_sent} DM sent</span>
+                                )}
+                                {group.stats.not_contacted > 0 && (
+                                  <span className="px-2 py-0.5 text-xs bg-gray-500/20 text-gray-400 rounded-full">{group.stats.not_contacted} pending</span>
+                                )}
+                              </div>
+                              {/* Status indicator */}
+                              <div className={`px-2 py-1 rounded-lg text-xs font-medium ${statusColors[groupStatus]} ${statusTextColors[groupStatus]}`}>
+                                {groupStatus === 'won' ? 'Converted' : groupStatus === 'responded' ? 'Active' : groupStatus === 'dm_sent' ? 'Contacted' : 'New'}
+                              </div>
+                              {isExpanded ? (
+                                <ChevronUp className="w-5 h-5 text-white/40" />
+                              ) : (
+                                <ChevronDown className="w-5 h-5 text-white/40" />
+                              )}
+                            </div>
+                          </button>
+
+                          {/* Expanded Admin List */}
+                          {isExpanded && (
+                            <div className="border-t border-white/10 p-3 space-y-2 bg-black/20">
+                              {group.contacts.map((contact) => (
+                                <ContactCard
+                                  key={contact.id}
+                                  {...contact}
+                                  onClick={() => setSelectedContact(contact)}
+                                  onQuickCopy={(e) => handleQuickCopy(contact, e)}
+                                  hasTemplate={!!bestTemplate}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+
+                    {/* Ungrouped Contacts (Twitter or FB without group) */}
+                    {ungroupedContacts.length > 0 && (
+                      <div className="mt-6">
+                        <h3 className="text-sm font-medium text-white/60 mb-3 flex items-center gap-2">
+                          <Twitter className="w-4 h-4" />
+                          Other Contacts ({ungroupedContacts.length})
+                        </h3>
+                        <div className="space-y-2">
+                          {ungroupedContacts.map((contact) => (
+                            <ContactCard
+                              key={contact.id}
+                              {...contact}
+                              onClick={() => setSelectedContact(contact)}
+                              onQuickCopy={(e) => handleQuickCopy(contact, e)}
+                              hasTemplate={!!bestTemplate}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
             ) : paginatedContacts.length === 0 ? (
               <div className="flex items-center justify-center h-32 text-white/30 text-sm">
                 No contacts found
@@ -567,8 +756,8 @@ function OutreachCRMContent() {
               </div>
             )}
 
-            {/* Pagination */}
-            {totalPages > 1 && (
+            {/* Pagination - only show for non-grouped view */}
+            {sortField !== 'group_name' && totalPages > 1 && (
               <div className="flex items-center justify-between mt-6 pt-4 border-t border-white/10">
                 <p className="text-sm text-white/40">
                   Showing {startIndex + 1}-{Math.min(startIndex + ITEMS_PER_PAGE, filteredContacts.length)} of {filteredContacts.length}
