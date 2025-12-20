@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from './shared/Card';
 import { ActivityTimeline, buildTimelineEvents } from './ActivityTimeline';
+import { QuickDatePicker } from './shared/QuickDatePicker';
 import {
   X,
   Users,
@@ -17,8 +18,22 @@ import {
   Mail,
   MapPin,
   Clock,
+  Save,
+  Edit2,
+  ChevronDown,
 } from 'lucide-react';
 import { UnifiedContact } from '@/app/api/admin/outreach/pipeline/route';
+
+// Response type options for tracking lead interest level
+const responseTypes = [
+  { value: 'not_contacted', label: 'Not Contacted', color: 'text-white/60' },
+  { value: 'dm_sent', label: 'DM Sent', color: 'text-cyan-400' },
+  { value: 'interested', label: 'Interested', color: 'text-emerald-400' },
+  { value: 'maybe_later', label: 'Maybe Later', color: 'text-yellow-400' },
+  { value: 'not_interested', label: 'Not Interested', color: 'text-red-400' },
+  { value: 'responded', label: 'Responded', color: 'text-emerald-400' },
+  { value: 'trial_requested', label: 'Trial Requested', color: 'text-purple-400' },
+];
 
 interface ContactDetailModalProps {
   contact: UnifiedContact;
@@ -43,6 +58,23 @@ export function ContactDetailModal({
   const [isUpdating, setIsUpdating] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
   const badge = stageBadges[contact.stage];
+
+  // Editable fields state
+  const [notes, setNotes] = useState(contact.notes || '');
+  const [isEditingNotes, setIsEditingNotes] = useState(false);
+  const [responseStatus, setResponseStatus] = useState(contact.response_status || 'not_contacted');
+  const [showResponseDropdown, setShowResponseDropdown] = useState(false);
+  const [priority, setPriority] = useState(contact.priority_score || 3);
+  const [nextFollowUp, setNextFollowUp] = useState(contact.next_follow_up);
+
+  // Sync state when contact changes
+  useEffect(() => {
+    setNotes(contact.notes || '');
+    setResponseStatus(contact.response_status || 'not_contacted');
+    setPriority(contact.priority_score || 3);
+    setNextFollowUp(contact.next_follow_up);
+    setIsEditingNotes(false);
+  }, [contact]);
 
   const timelineEvents = buildTimelineEvents({
     created_at: contact.created_at,
@@ -101,6 +133,51 @@ export function ContactDetailModal({
     setShowTemplates(false);
   };
 
+  // Save notes
+  const handleSaveNotes = async () => {
+    setIsUpdating(true);
+    try {
+      await onUpdate(contact.id, { notes });
+      setIsEditingNotes(false);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Update response status
+  const handleResponseStatusChange = async (newStatus: string) => {
+    setResponseStatus(newStatus);
+    setShowResponseDropdown(false);
+    setIsUpdating(true);
+    try {
+      await onUpdate(contact.id, { response_status: newStatus });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Update priority
+  const handlePriorityChange = async (newPriority: number) => {
+    setPriority(newPriority);
+    setIsUpdating(true);
+    try {
+      await onUpdate(contact.id, { priority_score: newPriority });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Update follow-up date
+  const handleFollowUpChange = async (date: string | null) => {
+    setNextFollowUp(date);
+    setIsUpdating(true);
+    try {
+      await onUpdate(contact.id, { next_follow_up: date });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <Card variant="elevated" className="w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
@@ -139,19 +216,69 @@ export function ContactDetailModal({
             <span className={`px-3 py-1 rounded-full text-sm ${badge.bg} ${badge.text}`}>
               {badge.label}
             </span>
-            {contact.priority_score >= 4 && (
-              <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(contact.priority_score, 5) }).map((_, i) => (
-                  <Star key={i} className="w-3 h-3 text-amber-400 fill-amber-400" />
-                ))}
-              </div>
-            )}
+
+            {/* Clickable Priority Stars */}
+            <div className="flex items-center gap-0.5">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => handlePriorityChange(i + 1)}
+                  disabled={isUpdating}
+                  className="p-0.5 hover:scale-110 transition-transform disabled:opacity-50"
+                  title={`Set priority to ${i + 1}`}
+                >
+                  <Star
+                    className={`w-4 h-4 ${i < priority ? 'text-amber-400 fill-amber-400' : 'text-white/20'}`}
+                  />
+                </button>
+              ))}
+            </div>
+
             {contact.member_count && (
               <span className="text-sm text-white/40">{contact.member_count.toLocaleString()} members</span>
             )}
             {contact.follower_count && (
               <span className="text-sm text-white/40">{contact.follower_count.toLocaleString()} followers</span>
             )}
+          </div>
+
+          {/* Response Status & Follow-up Row */}
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* Response Status Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowResponseDropdown(!showResponseDropdown)}
+                disabled={isUpdating}
+                className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-xl text-sm transition-colors disabled:opacity-50"
+              >
+                <span className={responseTypes.find(r => r.value === responseStatus)?.color || 'text-white/60'}>
+                  {responseTypes.find(r => r.value === responseStatus)?.label || 'Set Status'}
+                </span>
+                <ChevronDown className="w-3 h-3 text-white/40" />
+              </button>
+              {showResponseDropdown && (
+                <div className="absolute top-full mt-1 left-0 z-10 bg-[#1B1F39] border border-white/20 rounded-xl shadow-xl p-1 min-w-[160px]">
+                  {responseTypes.map((type) => (
+                    <button
+                      key={type.value}
+                      onClick={() => handleResponseStatusChange(type.value)}
+                      className={`w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-white/10 transition-colors ${type.color} ${
+                        responseStatus === type.value ? 'bg-white/10' : ''
+                      }`}
+                    >
+                      {type.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Follow-up Date Picker */}
+            <QuickDatePicker
+              value={nextFollowUp}
+              onChange={handleFollowUpChange}
+              disabled={isUpdating}
+            />
           </div>
 
           {/* Info grid */}
@@ -166,12 +293,6 @@ export function ContactDetailModal({
               <div className="flex items-center gap-2 text-white/60">
                 <Mail className="w-4 h-4" />
                 <span className="truncate">{contact.contact_email}</span>
-              </div>
-            )}
-            {contact.next_follow_up && (
-              <div className={`flex items-center gap-2 ${contact.follow_up_overdue ? 'text-orange-400' : 'text-white/60'}`}>
-                <Calendar className="w-4 h-4" />
-                <span>Follow-up: {new Date(contact.next_follow_up).toLocaleDateString()}</span>
               </div>
             )}
             {contact.days_since_dm !== null && (
@@ -189,13 +310,44 @@ export function ContactDetailModal({
             </div>
           )}
 
-          {/* Notes if available */}
-          {contact.notes && (
-            <div className="p-3 bg-white/5 rounded-xl">
-              <p className="text-xs text-white/40 mb-1">Notes</p>
-              <p className="text-sm text-white/70">{contact.notes}</p>
+          {/* Editable Notes */}
+          <div className="p-3 bg-white/5 rounded-xl">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs text-white/40 uppercase tracking-wider">Notes</p>
+              {!isEditingNotes ? (
+                <button
+                  onClick={() => setIsEditingNotes(true)}
+                  className="p-1 hover:bg-white/10 rounded-lg transition-colors"
+                  title="Edit notes"
+                >
+                  <Edit2 className="w-3 h-3 text-white/40" />
+                </button>
+              ) : (
+                <button
+                  onClick={handleSaveNotes}
+                  disabled={isUpdating}
+                  className="flex items-center gap-1 px-2 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 rounded-lg text-xs text-emerald-400 transition-colors disabled:opacity-50"
+                >
+                  <Save className="w-3 h-3" />
+                  Save
+                </button>
+              )}
             </div>
-          )}
+            {isEditingNotes ? (
+              <textarea
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Add notes about this contact..."
+                className="w-full bg-black/20 border border-white/10 rounded-lg p-2 text-sm text-white/70 placeholder:text-white/30 focus:outline-none focus:border-cyan-500/50 resize-none"
+                rows={3}
+                autoFocus
+              />
+            ) : (
+              <p className="text-sm text-white/70 min-h-[24px]">
+                {notes || <span className="text-white/30 italic">No notes yet. Click edit to add.</span>}
+              </p>
+            )}
+          </div>
 
           {/* Quick Actions */}
           <div className="space-y-2">
