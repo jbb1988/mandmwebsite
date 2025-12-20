@@ -1349,11 +1349,14 @@ export default function HomePage() {
             </div>
             <GradientTextReveal
               text="Mind & Muscle Daily Hit"
-              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-relaxed"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-2 leading-relaxed"
               gradientFrom="#F97316"
               gradientTo="#0EA5E9"
               delay={0.2}
             />
+            <p className="text-2xl sm:text-3xl md:text-4xl font-bold text-neon-cortex-blue mb-6 drop-shadow-[0_0_12px_rgba(14,165,233,0.5)]">
+              &quot;Unbreakable Minds&quot;
+            </p>
             <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto font-medium leading-relaxed">
               Your daily dose of mental toughness that builds champions. Fresh content every morning. Streak tracking to keep you accountable. <span className="text-solar-surge-orange font-bold">Always free.</span>
             </p>
@@ -2032,29 +2035,25 @@ export default function HomePage() {
                       <h4 className="text-sm font-bold text-neon-cortex-blue mb-3 tracking-wide flex items-center gap-2 drop-shadow-[0_0_8px_rgba(14,165,233,0.5)]">
                         BENCH <span className="text-xs bg-gradient-to-r from-solar-surge-orange to-orange-600 text-white px-3 py-1 rounded-full font-black shadow-[0_0_12px_rgba(249,115,22,0.6)]">FREE</span>
                       </h4>
-                      <ul className="space-y-2 text-sm text-white">
-                        <li className="flex items-center gap-2">
-                          <span className="text-neon-cortex-blue font-black">•</span> Daily Hit (audio motivation)
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <span className="text-neon-cortex-blue font-black">•</span> Field Notes (performance log)
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <span className="text-neon-cortex-blue font-black">•</span> Breathwork & Visualizations
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <span className="text-neon-cortex-blue font-black">•</span> Chatter & Events
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <span className="text-neon-cortex-blue font-black">•</span> Coach's Corner
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <span className="text-neon-cortex-blue font-black">•</span> Parent Dashboard
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <span className="text-neon-cortex-blue font-black">•</span> Arm Builder (arm care & long toss)
-                        </li>
-                      </ul>
+                      <div className="space-y-2 text-sm text-white">
+                        {[
+                          { num: '11', name: 'Daily Hit (audio motivation)' },
+                          { num: '12', name: 'Field Notes (performance log)' },
+                          { num: '13', name: 'Breathwork & Visualizations' },
+                          { num: '14', name: 'Chatter & Events' },
+                          { num: '15', name: "Coach's Corner" },
+                          { num: '16', name: 'Parent Dashboard' },
+                          { num: '17', name: 'Arm Builder (arm care & long toss)' },
+                          { num: '18', name: 'Speed Lab (sprint training)' },
+                        ].map((item, i) => (
+                          <div key={i} className="flex items-center gap-2">
+                            <div className="w-5 h-5 rounded-full bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange flex items-center justify-center flex-shrink-0 shadow-[0_0_8px_rgba(14,165,233,0.4)]">
+                              <span className="text-[10px] font-black text-white">{item.num}</span>
+                            </div>
+                            <span>{item.name}</span>
+                          </div>
+                        ))}
+                      </div>
                     </div>
 
                     {/* Coaching Staff - AI */}
@@ -2261,6 +2260,7 @@ export default function HomePage() {
                   'Game Lab Level 1: Baseball IQ basics',
                   'Breathwork: Guided breathing exercises',
                   'Arm Builder: Arm care & throwing routines',
+                  'Speed Lab: Sprint training & speed drills',
                 ].map((feature, i) => (
                   <li key={i} className="flex items-center gap-3 text-base md:text-lg text-gray-300">
                     <div className="w-2 h-2 bg-neon-cortex-blue rounded-full flex-shrink-0" />

@@ -1220,6 +1220,7 @@ function TeamLicensingContent() {
                 'Game Lab Level 1: Baseball IQ basics',
                 'Breathwork: Guided breathing exercises',
                 'Arm Builder: Arm care & throwing routines',
+                'Speed Lab: Sprint training & speed drills',
               ].map((feature, i) => (
                 <li key={i} className="flex items-center gap-3 text-base md:text-lg text-gray-300">
                   <div className="w-2 h-2 bg-neon-cortex-blue rounded-full flex-shrink-0" />
