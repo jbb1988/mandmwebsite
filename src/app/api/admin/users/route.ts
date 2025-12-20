@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { verifyAdmin, verifyAdminWithRateLimit } from '@/lib/admin-auth';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
-
-// Helper to verify admin password
-function verifyAdmin(request: NextRequest): boolean {
-  const authHeader = request.headers.get('X-Admin-Password');
-  return authHeader === process.env.ADMIN_DASHBOARD_PASSWORD;
-}
 
 // Basic user fields returned in list query
 interface UserListItem {
@@ -184,10 +179,11 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST: Get user details or update user
+// POST: Get user details or update user (rate limited)
 export async function POST(request: NextRequest) {
-  if (!verifyAdmin(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const auth = await verifyAdminWithRateLimit(request);
+  if (!auth.authorized) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
   try {

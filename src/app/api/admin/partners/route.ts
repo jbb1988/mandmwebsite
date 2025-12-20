@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { verifyAdmin, verifyAdminWithRateLimit } from '@/lib/admin-auth';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -9,12 +10,6 @@ const supabase = createClient(
 const TOLT_API_KEY = process.env.TOLT_API_KEY;
 const TOLT_PROGRAM_ID = process.env.TOLT_PROGRAM_ID;
 const TOLT_API_BASE = 'https://api.tolt.com/v1';
-
-// Helper to verify admin password
-function verifyAdmin(request: NextRequest): boolean {
-  const authHeader = request.headers.get('X-Admin-Password');
-  return authHeader === process.env.ADMIN_DASHBOARD_PASSWORD;
-}
 
 // Fetch partner status from Tolt with email verification
 async function getToltPartnerStatus(
@@ -176,10 +171,11 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// DELETE: Remove a partner from Supabase (and optionally Tolt)
+// DELETE: Remove a partner from Supabase (and optionally Tolt) - rate limited
 export async function DELETE(request: NextRequest) {
-  if (!verifyAdmin(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const auth = await verifyAdminWithRateLimit(request);
+  if (!auth.authorized) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
   try {
@@ -258,10 +254,11 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-// POST: Sync partner with Tolt or create new partner
+// POST: Sync partner with Tolt or create new partner - rate limited
 export async function POST(request: NextRequest) {
-  if (!verifyAdmin(request)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const auth = await verifyAdminWithRateLimit(request);
+  if (!auth.authorized) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
   try {

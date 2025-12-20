@@ -1,21 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { verifyAdmin, verifyAdminWithRateLimit } from '@/lib/admin-auth';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
-
-function verifyAdmin(request: NextRequest): boolean {
-  const password = request.headers.get('X-Admin-Password');
-  return password === ADMIN_PASSWORD;
-}
-
 export async function POST(request: NextRequest) {
-  if (!verifyAdmin(request)) {
-    return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
+  // Rate limit POST requests (grants trial - critical endpoint)
+  const auth = await verifyAdminWithRateLimit(request);
+  if (!auth.authorized) {
+    return NextResponse.json({ success: false, message: auth.error }, { status: auth.status });
   }
 
   try {
@@ -190,6 +186,7 @@ export async function POST(request: NextRequest) {
 
 // GET - Check trial status for a user
 export async function GET(request: NextRequest) {
+  // Read-only endpoint - use simple auth check
   if (!verifyAdmin(request)) {
     return NextResponse.json({ success: false, message: 'Unauthorized' }, { status: 401 });
   }
