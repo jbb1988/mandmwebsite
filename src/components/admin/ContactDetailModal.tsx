@@ -62,6 +62,8 @@ export function ContactDetailModal({
   // Editable fields state
   const [notes, setNotes] = useState(contact.notes || '');
   const [isEditingNotes, setIsEditingNotes] = useState(false);
+  const [email, setEmail] = useState(contact.contact_email || '');
+  const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [responseStatus, setResponseStatus] = useState(contact.response_status || 'not_contacted');
   const [showResponseDropdown, setShowResponseDropdown] = useState(false);
   const [priority, setPriority] = useState(contact.priority_score || 3);
@@ -70,10 +72,12 @@ export function ContactDetailModal({
   // Sync state when contact changes
   useEffect(() => {
     setNotes(contact.notes || '');
+    setEmail(contact.contact_email || '');
     setResponseStatus(contact.response_status || 'not_contacted');
     setPriority(contact.priority_score || 3);
     setNextFollowUp(contact.next_follow_up);
     setIsEditingNotes(false);
+    setIsEditingEmail(false);
   }, [contact]);
 
   const timelineEvents = buildTimelineEvents({
@@ -139,6 +143,17 @@ export function ContactDetailModal({
     try {
       await onUpdate(contact.id, { notes });
       setIsEditingNotes(false);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Save email
+  const handleSaveEmail = async () => {
+    setIsUpdating(true);
+    try {
+      await onUpdate(contact.id, { contact_email: email });
+      setIsEditingEmail(false);
     } finally {
       setIsUpdating(false);
     }
@@ -289,16 +304,54 @@ export function ContactDetailModal({
                 <span>{contact.state}</span>
               </div>
             )}
-            {contact.contact_email && (
-              <div className="flex items-center gap-2 text-white/60">
-                <Mail className="w-4 h-4" />
-                <span className="truncate">{contact.contact_email}</span>
-              </div>
-            )}
             {contact.days_since_dm !== null && (
               <div className="flex items-center gap-2 text-white/60">
                 <Clock className="w-4 h-4" />
                 <span>DM&apos;d {contact.days_since_dm}d ago</span>
+              </div>
+            )}
+          </div>
+
+          {/* Editable Email */}
+          <div className="p-3 bg-white/5 rounded-xl">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs text-white/40 uppercase tracking-wider">Contact Email</p>
+              {!isEditingEmail ? (
+                <button
+                  onClick={() => setIsEditingEmail(true)}
+                  className="p-1 hover:bg-white/10 rounded-lg transition-colors"
+                  title="Edit email"
+                >
+                  <Edit2 className="w-3 h-3 text-white/40" />
+                </button>
+              ) : (
+                <button
+                  onClick={handleSaveEmail}
+                  disabled={isUpdating}
+                  className="flex items-center gap-1 px-2 py-1 bg-emerald-500/20 hover:bg-emerald-500/30 rounded-lg text-xs text-emerald-400 transition-colors disabled:opacity-50"
+                >
+                  <Save className="w-3 h-3" />
+                  Save
+                </button>
+              )}
+            </div>
+            {isEditingEmail ? (
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter contact email..."
+                className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-sm text-white/70 placeholder:text-white/30 focus:outline-none focus:border-cyan-500/50"
+                autoFocus
+              />
+            ) : (
+              <div className="flex items-center gap-2 text-white/70 min-h-[24px]">
+                <Mail className="w-4 h-4 text-white/40" />
+                {email ? (
+                  <span>{email}</span>
+                ) : (
+                  <span className="text-white/30 italic">No email. Click edit to add.</span>
+                )}
               </div>
             )}
           </div>
