@@ -1180,6 +1180,41 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
 
                     {/* Status & Actions */}
                     <div className="flex items-center gap-3">
+                      {/* Follow-up Date Indicator */}
+                      {(() => {
+                        const followUpDates = admins
+                          .map(a => a.next_follow_up)
+                          .filter(Boolean)
+                          .sort();
+                        const nextFollowUp = followUpDates[0];
+                        if (!nextFollowUp) return null;
+
+                        const followUpDate = new Date(nextFollowUp);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const diffDays = Math.ceil((followUpDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+                        let colorClass = 'bg-white/10 text-white/50 border-white/20'; // Future
+                        if (diffDays < 0) {
+                          colorClass = 'bg-red-500/20 text-red-400 border-red-500/30'; // Overdue
+                        } else if (diffDays === 0) {
+                          colorClass = 'bg-orange-500/20 text-orange-400 border-orange-500/30'; // Today
+                        } else if (diffDays <= 2) {
+                          colorClass = 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'; // Soon
+                        }
+
+                        const displayDate = followUpDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+                        return (
+                          <span
+                            className={`px-2 py-1 rounded-lg text-xs font-medium border ${colorClass}`}
+                            title={`Follow-up: ${followUpDate.toLocaleDateString()}`}
+                          >
+                            <Calendar className="w-3 h-3 inline mr-1" />
+                            {diffDays < 0 ? `${Math.abs(diffDays)}d ago` : diffDays === 0 ? 'Today' : displayDate}
+                          </span>
+                        );
+                      })()}
                       <StatusBadge status={page.outreach_status} />
                       <ChevronDown className={`w-5 h-5 text-white/30 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                     </div>
