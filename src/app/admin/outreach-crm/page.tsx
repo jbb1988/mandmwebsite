@@ -112,7 +112,7 @@ function OutreachCRMContent() {
   const [sortField, setSortField] = useState<SortField>('priority');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [toast, setToast] = useState<{ message: string; type: ToastType } | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: ToastType; action?: { label: string; onClick: () => void } } | null>(null);
 
   const fetchPipeline = useCallback(async () => {
     if (!password) return;
@@ -335,8 +335,8 @@ function OutreachCRMContent() {
   // Get best performing template for quick copy
   const bestTemplate = templates.length > 0 ? templates[0] : null;
 
-  // Handle quick copy of template for a contact
-  const handleQuickCopy = async (contact: UnifiedContact, e: React.MouseEvent) => {
+  // Handle quick copy of template for a contact (with Open Profile action)
+  const handleCopyTemplate = async (contact: UnifiedContact, e: React.MouseEvent) => {
     e.stopPropagation();
     if (!bestTemplate || !password) return;
 
@@ -355,9 +355,80 @@ function OutreachCRMContent() {
         response_status: 'dm_sent',
         template_used: bestTemplate.name,
       });
-      setToast({ message: `Template copied! "${bestTemplate.name}" marked as sent.`, type: 'success' });
+      // Show toast with Open Profile action button
+      setToast({
+        message: `Template copied! Marked as sent.`,
+        type: 'success',
+        action: {
+          label: 'Open Profile',
+          onClick: () => window.open(contact.profile_url, '_blank'),
+        },
+      });
     } catch {
       setToast({ message: 'Copied but failed to update status', type: 'error' });
+    }
+  };
+
+  // Inline action: Mark as DM Sent (without copying template)
+  const handleMarkSent = async (contact: UnifiedContact, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!password) return;
+
+    try {
+      await handleUpdateContact(contact.id, {
+        dm_sent_at: new Date().toISOString(),
+        response_status: 'dm_sent',
+      });
+      setToast({ message: `${contact.name} marked as DM sent`, type: 'success' });
+    } catch {
+      setToast({ message: 'Failed to update status', type: 'error' });
+    }
+  };
+
+  // Inline action: Mark as Responded
+  const handleMarkResponded = async (contact: UnifiedContact, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!password) return;
+
+    try {
+      await handleUpdateContact(contact.id, {
+        response_status: 'responded',
+      });
+      setToast({ message: `${contact.name} marked as responded`, type: 'success' });
+    } catch {
+      setToast({ message: 'Failed to update status', type: 'error' });
+    }
+  };
+
+  // Inline action: Grant Trial
+  const handleGrantTrial = async (contact: UnifiedContact, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!password) return;
+
+    try {
+      await handleUpdateContact(contact.id, {
+        trial_granted_at: new Date().toISOString(),
+        response_status: 'trial_requested',
+      });
+      setToast({ message: `Trial granted to ${contact.name}`, type: 'success' });
+    } catch {
+      setToast({ message: 'Failed to grant trial', type: 'error' });
+    }
+  };
+
+  // Inline action: Mark as Won (Partner)
+  const handleMarkWon = async (contact: UnifiedContact, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!password) return;
+
+    try {
+      await handleUpdateContact(contact.id, {
+        partner_signed_up: true,
+        partner_signed_up_at: new Date().toISOString(),
+      });
+      setToast({ message: `${contact.name} is now a partner!`, type: 'success' });
+    } catch {
+      setToast({ message: 'Failed to update partner status', type: 'error' });
     }
   };
 
@@ -422,7 +493,7 @@ function OutreachCRMContent() {
                       </span>
                       {contact.stage === 'not_contacted' && bestTemplate && (
                         <button
-                          onClick={(e) => handleQuickCopy(contact, e)}
+                          onClick={(e) => handleCopyTemplate(contact, e)}
                           className="p-1.5 bg-cyan-500/20 hover:bg-cyan-500/30 rounded-lg transition-colors"
                           title={`Copy "${bestTemplate.name}" template`}
                         >
@@ -705,7 +776,11 @@ function OutreachCRMContent() {
                                   key={contact.id}
                                   {...contact}
                                   onClick={() => setSelectedContact(contact)}
-                                  onQuickCopy={(e) => handleQuickCopy(contact, e)}
+                                  onCopyTemplate={(e) => handleCopyTemplate(contact, e)}
+                                  onMarkSent={(e) => handleMarkSent(contact, e)}
+                                  onMarkResponded={(e) => handleMarkResponded(contact, e)}
+                                  onGrantTrial={(e) => handleGrantTrial(contact, e)}
+                                  onMarkWon={(e) => handleMarkWon(contact, e)}
                                   hasTemplate={!!bestTemplate}
                                 />
                               ))}
@@ -728,7 +803,11 @@ function OutreachCRMContent() {
                               key={contact.id}
                               {...contact}
                               onClick={() => setSelectedContact(contact)}
-                              onQuickCopy={(e) => handleQuickCopy(contact, e)}
+                              onCopyTemplate={(e) => handleCopyTemplate(contact, e)}
+                              onMarkSent={(e) => handleMarkSent(contact, e)}
+                              onMarkResponded={(e) => handleMarkResponded(contact, e)}
+                              onGrantTrial={(e) => handleGrantTrial(contact, e)}
+                              onMarkWon={(e) => handleMarkWon(contact, e)}
                               hasTemplate={!!bestTemplate}
                             />
                           ))}
@@ -749,7 +828,11 @@ function OutreachCRMContent() {
                     key={contact.id}
                     {...contact}
                     onClick={() => setSelectedContact(contact)}
-                    onQuickCopy={(e) => handleQuickCopy(contact, e)}
+                    onCopyTemplate={(e) => handleCopyTemplate(contact, e)}
+                    onMarkSent={(e) => handleMarkSent(contact, e)}
+                    onMarkResponded={(e) => handleMarkResponded(contact, e)}
+                    onGrantTrial={(e) => handleGrantTrial(contact, e)}
+                    onMarkWon={(e) => handleMarkWon(contact, e)}
                     hasTemplate={!!bestTemplate}
                   />
                 ))}
@@ -829,6 +912,8 @@ function OutreachCRMContent() {
               message={toast.message}
               type={toast.type}
               onClose={() => setToast(null)}
+              action={toast.action}
+              duration={toast.action ? 5000 : 3000}
             />
           )}
         </div>

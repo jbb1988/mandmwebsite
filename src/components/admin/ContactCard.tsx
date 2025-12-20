@@ -2,7 +2,20 @@
 
 import React from 'react';
 import { Card } from './shared/Card';
-import { Users, Twitter, MessageCircle, CheckCircle, AlertCircle, Clock, Star, Copy } from 'lucide-react';
+import {
+  Users,
+  Twitter,
+  MessageCircle,
+  CheckCircle,
+  AlertCircle,
+  Clock,
+  Star,
+  Copy,
+  Send,
+  Gift,
+  Trophy,
+  ExternalLink,
+} from 'lucide-react';
 
 export interface ContactCardProps {
   id: string;
@@ -23,7 +36,12 @@ export interface ContactCardProps {
   template_used: string | null;
   priority_score: number;
   onClick?: () => void;
-  onQuickCopy?: (e: React.MouseEvent) => void;
+  // Inline action callbacks
+  onCopyTemplate?: (e: React.MouseEvent) => void;
+  onMarkSent?: (e: React.MouseEvent) => void;
+  onMarkResponded?: (e: React.MouseEvent) => void;
+  onGrantTrial?: (e: React.MouseEvent) => void;
+  onMarkWon?: (e: React.MouseEvent) => void;
   hasTemplate?: boolean;
 }
 
@@ -46,6 +64,7 @@ export function ContactCard({
   name,
   handle,
   group_name,
+  profile_url,
   follower_count,
   member_count,
   stage,
@@ -54,18 +73,60 @@ export function ContactCard({
   template_used,
   priority_score,
   onClick,
-  onQuickCopy,
+  onCopyTemplate,
+  onMarkSent,
+  onMarkResponded,
+  onGrantTrial,
+  onMarkWon,
   hasTemplate,
 }: ContactCardProps) {
   const badge = stageBadges[stage];
 
+  // Inline action button component
+  const ActionButton = ({
+    icon: Icon,
+    label,
+    onClick: handleClick,
+    color,
+    disabled,
+  }: {
+    icon: React.ElementType;
+    label: string;
+    onClick?: (e: React.MouseEvent) => void;
+    color: 'cyan' | 'emerald' | 'purple' | 'amber' | 'white';
+    disabled?: boolean;
+  }) => {
+    const colorClasses = {
+      cyan: 'bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400',
+      emerald: 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400',
+      purple: 'bg-purple-500/20 hover:bg-purple-500/30 text-purple-400',
+      amber: 'bg-amber-500/20 hover:bg-amber-500/30 text-amber-400',
+      white: 'bg-white/10 hover:bg-white/20 text-white/60',
+    };
+
+    return (
+      <button
+        onClick={handleClick}
+        disabled={disabled}
+        className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${colorClasses[color]}`}
+        title={label}
+      >
+        <Icon className="w-3 h-3" />
+        <span className="hidden sm:inline">{label}</span>
+      </button>
+    );
+  };
+
   return (
     <Card
       variant="default"
-      className={`p-3 cursor-pointer hover:bg-white/5 transition-all border-l-2 ${stageColors[stage]}`}
-      onClick={onClick}
+      className={`p-3 hover:bg-white/5 transition-all border-l-2 ${stageColors[stage]}`}
     >
-      <div className="flex items-start justify-between gap-2">
+      {/* Main content row - clickable to open modal */}
+      <div
+        className="flex items-start justify-between gap-2 cursor-pointer"
+        onClick={onClick}
+      >
         {/* Left side - Icon and info */}
         <div className="flex items-start gap-2 min-w-0 flex-1">
           <div className={`p-1.5 rounded-lg shrink-0 ${source === 'facebook' ? 'bg-blue-500/20' : 'bg-sky-500/20'}`}>
@@ -95,35 +156,23 @@ export function ContactCard({
           </div>
         </div>
 
-        {/* Right side - Stage badge and actions */}
-        <div className="flex items-center gap-2 shrink-0">
-          {/* Quick Copy button for not contacted */}
-          {stage === 'not_contacted' && onQuickCopy && hasTemplate && (
-            <button
-              onClick={onQuickCopy}
-              className="p-2 bg-cyan-500/20 hover:bg-cyan-500/30 rounded-xl transition-colors"
-              title="Copy template & mark as sent"
-            >
-              <Copy className="w-4 h-4 text-cyan-400" />
-            </button>
+        {/* Right side - Stage badge */}
+        <div className="flex flex-col items-end gap-1 shrink-0">
+          <span className={`px-2 py-0.5 rounded-full text-xs ${badge.bg} ${badge.text}`}>
+            {badge.label}
+          </span>
+          {/* Priority stars */}
+          {priority_score >= 4 && (
+            <div className="flex items-center gap-0.5">
+              {Array.from({ length: Math.min(priority_score, 5) }).map((_, i) => (
+                <Star key={i} className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
+              ))}
+            </div>
           )}
-          <div className="flex flex-col items-end gap-1">
-            <span className={`px-2 py-0.5 rounded-full text-xs ${badge.bg} ${badge.text}`}>
-              {badge.label}
-            </span>
-            {/* Priority stars */}
-            {priority_score >= 4 && (
-              <div className="flex items-center gap-0.5">
-                {Array.from({ length: Math.min(priority_score, 5) }).map((_, i) => (
-                  <Star key={i} className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
-                ))}
-              </div>
-            )}
-          </div>
         </div>
       </div>
 
-      {/* Bottom info row */}
+      {/* Status info row */}
       <div className="flex items-center gap-3 mt-2 pt-2 border-t border-white/5">
         {days_since_dm !== null && (
           <div className="flex items-center gap-1 text-xs text-white/40">
@@ -148,6 +197,92 @@ export function ContactCard({
             <Clock className="w-3 h-3" />
             <span>Waiting to contact</span>
           </div>
+        )}
+      </div>
+
+      {/* Inline Action Bar */}
+      <div className="flex items-center gap-2 mt-2 pt-2 border-t border-white/5">
+        {/* Stage: not_contacted */}
+        {stage === 'not_contacted' && (
+          <>
+            <ActionButton
+              icon={Copy}
+              label="Copy DM"
+              onClick={onCopyTemplate}
+              color="cyan"
+              disabled={!hasTemplate}
+            />
+            <ActionButton
+              icon={Send}
+              label="Mark Sent"
+              onClick={onMarkSent}
+              color="cyan"
+            />
+          </>
+        )}
+
+        {/* Stage: dm_sent */}
+        {stage === 'dm_sent' && (
+          <>
+            <ActionButton
+              icon={MessageCircle}
+              label="Responded"
+              onClick={onMarkResponded}
+              color="emerald"
+            />
+            <ActionButton
+              icon={Gift}
+              label="Grant Trial"
+              onClick={onGrantTrial}
+              color="purple"
+            />
+          </>
+        )}
+
+        {/* Stage: responded */}
+        {stage === 'responded' && (
+          <>
+            <ActionButton
+              icon={Gift}
+              label="Grant Trial"
+              onClick={onGrantTrial}
+              color="purple"
+            />
+            <ActionButton
+              icon={Trophy}
+              label="Mark Won"
+              onClick={onMarkWon}
+              color="amber"
+            />
+          </>
+        )}
+
+        {/* Stage: won - just view profile */}
+        {stage === 'won' && (
+          <a
+            href={profile_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium bg-white/10 hover:bg-white/20 text-white/60 transition-colors"
+          >
+            <ExternalLink className="w-3 h-3" />
+            <span className="hidden sm:inline">View Profile</span>
+          </a>
+        )}
+
+        {/* Open profile link for all stages */}
+        {stage !== 'won' && (
+          <a
+            href={profile_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs bg-white/5 hover:bg-white/10 text-white/40 transition-colors ml-auto"
+            title="Open profile"
+          >
+            <ExternalLink className="w-3 h-3" />
+          </a>
         )}
       </div>
     </Card>

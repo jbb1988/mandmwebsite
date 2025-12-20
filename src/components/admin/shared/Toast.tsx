@@ -10,6 +10,10 @@ export interface ToastProps {
   type: ToastType;
   onClose?: () => void;
   duration?: number; // ms, 0 for no auto-close
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
 }
 
 const typeConfig: Record<ToastType, { icon: typeof Check; className: string }> = {
@@ -31,7 +35,7 @@ const typeConfig: Record<ToastType, { icon: typeof Check; className: string }> =
   },
 };
 
-export function Toast({ message, type, onClose, duration = 3000 }: ToastProps) {
+export function Toast({ message, type, onClose, duration = 3000, action }: ToastProps) {
   const config = typeConfig[type];
   const Icon = config.icon;
 
@@ -46,6 +50,14 @@ export function Toast({ message, type, onClose, duration = 3000 }: ToastProps) {
     <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl flex items-center gap-2 shadow-lg ${config.className}`}>
       <Icon className="w-4 h-4 flex-shrink-0" />
       <span className="text-sm">{message}</span>
+      {action && (
+        <button
+          onClick={action.onClick}
+          className="ml-2 px-3 py-1 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors"
+        >
+          {action.label}
+        </button>
+      )}
       {onClose && (
         <button
           onClick={onClose}
