@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import AdminGate from '@/components/AdminGate';
 import AdminNav from '@/components/AdminNav';
+import { Card, StatCard, TabButton } from '@/components/admin/shared';
 import {
   Users, Plus, RefreshCw, Search, MapPin, ExternalLink, MessageCircle,
   CheckCircle, Clock, XCircle, Send, FileText, ChevronDown, ChevronUp,
@@ -156,103 +157,6 @@ const ADMIN_RESPONSE_STATUS = {
   no_response: { label: 'No Response', color: 'orange' },
 };
 
-// Sophisticated Card Component
-function Card({ children, className = '', variant = 'default', glow = false }: {
-  children: React.ReactNode;
-  className?: string;
-  variant?: 'default' | 'elevated' | 'bordered';
-  glow?: boolean;
-}) {
-  const baseClasses = 'rounded-2xl transition-all duration-200';
-  const variantClasses = {
-    default: 'bg-[#0F1123]/80 border border-white/[0.08]',
-    elevated: 'bg-gradient-to-br from-[#0F1123] to-[#1B1F39] border border-white/[0.12] shadow-xl',
-    bordered: 'bg-[#0A0B14]/60 border-2 border-white/[0.1]',
-  };
-  const glowClass = glow ? 'shadow-lg shadow-blue-500/10' : '';
-
-  return (
-    <div className={`${baseClasses} ${variantClasses[variant]} ${glowClass} ${className}`}>
-      {children}
-    </div>
-  );
-}
-
-// Stat Card Component
-function StatCard({ value, label, icon: Icon, color = 'white', highlight = false }: {
-  value: number | string;
-  label: string;
-  icon?: typeof Clock;
-  color?: string;
-  highlight?: boolean;
-}) {
-  const colorClasses: Record<string, string> = {
-    white: 'text-white',
-    gray: 'text-gray-400',
-    blue: 'text-blue-400',
-    green: 'text-emerald-400',
-    red: 'text-red-400',
-    purple: 'text-purple-400',
-    cyan: 'text-cyan-400',
-    amber: 'text-amber-400',
-  };
-
-  return (
-    <Card variant={highlight ? 'elevated' : 'default'} className="p-4">
-      <div className="text-center">
-        {Icon && <Icon className={`w-5 h-5 ${colorClasses[color]} mx-auto mb-2 opacity-80`} />}
-        <p className={`text-2xl font-bold ${colorClasses[color]}`}>{value}</p>
-        <p className="text-xs text-white/50 mt-1">{label}</p>
-      </div>
-    </Card>
-  );
-}
-
-// Tab Button Component
-function TabButton({
-  active,
-  onClick,
-  icon: Icon,
-  label,
-  color = 'blue',
-  badge
-}: {
-  active: boolean;
-  onClick: () => void;
-  icon: typeof Clock;
-  label: string;
-  color?: string;
-  badge?: number;
-}) {
-  const colorMap: Record<string, { bg: string; border: string; text: string }> = {
-    blue: { bg: 'bg-blue-500/15', border: 'border-blue-500/40', text: 'text-blue-400' },
-    red: { bg: 'bg-red-500/15', border: 'border-red-500/40', text: 'text-red-400' },
-    green: { bg: 'bg-emerald-500/15', border: 'border-emerald-500/40', text: 'text-emerald-400' },
-    cyan: { bg: 'bg-cyan-500/15', border: 'border-cyan-500/40', text: 'text-cyan-400' },
-    orange: { bg: 'bg-orange-500/15', border: 'border-orange-500/40', text: 'text-orange-400' },
-  };
-
-  const colors = colorMap[color] || colorMap.blue;
-
-  return (
-    <button
-      onClick={onClick}
-      className={`relative flex items-center gap-2 px-5 py-3 rounded-xl font-medium transition-all text-sm ${
-        active
-          ? `${colors.bg} border ${colors.border} ${colors.text}`
-          : 'bg-white/[0.03] border border-white/[0.06] text-white/60 hover:bg-white/[0.06] hover:text-white/80'
-      }`}
-    >
-      <Icon className="w-5 h-5" />
-      <span className="hidden sm:inline">{label}</span>
-      {badge !== undefined && badge > 0 && (
-        <span className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-lg shadow-red-500/30">
-          {badge}
-        </span>
-      )}
-    </button>
-  );
-}
 
 // Input Component
 function Input({ label, required, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { label?: string; required?: boolean }) {
@@ -1361,6 +1265,8 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
                                 admin={admin}
                                 pageId={page.id}
                                 templates={templates}
+                                isMember={page.is_member}
+                                pageName={page.page_name}
                                 onEdit={() => {
                                   setEditingAdmin({ admin, pageId: page.id });
                                   setAdminForm({ name: admin.admin_name, profile_url: admin.admin_profile_url || '', email: admin.admin_email || '' });
@@ -1893,11 +1799,235 @@ function PartnersTab({ onUpdate }: { onUpdate: () => void }) {
   );
 }
 
+// Template Selector Modal - Full-screen modal for better template selection
+function TemplateModal({
+  isOpen,
+  onClose,
+  templates,
+  adminName,
+  pageName,
+  isMember,
+  onSelectTemplate,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+  templates: Template[];
+  adminName: string;
+  pageName: string;
+  isMember: boolean;
+  onSelectTemplate: (template: Template) => void;
+}) {
+  const [expandedTemplate, setExpandedTemplate] = useState<string | null>(null);
+  const [filter, setFilter] = useState<'recommended' | 'all' | 'follow_up'>('recommended');
+
+  if (!isOpen) return null;
+
+  const firstName = adminName.split(' ')[0];
+
+  // Sort templates: show non-member templates first if not a member, member templates first if member
+  const sortedTemplates = [...templates].sort((a, b) => {
+    const aIsNonMember = a.template_name.includes('non_member');
+    const bIsNonMember = b.template_name.includes('non_member');
+    const aIsFollowUp = a.template_type === 'follow_up';
+    const bIsFollowUp = b.template_type === 'follow_up';
+
+    // Follow-ups always at bottom unless filtering for them
+    if (filter !== 'follow_up') {
+      if (aIsFollowUp && !bIsFollowUp) return 1;
+      if (!aIsFollowUp && bIsFollowUp) return -1;
+    }
+
+    // Smart sorting based on membership
+    if (!isMember) {
+      // Not a member: non-member templates first
+      if (aIsNonMember && !bIsNonMember) return -1;
+      if (!aIsNonMember && bIsNonMember) return 1;
+    } else {
+      // Is a member: member templates first (non-member at bottom)
+      if (aIsNonMember && !bIsNonMember) return 1;
+      if (!aIsNonMember && bIsNonMember) return -1;
+    }
+
+    return a.template_name.localeCompare(b.template_name);
+  });
+
+  // Filter templates
+  const filteredTemplates = sortedTemplates.filter(t => {
+    if (filter === 'follow_up') return t.template_type === 'follow_up';
+    if (filter === 'recommended') {
+      // Show recommended based on membership status
+      if (!isMember) {
+        return t.template_name.includes('non_member') || t.template_type === 'initial';
+      }
+      return !t.template_name.includes('non_member') && t.template_type === 'initial';
+    }
+    return t.template_type !== 'follow_up'; // 'all' shows initial templates
+  });
+
+  const isRecommended = (template: Template) => {
+    if (!isMember) return template.template_name.includes('non_member');
+    return !template.template_name.includes('non_member') && template.template_type === 'initial';
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[200] flex items-center justify-center p-4" onClick={onClose}>
+      <div
+        className="bg-[#0F1123] border border-white/10 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="p-4 border-b border-white/10 flex-shrink-0">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-lg font-semibold text-white">Select DM Template</h2>
+            <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
+              <X className="w-5 h-5 text-white/60" />
+            </button>
+          </div>
+          <p className="text-sm text-white/50">
+            Sending to <span className="text-white font-medium">{firstName}</span> from <span className="text-white/70">{pageName}</span>
+          </p>
+
+          {/* Membership Status Alert */}
+          <div className={`mt-3 p-2 rounded-lg flex items-center gap-2 ${isMember ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-amber-500/10 border border-amber-500/20'}`}>
+            <Users className={`w-4 h-4 ${isMember ? 'text-emerald-400' : 'text-amber-400'}`} />
+            <span className={`text-sm ${isMember ? 'text-emerald-400' : 'text-amber-400'}`}>
+              {isMember ? 'You are a member of this group' : 'You are NOT a member - use non-member templates'}
+            </span>
+          </div>
+        </div>
+
+        {/* Filter Tabs */}
+        <div className="p-3 border-b border-white/10 flex gap-2 flex-shrink-0">
+          <button
+            onClick={() => setFilter('recommended')}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filter === 'recommended' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'text-white/50 hover:bg-white/5'}`}
+          >
+            Recommended
+          </button>
+          <button
+            onClick={() => setFilter('all')}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filter === 'all' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'text-white/50 hover:bg-white/5'}`}
+          >
+            All Initial
+          </button>
+          <button
+            onClick={() => setFilter('follow_up')}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filter === 'follow_up' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'text-white/50 hover:bg-white/5'}`}
+          >
+            Follow-up
+          </button>
+        </div>
+
+        {/* Template List */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {filteredTemplates.length === 0 ? (
+            <div className="text-center py-8 text-white/40">
+              No templates found for this filter
+            </div>
+          ) : (
+            filteredTemplates.map(template => {
+              const isExpanded = expandedTemplate === template.id;
+              const recommended = isRecommended(template);
+              const filledBody = template.body
+                .replace(/\{name\}/gi, firstName)
+                .replace(/\{\{name\}\}/gi, firstName)
+                .replace(/\{\{admin_name\}\}/gi, firstName);
+
+              return (
+                <div
+                  key={template.id}
+                  className={`rounded-xl border transition-all ${recommended ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-white/10 bg-white/[0.02]'}`}
+                >
+                  {/* Template Header */}
+                  <div
+                    className="p-3 flex items-center justify-between cursor-pointer hover:bg-white/5 rounded-t-xl"
+                    onClick={() => setExpandedTemplate(isExpanded ? null : template.id)}
+                  >
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      {recommended && (
+                        <span className="px-2 py-0.5 rounded text-xs bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex-shrink-0">
+                          Recommended
+                        </span>
+                      )}
+                      <span className="font-medium text-white truncate capitalize">
+                        {template.template_name.replace(/_/g, ' ')}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded text-xs flex-shrink-0 ${template.template_type === 'follow_up' ? 'bg-purple-500/20 text-purple-400' : 'bg-blue-500/20 text-blue-400'}`}>
+                        {template.template_type === 'follow_up' ? 'Follow-up' : 'Initial'}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onSelectTemplate(template);
+                        }}
+                        className="px-3 py-1.5 bg-blue-500/20 text-blue-400 border border-blue-500/30 rounded-lg text-sm font-medium hover:bg-blue-500/30 transition-colors flex items-center gap-1"
+                      >
+                        <Copy className="w-3 h-3" />
+                        Copy & Send
+                      </button>
+                      {isExpanded ? <ChevronUp className="w-4 h-4 text-white/40" /> : <ChevronDown className="w-4 h-4 text-white/40" />}
+                    </div>
+                  </div>
+
+                  {/* Collapsed Preview */}
+                  {!isExpanded && (
+                    <div className="px-3 pb-3">
+                      <p className="text-sm text-white/40 line-clamp-2">{filledBody.slice(0, 150)}...</p>
+                    </div>
+                  )}
+
+                  {/* Expanded Content */}
+                  {isExpanded && (
+                    <div className="px-3 pb-3 space-y-3">
+                      {/* Context Note */}
+                      {template.context_note && (
+                        <div className="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                          <p className="text-xs text-amber-400/90 font-medium mb-1">When to use:</p>
+                          <p className="text-xs text-amber-400/70">{template.context_note}</p>
+                        </div>
+                      )}
+
+                      {/* Full Template Text */}
+                      <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                        <p className="text-sm text-white/80 whitespace-pre-wrap">{filledBody}</p>
+                      </div>
+
+                      {/* Action Button */}
+                      <button
+                        onClick={() => onSelectTemplate(template)}
+                        className="w-full px-4 py-2.5 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg font-medium hover:bg-emerald-500/30 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Copy className="w-4 h-4" />
+                        Copy Template & Mark DM Sent
+                      </button>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="p-3 border-t border-white/10 flex-shrink-0">
+          <p className="text-xs text-white/40 text-center">
+            Template will be copied to clipboard and DM will be marked as sent with follow-up in 5 days
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Admin Card Component with Gift Button and DM Template Selector
 function AdminCard({
   admin,
   pageId,
   templates,
+  isMember,
+  pageName,
   onEdit,
   onDelete,
   onTrialGranted,
@@ -1906,21 +2036,24 @@ function AdminCard({
   admin: FBPageAdmin;
   pageId: string;
   templates: Template[];
+  isMember: boolean;
+  pageName: string;
   onEdit: () => void;
   onDelete: () => void;
   onTrialGranted: () => void;
   onAdminUpdated?: () => void;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const [showTemplates, setShowTemplates] = useState(false);
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [showDateEditor, setShowDateEditor] = useState(false);
-  const [copiedTemplateId, setCopiedTemplateId] = useState<string | null>(null);
+  const [copiedTemplate, setCopiedTemplate] = useState(false);
   const [trialEmail, setTrialEmail] = useState(admin.admin_email || '');
   const [grantingTrial, setGrantingTrial] = useState(false);
   const [trialMessage, setTrialMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [dmSentDate, setDmSentDate] = useState(admin.dm_sent_at ? admin.dm_sent_at.split('T')[0] : '');
   const [followUpDate, setFollowUpDate] = useState(admin.next_follow_up || '');
   const [notes, setNotes] = useState(admin.response_notes || '');
+  const [selectedTemplateForDate, setSelectedTemplateForDate] = useState(admin.template_used || '');
   const [savingDates, setSavingDates] = useState(false);
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
@@ -1930,16 +2063,16 @@ function AdminCard({
   const followUpUrgent = dmSentDaysAgo !== null && dmSentDaysAgo >= 7;
 
   // Copy template with admin name filled in AND mark DM as sent
-  const copyTemplateWithName = async (template: Template) => {
+  const handleTemplateSelect = async (template: Template) => {
     const firstName = admin.admin_name.split(' ')[0];
     const filledBody = template.body
       .replace(/\{name\}/gi, firstName)
       .replace(/\{\{name\}\}/gi, firstName)
       .replace(/\{\{admin_name\}\}/gi, firstName);
     navigator.clipboard.writeText(filledBody);
-    setCopiedTemplateId(template.id);
-    setTimeout(() => setCopiedTemplateId(null), 2000);
-    setShowTemplates(false);
+    setCopiedTemplate(true);
+    setTimeout(() => setCopiedTemplate(false), 2000);
+    setShowTemplateModal(false);
 
     // Mark DM as sent with template tracking
     try {
@@ -1993,6 +2126,11 @@ function AdminCard({
       // Handle notes
       if (notes !== admin.response_notes) {
         updates.response_notes = notes || null;
+      }
+
+      // Handle template used - track which template was used
+      if (selectedTemplateForDate && dmSentDate) {
+        updates.template_used = selectedTemplateForDate;
       }
 
       await fetch('/api/admin/fb-outreach/admins', {
@@ -2180,8 +2318,8 @@ function AdminCard({
                   DM sent {dmSentDaysAgo === 0 ? 'today' : `${dmSentDaysAgo}d ago`}
                 </span>
                 {admin.template_used && (
-                  <span className="text-white/30">
-                    • {admin.template_used.replace(/_/g, ' ')}
+                  <span className="text-blue-400/70 bg-blue-500/10 px-1.5 py-0.5 rounded">
+                    {admin.template_used.replace(/_/g, ' ')}
                   </span>
                 )}
                 {admin.next_follow_up && (
@@ -2194,53 +2332,33 @@ function AdminCard({
           </div>
         </div>
         <div className="flex items-center gap-1 relative">
-          {/* Send DM Button with Template Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setShowTemplates(!showTemplates)}
-              className={`p-2 rounded-lg transition-colors ${
-                showTemplates || copiedTemplateId
-                  ? 'bg-blue-500/20 text-blue-400'
-                  : 'hover:bg-blue-500/10 text-white/50 hover:text-blue-400'
-              }`}
-              title="Send DM - Select Template"
-            >
-              {copiedTemplateId ? (
-                <CheckCircle className="w-4 h-4 text-emerald-400" />
-              ) : (
-                <MessageCircle className="w-4 h-4" />
-              )}
-            </button>
-
-            {/* Template Dropdown */}
-            {showTemplates && templates.length > 0 && (
-              <div className="absolute right-0 top-full mt-1 w-96 bg-[#1B1F39] border border-white/10 rounded-xl shadow-xl z-50 max-h-[500px] overflow-y-auto">
-                <div className="p-3 text-xs text-white/50 border-b border-white/10 sticky top-0 bg-[#1B1F39]">
-                  <div className="font-medium text-white mb-1">Select DM Template for {admin.admin_name.split(' ')[0]}</div>
-                  <div className="text-white/40">Copying will also mark DM as sent</div>
-                </div>
-                {templates.map(template => (
-                  <button
-                    key={template.id}
-                    onClick={() => copyTemplateWithName(template)}
-                    className="w-full p-3 text-left hover:bg-white/5 border-b border-white/5 last:border-0 transition-colors"
-                  >
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="font-medium text-white text-sm capitalize">{template.template_name.replace(/_/g, ' ')}</p>
-                      <Copy className="w-3 h-3 text-white/30" />
-                    </div>
-                    {/* Context Note */}
-                    {template.context_note && (
-                      <div className="mb-2 p-2 rounded bg-amber-500/10 border border-amber-500/20">
-                        <p className="text-xs text-amber-400/90">{template.context_note}</p>
-                      </div>
-                    )}
-                    <p className="text-xs text-white/40 line-clamp-2">{template.body.slice(0, 120)}...</p>
-                  </button>
-                ))}
-              </div>
+          {/* Send DM Button - Opens Template Modal */}
+          <button
+            onClick={() => setShowTemplateModal(true)}
+            className={`p-2 rounded-lg transition-colors ${
+              copiedTemplate
+                ? 'bg-emerald-500/20 text-emerald-400'
+                : 'hover:bg-blue-500/10 text-white/50 hover:text-blue-400'
+            }`}
+            title="Send DM - Select Template"
+          >
+            {copiedTemplate ? (
+              <CheckCircle className="w-4 h-4 text-emerald-400" />
+            ) : (
+              <MessageCircle className="w-4 h-4" />
             )}
-          </div>
+          </button>
+
+          {/* Template Modal */}
+          <TemplateModal
+            isOpen={showTemplateModal}
+            onClose={() => setShowTemplateModal(false)}
+            templates={templates}
+            adminName={admin.admin_name}
+            pageName={pageName}
+            isMember={isMember}
+            onSelectTemplate={handleTemplateSelect}
+          />
 
           {/* Date Tracking Button */}
           <div className="relative">
@@ -2299,6 +2417,30 @@ function AdminCard({
                   </div>
                 </div>
 
+                {/* Template Used - Required when setting DM date */}
+                {dmSentDate && (
+                  <div className="mb-3">
+                    <label className="block text-xs text-white/50 mb-1">
+                      Template Used <span className="text-amber-400">*</span>
+                    </label>
+                    <select
+                      value={selectedTemplateForDate}
+                      onChange={(e) => setSelectedTemplateForDate(e.target.value)}
+                      className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:border-purple-500/50"
+                    >
+                      <option value="">Select template...</option>
+                      {templates.filter(t => t.template_type !== 'post').map(template => (
+                        <option key={template.id} value={template.template_name}>
+                          {template.template_name.replace(/_/g, ' ')}
+                        </option>
+                      ))}
+                    </select>
+                    {!selectedTemplateForDate && (
+                      <p className="text-xs text-amber-400/70 mt-1">Please select which template you used</p>
+                    )}
+                  </div>
+                )}
+
                 {/* Follow-up Date */}
                 <div className="mb-3">
                   <label className="block text-xs text-white/50 mb-1">Follow-up Date</label>
@@ -2336,19 +2478,22 @@ function AdminCard({
                 {/* Save Button */}
                 <button
                   onClick={saveDates}
-                  disabled={savingDates || (
+                  disabled={Boolean(savingDates || (
                     !dmSentDate && !followUpDate && !notes &&
                     !admin.dm_sent_at && !admin.next_follow_up
-                  )}
+                  ) || (dmSentDate && !selectedTemplateForDate))}
                   className="w-full px-3 py-2 bg-purple-500/20 text-purple-400 border border-purple-500/30 rounded-lg text-sm font-medium hover:bg-purple-500/30 transition-colors disabled:opacity-50"
                 >
-                  {savingDates ? 'Saving...' : 'Save'}
+                  {savingDates ? 'Saving...' : (dmSentDate && !selectedTemplateForDate ? 'Select Template First' : 'Save')}
                 </button>
 
                 {/* Current Status */}
                 {admin.dm_sent_at && (
-                  <div className="mt-3 pt-3 border-t border-white/10 text-xs text-white/50">
+                  <div className="mt-3 pt-3 border-t border-white/10 text-xs text-white/50 space-y-1">
                     <p>Sent: {new Date(admin.dm_sent_at).toLocaleDateString()}</p>
+                    {admin.template_used && (
+                      <p className="text-blue-400/70">Template: {admin.template_used.replace(/_/g, ' ')}</p>
+                    )}
                     {admin.next_follow_up && (
                       <p>Follow-up: {new Date(admin.next_follow_up).toLocaleDateString()}</p>
                     )}
@@ -2590,6 +2735,26 @@ function TrialGrantSection({
   );
 }
 
+interface TemplateStats {
+  name: string;
+  used: number;
+  responses: number;
+  conversions: number;
+  responseRate: number;
+  conversionRate: number;
+}
+
+interface TemplateStatsData {
+  stats: TemplateStats[];
+  totals: {
+    totalUsed: number;
+    totalResponses: number;
+    totalConversions: number;
+    overallResponseRate: number;
+    overallConversionRate: number;
+  };
+}
+
 function TemplatesTab() {
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
@@ -2598,17 +2763,26 @@ function TemplatesTab() {
   const [categoryFilter, setCategoryFilter] = useState<'all' | 'fb_group' | 'x_influencer'>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | 'initial' | 'post' | 'follow_up'>('all');
   const [showTips, setShowTips] = useState(false);
+  const [showStats, setShowStats] = useState(true);
+  const [templateStats, setTemplateStats] = useState<TemplateStatsData | null>(null);
   const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   useEffect(() => {
     const fetchTemplates = async () => {
       setLoading(true);
       try {
-        const response = await fetch('/api/admin/fb-outreach/templates', {
-          headers: { 'X-Admin-Password': adminPassword },
-        });
-        const data = await response.json();
-        if (data.templates) setTemplates(data.templates);
+        const [templatesRes, statsRes] = await Promise.all([
+          fetch('/api/admin/fb-outreach/templates', {
+            headers: { 'X-Admin-Password': adminPassword },
+          }),
+          fetch('/api/admin/fb-outreach/template-stats', {
+            headers: { 'X-Admin-Password': adminPassword },
+          }),
+        ]);
+        const templatesData = await templatesRes.json();
+        const statsData = await statsRes.json();
+        if (templatesData.templates) setTemplates(templatesData.templates);
+        if (statsData.success) setTemplateStats(statsData);
       } catch (error) {
         console.error('Error:', error);
       } finally {
@@ -2681,6 +2855,88 @@ function TemplatesTab() {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Template Performance Analytics - Collapsible */}
+      <div className="mb-6">
+        <button
+          onClick={() => setShowStats(!showStats)}
+          className="w-full flex items-center justify-between p-4 rounded-xl bg-gradient-to-r from-purple-500/10 to-blue-500/10 border border-purple-500/20 hover:border-purple-500/30 transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <span className="text-xl">📊</span>
+            <span className="font-medium text-purple-400">Template Performance</span>
+            {templateStats && (
+              <span className="text-xs text-white/40 hidden sm:inline">
+                {templateStats.totals.totalUsed} sent • {templateStats.totals.overallResponseRate}% response rate
+              </span>
+            )}
+          </div>
+          {showStats ? <ChevronUp className="w-5 h-5 text-purple-400" /> : <ChevronDown className="w-5 h-5 text-purple-400" />}
+        </button>
+
+        {showStats && templateStats && (
+          <div className="mt-3 p-5 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+            {/* Overview Stats */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+              <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20 text-center">
+                <p className="text-2xl font-bold text-blue-400">{templateStats.totals.totalUsed}</p>
+                <p className="text-xs text-white/50">Total DMs Sent</p>
+              </div>
+              <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-center">
+                <p className="text-2xl font-bold text-emerald-400">{templateStats.totals.totalResponses}</p>
+                <p className="text-xs text-white/50">Responses</p>
+              </div>
+              <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/20 text-center">
+                <p className="text-2xl font-bold text-purple-400">{templateStats.totals.overallResponseRate}%</p>
+                <p className="text-xs text-white/50">Response Rate</p>
+              </div>
+              <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-center">
+                <p className="text-2xl font-bold text-amber-400">{templateStats.totals.totalConversions}</p>
+                <p className="text-xs text-white/50">Conversions</p>
+              </div>
+            </div>
+
+            {/* Per-Template Stats */}
+            {templateStats.stats.length > 0 ? (
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold text-white/70 mb-3">Performance by Template</h4>
+                {templateStats.stats.map((stat) => (
+                  <div
+                    key={stat.name}
+                    className="flex items-center justify-between p-3 rounded-lg bg-white/[0.03] border border-white/[0.05] hover:bg-white/[0.05] transition-colors"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white truncate">
+                        {stat.name.replace(/_/g, ' ')}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-4 text-xs">
+                      <div className="text-center">
+                        <p className="font-bold text-blue-400">{stat.used}</p>
+                        <p className="text-white/40">sent</p>
+                      </div>
+                      <div className="text-center">
+                        <p className="font-bold text-emerald-400">{stat.responses}</p>
+                        <p className="text-white/40">replies</p>
+                      </div>
+                      <div className="text-center min-w-[50px]">
+                        <p className={`font-bold ${stat.responseRate >= 30 ? 'text-emerald-400' : stat.responseRate >= 15 ? 'text-amber-400' : 'text-white/60'}`}>
+                          {stat.responseRate}%
+                        </p>
+                        <p className="text-white/40">rate</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-white/40 text-sm py-4">
+                No template usage data yet. Templates will appear here once DMs are tracked.
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Strategy Tips - Collapsible */}

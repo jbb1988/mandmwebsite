@@ -3,96 +3,13 @@
 import { useState, useEffect, useCallback } from 'react';
 import AdminGate from '@/components/AdminGate';
 import AdminNav from '@/components/AdminNav';
+import { Card, StatCard, TabButton } from '@/components/admin/shared';
 import {
-  Twitter, BarChart3, Plus, Search, Users, MessageCircle,
+  BarChart3, Plus, Search, Users, MessageCircle,
   Handshake, TrendingUp, ExternalLink, Pencil, Trash2, X, Check,
-  ChevronDown, Send, AlertCircle, Clock, FileText, Copy, CheckCircle, RefreshCw,
+  Send, AlertCircle, Clock, FileText, Copy, CheckCircle, RefreshCw,
   Mail, Gift, Loader2
 } from 'lucide-react';
-
-// Card component
-function Card({ children, className = '', variant = 'default', glow = false }: {
-  children: React.ReactNode;
-  className?: string;
-  variant?: 'default' | 'elevated' | 'bordered';
-  glow?: boolean;
-}) {
-  const baseClasses = 'rounded-2xl transition-all duration-200';
-  const variantClasses = {
-    default: 'bg-[#0F1123]/80 border border-white/[0.08]',
-    elevated: 'bg-gradient-to-br from-[#0F1123] to-[#1B1F39] border border-white/[0.12] shadow-xl',
-    bordered: 'bg-[#0A0B14]/60 border-2 border-white/[0.1]',
-  };
-  const glowClass = glow ? 'shadow-lg shadow-cyan-500/10' : '';
-
-  return (
-    <div className={`${baseClasses} ${variantClasses[variant]} ${glowClass} ${className}`}>
-      {children}
-    </div>
-  );
-}
-
-// Stat card
-function StatCard({ value, label, icon: Icon, color = 'white' }: {
-  value: number | string;
-  label: string;
-  icon?: typeof Twitter;
-  color?: string;
-}) {
-  const colorClasses: Record<string, string> = {
-    white: 'text-white',
-    cyan: 'text-cyan-400',
-    green: 'text-emerald-400',
-    orange: 'text-orange-400',
-    purple: 'text-purple-400',
-    blue: 'text-blue-400',
-  };
-
-  return (
-    <Card variant="elevated" className="p-4">
-      <div className="text-center">
-        {Icon && <Icon className={`w-5 h-5 ${colorClasses[color]} mx-auto mb-2`} />}
-        <p className={`text-2xl font-bold ${colorClasses[color]}`}>{value}</p>
-        <p className="text-xs text-white/50 mt-1">{label}</p>
-      </div>
-    </Card>
-  );
-}
-
-// Tab button
-function TabButton({ active, onClick, icon: Icon, label, color = 'cyan', badge }: {
-  active: boolean;
-  onClick: () => void;
-  icon: typeof Twitter;
-  label: string;
-  color?: string;
-  badge?: number;
-}) {
-  const colorMap: Record<string, string> = {
-    cyan: 'bg-cyan-500/20 text-cyan-400 border-cyan-500/50',
-    green: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50',
-    orange: 'bg-orange-500/20 text-orange-400 border-orange-500/50',
-  };
-
-  return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all ${
-        active
-          ? colorMap[color]
-          : 'bg-white/5 text-white/60 border-white/10 hover:bg-white/10'
-      }`}
-    >
-      <Icon className="w-4 h-4" />
-      <span className="text-sm font-medium">{label}</span>
-      {badge !== undefined && badge > 0 && (
-        <span className={`px-2 py-0.5 rounded-full text-xs ${active ? 'bg-white/20' : 'bg-white/10'}`}>
-          {badge}
-        </span>
-      )}
-    </button>
-  );
-}
 
 interface XTarget {
   id: string;
