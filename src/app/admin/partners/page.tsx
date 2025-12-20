@@ -618,6 +618,7 @@ export default function AdminPartnersPage() {
             </div>
           </div>
         )}
+        </div>
       </div>
     </AdminGate>
   );

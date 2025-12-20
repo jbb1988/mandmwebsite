@@ -484,7 +484,6 @@ export default function AdminPromoCodesPage() {
             adminPassword={adminPassword}
           />
         )}
-          </div>
         </div>
       </div>
     </AdminGate>
