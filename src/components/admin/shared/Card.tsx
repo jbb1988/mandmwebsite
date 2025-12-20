@@ -8,6 +8,7 @@ export interface CardProps {
   variant?: 'default' | 'elevated' | 'bordered';
   glow?: boolean;
   glowColor?: 'cyan' | 'purple' | 'emerald' | 'orange';
+  onClick?: () => void;
 }
 
 export function Card({
@@ -15,7 +16,8 @@ export function Card({
   className = '',
   variant = 'default',
   glow = false,
-  glowColor = 'cyan'
+  glowColor = 'cyan',
+  onClick
 }: CardProps) {
   const baseClasses = 'rounded-2xl transition-all duration-200';
 
@@ -35,7 +37,10 @@ export function Card({
   const glowClass = glow ? glowClasses[glowColor] : '';
 
   return (
-    <div className={`${baseClasses} ${variantClasses[variant]} ${glowClass} ${className}`}>
+    <div
+      className={`${baseClasses} ${variantClasses[variant]} ${glowClass} ${className}`}
+      onClick={onClick}
+    >
       {children}
     </div>
   );
