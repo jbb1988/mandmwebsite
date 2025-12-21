@@ -97,6 +97,7 @@ export async function POST(request: NextRequest) {
     let whyExcited: string | undefined;
     let turnstileToken: string;
     let logoFile: File | null = null;
+    let source: string | undefined;
 
     const contentType = request.headers.get('content-type') || '';
 
@@ -112,6 +113,7 @@ export async function POST(request: NextRequest) {
       whyExcited = formData.get('whyExcited') as string || undefined;
       turnstileToken = formData.get('turnstileToken') as string || '';
       logoFile = formData.get('logo') as File | null;
+      source = formData.get('source') as string || undefined;
     } else {
       // Handle JSON submission (backwards compatibility)
       const body = await request.json();
@@ -123,6 +125,7 @@ export async function POST(request: NextRequest) {
       promotionChannel = body.promotionChannel;
       whyExcited = body.whyExcited;
       turnstileToken = body.turnstileToken || '';
+      source = body.source;
     }
 
     // Validate input
@@ -346,6 +349,7 @@ export async function POST(request: NextRequest) {
           referral_slug: referralSlug,
           referral_url: referralUrl,
           tolt_partner_id: toltPartnerId,
+          source: source || null,
         }, {
           onConflict: 'email',
         });

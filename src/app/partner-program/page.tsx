@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { Turnstile } from '@marsidev/react-turnstile';
 import { LiquidGlass } from '@/components/LiquidGlass';
@@ -26,7 +27,23 @@ export default function PartnerProgramPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [source, setSource] = useState<string>('');
   const logoInputRef = useRef<HTMLInputElement>(null);
+  const searchParams = useSearchParams();
+
+  // Pre-fill form from URL params (e.g., from D-BAT campaign)
+  useEffect(() => {
+    const typeParam = searchParams.get('type');
+    const sourceParam = searchParams.get('source');
+
+    if (sourceParam) {
+      setSource(sourceParam);
+    }
+
+    if (typeParam === 'facility' && !formData.promotionChannel) {
+      setFormData(prev => ({ ...prev, promotionChannel: 'facility' }));
+    }
+  }, [searchParams]);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -75,6 +92,9 @@ export default function PartnerProgramPage() {
       submitData.append('promotionChannel', formData.promotionChannel);
       submitData.append('whyExcited', formData.whyExcited);
       submitData.append('turnstileToken', captchaToken);
+      if (source) {
+        submitData.append('source', source);
+      }
 
       if (logoFile) {
         submitData.append('logo', logoFile);

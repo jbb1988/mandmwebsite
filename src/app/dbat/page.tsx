@@ -701,21 +701,21 @@ export default function DBatPartnerPage() {
                   Ready to Extend the Value of Every Lesson?
                 </h2>
                 <p className="text-xl text-white/80 mb-8 max-w-xl mx-auto">
-                  Email us to get started. We'll send your custom link and materials within minutes.
+                  Sign up takes 2 minutes. Get your referral link, QR code, and co-branded materials instantly.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
                   <a
-                    href="mailto:partners@mindandmuscle.ai?subject=D-BAT Partnership - {{facility_name}}&body=Hi Jeff,%0D%0A%0D%0AI'm interested in the Mind %26 Muscle partnership for my D-BAT location.%0D%0A%0D%0AFacility:%0D%0ACity/State:%0D%0AApprox. active athletes:%0D%0A%0D%0AThanks!"
+                    href="/partner-program?source=dbat&type=facility#apply"
                     className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange hover:from-neon-cortex-blue/90 hover:to-solar-surge-orange/90 text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl"
                   >
-                    <Mail className="w-5 h-5" />
-                    Get Started
+                    <ArrowRight className="w-5 h-5" />
+                    Become a Partner
                   </a>
                 </div>
 
                 <p className="text-white/40 text-sm">
-                  Questions first? Just reply to any email or reach out anytime.
+                  Questions? <a href="mailto:partners@mindandmuscle.ai" className="text-white/60 hover:text-white underline">partners@mindandmuscle.ai</a>
                 </p>
               </div>
             </div>
