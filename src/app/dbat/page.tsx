@@ -113,7 +113,7 @@ export default function DBatPartnerPage() {
   // What each stakeholder gets
   const stakeholders = [
     {
-      role: 'Facility Owners',
+      role: 'D-BAT Owners',
       icon: Building2,
       benefits: [
         'New recurring revenue stream',
@@ -173,17 +173,17 @@ export default function DBatPartnerPage() {
           <div className="text-center">
             <FadeInWhenVisible delay={0.2} direction="up">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6 leading-tight">
-                <span className="text-white">Your Lessons Don't End</span>
+                <span className="text-white">A Partnership Built for</span>
                 <br />
                 <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">
-                  When Athletes Leave the Facility.
+                  D-BAT Facility Owners.
                 </span>
               </h1>
             </FadeInWhenVisible>
 
             <FadeInWhenVisible delay={0.3} direction="up">
               <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto font-medium mb-4">
-                Mind & Muscle helps training facilities extend lesson impact, keep athletes engaged between visits, and increase long-term retention.
+                Mind & Muscle helps D-BAT locations extend lesson impact, keep athletes engaged between visits, and increase long-term retention.
               </p>
             </FadeInWhenVisible>
 
@@ -202,7 +202,7 @@ export default function DBatPartnerPage() {
                   rel="noopener noreferrer"
                   className="text-white/60 hover:text-white/80 text-sm underline underline-offset-4 transition-colors"
                 >
-                  15-minute walkthrough for training facilities
+                  15-minute walkthrough for D-BAT owners
                 </a>
               </div>
             </FadeInWhenVisible>
@@ -222,7 +222,7 @@ export default function DBatPartnerPage() {
               }}
             >
               <h2 className="text-2xl sm:text-3xl font-black text-white text-center mb-8">
-                Built for Training Facilities
+                Built for D-BAT Facilities
               </h2>
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[
