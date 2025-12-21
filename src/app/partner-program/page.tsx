@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import { Turnstile } from '@marsidev/react-turnstile';
@@ -9,6 +9,32 @@ import { LiquidButton } from '@/components/LiquidButton';
 import { GradientTextReveal } from '@/components/animations';
 import { EnhancedEarningsCalculator } from '@/components/partner/EnhancedEarningsCalculator';
 import { DollarSign, TrendingUp, Users, Gift, BarChart, Rocket, Check, Link2, Star, Zap, Target, Award, BookOpen, Sparkles, Clock, Trophy, ChevronDown, GraduationCap, Briefcase, UserPlus, Building2, Upload, X, ArrowRight, Video, Brain, Apple, LineChart } from 'lucide-react';
+
+// Component that handles URL search params
+function SearchParamsHandler({
+  onSourceChange,
+  onTypeChange
+}: {
+  onSourceChange: (source: string) => void;
+  onTypeChange: (type: string) => void;
+}) {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const typeParam = searchParams.get('type');
+    const sourceParam = searchParams.get('source');
+
+    if (sourceParam) {
+      onSourceChange(sourceParam);
+    }
+
+    if (typeParam) {
+      onTypeChange(typeParam);
+    }
+  }, [searchParams, onSourceChange, onTypeChange]);
+
+  return null;
+}
 
 export default function PartnerProgramPage() {
   const [formData, setFormData] = useState({
@@ -29,21 +55,17 @@ export default function PartnerProgramPage() {
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [source, setSource] = useState<string>('');
   const logoInputRef = useRef<HTMLInputElement>(null);
-  const searchParams = useSearchParams();
 
-  // Pre-fill form from URL params (e.g., from D-BAT campaign)
-  useEffect(() => {
-    const typeParam = searchParams.get('type');
-    const sourceParam = searchParams.get('source');
+  // Handlers for URL params (wrapped in Suspense below)
+  const handleSourceChange = React.useCallback((newSource: string) => {
+    setSource(newSource);
+  }, []);
 
-    if (sourceParam) {
-      setSource(sourceParam);
-    }
-
-    if (typeParam === 'facility' && !formData.promotionChannel) {
+  const handleTypeChange = React.useCallback((type: string) => {
+    if (type === 'facility' && !formData.promotionChannel) {
       setFormData(prev => ({ ...prev, promotionChannel: 'facility' }));
     }
-  }, [searchParams]);
+  }, [formData.promotionChannel]);
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -180,6 +202,14 @@ export default function PartnerProgramPage() {
 
   return (
     <div className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative">
+      {/* Handle URL search params (wrapped in Suspense for Next.js 15) */}
+      <Suspense fallback={null}>
+        <SearchParamsHandler
+          onSourceChange={handleSourceChange}
+          onTypeChange={handleTypeChange}
+        />
+      </Suspense>
+
       {/* Logo Watermark */}
       <div className="fixed inset-0 flex items-center justify-center opacity-[0.04] pointer-events-none z-0">
         <Image
