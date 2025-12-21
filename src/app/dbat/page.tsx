@@ -629,8 +629,8 @@ export default function DBatPartnerPage() {
                   <p className="text-center text-sm">
                     <span className="font-bold text-neon-cortex-blue">The insight:</span>{' '}
                     <span className="text-white/80">
-                      Retention + conversion is {Math.round((retentionValue + conversionValue) / annualCommission * 10) / 10}x the partner earnings.
-                      The app pays for itself through member retention alone.
+                      Retention + conversion value is {Math.round((retentionValue + conversionValue) / annualCommission * 10) / 10}x the partner earnings.
+                      Zero cost to you—athletes buy their own subscriptions.
                     </span>
                   </p>
                 </div>
