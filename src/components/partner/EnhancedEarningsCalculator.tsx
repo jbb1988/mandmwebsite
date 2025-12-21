@@ -103,7 +103,7 @@ export function EnhancedEarningsCalculator() {
         {inputMode === 'users' && (
           <div className="mb-6">
             <label className="block text-lg font-bold mb-3">
-              How many users can you reach?
+              How many active athletes do you reach each year?
             </label>
             <div className="flex items-center gap-4 mb-2">
               <input

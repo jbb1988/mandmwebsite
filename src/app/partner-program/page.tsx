@@ -203,7 +203,7 @@ export default function PartnerProgramPage() {
             onClick={() => scrollToSection('facilities')}
             className="!bg-gradient-to-r !from-solar-surge-orange !to-muscle-primary !shadow-[0_0_30px_rgba(251,146,60,0.6)] hover:!shadow-[0_0_40px_rgba(251,146,60,0.8)] !border-solar-surge-orange/60 !text-white !font-bold !text-lg"
           >
-            Explore Partner Options
+            Become a Partner
           </LiquidButton>
           <button
             onClick={() => scrollToSection('facilities')}
@@ -233,7 +233,7 @@ export default function PartnerProgramPage() {
                 <h3 className="text-2xl font-black mb-2">Training Facilities</h3>
                 <p className="text-text-secondary text-sm mb-4">Batting cages, academies, indoor facilities</p>
                 <span className="text-solar-surge-orange font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
-                  Learn More <ArrowRight className="w-4 h-4" />
+                  View Facility Use Case <ArrowRight className="w-4 h-4" />
                 </span>
               </div>
             </LiquidGlass>
@@ -252,13 +252,13 @@ export default function PartnerProgramPage() {
                 <h3 className="text-2xl font-black mb-2">Coaches & Instructors</h3>
                 <p className="text-text-secondary text-sm mb-4">Private coaches, team trainers</p>
                 <span className="text-neon-cortex-blue font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
-                  Learn More <ArrowRight className="w-4 h-4" />
+                  View Coach Use Case <ArrowRight className="w-4 h-4" />
                 </span>
               </div>
             </LiquidGlass>
           </button>
 
-          {/* Teams & Training Influencers Card */}
+          {/* Teams & Training Creators Card */}
           <button
             onClick={() => scrollToSection('teams')}
             className="text-left group"
@@ -268,10 +268,10 @@ export default function PartnerProgramPage() {
                 <div className="inline-block p-4 rounded-xl bg-solar-surge-orange/20 mb-4">
                   <Star className="w-10 h-10 text-solar-surge-orange" />
                 </div>
-                <h3 className="text-2xl font-black mb-2">Teams & Training Influencers</h3>
+                <h3 className="text-2xl font-black mb-2">Teams & Training Creators</h3>
                 <p className="text-text-secondary text-sm mb-4">Travel teams, orgs, training creators</p>
                 <span className="text-solar-surge-orange font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
-                  Learn More <ArrowRight className="w-4 h-4" />
+                  View Team Use Case <ArrowRight className="w-4 h-4" />
                 </span>
               </div>
             </LiquidGlass>
@@ -314,11 +314,11 @@ export default function PartnerProgramPage() {
             </span>
             <span className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-solar-surge-orange"></span>
-              Parents see continued progress outside scheduled sessions
+              Parents see progress outside paid sessions
             </span>
             <span className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-solar-surge-orange"></span>
-              Programs feel more complete, increasing repeat visits and renewals
+              Programs feel more complete, increasing repeat visits
             </span>
           </div>
         </div>
@@ -348,21 +348,13 @@ export default function PartnerProgramPage() {
           </div>
         </LiquidGlass>
 
-        {/* 4-Bullet Value Grid */}
+        {/* 4-Bullet Value Grid - Order: Retention → Value → Zero Staff → Revenue */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <LiquidGlass variant="orange" className="p-6 text-center">
-            <div className="inline-block p-3 rounded-xl bg-solar-surge-orange/20 mb-4">
-              <DollarSign className="w-8 h-8 text-solar-surge-orange" />
-            </div>
-            <h4 className="text-lg font-bold mb-2">New Revenue for Your Facility</h4>
-            <p className="text-sm text-text-secondary">Earn 10-15% on every athlete subscription you refer</p>
-          </LiquidGlass>
-
           <LiquidGlass variant="blue" className="p-6 text-center">
             <div className="inline-block p-3 rounded-xl bg-neon-cortex-blue/20 mb-4">
               <TrendingUp className="w-8 h-8 text-neon-cortex-blue" />
             </div>
-            <h4 className="text-lg font-bold mb-2">Stronger Retention of Your Coaching</h4>
+            <h4 className="text-lg font-bold mb-2">Stronger Lesson Retention</h4>
             <p className="text-sm text-text-secondary">Athletes practice your cues and drills between visits to your facility</p>
           </LiquidGlass>
 
@@ -370,7 +362,7 @@ export default function PartnerProgramPage() {
             <div className="inline-block p-3 rounded-xl bg-solar-surge-orange/20 mb-4">
               <Star className="w-8 h-8 text-solar-surge-orange" />
             </div>
-            <h4 className="text-lg font-bold mb-2">Increased Value of Your Programs</h4>
+            <h4 className="text-lg font-bold mb-2">Increased Perceived Value</h4>
             <p className="text-sm text-text-secondary">Parents see continuous development from your facility, not just hourly lessons</p>
           </LiquidGlass>
 
@@ -378,8 +370,16 @@ export default function PartnerProgramPage() {
             <div className="inline-block p-3 rounded-xl bg-neon-cortex-blue/20 mb-4">
               <Zap className="w-8 h-8 text-neon-cortex-blue" />
             </div>
-            <h4 className="text-lg font-bold mb-2">Zero Training for Your Staff</h4>
+            <h4 className="text-lg font-bold mb-2">Zero Staff Training Required</h4>
             <p className="text-sm text-text-secondary">Athletes use the app independently—your team doesn't manage it</p>
+          </LiquidGlass>
+
+          <LiquidGlass variant="orange" className="p-6 text-center">
+            <div className="inline-block p-3 rounded-xl bg-solar-surge-orange/20 mb-4">
+              <DollarSign className="w-8 h-8 text-solar-surge-orange" />
+            </div>
+            <h4 className="text-lg font-bold mb-2">New Recurring Revenue Stream</h4>
+            <p className="text-sm text-text-secondary">Earn 10-15% on every athlete subscription you refer</p>
           </LiquidGlass>
         </div>
 
@@ -435,6 +435,29 @@ export default function PartnerProgramPage() {
           </LiquidGlass>
         </div>
 
+        {/* How Facilities Deploy It */}
+        <LiquidGlass variant="blue" className="p-8 mb-12">
+          <h3 className="text-xl font-bold mb-6 text-center">How Facilities Deploy Mind & Muscle</h3>
+          <div className="grid md:grid-cols-2 gap-4 max-w-3xl mx-auto">
+            <div className="flex items-start gap-3">
+              <Check className="w-5 h-5 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+              <span className="text-sm text-text-secondary">Recommended next step after lessons</span>
+            </div>
+            <div className="flex items-start gap-3">
+              <Check className="w-5 h-5 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+              <span className="text-sm text-text-secondary">QR code or follow-up link shared post-session</span>
+            </div>
+            <div className="flex items-start gap-3">
+              <Check className="w-5 h-5 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+              <span className="text-sm text-text-secondary">Positioned as at-home training between visits</span>
+            </div>
+            <div className="flex items-start gap-3">
+              <Check className="w-5 h-5 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+              <span className="text-sm text-text-secondary">Paid upgrade for athletes who want continued progress</span>
+            </div>
+          </div>
+        </LiquidGlass>
+
         {/* ROI Calculator */}
         <div className="mb-8">
           <p className="text-center text-lg text-gray-300 mb-6">
@@ -442,6 +465,11 @@ export default function PartnerProgramPage() {
           </p>
           <EnhancedEarningsCalculator />
         </div>
+
+        {/* Transparency Line */}
+        <p className="text-center text-sm text-gray-500 mb-8">
+          Mind & Muscle is free to try. Paid plans are required for full training access.
+        </p>
 
         {/* Facility CTA */}
         <div className="text-center">
@@ -451,7 +479,7 @@ export default function PartnerProgramPage() {
             onClick={() => scrollToSection('apply')}
             className="!bg-gradient-to-r !from-solar-surge-orange !to-muscle-primary !shadow-[0_0_30px_rgba(251,146,60,0.6)] hover:!shadow-[0_0_40px_rgba(251,146,60,0.8)]"
           >
-            Partner Your Facility
+            Become a Partner
           </LiquidButton>
         </div>
       </div>
@@ -478,8 +506,8 @@ export default function PartnerProgramPage() {
           <p className="text-lg text-gray-400 max-w-2xl mx-auto mb-2">
             Help athletes stay bought in between lessons and keep parents confident in your coaching.
           </p>
-          <p className="text-sm text-gray-500 max-w-xl mx-auto">
-            Designed to work with your coaching style—and reinforce it, not replace it.
+          <p className="text-sm text-gray-500 max-w-xl mx-auto font-medium">
+            Built to reinforce your coaching — not replace it.
           </p>
         </div>
 
@@ -500,8 +528,8 @@ export default function PartnerProgramPage() {
                 <Check className="w-5 h-5 text-neon-cortex-blue" />
               </div>
               <div>
-                <h4 className="font-bold mb-1">Keep Athletes Engaged Between Sessions</h4>
-                <p className="text-sm text-text-secondary">No more starting over each lesson</p>
+                <h4 className="font-bold mb-1">Recommend Structured Drills</h4>
+                <p className="text-sm text-text-secondary">Athletes unlock drills through the app between lessons</p>
               </div>
             </div>
 
@@ -545,7 +573,7 @@ export default function PartnerProgramPage() {
         <div className="text-center mb-8">
           <div className="inline-block mb-4">
             <LiquidGlass variant="orange" rounded="full" padding="none" glow={true} className="px-4 py-2">
-              <span className="text-sm font-bold text-solar-surge-orange">FOR TEAMS & TRAINING INFLUENCERS</span>
+              <span className="text-sm font-bold text-solar-surge-orange">FOR TEAMS & TRAINING CREATORS</span>
             </LiquidGlass>
           </div>
 
@@ -572,8 +600,8 @@ export default function PartnerProgramPage() {
                 <Check className="w-5 h-5 text-solar-surge-orange" />
               </div>
               <div>
-                <h4 className="font-bold mb-1">Athletes Stay Engaged Outside Practices</h4>
-                <p className="text-sm text-text-secondary">Keep your team connected year-round</p>
+                <h4 className="font-bold mb-1">Keep Athletes Engaged Year-Round</h4>
+                <p className="text-sm text-text-secondary">Even outside practice and season</p>
               </div>
             </div>
 
@@ -592,8 +620,8 @@ export default function PartnerProgramPage() {
                 <Check className="w-5 h-5 text-solar-surge-orange" />
               </div>
               <div>
-                <h4 className="font-bold mb-1">Programs Feel Complete, Not Seasonal</h4>
-                <p className="text-sm text-text-secondary">Engagement continues during off-season</p>
+                <h4 className="font-bold mb-1">Drive Athletes to Premium Training</h4>
+                <p className="text-sm text-text-secondary">Revenue share applies to paid subscriptions</p>
               </div>
             </div>
 
@@ -602,8 +630,8 @@ export default function PartnerProgramPage() {
                 <Check className="w-5 h-5 text-solar-surge-orange" />
               </div>
               <div>
-                <h4 className="font-bold mb-1">Affiliate or Revenue-Share Options</h4>
-                <p className="text-sm text-text-secondary">Earn 10-15% on every subscription you refer</p>
+                <h4 className="font-bold mb-1">Programs Feel Complete, Not Seasonal</h4>
+                <p className="text-sm text-text-secondary">Engagement continues during off-season</p>
               </div>
             </div>
           </div>
@@ -615,7 +643,7 @@ export default function PartnerProgramPage() {
               onClick={() => scrollToSection('apply')}
               className="!bg-gradient-to-r !from-solar-surge-orange !to-muscle-primary"
             >
-              Partner With Mind & Muscle
+              Become a Partner
             </LiquidButton>
           </div>
         </LiquidGlass>
@@ -636,8 +664,11 @@ export default function PartnerProgramPage() {
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-gray-200">
             Partner Program Details
           </h2>
-          <p className="text-lg text-gray-400 max-w-3xl mx-auto">
+          <p className="text-lg text-gray-400 max-w-3xl mx-auto mb-4">
             Setup, tracking, and payouts.
+          </p>
+          <p className="text-sm text-gray-500 max-w-2xl mx-auto">
+            Partners earn commission on paid subscriptions, not free accounts.
           </p>
         </div>
 
@@ -753,14 +784,14 @@ export default function PartnerProgramPage() {
       <div id="apply" className="max-w-3xl mx-auto mb-24 scroll-mt-32">
         <LiquidGlass variant="blue" glow={true} className="p-8">
           <GradientTextReveal
-            text="Let's Build a Smarter Training Ecosystem"
+            text="Apply in 2 Minutes"
             className="text-2xl sm:text-3xl md:text-4xl font-black mb-4 leading-tight text-center"
             gradientFrom="#0EA5E9"
             gradientTo="#F97316"
             delay={0.2}
           />
           <p className="text-lg text-gray-300 max-w-2xl mx-auto mb-8 text-center">
-            Apply now and start partnering immediately. Instant approval!
+            Instant approval. Your referral link and marketing materials are sent immediately.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -984,7 +1015,7 @@ export default function PartnerProgramPage() {
             onClick={() => scrollToSection('apply')}
             className="!bg-gradient-to-r !from-solar-surge-orange !to-muscle-primary !shadow-[0_0_30px_rgba(251,146,60,0.6)] hover:!shadow-[0_0_40px_rgba(251,146,60,0.8)]"
           >
-            Explore Partner Options
+            Become a Partner
           </LiquidButton>
           <a
             href="https://calendly.com/jeff-mindandmuscle/mind-muscle-discovery-call"
