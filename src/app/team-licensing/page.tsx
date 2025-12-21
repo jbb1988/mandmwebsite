@@ -1066,13 +1066,13 @@ function TeamLicensingContent() {
 
             <div className="space-y-3 mb-8">
               {[
-                { app: 'Team communication platform', cost: '$0-50/mo' },
-                { app: 'Mental performance training', cost: '$15-30/mo' },
-                { app: 'Video swing analysis', cost: '$20-50/mo' },
-                { app: 'Strength & conditioning', cost: '$10-20/mo' },
-                { app: 'Nutrition planning', cost: '$15-30/mo' },
-                { app: 'Baseball IQ development', cost: '$10-25/mo' },
-                { app: 'Goal tracking system', cost: '$5-15/mo' },
+                { app: 'Team communication platform', cost: '$50/mo' },
+                { app: 'Mental performance training', cost: '$30/mo' },
+                { app: 'Video swing analysis', cost: '$50/mo' },
+                { app: 'Strength & conditioning', cost: '$20/mo' },
+                { app: 'Nutrition planning', cost: '$30/mo' },
+                { app: 'Baseball IQ development', cost: '$25/mo' },
+                { app: 'Goal tracking system', cost: '$15/mo' },
               ].map((item, i) => (
                 <div key={i} className="flex items-start justify-between gap-4 p-3 rounded-lg bg-red-500/5 border border-red-500/20">
                   <div className="flex items-start gap-2">
@@ -1087,11 +1087,11 @@ function TeamLicensingContent() {
             <div className="pt-6 border-t border-red-500/30 space-y-4">
               <div className="flex items-baseline justify-between">
                 <span className="text-lg font-semibold text-gray-300">Monthly per athlete:</span>
-                <span className="text-3xl font-black text-red-400">$75-220</span>
+                <span className="text-3xl font-black text-red-400">$92</span>
               </div>
               <div className="flex items-baseline justify-between">
                 <span className="text-xl font-bold text-gray-200">Annual per athlete:</span>
-                <span className="text-4xl font-black text-red-400">$900-2,640</span>
+                <span className="text-4xl font-black text-red-400">$1,100</span>
               </div>
             </div>
 
@@ -1140,18 +1140,18 @@ function TeamLicensingContent() {
               <div className="pt-6 border-t border-neon-cortex-blue/30 space-y-4">
                 <div className="flex items-baseline justify-between">
                   <span className="text-lg font-semibold text-gray-200">Monthly per athlete:</span>
-                  <span className="text-3xl font-black text-solar-surge-orange drop-shadow-[0_0_20px_rgba(249,115,22,0.6)]">$9.92</span>
+                  <span className="text-3xl font-black text-solar-surge-orange drop-shadow-[0_0_20px_rgba(249,115,22,0.6)]">$13.17</span>
                 </div>
                 <div className="flex items-baseline justify-between">
-                  <span className="text-xl font-bold text-gray-100">Annual per athlete:</span>
+                  <span className="text-xl font-bold text-gray-100">Per 6 months:</span>
                   <span className="text-4xl font-black text-solar-surge-orange drop-shadow-[0_0_24px_rgba(249,115,22,0.6)]">$79</span>
                 </div>
                 <div className="pt-4 border-t border-neon-cortex-blue/20">
                   <div className="flex items-baseline justify-between">
                     <span className="text-xl font-bold text-neon-cortex-green">You Save:</span>
-                    <span className="text-3xl font-black text-neon-cortex-green">$780-2,520</span>
+                    <span className="text-3xl font-black text-neon-cortex-green">$1,021</span>
                   </div>
-                  <p className="text-xs text-gray-400 mt-2">Per athlete, per 6 months</p>
+                  <p className="text-xs text-gray-400 mt-2">Per athlete annually vs fragmented tools</p>
                 </div>
               </div>
 
