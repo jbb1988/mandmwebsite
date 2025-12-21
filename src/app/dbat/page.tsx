@@ -701,7 +701,7 @@ export default function DBatPartnerPage() {
                   Ready to Extend the Value of Every Lesson?
                 </h2>
                 <p className="text-xl text-white/80 mb-8 max-w-xl mx-auto">
-                  Email us to get started. We'll send your custom link and materials within 24 hours.
+                  Email us to get started. We'll send your custom link and materials within minutes.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
