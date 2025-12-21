@@ -1326,7 +1326,7 @@ export default function HomePage() {
               </div>
             </div>
             <GradientTextReveal
-              text="Daily Mental Reps for Young Athletes"
+              text="Daily Mental Reps for Every Athlete"
               className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-relaxed"
               gradientFrom="#F97316"
               gradientTo="#0EA5E9"
