@@ -302,8 +302,11 @@ export default function PartnerProgramPage() {
           <p className="text-xl sm:text-2xl text-gray-300 max-w-4xl mx-auto font-medium leading-relaxed mb-4">
             Keep athletes engaged between visits—without adding staff or time.
           </p>
-          <p className="text-lg text-gray-400 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg text-gray-400 max-w-3xl mx-auto leading-relaxed mb-4">
             Most training happens outside the cage. Mind & Muscle ensures your coaching continues between visits.
+          </p>
+          <p className="text-base text-gray-500 max-w-2xl mx-auto">
+            Reduce lesson drop-off, increase repeat visits, and extend athlete engagement year-round.
           </p>
         </div>
 
@@ -460,7 +463,7 @@ export default function PartnerProgramPage() {
           />
 
           <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-            Designed to reinforce your coaching—not replace it.
+            Designed to work with your coaching style—and reinforce it, not replace it.
           </p>
         </div>
 
@@ -538,8 +541,11 @@ export default function PartnerProgramPage() {
             delay={0.2}
           />
 
-          <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-400 max-w-2xl mx-auto mb-2">
             For coaches, trainers, and organizations with an audience of athletes.
+          </p>
+          <p className="text-sm text-gray-500 max-w-xl mx-auto">
+            Examples: travel ball programs, performance teams, content creators in the baseball/softball space.
           </p>
         </div>
 
@@ -605,10 +611,10 @@ export default function PartnerProgramPage() {
       <div className="max-w-7xl mx-auto mb-24">
         <div className="text-center mb-12">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 text-gray-200">
-            How the Partner Program Works
+            Partner Program Details
           </h2>
           <p className="text-lg text-gray-400 max-w-3xl mx-auto">
-            Here's how setup, tracking, and payouts work.
+            Setup, tracking, and payouts.
           </p>
         </div>
 
@@ -939,14 +945,14 @@ export default function PartnerProgramPage() {
       {/* ============================================= */}
       <div className="max-w-4xl mx-auto mb-24 text-center">
         <GradientTextReveal
-          text="Let's Build a Smarter Training Ecosystem"
+          text="Grow Engagement, Retention & Athlete Development"
           className="text-3xl sm:text-4xl md:text-5xl font-black mb-6 leading-tight"
           gradientFrom="#F97316"
           gradientTo="#0EA5E9"
           delay={0.2}
         />
         <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-          Whether you're a facility, coach, or influencer—we're here to help you add value for your athletes.
+          Whether you're a facility, coach, or team—let's elevate your training programs together.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <LiquidButton
