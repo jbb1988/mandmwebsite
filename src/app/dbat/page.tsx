@@ -12,7 +12,7 @@ import {
 } from '@/components/animations';
 import {
   TrendingDown, UserX, Target, Repeat, Video, Brain, Gamepad2,
-  Dumbbell, DollarSign, Users, TrendingUp, Calendar, Mail,
+  Dumbbell, DollarSign, Users, TrendingUp, Mail,
   CheckCircle, ArrowRight, Play, Award, Building2, Zap, UserPlus
 } from 'lucide-react';
 
@@ -196,14 +196,9 @@ export default function DBatPartnerPage() {
                   <ArrowRight className="w-5 h-5" />
                   Explore the Partner Program
                 </a>
-                <a
-                  href="https://calendly.com/jeff-mindandmuscle/mind-muscle-discovery-call"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-white/60 hover:text-white/80 text-sm underline underline-offset-4 transition-colors"
-                >
-                  15-minute walkthrough for D-BAT owners
-                </a>
+                <p className="text-white/50 text-sm">
+                  Questions? <a href="mailto:partners@mindandmuscle.ai" className="text-white/70 hover:text-white underline underline-offset-4 transition-colors">partners@mindandmuscle.ai</a>
+                </p>
               </div>
             </FadeInWhenVisible>
           </div>
@@ -706,35 +701,21 @@ export default function DBatPartnerPage() {
                   Ready to Extend the Value of Every Lesson?
                 </h2>
                 <p className="text-xl text-white/80 mb-8 max-w-xl mx-auto">
-                  Let's talk about how Mind & Muscle fits your facility.
-                  15 minutes. No pressure.
+                  Email us to get started. We'll send your custom link and materials within 24 hours.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
                   <a
-                    href="https://calendly.com/jeff-mindandmuscle/mind-muscle-discovery-call"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href="mailto:partners@mindandmuscle.ai?subject=D-BAT Partnership - {{facility_name}}&body=Hi Jeff,%0D%0A%0D%0AI'm interested in the Mind %26 Muscle partnership for my D-BAT location.%0D%0A%0D%0AFacility:%0D%0ACity/State:%0D%0AApprox. active athletes:%0D%0A%0D%0AThanks!"
                     className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange hover:from-neon-cortex-blue/90 hover:to-solar-surge-orange/90 text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl"
                   >
-                    <ArrowRight className="w-5 h-5" />
-                    View Partner Options
-                  </a>
-                  <a
-                    href="mailto:partners@mindandmuscle.ai?subject=Training Facility Partnership"
-                    className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold text-lg rounded-xl transition-all border border-white/20"
-                  >
                     <Mail className="w-5 h-5" />
-                    Email Us
+                    Get Started
                   </a>
                 </div>
 
-                <p className="text-white/40 text-xs mb-4">
-                  Used by athletes and training facilities to reinforce lessons between sessions.
-                </p>
-
-                <p className="text-white/50 text-sm">
-                  partners@mindandmuscle.ai
+                <p className="text-white/40 text-sm">
+                  Questions first? Just reply to any email or reach out anytime.
                 </p>
               </div>
             </div>
