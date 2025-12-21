@@ -325,7 +325,7 @@ function TeamLicensingContent() {
         </div>
 
         <GradientTextReveal
-          text="Unlock Premium for Your Entire Team"
+          text="Equip Your Entire Team With a Complete Performance System"
           className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-relaxed"
           gradientFrom="#0EA5E9"
           gradientTo="#F97316"
@@ -333,7 +333,7 @@ function TeamLicensingContent() {
         />
 
         <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed">
-          One Premium team license unlocks all 8 AI-powered apps, personalized training, and advanced analytics for your entire team.
+          One platform built exclusively for baseball and softball programs — supporting coaches, athletes, and parents with intelligent training, communication, and development tools.
         </p>
       </div>
 
@@ -343,7 +343,7 @@ function TeamLicensingContent() {
           How many teams do you need to license?
         </h2>
         <p className="text-text-secondary text-center mb-6 text-sm md:text-base">
-          Select an option to continue
+          Select your roster size to view team pricing and savings
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1044,17 +1044,17 @@ function TeamLicensingContent() {
             gradientTo="#F97316"
             delay={0.2}
           />
-          <p className="text-xl sm:text-2xl text-gray-300 max-w-4xl mx-auto font-medium leading-relaxed">
-            Stop paying for fragmented solutions. Get everything your athletes need in one intelligent system.
+          <p className="text-xl sm:text-2xl text-gray-300 max-w-4xl mx-auto font-medium leading-relaxed mb-4">
+            Serious programs don't piece together development from disconnected apps.
           </p>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8">
-          {/* The Traditional Approach */}
+          {/* Fragmented Tools */}
           <LiquidGlass variant="neutral" className="p-8 border-2 border-red-500/30">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-3 h-3 bg-red-500 rounded-full" style={{boxShadow: '0 0 12px rgba(239,68,68,0.8)'}} />
-              <h3 className="text-2xl md:text-3xl font-black text-red-400">The Traditional Approach</h3>
+              <h3 className="text-2xl md:text-3xl font-black text-red-400">Fragmented Tools</h3>
             </div>
 
             <p className="text-gray-400 mb-6 text-lg">Piecing together multiple apps creates complexity, not champions:</p>
@@ -1097,7 +1097,7 @@ function TeamLicensingContent() {
             </div>
           </LiquidGlass>
 
-          {/* The Mind & Muscle Way */}
+          {/* Unified Team System */}
           <LiquidGlass variant="blue" glow={true} className="p-8 border-2 border-neon-cortex-blue/50 relative">
             {/* Glow effect */}
             <div className="absolute -inset-1 bg-gradient-to-r from-neon-cortex-blue via-solar-surge-orange to-neon-cortex-blue opacity-20 blur-2xl rounded-3xl animate-pulse" />
@@ -1105,7 +1105,7 @@ function TeamLicensingContent() {
             <div className="relative">
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-3 h-3 bg-neon-cortex-blue rounded-full animate-pulse" style={{boxShadow: '0 0 12px rgba(14,165,233,0.8)'}} />
-                <h3 className="text-2xl md:text-3xl font-black bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">The Mind & Muscle Way</h3>
+                <h3 className="text-2xl md:text-3xl font-black bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">Unified Team System</h3>
               </div>
 
               <p className="text-gray-200 mb-6 text-lg">One intelligent platform. All development tools. Actually learns.</p>
@@ -1166,12 +1166,12 @@ function TeamLicensingContent() {
         <div className="mt-12 text-center">
           <LiquidGlass variant="neutral" rounded="2xl" className="p-8 max-w-4xl mx-auto [&>div:first-child]:bg-gradient-to-r [&>div:first-child]:from-neon-cortex-blue/5 [&>div:first-child]:via-solar-surge-orange/5 [&>div:first-child]:to-neon-cortex-blue/5">
             <p className="text-xl sm:text-2xl md:text-3xl font-medium text-gray-300 mb-4 leading-tight">
-              Stop paying more for less.
+              One login. One standard. One system your entire team understands.
             </p>
             <p className="text-2xl sm:text-3xl md:text-4xl font-black">
-              <span className="text-white">Get the </span>
-              <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">complete development system</span>
-              <span className="text-white"> your athletes deserve.</span>
+              <span className="text-white">Simplify your </span>
+              <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">team's development stack</span>
+              <span className="text-white"> with one purpose-built system.</span>
             </p>
           </LiquidGlass>
         </div>
@@ -1189,14 +1189,14 @@ function TeamLicensingContent() {
             </LiquidGlass>
           </div>
           <GradientTextReveal
-            text="Team Up. Level Up. Save Up."
+            text="Built to Scale With Your Roster"
             className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed"
             gradientFrom="#0EA5E9"
             gradientTo="#F97316"
             delay={0.2}
           />
           <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed">
-            Get up to 20% off Premium when your team joins together.
+            Team licenses reduce per-athlete cost as your roster grows — without sacrificing quality or capability.
           </p>
           <p className="text-sm text-text-secondary/70 max-w-3xl mx-auto mt-4">
             1-11 users: $79/seat • 12-119 users: 10% off • 120-199 users: 15% off • 200+ users: 20% off
@@ -1289,10 +1289,21 @@ function TeamLicensingContent() {
                 </p>
               </div>
             </div>
-            <p className="text-text-secondary mb-8 text-lg md:text-xl">Everything free has, plus 10+ AI coaches and unlimited access</p>
+            <p className="text-text-secondary mb-4 text-lg md:text-xl">Everything free has, plus 10+ AI coaches and unlimited access</p>
+            <p className="text-neon-cortex-blue font-semibold mb-8 text-base">Designed for programs committed to long-term athlete development.</p>
             <ul className="space-y-4 mb-10">
+              {/* Everything in Free */}
+              <li className="flex items-start gap-3 text-base md:text-lg text-gray-300">
+                <Check className="w-5 h-5 text-solar-surge-orange flex-shrink-0 mt-0.5" />
+                <span>Everything in Free</span>
+              </li>
+
+              {/* Divider Label */}
+              <li className="pt-2 pb-1">
+                <span className="text-xs font-bold text-solar-surge-orange/80 uppercase tracking-wider">Advanced Development Tools</span>
+              </li>
+
               {[
-                'Everything in Free',
                 'Mind AI Coach: Mental toughness training',
                 'Muscle AI Coach: All workouts',
                 'Swing Lab: AI swing analysis',
@@ -1342,7 +1353,10 @@ function TeamLicensingContent() {
             gradientTo="#F97316"
             delay={0.2}
           />
-          <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed">
+          <p className="text-xl sm:text-2xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-2">
+            Common questions from coaches, program directors, and parents.
+          </p>
+          <p className="text-base text-text-secondary max-w-5xl mx-auto">
             Click any question to expand
           </p>
         </div>
@@ -1908,6 +1922,9 @@ function TeamLicensingContent() {
         {/* Still Have Questions CTA */}
         <div className="max-w-4xl mx-auto mt-12">
           <LiquidGlass variant="neutral" rounded="2xl" className="p-8 text-center [&>div:first-child]:bg-gradient-to-br [&>div:first-child]:from-white/[0.02] [&>div:first-child]:via-transparent [&>div:first-child]:to-transparent">
+            <p className="text-lg font-semibold text-gray-300 mb-2">
+              Lead your program with confidence — on and off the field.
+            </p>
             <h3 className="text-2xl font-black mb-4">Still have questions?</h3>
             <p className="text-text-secondary mb-6">
               Need help deciding on the right team size or have billing questions? Our support team is here to help.
