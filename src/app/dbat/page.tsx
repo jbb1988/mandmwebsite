@@ -229,7 +229,70 @@ export default function DBatPartnerPage() {
         </div>
       </section>
 
-      {/* Section 2: Pain Points */}
+      {/* Section 2: Partner Banner */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <FadeInWhenVisible delay={0} direction="up">
+            <div
+              className="relative rounded-2xl overflow-hidden"
+              style={{
+                background: 'linear-gradient(135deg, rgba(15, 17, 35, 0.95) 0%, rgba(27, 31, 57, 0.95) 100%)',
+                border: '2px solid rgba(14, 165, 233, 0.3)',
+                boxShadow: '0 8px 32px rgba(14, 165, 233, 0.15)',
+              }}
+            >
+              {/* Background image */}
+              <div className="absolute inset-0">
+                <Image
+                  src="/assets/images/baseball_field_dusk.png"
+                  alt="Baseball field"
+                  fill
+                  className="object-cover opacity-30"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-[#0F1123]/90 via-[#0F1123]/70 to-[#0F1123]/90" />
+              </div>
+
+              <div className="relative p-8 sm:p-12 flex flex-col sm:flex-row items-center justify-between gap-8">
+                {/* Left side - logos */}
+                <div className="flex items-center gap-4">
+                  <div className="relative w-20 h-20 sm:w-24 sm:h-24">
+                    <Image
+                      src="/assets/images/dbat-logo.png"
+                      alt="D-BAT"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                  <div className="text-2xl font-bold text-white/40">+</div>
+                  <div className="relative w-20 h-20 sm:w-24 sm:h-24">
+                    <Image
+                      src="/assets/images/logo.png"
+                      alt="Mind & Muscle"
+                      fill
+                      className="object-contain"
+                    />
+                  </div>
+                </div>
+
+                {/* Right side - text */}
+                <div className="text-center sm:text-right">
+                  <p className="text-sm text-neon-cortex-blue font-bold uppercase tracking-wider mb-2">
+                    Official Partner Program
+                  </p>
+                  <h3 className="text-2xl sm:text-3xl font-black text-white mb-2">
+                    D-BAT × Mind & Muscle
+                  </h3>
+                  <p className="text-white/60 text-sm">
+                    Complete player development: physical + mental + game IQ
+                  </p>
+                </div>
+              </div>
+            </div>
+          </FadeInWhenVisible>
+        </div>
+      </section>
+
+      {/* Section 3: Pain Points */}
       <section className="relative py-20 px-4 sm:px-6 lg:px-8">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-red-900/5 to-transparent" />
 
@@ -533,7 +596,7 @@ export default function DBatPartnerPage() {
                     </p>
                   </div>
                   <div className="text-center p-5 bg-white/5 rounded-xl border border-white/10">
-                    <p className="text-xs text-text-secondary mb-2">Commission</p>
+                    <p className="text-xs text-text-secondary mb-2">Partner Earnings</p>
                     <p className="text-2xl font-black text-white/80">
                       ${annualCommission.toLocaleString()}
                     </p>
@@ -557,7 +620,7 @@ export default function DBatPartnerPage() {
                   <p className="text-center text-sm">
                     <span className="font-bold text-neon-cortex-blue">The insight:</span>{' '}
                     <span className="text-white/80">
-                      Retention + conversion is {Math.round((retentionValue + conversionValue) / annualCommission * 10) / 10}x the commission.
+                      Retention + conversion is {Math.round((retentionValue + conversionValue) / annualCommission * 10) / 10}x the partner earnings.
                       The app pays for itself through member retention alone.
                     </span>
                   </p>
