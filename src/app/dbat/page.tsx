@@ -47,36 +47,31 @@ export default function DBatPartnerPage() {
   // Total annual value
   const totalAnnualValue = retentionValue + conversionValue + annualCommission;
 
-  // D-BAT specific pain points
+  // Training facility pain points (business-focused)
   const painPoints = [
     {
       icon: TrendingDown,
-      title: 'Athletes Plateau, Then Quit',
-      description: 'They take lessons for months. Progress stalls. Parents question the investment. Membership cancelled.',
+      title: 'Lessons Plateau',
+      description: 'Athletes forget mechanical changes between visits. Progress stalls, and parents question the value of continued lessons.',
     },
     {
       icon: UserX,
-      title: 'Nothing Happens Between Lessons',
-      description: 'You teach mechanics on Tuesday. By Saturday\'s lesson, they forgot half of it. Repeat forever.',
+      title: 'Parents Question Value',
+      description: 'Parents don\'t see progress outside the cage. Without visible results between sessions, they reconsider the investment.',
     },
     {
       icon: Target,
-      title: 'The Mental Game Gets Ignored',
-      description: 'You can fix their swing. But confidence, focus, pressure handling? That\'s on them to figure out.',
-    },
-    {
-      icon: Repeat,
-      title: 'Same Conversations, Different Day',
-      description: '"Stay focused." "Trust your training." "Slow the game down." You say it 50 times. It doesn\'t stick.',
+      title: 'Drop-Off Between Seasons',
+      description: 'Athletes disengage between sessions or seasons. When they return, you\'re starting over instead of building forward.',
     },
   ];
 
-  // Features relevant to D-BAT
+  // Features for training facilities
   const features = [
     {
       id: 'swing-lab',
-      title: 'Swing Lab',
-      tagline: 'Reinforce your cage work at home.',
+      title: 'Reinforce Mechanical Changes',
+      tagline: 'Swing Lab',
       description: 'Athletes upload videos from lessons. AI analyzes mechanics and reminds them what you taught. They practice the right things between sessions.',
       color: 'orange',
       videoUrl: '/assets/videos/swing_lab.mp4',
@@ -84,52 +79,52 @@ export default function DBatPartnerPage() {
       forInstructor: 'Athletes come prepared. They remember what you worked on.',
     },
     {
-      id: 'pitch-lab',
-      title: 'Pitch Lab',
-      tagline: 'For your pitchers between bullpens.',
-      description: 'Pitchers analyze their mechanics on their own time. Identify arm slot issues, release points, spin patterns before they even arrive for instruction.',
-      color: 'blue',
-      videoUrl: '/assets/videos/pitch_lab.mp4',
-      iconImage: '/assets/images/pitch_lab_icon.png',
-      forInstructor: 'Pitchers show up already knowing what to work on.',
-    },
-    {
-      id: 'plate-iq',
-      title: 'Plate IQ',
-      tagline: '186 real game scenarios.',
-      description: 'Pitch recognition. Count leverage. Situational hitting. They can\'t practice game decisions in the cage - but they can here.',
-      color: 'orange',
-      videoUrl: '/assets/videos/plate_iq.mp4',
-      iconImage: '/assets/images/plate_iq_icon.png',
-      forInstructor: 'Better at-bats in games. Parents see results.',
-    },
-    {
       id: 'mind-coach',
-      title: 'Mind Coach AI',
-      tagline: 'The mental reps they\'re not getting.',
+      title: 'Build Confidence Between Visits',
+      tagline: 'Mind Coach AI',
       description: 'Pre-lesson focus routine. Post-game reflection. Confidence building between sessions. Finally, structured mental training.',
       color: 'blue',
       videoUrl: '/assets/videos/mind_coachai.mp4',
       iconImage: '/assets/images/Mind AI Coach.png',
       forInstructor: 'You coach mechanics. AI coaches mindset. Complete player.',
     },
+    {
+      id: 'fuel-lab',
+      title: 'Support Recovery & Performance at Home',
+      tagline: 'Fuel Lab',
+      description: 'Nutrition guidance and recovery protocols athletes can follow at home. Proper fueling means better performance in the cage.',
+      color: 'orange',
+      videoUrl: '/assets/videos/plate_iq.mp4',
+      iconImage: '/assets/images/plate_iq_icon.png',
+      forInstructor: 'Athletes arrive fueled and recovered. Ready to train.',
+    },
+    {
+      id: 'progress',
+      title: 'Visible Progress for Parents',
+      tagline: 'Progress Tracking',
+      description: 'Parents see what their athlete is working on between lessons. Weekly reports show engagement, improvement, and value delivered.',
+      color: 'blue',
+      videoUrl: '/assets/videos/pitch_lab.mp4',
+      iconImage: '/assets/images/pitch_lab_icon.png',
+      forInstructor: 'Parents see the value. Retention increases.',
+    },
   ];
 
   // What each stakeholder gets
   const stakeholders = [
     {
-      role: 'D-BAT Owners',
+      role: 'Facility Owners',
       icon: Building2,
       benefits: [
-        'Higher retention - athletes who see progress stay longer',
-        'Differentiation from every other D-BAT and facility nearby',
-        'Passive commission on subscriptions (10-15%)',
-        'Zero cost, zero staff, zero inventory',
+        'New recurring revenue stream',
+        'Stronger lesson retention',
+        'Increased perceived value of training programs',
+        'Differentiation from competing facilities',
       ],
       color: 'blue',
     },
     {
-      role: 'Lesson Instructors',
+      role: 'Coaches & Instructors',
       icon: Award,
       benefits: [
         'Athletes arrive prepared with 5-min pre-lesson focus',
@@ -190,42 +185,74 @@ export default function DBatPartnerPage() {
           <div className="text-center">
             <FadeInWhenVisible delay={0.2} direction="up">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6 leading-tight">
-                <span className="text-white">Your Athletes Take Lessons.</span>
+                <span className="text-white">Your Lessons Don't End</span>
                 <br />
                 <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">
-                  What Happens After They Leave?
+                  When Athletes Leave the Facility.
                 </span>
               </h1>
             </FadeInWhenVisible>
 
             <FadeInWhenVisible delay={0.3} direction="up">
               <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto font-medium mb-4">
-                Mind & Muscle gives your athletes structured training between lessons.
-                They progress faster. They stay longer. You earn more.
+                Mind & Muscle helps training facilities extend lesson impact, keep athletes engaged between visits, and increase long-term retention.
               </p>
             </FadeInWhenVisible>
 
             <FadeInWhenVisible delay={0.4} direction="up">
-              <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+              <div className="flex flex-col items-center mt-8">
                 <a
                   href="#calculator"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange hover:from-neon-cortex-blue/90 hover:to-solar-surge-orange/90 text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange hover:from-neon-cortex-blue/90 hover:to-solar-surge-orange/90 text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl mb-4"
                 >
-                  <DollarSign className="w-5 h-5" />
-                  See the Math
+                  <ArrowRight className="w-5 h-5" />
+                  Explore the Partner Program
                 </a>
                 <a
                   href="https://calendly.com/jeff-mindandmuscle/mind-muscle-discovery-call"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold text-lg rounded-xl transition-all border border-white/20"
+                  className="text-white/60 hover:text-white/80 text-sm underline underline-offset-4 transition-colors"
                 >
-                  <Calendar className="w-5 h-5" />
-                  Schedule a Call
+                  15-minute walkthrough for training facilities
                 </a>
               </div>
             </FadeInWhenVisible>
           </div>
+        </div>
+      </section>
+
+      {/* Section: Built for Training Facilities */}
+      <section className="py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto">
+          <FadeInWhenVisible delay={0} direction="up">
+            <div
+              className="rounded-2xl p-8"
+              style={{
+                background: 'linear-gradient(135deg, rgba(15, 17, 35, 0.9) 0%, rgba(27, 31, 57, 0.9) 100%)',
+                border: '1px solid rgba(14, 165, 233, 0.3)',
+              }}
+            >
+              <h2 className="text-2xl sm:text-3xl font-black text-white text-center mb-8">
+                Built for Training Facilities
+              </h2>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                  { icon: DollarSign, text: 'Creates a new recurring revenue stream' },
+                  { icon: TrendingUp, text: 'Keeps athletes progressing between lessons' },
+                  { icon: Repeat, text: 'Increases lesson retention & repeat visits' },
+                  { icon: UserPlus, text: 'Zero additional staff or coaching time' },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-neon-cortex-blue/20 flex items-center justify-center">
+                      <item.icon className="w-5 h-5 text-neon-cortex-blue" />
+                    </div>
+                    <p className="text-white/80 text-sm font-medium leading-snug">{item.text}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </FadeInWhenVisible>
         </div>
       </section>
 
@@ -265,14 +292,14 @@ export default function DBatPartnerPage() {
         <div className="max-w-6xl mx-auto relative z-10">
           <FadeInWhenVisible delay={0} direction="up" className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
-              Sound Familiar?
+              Common Challenges for Training Facilities
             </h2>
             <p className="text-lg text-text-secondary">
-              Every D-BAT deals with this. It's not your fault - it's a gap in the system.
+              These challenges affect every training facility. Mind & Muscle helps solve them.
             </p>
           </FadeInWhenVisible>
 
-          <StaggerChildren staggerDelay={0.1} className="grid sm:grid-cols-2 gap-6">
+          <StaggerChildren staggerDelay={0.1} className="grid sm:grid-cols-3 gap-6">
             {painPoints.map((point, index) => (
               <motion.div key={index} variants={staggerItemVariants} className="group">
                 <div
@@ -313,7 +340,7 @@ export default function DBatPartnerPage() {
           <FadeInWhenVisible delay={0} direction="up" className="text-center mb-16">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neon-cortex-blue/20 text-neon-cortex-blue text-sm font-bold mb-6">
               <Zap className="w-4 h-4" />
-              WHAT YOUR ATHLETES GET
+              EXTEND YOUR COACHING IMPACT
             </div>
             <GradientTextReveal
               text="Training Between Lessons"
@@ -323,7 +350,7 @@ export default function DBatPartnerPage() {
               delay={0.2}
             />
             <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-              Four AI tools that turn your weekly lesson into daily progress.
+              Facilities use Mind & Muscle to extend coaching impact—without replacing lessons.
             </p>
           </FadeInWhenVisible>
 
@@ -398,6 +425,39 @@ export default function DBatPartnerPage() {
         </div>
       </section>
 
+      {/* Section: How Facilities Use Mind & Muscle */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <FadeInWhenVisible delay={0} direction="up">
+            <div
+              className="rounded-2xl p-8"
+              style={{
+                background: 'linear-gradient(135deg, rgba(15, 17, 35, 0.9) 0%, rgba(27, 31, 57, 0.9) 100%)',
+                border: '1px solid rgba(249, 115, 22, 0.3)',
+              }}
+            >
+              <h2 className="text-2xl sm:text-3xl font-black text-white text-center mb-8">
+                How Facilities Use Mind & Muscle
+              </h2>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[
+                  'QR code at front desk or cage exits',
+                  'Included with lessons, camps, or memberships',
+                  'Optional add-on for families',
+                  'Co-branded with your facility',
+                  'No staff training required',
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-3 p-3 bg-white/5 rounded-lg">
+                    <CheckCircle className="w-5 h-5 text-solar-surge-orange flex-shrink-0" />
+                    <p className="text-white/80 text-sm">{item}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </FadeInWhenVisible>
+        </div>
+      </section>
+
       {/* Section 4: What's In It For You */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
@@ -450,10 +510,10 @@ export default function DBatPartnerPage() {
         <div className="max-w-4xl mx-auto">
           <FadeInWhenVisible delay={0} direction="up" className="text-center mb-10">
             <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
-              The Real Math
+              What If Every Lesson Created More Long-Term Value?
             </h2>
             <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-              Commission is nice. But the real value? Members who stay and lesson athletes who convert.
+              Facilities use Mind & Muscle to increase engagement and retention—not replace lessons.
             </p>
           </FadeInWhenVisible>
 
@@ -655,31 +715,35 @@ export default function DBatPartnerPage() {
             >
               <div className="p-8 sm:p-12">
                 <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
-                  Ready to Fill the Gap?
+                  Ready to Extend the Value of Every Lesson?
                 </h2>
                 <p className="text-xl text-white/80 mb-8 max-w-xl mx-auto">
-                  Let's talk about how Mind & Muscle fits your D-BAT.
+                  Let's talk about how Mind & Muscle fits your facility.
                   15 minutes. No pressure.
                 </p>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
                   <a
                     href="https://calendly.com/jeff-mindandmuscle/mind-muscle-discovery-call"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange hover:from-neon-cortex-blue/90 hover:to-solar-surge-orange/90 text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl"
                   >
-                    <Calendar className="w-5 h-5" />
-                    Schedule a Call
+                    <ArrowRight className="w-5 h-5" />
+                    View Partner Options
                   </a>
                   <a
-                    href="mailto:partners@mindandmuscle.ai?subject=D-BAT Partnership"
+                    href="mailto:partners@mindandmuscle.ai?subject=Training Facility Partnership"
                     className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold text-lg rounded-xl transition-all border border-white/20"
                   >
                     <Mail className="w-5 h-5" />
                     Email Us
                   </a>
                 </div>
+
+                <p className="text-white/40 text-xs mb-4">
+                  Used by athletes and training facilities to reinforce lessons between sessions.
+                </p>
 
                 <p className="text-white/50 text-sm">
                   partners@mindandmuscle.ai
