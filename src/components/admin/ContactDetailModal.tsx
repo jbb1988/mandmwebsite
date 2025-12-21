@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Card } from './shared/Card';
 import { ActivityTimeline, buildTimelineEvents } from './ActivityTimeline';
 import { QuickDatePicker } from './shared/QuickDatePicker';
+import { TemplatePickerModal } from './TemplatePickerModal';
 import {
   X,
   Users,
@@ -35,11 +36,21 @@ const responseTypes = [
   { value: 'trial_requested', label: 'Trial Requested', color: 'text-purple-400' },
 ];
 
+interface TemplateStats {
+  name: string;
+  used: number;
+  responses: number;
+  conversions: number;
+  responseRate: number;
+  conversionRate: number;
+}
+
 interface ContactDetailModalProps {
   contact: UnifiedContact;
   onClose: () => void;
   onUpdate: (id: string, updates: Record<string, unknown>) => Promise<void>;
   templates?: Array<{ id: string; name: string; content: string }>;
+  templateStats?: TemplateStats[];
 }
 
 const stageBadges = {
@@ -54,6 +65,7 @@ export function ContactDetailModal({
   onClose,
   onUpdate,
   templates = [],
+  templateStats = [],
 }: ContactDetailModalProps) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [showTemplates, setShowTemplates] = useState(false);
@@ -462,23 +474,16 @@ export function ContactDetailModal({
             </div>
           </div>
 
-          {/* Template selection */}
+          {/* Template Picker Modal */}
           {showTemplates && templates.length > 0 && (
-            <div className="space-y-2">
-              <p className="text-xs text-white/40 uppercase tracking-wider">Select Template</p>
-              <div className="space-y-2 max-h-48 overflow-y-auto">
-                {templates.map((template) => (
-                  <button
-                    key={template.id}
-                    onClick={() => handleCopyTemplate(template)}
-                    className="w-full text-left p-3 bg-white/5 hover:bg-white/10 rounded-xl transition-colors"
-                  >
-                    <p className="text-sm font-medium text-white">{template.name}</p>
-                    <p className="text-xs text-white/40 mt-1 line-clamp-2">{template.content}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
+            <TemplatePickerModal
+              templates={templates}
+              templateStats={templateStats}
+              contactName={contact.name}
+              groupName={contact.group_name}
+              onSelect={handleCopyTemplate}
+              onClose={() => setShowTemplates(false)}
+            />
           )}
 
           {/* Activity Timeline */}

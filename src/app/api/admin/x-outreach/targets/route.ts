@@ -71,10 +71,13 @@ export async function POST(request: NextRequest) {
       display_name,
       follower_count,
       category,
+      sport,
       bio,
       priority_score,
       notes,
       contact_email,
+      location,
+      website,
     } = body;
 
     if (!handle) {
@@ -118,11 +121,15 @@ export async function POST(request: NextRequest) {
         handle: cleanHandle,
         display_name: display_name || null,
         follower_count: follower_count || null,
-        category: category || 'influencer',
+        category: category || 'content_creator',
+        sport: sport || 'baseball',
         bio: bio || null,
         priority_score: priority_score || calculatePriority(follower_count),
         notes: notes || null,
         contact_email: contact_email || null,
+        location: location || null,
+        website: website || null,
+        profile_url: `https://x.com/${cleanHandle}`,
         outreach_status: 'not_started',
         response_status: 'no_response',
       })

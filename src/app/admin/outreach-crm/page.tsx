@@ -27,6 +27,8 @@ import {
   BarChart3,
   ChevronUp,
   CheckSquare,
+  Plus,
+  X,
 } from 'lucide-react';
 
 // Types
@@ -116,6 +118,18 @@ function OutreachCRMContent() {
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [toast, setToast] = useState<{ message: string; type: ToastType; action?: { label: string; onClick: () => void } } | null>(null);
+
+  // Add X Target modal state
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addingTarget, setAddingTarget] = useState(false);
+  const [newTarget, setNewTarget] = useState({
+    handle: '',
+    display_name: '',
+    follower_count: '',
+    category: 'coach',
+    bio: '',
+    notes: '',
+  });
 
   // Selection mode state
   const [selectionMode, setSelectionMode] = useState(false);
@@ -474,6 +488,45 @@ function OutreachCRMContent() {
     }
   };
 
+  // Add X Target handler
+  const handleAddTarget = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!password || !newTarget.handle.trim()) return;
+
+    setAddingTarget(true);
+    try {
+      const response = await fetch('/api/admin/x-outreach/targets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': password,
+        },
+        body: JSON.stringify({
+          handle: newTarget.handle.replace(/^@/, ''),
+          display_name: newTarget.display_name || null,
+          follower_count: newTarget.follower_count ? parseInt(newTarget.follower_count) : null,
+          category: newTarget.category,
+          bio: newTarget.bio || null,
+          notes: newTarget.notes || null,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        setToast({ message: `@${newTarget.handle.replace(/^@/, '')} added successfully!`, type: 'success' });
+        setNewTarget({ handle: '', display_name: '', follower_count: '', category: 'coach', bio: '', notes: '' });
+        setShowAddModal(false);
+        fetchPipeline();
+      } else {
+        setToast({ message: data.message || 'Failed to add target', type: 'error' });
+      }
+    } catch {
+      setToast({ message: 'Failed to add target', type: 'error' });
+    } finally {
+      setAddingTarget(false);
+    }
+  };
+
   // Selection handlers
   const toggleSelectContact = (contactId: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -579,6 +632,15 @@ function OutreachCRMContent() {
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 tracking-tight">Outreach CRM</h1>
             <p className="text-white/50 text-sm sm:text-base">Unified pipeline for all contacts</p>
+
+            {/* Add X Target Button */}
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-medium rounded-xl hover:opacity-90 transition-opacity"
+            >
+              <Plus className="w-4 h-4" />
+              Add X Target
+            </button>
           </div>
 
           {/* Admin Navigation */}
@@ -1088,6 +1150,7 @@ function OutreachCRMContent() {
               onClose={() => setSelectedContact(null)}
               onUpdate={handleUpdateContact}
               templates={templates}
+              templateStats={templateStats}
             />
           )}
 
@@ -1106,6 +1169,106 @@ function OutreachCRMContent() {
           )}
 
           {/* Toast */}
+          {/* Add X Target Modal */}
+          {showAddModal && (
+            <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+              <Card variant="elevated" className="w-full max-w-lg p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-cyan-500/20 rounded-xl">
+                      <Twitter className="w-5 h-5 text-cyan-400" />
+                    </div>
+                    <h2 className="text-lg font-semibold text-white">Add X/Twitter Target</h2>
+                  </div>
+                  <button
+                    onClick={() => setShowAddModal(false)}
+                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5 text-white/50" />
+                  </button>
+                </div>
+                <form onSubmit={handleAddTarget} className="space-y-4">
+                  <div>
+                    <label className="block text-sm text-white/60 mb-1">X Handle *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="@username"
+                      value={newTarget.handle}
+                      onChange={(e) => setNewTarget({ ...newTarget, handle: e.target.value })}
+                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-cyan-500/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-white/60 mb-1">Display Name</label>
+                    <input
+                      type="text"
+                      placeholder="John Doe"
+                      value={newTarget.display_name}
+                      onChange={(e) => setNewTarget({ ...newTarget, display_name: e.target.value })}
+                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-cyan-500/50"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm text-white/60 mb-1">Followers</label>
+                      <input
+                        type="number"
+                        placeholder="10000"
+                        value={newTarget.follower_count}
+                        onChange={(e) => setNewTarget({ ...newTarget, follower_count: e.target.value })}
+                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-cyan-500/50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-white/60 mb-1">Category</label>
+                      <select
+                        value={newTarget.category}
+                        onChange={(e) => setNewTarget({ ...newTarget, category: e.target.value })}
+                        className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500/50"
+                      >
+                        <option value="coach">Coach</option>
+                        <option value="trainer">Trainer</option>
+                        <option value="player">Player</option>
+                        <option value="content_creator">Content Creator</option>
+                        <option value="organization">Organization</option>
+                        <option value="facility">Facility</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm text-white/60 mb-1">Bio</label>
+                    <textarea
+                      placeholder="Brief description..."
+                      value={newTarget.bio}
+                      onChange={(e) => setNewTarget({ ...newTarget, bio: e.target.value })}
+                      rows={2}
+                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-cyan-500/50 resize-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm text-white/60 mb-1">Notes</label>
+                    <textarea
+                      placeholder="Internal notes..."
+                      value={newTarget.notes}
+                      onChange={(e) => setNewTarget({ ...newTarget, notes: e.target.value })}
+                      rows={2}
+                      className="w-full px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-cyan-500/50 resize-none"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={addingTarget || !newTarget.handle.trim()}
+                    className="w-full py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {addingTarget ? 'Adding...' : 'Add Target'}
+                  </button>
+                </form>
+              </Card>
+            </div>
+          )}
+
           {toast && (
             <Toast
               message={toast.message}
