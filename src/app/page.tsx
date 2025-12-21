@@ -374,61 +374,20 @@ export default function HomePage() {
 
             {/* Hero Headline */}
             <TextReveal
-              text="Get Better Every Day — On the Field and in the Stats."
+              text="The AI training platform built only for baseball & softball."
               as="h1"
               className="text-[40px] sm:text-[56px] md:text-[64px] lg:text-[72px] font-black mb-6 leading-[1.1] text-white"
               delay={0.1}
               staggerDelay={0.03}
             />
 
-            {/* Subheadline - Positioning Statement */}
+            {/* Single Subheadline */}
             <FadeInWhenVisible delay={0.8} direction="up">
-              <p className="text-[22px] sm:text-[26px] text-gray-100 mb-3 leading-relaxed max-w-2xl font-semibold" style={{textShadow: '0 2px 12px rgba(0,0,0,0.7)'}}>
-                The complete AI-powered training platform built exclusively for baseball and softball athletes.
+              <p className="text-[20px] sm:text-[24px] text-gray-200 mb-8 leading-relaxed max-w-2xl font-medium" style={{textShadow: '0 2px 12px rgba(0,0,0,0.7)'}}>
+                Video analysis, mental training, workouts, goals, and recovery—connected in one system that adapts to every athlete.
               </p>
             </FadeInWhenVisible>
 
-            {/* Micro-Clarifier */}
-            <FadeInWhenVisible delay={1.0} direction="up">
-              <p className="text-[16px] sm:text-[18px] text-gray-300 mb-8 leading-relaxed max-w-2xl font-normal" style={{textShadow: '0 2px 12px rgba(0,0,0,0.7)'}}>
-                Skills. Mindset. Strength. Game IQ. All connected.
-              </p>
-            </FadeInWhenVisible>
-
-            {/* AI Learning Pulse Badge */}
-            <FadeInWhenVisible delay={1.2} direction="up" className="mb-6">
-              <div className="inline-block">
-                <div className="relative px-6 py-3 bg-gradient-to-r from-neon-cortex-blue/20 to-solar-surge-orange/20 backdrop-blur-md border-2 border-neon-cortex-blue/40 rounded-xl animate-pulse">
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-neon-cortex-blue drop-shadow-[0_0_8px_rgba(14,165,233,0.8)]">
-                      ⚡ BUILDS YOUR PERFECT TRAINING PLAN AS YOU GO—GETS SMARTER WITH EVERY SESSION
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </FadeInWhenVisible>
-
-            {/* CTA Buttons */}
-            <FadeInWhenVisible delay={1.5} direction="up" className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center w-full sm:w-auto">
-              <Link
-                href="https://apps.apple.com/us/app/mind-muscle/id6754098729"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block"
-              >
-                <div className="shimmer-button px-8 sm:px-10 py-4 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange rounded-xl border border-white/20 hover:border-white/40 transition-all hover:scale-105 flex items-center justify-center w-full">
-                  <span className="text-lg sm:text-xl font-bold text-white whitespace-nowrap">Start Free Today</span>
-                </div>
-              </Link>
-              <Link
-                href="#features"
-                className="inline-block"
-              >
-                <div className="shimmer-button shimmer-button-delayed px-8 sm:px-10 py-4 bg-black/50 backdrop-blur-sm rounded-xl border border-white/30 hover:border-white/50 transition-all hover:scale-105 flex items-center justify-center w-full">
-                  <span className="text-lg sm:text-xl font-semibold text-white whitespace-nowrap">See Pro Features</span>
-                </div>
-              </Link>
-            </FadeInWhenVisible>
           </div>
 
           {/* Logo - Right Side */}
@@ -1575,14 +1534,6 @@ export default function HomePage() {
         </div>
 
         <div className="max-w-7xl mx-auto relative z-10">
-          {/* Top Tagline Badge */}
-          <div className="flex justify-center mb-8">
-            <div className="inline-flex items-center gap-3 px-6 py-3 backdrop-blur-sm bg-white/5 border border-neon-cortex-blue/30 rounded-full">
-              <div className="w-2 h-2 bg-neon-cortex-blue rounded-full animate-pulse" style={{boxShadow: '0 0 12px rgba(14,165,233,0.8)'}} />
-              <span className="text-sm md:text-base font-bold text-gray-200 tracking-wide">BUILT FOR THE DIAMOND. ZERO GENERIC CONTENT.</span>
-            </div>
-          </div>
-
           {/* Main Headline */}
           <div className="text-center mb-16">
             <h2 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black mb-6 leading-[1.1]">
