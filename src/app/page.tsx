@@ -365,17 +365,17 @@ export default function HomePage() {
             <div className="max-w-3xl">
             {/* Tagline */}
             <FadeInWhenVisible delay={0} direction="down">
-              <h1 className="text-[48px] sm:text-[64px] md:text-[80px] lg:text-[96px] font-black mb-4 leading-[1.0]">
+              <h1 className="text-[48px] sm:text-[64px] md:text-[80px] lg:text-[96px] font-black mb-10 leading-[1.0]">
                 <span className="text-neon-cortex-blue" style={{textShadow: '0 0 30px rgba(14,165,233,0.6)'}}>Discipline the Mind.</span>
                 <br />
                 <span className="text-solar-surge-orange" style={{textShadow: '0 0 30px rgba(249,115,22,0.6)'}}>Dominate the Game.</span>
-                <span className="text-white text-[24px] sm:text-[32px] align-top">™</span>
+                <span className="text-solar-surge-orange text-[24px] sm:text-[32px] align-top" style={{textShadow: '0 0 20px rgba(249,115,22,0.5)'}}>™</span>
               </h1>
             </FadeInWhenVisible>
 
             {/* Primary Headline */}
             <FadeInWhenVisible delay={0.4} direction="up">
-              <p className="text-[24px] sm:text-[32px] md:text-[40px] text-white font-bold mb-4 leading-tight max-w-2xl" style={{textShadow: '0 2px 12px rgba(0,0,0,0.7)'}}>
+              <p className="text-[24px] sm:text-[32px] md:text-[40px] text-white font-bold mb-5 leading-tight max-w-2xl" style={{textShadow: '0 2px 12px rgba(0,0,0,0.7)'}}>
                 Built for the Mental and Physical Demands of Baseball and Softball.
               </p>
             </FadeInWhenVisible>
@@ -384,6 +384,13 @@ export default function HomePage() {
             <FadeInWhenVisible delay={0.8} direction="up">
               <p className="text-[18px] sm:text-[22px] text-gray-300 mb-8 leading-relaxed max-w-2xl font-medium" style={{textShadow: '0 2px 12px rgba(0,0,0,0.7)'}}>
                 AI-powered training for skills, mindset, strength, and game IQ — designed specifically for baseball and softball athletes.
+              </p>
+            </FadeInWhenVisible>
+
+            {/* Micro-clarifier */}
+            <FadeInWhenVisible delay={0.9} direction="up">
+              <p className="text-[14px] sm:text-[16px] text-gray-400 mb-4 font-normal" style={{textShadow: '0 2px 8px rgba(0,0,0,0.5)'}}>
+                Train smarter between practices and games.
               </p>
             </FadeInWhenVisible>
 
@@ -426,12 +433,12 @@ export default function HomePage() {
           </div>
 
           {/* Logo - Right Side */}
-          <div className="hidden lg:block flex-shrink-0">
+          <div className="hidden lg:block flex-shrink-0 opacity-90">
             <Image
               src="/assets/images/logo.png"
               alt="Mind & Muscle Logo"
-              width={438}
-              height={438}
+              width={400}
+              height={400}
             />
           </div>
         </div>
