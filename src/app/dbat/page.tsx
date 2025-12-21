@@ -13,20 +13,31 @@ import {
 import {
   TrendingDown, UserX, Target, Repeat, Video, Brain, Gamepad2,
   Dumbbell, DollarSign, Users, TrendingUp, Calendar, Mail,
-  CheckCircle, ArrowRight, Play, Award, Building2, Zap
+  CheckCircle, ArrowRight, Play, Award, Building2, Zap, UserPlus
 } from 'lucide-react';
 
 export default function DBatPartnerPage() {
   const [athleteCount, setAthleteCount] = useState(200);
-  const [retentionLift, setRetentionLift] = useState(10); // % of athletes who stay longer
+  const [retentionLift, setRetentionLift] = useState(10); // % of members who stay longer
+  const [conversionRate, setConversionRate] = useState(5); // % of lesson-only athletes who become members
 
-  // Revenue calculations
-  const avgLessonPrice = 65; // Average lesson price
+  // D-BAT specific costs (researched)
+  const avgLessonPrice = 100; // $100/hour average (user confirmed)
+  const avgMembershipPrice = 68; // $48-88/mo, using average
   const lessonsPerMonth = 4; // Typical lessons per month
-  const extraMonths = 3; // How many extra months retained athletes stay
+  const extraMonths = 3; // How many extra months retained members stay
 
-  // Retention value: X% of athletes × lessons/month × price × extra months
-  const retentionValue = Math.round((athleteCount * (retentionLift / 100)) * lessonsPerMonth * avgLessonPrice * extraMonths);
+  // Assume 30% of athletes are lesson-only (not members)
+  const lessonOnlyAthletes = Math.round(athleteCount * 0.3);
+
+  // Retention value: X% of members stay 3 extra months = (lessons + membership) × 3
+  const retainedMembers = Math.round(athleteCount * 0.7 * (retentionLift / 100));
+  const monthlyValuePerMember = (lessonsPerMonth * avgLessonPrice) + avgMembershipPrice;
+  const retentionValue = Math.round(retainedMembers * monthlyValuePerMember * extraMonths);
+
+  // New member conversion: Y% of lesson-only athletes become members
+  const newMembers = Math.round(lessonOnlyAthletes * (conversionRate / 100));
+  const conversionValue = Math.round(newMembers * avgMembershipPrice * 12); // Annual membership value
 
   // Commission calculation (10% base, 15% at 101+)
   const pricePerUser = athleteCount >= 200 ? 63.20 : athleteCount >= 120 ? 67.15 : athleteCount >= 12 ? 71.10 : 79;
@@ -34,7 +45,7 @@ export default function DBatPartnerPage() {
   const annualCommission = Math.round(athleteCount * pricePerUser * commissionRate * 2);
 
   // Total annual value
-  const totalAnnualValue = retentionValue + annualCommission;
+  const totalAnnualValue = retentionValue + conversionValue + annualCommission;
 
   // D-BAT specific pain points
   const painPoints = [
@@ -78,7 +89,7 @@ export default function DBatPartnerPage() {
       tagline: 'For your pitchers between bullpens.',
       description: 'Pitchers analyze their mechanics on their own time. Identify arm slot issues, release points, spin patterns before they even arrive for instruction.',
       color: 'blue',
-      videoUrl: '/assets/videos/pitch_lab_1.mp4',
+      videoUrl: '/assets/videos/pitch_lab.mp4',
       iconImage: '/assets/images/pitch_lab_icon.png',
       forInstructor: 'Pitchers show up already knowing what to work on.',
     },
@@ -145,7 +156,7 @@ export default function DBatPartnerPage() {
     <div className="min-h-screen">
       {/* Section 1: Hero */}
       <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#003366]/20 via-[#0F1123] to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-neon-cortex-blue/20 via-[#0F1123] to-transparent" />
 
         <div className="max-w-6xl mx-auto relative z-10">
           {/* Logos */}
@@ -181,7 +192,7 @@ export default function DBatPartnerPage() {
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6 leading-tight">
                 <span className="text-white">Your Athletes Take Lessons.</span>
                 <br />
-                <span className="bg-gradient-to-r from-[#003366] to-[#228B22] bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">
                   What Happens After They Leave?
                 </span>
               </h1>
@@ -198,19 +209,19 @@ export default function DBatPartnerPage() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
                 <a
                   href="#calculator"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-[#003366] to-[#228B22] hover:from-[#003366]/90 hover:to-[#228B22]/90 text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange hover:from-neon-cortex-blue/90 hover:to-solar-surge-orange/90 text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl"
                 >
                   <DollarSign className="w-5 h-5" />
                   See the Math
                 </a>
                 <a
-                  href="https://calendly.com/mindandmuscle/dbat-partnership"
+                  href="https://calendly.com/jeff-mindandmuscle/mind-muscle-discovery-call"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold text-lg rounded-xl transition-all border border-white/20"
                 >
                   <Calendar className="w-5 h-5" />
-                  Talk to Jeff
+                  Schedule a Call
                 </a>
               </div>
             </FadeInWhenVisible>
@@ -271,15 +282,15 @@ export default function DBatPartnerPage() {
 
         <div className="max-w-7xl mx-auto relative z-10">
           <FadeInWhenVisible delay={0} direction="up" className="text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#228B22]/20 text-[#228B22] text-sm font-bold mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neon-cortex-blue/20 text-neon-cortex-blue text-sm font-bold mb-6">
               <Zap className="w-4 h-4" />
               WHAT YOUR ATHLETES GET
             </div>
             <GradientTextReveal
               text="Training Between Lessons"
               className="text-3xl sm:text-4xl lg:text-5xl font-black mb-6"
-              gradientFrom="#003366"
-              gradientTo="#228B22"
+              gradientFrom="#0EA5E9"
+              gradientTo="#F97316"
               delay={0.2}
             />
             <p className="text-lg text-text-secondary max-w-2xl mx-auto">
@@ -294,14 +305,14 @@ export default function DBatPartnerPage() {
                 <motion.div key={feature.id} className="group relative" variants={staggerItemVariants}>
                   <div
                     className={`absolute -inset-2 rounded-3xl blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500 ${
-                      isBlue ? 'bg-gradient-to-b from-neon-cortex-blue/30 to-transparent' : 'bg-gradient-to-b from-[#228B22]/30 to-transparent'
+                      isBlue ? 'bg-gradient-to-b from-neon-cortex-blue/30 to-transparent' : 'bg-gradient-to-b from-solar-surge-orange/30 to-transparent'
                     }`}
                   />
                   <div
                     className={`relative backdrop-blur-sm bg-white/[0.02] p-6 rounded-2xl border-2 transition-all duration-500 hover:scale-[1.02] hover:bg-white/[0.05] h-full ${
                       isBlue
                         ? 'border-neon-cortex-blue/40 hover:border-neon-cortex-blue shadow-[0_0_20px_rgba(14,165,233,0.3)]'
-                        : 'border-[#228B22]/40 hover:border-[#228B22] shadow-[0_0_20px_rgba(34,139,34,0.3)]'
+                        : 'border-solar-surge-orange/40 hover:border-solar-surge-orange shadow-[0_0_20px_rgba(249,115,22,0.3)]'
                     }`}
                   >
                     {/* Video */}
@@ -321,7 +332,7 @@ export default function DBatPartnerPage() {
                     <div className="flex items-center gap-3 mb-3">
                       <div
                         className={`flex-shrink-0 w-14 h-14 rounded-xl flex items-center justify-center ${
-                          isBlue ? 'bg-neon-cortex-blue/10 border border-neon-cortex-blue/30' : 'bg-[#228B22]/10 border border-[#228B22]/30'
+                          isBlue ? 'bg-neon-cortex-blue/10 border border-neon-cortex-blue/30' : 'bg-solar-surge-orange/10 border border-solar-surge-orange/30'
                         }`}
                       >
                         <Image
@@ -333,10 +344,10 @@ export default function DBatPartnerPage() {
                         />
                       </div>
                       <div>
-                        <h3 className={`text-xl font-black ${isBlue ? 'text-neon-cortex-blue' : 'text-[#228B22]'}`}>
+                        <h3 className={`text-xl font-black ${isBlue ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`}>
                           {feature.title}
                         </h3>
-                        <p className={`text-sm font-medium ${isBlue ? 'text-neon-cortex-blue/70' : 'text-[#228B22]/70'}`}>
+                        <p className={`text-sm font-medium ${isBlue ? 'text-neon-cortex-blue/70' : 'text-solar-surge-orange/70'}`}>
                           {feature.tagline}
                         </p>
                       </div>
@@ -345,8 +356,8 @@ export default function DBatPartnerPage() {
                     <p className="text-text-secondary leading-relaxed mb-4">{feature.description}</p>
 
                     {/* Instructor benefit callout */}
-                    <div className={`p-3 rounded-lg ${isBlue ? 'bg-neon-cortex-blue/10' : 'bg-[#228B22]/10'}`}>
-                      <p className={`text-sm font-medium ${isBlue ? 'text-neon-cortex-blue' : 'text-[#228B22]'}`}>
+                    <div className={`p-3 rounded-lg ${isBlue ? 'bg-neon-cortex-blue/10' : 'bg-solar-surge-orange/10'}`}>
+                      <p className={`text-sm font-medium ${isBlue ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'}`}>
                         <span className="font-bold">For instructors:</span> {feature.forInstructor}
                       </p>
                     </div>
@@ -405,7 +416,7 @@ export default function DBatPartnerPage() {
         </div>
       </section>
 
-      {/* Section 5: The Calculator - Retention + Commission */}
+      {/* Section 5: The Calculator - Retention + Conversion + Commission */}
       <section id="calculator" className="py-20 px-4 sm:px-6 lg:px-8 scroll-mt-20">
         <div className="max-w-4xl mx-auto">
           <FadeInWhenVisible delay={0} direction="up" className="text-center mb-10">
@@ -413,7 +424,7 @@ export default function DBatPartnerPage() {
               The Real Math
             </h2>
             <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-              Commission is nice. But the real value? Athletes who stay because they're seeing results.
+              Commission is nice. But the real value? Members who stay and lesson athletes who convert.
             </p>
           </FadeInWhenVisible>
 
@@ -422,11 +433,18 @@ export default function DBatPartnerPage() {
               className="rounded-3xl overflow-hidden"
               style={{
                 background: 'linear-gradient(135deg, rgba(15, 17, 35, 0.95) 0%, rgba(27, 31, 57, 0.95) 100%)',
-                border: '2px solid rgba(34, 139, 34, 0.4)',
-                boxShadow: '0 8px 32px rgba(34, 139, 34, 0.2)',
+                border: '2px solid rgba(14, 165, 233, 0.4)',
+                boxShadow: '0 8px 32px rgba(14, 165, 233, 0.2)',
               }}
             >
               <div className="p-8">
+                {/* Assumptions callout */}
+                <div className="mb-6 p-4 bg-white/5 rounded-lg border border-white/10">
+                  <p className="text-sm text-text-secondary">
+                    <span className="font-bold text-white">Based on D-BAT averages:</span> $100/hr lessons, $68/mo membership (Gold $48, Platinum $88), 4 lessons/month
+                  </p>
+                </div>
+
                 {/* Athlete Count Slider */}
                 <div className="mb-8">
                   <label className="block text-lg font-bold mb-4 text-white">
@@ -439,7 +457,7 @@ export default function DBatPartnerPage() {
                     step="10"
                     value={athleteCount}
                     onChange={(e) => setAthleteCount(Number(e.target.value))}
-                    className="w-full h-3 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#228B22]"
+                    className="w-full h-3 bg-white/10 rounded-lg appearance-none cursor-pointer accent-neon-cortex-blue"
                   />
                   <div className="flex justify-between text-sm text-text-secondary mt-2">
                     <span>50</span>
@@ -451,7 +469,7 @@ export default function DBatPartnerPage() {
                 {/* Retention Lift Slider */}
                 <div className="mb-8">
                   <label className="block text-lg font-bold mb-2 text-white">
-                    If just <span className="text-[#228B22]">{retentionLift}%</span> of athletes stay 3 extra months...
+                    If <span className="text-neon-cortex-blue">{retentionLift}%</span> of members stay 3 extra months...
                   </label>
                   <p className="text-sm text-text-secondary mb-4">
                     Because they're seeing faster progress with structured between-lesson training
@@ -463,7 +481,7 @@ export default function DBatPartnerPage() {
                     step="5"
                     value={retentionLift}
                     onChange={(e) => setRetentionLift(Number(e.target.value))}
-                    className="w-full h-3 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#228B22]"
+                    className="w-full h-3 bg-white/10 rounded-lg appearance-none cursor-pointer accent-neon-cortex-blue"
                   />
                   <div className="flex justify-between text-sm text-text-secondary mt-2">
                     <span>5%</span>
@@ -471,44 +489,76 @@ export default function DBatPartnerPage() {
                   </div>
                 </div>
 
+                {/* New Member Conversion Slider */}
+                <div className="mb-8">
+                  <label className="block text-lg font-bold mb-2 text-white">
+                    If <span className="text-solar-surge-orange">{conversionRate}%</span> of lesson-only athletes become members...
+                  </label>
+                  <p className="text-sm text-text-secondary mb-4">
+                    {lessonOnlyAthletes} athletes take lessons but aren't members. The app shows them the value of training more.
+                  </p>
+                  <input
+                    type="range"
+                    min="0"
+                    max="20"
+                    step="5"
+                    value={conversionRate}
+                    onChange={(e) => setConversionRate(Number(e.target.value))}
+                    className="w-full h-3 bg-white/10 rounded-lg appearance-none cursor-pointer accent-solar-surge-orange"
+                  />
+                  <div className="flex justify-between text-sm text-text-secondary mt-2">
+                    <span>0%</span>
+                    <span>20%</span>
+                  </div>
+                </div>
+
                 {/* Results */}
-                <div className="grid md:grid-cols-3 gap-4 mb-8">
-                  <div className="text-center p-6 bg-white/5 rounded-xl border border-white/10">
-                    <p className="text-sm text-text-secondary mb-2">Retention Value</p>
-                    <p className="text-3xl font-black text-[#228B22]">
+                <div className="grid md:grid-cols-4 gap-4 mb-8">
+                  <div className="text-center p-5 bg-white/5 rounded-xl border border-white/10">
+                    <p className="text-xs text-text-secondary mb-2">Member Retention</p>
+                    <p className="text-2xl font-black text-neon-cortex-blue">
                       ${retentionValue.toLocaleString()}
                     </p>
                     <p className="text-xs text-text-secondary mt-1">
-                      {Math.round(athleteCount * (retentionLift / 100))} athletes × 3 months lessons
+                      {retainedMembers} members × 3 mo
                     </p>
                   </div>
-                  <div className="text-center p-6 bg-white/5 rounded-xl border border-white/10">
-                    <p className="text-sm text-text-secondary mb-2">Commission</p>
-                    <p className="text-3xl font-black text-[#003366]">
+                  <div className="text-center p-5 bg-white/5 rounded-xl border border-white/10">
+                    <p className="text-xs text-text-secondary mb-2">New Members</p>
+                    <p className="text-2xl font-black text-solar-surge-orange">
+                      ${conversionValue.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-text-secondary mt-1">
+                      {newMembers} converted × 12 mo
+                    </p>
+                  </div>
+                  <div className="text-center p-5 bg-white/5 rounded-xl border border-white/10">
+                    <p className="text-xs text-text-secondary mb-2">Commission</p>
+                    <p className="text-2xl font-black text-white/80">
                       ${annualCommission.toLocaleString()}
                     </p>
                     <p className="text-xs text-text-secondary mt-1">
-                      {athleteCount >= 101 ? '15%' : '10%'} of subscriptions
+                      {athleteCount >= 101 ? '15%' : '10%'} of app subs
                     </p>
                   </div>
-                  <div className="text-center p-6 bg-gradient-to-br from-[#003366]/20 to-[#228B22]/20 rounded-xl border-2 border-[#228B22]/40">
-                    <p className="text-sm text-white/80 mb-2 font-medium">Total Annual Value</p>
-                    <p className="text-4xl font-black bg-gradient-to-r from-[#003366] to-[#228B22] bg-clip-text text-transparent">
+                  <div className="text-center p-5 bg-gradient-to-br from-neon-cortex-blue/20 to-solar-surge-orange/20 rounded-xl border-2 border-neon-cortex-blue/40">
+                    <p className="text-xs text-white/80 mb-2 font-medium">Total Annual Value</p>
+                    <p className="text-3xl font-black bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">
                       ${totalAnnualValue.toLocaleString()}
                     </p>
                     <p className="text-xs text-white/60 mt-1">
-                      Retention + Commission
+                      Per year
                     </p>
                   </div>
                 </div>
 
                 {/* Key insight */}
-                <div className="p-4 bg-[#228B22]/10 border border-[#228B22]/30 rounded-lg">
+                <div className="p-4 bg-neon-cortex-blue/10 border border-neon-cortex-blue/30 rounded-lg">
                   <p className="text-center text-sm">
-                    <span className="font-bold text-[#228B22]">The insight:</span>{' '}
+                    <span className="font-bold text-neon-cortex-blue">The insight:</span>{' '}
                     <span className="text-white/80">
-                      Retention value is {Math.round(retentionValue / annualCommission * 10) / 10}x the commission.
-                      Athletes who train between lessons see faster progress → stay longer → more lesson revenue.
+                      Retention + conversion is {Math.round((retentionValue + conversionValue) / annualCommission * 10) / 10}x the commission.
+                      The app pays for itself through member retention alone.
                     </span>
                   </p>
                 </div>
@@ -542,7 +592,7 @@ export default function DBatPartnerPage() {
                     { step: '3', title: 'Track Everything', desc: 'See who\'s signed up, who\'s training, and your commission in real-time' },
                   ].map((item) => (
                     <div key={item.step} className="text-center">
-                      <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-[#003366] to-[#228B22] mb-4 text-xl font-black text-white">
+                      <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-neon-cortex-blue to-solar-surge-orange mb-4 text-xl font-black text-white">
                         {item.step}
                       </div>
                       <h3 className="text-lg font-bold text-white mb-2">{item.title}</h3>
@@ -552,9 +602,9 @@ export default function DBatPartnerPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center justify-center gap-3 text-sm">
-                  <span className="px-4 py-2 rounded-full bg-[#228B22]/20 text-[#228B22] font-medium">Zero upfront cost</span>
-                  <span className="px-4 py-2 rounded-full bg-[#228B22]/20 text-[#228B22] font-medium">Zero staff time</span>
-                  <span className="px-4 py-2 rounded-full bg-[#228B22]/20 text-[#228B22] font-medium">Zero risk</span>
+                  <span className="px-4 py-2 rounded-full bg-neon-cortex-blue/20 text-neon-cortex-blue font-medium">Zero upfront cost</span>
+                  <span className="px-4 py-2 rounded-full bg-neon-cortex-blue/20 text-neon-cortex-blue font-medium">Zero staff time</span>
+                  <span className="px-4 py-2 rounded-full bg-neon-cortex-blue/20 text-neon-cortex-blue font-medium">Zero risk</span>
                 </div>
               </div>
             </div>
@@ -569,9 +619,9 @@ export default function DBatPartnerPage() {
             <div
               className="rounded-3xl overflow-hidden text-center"
               style={{
-                background: 'linear-gradient(135deg, rgba(0, 51, 102, 0.3) 0%, rgba(34, 139, 34, 0.3) 100%)',
-                border: '2px solid rgba(34, 139, 34, 0.5)',
-                boxShadow: '0 8px 32px rgba(34, 139, 34, 0.3)',
+                background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.2) 0%, rgba(249, 115, 22, 0.2) 100%)',
+                border: '2px solid rgba(14, 165, 233, 0.5)',
+                boxShadow: '0 8px 32px rgba(14, 165, 233, 0.3)',
               }}
             >
               <div className="p-8 sm:p-12">
@@ -585,25 +635,25 @@ export default function DBatPartnerPage() {
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
                   <a
-                    href="https://calendly.com/mindandmuscle/dbat-partnership"
+                    href="https://calendly.com/jeff-mindandmuscle/mind-muscle-discovery-call"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#003366] to-[#228B22] hover:from-[#003366]/90 hover:to-[#228B22]/90 text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl"
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange hover:from-neon-cortex-blue/90 hover:to-solar-surge-orange/90 text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl"
                   >
                     <Calendar className="w-5 h-5" />
                     Schedule a Call
                   </a>
                   <a
-                    href="mailto:jeff@mindandmuscle.ai?subject=D-BAT Partnership"
+                    href="mailto:support@mindandmuscle.ai?subject=D-BAT Partnership"
                     className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold text-lg rounded-xl transition-all border border-white/20"
                   >
                     <Mail className="w-5 h-5" />
-                    Email Jeff
+                    Email Us
                   </a>
                 </div>
 
                 <p className="text-white/50 text-sm">
-                  jeff@mindandmuscle.ai • Founder, Mind & Muscle
+                  support@mindandmuscle.ai
                 </p>
               </div>
             </div>
