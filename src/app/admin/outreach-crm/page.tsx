@@ -173,10 +173,10 @@ function OutreachCRMContent() {
 
       const data = await response.json();
       if (data.success) {
-        setTemplates(data.templates.map((t: { id: string; name: string; template_text: string }) => ({
+        setTemplates(data.templates.map((t: { id: string; template_name: string; body: string }) => ({
           id: t.id,
-          name: t.name,
-          content: t.template_text,
+          name: t.template_name,
+          content: t.body,
         })));
       }
     } catch (error) {
