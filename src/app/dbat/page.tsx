@@ -229,65 +229,31 @@ export default function DBatPartnerPage() {
         </div>
       </section>
 
-      {/* Section 2: Partner Banner */}
+      {/* Section 2: Partner Banner Example */}
       <section className="py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <FadeInWhenVisible delay={0} direction="up">
-            <div
-              className="relative rounded-2xl overflow-hidden"
-              style={{
-                background: 'linear-gradient(135deg, rgba(15, 17, 35, 0.95) 0%, rgba(27, 31, 57, 0.95) 100%)',
-                border: '2px solid rgba(14, 165, 233, 0.3)',
-                boxShadow: '0 8px 32px rgba(14, 165, 233, 0.15)',
-              }}
-            >
-              {/* Background image */}
-              <div className="absolute inset-0">
-                <Image
-                  src="/assets/images/baseball_field_dusk.png"
-                  alt="Baseball field"
-                  fill
-                  className="object-cover opacity-30"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-[#0F1123]/90 via-[#0F1123]/70 to-[#0F1123]/90" />
-              </div>
-
-              <div className="relative p-8 sm:p-12 flex flex-col sm:flex-row items-center justify-between gap-8">
-                {/* Left side - logos */}
-                <div className="flex items-center gap-4">
-                  <div className="relative w-20 h-20 sm:w-24 sm:h-24">
-                    <Image
-                      src="/assets/images/dbat-logo.png"
-                      alt="D-BAT"
-                      fill
-                      className="object-contain"
-                    />
-                  </div>
-                  <div className="text-2xl font-bold text-white/40">+</div>
-                  <div className="relative w-20 h-20 sm:w-24 sm:h-24">
-                    <Image
-                      src="/assets/images/logo.png"
-                      alt="Mind & Muscle"
-                      fill
-                      className="object-contain"
-                    />
-                  </div>
-                </div>
-
-                {/* Right side - text */}
-                <div className="text-center sm:text-right">
-                  <p className="text-sm text-neon-cortex-blue font-bold uppercase tracking-wider mb-2">
-                    Official Partner Program
-                  </p>
-                  <h3 className="text-2xl sm:text-3xl font-black text-white mb-2">
-                    D-BAT × Mind & Muscle
-                  </h3>
-                  <p className="text-white/60 text-sm">
-                    Complete player development: physical + mental + game IQ
-                  </p>
-                </div>
-              </div>
+            <div className="text-center mb-6">
+              <p className="text-sm text-neon-cortex-blue font-bold uppercase tracking-wider">
+                Your Custom Partner Banner
+              </p>
             </div>
+            <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+              {/* EXAMPLE Badge */}
+              <div className="absolute top-4 right-4 z-10 bg-solar-surge-orange text-white px-4 py-2 rounded-lg font-bold text-sm uppercase tracking-wider shadow-lg">
+                Example
+              </div>
+              <Image
+                src="/assets/images/dbat-partner-banner-example.png"
+                alt="D-BAT × Mind & Muscle Partner Banner Example"
+                width={1456}
+                height={816}
+                className="w-full h-auto"
+              />
+            </div>
+            <p className="text-center text-white/50 text-sm mt-4">
+              We create custom co-branded marketing materials for every partner location
+            </p>
           </FadeInWhenVisible>
         </div>
       </section>
