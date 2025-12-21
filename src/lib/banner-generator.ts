@@ -398,8 +398,8 @@ function createFacebookCoBrandedBanner(qrCodeDataUrl: string, partnerLogoDataUrl
                             props: {
                               src: partnerLogoDataUrl,
                               style: {
-                                height: 70,
-                                maxWidth: 180,
+                                height: 100,
+                                maxWidth: 260,
                                 objectFit: 'contain',
                               },
                             },
@@ -865,8 +865,8 @@ function createTwitterCoBrandedBanner(qrCodeDataUrl: string, partnerLogoDataUrl:
                             props: {
                               src: partnerLogoDataUrl,
                               style: {
-                                height: 95,
-                                maxWidth: 240,
+                                height: 130,
+                                maxWidth: 320,
                                 objectFit: 'contain',
                               },
                             },
@@ -1124,8 +1124,8 @@ function createPartnerBanner(qrCodeDataUrl: string, partnerLogoDataUrl: string) 
                             props: {
                               src: partnerLogoDataUrl,
                               style: {
-                                height: 95,
-                                maxWidth: 240,
+                                height: 130,
+                                maxWidth: 320,
                                 objectFit: 'contain',
                               },
                             },
