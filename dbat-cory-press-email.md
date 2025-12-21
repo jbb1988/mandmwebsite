@@ -16,7 +16,7 @@ I'm reaching out because I believe D-BAT is perfectly positioned to offer someth
 D-BAT's mission is "complete player development" - but right now that means physical skills only. What happens when your athletes leave the cage? Most go home and... nothing. The mental side of the game - focus, confidence, pressure handling, baseball IQ - gets ignored until game time.
 
 Mind & Muscle fills that gap with:
-- **5-minute pre-lesson mental focus routines** (via QR codes in tunnels)
+- **5-minute pre-lesson mental focus routines** (via QR codes in your facility)
 - **AI swing analysis** (athletes upload cage videos for instant feedback)
 - **186 real game scenarios** for baseball IQ development
 - **Position-specific strength training** designed for rotational power
@@ -24,12 +24,12 @@ Mind & Muscle fills that gap with:
 
 **The partnership model:**
 
-We're proposing an affiliate partnership where D-BAT locations earn **15-20% commission** on every athlete subscription. For context:
-- A location with 200 active athletes could generate **$4,000-6,000+/year** in passive revenue
-- With 300+ athletes: **$6,000-9,000+/year**
+We're proposing an affiliate partnership where D-BAT locations earn **10-15% commission** on every athlete subscription (10% base, 15% at 101+ users). For context:
+- A location with 200 active athletes could generate **$3,000+/year** in passive revenue
+- With 300+ athletes: **$5,000+/year**
 - Zero cost, zero staff, zero inventory
 
-We provide everything: QR code posters for tunnels, email templates, social graphics, and tracking dashboards.
+We provide everything: QR code posters for your facility, email templates, social graphics, and tracking dashboards.
 
 **I built a custom page for D-BAT:** https://mindandmuscle.ai/dbat
 

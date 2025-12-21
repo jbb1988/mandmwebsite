@@ -3,519 +3,613 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { LiquidGlass } from '@/components/LiquidGlass';
-import { LiquidButton } from '@/components/LiquidButton';
-import { GradientTextReveal } from '@/components/animations';
+import { motion } from 'framer-motion';
 import {
-  DollarSign, TrendingUp, Users, Check, Zap, Target,
-  Building2, ChevronDown, Calendar, Phone, Mail, MapPin,
-  Play, ArrowRight, Sparkles, Shield, Clock
+  FadeInWhenVisible,
+  StaggerChildren,
+  GradientTextReveal,
+  staggerItemVariants,
+} from '@/components/animations';
+import {
+  TrendingDown, UserX, Target, Repeat, Video, Brain, Gamepad2,
+  Dumbbell, DollarSign, Users, TrendingUp, Calendar, Mail,
+  CheckCircle, ArrowRight, Play, Award, Building2, Zap
 } from 'lucide-react';
 
 export default function DBatPartnerPage() {
   const [athleteCount, setAthleteCount] = useState(200);
-  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
-  const [selectedLocation, setSelectedLocation] = useState('');
+  const [retentionLift, setRetentionLift] = useState(10); // % of athletes who stay longer
 
-  // Commission calculation (same as partner program)
+  // Revenue calculations
+  const avgLessonPrice = 65; // Average lesson price
+  const lessonsPerMonth = 4; // Typical lessons per month
+  const extraMonths = 3; // How many extra months retained athletes stay
+
+  // Retention value: X% of athletes × lessons/month × price × extra months
+  const retentionValue = Math.round((athleteCount * (retentionLift / 100)) * lessonsPerMonth * avgLessonPrice * extraMonths);
+
+  // Commission calculation (10% base, 15% at 101+)
   const pricePerUser = athleteCount >= 200 ? 63.20 : athleteCount >= 120 ? 67.15 : athleteCount >= 12 ? 71.10 : 79;
   const commissionRate = athleteCount >= 101 ? 0.15 : 0.10;
-  const sixMonthRevenue = athleteCount * pricePerUser * commissionRate;
-  const annualRevenue = sixMonthRevenue * 2;
-  const threeYearRevenue = annualRevenue * 3;
+  const annualCommission = Math.round(athleteCount * pricePerUser * commissionRate * 2);
 
-  const valueProps = [
+  // Total annual value
+  const totalAnnualValue = retentionValue + annualCommission;
+
+  // D-BAT specific pain points
+  const painPoints = [
     {
-      icon: Zap,
-      title: 'Complement Your Lessons',
-      description: 'Athletes use Mind & Muscle between cage sessions to develop the mental side. Your lessons work on mechanics, we work on the mind.',
-      color: 'orange',
+      icon: TrendingDown,
+      title: 'Athletes Plateau, Then Quit',
+      description: 'They take lessons for months. Progress stalls. Parents question the investment. Membership cancelled.',
+    },
+    {
+      icon: UserX,
+      title: 'Nothing Happens Between Lessons',
+      description: 'You teach mechanics on Tuesday. By Saturday\'s lesson, they forgot half of it. Repeat forever.',
     },
     {
       icon: Target,
-      title: 'Complete Player Development',
-      description: 'D-BAT already provides elite physical training. Add mental training, strength programs, and baseball IQ to create truly complete players.',
+      title: 'The Mental Game Gets Ignored',
+      description: 'You can fix their swing. But confidence, focus, pressure handling? That\'s on them to figure out.',
+    },
+    {
+      icon: Repeat,
+      title: 'Same Conversations, Different Day',
+      description: '"Stay focused." "Trust your training." "Slow the game down." You say it 50 times. It doesn\'t stick.',
+    },
+  ];
+
+  // Features relevant to D-BAT
+  const features = [
+    {
+      id: 'swing-lab',
+      title: 'Swing Lab',
+      tagline: 'Reinforce your cage work at home.',
+      description: 'Athletes upload videos from lessons. AI analyzes mechanics and reminds them what you taught. They practice the right things between sessions.',
+      color: 'orange',
+      videoUrl: '/assets/videos/swing_lab.mp4',
+      iconImage: '/assets/images/Swing Lab1.png',
+      forInstructor: 'Athletes come prepared. They remember what you worked on.',
+    },
+    {
+      id: 'pitch-lab',
+      title: 'Pitch Lab',
+      tagline: 'For your pitchers between bullpens.',
+      description: 'Pitchers analyze their mechanics on their own time. Identify arm slot issues, release points, spin patterns before they even arrive for instruction.',
+      color: 'blue',
+      videoUrl: '/assets/videos/pitch_lab_1.mp4',
+      iconImage: '/assets/images/pitch_lab_icon.png',
+      forInstructor: 'Pitchers show up already knowing what to work on.',
+    },
+    {
+      id: 'plate-iq',
+      title: 'Plate IQ',
+      tagline: '186 real game scenarios.',
+      description: 'Pitch recognition. Count leverage. Situational hitting. They can\'t practice game decisions in the cage - but they can here.',
+      color: 'orange',
+      videoUrl: '/assets/videos/plate_iq.mp4',
+      iconImage: '/assets/images/plate_iq_icon_3x.png',
+      forInstructor: 'Better at-bats in games. Parents see results.',
+    },
+    {
+      id: 'mind-coach',
+      title: 'Mind Coach AI',
+      tagline: 'The mental reps they\'re not getting.',
+      description: 'Pre-lesson focus routine. Post-game reflection. Confidence building between sessions. Finally, structured mental training.',
+      color: 'blue',
+      videoUrl: '/assets/videos/mind_coachai.mp4',
+      iconImage: '/assets/images/Mind AI Coach.png',
+      forInstructor: 'You coach mechanics. AI coaches mindset. Complete player.',
+    },
+  ];
+
+  // What each stakeholder gets
+  const stakeholders = [
+    {
+      role: 'D-BAT Owners',
+      icon: Building2,
+      benefits: [
+        'Higher retention - athletes who see progress stay longer',
+        'Differentiation from every other D-BAT and facility nearby',
+        'Passive commission on subscriptions (10-15%)',
+        'Zero cost, zero staff, zero inventory',
+      ],
       color: 'blue',
     },
     {
-      icon: DollarSign,
-      title: 'Passive Revenue Stream',
-      description: 'Earn 15-20% commission on every athlete who subscribes. No extra work, no inventory, no staff needed.',
+      role: 'Lesson Instructors',
+      icon: Award,
+      benefits: [
+        'Athletes arrive prepared with 5-min pre-lesson focus',
+        'They practice what you taught (not random swings)',
+        'Faster progress = you look good = more referrals',
+        'AI handles mental coaching so you can focus on mechanics',
+      ],
       color: 'orange',
     },
     {
-      icon: Shield,
-      title: 'Zero Risk Partnership',
-      description: 'No upfront costs. No commitments. Just share with your athletes and earn when they subscribe.',
+      role: 'Athletes & Parents',
+      icon: Users,
+      benefits: [
+        'See real progress between lessons',
+        'Complete development: physical + mental + game IQ',
+        'AI swing analysis from their own cage videos',
+        'Finally understand what to work on at home',
+      ],
       color: 'blue',
     },
   ];
 
-  const howItWorks = [
-    {
-      step: '1',
-      title: 'QR Codes in Your Tunnels',
-      description: 'We provide printable QR code posters for your batting cages. Athletes scan before or after lessons.',
-    },
-    {
-      step: '2',
-      title: 'Athletes Start Training',
-      description: 'They get AI-powered mental training, swing analysis, strength programs, and 186 game scenarios.',
-    },
-    {
-      step: '3',
-      title: 'You Earn Automatically',
-      description: 'Every subscription generates 15-20% commission paid directly to you. Forever, on every renewal.',
-    },
-  ];
-
-  const faqs = [
-    {
-      question: 'How does this fit with what D-BAT already offers?',
-      answer: 'D-BAT provides elite physical training in the cages. Mind & Muscle adds what happens between sessions: mental training, game IQ, goal tracking, and at-home development. We complement your lessons, not compete with them.',
-    },
-    {
-      question: 'What do I actually have to do?',
-      answer: 'Almost nothing. We provide QR code posters for your tunnels, email templates for your athlete list, and social graphics. Athletes see it, scan it, subscribe. You earn commission automatically.',
-    },
-    {
-      question: 'How much can a typical D-BAT location earn?',
-      answer: 'A D-BAT with 200 active athletes could generate $4,000-6,000+ per year in passive commission. With 300+ athletes, you\'re looking at $6,000-9,000+ annually. Zero additional work required.',
-    },
-    {
-      question: 'Is there a franchise-wide deal available?',
-      answer: 'We\'re in discussions with D-BAT corporate about a franchise-wide partnership. Individual locations can start earning now, and any deal would include early adopters.',
-    },
-    {
-      question: 'What if our athletes already use other apps?',
-      answer: 'Most "baseball apps" are single-purpose: just video, just workouts, or just stats. Mind & Muscle integrates 8 AI tools into one platform. Athletes save money and get better development.',
-    },
-  ];
-
-  const dbatLocations = [
-    'Select your D-BAT location...',
-    'D-BAT Frisco', 'D-BAT Addison', 'D-BAT Allen', 'D-BAT Arlington',
-    'D-BAT Austin', 'D-BAT Atlanta', 'D-BAT Buckhead', 'D-BAT Centennial',
-    'D-BAT Colorado Springs', 'D-BAT Columbus', 'D-BAT Dallas',
-    'D-BAT Fort Worth', 'D-BAT Houston', 'D-BAT Jacksonville',
-    'D-BAT Kansas City', 'D-BAT Nashville', 'D-BAT Phoenix',
-    'D-BAT San Antonio', 'D-BAT Tampa', 'D-BAT The Woodlands',
-    'Other D-BAT Location',
-  ];
-
   return (
-    <div className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative">
-      {/* Background */}
-      <div className="fixed inset-0 bg-gradient-to-br from-[#003366]/10 via-transparent to-[#228B22]/10 pointer-events-none" />
+    <div className="min-h-screen">
+      {/* Section 1: Hero */}
+      <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#003366]/20 via-[#0F1123] to-transparent" />
 
-      {/* Hero Section */}
-      <div className="max-w-7xl mx-auto text-center mb-16">
-        {/* D-BAT + M&M Logos */}
-        <div className="flex items-center justify-center gap-6 mb-8">
-          <Image
-            src="/assets/images/dbat-logo.png"
-            alt="D-BAT"
-            width={120}
-            height={120}
-            className="object-contain"
-          />
-          <div className="text-4xl text-white/30 font-thin">×</div>
-          <Image
-            src="/assets/images/logo.png"
-            alt="Mind & Muscle"
-            width={120}
-            height={120}
-            className="object-contain"
-          />
-        </div>
-
-        <div className="inline-block mb-6">
-          <LiquidGlass variant="blue" rounded="full" padding="none" glow={true} className="px-6 py-3">
-            <div className="flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-neon-cortex-blue" />
-              <span className="text-base font-bold">D-BAT FRANCHISE PARTNERSHIP</span>
-            </div>
-          </LiquidGlass>
-        </div>
-
-        <GradientTextReveal
-          text="Add Mental Training to Your D-BAT Academy"
-          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-tight"
-          gradientFrom="#003366"
-          gradientTo="#228B22"
-          delay={0.2}
-        />
-
-        <p className="text-xl sm:text-2xl text-gray-300 max-w-4xl mx-auto font-medium leading-relaxed mb-10">
-          Give your athletes complete player development. Earn passive income on every subscription.
-          <br />
-          <span className="text-white/50 text-lg">No extra staff. No inventory. No risk.</span>
-        </p>
-
-        {/* Quick Stats */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-          <LiquidGlass variant="orange" glow={true} className="p-5 text-center min-w-[180px]">
-            <div className="text-3xl font-black text-solar-surge-orange mb-1">15-20%</div>
-            <div className="text-sm text-text-secondary">Commission Rate</div>
-          </LiquidGlass>
-
-          <LiquidGlass variant="blue" glow={true} className="p-5 text-center min-w-[180px]">
-            <div className="text-3xl font-black text-neon-cortex-blue mb-1">$6K+</div>
-            <div className="text-sm text-text-secondary">Annual Potential</div>
-          </LiquidGlass>
-
-          <LiquidGlass variant="orange" glow={true} className="p-5 text-center min-w-[180px]">
-            <div className="text-3xl font-black text-solar-surge-orange mb-1">Zero</div>
-            <div className="text-sm text-text-secondary">Upfront Cost</div>
-          </LiquidGlass>
-        </div>
-
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <a
-            href="https://calendly.com/mindandmuscle/dbat-partnership"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#003366] to-[#228B22] hover:from-[#003366]/90 hover:to-[#228B22]/90 text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl"
-          >
-            <Calendar className="w-5 h-5" />
-            Schedule Partnership Call
-          </a>
-          <a
-            href="#calculator"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold text-lg rounded-xl transition-all border border-white/20"
-          >
-            <DollarSign className="w-5 h-5" />
-            See Your Earnings Potential
-          </a>
-        </div>
-      </div>
-
-      {/* Value Props */}
-      <div className="max-w-7xl mx-auto mb-20">
-        <GradientTextReveal
-          text="Why D-BAT + Mind & Muscle?"
-          className="text-3xl sm:text-4xl md:text-5xl font-black mb-8 text-center"
-          gradientFrom="#003366"
-          gradientTo="#228B22"
-          delay={0.2}
-        />
-        <p className="text-xl text-gray-300 max-w-3xl mx-auto text-center mb-12">
-          D-BAT develops elite physical skills. We add the mental edge that separates good players from great ones.
-        </p>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {valueProps.map((prop, index) => {
-            const Icon = prop.icon;
-            return (
-              <LiquidGlass key={index} variant={prop.color as 'orange' | 'blue'} className="p-6">
-                <div className={`inline-block p-3 rounded-xl mb-4 ${
-                  prop.color === 'blue' ? 'bg-neon-cortex-blue/20' : 'bg-solar-surge-orange/20'
-                }`}>
-                  <Icon className={`w-6 h-6 ${
-                    prop.color === 'blue' ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'
-                  }`} />
+        <div className="max-w-6xl mx-auto relative z-10">
+          {/* Logos */}
+          <FadeInWhenVisible delay={0} direction="down">
+            <div className="flex flex-col items-center justify-center mb-10">
+              <div className="flex items-center justify-center gap-6 sm:gap-10">
+                <div className="relative w-28 h-28 sm:w-36 sm:h-36">
+                  <Image
+                    src="/assets/images/dbat-logo.png"
+                    alt="D-BAT"
+                    fill
+                    className="object-contain"
+                    priority
+                  />
                 </div>
-                <h3 className="text-lg font-bold mb-2">{prop.title}</h3>
-                <p className="text-text-secondary text-sm">{prop.description}</p>
-              </LiquidGlass>
-            );
-          })}
+                <div className="text-3xl sm:text-4xl font-bold text-white/30">×</div>
+                <div className="relative w-28 h-28 sm:w-36 sm:h-36">
+                  <Image
+                    src="/assets/images/logo.png"
+                    alt="Mind & Muscle"
+                    fill
+                    className="object-contain"
+                    priority
+                  />
+                </div>
+              </div>
+            </div>
+          </FadeInWhenVisible>
+
+          {/* Headline */}
+          <div className="text-center">
+            <FadeInWhenVisible delay={0.2} direction="up">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6 leading-tight">
+                <span className="text-white">Your Athletes Take Lessons.</span>
+                <br />
+                <span className="bg-gradient-to-r from-[#003366] to-[#228B22] bg-clip-text text-transparent">
+                  What Happens After They Leave?
+                </span>
+              </h1>
+            </FadeInWhenVisible>
+
+            <FadeInWhenVisible delay={0.3} direction="up">
+              <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto font-medium mb-4">
+                Mind & Muscle gives your athletes structured training between lessons.
+                They progress faster. They stay longer. You earn more.
+              </p>
+            </FadeInWhenVisible>
+
+            <FadeInWhenVisible delay={0.4} direction="up">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
+                <a
+                  href="#calculator"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-[#003366] to-[#228B22] hover:from-[#003366]/90 hover:to-[#228B22]/90 text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl"
+                >
+                  <DollarSign className="w-5 h-5" />
+                  See the Math
+                </a>
+                <a
+                  href="https://calendly.com/mindandmuscle/dbat-partnership"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold text-lg rounded-xl transition-all border border-white/20"
+                >
+                  <Calendar className="w-5 h-5" />
+                  Talk to Jeff
+                </a>
+              </div>
+            </FadeInWhenVisible>
+          </div>
         </div>
-      </div>
+      </section>
 
-      {/* Earnings Calculator */}
-      <div id="calculator" className="max-w-4xl mx-auto mb-20 scroll-mt-32">
-        <GradientTextReveal
-          text="Calculate Your D-BAT's Earnings"
-          className="text-3xl sm:text-4xl md:text-5xl font-black mb-8 text-center"
-          gradientFrom="#228B22"
-          gradientTo="#003366"
-          delay={0.2}
-        />
+      {/* Section 2: Pain Points */}
+      <section className="relative py-20 px-4 sm:px-6 lg:px-8">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-red-900/5 to-transparent" />
 
-        <LiquidGlass variant="blue" glow={true} className="p-8">
-          <div className="mb-8">
-            <label className="block text-lg font-bold mb-4">
-              How many active athletes does your D-BAT have?
-            </label>
-            <input
-              type="range"
-              min="50"
-              max="500"
-              step="10"
-              value={athleteCount}
-              onChange={(e) => setAthleteCount(Number(e.target.value))}
-              className="w-full h-3 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#228B22]"
-            />
-            <div className="flex justify-between text-sm text-text-secondary mt-2">
-              <span>50</span>
-              <span className="text-2xl font-black text-white">{athleteCount} athletes</span>
-              <span>500</span>
-            </div>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6 mb-8">
-            <div className="text-center p-6 bg-white/5 rounded-xl border border-white/10">
-              <p className="text-sm text-text-secondary mb-2">Per 6-Month Cycle</p>
-              <p className="text-3xl font-black text-[#228B22]">
-                ${sixMonthRevenue.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-              </p>
-            </div>
-            <div className="text-center p-6 bg-[#228B22]/10 rounded-xl border border-[#228B22]/30">
-              <p className="text-sm text-text-secondary mb-2">Annual Earnings</p>
-              <p className="text-4xl font-black text-[#228B22]">
-                ${annualRevenue.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-              </p>
-            </div>
-            <div className="text-center p-6 bg-white/5 rounded-xl border border-white/10">
-              <p className="text-sm text-text-secondary mb-2">3-Year Value</p>
-              <p className="text-3xl font-black text-[#003366]">
-                ${threeYearRevenue.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-              </p>
-            </div>
-          </div>
-
-          <div className="p-4 bg-[#228B22]/10 border border-[#228B22]/30 rounded-lg">
-            <p className="text-sm text-center">
-              <strong className="text-[#228B22]">Commission Rate:</strong>{' '}
-              {athleteCount >= 101 ? '15%' : '10%'}
-              {athleteCount < 101 && (
-                <span className="text-text-secondary"> (hits 15% at 101+ athletes)</span>
-              )}
-              <br />
-              <span className="text-text-secondary text-xs">
-                Based on team pricing: ${pricePerUser.toFixed(2)}/user per 6-month subscription
-              </span>
+        <div className="max-w-6xl mx-auto relative z-10">
+          <FadeInWhenVisible delay={0} direction="up" className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
+              Sound Familiar?
+            </h2>
+            <p className="text-lg text-text-secondary">
+              Every D-BAT deals with this. It's not your fault - it's a gap in the system.
             </p>
-          </div>
-        </LiquidGlass>
-      </div>
+          </FadeInWhenVisible>
 
-      {/* How It Works */}
-      <div className="max-w-5xl mx-auto mb-20">
-        <GradientTextReveal
-          text="How It Works at Your D-BAT"
-          className="text-3xl sm:text-4xl md:text-5xl font-black mb-12 text-center"
-          gradientFrom="#003366"
-          gradientTo="#228B22"
-          delay={0.2}
-        />
-
-        <div className="grid md:grid-cols-3 gap-8">
-          {howItWorks.map((item, index) => (
-            <div key={index} className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#003366] to-[#228B22] mb-4 text-2xl font-black">
-                {item.step}
-              </div>
-              <h3 className="text-xl font-bold mb-2">{item.title}</h3>
-              <p className="text-sm text-text-secondary">{item.description}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* QR Code Visual */}
-        <div className="mt-12">
-          <LiquidGlass variant="orange" className="p-8">
-            <div className="flex flex-col md:flex-row items-center gap-8">
-              <div className="flex-1">
-                <h3 className="text-2xl font-bold mb-4">QR Codes for Your Tunnels</h3>
-                <p className="text-text-secondary mb-4">
-                  We create custom QR code posters with your D-BAT location name. Athletes scan before or after lessons to access:
-                </p>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#228B22]" />
-                    <span>5-minute pre-lesson mental focus routine</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#228B22]" />
-                    <span>AI swing analysis (upload cage videos)</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#228B22]" />
-                    <span>Position-specific strength training</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-[#228B22]" />
-                    <span>186 real game scenarios for baseball IQ</span>
-                  </li>
-                </ul>
-              </div>
-              <div className="w-48 h-48 bg-white rounded-xl flex items-center justify-center">
-                <div className="text-center">
-                  <div className="w-32 h-32 bg-gray-200 rounded-lg mx-auto mb-2 flex items-center justify-center">
-                    <span className="text-gray-500 text-xs">QR Preview</span>
+          <StaggerChildren staggerDelay={0.1} className="grid sm:grid-cols-2 gap-6">
+            {painPoints.map((point, index) => (
+              <motion.div key={index} variants={staggerItemVariants} className="group">
+                <div
+                  className="relative h-full rounded-2xl overflow-hidden transition-all duration-300 hover:scale-[1.02]"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(15, 17, 35, 0.9) 0%, rgba(27, 31, 57, 0.9) 100%)',
+                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                    boxShadow: '0 4px 16px rgba(239, 68, 68, 0.15), inset 0 1px 0 rgba(255,255,255,0.05)',
+                  }}
+                >
+                  <div className="relative p-6 flex items-start gap-4">
+                    <div
+                      className="flex-shrink-0 w-14 h-14 rounded-xl flex items-center justify-center"
+                      style={{
+                        background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.3) 0%, rgba(239, 68, 68, 0.6) 100%)',
+                        boxShadow: '0 4px 12px rgba(239, 68, 68, 0.4)',
+                      }}
+                    >
+                      <point.icon className="w-7 h-7 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white mb-2">{point.title}</h3>
+                      <p className="text-white/70 leading-relaxed">{point.description}</p>
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-600 font-medium">D-BAT [Your Location]</p>
+                </div>
+              </motion.div>
+            ))}
+          </StaggerChildren>
+        </div>
+      </section>
+
+      {/* Section 3: The Solution - Features */}
+      <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1A1F3A] via-[#0F1123] to-[#1A1F3A]" />
+
+        <div className="max-w-7xl mx-auto relative z-10">
+          <FadeInWhenVisible delay={0} direction="up" className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#228B22]/20 text-[#228B22] text-sm font-bold mb-6">
+              <Zap className="w-4 h-4" />
+              WHAT YOUR ATHLETES GET
+            </div>
+            <GradientTextReveal
+              text="Training Between Lessons"
+              className="text-3xl sm:text-4xl lg:text-5xl font-black mb-6"
+              gradientFrom="#003366"
+              gradientTo="#228B22"
+              delay={0.2}
+            />
+            <p className="text-lg text-text-secondary max-w-2xl mx-auto">
+              Four AI tools that turn your weekly lesson into daily progress.
+            </p>
+          </FadeInWhenVisible>
+
+          <StaggerChildren staggerDelay={0.15} className="grid md:grid-cols-2 gap-8">
+            {features.map((feature) => {
+              const isBlue = feature.color === 'blue';
+              return (
+                <motion.div key={feature.id} className="group relative" variants={staggerItemVariants}>
+                  <div
+                    className={`absolute -inset-2 rounded-3xl blur-2xl opacity-0 group-hover:opacity-60 transition-opacity duration-500 ${
+                      isBlue ? 'bg-gradient-to-b from-neon-cortex-blue/30 to-transparent' : 'bg-gradient-to-b from-[#228B22]/30 to-transparent'
+                    }`}
+                  />
+                  <div
+                    className={`relative backdrop-blur-sm bg-white/[0.02] p-6 rounded-2xl border-2 transition-all duration-500 hover:scale-[1.02] hover:bg-white/[0.05] h-full ${
+                      isBlue
+                        ? 'border-neon-cortex-blue/40 hover:border-neon-cortex-blue shadow-[0_0_20px_rgba(14,165,233,0.3)]'
+                        : 'border-[#228B22]/40 hover:border-[#228B22] shadow-[0_0_20px_rgba(34,139,34,0.3)]'
+                    }`}
+                  >
+                    {/* Video */}
+                    <div className="relative aspect-video bg-gradient-to-br from-white/5 to-transparent rounded-xl mb-4 overflow-hidden">
+                      <video
+                        src={feature.videoUrl}
+                        className="w-full h-full object-cover opacity-95"
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        preload="auto"
+                      />
+                    </div>
+
+                    {/* Icon + Title */}
+                    <div className="flex items-center gap-3 mb-3">
+                      <div
+                        className={`flex-shrink-0 w-14 h-14 rounded-xl flex items-center justify-center ${
+                          isBlue ? 'bg-neon-cortex-blue/10 border border-neon-cortex-blue/30' : 'bg-[#228B22]/10 border border-[#228B22]/30'
+                        }`}
+                      >
+                        <Image
+                          src={feature.iconImage}
+                          alt={`${feature.title} icon`}
+                          width={36}
+                          height={36}
+                          className="object-contain"
+                        />
+                      </div>
+                      <div>
+                        <h3 className={`text-xl font-black ${isBlue ? 'text-neon-cortex-blue' : 'text-[#228B22]'}`}>
+                          {feature.title}
+                        </h3>
+                        <p className={`text-sm font-medium ${isBlue ? 'text-neon-cortex-blue/70' : 'text-[#228B22]/70'}`}>
+                          {feature.tagline}
+                        </p>
+                      </div>
+                    </div>
+
+                    <p className="text-text-secondary leading-relaxed mb-4">{feature.description}</p>
+
+                    {/* Instructor benefit callout */}
+                    <div className={`p-3 rounded-lg ${isBlue ? 'bg-neon-cortex-blue/10' : 'bg-[#228B22]/10'}`}>
+                      <p className={`text-sm font-medium ${isBlue ? 'text-neon-cortex-blue' : 'text-[#228B22]'}`}>
+                        <span className="font-bold">For instructors:</span> {feature.forInstructor}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </StaggerChildren>
+        </div>
+      </section>
+
+      {/* Section 4: What's In It For You */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <FadeInWhenVisible delay={0} direction="up" className="text-center mb-12">
+            <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
+              What's In It For You?
+            </h2>
+            <p className="text-lg text-text-secondary">
+              Everyone wins. Here's how.
+            </p>
+          </FadeInWhenVisible>
+
+          <StaggerChildren staggerDelay={0.1} className="grid md:grid-cols-3 gap-6">
+            {stakeholders.map((stakeholder, index) => (
+              <motion.div key={index} variants={staggerItemVariants}>
+                <LiquidGlass
+                  variant={stakeholder.color as 'blue' | 'orange'}
+                  padding="lg"
+                  className="h-full"
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className={`p-3 rounded-xl ${
+                      stakeholder.color === 'blue' ? 'bg-neon-cortex-blue/20' : 'bg-solar-surge-orange/20'
+                    }`}>
+                      <stakeholder.icon className={`w-6 h-6 ${
+                        stakeholder.color === 'blue' ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'
+                      }`} />
+                    </div>
+                    <h3 className="text-xl font-bold text-white">{stakeholder.role}</h3>
+                  </div>
+                  <ul className="space-y-3">
+                    {stakeholder.benefits.map((benefit, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <CheckCircle className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
+                          stakeholder.color === 'blue' ? 'text-neon-cortex-blue' : 'text-solar-surge-orange'
+                        }`} />
+                        <span className="text-text-secondary text-sm">{benefit}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </LiquidGlass>
+              </motion.div>
+            ))}
+          </StaggerChildren>
+        </div>
+      </section>
+
+      {/* Section 5: The Calculator - Retention + Commission */}
+      <section id="calculator" className="py-20 px-4 sm:px-6 lg:px-8 scroll-mt-20">
+        <div className="max-w-4xl mx-auto">
+          <FadeInWhenVisible delay={0} direction="up" className="text-center mb-10">
+            <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
+              The Real Math
+            </h2>
+            <p className="text-lg text-text-secondary max-w-2xl mx-auto">
+              Commission is nice. But the real value? Athletes who stay because they're seeing results.
+            </p>
+          </FadeInWhenVisible>
+
+          <FadeInWhenVisible delay={0.2} direction="up">
+            <div
+              className="rounded-3xl overflow-hidden"
+              style={{
+                background: 'linear-gradient(135deg, rgba(15, 17, 35, 0.95) 0%, rgba(27, 31, 57, 0.95) 100%)',
+                border: '2px solid rgba(34, 139, 34, 0.4)',
+                boxShadow: '0 8px 32px rgba(34, 139, 34, 0.2)',
+              }}
+            >
+              <div className="p-8">
+                {/* Athlete Count Slider */}
+                <div className="mb-8">
+                  <label className="block text-lg font-bold mb-4 text-white">
+                    How many active athletes at your D-BAT?
+                  </label>
+                  <input
+                    type="range"
+                    min="50"
+                    max="500"
+                    step="10"
+                    value={athleteCount}
+                    onChange={(e) => setAthleteCount(Number(e.target.value))}
+                    className="w-full h-3 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#228B22]"
+                  />
+                  <div className="flex justify-between text-sm text-text-secondary mt-2">
+                    <span>50</span>
+                    <span className="text-2xl font-black text-white">{athleteCount}</span>
+                    <span>500</span>
+                  </div>
+                </div>
+
+                {/* Retention Lift Slider */}
+                <div className="mb-8">
+                  <label className="block text-lg font-bold mb-2 text-white">
+                    If just <span className="text-[#228B22]">{retentionLift}%</span> of athletes stay 3 extra months...
+                  </label>
+                  <p className="text-sm text-text-secondary mb-4">
+                    Because they're seeing faster progress with structured between-lesson training
+                  </p>
+                  <input
+                    type="range"
+                    min="5"
+                    max="25"
+                    step="5"
+                    value={retentionLift}
+                    onChange={(e) => setRetentionLift(Number(e.target.value))}
+                    className="w-full h-3 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#228B22]"
+                  />
+                  <div className="flex justify-between text-sm text-text-secondary mt-2">
+                    <span>5%</span>
+                    <span>25%</span>
+                  </div>
+                </div>
+
+                {/* Results */}
+                <div className="grid md:grid-cols-3 gap-4 mb-8">
+                  <div className="text-center p-6 bg-white/5 rounded-xl border border-white/10">
+                    <p className="text-sm text-text-secondary mb-2">Retention Value</p>
+                    <p className="text-3xl font-black text-[#228B22]">
+                      ${retentionValue.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-text-secondary mt-1">
+                      {Math.round(athleteCount * (retentionLift / 100))} athletes × 3 months lessons
+                    </p>
+                  </div>
+                  <div className="text-center p-6 bg-white/5 rounded-xl border border-white/10">
+                    <p className="text-sm text-text-secondary mb-2">Commission</p>
+                    <p className="text-3xl font-black text-[#003366]">
+                      ${annualCommission.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-text-secondary mt-1">
+                      {athleteCount >= 101 ? '15%' : '10%'} of subscriptions
+                    </p>
+                  </div>
+                  <div className="text-center p-6 bg-gradient-to-br from-[#003366]/20 to-[#228B22]/20 rounded-xl border-2 border-[#228B22]/40">
+                    <p className="text-sm text-white/80 mb-2 font-medium">Total Annual Value</p>
+                    <p className="text-4xl font-black bg-gradient-to-r from-[#003366] to-[#228B22] bg-clip-text text-transparent">
+                      ${totalAnnualValue.toLocaleString()}
+                    </p>
+                    <p className="text-xs text-white/60 mt-1">
+                      Retention + Commission
+                    </p>
+                  </div>
+                </div>
+
+                {/* Key insight */}
+                <div className="p-4 bg-[#228B22]/10 border border-[#228B22]/30 rounded-lg">
+                  <p className="text-center text-sm">
+                    <span className="font-bold text-[#228B22]">The insight:</span>{' '}
+                    <span className="text-white/80">
+                      Retention value is {Math.round(retentionValue / annualCommission * 10) / 10}x the commission.
+                      Athletes who train between lessons see faster progress → stay longer → more lesson revenue.
+                    </span>
+                  </p>
                 </div>
               </div>
             </div>
-          </LiquidGlass>
+          </FadeInWhenVisible>
         </div>
-      </div>
+      </section>
 
-      {/* Contact Form */}
-      <div className="max-w-3xl mx-auto mb-20">
-        <GradientTextReveal
-          text="Start Your D-BAT Partnership"
-          className="text-3xl sm:text-4xl md:text-5xl font-black mb-8 text-center"
-          gradientFrom="#228B22"
-          gradientTo="#003366"
-          delay={0.2}
-        />
-
-        <LiquidGlass variant="blue" glow={true} className="p-8">
-          <form className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-semibold mb-2">Your Name *</label>
-                <input
-                  type="text"
-                  required
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-[#228B22] focus:outline-none transition-colors"
-                  placeholder="John Smith"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-2">Email *</label>
-                <input
-                  type="email"
-                  required
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-[#228B22] focus:outline-none transition-colors"
-                  placeholder="john@dbatfrisco.com"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold mb-2">Your D-BAT Location *</label>
-              <select
-                required
-                value={selectedLocation}
-                onChange={(e) => setSelectedLocation(e.target.value)}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-[#228B22] focus:outline-none transition-colors"
-              >
-                {dbatLocations.map((loc) => (
-                  <option key={loc} value={loc} className="bg-[#0A0B14]">{loc}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold mb-2">Approximate Active Athletes</label>
-              <select
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-[#228B22] focus:outline-none transition-colors"
-              >
-                <option value="" className="bg-[#0A0B14]">Select range...</option>
-                <option value="50-100" className="bg-[#0A0B14]">50-100 athletes</option>
-                <option value="100-200" className="bg-[#0A0B14]">100-200 athletes</option>
-                <option value="200-300" className="bg-[#0A0B14]">200-300 athletes</option>
-                <option value="300+" className="bg-[#0A0B14]">300+ athletes</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold mb-2">Questions or Comments</label>
-              <textarea
-                rows={3}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-[#228B22] focus:outline-none transition-colors resize-none"
-                placeholder="Any questions about the partnership?"
-              />
-            </div>
-
-            <div className="p-4 bg-[#228B22]/10 border border-[#228B22]/30 rounded-lg">
-              <p className="text-xs text-center text-text-secondary">
-                <Check className="w-4 h-4 inline mr-1 text-[#228B22]" />
-                No commitment required. We'll send you a partnership kit and schedule a quick call to answer questions.
-              </p>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full py-4 px-6 bg-gradient-to-r from-[#003366] to-[#228B22] hover:from-[#003366]/90 hover:to-[#228B22]/90 text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
+      {/* Section 6: How It Works */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <FadeInWhenVisible delay={0} direction="up">
+            <div
+              className="rounded-3xl overflow-hidden text-center"
+              style={{
+                background: 'linear-gradient(135deg, rgba(15, 17, 35, 0.95) 0%, rgba(27, 31, 57, 0.95) 100%)',
+                border: '1px solid rgba(14, 165, 233, 0.3)',
+                boxShadow: '0 8px 32px rgba(14, 165, 233, 0.2)',
+              }}
             >
-              <Mail className="w-5 h-5" />
-              Get Partnership Kit
-            </button>
+              <div className="p-8 sm:p-12">
+                <h2 className="text-2xl sm:text-3xl font-black text-white mb-8">
+                  Getting Started Takes 10 Minutes
+                </h2>
 
-            <p className="text-center text-sm text-text-secondary">
-              Or schedule directly:{' '}
-              <a
-                href="https://calendly.com/mindandmuscle/dbat-partnership"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[#228B22] hover:underline font-semibold"
-              >
-                Book a 15-min call →
-              </a>
-            </p>
-          </form>
-        </LiquidGlass>
-      </div>
+                <div className="grid sm:grid-cols-3 gap-6 mb-8">
+                  {[
+                    { step: '1', title: 'We Set You Up', desc: 'Custom referral link, QR codes, email templates - all branded for your D-BAT' },
+                    { step: '2', title: 'You Share It', desc: 'QR poster in your facility. Quick email to your athlete list. That\'s it.' },
+                    { step: '3', title: 'Track Everything', desc: 'See who\'s signed up, who\'s training, and your commission in real-time' },
+                  ].map((item) => (
+                    <div key={item.step} className="text-center">
+                      <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-[#003366] to-[#228B22] mb-4 text-xl font-black text-white">
+                        {item.step}
+                      </div>
+                      <h3 className="text-lg font-bold text-white mb-2">{item.title}</h3>
+                      <p className="text-sm text-text-secondary">{item.desc}</p>
+                    </div>
+                  ))}
+                </div>
 
-      {/* FAQ Section */}
-      <div className="max-w-4xl mx-auto mb-20">
-        <GradientTextReveal
-          text="D-BAT Partner FAQs"
-          className="text-3xl sm:text-4xl md:text-5xl font-black mb-8 text-center"
-          gradientFrom="#003366"
-          gradientTo="#228B22"
-          delay={0.2}
-        />
+                <div className="flex flex-wrap items-center justify-center gap-3 text-sm">
+                  <span className="px-4 py-2 rounded-full bg-[#228B22]/20 text-[#228B22] font-medium">Zero upfront cost</span>
+                  <span className="px-4 py-2 rounded-full bg-[#228B22]/20 text-[#228B22] font-medium">Zero staff time</span>
+                  <span className="px-4 py-2 rounded-full bg-[#228B22]/20 text-[#228B22] font-medium">Zero risk</span>
+                </div>
+              </div>
+            </div>
+          </FadeInWhenVisible>
+        </div>
+      </section>
 
-        <div className="space-y-4">
-          {faqs.map((faq, index) => (
-            <LiquidGlass key={index} variant="blue" className="p-6">
-              <button
-                onClick={() => setExpandedFaq(expandedFaq === index ? null : index)}
-                className="w-full text-left flex items-center justify-between gap-4"
-              >
-                <h3 className="text-lg font-bold">{faq.question}</h3>
-                <ChevronDown
-                  className={`w-5 h-5 text-[#228B22] transition-transform flex-shrink-0 ${
-                    expandedFaq === index ? 'rotate-180' : ''
-                  }`}
-                />
-              </button>
-              {expandedFaq === index && (
-                <p className="text-text-secondary text-sm mt-4 leading-relaxed">
-                  {faq.answer}
+      {/* Section 7: CTA */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto">
+          <FadeInWhenVisible delay={0} direction="up">
+            <div
+              className="rounded-3xl overflow-hidden text-center"
+              style={{
+                background: 'linear-gradient(135deg, rgba(0, 51, 102, 0.3) 0%, rgba(34, 139, 34, 0.3) 100%)',
+                border: '2px solid rgba(34, 139, 34, 0.5)',
+                boxShadow: '0 8px 32px rgba(34, 139, 34, 0.3)',
+              }}
+            >
+              <div className="p-8 sm:p-12">
+                <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
+                  Ready to Fill the Gap?
+                </h2>
+                <p className="text-xl text-white/80 mb-8 max-w-xl mx-auto">
+                  Let's talk about how Mind & Muscle fits your D-BAT.
+                  15 minutes. No pressure.
                 </p>
-              )}
-            </LiquidGlass>
-          ))}
-        </div>
-      </div>
 
-      {/* Final CTA */}
-      <div className="max-w-4xl mx-auto text-center">
-        <LiquidGlass variant="orange" glow={true} className="p-10">
-          <h2 className="text-3xl sm:text-4xl font-black mb-4">
-            Ready to Add Passive Revenue to Your D-BAT?
-          </h2>
-          <p className="text-xl text-text-secondary mb-8">
-            Join the D-BAT locations already earning with Mind & Muscle.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="https://calendly.com/mindandmuscle/dbat-partnership"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#003366] to-[#228B22] hover:from-[#003366]/90 hover:to-[#228B22]/90 text-white font-bold text-lg rounded-xl transition-all"
-            >
-              <Calendar className="w-5 h-5" />
-              Schedule Call with Jeff
-            </a>
-            <a
-              href="mailto:jeff@mindandmuscle.ai?subject=D-BAT Partnership Inquiry"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold text-lg rounded-xl transition-all border border-white/20"
-            >
-              <Mail className="w-5 h-5" />
-              Email Directly
-            </a>
-          </div>
-        </LiquidGlass>
-      </div>
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+                  <a
+                    href="https://calendly.com/mindandmuscle/dbat-partnership"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-[#003366] to-[#228B22] hover:from-[#003366]/90 hover:to-[#228B22]/90 text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl"
+                  >
+                    <Calendar className="w-5 h-5" />
+                    Schedule a Call
+                  </a>
+                  <a
+                    href="mailto:jeff@mindandmuscle.ai?subject=D-BAT Partnership"
+                    className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold text-lg rounded-xl transition-all border border-white/20"
+                  >
+                    <Mail className="w-5 h-5" />
+                    Email Jeff
+                  </a>
+                </div>
+
+                <p className="text-white/50 text-sm">
+                  jeff@mindandmuscle.ai • Founder, Mind & Muscle
+                </p>
+              </div>
+            </div>
+          </FadeInWhenVisible>
+        </div>
+      </section>
     </div>
   );
 }
