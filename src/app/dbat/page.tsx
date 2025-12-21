@@ -707,7 +707,7 @@ export default function DBatPartnerPage() {
                     Schedule a Call
                   </a>
                   <a
-                    href="mailto:support@mindandmuscle.ai?subject=D-BAT Partnership"
+                    href="mailto:partners@mindandmuscle.ai?subject=D-BAT Partnership"
                     className="inline-flex items-center gap-2 px-8 py-4 bg-white/10 hover:bg-white/20 text-white font-bold text-lg rounded-xl transition-all border border-white/20"
                   >
                     <Mail className="w-5 h-5" />
@@ -716,7 +716,7 @@ export default function DBatPartnerPage() {
                 </div>
 
                 <p className="text-white/50 text-sm">
-                  support@mindandmuscle.ai
+                  partners@mindandmuscle.ai
                 </p>
               </div>
             </div>
