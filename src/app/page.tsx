@@ -455,14 +455,14 @@ export default function HomePage() {
           {/* Header */}
           <FadeInWhenVisible delay={0} direction="up" className="text-center mb-24">
             <GradientTextReveal
-              text="The Complete Performance Ecosystem."
+              text="A Connected Performance System — Not Disconnected Tools."
               className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-relaxed"
               gradientFrom="#0EA5E9"
               gradientTo="#F97316"
               delay={0.2}
             />
             <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-6">
-              Every tool an athlete needs — mental toughness, physical mastery, precision coaching, and intelligent recovery — all connected in one seamless system.
+              Elite development doesn&apos;t happen in silos. Mind & Muscle unifies mental training, physical prep, arm health, mechanics, and game IQ into one continuous performance loop.
             </p>
             <p className="text-base sm:text-lg text-text-secondary max-w-3xl mx-auto">
               <span className="text-neon-cortex-blue font-semibold">FREE features:</span> Chatter, Events, Daily Hit, Dugout Talk, Game Lab Level 1, Arm Builder, Speed Lab, Coach&apos;s Corner, Parent Dashboard, and Breathwork. <span className="text-solar-surge-orange font-semibold">PRO</span> unlocks AI coaching, video analysis, and advanced training tools.
@@ -1110,6 +1110,13 @@ export default function HomePage() {
               );
             })}
           </StaggerChildren>
+
+          {/* Anchor Line */}
+          <FadeInWhenVisible delay={0.3}>
+            <p className="text-center text-lg sm:text-xl text-gray-400 mt-12 font-medium italic">
+              Every module feeds the next. Nothing is random.
+            </p>
+          </FadeInWhenVisible>
         </div>
 
         {/* Feature Modal */}
@@ -1319,14 +1326,14 @@ export default function HomePage() {
               </div>
             </div>
             <GradientTextReveal
-              text="Mind & Muscle Daily Hit"
+              text="Daily Mental Reps for Young Athletes"
               className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-relaxed"
               gradientFrom="#F97316"
               gradientTo="#0EA5E9"
               delay={0.2}
             />
             <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto font-medium leading-relaxed">
-              Your daily dose of mental toughness that builds champions. Fresh content every morning. Streak tracking to keep you accountable. <span className="text-solar-surge-orange font-bold">Always free.</span>
+              Mental reps — same as hitting or throwing. These aren&apos;t just quotes. They&apos;re short, repeatable lessons that train focus, resilience, and composure. <span className="text-solar-surge-orange font-bold">Always free.</span>
             </p>
           </FadeInWhenVisible>
 
@@ -1384,35 +1391,35 @@ export default function HomePage() {
 
           {/* Feature Cards */}
           <StaggerChildren staggerDelay={0.1} className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            {/* Fresh Every Day */}
+            {/* Practice */}
             <motion.div variants={staggerItemVariants}>
               <LiquidGlass variant="orange" glow={true} className="p-6 h-full text-center">
-                <div className="text-4xl mb-4">🌅</div>
-                <h3 className="text-xl font-black text-white mb-2">Fresh Every Day</h3>
+                <div className="text-4xl mb-4">🎯</div>
+                <h3 className="text-xl font-black text-white mb-2">Practice</h3>
                 <p className="text-gray-300 leading-relaxed">
-                  New motivational content delivered daily at 8 AM in your timezone. Never the same message twice.
+                  New mental reps delivered daily at 8 AM. Short, focused lessons that build focus, composure, and confidence.
                 </p>
               </LiquidGlass>
             </motion.div>
 
-            {/* Build Your Streak */}
+            {/* Skill */}
             <motion.div variants={staggerItemVariants}>
               <LiquidGlass variant="orange" glow={true} className="p-6 h-full text-center">
                 <div className="text-4xl mb-4">🔥</div>
-                <h3 className="text-xl font-black text-white mb-2">Build Your Streak</h3>
+                <h3 className="text-xl font-black text-white mb-2">Skill</h3>
                 <p className="text-gray-300 leading-relaxed">
-                  Track your consecutive days. Watch your mental toughness compound. Champions don't skip days.
+                  Track your streak. Watch your mental toughness compound. Repetition turns lessons into reflexes.
                 </p>
               </LiquidGlass>
             </motion.div>
 
-            {/* Mental Reps */}
+            {/* Habit */}
             <motion.div variants={staggerItemVariants}>
               <LiquidGlass variant="orange" glow={true} className="p-6 h-full text-center">
                 <div className="text-4xl mb-4">🧠</div>
-                <h3 className="text-xl font-black text-white mb-2">Mental Reps</h3>
+                <h3 className="text-xl font-black text-white mb-2">Habit</h3>
                 <p className="text-gray-300 leading-relaxed">
-                  2 minutes a day that separates good athletes from great ones. Train your mind like you train your body.
+                  2 minutes a day that separates good athletes from great ones. Mental strength becomes automatic.
                 </p>
               </LiquidGlass>
             </motion.div>
@@ -1449,12 +1456,15 @@ export default function HomePage() {
               </div>
             </div>
             <GradientTextReveal
-              text="The More You Grind, The Smarter It Gets"
+              text="AI That Actually Learns How You Play"
               className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-6 leading-relaxed"
               gradientFrom="#0EA5E9"
               gradientTo="#F97316"
               delay={0.2}
             />
+            <p className="text-xl sm:text-2xl text-gray-300 max-w-4xl mx-auto font-medium leading-relaxed">
+              Week 1: solid suggestions. Week 4: knows your weak spots. Month 3: feels like a real coach who&apos;s been with you all season.
+            </p>
           </FadeInWhenVisible>
 
           {/* Three Column Progression */}
@@ -1499,6 +1509,13 @@ export default function HomePage() {
             </motion.div>
           </StaggerChildren>
 
+          {/* Callout */}
+          <FadeInWhenVisible delay={0.4} direction="up" className="text-center mb-8">
+            <p className="text-lg sm:text-xl text-gray-400 italic max-w-3xl mx-auto">
+              This isn&apos;t generic training. Every plan adapts to how you work, play, and recover.
+            </p>
+          </FadeInWhenVisible>
+
           {/* Bottom Callout */}
           <FadeInWhenVisible delay={0.6} direction="up" className="text-center">
             <div className="inline-block">
@@ -1541,8 +1558,8 @@ export default function HomePage() {
               gradientTo="#F97316"
               delay={0.2}
             />
-            <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto font-medium leading-relaxed">
-              Everything you need to level up your game, now in your pocket.
+            <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto font-medium leading-relaxed mb-4">
+              Swipe through what&apos;s inside. Each screen is purpose-built for athletes in the diamond game.
             </p>
           </FadeInWhenVisible>
 
@@ -1579,21 +1596,17 @@ export default function HomePage() {
           {/* Main Headline */}
           <div className="text-center mb-16">
             <h2 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black mb-6 leading-[1.1]">
-              <span className="text-white" style={{textShadow: '0 4px 30px rgba(0,0,0,0.9)'}}>
-                Not a Multi-Sport App.
-              </span>
-              <br />
               <span className="bg-gradient-to-r from-neon-cortex-blue via-mind-primary to-solar-surge-orange bg-clip-text text-transparent" style={{textShadow: '0 0 40px rgba(14,165,233,0.5)'}}>
-                A Diamond Sport Obsession.
+                We Only Build for the Diamond.
               </span>
             </h2>
             {/* Opening Statement */}
             <div className="max-w-5xl mx-auto mb-20">
               <p className="text-2xl sm:text-3xl md:text-4xl text-gray-300 font-medium leading-relaxed mb-8">
-                Other apps take generic training and slap a baseball or softball filter on it.
+                Every feature, every lesson, every AI insight — made specifically for baseball and softball athletes.
               </p>
               <p className="text-2xl sm:text-3xl md:text-4xl text-white font-black leading-relaxed mb-6">
-                We started from scratch.
+                No generic content. No borrowed frameworks. Just pure diamond sport training.
               </p>
               <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 font-medium leading-relaxed">
                 Every drill designed for baseball and softball movements. Every AI model trained exclusively on baseball and softball content. Every mental scenario pulled from real game situations.
@@ -1832,16 +1845,12 @@ export default function HomePage() {
               </div>
             </div>
             <h2 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black mb-6 leading-[1.1]">
-              <span className="text-white" style={{textShadow: '0 4px 30px rgba(0,0,0,0.9)'}}>
-                Who You Taking to the
-              </span>
-              <br />
               <span className="bg-gradient-to-r from-neon-cortex-blue via-mind-primary to-solar-surge-orange bg-clip-text text-transparent" style={{textShadow: '0 0 40px rgba(14,165,233,0.5)'}}>
-                Championship?
+                Depth Over Fragmentation.
               </span>
             </h2>
             <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto font-medium leading-relaxed">
-              Their roster vs. ours. Same game. Different level.
+              Other platforms make you piece together your own training stack. We built a complete system — so athletes actually use it.
             </p>
           </FadeInWhenVisible>
 
@@ -2253,7 +2262,7 @@ export default function HomePage() {
                 </LiquidGlass>
               </div>
               <LiquidGlass variant="orange" glow={true} className="p-10">
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between mb-4">
                 <h3 className="text-4xl md:text-5xl font-black">Pro</h3>
                 <div className="flex flex-col items-end">
                   <div className="flex items-baseline gap-2">
@@ -2263,6 +2272,7 @@ export default function HomePage() {
                   <div className="text-sm text-text-secondary mt-1">Individual License</div>
                 </div>
               </div>
+              <p className="text-center text-gray-400 italic text-sm mb-6">This is how serious athletes train.</p>
 
               {/* Team Licensing Callout */}
               <div className="mb-6 p-4 rounded-xl bg-gradient-to-br from-neon-cortex-blue/20 via-solar-surge-orange/10 to-transparent border-2 border-neon-cortex-blue/40">
@@ -2345,10 +2355,10 @@ export default function HomePage() {
           <FadeInWhenVisible delay={0} direction="up">
             <LiquidGlass variant="blue" glow={true} className="p-12 text-center">
             <h2 className="text-3xl sm:text-4xl font-black mb-4">
-              Ready to Dominate?
+              Start Training Smarter Today.
             </h2>
             <p className="text-xl text-text-secondary mb-6 max-w-2xl mx-auto">
-              Join thousands of baseball and softball players, coaches, and teams using Mind & Muscle to elevate their game
+              Download the app. Start with free. Go Pro when you&apos;re ready.
             </p>
             <p className="text-sm text-text-secondary">
               Team licensing available • Partner program open
