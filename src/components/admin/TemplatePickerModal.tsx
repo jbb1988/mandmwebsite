@@ -53,8 +53,10 @@ export function TemplatePickerModal({
 
   // Preview template with replaced placeholders
   const previewTemplate = (content: string) => {
+    if (!content) return '';
     let text = content;
-    text = text.replace(/{name}/g, contactName.split(' ')[0]);
+    const firstName = contactName ? contactName.split(' ')[0] : '[Name]';
+    text = text.replace(/{name}/g, firstName);
     text = text.replace(/{group_name}/g, groupName || '[Group Name]');
     return text;
   };

@@ -15,7 +15,6 @@ import {
   Gift,
   CheckCircle,
   Star,
-  Calendar,
   Mail,
   MapPin,
   Clock,
@@ -138,8 +137,9 @@ export function ContactDetailModal({
 
   const handleCopyTemplate = (template: { name: string; content: string }) => {
     // Replace placeholders
-    let text = template.content;
-    text = text.replace(/{name}/g, contact.name.split(' ')[0]);
+    let text = template.content || '';
+    const firstName = contact.name ? contact.name.split(' ')[0] : '';
+    text = text.replace(/{name}/g, firstName);
     text = text.replace(/{group_name}/g, contact.group_name || '');
 
     navigator.clipboard.writeText(text);
