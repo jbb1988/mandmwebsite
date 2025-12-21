@@ -7,9 +7,7 @@ import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
 import { GradientTextReveal } from '@/components/animations';
 import { EnhancedEarningsCalculator } from '@/components/partner/EnhancedEarningsCalculator';
-import { ScenarioCard } from '@/components/partner/ScenarioCard';
-// QR Code Generator moved to admin/banner-generator
-import { DollarSign, TrendingUp, Users, Gift, BarChart, Rocket, Check, Link2, Star, Zap, Target, Award, BookOpen, Sparkles, Clock, Trophy, ChevronDown, GraduationCap, Briefcase, UserPlus, Building2, Upload, X } from 'lucide-react';
+import { DollarSign, TrendingUp, Users, Gift, BarChart, Rocket, Check, Link2, Star, Zap, Target, Award, BookOpen, Sparkles, Clock, Trophy, ChevronDown, GraduationCap, Briefcase, UserPlus, Building2, Upload, X, ArrowRight, Video, Brain, Apple, LineChart } from 'lucide-react';
 
 export default function PartnerProgramPage() {
   const [formData, setFormData] = useState({
@@ -33,12 +31,10 @@ export default function PartnerProgramPage() {
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validate file type
       if (!file.type.startsWith('image/')) {
         alert('Please upload an image file (PNG, JPG, SVG)');
         return;
       }
-      // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
         alert('Logo file must be less than 5MB');
         return;
@@ -70,7 +66,6 @@ export default function PartnerProgramPage() {
     setIsSubmitting(true);
 
     try {
-      // Use FormData to support file upload
       const submitData = new FormData();
       submitData.append('name', formData.name);
       submitData.append('email', formData.email);
@@ -106,144 +101,37 @@ export default function PartnerProgramPage() {
     }
   };
 
-  const benefits = [
-    {
-      icon: TrendingUp,
-      title: 'Scale to 15% Commission',
-      description: 'Start at 10%, earn 15% when you refer teams with 101+ users. The bigger the organization, the more you earn per user.',
-      variant: 'orange' as const,
-    },
-    {
-      icon: Target,
-      title: 'Target High-Value Organizations',
-      description: 'One training facility or travel ball organization can generate more recurring income than 50 individual referrals.',
-      variant: 'blue' as const,
-    },
-    {
-      icon: Star,
-      title: 'Lifetime Recurring Commission',
-      description: 'Earn 10% commission on every team license you refer - initial purchase plus all renewals, forever. Each team is tracked separately.',
-      variant: 'orange' as const,
-    },
-    {
-      icon: Gift,
-      title: 'Done-For-You Marketing Kit',
-      description: 'Email templates, social graphics, landing pages - we create everything you need. Just share.',
-      variant: 'orange' as const,
-    },
-    {
-      icon: BarChart,
-      title: 'Track Your Growing Income',
-      description: 'See every click, sign-up, and commission in real-time as the platform scales',
-      variant: 'blue' as const,
-    },
-    {
-      icon: Users,
-      title: 'Automatic Payouts',
-      description: 'Earn commission on every referral payment - automatically paid via PayPal 60 days after payment clears',
-      variant: 'orange' as const,
-    },
-    {
-      icon: Target,
-      title: 'No Earnings Cap',
-      description: 'Unlimited potential - the more you share, the more you earn. No limits, no restrictions.',
-      variant: 'orange' as const,
-    },
-    {
-      icon: Sparkles,
-      title: 'Co-Marketing Opportunities',
-      description: 'Get featured in our content, social media, and product announcements. Grow your brand with ours.',
-      variant: 'blue' as const,
-    },
-  ];
-
-  const scenarios = [
-    {
-      title: 'Youth Coach Sarah',
-      subtitle: 'Local Team Coach',
-      icon: GraduationCap,
-      stats: [
-        { label: 'Coaches', value: '3 local teams' },
-        { label: 'Total users', value: '45 players' },
-        { label: 'Time invested', value: 'Shares at team meetings' },
-      ],
-      earnings: '$641.90/year (if renewed)',
-      variant: 'blue' as const,
-    },
-    {
-      title: 'Facility Owner Mike',
-      subtitle: 'Batting Cage Owner',
-      icon: Briefcase,
-      stats: [
-        { label: 'Regular clients', value: '125 users' },
-        { label: 'Commission tier', value: '10% + 15% bonus' },
-        { label: 'Time invested', value: 'Promotes in facility + email' },
-      ],
-      earnings: '$1,972.62/year (if renewed)',
-      variant: 'orange' as const,
-    },
-    {
-      title: 'Baseball Influencer Jordan',
-      subtitle: 'YouTube Coach (50k subs)',
-      icon: UserPlus,
-      stats: [
-        { label: 'Subscribers', value: '50,000' },
-        { label: 'Conversion', value: '8 teams (240 users)' },
-        { label: 'Time invested', value: 'One video + link' },
-      ],
-      earnings: '$4,283.38/year (if renewed)',
-      variant: 'blue' as const,
-    },
-  ];
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   const faqs = [
     {
       question: 'How much can I really earn?',
-      answer: 'You earn 10% commission on every 6-month payment (15% on users 101+ for organizations). Customers subscribe for 6 months at a time. Examples per 6-month subscription: Individual referrals = $7.90 each. 12-user team = $85.32 total. 150-user facility = $930.29 per payment. If they renew after 6 months, you earn commission again - so annual potential doubles (2 payments = 2× commission). Commission is calculated on 6-month pricing: $79 (1-11 users), $71.10 (12-119 users), $67.15 (120-199 users), $63.20 (200+ users).'
+      answer: 'You earn 10% commission on every 6-month payment (15% on users 101+ for organizations). Customers subscribe for 6 months at a time. Examples per 6-month subscription: Individual referrals = $7.90 each. 12-user team = $85.32 total. 150-user facility = $930.29 per payment. If they renew after 6 months, you earn commission again - so annual potential doubles (2 payments = 2x commission).'
     },
     {
       question: 'How does the referral tracking work?',
-      answer: 'We use Tolt, a professional affiliate tracking platform, to manage your referral link and commissions. When you sign up, we automatically create your unique referral link (based on your name) and send it to you via email along with a QR code and co-branded marketing banners. When someone clicks your unique tracking link, Tolt sets a 90-day cookie to track the conversion. Your dashboard shows real-time stats: every click, signup, conversion, and commission earned. To access your dashboard: Go to mind-and-muscle.tolt.io, enter your email, check for an authentication code from Tolt, and enter the code. All commission calculations are automatic, and payouts go directly to your PayPal account 60 days after payment clears.'
+      answer: 'We use Tolt, a professional affiliate tracking platform, to manage your referral link and commissions. When you sign up, we automatically create your unique referral link and send it to you via email along with a QR code and co-branded marketing banners. When someone clicks your unique tracking link, Tolt sets a 90-day cookie to track the conversion.'
     },
     {
       question: 'What if I know facility owners or league directors?',
-      answer: 'Perfect! One training facility or travel ball organization can generate more recurring income than dozens of individual referrals. Focus on organizations with 100+ users to unlock 15% commission on the volume above 100. We also offer special bonuses for partners who introduce other high-value partners to our program—contact us to learn more.'
-    },
-    {
-      question: 'What if the platform doesn\'t succeed?',
-      answer: 'There\'s zero cost to you. You only win if we win. No risk, all upside. Plus, you can stop participating at any time with no penalties.'
-    },
-    {
-      question: 'What if I can\'t make any sales?',
-      answer: 'We provide everything you need to succeed: email templates, social graphics, demo videos, and comprehensive marketing materials. Most partners get their first referral within 45 days just by sharing with their existing network.'
-    },
-    {
-      question: 'Why should I join the partner program?',
-      answer: 'Partners earn 10% lifetime commission on every referral - true passive income that compounds as your referrals renew every 6 months. Plus, you get co-marketing opportunities and access to new features before they\'re publicly available.'
-    },
-    {
-      question: 'How long does approval take?',
-      answer: 'Instant! When you submit your application, you\'re automatically approved and your referral link is created immediately. Check your email for your unique referral link, QR code, and co-branded marketing banners (if you uploaded a logo). You can start sharing right away!'
-    },
-    {
-      question: 'Do I need to be a coach to join?',
-      answer: 'Not at all! We welcome coaches, athletic directors, sports bloggers, influencers, parents, and anyone with connections to the youth sports community. If you know people who coach teams, you\'re qualified.'
-    },
-    {
-      question: 'What if I sign up but don\'t actively promote?',
-      answer: 'While there\'s no minimum referral requirement, we reserve the right to remove partnerships that show no activity for extended periods (6+ months). The program is designed for active promoters who genuinely believe in Mind & Muscle and share it with their networks.'
+      answer: 'Perfect! One training facility or travel ball organization can generate more recurring income than dozens of individual referrals. Focus on organizations with 100+ users to unlock 15% commission on the volume above 100.'
     },
     {
       question: 'How do payouts work?',
-      answer: 'You earn 10% commission each time a referral pays for a subscription. Commissions are held for 60 days after payment clears (standard industry practice to protect against chargebacks), then paid automatically via PayPal. There\'s a $50 minimum threshold. Example: Referral subscribes January 1st = commission paid March 1st. If they renew after 6 months, you earn another commission. Your dashboard shows real-time earnings and tracks every referral.'
+      answer: 'You earn 10% commission each time a referral pays for a subscription. Commissions are held for 60 days after payment clears (standard industry practice to protect against chargebacks), then paid automatically via PayPal. There\'s a $50 minimum threshold.'
     },
     {
-      question: 'What if the same organization purchases multiple teams?',
-      answer: 'Each team license is tracked separately. If an organization clicks your referral link and purchases a 12-seat team, you earn commission on that team forever. If they later purchase another 25-seat team (even through a different partner link), each partner earns commission on their respective team. Team licenses are independent subscriptions.'
+      question: 'Do I need to be a coach to join?',
+      answer: 'Not at all! We welcome coaches, facility owners, athletic directors, sports bloggers, influencers, parents, and anyone with connections to the youth sports community.'
     },
     {
-      question: 'What if someone clicks multiple partner links before purchasing?',
-      answer: 'Tolt uses last-click attribution within the 90-day window. If someone clicks Partner A\'s link on Day 1, then clicks Partner B\'s link on Day 30, Partner B gets credited when they purchase on Day 31. The most recent partner link clicked within 90 days wins the attribution.'
+      question: 'How long does approval take?',
+      answer: 'Instant! When you submit your application, you\'re automatically approved and your referral link is created immediately. Check your email for your unique referral link, QR code, and co-branded marketing banners.'
     },
   ];
 
@@ -283,95 +171,560 @@ export default function PartnerProgramPage() {
         />
       </div>
 
-      {/* Hero Section */}
-      <div className="max-w-7xl mx-auto text-center mb-20">
+      {/* ============================================= */}
+      {/* SECTION 1: HERO - Value-First Messaging */}
+      {/* ============================================= */}
+      <div className="max-w-7xl mx-auto text-center mb-16">
         <div className="inline-block mb-8">
-          <LiquidGlass variant="orange" rounded="full" padding="none" glow={true} className="px-6 py-3">
+          <LiquidGlass variant="blue" rounded="full" padding="none" glow={true} className="px-6 py-3">
             <div className="flex items-center gap-2">
-              <Star className="w-6 h-6 text-solar-surge-orange drop-shadow-[0_0_12px_rgba(251,146,60,0.8)]" />
+              <Sparkles className="w-6 h-6 text-neon-cortex-blue drop-shadow-[0_0_12px_rgba(14,165,233,0.8)]" />
               <span className="text-base md:text-lg font-bold">PARTNER PROGRAM</span>
             </div>
           </LiquidGlass>
         </div>
 
         <GradientTextReveal
-          text="Turn Your Baseball & Softball Connections Into Recurring Income"
-          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black mb-8 leading-relaxed"
-          gradientFrom="#F97316"
-          gradientTo="#0EA5E9"
-          delay={0.2}
-        />
-
-        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12">
-          Earn 10-15% commission on every team license payment—forever. Perfect for coaches, facility owners, and league directors with connections in youth sports organizations.
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-          <LiquidGlass variant="orange" glow={true} className="p-6 text-center min-w-[200px]">
-            <div className="text-4xl font-black text-solar-surge-orange mb-2">10-15%</div>
-            <div className="text-sm text-text-secondary">Lifetime Commission</div>
-          </LiquidGlass>
-
-          <LiquidGlass variant="blue" glow={true} className="p-6 text-center min-w-[200px]">
-            <div className="text-4xl font-black text-neon-cortex-blue mb-2">Forever</div>
-            <div className="text-sm text-text-secondary">Recurring Income</div>
-          </LiquidGlass>
-
-          <LiquidGlass variant="orange" glow={true} className="p-6 text-center min-w-[200px]">
-            <div className="text-4xl font-black text-solar-surge-orange mb-2">8+ Teams</div>
-            <div className="text-sm text-text-secondary">Unlocks 15%</div>
-          </LiquidGlass>
-        </div>
-      </div>
-
-      {/* Market Opportunity */}
-      <div className="max-w-7xl mx-auto mb-20">
-        <GradientTextReveal
-          text="The Opportunity is Massive"
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
+          text="Built for Coaches, Facilities, and Teams"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight"
           gradientFrom="#0EA5E9"
           gradientTo="#F97316"
           delay={0.2}
         />
-        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
-          Youth sports is a $19.2B market. Coaches are actively seeking better tools. You're just connecting them to what they need.
+
+        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12">
+          Mind & Muscle extends training beyond the session—helping partners increase engagement, retention, and long-term athlete development.
         </p>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          <LiquidGlass variant="blue" glow={true} className="p-8 text-center">
-            <div className="text-5xl font-black text-neon-cortex-blue mb-3">12.5M</div>
-            <div className="text-text-secondary">Youth athletes in the US</div>
-          </LiquidGlass>
-
-          <LiquidGlass variant="orange" glow={true} className="p-8 text-center">
-            <div className="text-5xl font-black text-solar-surge-orange mb-3">$19.2B</div>
-            <div className="text-text-secondary">Youth sports market size</div>
-          </LiquidGlass>
-
-          <LiquidGlass variant="blue" glow={true} className="p-8 text-center">
-            <div className="text-5xl font-black text-neon-cortex-blue mb-3">2.4M</div>
-            <div className="text-text-secondary">Coaches nationwide</div>
-          </LiquidGlass>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <LiquidButton
+            variant="orange"
+            size="lg"
+            onClick={() => scrollToSection('facilities')}
+            className="!bg-gradient-to-r !from-solar-surge-orange !to-muscle-primary !shadow-[0_0_30px_rgba(251,146,60,0.6)] hover:!shadow-[0_0_40px_rgba(251,146,60,0.8)] !border-solar-surge-orange/60 !text-white !font-bold !text-lg"
+          >
+            Explore Partner Options
+          </LiquidButton>
+          <button
+            onClick={() => scrollToSection('facilities')}
+            className="text-neon-cortex-blue hover:text-white transition-colors font-medium flex items-center gap-2"
+          >
+            See how it works for your role
+            <ArrowRight className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
-      {/* Interactive Calculator */}
-      <div className="max-w-7xl mx-auto mb-20">
-        <EnhancedEarningsCalculator />
+      {/* ============================================= */}
+      {/* SECTION 2: AUDIENCE SELECTOR CARDS */}
+      {/* ============================================= */}
+      <div className="max-w-5xl mx-auto mb-24">
+        <div className="grid md:grid-cols-3 gap-6">
+          {/* Facilities Card */}
+          <button
+            onClick={() => scrollToSection('facilities')}
+            className="text-left group"
+          >
+            <LiquidGlass variant="orange" glow={true} className="p-8 h-full transition-all group-hover:scale-[1.02]">
+              <div className="flex flex-col items-center text-center">
+                <div className="inline-block p-4 rounded-xl bg-solar-surge-orange/20 mb-4">
+                  <Building2 className="w-10 h-10 text-solar-surge-orange" />
+                </div>
+                <h3 className="text-2xl font-black mb-2">Training Facilities</h3>
+                <p className="text-text-secondary text-sm mb-4">Batting cages, academies, indoor facilities</p>
+                <span className="text-solar-surge-orange font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
+                  Learn More <ArrowRight className="w-4 h-4" />
+                </span>
+              </div>
+            </LiquidGlass>
+          </button>
+
+          {/* Coaches Card */}
+          <button
+            onClick={() => scrollToSection('coaches')}
+            className="text-left group"
+          >
+            <LiquidGlass variant="blue" glow={true} className="p-8 h-full transition-all group-hover:scale-[1.02]">
+              <div className="flex flex-col items-center text-center">
+                <div className="inline-block p-4 rounded-xl bg-neon-cortex-blue/20 mb-4">
+                  <Users className="w-10 h-10 text-neon-cortex-blue" />
+                </div>
+                <h3 className="text-2xl font-black mb-2">Coaches & Instructors</h3>
+                <p className="text-text-secondary text-sm mb-4">Private coaches, team trainers</p>
+                <span className="text-neon-cortex-blue font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
+                  Learn More <ArrowRight className="w-4 h-4" />
+                </span>
+              </div>
+            </LiquidGlass>
+          </button>
+
+          {/* Teams & Influencers Card */}
+          <button
+            onClick={() => scrollToSection('teams')}
+            className="text-left group"
+          >
+            <LiquidGlass variant="orange" glow={true} className="p-8 h-full transition-all group-hover:scale-[1.02]">
+              <div className="flex flex-col items-center text-center">
+                <div className="inline-block p-4 rounded-xl bg-solar-surge-orange/20 mb-4">
+                  <Star className="w-10 h-10 text-solar-surge-orange" />
+                </div>
+                <h3 className="text-2xl font-black mb-2">Teams & Influencers</h3>
+                <p className="text-text-secondary text-sm mb-4">Travel teams, orgs, creators</p>
+                <span className="text-solar-surge-orange font-bold flex items-center gap-1 group-hover:gap-2 transition-all">
+                  Learn More <ArrowRight className="w-4 h-4" />
+                </span>
+              </div>
+            </LiquidGlass>
+          </button>
+        </div>
       </div>
 
-      {/* Application Form */}
-      <div className="max-w-3xl mx-auto mb-20">
-        <LiquidGlass variant="blue" glow={true} className="p-8">
+      {/* ============================================= */}
+      {/* SECTION 3: FACILITIES (Largest Section) */}
+      {/* ============================================= */}
+      <div id="facilities" className="max-w-7xl mx-auto mb-24 scroll-mt-32">
+        {/* Section Header */}
+        <div className="text-center mb-12">
+          <div className="inline-block mb-4">
+            <LiquidGlass variant="orange" rounded="full" padding="none" glow={true} className="px-4 py-2">
+              <span className="text-sm font-bold text-solar-surge-orange">FOR TRAINING FACILITIES</span>
+            </LiquidGlass>
+          </div>
+
           <GradientTextReveal
-            text="Ready to Start Earning?"
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
+            text="Turn Every Lesson Into Ongoing Training"
+            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-6 leading-tight"
+            gradientFrom="#F97316"
+            gradientTo="#0EA5E9"
+            delay={0.2}
+          />
+
+          <p className="text-xl sm:text-2xl text-gray-300 max-w-4xl mx-auto font-medium leading-relaxed">
+            Keep athletes engaged between visits—without adding staff or time.
+          </p>
+        </div>
+
+        {/* Facility Banner */}
+        <LiquidGlass variant="orange" glow={true} className="p-8 mb-12">
+          <div className="flex flex-col md:flex-row items-center gap-8">
+            <div className="flex-1">
+              <h3 className="text-3xl sm:text-4xl font-black mb-4">
+                <span className="text-white">Your Facility</span>
+                <span className="text-solar-surge-orange"> × </span>
+                <span className="bg-gradient-to-r from-solar-surge-orange to-neon-cortex-blue bg-clip-text text-transparent">Mind & Muscle</span>
+              </h3>
+              <p className="text-lg text-gray-300 leading-relaxed">
+                Facilities use Mind & Muscle to extend lesson impact—not replace lessons. Athletes continue developing between visits, making your instruction more valuable.
+              </p>
+            </div>
+            <div className="flex-shrink-0">
+              <Image
+                src="/assets/images/logo.png"
+                alt="Mind & Muscle"
+                width={150}
+                height={150}
+                className="opacity-90"
+              />
+            </div>
+          </div>
+        </LiquidGlass>
+
+        {/* 4-Bullet Value Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <LiquidGlass variant="orange" className="p-6 text-center">
+            <div className="inline-block p-3 rounded-xl bg-solar-surge-orange/20 mb-4">
+              <DollarSign className="w-8 h-8 text-solar-surge-orange" />
+            </div>
+            <h4 className="text-lg font-bold mb-2">New Recurring Revenue Stream</h4>
+            <p className="text-sm text-text-secondary">Earn 10-15% commission on every athlete subscription</p>
+          </LiquidGlass>
+
+          <LiquidGlass variant="blue" className="p-6 text-center">
+            <div className="inline-block p-3 rounded-xl bg-neon-cortex-blue/20 mb-4">
+              <TrendingUp className="w-8 h-8 text-neon-cortex-blue" />
+            </div>
+            <h4 className="text-lg font-bold mb-2">Stronger Lesson Retention</h4>
+            <p className="text-sm text-text-secondary">Athletes practice cues and drills between visits</p>
+          </LiquidGlass>
+
+          <LiquidGlass variant="orange" className="p-6 text-center">
+            <div className="inline-block p-3 rounded-xl bg-solar-surge-orange/20 mb-4">
+              <Star className="w-8 h-8 text-solar-surge-orange" />
+            </div>
+            <h4 className="text-lg font-bold mb-2">Increased Perceived Value</h4>
+            <p className="text-sm text-text-secondary">Parents see continuous development, not just hourly lessons</p>
+          </LiquidGlass>
+
+          <LiquidGlass variant="blue" className="p-6 text-center">
+            <div className="inline-block p-3 rounded-xl bg-neon-cortex-blue/20 mb-4">
+              <Zap className="w-8 h-8 text-neon-cortex-blue" />
+            </div>
+            <h4 className="text-lg font-bold mb-2">Zero Staff Training Required</h4>
+            <p className="text-sm text-text-secondary">Athletes use the app independently at home</p>
+          </LiquidGlass>
+        </div>
+
+        {/* Feature Cards - Renamed for Facilities */}
+        <h3 className="text-2xl font-bold text-center mb-8">How Your Athletes Use Mind & Muscle</h3>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          <LiquidGlass variant="blue" className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 p-3 rounded-xl bg-neon-cortex-blue/20">
+                <Video className="w-6 h-6 text-neon-cortex-blue" />
+              </div>
+              <div>
+                <h4 className="font-bold mb-2">Reinforce Mechanical Changes</h4>
+                <p className="text-sm text-text-secondary">AI swing analysis reinforces exactly what you teach in lessons</p>
+              </div>
+            </div>
+          </LiquidGlass>
+
+          <LiquidGlass variant="orange" className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 p-3 rounded-xl bg-solar-surge-orange/20">
+                <Brain className="w-6 h-6 text-solar-surge-orange" />
+              </div>
+              <div>
+                <h4 className="font-bold mb-2">Build Confidence Between Visits</h4>
+                <p className="text-sm text-text-secondary">Mental training content keeps athletes mentally sharp</p>
+              </div>
+            </div>
+          </LiquidGlass>
+
+          <LiquidGlass variant="blue" className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 p-3 rounded-xl bg-neon-cortex-blue/20">
+                <Apple className="w-6 h-6 text-neon-cortex-blue" />
+              </div>
+              <div>
+                <h4 className="font-bold mb-2">Support Recovery at Home</h4>
+                <p className="text-sm text-text-secondary">Nutrition and arm care guidance for better results</p>
+              </div>
+            </div>
+          </LiquidGlass>
+
+          <LiquidGlass variant="orange" className="p-6">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 p-3 rounded-xl bg-solar-surge-orange/20">
+                <LineChart className="w-6 h-6 text-solar-surge-orange" />
+              </div>
+              <div>
+                <h4 className="font-bold mb-2">Visible Progress for Parents</h4>
+                <p className="text-sm text-text-secondary">Weekly reports show parents their investment is working</p>
+              </div>
+            </div>
+          </LiquidGlass>
+        </div>
+
+        {/* ROI Calculator */}
+        <div className="mb-8">
+          <p className="text-center text-lg text-gray-300 mb-6">
+            <strong className="text-white">Calculate your facility's potential:</strong> See how much recurring revenue you could generate from your existing clients.
+          </p>
+          <EnhancedEarningsCalculator />
+        </div>
+
+        {/* Facility CTA */}
+        <div className="text-center">
+          <LiquidButton
+            variant="orange"
+            size="lg"
+            onClick={() => scrollToSection('apply')}
+            className="!bg-gradient-to-r !from-solar-surge-orange !to-muscle-primary !shadow-[0_0_30px_rgba(251,146,60,0.6)] hover:!shadow-[0_0_40px_rgba(251,146,60,0.8)]"
+          >
+            Partner Your Facility
+          </LiquidButton>
+        </div>
+      </div>
+
+      {/* ============================================= */}
+      {/* SECTION 4: COACHES (Short Section) */}
+      {/* ============================================= */}
+      <div id="coaches" className="max-w-5xl mx-auto mb-24 scroll-mt-32">
+        <div className="text-center mb-8">
+          <div className="inline-block mb-4">
+            <LiquidGlass variant="blue" rounded="full" padding="none" glow={true} className="px-4 py-2">
+              <span className="text-sm font-bold text-neon-cortex-blue">FOR COACHES & INSTRUCTORS</span>
+            </LiquidGlass>
+          </div>
+
+          <GradientTextReveal
+            text="Extend Your Impact Beyond the Session"
+            className="text-3xl sm:text-4xl md:text-5xl font-black mb-6 leading-tight"
             gradientFrom="#0EA5E9"
             gradientTo="#F97316"
             delay={0.2}
           />
-          <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
-            Apply below and start earning immediately. Instant approval!
+        </div>
+
+        <LiquidGlass variant="blue" glow={true} className="p-8">
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-neon-cortex-blue/20 flex items-center justify-center">
+                <Check className="w-5 h-5 text-neon-cortex-blue" />
+              </div>
+              <div>
+                <h4 className="font-bold mb-1">Reinforce Cues Between Lessons</h4>
+                <p className="text-sm text-text-secondary">Athletes practice exactly what you teach</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-neon-cortex-blue/20 flex items-center justify-center">
+                <Check className="w-5 h-5 text-neon-cortex-blue" />
+              </div>
+              <div>
+                <h4 className="font-bold mb-1">Assign Drills & Mindset Work Remotely</h4>
+                <p className="text-sm text-text-secondary">Keep athletes working between sessions</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-neon-cortex-blue/20 flex items-center justify-center">
+                <Check className="w-5 h-5 text-neon-cortex-blue" />
+              </div>
+              <div>
+                <h4 className="font-bold mb-1">Track Athlete Progress Over Time</h4>
+                <p className="text-sm text-text-secondary">See development data and engagement metrics</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-neon-cortex-blue/20 flex items-center justify-center">
+                <Check className="w-5 h-5 text-neon-cortex-blue" />
+              </div>
+              <div>
+                <h4 className="font-bold mb-1">Look More Professional to Parents</h4>
+                <p className="text-sm text-text-secondary">Offer a complete development ecosystem</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <LiquidButton
+              variant="blue"
+              size="lg"
+              onClick={() => scrollToSection('apply')}
+            >
+              See Coach Tools
+            </LiquidButton>
+          </div>
+        </LiquidGlass>
+      </div>
+
+      {/* ============================================= */}
+      {/* SECTION 5: TEAMS & INFLUENCERS (Short Section) */}
+      {/* ============================================= */}
+      <div id="teams" className="max-w-5xl mx-auto mb-24 scroll-mt-32">
+        <div className="text-center mb-8">
+          <div className="inline-block mb-4">
+            <LiquidGlass variant="orange" rounded="full" padding="none" glow={true} className="px-4 py-2">
+              <span className="text-sm font-bold text-solar-surge-orange">FOR TEAMS & INFLUENCERS</span>
+            </LiquidGlass>
+          </div>
+
+          <GradientTextReveal
+            text="Add Value Without Extra Work"
+            className="text-3xl sm:text-4xl md:text-5xl font-black mb-6 leading-tight"
+            gradientFrom="#F97316"
+            gradientTo="#0EA5E9"
+            delay={0.2}
+          />
+        </div>
+
+        <LiquidGlass variant="orange" glow={true} className="p-8">
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-solar-surge-orange/20 flex items-center justify-center">
+                <Check className="w-5 h-5 text-solar-surge-orange" />
+              </div>
+              <div>
+                <h4 className="font-bold mb-1">Branded Access for Your Team or Audience</h4>
+                <p className="text-sm text-text-secondary">Custom experience tied to your organization</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-solar-surge-orange/20 flex items-center justify-center">
+                <Check className="w-5 h-5 text-solar-surge-orange" />
+              </div>
+              <div>
+                <h4 className="font-bold mb-1">Mental Training Content You Didn't Create</h4>
+                <p className="text-sm text-text-secondary">Professional-grade development content ready to go</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-solar-surge-orange/20 flex items-center justify-center">
+                <Check className="w-5 h-5 text-solar-surge-orange" />
+              </div>
+              <div>
+                <h4 className="font-bold mb-1">Affiliate or Revenue-Share Options</h4>
+                <p className="text-sm text-text-secondary">Earn 10-15% on every subscription you refer</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-solar-surge-orange/20 flex items-center justify-center">
+                <Check className="w-5 h-5 text-solar-surge-orange" />
+              </div>
+              <div>
+                <h4 className="font-bold mb-1">Adds Value Without Extra Work</h4>
+                <p className="text-sm text-text-secondary">Just share—we handle everything else</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="text-center">
+            <LiquidButton
+              variant="orange"
+              size="lg"
+              onClick={() => scrollToSection('apply')}
+              className="!bg-gradient-to-r !from-solar-surge-orange !to-muscle-primary"
+            >
+              Partner With Mind & Muscle
+            </LiquidButton>
+          </div>
+        </LiquidGlass>
+      </div>
+
+      {/* ============================================= */}
+      {/* SECTION 6: PARTNER MECHANICS */}
+      {/* ============================================= */}
+      <div className="max-w-7xl mx-auto mb-24">
+        <div className="text-center mb-12">
+          <GradientTextReveal
+            text="How the Partner Program Works"
+            className="text-3xl sm:text-4xl md:text-5xl font-black mb-6 leading-tight"
+            gradientFrom="#0EA5E9"
+            gradientTo="#F97316"
+            delay={0.2}
+          />
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            Simple setup, transparent tracking, automatic payouts.
+          </p>
+        </div>
+
+        {/* How It Works Steps */}
+        <div className="grid md:grid-cols-4 gap-6 mb-16">
+          {steps.map((step, index) => (
+            <div key={index} className="text-center">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-neon-cortex-blue to-solar-surge-orange mb-4 text-2xl font-black">
+                {step.number}
+              </div>
+              <h3 className="text-xl font-bold mb-2">{step.title}</h3>
+              <p className="text-sm text-text-secondary">{step.description}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Revenue Share Details */}
+        <div className="grid md:grid-cols-3 gap-6 mb-12">
+          <LiquidGlass variant="orange" glow={true} className="p-6 text-center">
+            <div className="text-4xl font-black text-solar-surge-orange mb-2">10%</div>
+            <div className="text-lg font-bold mb-1">Base Commission</div>
+            <div className="text-sm text-text-secondary">On every subscription payment, forever</div>
+          </LiquidGlass>
+
+          <LiquidGlass variant="blue" glow={true} className="p-6 text-center">
+            <div className="text-4xl font-black text-neon-cortex-blue mb-2">15%</div>
+            <div className="text-lg font-bold mb-1">Volume Bonus</div>
+            <div className="text-sm text-text-secondary">On users 101+ for large organizations</div>
+          </LiquidGlass>
+
+          <LiquidGlass variant="orange" glow={true} className="p-6 text-center">
+            <div className="text-4xl font-black text-solar-surge-orange mb-2">90 Days</div>
+            <div className="text-lg font-bold mb-1">Cookie Duration</div>
+            <div className="text-sm text-text-secondary">Credit for clicks up to 90 days before signup</div>
+          </LiquidGlass>
+        </div>
+
+        {/* What You Get */}
+        <div className="grid md:grid-cols-2 gap-6 mb-12">
+          <LiquidGlass variant="blue" className="p-6">
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <BookOpen className="w-6 h-6 text-mind-primary" />
+              Marketing Materials
+            </h3>
+            <ul className="space-y-2 text-sm text-text-secondary">
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0" />
+                Your unique referral link and QR code
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0" />
+                Co-branded banners (if you upload your logo)
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0" />
+                Email templates ready to customize
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0" />
+                Social media graphics and posts
+              </li>
+            </ul>
+          </LiquidGlass>
+
+          <LiquidGlass variant="orange" className="p-6">
+            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <Award className="w-6 h-6 text-muscle-primary" />
+              Tracking & Payouts
+            </h3>
+            <ul className="space-y-2 text-sm text-text-secondary">
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0" />
+                Real-time click and conversion tracking
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0" />
+                Commission dashboard with full transparency
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0" />
+                Automatic PayPal payouts (60 days after sale)
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0" />
+                $50 minimum threshold for payout
+              </li>
+            </ul>
+          </LiquidGlass>
+        </div>
+
+        {/* Example Banner */}
+        <LiquidGlass variant="blue" glow={true} className="p-8">
+          <h3 className="text-xl font-bold mb-4 text-center">Your Co-Branded Marketing Banner</h3>
+          <p className="text-center text-text-secondary mb-6">Upload your logo when applying and we'll create professional banners like this:</p>
+          <div className="rounded-xl overflow-hidden border border-white/10 mb-4">
+            <Image
+              src="/assets/images/example-partner-banner.png"
+              alt="Example Co-Branded Partner Banner"
+              width={1600}
+              height={900}
+              className="w-full h-auto"
+            />
+          </div>
+          <p className="text-xs text-center text-text-secondary">
+            Perfect for social media, email newsletters, and your website
+          </p>
+        </LiquidGlass>
+      </div>
+
+      {/* ============================================= */}
+      {/* SECTION 7: APPLICATION FORM */}
+      {/* ============================================= */}
+      <div id="apply" className="max-w-3xl mx-auto mb-24 scroll-mt-32">
+        <LiquidGlass variant="blue" glow={true} className="p-8">
+          <GradientTextReveal
+            text="Let's Build a Smarter Training Ecosystem"
+            className="text-2xl sm:text-3xl md:text-4xl font-black mb-4 leading-tight text-center"
+            gradientFrom="#0EA5E9"
+            gradientTo="#F97316"
+            delay={0.2}
+          />
+          <p className="text-lg text-gray-300 max-w-2xl mx-auto mb-8 text-center">
+            Apply now and start partnering immediately. Instant approval!
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -407,7 +760,7 @@ export default function PartnerProgramPage() {
 
             <div>
               <label htmlFor="organization" className="block text-sm font-semibold mb-2">
-                Organization/Website (Optional)
+                Organization/Facility Name (Optional)
               </label>
               <input
                 type="text"
@@ -415,7 +768,7 @@ export default function PartnerProgramPage() {
                 value={formData.organization}
                 onChange={(e) => setFormData({ ...formData, organization: e.target.value })}
                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors backdrop-blur-md"
-                placeholder="Your organization or website"
+                placeholder="Your facility or organization name"
               />
             </div>
 
@@ -467,7 +820,7 @@ export default function PartnerProgramPage() {
 
             <div>
               <label htmlFor="networkSize" className="block text-sm font-semibold mb-2">
-                How many coaches/teams are in your network? *
+                How many coaches/teams/athletes do you reach? *
               </label>
               <select
                 id="networkSize"
@@ -477,17 +830,17 @@ export default function PartnerProgramPage() {
                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors backdrop-blur-md"
               >
                 <option value="">Select range...</option>
-                <option value="1-5">1-5 coaches/teams</option>
-                <option value="6-15">6-15 coaches/teams</option>
-                <option value="16-30">16-30 coaches/teams</option>
-                <option value="31-50">31-50 coaches/teams</option>
-                <option value="50+">50+ coaches/teams</option>
+                <option value="1-25">1-25 athletes</option>
+                <option value="26-50">26-50 athletes</option>
+                <option value="51-100">51-100 athletes</option>
+                <option value="101-200">101-200 athletes</option>
+                <option value="200+">200+ athletes</option>
               </select>
             </div>
 
             <div>
               <label htmlFor="promotionChannel" className="block text-sm font-semibold mb-2">
-                How will you primarily promote? *
+                What best describes you? *
               </label>
               <select
                 id="promotionChannel"
@@ -496,19 +849,18 @@ export default function PartnerProgramPage() {
                 onChange={(e) => setFormData({ ...formData, promotionChannel: e.target.value })}
                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors backdrop-blur-md"
               >
-                <option value="">Select channel...</option>
-                <option value="email">Direct email to coaches</option>
-                <option value="social">Social media (Instagram, Twitter, etc.)</option>
-                <option value="blog">Blog or website</option>
-                <option value="inperson">In-person at games/events</option>
-                <option value="community">Online community or group</option>
+                <option value="">Select type...</option>
+                <option value="facility">Training Facility / Academy</option>
+                <option value="coach">Private Coach / Instructor</option>
+                <option value="team">Team Coach / Organization</option>
+                <option value="influencer">Content Creator / Influencer</option>
                 <option value="other">Other</option>
               </select>
             </div>
 
             <div>
               <label htmlFor="whyExcited" className="block text-sm font-semibold mb-2">
-                Why are you excited about Mind & Muscle? *
+                How would you use Mind & Muscle with your athletes? *
               </label>
               <textarea
                 id="whyExcited"
@@ -517,21 +869,21 @@ export default function PartnerProgramPage() {
                 value={formData.whyExcited}
                 onChange={(e) => setFormData({ ...formData, whyExcited: e.target.value })}
                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors backdrop-blur-md resize-none"
-                placeholder="What excites you about helping coaches with mental and physical training..."
+                placeholder="Tell us how you'd integrate Mind & Muscle into your training..."
               />
             </div>
 
             <div>
               <label htmlFor="audience" className="block text-sm font-semibold mb-2">
-                Tell us about your audience
+                Anything else we should know? (Optional)
               </label>
               <textarea
                 id="audience"
-                rows={3}
+                rows={2}
                 value={formData.audience}
                 onChange={(e) => setFormData({ ...formData, audience: e.target.value })}
                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors backdrop-blur-md resize-none"
-                placeholder="Optional: demographics, sports, competitive level, etc."
+                placeholder="Additional context, questions, or ideas..."
               />
             </div>
 
@@ -543,7 +895,7 @@ export default function PartnerProgramPage() {
                   <a href="/partner-terms" target="_blank" className="text-neon-cortex-green hover:underline">
                     partner terms
                   </a>
-                  . No commitments required - you can stop at any time. Zero risk, all upside.
+                  . No commitments required—you can stop at any time.
                 </p>
               </div>
             </div>
@@ -563,552 +915,63 @@ export default function PartnerProgramPage() {
               size="lg"
               fullWidth={true}
               disabled={!captchaToken || isSubmitting}
-              className="!bg-gradient-to-r !from-solar-surge-orange !to-muscle-primary !shadow-[0_0_30px_rgba(251,146,60,0.6)] hover:!shadow-[0_0_40px_rgba(251,146,60,0.8)] !border-solar-surge-orange/60 !text-white !font-black !text-xl animate-pulse-subtle"
+              className="!bg-gradient-to-r !from-solar-surge-orange !to-muscle-primary !shadow-[0_0_30px_rgba(251,146,60,0.6)] hover:!shadow-[0_0_40px_rgba(251,146,60,0.8)] !border-solar-surge-orange/60 !text-white !font-black !text-xl"
             >
-              {isSubmitting ? 'Submitting...' : 'Apply Now - Start Earning'}
+              {isSubmitting ? 'Submitting...' : 'Become a Partner'}
             </LiquidButton>
 
             <p className="text-xs text-text-secondary text-center">
-              Instant approval! Your referral link, QR code, and marketing banners will be emailed to you immediately.
+              Instant approval! Your referral link and marketing materials will be emailed immediately.
             </p>
           </form>
         </LiquidGlass>
       </div>
 
-      {/* Perfect For High-Impact Partners */}
-      <div className="max-w-7xl mx-auto mb-20">
+      {/* ============================================= */}
+      {/* SECTION 8: FINAL CTA */}
+      {/* ============================================= */}
+      <div className="max-w-4xl mx-auto mb-24 text-center">
         <GradientTextReveal
-          text="Perfect For High-Impact Partners"
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
-          gradientFrom="#0EA5E9"
-          gradientTo="#F97316"
-          delay={0.2}
-        />
-        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
-          Whether you're a facility owner, league director, coach, or influencer—if you have connections in youth baseball and softball, you can earn serious recurring income.
-        </p>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {/* Organizations & Facilities */}
-          <LiquidGlass variant="orange" className="p-8">
-            <div className="text-center mb-6">
-              <div className="inline-block p-4 rounded-xl bg-solar-surge-orange/20 mb-4">
-                <Building2 className="w-8 h-8 text-solar-surge-orange" />
-              </div>
-              <h3 className="text-2xl font-black mb-2">Organizations & Facilities</h3>
-            </div>
-            <ul className="space-y-3 text-sm text-text-secondary">
-              <li className="flex items-start gap-2">
-                <span className="text-solar-surge-orange mt-1">⚾</span>
-                <span>Travel Ball Organizations</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-solar-surge-orange mt-1">🏟️</span>
-                <span>Batting Cages & Performance Centers</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-solar-surge-orange mt-1">🎓</span>
-                <span>High School & College Programs</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-solar-surge-orange mt-1">🥎</span>
-                <span>Local Leagues (Little League, Babe Ruth, Pony)</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-solar-surge-orange mt-1">🏋️</span>
-                <span>Multi-Sport Training Facilities</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-solar-surge-orange mt-1">🏅</span>
-                <span>Sports Performance Centers</span>
-              </li>
-            </ul>
-          </LiquidGlass>
-
-          {/* Coaches & Trainers */}
-          <LiquidGlass variant="blue" className="p-8">
-            <div className="text-center mb-6">
-              <div className="inline-block p-4 rounded-xl bg-neon-cortex-blue/20 mb-4">
-                <Users className="w-8 h-8 text-neon-cortex-blue" />
-              </div>
-              <h3 className="text-2xl font-black mb-2">Coaches & Trainers</h3>
-            </div>
-            <ul className="space-y-3 text-sm text-text-secondary">
-              <li className="flex items-start gap-2">
-                <span className="text-neon-cortex-blue mt-1">⚾</span>
-                <span>Private Hitting Coaches</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-neon-cortex-blue mt-1">🥎</span>
-                <span>Pitching Instructors</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-neon-cortex-blue mt-1">🧠</span>
-                <span>Mental Performance Coaches</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-neon-cortex-blue mt-1">💪</span>
-                <span>Strength & Conditioning Trainers</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-neon-cortex-blue mt-1">👥</span>
-                <span>Team Coaches (Travel Ball, High School)</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-neon-cortex-blue mt-1">🎯</span>
-                <span>Recruiting Consultants</span>
-              </li>
-            </ul>
-          </LiquidGlass>
-
-          {/* Influencers & Creators */}
-          <LiquidGlass variant="orange" className="p-8">
-            <div className="text-center mb-6">
-              <div className="inline-block p-4 rounded-xl bg-solar-surge-orange/20 mb-4">
-                <Star className="w-8 h-8 text-solar-surge-orange" />
-              </div>
-              <h3 className="text-2xl font-black mb-2">Influencers & Creators</h3>
-            </div>
-            <ul className="space-y-3 text-sm text-text-secondary">
-              <li className="flex items-start gap-2">
-                <span className="text-solar-surge-orange mt-1">📹</span>
-                <span>YouTube Baseball/Softball Coaches (5k+ subscribers)</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-solar-surge-orange mt-1">📱</span>
-                <span>TikTok/Instagram Skill Trainers (10k+ followers)</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-solar-surge-orange mt-1">🎙️</span>
-                <span>Sports Performance Podcasters</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-solar-surge-orange mt-1">✍️</span>
-                <span>Baseball/Softball Bloggers</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-solar-surge-orange mt-1">📺</span>
-                <span>Equipment Review Channels</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="text-solar-surge-orange mt-1">🎓</span>
-                <span>Recruiting Advice Content Creators</span>
-              </li>
-            </ul>
-          </LiquidGlass>
-        </div>
-
-        {/* Call-out box */}
-        <div className="mt-8">
-          <LiquidGlass variant="blue" className="p-6">
-            <div className="text-center">
-              <div className="inline-block p-3 rounded-xl bg-neon-cortex-green/20 mb-3">
-                <TrendingUp className="w-6 h-6 text-neon-cortex-green" />
-              </div>
-              <h4 className="text-xl font-bold mb-2">Know High-Value Partners?</h4>
-              <p className="text-text-secondary text-sm max-w-3xl mx-auto">
-                Know facility owners, league directors, or influencers who could be great partners? One introduction to a high-value partner can generate more recurring income than dozens of individual referrals. <a href="mailto:support@mindandmuscle.ai" className="text-neon-cortex-blue hover:underline font-bold">Contact us</a> about special introducer opportunities.
-              </p>
-            </div>
-          </LiquidGlass>
-        </div>
-      </div>
-
-      {/* Aspirational Scenarios */}
-      <div className="max-w-7xl mx-auto mb-20">
-        <GradientTextReveal
-          text="What Partners Like You Can Earn"
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
-          gradientFrom="#0EA5E9"
-          gradientTo="#F97316"
-          delay={0.2}
-        />
-        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
-          Real scenarios based on typical networks and conversion rates. Your actual earnings depend on your connections and how actively you promote.
-        </p>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {scenarios.map((scenario, index) => (
-            <ScenarioCard key={index} {...scenario} />
-          ))}
-        </div>
-      </div>
-
-      {/* Benefits Grid */}
-      <div className="max-w-7xl mx-auto mb-20">
-        <GradientTextReveal
-          text="Why Partner With Us?"
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
-          gradientFrom="#0EA5E9"
-          gradientTo="#F97316"
-          delay={0.2}
-        />
-        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
-          Lifetime commission opportunity. Earn on every payment. Everything you need to succeed.
-        </p>
-
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {benefits.map((benefit, index) => {
-            const Icon = benefit.icon;
-            return (
-              <LiquidGlass key={index} variant={benefit.variant} className="p-6">
-                <div className={`inline-block p-3 rounded-xl mb-4 ${
-                  benefit.variant === 'blue'
-                    ? 'bg-neon-cortex-blue/20'
-                    : 'bg-solar-surge-orange/20'
-                }`}>
-                  <Icon className={`w-6 h-6 ${
-                    benefit.variant === 'blue'
-                      ? 'text-mind-primary'
-                      : 'text-muscle-primary'
-                  }`} />
-                </div>
-                <h3 className="text-lg font-bold mb-2">{benefit.title}</h3>
-                <p className="text-text-secondary text-sm">{benefit.description}</p>
-              </LiquidGlass>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Why Partners Choose Mind & Muscle - Competitive Talking Points */}
-      <div className="max-w-7xl mx-auto mb-20">
-        <GradientTextReveal
-          text="What Makes Mind & Muscle Easy to Sell"
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
-          gradientFrom="#0EA5E9"
-          gradientTo="#F97316"
-          delay={0.2}
-        />
-        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
-          These talking points help partners explain why Mind & Muscle is different from other apps in the market.
-        </p>
-
-        <div className="space-y-6">
-          {/* Talking Point 1: All-in-One Integration */}
-          <LiquidGlass variant="blue" className="p-8">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-neon-cortex-blue/20 flex items-center justify-center">
-                <Zap className="w-6 h-6 text-neon-cortex-blue" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-2xl font-black mb-3 text-neon-cortex-blue">All-In-One Integration</h3>
-                <p className="text-text-secondary mb-4 leading-relaxed">
-                  <strong className="text-white">What coaches are dealing with now:</strong> Juggling 7+ different apps (team communication, mental training, video analysis, strength training, nutrition, IQ training, goal tracking). Multiple monthly payments. Data that never connects. Athletes who quit because it's too complicated.
-                </p>
-                <p className="text-gray-200 leading-relaxed">
-                  <strong className="text-neon-cortex-blue">Mind & Muscle solution:</strong> One intelligent platform where everything connects. The AI learns from swing videos, workouts, mental training, and goals—making smarter recommendations across all areas. One login. One 6-month payment. Development that actually integrates.
-                </p>
-                <div className="mt-4 p-4 bg-neon-cortex-blue/10 border border-neon-cortex-blue/30 rounded-lg">
-                  <p className="text-sm text-gray-300">
-                    💡 <strong>Differentiator:</strong> "Stop piecing together 7 apps that cost $1,060/year per athlete. Get everything integrated for $79 per 6 months—or less with team discounts."
-                  </p>
-                </div>
-              </div>
-            </div>
-          </LiquidGlass>
-
-          {/* Talking Point 2: Baseball-Specific AI */}
-          <LiquidGlass variant="orange" className="p-8">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-solar-surge-orange/20 flex items-center justify-center">
-                <Target className="w-6 h-6 text-solar-surge-orange" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-2xl font-black mb-3 text-solar-surge-orange">Built from Scratch for Baseball and Softball</h3>
-                <p className="text-text-secondary mb-4 leading-relaxed">
-                  <strong className="text-white">What coaches are dealing with now:</strong> Generic multi-sport apps with a "baseball filter" slapped on. Mental training designed for general athletes. Strength programs not optimized for rotational power. Scenarios that don't match real game situations.
-                </p>
-                <p className="text-gray-200 leading-relaxed">
-                  <strong className="text-solar-surge-orange">Mind & Muscle solution:</strong> Every drill designed for baseball and softball movements. AI trained exclusively on baseball and softball content. 186 real game scenarios. Position-specific strength training (pitchers get rotational power, catchers get explosive legs). Not adapted—purpose-built.
-                </p>
-                <div className="mt-4 p-4 bg-solar-surge-orange/10 border border-solar-surge-orange/30 rounded-lg">
-                  <p className="text-sm text-gray-300">
-                    💡 <strong>Differentiator:</strong> "Unlike multi-sport apps, Mind & Muscle was built exclusively for baseball and softball athletes. Every feature is designed for your sport."
-                  </p>
-                </div>
-              </div>
-            </div>
-          </LiquidGlass>
-
-          {/* Talking Point 3: Adaptive Learning AI */}
-          <LiquidGlass variant="blue" className="p-8">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-neon-cortex-blue/20 flex items-center justify-center">
-                <TrendingUp className="w-6 h-6 text-neon-cortex-blue" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-2xl font-black mb-3 text-neon-cortex-blue">AI That Actually Learns</h3>
-                <p className="text-text-secondary mb-4 leading-relaxed">
-                  <strong className="text-white">What coaches are dealing with now:</strong> Static content libraries. One-size-fits-all training programs. Apps that deliver the same workouts to every athlete regardless of position, skill level, or progress. No personalization. No adaptation.
-                </p>
-                <p className="text-gray-200 leading-relaxed">
-                  <strong className="text-neon-cortex-blue">Mind & Muscle solution:</strong> AI creates a complete profile of each athlete. Learns from every session, workout, and analysis. Cross-feature insights: swing analysis identifies timing issues → Mind Coach recommends focus training → Goals AI suggests milestones → Muscle Coach designs bat speed workouts. Everything connects and improves together.
-                </p>
-                <div className="mt-4 p-4 bg-neon-cortex-blue/10 border border-neon-cortex-blue/30 rounded-lg">
-                  <p className="text-sm text-gray-300">
-                    💡 <strong>Differentiator:</strong> "Other apps deliver the same content to everyone. Mind & Muscle's AI learns each athlete's strengths and gaps, then engineers personalized development plans."
-                  </p>
-                </div>
-              </div>
-            </div>
-          </LiquidGlass>
-
-          {/* Talking Point 4: Team Value Proposition */}
-          <LiquidGlass variant="orange" className="p-8">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-solar-surge-orange/20 flex items-center justify-center">
-                <Users className="w-6 h-6 text-solar-surge-orange" />
-              </div>
-              <div className="flex-1">
-                <h3 className="text-2xl font-black mb-3 text-solar-surge-orange">Beyond Team Logistics</h3>
-                <p className="text-text-secondary mb-4 leading-relaxed">
-                  <strong className="text-white">What coaches are dealing with now:</strong> Free team communication apps handle logistics (schedules, messages, stats) but offer zero athlete development. When practice ends, athletes are on their own for mental training, strength work, and skill development.
-                </p>
-                <p className="text-gray-200 leading-relaxed">
-                  <strong className="text-solar-surge-orange">Mind & Muscle solution:</strong> Team communication PLUS 8 AI development tools. Yes, we have scheduling and team chat. But we also have AI mental training, swing analysis, position-specific strength programs, baseball IQ scenarios, nutrition planning, and goal coaching. We're not replacing team logistics apps—we're adding what happens between games.
-                </p>
-                <div className="mt-4 p-4 bg-solar-surge-orange/10 border border-solar-surge-orange/30 rounded-lg">
-                  <p className="text-sm text-gray-300">
-                    💡 <strong>Differentiator:</strong> "Team communication apps track what happened. Mind & Muscle develops what happens next. Get logistics + athlete development in one platform."
-                  </p>
-                </div>
-              </div>
-            </div>
-          </LiquidGlass>
-        </div>
-      </div>
-
-      {/* Partner Resources Preview */}
-      <div className="max-w-6xl mx-auto mb-20">
-        <GradientTextReveal
-          text="Everything You Need to Succeed"
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
-          gradientFrom="#0EA5E9"
-          gradientTo="#F97316"
-          delay={0.2}
-        />
-        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
-          We do the heavy lifting. You just share. Here's what you get when approved:
-        </p>
-
-        <div className="grid md:grid-cols-2 gap-6">
-          <LiquidGlass variant="blue" className="p-6">
-            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <BookOpen className="w-6 h-6 text-mind-primary" />
-              Marketing Materials
-            </h3>
-            <ul className="space-y-2 text-sm text-text-secondary">
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0" />
-                Email templates (ready to customize and send)
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0" />
-                Social media graphics and posts
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0" />
-                Program guides (leagues, scholarships, community)
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0" />
-                Brand assets (logo, colors, usage tips)
-              </li>
-            </ul>
-            <p className="text-xs text-text-secondary/70 mt-3 italic">
-              New resources added regularly
-            </p>
-          </LiquidGlass>
-
-          <LiquidGlass variant="orange" className="p-6">
-            <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <Award className="w-6 h-6 text-muscle-primary" />
-              Real-Time Tracking
-            </h3>
-            <ul className="space-y-2 text-sm text-text-secondary">
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0" />
-                Track every click and signup
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0" />
-                See commission earnings in real-time
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0" />
-                Monitor conversion rates
-              </li>
-              <li className="flex items-center gap-2">
-                <Check className="w-4 h-4 text-neon-cortex-green flex-shrink-0" />
-                Automatic PayPal payouts (60 days after sale)
-              </li>
-            </ul>
-          </LiquidGlass>
-        </div>
-      </div>
-
-      {/* Co-Branded Marketing Materials Section */}
-      <div className="max-w-6xl mx-auto mb-20">
-        <GradientTextReveal
-          text="Your Co-Branded Marketing Materials"
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
+          text="Let's Build a Smarter Training Ecosystem"
+          className="text-3xl sm:text-4xl md:text-5xl font-black mb-6 leading-tight"
           gradientFrom="#F97316"
           gradientTo="#0EA5E9"
           delay={0.2}
         />
-        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
-          When you join our Partner Program, we create professional co-branded banners featuring your organization's logo.
+        <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+          Whether you're a facility, coach, or influencer—we're here to help you add value for your athletes.
         </p>
-
-        <LiquidGlass variant="orange" glow={true} className="p-8">
-          {/* Example Partner Banner */}
-          <div className="rounded-xl overflow-hidden mb-8 border border-white/10">
-            <Image
-              src="/assets/images/example-partner-banner.png"
-              alt="Example Co-Branded Partner Banner"
-              width={1600}
-              height={900}
-              className="w-full h-auto"
-            />
-          </div>
-
-          {/* Use Cases */}
-          <h3 className="text-xl font-bold mb-4 text-center">Perfect For:</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-white/5 border border-white/10 rounded-xl">
-              <div className="w-12 h-12 bg-solar-surge-orange/20 rounded-full flex items-center justify-center mx-auto mb-2">
-                <span className="text-2xl">📱</span>
-              </div>
-              <p className="text-sm font-medium">Social Media Posts</p>
-            </div>
-            <div className="text-center p-4 bg-white/5 border border-white/10 rounded-xl">
-              <div className="w-12 h-12 bg-neon-cortex-blue/20 rounded-full flex items-center justify-center mx-auto mb-2">
-                <span className="text-2xl">📧</span>
-              </div>
-              <p className="text-sm font-medium">Email Newsletters</p>
-            </div>
-            <div className="text-center p-4 bg-white/5 border border-white/10 rounded-xl">
-              <div className="w-12 h-12 bg-solar-surge-orange/20 rounded-full flex items-center justify-center mx-auto mb-2">
-                <span className="text-2xl">🌐</span>
-              </div>
-              <p className="text-sm font-medium">Team Websites</p>
-            </div>
-            <div className="text-center p-4 bg-white/5 border border-white/10 rounded-xl">
-              <div className="w-12 h-12 bg-neon-cortex-blue/20 rounded-full flex items-center justify-center mx-auto mb-2">
-                <span className="text-2xl">🎪</span>
-              </div>
-              <p className="text-sm font-medium">Event Promotions</p>
-            </div>
-          </div>
-
-          <div className="mt-6 p-4 bg-neon-cortex-green/10 border border-neon-cortex-green/30 rounded-lg">
-            <p className="text-sm text-center text-gray-300">
-              <strong className="text-neon-cortex-green">Pro tip:</strong> Upload your logo when applying above, and we'll create your custom banner within 24 hours of approval!
-            </p>
-          </div>
-        </LiquidGlass>
-      </div>
-
-
-      {/* How It Works */}
-      <div className="max-w-6xl mx-auto mb-20">
-        <GradientTextReveal
-          text="How It Works"
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-12 leading-relaxed text-center"
-          gradientFrom="#0EA5E9"
-          gradientTo="#F97316"
-          delay={0.2}
-        />
-
-        <div className="grid md:grid-cols-4 gap-6">
-          {steps.map((step, index) => (
-            <div key={index} className="text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-neon-cortex-blue to-solar-surge-orange mb-4 text-2xl font-black">
-                {step.number}
-              </div>
-              <h3 className="text-xl font-bold mb-2">{step.title}</h3>
-              <p className="text-sm text-text-secondary">{step.description}</p>
-            </div>
-          ))}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+          <LiquidButton
+            variant="orange"
+            size="lg"
+            onClick={() => scrollToSection('apply')}
+            className="!bg-gradient-to-r !from-solar-surge-orange !to-muscle-primary !shadow-[0_0_30px_rgba(251,146,60,0.6)] hover:!shadow-[0_0_40px_rgba(251,146,60,0.8)]"
+          >
+            Explore Partner Options
+          </LiquidButton>
+          <a
+            href="https://calendly.com/jeff-mindandmuscle/mind-muscle-discovery-call"
+            target="_blank"
+            className="text-neon-cortex-blue hover:text-white transition-colors font-medium flex items-center gap-2"
+          >
+            Schedule a 15-Minute Walkthrough
+            <ArrowRight className="w-4 h-4" />
+          </a>
         </div>
       </div>
 
-      {/* Access Your Dashboard Section */}
+      {/* ============================================= */}
+      {/* FAQ SECTION */}
+      {/* ============================================= */}
       <div className="max-w-4xl mx-auto mb-20">
         <GradientTextReveal
-          text="Already a Partner? Access Your Dashboard"
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
-          gradientFrom="#F97316"
-          gradientTo="#0EA5E9"
-          delay={0.2}
-        />
-        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
-          Track your commissions, view click analytics, and access marketing resources.
-        </p>
-
-        <LiquidGlass variant="blue" glow={true} className="p-8">
-          <ol className="space-y-6 text-base">
-            <li className="flex items-start gap-4">
-              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-solar-surge-orange flex items-center justify-center text-sm font-black">1</span>
-              <div>
-                <h4 className="font-bold text-lg mb-1">Go to the Partner Portal</h4>
-                <p className="text-text-secondary">Visit <a href="https://mind-and-muscle.tolt.io" target="_blank" className="text-solar-surge-orange hover:underline font-semibold">mind-and-muscle.tolt.io</a></p>
-              </div>
-            </li>
-            <li className="flex items-start gap-4">
-              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-solar-surge-orange flex items-center justify-center text-sm font-black">2</span>
-              <div>
-                <h4 className="font-bold text-lg mb-1">Enter Your Email</h4>
-                <p className="text-text-secondary">Use the email address you registered with when applying</p>
-              </div>
-            </li>
-            <li className="flex items-start gap-4">
-              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-solar-surge-orange flex items-center justify-center text-sm font-black">3</span>
-              <div>
-                <h4 className="font-bold text-lg mb-1">Check Your Email for Authentication Code</h4>
-                <p className="text-text-secondary">Tolt will send you a code to verify your identity (check spam if needed)</p>
-              </div>
-            </li>
-            <li className="flex items-start gap-4">
-              <span className="flex-shrink-0 w-8 h-8 rounded-full bg-neon-cortex-green flex items-center justify-center text-sm font-black">4</span>
-              <div>
-                <h4 className="font-bold text-lg mb-1">Access Your Dashboard</h4>
-                <p className="text-text-secondary">View your referral link, track clicks and conversions, monitor commissions, and access all marketing resources.</p>
-              </div>
-            </li>
-          </ol>
-
-          <div className="mt-6 p-4 bg-neon-cortex-green/10 border border-neon-cortex-green/30 rounded-lg">
-            <p className="text-sm text-center text-gray-300">
-              <strong className="text-neon-cortex-green">Note:</strong> Your referral link was automatically created when you signed up. Check your welcome email for the link and co-branded marketing banners!
-            </p>
-          </div>
-
-          <div className="mt-8 text-center">
-            <a
-              href="https://mind-and-muscle.tolt.io"
-              target="_blank"
-              className="inline-block bg-gradient-to-r from-solar-surge-orange to-muscle-primary text-white px-8 py-4 rounded-xl font-bold text-lg shadow-[0_0_30px_rgba(251,146,60,0.6)] hover:shadow-[0_0_40px_rgba(251,146,60,0.8)] transition-shadow"
-            >
-              Access Partner Dashboard →
-            </a>
-          </div>
-        </LiquidGlass>
-      </div>
-
-      {/* FAQ Section */}
-      <div className="max-w-4xl mx-auto mb-20">
-        <GradientTextReveal
-          text="Questions? We've Got Answers"
-          className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-relaxed text-center"
+          text="Frequently Asked Questions"
+          className="text-3xl sm:text-4xl font-black mb-8 leading-tight text-center"
           gradientFrom="#0EA5E9"
           gradientTo="#F97316"
           delay={0.2}
         />
-        <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed mb-12 text-center">
-          Everything you need to know about becoming a partner.
-        </p>
 
         <div className="space-y-4">
           {faqs.map((faq, index) => (
@@ -1134,27 +997,33 @@ export default function PartnerProgramPage() {
         </div>
       </div>
 
+      {/* Footer Micro-Copy */}
+      <div className="max-w-2xl mx-auto text-center">
+        <p className="text-sm text-text-secondary">
+          Questions? Reach out to{' '}
+          <a href="mailto:partners@mindandmuscle.ai" className="text-neon-cortex-blue hover:underline">
+            partners@mindandmuscle.ai
+          </a>
+        </p>
+      </div>
+
       {/* Success Modal */}
       {showSuccessModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
           <LiquidGlass variant="orange" glow={true} className="max-w-2xl w-full p-8 relative">
             <div className="text-center">
-              {/* Success Icon */}
               <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br from-neon-cortex-green to-muscle-primary mb-6 animate-float">
                 <Check className="w-12 h-12 text-white" />
               </div>
 
-              {/* Title */}
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4 bg-gradient-to-r from-solar-surge-orange to-neon-cortex-blue bg-clip-text text-transparent">
-                Welcome to the Team! 🎉
+              <h2 className="text-3xl sm:text-4xl font-black mb-4 bg-gradient-to-r from-solar-surge-orange to-neon-cortex-blue bg-clip-text text-transparent">
+                Welcome to the Team!
               </h2>
 
-              {/* Message */}
-              <p className="text-lg sm:text-xl text-gray-300 mb-6 leading-relaxed">
-                You&apos;re in! Your Partner Dashboard is ready with all your marketing materials.
+              <p className="text-lg text-gray-300 mb-6 leading-relaxed">
+                You're in! Check your email for your referral link and marketing materials.
               </p>
 
-              {/* Info Cards */}
               <div className="grid md:grid-cols-2 gap-4 mb-8 text-left">
                 <div className="bg-neon-cortex-green/10 border border-neon-cortex-green/30 rounded-lg p-4">
                   <div className="flex items-start gap-3">
@@ -1162,7 +1031,7 @@ export default function PartnerProgramPage() {
                     <div>
                       <h3 className="font-bold text-sm mb-1">Partner Dashboard Ready</h3>
                       <p className="text-xs text-text-secondary">
-                        Access email templates, social posts, banners, and track your earnings at <strong>mindandmuscle.ai/partner/login</strong>
+                        Access your marketing materials and track earnings
                       </p>
                     </div>
                   </div>
@@ -1172,73 +1041,27 @@ export default function PartnerProgramPage() {
                   <div className="flex items-start gap-3">
                     <Rocket className="w-5 h-5 text-solar-surge-orange flex-shrink-0 mt-0.5" />
                     <div>
-                      <h3 className="font-bold text-sm mb-1">Marketing Banners Attached</h3>
+                      <h3 className="font-bold text-sm mb-1">Materials in Your Inbox</h3>
                       <p className="text-xs text-text-secondary">
-                        {logoFile ? 'Your co-branded banners with QR code are attached to your welcome email!' : 'Check your email for your QR code and referral link.'}
+                        {logoFile ? 'Co-branded banners attached!' : 'QR code and referral link ready.'}
                       </p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* What's in Your Email */}
-              <div className="bg-neon-cortex-blue/10 border border-neon-cortex-blue/30 rounded-lg p-6 mb-8 text-left">
-                <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                  <Trophy className="w-5 h-5 text-neon-cortex-blue" />
-                  What's in Your Welcome Email
-                </h3>
-                <ul className="space-y-3 text-sm text-text-secondary">
-                  <li className="flex items-start gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-neon-cortex-green/20 flex items-center justify-center">
-                      <Check className="w-3 h-3 text-neon-cortex-green" />
-                    </span>
-                    <span><strong>Your unique referral link</strong> - Ready to share immediately</span>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-neon-cortex-green/20 flex items-center justify-center">
-                      <Check className="w-3 h-3 text-neon-cortex-green" />
-                    </span>
-                    <span><strong>QR code</strong> - Links directly to your referral URL</span>
-                  </li>
-                  {logoFile && (
-                    <>
-                      <li className="flex items-start gap-3">
-                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-neon-cortex-green/20 flex items-center justify-center">
-                          <Check className="w-3 h-3 text-neon-cortex-green" />
-                        </span>
-                        <span><strong>Facebook banners</strong> - Standard + co-branded with your logo</span>
-                      </li>
-                      <li className="flex items-start gap-3">
-                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-neon-cortex-green/20 flex items-center justify-center">
-                          <Check className="w-3 h-3 text-neon-cortex-green" />
-                        </span>
-                        <span><strong>X/Twitter banners</strong> - Standard + co-branded with your logo</span>
-                      </li>
-                    </>
-                  )}
-                  <li className="flex items-start gap-3">
-                    <span className="flex-shrink-0 w-6 h-6 rounded-full bg-neon-cortex-green/20 flex items-center justify-center">
-                      <Check className="w-3 h-3 text-neon-cortex-green" />
-                    </span>
-                    <span><strong>Partner Dashboard login</strong> - All your resources, templates, and earnings in one place</span>
-                  </li>
-                </ul>
-              </div>
-
-              {/* Warning about spam */}
               <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 mb-8">
                 <p className="text-xs text-yellow-200">
-                  ⚠️ <strong>Important:</strong> Check your spam folder! The welcome email contains your referral link and all your marketing materials.
+                  Check your spam folder if you don't see the welcome email within a few minutes.
                 </p>
               </div>
 
-              {/* CTA Buttons */}
               <div className="space-y-3">
                 <a
                   href="https://mindandmuscle.ai/partner/login"
                   className="block w-full py-4 px-6 bg-gradient-to-r from-solar-surge-orange to-muscle-primary hover:from-solar-surge-orange/90 hover:to-muscle-primary/90 text-white font-bold text-lg rounded-xl transition-all text-center"
                 >
-                  Go to Partner Dashboard →
+                  Go to Partner Dashboard
                 </a>
                 <LiquidButton
                   onClick={() => setShowSuccessModal(false)}
@@ -1246,7 +1069,7 @@ export default function PartnerProgramPage() {
                   size="lg"
                   fullWidth={true}
                 >
-                  Close & Check My Email
+                  Close
                 </LiquidButton>
               </div>
             </div>
