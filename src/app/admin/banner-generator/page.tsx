@@ -1023,8 +1023,8 @@ export default function BannerGeneratorPage() {
                         src={partnerLogo}
                         alt="Partner"
                         style={{
-                          height: '70px',
-                          maxWidth: '180px',
+                          height: '100px',
+                          maxWidth: '260px',
                           objectFit: 'contain',
                           filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.4))',
                         }}
@@ -1032,8 +1032,8 @@ export default function BannerGeneratorPage() {
                     ) : (
                       <div
                         style={{
-                          height: '70px',
-                          width: '100px',
+                          height: '100px',
+                          width: '130px',
                           backgroundColor: 'rgba(255,255,255,0.08)',
                           borderRadius: '6px',
                           border: '2px dashed rgba(255,255,255,0.25)',
@@ -1648,8 +1648,8 @@ export default function BannerGeneratorPage() {
                         src={partnerLogo}
                         alt="Partner"
                         style={{
-                          height: '95px',
-                          maxWidth: '240px',
+                          height: '130px',
+                          maxWidth: '320px',
                           objectFit: 'contain',
                           filter: 'drop-shadow(0 2px 10px rgba(0,0,0,0.4))',
                         }}
@@ -1657,8 +1657,8 @@ export default function BannerGeneratorPage() {
                     ) : (
                       <div
                         style={{
-                          height: '95px',
-                          width: '140px',
+                          height: '130px',
+                          width: '180px',
                           backgroundColor: 'rgba(255,255,255,0.08)',
                           borderRadius: '8px',
                           border: '2px dashed rgba(255,255,255,0.25)',
@@ -1979,8 +1979,8 @@ export default function BannerGeneratorPage() {
                         src={partnerLogo}
                         alt="Partner"
                         style={{
-                          height: '95px',
-                          maxWidth: '240px',
+                          height: '130px',
+                          maxWidth: '320px',
                           objectFit: 'contain',
                           filter: 'drop-shadow(0 2px 10px rgba(0,0,0,0.4))',
                         }}
@@ -1988,8 +1988,8 @@ export default function BannerGeneratorPage() {
                     ) : (
                       <div
                         style={{
-                          height: '95px',
-                          width: '140px',
+                          height: '130px',
+                          width: '180px',
                           backgroundColor: 'rgba(255,255,255,0.08)',
                           borderRadius: '8px',
                           border: '2px dashed rgba(255,255,255,0.25)',
