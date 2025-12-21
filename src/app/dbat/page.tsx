@@ -90,7 +90,7 @@ export default function DBatPartnerPage() {
       description: 'Pitchers analyze their mechanics on their own time. Identify arm slot issues, release points, spin patterns before they even arrive for instruction.',
       color: 'blue',
       videoUrl: '/assets/videos/pitch_lab.mp4',
-      iconImage: '/assets/images/pitch_lab_icon.png',
+      iconImage: '/assets/images/pitch_lab.png',
       forInstructor: 'Pitchers show up already knowing what to work on.',
     },
     {
@@ -100,7 +100,7 @@ export default function DBatPartnerPage() {
       description: 'Pitch recognition. Count leverage. Situational hitting. They can\'t practice game decisions in the cage - but they can here.',
       color: 'orange',
       videoUrl: '/assets/videos/plate_iq.mp4',
-      iconImage: '/assets/images/plate_iq_icon_3x.png',
+      iconImage: '/assets/images/plate_iq_icon.png',
       forInstructor: 'Better at-bats in games. Parents see results.',
     },
     {
