@@ -19,7 +19,7 @@ function TeamLicensingContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState('');
   const [showCanceledMessage, setShowCanceledMessage] = useState(false);
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [openFaqIndices, setOpenFaqIndices] = useState<Set<number>>(new Set([0, 1])); // Auto-expand first 2 FAQs
   const [promoCode, setPromoCode] = useState('');
   const [promoValidation, setPromoValidation] = useState<{
     valid: boolean;
@@ -333,7 +333,12 @@ function TeamLicensingContent() {
         />
 
         <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed">
-          One platform built exclusively for baseball and softball programs — supporting coaches, athletes, and parents with intelligent training, communication, and development tools.
+          One platform built exclusively for baseball and softball programs — supporting coaches, athletes, and parents with intelligent training, communication, and development.
+        </p>
+
+        {/* Credibility Line */}
+        <p className="text-base text-text-secondary mt-6 font-medium">
+          Built specifically for serious baseball & softball development.
         </p>
       </div>
 
@@ -754,7 +759,7 @@ function TeamLicensingContent() {
                 ) : (
                   <>
                     <p className="text-xs text-text-secondary mt-2">
-                      Athletes and coaches who need Premium access
+                      Athletes and coaches who need Pro access
                       <br />
                       <span className="text-neon-cortex-blue font-semibold">Parents get free read-only access to their athlete's Goals & Reports</span>
                     </p>
@@ -1196,7 +1201,7 @@ function TeamLicensingContent() {
             delay={0.2}
           />
           <p className="text-xl sm:text-2xl md:text-3xl text-gray-300 max-w-5xl mx-auto font-medium leading-relaxed">
-            Team licenses reduce per-athlete cost as your roster grows — without sacrificing quality or capability.
+            Team licenses reduce per-athlete cost as your roster grows — while maintaining a consistent development standard.
           </p>
           <p className="text-sm text-text-secondary/70 max-w-3xl mx-auto mt-4">
             1-11 users: $79/seat • 12-119 users: 10% off • 120-199 users: 15% off • 200+ users: 20% off
@@ -1388,7 +1393,7 @@ function TeamLicensingContent() {
                         </li>
                         <li className="flex items-start gap-2">
                           <Check className="w-3 h-3 text-neon-cortex-green flex-shrink-0 mt-1" />
-                          <span>Creates a NEW Premium team automatically</span>
+                          <span>Creates a NEW Pro team automatically</span>
                         </li>
                         <li className="flex items-start gap-2">
                           <Check className="w-3 h-3 text-neon-cortex-green flex-shrink-0 mt-1" />
@@ -1432,7 +1437,7 @@ function TeamLicensingContent() {
                     ✅ No problem! You can own multiple teams.
                   </p>
                   <p>
-                    When you redeem your COACH code, it creates a NEW Premium team for the purchased license. Your existing free team stays exactly as it is:
+                    When you redeem your COACH code, it creates a NEW Pro team for the purchased license. Your existing free team stays exactly as it is:
                   </p>
                   <ul className="space-y-2 ml-4">
                     <li className="flex items-start gap-2">
@@ -1441,7 +1446,7 @@ function TeamLicensingContent() {
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
-                      <span><span className="font-semibold text-white">New Premium team</span> - Created from your purchase</span>
+                      <span><span className="font-semibold text-white">New Pro team</span> - Created from your purchase</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
@@ -1454,7 +1459,7 @@ function TeamLicensingContent() {
                   </ul>
                   <div className="bg-white/5 rounded-lg p-3 border border-white/10">
                     <p className="text-xs">
-                      💡 <span className="font-semibold text-white">Perfect for Travel Baseball:</span> Many coaches work with multiple teams (12U, 14U, different organizations). Each COACH code creates a separate team with its own Premium license.
+                      💡 <span className="font-semibold text-white">Perfect for Travel Baseball:</span> Many coaches work with multiple teams (12U, 14U, different organizations). Each COACH code creates a separate team with its own Pro license.
                     </p>
                   </div>
                 </div>
@@ -1476,7 +1481,7 @@ function TeamLicensingContent() {
                   <ul className="space-y-2 ml-4">
                     <li className="flex items-start gap-2">
                       <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
-                      <span>Creates a NEW Premium team from your purchase</span>
+                      <span>Creates a NEW Pro team from your purchase</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
@@ -1488,7 +1493,7 @@ function TeamLicensingContent() {
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
-                      <span>Activates Premium features</span>
+                      <span>Activates Pro features</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-4 h-4 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
@@ -1498,7 +1503,7 @@ function TeamLicensingContent() {
                   <div className="bg-white/5 rounded-lg p-4 border border-white/10 mt-3">
                     <p className="mb-2"><span className="font-semibold text-neon-cortex-blue">What if I already have a free team?</span></p>
                     <p className="text-xs">
-                      No problem! Your free team stays as-is, and your COACH code creates a NEW Premium team. You'll own both teams and can easily switch between them in the app. Perfect for coaches managing multiple age groups!
+                      No problem! Your free team stays as-is, and your COACH code creates a NEW Pro team. You'll own both teams and can easily switch between them in the app. Perfect for coaches managing multiple age groups!
                     </p>
                   </div>
                 </div>
@@ -1534,7 +1539,7 @@ function TeamLicensingContent() {
                         </tr>
                         <tr>
                           <td className="p-3 font-semibold">What it does</td>
-                          <td className="p-3">Creates NEW Premium team, makes you owner</td>
+                          <td className="p-3">Creates NEW Pro team, makes you owner</td>
                           <td className="p-3">Joins members to your team</td>
                         </tr>
                         <tr>
@@ -1587,11 +1592,11 @@ function TeamLicensingContent() {
                   </ul>
                   <div className="bg-white/5 rounded-lg p-3 border border-white/10">
                     <p className="text-xs">
-                      💡 <span className="font-semibold text-white">Seat Management:</span> Only athletes and coaches with the TEAM code consume Premium license seats. Parents are always free!
+                      💡 <span className="font-semibold text-white">Seat Management:</span> Only athletes and coaches with the TEAM code consume Pro license seats. Parents are always free!
                     </p>
                   </div>
                   <p className="text-xs text-text-secondary/70">
-                    Example: If you purchase 12 seats, you can have 12 athletes/coaches with full Premium access AND unlimited parents with free read-only access.
+                    Example: If you purchase 12 seats, you can have 12 athletes/coaches with full Pro access AND unlimited parents with free read-only access.
                   </p>
                 </div>
               ),
@@ -1635,10 +1640,10 @@ function TeamLicensingContent() {
               category: 'Features',
               icon: Sparkles,
               color: 'blue',
-              question: 'What features do Premium codes unlock?',
+              question: 'What features do Pro codes enable?',
               answer: (
                 <p className="text-text-secondary text-sm leading-relaxed">
-                  Premium team codes unlock <span className="text-neon-cortex-blue font-semibold">ALL Premium features</span> for your athletes: Goals AI coaching, coach feedback, Mind & Muscle AI coaches, Fuel AI nutrition, Swing Lab & Plate IQ (video analysis + pitch anticipation), Sound Lab music library, Game Lab (all levels), weekly AI reports, and advanced analytics.
+                  Pro team codes enable access to <span className="text-neon-cortex-blue font-semibold">ALL Pro features</span> for your athletes: Goals AI coaching, coach feedback, Mind & Muscle AI coaches, Fuel AI nutrition, Swing Lab & Plate IQ (video analysis + pitch anticipation), Sound Lab music library, Game Lab (all levels), weekly AI reports, and advanced analytics.
                 </p>
               ),
             },
@@ -1660,7 +1665,7 @@ function TeamLicensingContent() {
                     <span className="font-semibold text-white">Important:</span> The team code only works for the number of seats you purchased. For example, if you have 12 athletes and 2 coaches, you need to purchase 14 seats.
                   </p>
                   <p>
-                    <span className="font-semibold text-white">Automatic seat management:</span> During registration, users select their role (Athlete/Coach/Parent). When they enter the team code, the system automatically handles license seats: Athletes and coaches get Premium and consume a seat. Parents get free read-only access and don't consume any seats.
+                    <span className="font-semibold text-white">Automatic seat management:</span> During registration, users select their role (Athlete/Coach/Parent). When they enter the team code, the system automatically handles license seats: Athletes and coaches get Pro access and consume a seat. Parents get free read-only access and don't consume any seats.
                   </p>
                 </div>
               ),
@@ -1673,7 +1678,7 @@ function TeamLicensingContent() {
               answer: (
                 <div className="text-text-secondary text-sm space-y-3 leading-relaxed">
                   <p>
-                    When your team reaches the license limit, new athletes and coaches will be unable to join with Premium access until you purchase additional seats. <span className="text-neon-cortex-green font-semibold">Parents can always join</span> regardless of seat availability—they don't consume license seats (see parent FAQ below for details on parent access). Existing Premium users retain their access.
+                    When your team reaches the license limit, new athletes and coaches will be unable to join with Pro access until you purchase additional seats. <span className="text-neon-cortex-green font-semibold">Parents can always join</span> regardless of seat availability—they don't consume license seats (see parent FAQ below for details on parent access). Existing Pro users retain their access.
                   </p>
                   <p>
                     <span className="text-neon-cortex-green font-semibold">Yes, you can add more seats!</span> You can add more seats to your team license at any time through our automated system.
@@ -1696,7 +1701,7 @@ function TeamLicensingContent() {
               question: 'Do users need individual subscriptions?',
               answer: (
                 <p className="text-text-secondary text-sm leading-relaxed">
-                  <span className="text-neon-cortex-green font-bold text-base">No!</span> When users join using your Premium team code, they get full Premium access without needing to purchase an individual subscription. The team license covers all Premium features for all your users.
+                  <span className="text-neon-cortex-green font-bold text-base">No!</span> When users join using your Pro team code, they get full Pro access without needing to purchase an individual subscription. The team license covers all Pro features for all your users.
                 </p>
               ),
             },
@@ -1725,7 +1730,7 @@ function TeamLicensingContent() {
                     </li>
                   </ul>
                   <p className="bg-white/5 rounded-lg p-3 border border-white/10">
-                    💡 Parents link to their athlete using the team code, but they don't count toward your paid user limit and don't get full Premium features—just visibility into their athlete's progress.
+                    💡 Parents link to their athlete using the team code, but they don't count toward your paid user limit and don't get full Pro features—just visibility into their athlete's progress.
                   </p>
                 </div>
               ),
@@ -1759,7 +1764,7 @@ function TeamLicensingContent() {
               question: 'Can I cancel anytime?',
               answer: (
                 <p className="text-text-secondary text-sm leading-relaxed">
-                  <span className="text-neon-cortex-green font-semibold">Absolutely.</span> There are no long-term contracts. You can cancel your subscription at any time. All users will retain Premium access until the end of your billing period, then revert to free tier features.
+                  <span className="text-neon-cortex-green font-semibold">Absolutely.</span> There are no long-term contracts. You can cancel your subscription at any time. All users will retain Pro access until the end of your billing period, then revert to free tier features.
                 </p>
               ),
             },
@@ -1870,12 +1875,24 @@ function TeamLicensingContent() {
             },
           ].map((faq, index) => {
             const Icon = faq.icon;
-            const isOpen = openFaqIndex === index;
+            const isOpen = openFaqIndices.has(index);
             const borderColor = faq.color === 'blue' ? 'border-neon-cortex-blue/30' : 'border-solar-surge-orange/30';
             const hoverBorderColor = faq.color === 'blue' ? 'hover:border-neon-cortex-blue/60' : 'hover:border-solar-surge-orange/60';
             const iconColor = faq.color === 'blue' ? 'text-neon-cortex-blue' : 'text-solar-surge-orange';
             const badgeBg = faq.color === 'blue' ? 'bg-neon-cortex-blue/10' : 'bg-solar-surge-orange/10';
             const badgeText = faq.color === 'blue' ? 'text-neon-cortex-blue' : 'text-solar-surge-orange';
+
+            const toggleFaq = () => {
+              setOpenFaqIndices(prev => {
+                const newSet = new Set(prev);
+                if (newSet.has(index)) {
+                  newSet.delete(index);
+                } else {
+                  newSet.add(index);
+                }
+                return newSet;
+              });
+            };
 
             return (
               <LiquidGlass
@@ -1884,7 +1901,7 @@ function TeamLicensingContent() {
                 className={`transition-all duration-300 ${borderColor} ${hoverBorderColor} ${isOpen ? 'shadow-lg' : ''}`}
               >
                 <button
-                  onClick={() => setOpenFaqIndex(isOpen ? null : index)}
+                  onClick={toggleFaq}
                   className="w-full text-left p-6"
                 >
                   <div className="flex items-start justify-between gap-4">
