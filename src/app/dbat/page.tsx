@@ -154,29 +154,17 @@ export default function DBatPartnerPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-neon-cortex-blue/20 via-[#0F1123] to-transparent" />
 
         <div className="max-w-6xl mx-auto relative z-10">
-          {/* Logos */}
+          {/* Logo */}
           <FadeInWhenVisible delay={0} direction="down">
             <div className="flex flex-col items-center justify-center mb-10">
-              <div className="flex items-center justify-center gap-6 sm:gap-10">
-                <div className="relative w-28 h-28 sm:w-36 sm:h-36">
-                  <Image
-                    src="/assets/images/dbat-logo.png"
-                    alt="D-BAT"
-                    fill
-                    className="object-contain"
-                    priority
-                  />
-                </div>
-                <div className="text-3xl sm:text-4xl font-bold text-white/30">×</div>
-                <div className="relative w-28 h-28 sm:w-36 sm:h-36">
-                  <Image
-                    src="/assets/images/logo.png"
-                    alt="Mind & Muscle"
-                    fill
-                    className="object-contain"
-                    priority
-                  />
-                </div>
+              <div className="relative w-32 h-32 sm:w-40 sm:h-40">
+                <Image
+                  src="/assets/images/logo.png"
+                  alt="Mind & Muscle"
+                  fill
+                  className="object-contain"
+                  priority
+                />
               </div>
             </div>
           </FadeInWhenVisible>
@@ -256,31 +244,37 @@ export default function DBatPartnerPage() {
         </div>
       </section>
 
-      {/* Section 2: Partner Banner Example */}
+      {/* Section 2: What You Get */}
       <section className="py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           <FadeInWhenVisible delay={0} direction="up">
             <div className="text-center mb-6">
               <p className="text-sm text-neon-cortex-blue font-bold uppercase tracking-wider">
-                Your Custom Partner Banner
+                Partner Materials Included
               </p>
             </div>
-            <div className="relative rounded-2xl overflow-hidden shadow-2xl">
-              {/* EXAMPLE Badge */}
-              <div className="absolute top-4 right-4 z-10 bg-solar-surge-orange text-white px-4 py-2 rounded-lg font-bold text-sm uppercase tracking-wider shadow-lg">
-                Example
+            <div
+              className="rounded-2xl p-8"
+              style={{
+                background: 'linear-gradient(135deg, rgba(15, 17, 35, 0.9) 0%, rgba(27, 31, 57, 0.9) 100%)',
+                border: '1px solid rgba(14, 165, 233, 0.3)',
+              }}
+            >
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[
+                  { icon: '📱', title: 'QR Posters', desc: 'Print-ready posters for your facility' },
+                  { icon: '📧', title: 'Email Templates', desc: 'Ready to send to your athlete list' },
+                  { icon: '🎨', title: 'Social Graphics', desc: 'Co-branded for your facility' },
+                  { icon: '📊', title: 'Partner Dashboard', desc: 'Track signups & earnings' },
+                ].map((item, i) => (
+                  <div key={i} className="text-center">
+                    <div className="text-4xl mb-3">{item.icon}</div>
+                    <h3 className="text-white font-bold mb-1">{item.title}</h3>
+                    <p className="text-white/60 text-sm">{item.desc}</p>
+                  </div>
+                ))}
               </div>
-              <Image
-                src="/assets/images/dbat-partner-banner-example.png"
-                alt="D-BAT × Mind & Muscle Partner Banner Example"
-                width={1456}
-                height={816}
-                className="w-full h-auto"
-              />
             </div>
-            <p className="text-center text-white/50 text-sm mt-4">
-              We create custom co-branded marketing materials for every partner location
-            </p>
           </FadeInWhenVisible>
         </div>
       </section>
@@ -530,14 +524,14 @@ export default function DBatPartnerPage() {
                 {/* Assumptions callout */}
                 <div className="mb-6 p-4 bg-white/5 rounded-lg border border-white/10">
                   <p className="text-sm text-text-secondary">
-                    <span className="font-bold text-white">Based on D-BAT averages:</span> $100/hr lessons, $68/mo membership (Gold $48, Platinum $88), 4 lessons/month
+                    <span className="font-bold text-white">Based on industry averages:</span> $100/hr lessons, $68/mo membership, 4 lessons/month
                   </p>
                 </div>
 
                 {/* Athlete Count Slider */}
                 <div className="mb-8">
                   <label className="block text-lg font-bold mb-4 text-white">
-                    How many active athletes at your D-BAT?
+                    How many active athletes at your facility?
                   </label>
                   <input
                     type="range"
@@ -676,7 +670,7 @@ export default function DBatPartnerPage() {
 
                 <div className="grid sm:grid-cols-3 gap-6 mb-8">
                   {[
-                    { step: '1', title: 'We Set You Up', desc: 'Custom referral link, QR codes, email templates - all branded for your D-BAT' },
+                    { step: '1', title: 'We Set You Up', desc: 'Custom referral link, QR codes, email templates - all branded for your facility' },
                     { step: '2', title: 'You Share It', desc: 'QR poster in your facility. Quick email to your athlete list. That\'s it.' },
                     { step: '3', title: 'Track Everything', desc: 'See who\'s signed up, who\'s training, and your commission in real-time' },
                   ].map((item) => (
