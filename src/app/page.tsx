@@ -372,47 +372,31 @@ export default function HomePage() {
               </div>
             </FadeInWhenVisible>
 
-            {/* Tagline - Blue and Orange Split with Text Reveal */}
-            <div className="mb-6">
-              <TextReveal
-                text="Discipline the Mind."
-                as="h2"
-                className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight leading-relaxed text-neon-cortex-blue block"
-                delay={0.1}
-                staggerDelay={0.05}
-              />
-              <TextReveal
-                text="Dominate the Game.™"
-                as="h2"
-                className="text-3xl md:text-4xl lg:text-5xl font-black tracking-tight leading-relaxed text-solar-surge-orange block"
-                delay={0.4}
-                staggerDelay={0.05}
-              />
-            </div>
-
-            {/* Main Heading - Mobile-optimized Typography with Text Reveal */}
+            {/* Hero Headline */}
             <TextReveal
-              text="The complete training platform for baseball and softball athletes. Every feature. Every drill. Every mental toughness tool."
+              text="Get Better Every Day — On the Field and in the Stats."
               as="h1"
               className="text-[40px] sm:text-[56px] md:text-[64px] lg:text-[72px] font-black mb-6 leading-[1.1] text-white"
-              delay={0.7}
+              delay={0.1}
               staggerDelay={0.03}
             />
 
-            {/* Subheading - 20-22px Medium Weight */}
-            <FadeInWhenVisible delay={1.2} direction="up">
-              <p className="text-[20px] sm:text-[22px] text-gray-200 mb-4 leading-relaxed max-w-2xl font-medium" style={{textShadow: '0 2px 12px rgba(0,0,0,0.7)'}}>
-                The first AI platform that develops complete baseball and softball athletes. Seven integrated apps. One intelligent system. Adapts to every athlete.
+            {/* Subheadline - Positioning Statement */}
+            <FadeInWhenVisible delay={0.8} direction="up">
+              <p className="text-[22px] sm:text-[26px] text-gray-100 mb-3 leading-relaxed max-w-2xl font-semibold" style={{textShadow: '0 2px 12px rgba(0,0,0,0.7)'}}>
+                The complete AI-powered training platform built exclusively for baseball and softball athletes.
               </p>
             </FadeInWhenVisible>
-            <FadeInWhenVisible delay={1.3} direction="up">
-              <p className="text-[18px] sm:text-[20px] text-gray-300 mb-8 leading-relaxed max-w-2xl" style={{textShadow: '0 2px 12px rgba(0,0,0,0.7)'}}>
-                Train smarter, recover faster, and outthink every play with AI that learns from your swing videos, mental training, goals, and workouts.
+
+            {/* Micro-Clarifier */}
+            <FadeInWhenVisible delay={1.0} direction="up">
+              <p className="text-[16px] sm:text-[18px] text-gray-300 mb-8 leading-relaxed max-w-2xl font-normal" style={{textShadow: '0 2px 12px rgba(0,0,0,0.7)'}}>
+                Skills. Mindset. Strength. Game IQ. All connected.
               </p>
             </FadeInWhenVisible>
 
             {/* AI Learning Pulse Badge */}
-            <FadeInWhenVisible delay={1.4} direction="up" className="mb-6">
+            <FadeInWhenVisible delay={1.2} direction="up" className="mb-6">
               <div className="inline-block">
                 <div className="relative px-6 py-3 bg-gradient-to-r from-neon-cortex-blue/20 to-solar-surge-orange/20 backdrop-blur-md border-2 border-neon-cortex-blue/40 rounded-xl animate-pulse">
                   <div className="flex items-center gap-2">
@@ -424,7 +408,7 @@ export default function HomePage() {
               </div>
             </FadeInWhenVisible>
 
-            {/* Download Links */}
+            {/* CTA Buttons */}
             <FadeInWhenVisible delay={1.5} direction="up" className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center w-full sm:w-auto">
               <Link
                 href="https://apps.apple.com/us/app/mind-muscle/id6754098729"
@@ -432,30 +416,16 @@ export default function HomePage() {
                 rel="noopener noreferrer"
                 className="inline-block"
               >
-                <div className="shimmer-button px-6 sm:px-8 py-3 bg-black rounded-xl border border-white/20 hover:border-white/40 transition-all hover:scale-105 flex items-center justify-center gap-3 w-full">
-                  <svg className="w-7 h-7 sm:w-8 sm:h-8 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-                  </svg>
-                  <div className="text-left">
-                    <div className="text-xs text-text-secondary whitespace-nowrap">Download on the</div>
-                    <div className="text-base sm:text-lg font-semibold -mt-1 whitespace-nowrap">App Store</div>
-                  </div>
+                <div className="shimmer-button px-8 sm:px-10 py-4 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange rounded-xl border border-white/20 hover:border-white/40 transition-all hover:scale-105 flex items-center justify-center w-full">
+                  <span className="text-lg sm:text-xl font-bold text-white whitespace-nowrap">Start Free Today</span>
                 </div>
               </Link>
               <Link
-                href="https://play.google.com/store/apps/details?id=com.exceptionalhabit.mind_and_muscle"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#features"
                 className="inline-block"
               >
-                <div className="shimmer-button shimmer-button-delayed px-6 sm:px-8 py-3 bg-black rounded-xl border border-white/20 hover:border-white/40 transition-all hover:scale-105 flex items-center justify-center gap-3 w-full">
-                  <svg className="w-7 h-7 sm:w-8 sm:h-8 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.5,12.92 20.16,13.19L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
-                  </svg>
-                  <div className="text-left">
-                    <div className="text-xs text-text-secondary whitespace-nowrap">GET IT ON</div>
-                    <div className="text-base sm:text-lg font-semibold -mt-1 whitespace-nowrap">Google Play</div>
-                  </div>
+                <div className="shimmer-button shimmer-button-delayed px-8 sm:px-10 py-4 bg-black/50 backdrop-blur-sm rounded-xl border border-white/30 hover:border-white/50 transition-all hover:scale-105 flex items-center justify-center w-full">
+                  <span className="text-lg sm:text-xl font-semibold text-white whitespace-nowrap">See Pro Features</span>
                 </div>
               </Link>
             </FadeInWhenVisible>

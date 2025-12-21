@@ -7,10 +7,18 @@ import { Menu, X } from 'lucide-react';
 import { LiquidGlass } from './LiquidGlass';
 import { clsx } from 'clsx';
 
+// Routes that have their own navigation/header
+const ROUTES_WITH_CUSTOM_NAV = ['/partner/dashboard', '/partner/login', '/partner/email-templates', '/admin'];
+
 export const Navigation: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const pathname = usePathname();
+
+  // Hide navigation on routes that have custom headers
+  if (ROUTES_WITH_CUSTOM_NAV.some(route => pathname?.startsWith(route))) {
+    return null;
+  }
 
   // Helper function to check if link is active
   const isActive = (href: string) => {

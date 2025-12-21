@@ -1122,7 +1122,7 @@ function DashboardContent() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0A0B14] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0A0B14] flex items-center justify-center pt-32">
         <div className="text-center">
           <Loader2 className="w-8 h-8 text-blue-400 animate-spin mx-auto mb-4" />
           <p className="text-white/50">Loading dashboard...</p>
@@ -1134,7 +1134,7 @@ function DashboardContent() {
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-[#0A0B14] flex items-center justify-center">
+      <div className="min-h-screen bg-[#0A0B14] flex items-center justify-center pt-32">
         <Card variant="elevated" className="p-8 max-w-md text-center">
           <p className="text-red-400 mb-4">{error}</p>
           <Link
@@ -3051,7 +3051,7 @@ function DashboardContent() {
 // Loading fallback for Suspense
 function DashboardLoading() {
   return (
-    <div className="min-h-screen bg-[#0A0B14] flex items-center justify-center">
+    <div className="min-h-screen bg-[#0A0B14] flex items-center justify-center pt-32">
       <div className="text-center">
         <Loader2 className="w-8 h-8 text-blue-400 animate-spin mx-auto mb-4" />
         <p className="text-white/50">Loading dashboard...</p>

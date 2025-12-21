@@ -1,0 +1,104 @@
+Location,City,State,Owner Name,Title,Predicted Email,Confirmed Email,Priority,Notes
+D-BAT Addison (Flagship),Addison,TX,Cade Griffis,President & Owner,cade@dbataddison.com,,LOW,Corporate HQ - Founder
+D-BAT Austin,Austin,TX,Scott Leon,Owner/Director,scott@dbataustin.com,,HIGH,Former Tampa Bay Ray
+D-BAT Bothell,Bothell,WA,John Ard,Owner,john@dbatbothell.com,,MEDIUM,
+D-BAT Carrollton GA,Carrollton,GA,David Collings,Owner,david@dbatcarrollton.com,david@dbatatlanta.com,HIGH,Owns 4 GA locations
+D-BAT Chattanooga,Chattanooga,TN,Tom Gardenhire Jr.,Owner,tom@dbatchatt.com,,MEDIUM,
+D-BAT Columbia Basin,Columbia Basin,WA,Robert Benson,Principal Owner,robert@dbatcolumbiabasin.com,,HIGH,Franchise of Year 2024
+D-BAT Columbus,Columbus,OH,Eric Emerman,President & Owner,eric@dbatcolumbus.com,,HIGH,Owns multiple locations
+D-BAT Columbus,Columbus,OH,Andy Larned,Co-Owner,andy@dbatcolumbus.com,,MEDIUM,
+D-BAT Columbus,Columbus,OH,Jeffrey Cogan,Co-Owner,jeffrey@dbatcolumbus.com,,MEDIUM,
+D-BAT Cypress,Cypress,TX,Eric Kirkland,Owner,eric@dbatcypress.com,,MEDIUM,
+D-BAT Denton,Denton,TX,Scott Harp,Owner,scott@dbatdenton.com,scott@dbatdenton.com,HIGH,Confirmed email
+D-BAT Denton,Denton,TX,Bart Hirneise,Co-Owner,bart@dbatdenton.com,,MEDIUM,
+D-BAT DFW/Southlake,Southlake,TX,Jayne Murray,Owner,jayne@dbatdfw.com,,MEDIUM,
+D-BAT DFW/Southlake,Southlake,TX,Matthew Redding,Co-Owner,matthew@dbatdfw.com,,MEDIUM,
+D-BAT Douglasville,Douglasville,GA,David Collings,Owner,david@dbatdouglasville.com,david@dbatatlanta.com,SKIP,Same owner as Carrollton
+D-BAT El Paso West,El Paso,TX,Andy Powers,Owner/Operator,andy@dbatwestelpaso.com,,MEDIUM,
+D-BAT El Paso West,El Paso,TX,Bill Powers,Co-Owner,bill@dbatwestelpaso.com,,LOW,Father - likely less active
+D-BAT Georgetown,Georgetown,TX,Don Stevens,Owner,don@dbatgeorgetown.com,don@dbatgeorgetown.com,HIGH,Confirmed email
+D-BAT Jacksonville,Jacksonville,FL,Zack Phillips,Owner,zack@dbatjax.com,,HIGH,Also owns Asheville NC
+D-BAT Katy,Katy,TX,Maria Pena,Co-Owner,maria@dbatkaty.com,,MEDIUM,
+D-BAT Katy,Katy,TX,Michael Pena,Co-Owner,michael@dbatkaty.com,,MEDIUM,
+D-BAT Lake Charles,Lake Charles,LA,David Collings,Owner,david@dbatlc.com,,SKIP,Same owner as Carrollton
+D-BAT Lake Charles,Lake Charles,LA,Nick Buck,Co-Owner,nick@dbatlc.com,,MEDIUM,
+D-BAT Lewisville,Lewisville,TX,Cory Legner,Owner,cory@dbatlewisville.com,cory@dbatnt.com,HIGH,Confirmed email (alt domain)
+D-BAT Mansfield,Mansfield,TX,Stacey Wilson,Co-Owner,stacey@dbatmansfield.com,,MEDIUM,
+D-BAT Nashville,Nashville,TN,John Crist,Owner & Operator,john@dbatnashville.com,,HIGH,
+D-BAT New Braunfels,New Braunfels,TX,Kristopher Ruepke,Co-Owner & GM,kristopher@dbatnewbraunfels.com,,MEDIUM,
+D-BAT OKC,Oklahoma City,OK,Daniel Eidson,Owner,daniel@dbatokc.com,,HIGH,Also owns Warner Robins GA
+D-BAT OKC,Oklahoma City,OK,Todd Currie,Co-Owner,todd@dbatokc.com,,MEDIUM,
+D-BAT OKC,Oklahoma City,OK,Eric Dahlgren,Co-Owner,eric@dbatokc.com,,MEDIUM,
+D-BAT Pearland,Pearland,TX,David Osborne,Owner,david@dbatpearland.com,,MEDIUM,
+D-BAT Peachtree City,Peachtree City,GA,David Collings,Owner,david@dbatpeachtreecity.com,,SKIP,Same owner as Carrollton
+D-BAT Peachtree City,Peachtree City,GA,Jacob Hester,Owner/GM,jacob@dbatpeachtreecity.com,,MEDIUM,
+D-BAT Permian Basin,Midland,TX,Chris Wilson,Owner,chris@dbatpb.com,,HIGH,Largest D-BAT facility (32k sqft)
+D-BAT Permian Basin,Midland,TX,Stacey Dusek Wilson,Co-Owner,stacey@dbatpb.com,,MEDIUM,
+D-BAT Sugar Land,Sugar Land,TX,Jeff Ballard,Owner,jeff@dbatsugarland.com,,MEDIUM,
+D-BAT The Woodlands,The Woodlands,TX,Alan Shelby,Owner,alan@dbatthewoodlands.com,,MEDIUM,
+D-BAT Tulsa,Tulsa,OK,Rick,Owner/Operator,rick@dbattulsa.com,rick@dbat.net,MEDIUM,Last name unknown
+D-BAT Tyler,Tyler,TX,Les Campbell,Owner,les@dbattyler.com,,MEDIUM,
+D-BAT Victoria,Victoria,TX,Michael Baucom,Owner,michael@dbatvictoria.com,,MEDIUM,
+D-BAT Virginia Beach,Virginia Beach,VA,Craig Colucci,Owner,craig@dbatvirginiabeach.com,,HIGH,Veteran-owned
+D-BAT West Chester,West Chester,OH,Ryan,Owner,ryan@dbatwestchester.com,ryan@dbatwestchester.com,MEDIUM,Last name unknown
+D-BAT West Chester,West Chester,OH,Megan,Owner,megan@dbatwestchester.com,megan@dbatwestchester.com,MEDIUM,Last name unknown
+D-BAT Bakersfield,Bakersfield,CA,Pat Person,President,pat@dbatbakersfield.com,,MEDIUM,
+D-BAT Bakersfield,Bakersfield,CA,Thomas Person,COO,thomas@dbatbakersfield.com,,MEDIUM,
+D-BAT Gainesville FL,Gainesville,FL,Priscilla Screen,Operator,priscilla@dbatgainesville.com,,MEDIUM,
+D-BAT Longview,Longview,TX,Jason Cox,Owner,jason@dbatlongview.com,jason@dbatlongview.com,HIGH,Confirmed email
+D-BAT Longview,Longview,TX,Chelsea Cox,Co-Owner,chelsea@dbatlongview.com,,MEDIUM,
+D-BAT St. Augustine,St. Augustine,FL,Jane Park,Co-Owner,jane@dbatstaugustine.com,,MEDIUM,
+D-BAT Texarkana,Nash,TX,TJ Cox,Owner,tj@dbattexarkana.com,,MEDIUM,
+D-BAT Texarkana,Nash,TX,Emily Cox,Co-Owner,emily@dbattexarkana.com,,MEDIUM,
+D-BAT Waxahachie,Waxahachie,TX,Whoa Dill,Owner,whoa@dbatwaxahachie.com,,LOW,Unusual name - verify
+D-BAT Fort Smith,Fort Smith,AR,Alan Dickinson,Co-Owner,alan@dbatfortsmith.com,,MEDIUM,
+D-BAT Suffolk,Suffolk,VA,Matt Finch,Owner,matt@dbatsuffolk.com,,MEDIUM,
+D-BAT Abilene,Abilene,TX,Josh R. Duwe,Owner,josh@dbatabilene.com,,MEDIUM,
+D-BAT Amarillo,Amarillo,TX,Robbie Wine,Owner/GM,robbie@dbatamarillo.com,robbie@dbatamarillo.com,HIGH,Former MLB Player - Confirmed
+D-BAT Baton Rouge,Baton Rouge,LA,Hayden Jennings,Part Owner,hayden@dbatbatonrouge.com,,HIGH,Former LSU Baseball
+D-BAT Baytown,Baytown,TX,David Reed,Owner,david@dbatbaytown.com,,MEDIUM,Also owns Lufkin
+D-BAT Liberty Hill,Liberty Hill,TX,Thomas Hood,Owner,thomas@dbatlibertyhill.com,,MEDIUM,
+D-BAT Liberty Hill,Liberty Hill,TX,Amy Hood,Co-Owner,amy@dbatlibertyhill.com,,MEDIUM,
+D-BAT Lufkin,Lufkin,TX,David Reed,Owner,david@dbatlufkin.com,,SKIP,Same owner as Baytown
+D-BAT Rockwall,Rowlett,TX,Ryan Bonesio,Owner,ryan@dbatrockwall.com,,MEDIUM,
+D-BAT Monroe,Monroe,LA,Rodger Fulmer,Owner,rodger@dbatmonroe.com,rodger@dbatmonroe.com,HIGH,Confirmed email
+D-BAT Monroe,Monroe,LA,Jamie Johnson,Co-Owner,jamie@dbatmonroe.com,,MEDIUM,
+D-BAT Ruston,Ruston,LA,Keeton Tennison,Owner,keeton@dbatruston.com,,MEDIUM,
+D-BAT Warner Robins,Warner Robins,GA,Daniel Eidson,Owner,daniel@dbatwarnerrobins.com,,SKIP,Same owner as OKC
+D-BAT Colorado Springs,Colorado Springs,CO,Dion Arellano,Owner,dion@dbatcos.com,,HIGH,Also owns Pueblo
+D-BAT NorCo,Windsor,CO,Ken Salazar,Owner,ken@dbatnorco.com,,MEDIUM,
+D-BAT Oakley,Oakley,CA,Joshua Choy,Co-Owner,joshua@dbatoakley.com,,MEDIUM,
+D-BAT Oakley,Oakley,CA,Brian Bajarias,Co-Owner,brian@dbatoakley.com,,MEDIUM,
+D-BAT Oakley,Oakley,CA,Vanessa Vasquez,Co-Owner,vanessa@dbatoakley.com,,MEDIUM,
+D-BAT Pueblo,Pueblo,CO,Dion Arellano,Owner,dion@dbatpueblo.com,,SKIP,Same owner as Colorado Springs
+D-BAT Redlands,Redlands,CA,Melissa Guerrero,Co-Owner,melissa@dbatredlands.com,,MEDIUM,
+D-BAT Simi Valley,Simi Valley,CA,Phillip Greene,Owner,phillip@dbatsimivalley.com,,MEDIUM,
+D-BAT Melissa,Melissa,TX,Andrew Brown,Owner,andrew@dbatmelissa.com,,HIGH,Former Minor League Exec
+D-BAT NorthShore,Covington,LA,Ryan Davis,Co-Owner,ryan@dbatnorthshore.com,,MEDIUM,
+D-BAT NorthShore,Covington,LA,Dr. Ruth Nichols,Co-Owner,ruth@dbatnorthshore.com,,MEDIUM,
+D-BAT Alexandria,Alexandria,LA,Kim Harrell,Owner,kim@dbatalexandria.com,,MEDIUM,
+D-BAT Alexandria,Alexandria,LA,David Harrell,Co-Owner,david@dbatalexandria.com,,MEDIUM,
+D-BAT Winter Garden,Winter Garden,FL,Joey Capparelli,Co-Owner,joey@dbatwintergarden.com,,MEDIUM,
+D-BAT South Shore,South Shore,FL,Jacob Collier,Owner,jacob@dbatsouthshore.com,,MEDIUM,
+D-BAT Middleburg Heights,Middleburg Heights,OH,Lisa Hirsch,CEO,lisa@dbatmiddleburgheights.com,,MEDIUM,
+D-BAT Peoria,Peoria,AZ,Damion Easley,Owner,damion@dbatpeoria.com,,HIGH,Former MLB Player
+D-BAT Tucson,Tucson,AZ,Brian Mitchell,Owner,brian@dbattucson.com,,MEDIUM,
+D-BAT Kansas City,Lenexa,KS,Curt Lowry,Owner & Operator,curt@dbatkc.com,,HIGH,
+D-BAT Huntersville,Huntersville,NC,Brooke McCraw,Owner,brooke@dbathuntersville.com,,HIGH,Former College Softball Coach
+D-BAT Fayetteville,Fayetteville,NC,Wayne Richey,Franchise Owner,wayne@dbatfayetteville.com,,HIGH,Active-Duty Soldier
+D-BAT Wake Forest,Wake Forest,NC,Tim Rotellini,Franchise Owner,tim@dbatwakeforest.com,,HIGH,
+D-BAT Asheville,Asheville,NC,Zack Phillips,Owner,zack@dbatasheville.com,,SKIP,Same owner as Jacksonville
+D-BAT Indian Trail,Indian Trail,NC,Jeff Churchich,Owner,jeff@dbatindiantrail.com,,MEDIUM,
+D-BAT Solon,Solon,OH,Brad Emerman,Owner,brad@dbatsolon.com,,MEDIUM,Possibly related to Eric Emerman
+D-BAT Kerrville,Kerrville,TX,Brandon Harjo,Owner,brandon@dbatkerrville.com,,MEDIUM,
+D-BAT Evans,Evans,GA,Bryce Massey,Co-Owner,bryce@dbatevans.com,,HIGH,Former Augusta U Baseball
+D-BAT Evans,Evans,GA,Corey Carpenter,Co-Owner,corey@dbatevans.com,,MEDIUM,
+D-BAT Dacula,Dacula,GA,Scott K. Henrichsen,Owner & CEO,scott@dbatdacula.com,,HIGH,
+D-BAT Trumbull,Trumbull,CT,Lou Bunosso,Co-Owner,lou@dbattrumbull.com,,HIGH,First CT D-BAT
+D-BAT Trumbull,Trumbull,CT,Mark Szuchman,Co-Owner,mark@dbattrumbull.com,,MEDIUM,
+D-BAT River Falls,River Falls,WI,Nate Kochendorfer,Co-Owner,nate@dbatriverfalls.com,,MEDIUM,
+D-BAT River Falls,River Falls,WI,Jes Kochendorfer,Co-Owner,jes@dbatriverfalls.com,,MEDIUM,
+D-BAT Lincoln,Lincoln,NE,John Scheer,Owner,john@dbatlincoln.com,,MEDIUM,
+D-BAT Marion,Marion,IA,Darren Lewis,Co-Owner,darren@dbatmarion.com,,HIGH,Former Baseball Player
+D-BAT Marion,Marion,IA,Casey Pauli,Co-Owner,casey@dbatmarion.com,,MEDIUM,Former Kirkwood Coach
+D-BAT Rocket City,Huntsville,AL,Jason Trufant,Owner,jason@dbatrocketcity.com,,MEDIUM,

@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { LiquidGlass } from "@/components/LiquidGlass";
-import PasswordGate from "@/components/PasswordGate";
 import { motion } from "framer-motion";
 import {
   FadeInWhenVisible,
@@ -164,11 +163,6 @@ export default function USAPrimePage() {
   ];
 
   return (
-    <PasswordGate
-      password="prime"
-      title="USA Prime Partnership"
-      description="Enter the access code to view partnership details."
-    >
       <div className="min-h-screen">
         {/* Section 1: Hero with 3 Logos */}
         <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
@@ -788,6 +782,5 @@ export default function USAPrimePage() {
           </div>
         </section>
       </div>
-    </PasswordGate>
   );
 }

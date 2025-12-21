@@ -300,14 +300,27 @@ export default function PartnerProgramPage() {
           />
 
           <p className="text-xl sm:text-2xl text-gray-300 max-w-4xl mx-auto font-medium leading-relaxed mb-4">
-            Keep athletes engaged between visits—without adding staff or time.
+            Increase athlete retention by extending coaching value beyond the facility.
           </p>
-          <p className="text-lg text-gray-400 max-w-3xl mx-auto leading-relaxed mb-4">
+          <p className="text-lg text-gray-400 max-w-3xl mx-auto leading-relaxed mb-6">
             Most training happens outside the cage. Mind & Muscle ensures your coaching continues between visits.
           </p>
-          <p className="text-base text-gray-500 max-w-2xl mx-auto">
-            Reduce lesson drop-off, increase repeat visits, and extend athlete engagement year-round.
-          </p>
+
+          {/* Retention Benefits */}
+          <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-400 max-w-3xl mx-auto">
+            <span className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-solar-surge-orange"></span>
+              Athletes stay engaged with your facility between lessons
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-solar-surge-orange"></span>
+              Parents see continued progress outside scheduled sessions
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-solar-surge-orange"></span>
+              Programs feel more complete, increasing repeat visits and renewals
+            </span>
+          </div>
         </div>
 
         {/* Facility Banner */}
@@ -462,7 +475,10 @@ export default function PartnerProgramPage() {
             delay={0.2}
           />
 
-          <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-400 max-w-2xl mx-auto mb-2">
+            Help athletes stay bought in between lessons and keep parents confident in your coaching.
+          </p>
+          <p className="text-sm text-gray-500 max-w-xl mx-auto">
             Designed to work with your coaching style—and reinforce it, not replace it.
           </p>
         </div>
@@ -474,8 +490,8 @@ export default function PartnerProgramPage() {
                 <Check className="w-5 h-5 text-neon-cortex-blue" />
               </div>
               <div>
-                <h4 className="font-bold mb-1">Reinforce Cues Between Lessons</h4>
-                <p className="text-sm text-text-secondary">Athletes practice exactly what you teach</p>
+                <h4 className="font-bold mb-1">Reinforce Cues So Athletes Don't Regress</h4>
+                <p className="text-sm text-text-secondary">Athletes practice exactly what you teach between lessons</p>
               </div>
             </div>
 
@@ -484,8 +500,8 @@ export default function PartnerProgramPage() {
                 <Check className="w-5 h-5 text-neon-cortex-blue" />
               </div>
               <div>
-                <h4 className="font-bold mb-1">Assign Drills & Mindset Work Remotely</h4>
-                <p className="text-sm text-text-secondary">Keep athletes working between sessions</p>
+                <h4 className="font-bold mb-1">Keep Athletes Engaged Between Sessions</h4>
+                <p className="text-sm text-text-secondary">No more starting over each lesson</p>
               </div>
             </div>
 
@@ -494,8 +510,8 @@ export default function PartnerProgramPage() {
                 <Check className="w-5 h-5 text-neon-cortex-blue" />
               </div>
               <div>
-                <h4 className="font-bold mb-1">Track Athlete Progress Over Time</h4>
-                <p className="text-sm text-text-secondary">See development data and engagement metrics</p>
+                <h4 className="font-bold mb-1">Parents See Structure & Continuity</h4>
+                <p className="text-sm text-text-secondary">Not just one-off lessons—an intentional program</p>
               </div>
             </div>
 
@@ -504,8 +520,8 @@ export default function PartnerProgramPage() {
                 <Check className="w-5 h-5 text-neon-cortex-blue" />
               </div>
               <div>
-                <h4 className="font-bold mb-1">Look More Professional to Parents</h4>
-                <p className="text-sm text-text-secondary">Offer a complete development ecosystem</p>
+                <h4 className="font-bold mb-1">Your Coaching Feels Intentional</h4>
+                <p className="text-sm text-text-secondary">Professional, not episodic</p>
               </div>
             </div>
           </div>
@@ -542,7 +558,7 @@ export default function PartnerProgramPage() {
           />
 
           <p className="text-lg text-gray-400 max-w-2xl mx-auto mb-2">
-            For coaches, trainers, and organizations with an audience of athletes.
+            Create year-round engagement that keeps athletes connected to your program.
           </p>
           <p className="text-sm text-gray-500 max-w-xl mx-auto">
             Examples: travel ball programs, performance teams, content creators in the baseball/softball space.
@@ -556,8 +572,8 @@ export default function PartnerProgramPage() {
                 <Check className="w-5 h-5 text-solar-surge-orange" />
               </div>
               <div>
-                <h4 className="font-bold mb-1">Branded Access for Your Team or Audience</h4>
-                <p className="text-sm text-text-secondary">Custom experience tied to your organization</p>
+                <h4 className="font-bold mb-1">Athletes Stay Engaged Outside Practices</h4>
+                <p className="text-sm text-text-secondary">Keep your team connected year-round</p>
               </div>
             </div>
 
@@ -566,8 +582,18 @@ export default function PartnerProgramPage() {
                 <Check className="w-5 h-5 text-solar-surge-orange" />
               </div>
               <div>
-                <h4 className="font-bold mb-1">Mental Training Content You Didn't Create</h4>
-                <p className="text-sm text-text-secondary">Professional-grade development content ready to go</p>
+                <h4 className="font-bold mb-1">Parents See Added Value</h4>
+                <p className="text-sm text-text-secondary">Beyond games and tournaments</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-solar-surge-orange/20 flex items-center justify-center">
+                <Check className="w-5 h-5 text-solar-surge-orange" />
+              </div>
+              <div>
+                <h4 className="font-bold mb-1">Programs Feel Complete, Not Seasonal</h4>
+                <p className="text-sm text-text-secondary">Engagement continues during off-season</p>
               </div>
             </div>
 
@@ -578,16 +604,6 @@ export default function PartnerProgramPage() {
               <div>
                 <h4 className="font-bold mb-1">Affiliate or Revenue-Share Options</h4>
                 <p className="text-sm text-text-secondary">Earn 10-15% on every subscription you refer</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-solar-surge-orange/20 flex items-center justify-center">
-                <Check className="w-5 h-5 text-solar-surge-orange" />
-              </div>
-              <div>
-                <h4 className="font-bold mb-1">Adds Value Without Extra Work</h4>
-                <p className="text-sm text-text-secondary">Just share—we handle everything else</p>
               </div>
             </div>
           </div>
@@ -603,6 +619,13 @@ export default function PartnerProgramPage() {
             </LiquidButton>
           </div>
         </LiquidGlass>
+      </div>
+
+      {/* Universal Retention Statement */}
+      <div className="max-w-4xl mx-auto mb-16 text-center">
+        <p className="text-lg text-gray-400 leading-relaxed border-l-4 border-solar-surge-orange/40 pl-6 text-left">
+          Retention looks different for every partner—but it always comes from consistent engagement, visible progress, and continued development outside scheduled sessions.
+        </p>
       </div>
 
       {/* ============================================= */}

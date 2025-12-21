@@ -2,8 +2,19 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+// Routes that have their own footer
+const ROUTES_WITH_CUSTOM_FOOTER = ['/partner/dashboard', '/partner/login', '/partner/email-templates', '/admin'];
 
 export function Footer() {
+  const pathname = usePathname();
+
+  // Hide footer on routes that have custom footers
+  if (ROUTES_WITH_CUSTOM_FOOTER.some(route => pathname?.startsWith(route))) {
+    return null;
+  }
+
   return (
     <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-white/10">
       <div className="max-w-7xl mx-auto text-center">
