@@ -518,8 +518,8 @@ export default function PartnerProgramPage() {
                 <Check className="w-5 h-5 text-neon-cortex-blue" />
               </div>
               <div>
-                <h4 className="font-bold mb-1">Reinforce Cues So Athletes Don't Regress</h4>
-                <p className="text-sm text-text-secondary">Athletes practice exactly what you teach between lessons</p>
+                <h4 className="font-bold mb-1">Prevent Regression Between Lessons</h4>
+                <p className="text-sm text-text-secondary">Lessons build instead of reset—athletes practice your cues at home</p>
               </div>
             </div>
 
@@ -643,7 +643,7 @@ export default function PartnerProgramPage() {
               onClick={() => scrollToSection('apply')}
               className="!bg-gradient-to-r !from-solar-surge-orange !to-muscle-primary"
             >
-              Become a Partner
+              Enable Your Program
             </LiquidButton>
           </div>
         </LiquidGlass>
