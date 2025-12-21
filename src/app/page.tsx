@@ -363,28 +363,27 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
           <div className="max-w-full flex items-center justify-between gap-8">
             <div className="max-w-3xl">
-            {/* Baseball Badge */}
+            {/* Tagline */}
             <FadeInWhenVisible delay={0} direction="down">
-              <div className="mb-6 inline-block mt-4">
-                <LiquidGlass variant="blue" rounded="full" padding="sm" glow={true} className="inline-flex items-center gap-2 px-6 py-2">
-                  <span className="text-sm font-bold">⚾🥎 BUILT FOR THE DIAMOND. ZERO GENERIC CONTENT.</span>
-                </LiquidGlass>
-              </div>
+              <h1 className="text-[48px] sm:text-[64px] md:text-[80px] lg:text-[96px] font-black mb-4 leading-[1.0]">
+                <span className="text-neon-cortex-blue" style={{textShadow: '0 0 30px rgba(14,165,233,0.6)'}}>Discipline the Mind.</span>
+                <br />
+                <span className="text-solar-surge-orange" style={{textShadow: '0 0 30px rgba(249,115,22,0.6)'}}>Dominate the Game.</span>
+                <span className="text-white text-[24px] sm:text-[32px] align-top">™</span>
+              </h1>
             </FadeInWhenVisible>
 
-            {/* Hero Headline */}
-            <TextReveal
-              text="The AI training platform built only for baseball & softball."
-              as="h1"
-              className="text-[40px] sm:text-[56px] md:text-[64px] lg:text-[72px] font-black mb-6 leading-[1.1] text-white"
-              delay={0.1}
-              staggerDelay={0.03}
-            />
+            {/* Primary Headline */}
+            <FadeInWhenVisible delay={0.4} direction="up">
+              <p className="text-[24px] sm:text-[32px] md:text-[40px] text-white font-bold mb-4 leading-tight max-w-2xl" style={{textShadow: '0 2px 12px rgba(0,0,0,0.7)'}}>
+                Built for the Mental and Physical Demands of Baseball and Softball.
+              </p>
+            </FadeInWhenVisible>
 
-            {/* Single Subheadline */}
+            {/* Subheadline */}
             <FadeInWhenVisible delay={0.8} direction="up">
-              <p className="text-[20px] sm:text-[24px] text-gray-200 mb-8 leading-relaxed max-w-2xl font-medium" style={{textShadow: '0 2px 12px rgba(0,0,0,0.7)'}}>
-                Video analysis, mental training, workouts, goals, and recovery—connected in one system that adapts to every athlete.
+              <p className="text-[18px] sm:text-[22px] text-gray-300 mb-8 leading-relaxed max-w-2xl font-medium" style={{textShadow: '0 2px 12px rgba(0,0,0,0.7)'}}>
+                AI-powered training for skills, mindset, strength, and game IQ — designed specifically for baseball and softball athletes.
               </p>
             </FadeInWhenVisible>
 
