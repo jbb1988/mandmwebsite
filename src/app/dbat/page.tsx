@@ -90,7 +90,7 @@ export default function DBatPartnerPage() {
       description: 'Pitchers analyze their mechanics on their own time. Identify arm slot issues, release points, spin patterns before they even arrive for instruction.',
       color: 'blue',
       videoUrl: '/assets/videos/pitch_lab.mp4',
-      iconImage: '/assets/images/pitch_lab.png',
+      iconImage: '/assets/images/pitch_lab_icon.png',
       forInstructor: 'Pitchers show up already knowing what to work on.',
     },
     {
