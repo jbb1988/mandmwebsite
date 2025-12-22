@@ -627,25 +627,90 @@ export default function AnnouncementsPage() {
                     <p className="text-xs text-white/40 mt-1">Leave empty for no expiration</p>
                   </div>
 
-                  {/* Preview */}
+                  {/* Preview - Mobile App Banner */}
                   <div>
-                    <label className="block text-sm font-medium text-white/70 mb-2">Preview</label>
-                    <div className={`p-4 rounded-lg border`}
-                         style={{
-                           backgroundColor: `color-mix(in srgb, ${formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6'} 10%, #0F1123)`,
-                           borderColor: `color-mix(in srgb, ${formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6'} 40%, transparent)`,
-                         }}>
-                      <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-lg flex items-center justify-center"
-                             style={{ backgroundColor: `color-mix(in srgb, ${formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6'} 30%, transparent)` }}>
-                          {(() => {
-                            const IconComponent = typeConfig[formType].icon;
-                            return <IconComponent className="w-5 h-5" style={{ color: formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6' }} />;
-                          })()}
-                        </div>
-                        <div className="flex-1">
-                          <div className="font-semibold text-white">{formTitle || 'Title'}</div>
-                          <div className="text-white/70 text-sm mt-1">{formMessage || 'Message'}</div>
+                    <label className="block text-sm font-medium text-white/70 mb-2">App Preview</label>
+                    <div className="bg-[#0A0B14] p-4 rounded-xl">
+                      {/* Phone mockup frame */}
+                      <div className="max-w-[320px] mx-auto">
+                        <div
+                          className="p-4 rounded-[20px] backdrop-blur-xl relative overflow-hidden"
+                          style={{
+                            background: `linear-gradient(135deg, #1A1D2E 0%, #0D0F1A 50%, color-mix(in srgb, ${formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6'} 15%, transparent) 100%)`,
+                            border: `1.5px solid color-mix(in srgb, ${formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6'} 50%, transparent)`,
+                            boxShadow: `0 8px 20px color-mix(in srgb, ${formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6'} 30%, transparent), 0 4px 20px rgba(0,0,0,0.5)`,
+                          }}
+                        >
+                          {/* Glass overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-b from-white/[0.08] to-white/[0.02] pointer-events-none rounded-[20px]" />
+
+                          <div className="flex items-start gap-3.5 relative">
+                            {/* Logo with glow */}
+                            <div
+                              className="w-[52px] h-[52px] rounded-[14px] flex-shrink-0 overflow-hidden"
+                              style={{
+                                boxShadow: `0 0 12px color-mix(in srgb, ${formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6'} 40%, transparent)`,
+                              }}
+                            >
+                              <img
+                                src="/assets/images/mm-logo.png"
+                                alt="Mind & Muscle"
+                                className="w-full h-full object-contain"
+                                onError={(e) => {
+                                  // Fallback to icon if image not found
+                                  e.currentTarget.style.display = 'none';
+                                  e.currentTarget.parentElement!.innerHTML = `<div class="w-full h-full bg-gradient-to-br from-blue-500/30 to-orange-500/30 flex items-center justify-center"><span class="text-2xl">💪</span></div>`;
+                                }}
+                              />
+                            </div>
+
+                            {/* Content */}
+                            <div className="flex-1 min-w-0">
+                              {/* Badge row */}
+                              <div className="flex items-center justify-between mb-2.5">
+                                <div
+                                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wide"
+                                  style={{
+                                    background: `linear-gradient(90deg, color-mix(in srgb, ${formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6'} 30%, transparent), color-mix(in srgb, ${formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6'} 15%, transparent))`,
+                                    border: `1px solid color-mix(in srgb, ${formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6'} 40%, transparent)`,
+                                    color: formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6',
+                                  }}
+                                >
+                                  {/* Glowing dot */}
+                                  <div
+                                    className="w-1.5 h-1.5 rounded-full"
+                                    style={{
+                                      backgroundColor: formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6',
+                                      boxShadow: `0 0 4px ${formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6'}`,
+                                    }}
+                                  />
+                                  {formType === 'info' ? 'INFO' : formType === 'warning' ? 'NOTICE' : formType === 'success' ? 'GOOD NEWS' : 'NEW UPDATE'}
+                                </div>
+                                {/* Close button */}
+                                <div className="w-[30px] h-[30px] rounded-[10px] bg-white/[0.08] border border-white/10 flex items-center justify-center">
+                                  <X className="w-4 h-4 text-white/60" />
+                                </div>
+                              </div>
+
+                              {/* Title */}
+                              <div className="text-white font-bold text-[16px] leading-tight tracking-tight mb-1.5">
+                                {formTitle || 'Announcement Title'}
+                              </div>
+
+                              {/* Message */}
+                              <div className="text-white/80 text-[13px] leading-relaxed mb-2.5 line-clamp-3">
+                                {formMessage || 'Your announcement message will appear here...'}
+                              </div>
+
+                              {/* Swipe hint */}
+                              <div className="flex items-center gap-1.5 text-white/35 text-[11px]">
+                                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M10.59 4.59A2 2 0 1 0 8.17 2.17 2 2 0 0 0 10.59 4.59zM8.5 8.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm8.5 2.5c.28 0 .5.22.5.5v4c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-4c0-.28.22-.5.5-.5zm-5-1c-.28 0-.5.22-.5.5v5c0 .28.22.5.5.5s.5-.22.5-.5v-5c0-.28-.22-.5-.5-.5zm-3 2c-.28 0-.5.22-.5.5v3c0 .28.22.5.5.5s.5-.22.5-.5v-3c0-.28-.22-.5-.5-.5z"/>
+                                </svg>
+                                Swipe to dismiss
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
