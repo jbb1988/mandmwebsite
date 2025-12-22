@@ -10,7 +10,8 @@ import {
   BarChart3, Users, TrendingUp, TrendingDown, AlertTriangle,
   Loader2, Search, X, ChevronDown, ChevronUp, ArrowUpRight,
   ArrowDownRight, Minus, RefreshCw, Activity, Heart, Target,
-  Zap, Shield, Clock, Star
+  Zap, Shield, Clock, Star, Gift, UserX, Wrench, Download,
+  Mail, DollarSign, AlertCircle, CheckCircle2
 } from 'lucide-react';
 
 interface FeatureStats {
@@ -92,6 +93,61 @@ interface HealthDetails {
   messages_sent: number;
 }
 
+interface ConversionOpportunity {
+  user_id: string;
+  email: string;
+  name: string | null;
+  tier: string;
+  features_used: number;
+  total_opens: number;
+  days_active: number;
+  last_activity: string | null;
+  reason: string;
+  priority: 'high' | 'medium' | 'low';
+}
+
+interface ChurnRisk {
+  user_id: string;
+  email: string;
+  name: string | null;
+  tier: string;
+  promo_tier_expires_at: string | null;
+  days_until_expiry: number | null;
+  days_inactive: number;
+  pro_features_used: number;
+  total_pro_features: number;
+  health_score: number;
+  risk_reason: string;
+  risk_level: 'critical' | 'high' | 'medium';
+}
+
+interface FeatureHealthIssue {
+  feature_name: string;
+  opens: number;
+  completions: number;
+  completion_rate: number;
+  unique_users: number;
+  issue: string | null;
+}
+
+interface Insights {
+  conversion_opportunities: {
+    total: number;
+    high_priority: number;
+    users: ConversionOpportunity[];
+  };
+  churn_risks: {
+    total: number;
+    critical: number;
+    high: number;
+    users: ChurnRisk[];
+  };
+  feature_health: {
+    issues_count: number;
+    features: FeatureHealthIssue[];
+  };
+}
+
 const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || '';
 
 export default function FeatureAnalyticsPage() {
@@ -118,6 +174,14 @@ export default function FeatureAnalyticsPage() {
   const [showNonUsers, setShowNonUsers] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [recalculating, setRecalculating] = useState(false);
+
+  // New: Insights and actions state
+  const [activeTab, setActiveTab] = useState<'overview' | 'insights'>('overview');
+  const [insights, setInsights] = useState<Insights | null>(null);
+  const [insightsLoading, setInsightsLoading] = useState(false);
+  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionResult, setActionResult] = useState<{ success: boolean; message: string } | null>(null);
 
   const fetchData = async () => {
     setLoading(true);
@@ -236,10 +300,126 @@ export default function FeatureAnalyticsPage() {
     }
   };
 
+  // Fetch actionable insights
+  const fetchInsights = async () => {
+    setInsightsLoading(true);
+    try {
+      const res = await fetch('/api/admin/feature-analytics/insights', {
+        headers: { 'X-Admin-Password': getPassword() || adminPassword },
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setInsights(data.insights);
+      }
+    } catch (error) {
+      console.error('Failed to fetch insights:', error);
+    } finally {
+      setInsightsLoading(false);
+    }
+  };
+
+  // Toggle user selection
+  const toggleUserSelection = (userId: string) => {
+    setSelectedUsers(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(userId)) {
+        newSet.delete(userId);
+      } else {
+        newSet.add(userId);
+      }
+      return newSet;
+    });
+  };
+
+  // Select all users in a list
+  const selectAllUsers = (userIds: string[]) => {
+    setSelectedUsers(new Set(userIds));
+  };
+
+  // Clear selection
+  const clearSelection = () => {
+    setSelectedUsers(new Set());
+  };
+
+  // Grant trial extension to selected users
+  const grantTrialExtension = async (days: number = 7) => {
+    if (selectedUsers.size === 0) return;
+
+    setActionLoading(true);
+    setActionResult(null);
+    try {
+      const res = await fetch('/api/admin/feature-analytics/insights', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': getPassword() || adminPassword,
+        },
+        body: JSON.stringify({
+          action: 'grant-trial-extension',
+          user_ids: Array.from(selectedUsers),
+          days,
+        }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setActionResult({ success: true, message: data.message });
+        setSelectedUsers(new Set());
+        fetchInsights(); // Refresh insights
+      } else {
+        setActionResult({ success: false, message: data.error || 'Failed to grant trial' });
+      }
+    } catch (error) {
+      setActionResult({ success: false, message: 'Network error' });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Export selected users as CSV
+  const exportSelectedUsers = async () => {
+    if (selectedUsers.size === 0) return;
+
+    try {
+      const res = await fetch('/api/admin/feature-analytics/insights', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': getPassword() || adminPassword,
+        },
+        body: JSON.stringify({
+          action: 'export-csv',
+          user_ids: Array.from(selectedUsers),
+        }),
+      });
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'users-export.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to export users:', error);
+    }
+  };
+
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [timeRange, selectedCategory]);
+
+  // Fetch insights when tab changes to insights
+  useEffect(() => {
+    if (activeTab === 'insights' && !insights) {
+      fetchInsights();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
 
   useEffect(() => {
     if (selectedFeature) {
@@ -350,46 +530,80 @@ export default function FeatureAnalyticsPage() {
             {/* Admin Navigation */}
             <AdminNav />
 
-            {/* Filters */}
-            <div className="flex flex-wrap justify-center items-center gap-3 mb-8">
-              {/* Time Range Selector */}
-              <select
-                value={timeRange}
-                onChange={(e) => setTimeRange(e.target.value)}
-                className="bg-[#0F1123] border border-white/10 rounded-lg px-3 py-2 text-sm"
-              >
-                <option value="7">Last 7 days</option>
-                <option value="14">Last 14 days</option>
-                <option value="30">Last 30 days</option>
-                <option value="90">Last 90 days</option>
-              </select>
-
-              {/* Category Filter */}
-              <select
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="bg-[#0F1123] border border-white/10 rounded-lg px-3 py-2 text-sm"
-              >
-                <option value="all">All Categories</option>
-                {categories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-
-              {/* Recalculate Button */}
+            {/* Tab Switcher */}
+            <div className="flex justify-center gap-2 mb-6">
               <button
-                onClick={recalculateHealthScores}
-                disabled={recalculating}
-                className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-sm disabled:opacity-50"
+                onClick={() => setActiveTab('overview')}
+                className={`px-6 py-2 rounded-lg font-medium transition ${
+                  activeTab === 'overview'
+                    ? 'bg-cyan-600 text-white'
+                    : 'bg-white/5 text-white/70 hover:bg-white/10'
+                }`}
               >
-                {recalculating ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <RefreshCw className="w-4 h-4" />
+                <BarChart3 className="w-4 h-4 inline mr-2" />
+                Overview
+              </button>
+              <button
+                onClick={() => setActiveTab('insights')}
+                className={`px-6 py-2 rounded-lg font-medium transition flex items-center gap-2 ${
+                  activeTab === 'insights'
+                    ? 'bg-orange-600 text-white'
+                    : 'bg-white/5 text-white/70 hover:bg-white/10'
+                }`}
+              >
+                <Zap className="w-4 h-4" />
+                Actionable Insights
+                {insights && (insights.conversion_opportunities.high_priority > 0 || insights.churn_risks.critical > 0) && (
+                  <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                    {insights.conversion_opportunities.high_priority + insights.churn_risks.critical}
+                  </span>
                 )}
-                Recalculate Scores
               </button>
             </div>
+
+            {/* OVERVIEW TAB */}
+            {activeTab === 'overview' && (
+              <>
+                {/* Filters */}
+                <div className="flex flex-wrap justify-center items-center gap-3 mb-8">
+                  {/* Time Range Selector */}
+                  <select
+                    value={timeRange}
+                    onChange={(e) => setTimeRange(e.target.value)}
+                    className="bg-[#0F1123] border border-white/10 rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="7">Last 7 days</option>
+                    <option value="14">Last 14 days</option>
+                    <option value="30">Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                  </select>
+
+                  {/* Category Filter */}
+                  <select
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="bg-[#0F1123] border border-white/10 rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="all">All Categories</option>
+                    {categories.map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+
+                  {/* Recalculate Button */}
+                  <button
+                    onClick={recalculateHealthScores}
+                    disabled={recalculating}
+                    className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-sm disabled:opacity-50"
+                  >
+                    {recalculating ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="w-4 h-4" />
+                    )}
+                    Recalculate Scores
+                  </button>
+                </div>
 
           {loading ? (
             <div className="flex items-center justify-center h-64">
@@ -774,6 +988,322 @@ export default function FeatureAnalyticsPage() {
               )}
             </>
           )}
+              </>
+            )}
+
+            {/* INSIGHTS TAB */}
+            {activeTab === 'insights' && (
+              <>
+                {/* Action Result Toast */}
+                {actionResult && (
+                  <div className={`mb-6 p-4 rounded-lg flex items-center gap-3 ${
+                    actionResult.success ? 'bg-emerald-500/20 border border-emerald-500/30' : 'bg-red-500/20 border border-red-500/30'
+                  }`}>
+                    {actionResult.success ? (
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                    ) : (
+                      <AlertCircle className="w-5 h-5 text-red-400" />
+                    )}
+                    <span className={actionResult.success ? 'text-emerald-300' : 'text-red-300'}>
+                      {actionResult.message}
+                    </span>
+                    <button
+                      onClick={() => setActionResult(null)}
+                      className="ml-auto text-white/50 hover:text-white"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Quick Actions Bar */}
+                {selectedUsers.size > 0 && (
+                  <div className="mb-6 p-4 bg-blue-600/20 border border-blue-500/30 rounded-lg flex items-center gap-4">
+                    <span className="text-blue-300 font-medium">
+                      {selectedUsers.size} user(s) selected
+                    </span>
+                    <div className="flex-1" />
+                    <button
+                      onClick={() => grantTrialExtension(7)}
+                      disabled={actionLoading}
+                      className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg text-sm disabled:opacity-50"
+                    >
+                      <Gift className="w-4 h-4" />
+                      Grant 7-Day Trial
+                    </button>
+                    <button
+                      onClick={() => grantTrialExtension(30)}
+                      disabled={actionLoading}
+                      className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-sm disabled:opacity-50"
+                    >
+                      <Gift className="w-4 h-4" />
+                      Grant 30-Day Trial
+                    </button>
+                    <button
+                      onClick={exportSelectedUsers}
+                      className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm"
+                    >
+                      <Download className="w-4 h-4" />
+                      Export CSV
+                    </button>
+                    <button
+                      onClick={clearSelection}
+                      className="flex items-center gap-2 px-3 py-2 text-white/50 hover:text-white text-sm"
+                    >
+                      <X className="w-4 h-4" />
+                      Clear
+                    </button>
+                  </div>
+                )}
+
+                {insightsLoading ? (
+                  <div className="flex items-center justify-center h-64">
+                    <Loader2 className="w-8 h-8 animate-spin text-orange-400" />
+                  </div>
+                ) : insights ? (
+                  <div className="space-y-8">
+                    {/* Summary Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      <Card variant="elevated" className="p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="p-2 bg-emerald-500/20 rounded-lg">
+                            <DollarSign className="w-5 h-5 text-emerald-400" />
+                          </div>
+                          <h3 className="font-semibold">Conversion Opportunities</h3>
+                        </div>
+                        <div className="text-3xl font-bold text-emerald-400 mb-1">
+                          {insights.conversion_opportunities.high_priority}
+                        </div>
+                        <p className="text-white/50 text-sm">
+                          High-priority free users ready to convert ({insights.conversion_opportunities.total} total)
+                        </p>
+                      </Card>
+
+                      <Card variant="elevated" className="p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="p-2 bg-red-500/20 rounded-lg">
+                            <UserX className="w-5 h-5 text-red-400" />
+                          </div>
+                          <h3 className="font-semibold">Churn Risks</h3>
+                        </div>
+                        <div className="text-3xl font-bold text-red-400 mb-1">
+                          {insights.churn_risks.critical}
+                        </div>
+                        <p className="text-white/50 text-sm">
+                          Critical churn risks ({insights.churn_risks.high} high, {insights.churn_risks.total} total)
+                        </p>
+                      </Card>
+
+                      <Card variant="elevated" className="p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="p-2 bg-orange-500/20 rounded-lg">
+                            <Wrench className="w-5 h-5 text-orange-400" />
+                          </div>
+                          <h3 className="font-semibold">Feature Issues</h3>
+                        </div>
+                        <div className="text-3xl font-bold text-orange-400 mb-1">
+                          {insights.feature_health.issues_count}
+                        </div>
+                        <p className="text-white/50 text-sm">
+                          Features with low completion rates (possible UX issues)
+                        </p>
+                      </Card>
+                    </div>
+
+                    {/* Conversion Opportunities */}
+                    <Card variant="elevated" className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold flex items-center gap-2">
+                          <DollarSign className="w-5 h-5 text-emerald-400" />
+                          Conversion Opportunities
+                          <span className="text-sm font-normal text-white/50">
+                            Free users with high engagement - offer them a trial!
+                          </span>
+                        </h3>
+                        {insights.conversion_opportunities.users.length > 0 && (
+                          <button
+                            onClick={() => selectAllUsers(insights.conversion_opportunities.users.map(u => u.user_id))}
+                            className="text-sm text-blue-400 hover:text-blue-300"
+                          >
+                            Select All
+                          </button>
+                        )}
+                      </div>
+                      <div className="space-y-2 max-h-96 overflow-y-auto">
+                        {insights.conversion_opportunities.users.map(user => (
+                          <div
+                            key={user.user_id}
+                            className={`flex items-center gap-4 p-4 rounded-lg transition cursor-pointer ${
+                              selectedUsers.has(user.user_id)
+                                ? 'bg-blue-600/20 border border-blue-500/30'
+                                : 'bg-[#0A0B14]/60 hover:bg-[#0A0B14]'
+                            }`}
+                            onClick={() => toggleUserSelection(user.user_id)}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedUsers.has(user.user_id)}
+                              onChange={() => toggleUserSelection(user.user_id)}
+                              className="rounded"
+                            />
+                            <div className="flex-1">
+                              <div className="font-medium">{user.name || user.email}</div>
+                              <div className="text-sm text-white/50">{user.email}</div>
+                            </div>
+                            <div className="flex items-center gap-4 text-sm">
+                              <span className={`px-2 py-1 rounded ${
+                                user.priority === 'high' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
+                              }`}>
+                                {user.priority}
+                              </span>
+                              <span className="text-white/50">{user.features_used} features</span>
+                              <span className="text-white/50">{user.total_opens} opens</span>
+                            </div>
+                            <div className="text-xs text-white/30 max-w-48 truncate">
+                              {user.reason}
+                            </div>
+                          </div>
+                        ))}
+                        {insights.conversion_opportunities.users.length === 0 && (
+                          <div className="text-center py-8 text-white/50">
+                            No conversion opportunities found
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+
+                    {/* Churn Risks */}
+                    <Card variant="elevated" className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold flex items-center gap-2">
+                          <UserX className="w-5 h-5 text-red-400" />
+                          Churn Risks
+                          <span className="text-sm font-normal text-white/50">
+                            Trial/Pro users at risk of churning - intervene now!
+                          </span>
+                        </h3>
+                        {insights.churn_risks.users.length > 0 && (
+                          <button
+                            onClick={() => selectAllUsers(insights.churn_risks.users.map(u => u.user_id))}
+                            className="text-sm text-blue-400 hover:text-blue-300"
+                          >
+                            Select All
+                          </button>
+                        )}
+                      </div>
+                      <div className="space-y-2 max-h-96 overflow-y-auto">
+                        {insights.churn_risks.users.map(user => (
+                          <div
+                            key={user.user_id}
+                            className={`flex items-center gap-4 p-4 rounded-lg transition cursor-pointer ${
+                              selectedUsers.has(user.user_id)
+                                ? 'bg-blue-600/20 border border-blue-500/30'
+                                : 'bg-[#0A0B14]/60 hover:bg-[#0A0B14]'
+                            }`}
+                            onClick={() => toggleUserSelection(user.user_id)}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={selectedUsers.has(user.user_id)}
+                              onChange={() => toggleUserSelection(user.user_id)}
+                              className="rounded"
+                            />
+                            <div className="flex-1">
+                              <div className="font-medium">{user.name || user.email}</div>
+                              <div className="text-sm text-white/50">{user.email}</div>
+                            </div>
+                            <div className="flex items-center gap-4 text-sm">
+                              <span className={`px-2 py-1 rounded ${
+                                user.risk_level === 'critical' ? 'bg-red-500/20 text-red-400' :
+                                user.risk_level === 'high' ? 'bg-orange-500/20 text-orange-400' :
+                                'bg-amber-500/20 text-amber-400'
+                              }`}>
+                                {user.risk_level}
+                              </span>
+                              <span className="text-white/50">{user.tier}</span>
+                              {user.days_until_expiry !== null && user.days_until_expiry > 0 && (
+                                <span className="text-orange-400">{user.days_until_expiry}d left</span>
+                              )}
+                              <span className="text-white/50">{user.pro_features_used}/{user.total_pro_features} Pro features</span>
+                            </div>
+                            <div className="text-xs text-white/30 max-w-48 truncate">
+                              {user.risk_reason}
+                            </div>
+                          </div>
+                        ))}
+                        {insights.churn_risks.users.length === 0 && (
+                          <div className="text-center py-8 text-white/50">
+                            No churn risks detected
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+
+                    {/* Feature Health Issues */}
+                    {insights.feature_health.features.length > 0 && (
+                      <Card variant="elevated" className="p-6">
+                        <h3 className="text-lg font-semibold flex items-center gap-2 mb-4">
+                          <Wrench className="w-5 h-5 text-orange-400" />
+                          Feature Health Issues
+                          <span className="text-sm font-normal text-white/50">
+                            Features with low completion rates may have UX problems
+                          </span>
+                        </h3>
+                        <div className="space-y-2">
+                          {insights.feature_health.features.map(feature => (
+                            <div
+                              key={feature.feature_name}
+                              className="flex items-center gap-4 p-4 bg-[#0A0B14]/60 rounded-lg"
+                            >
+                              <div className="flex-1">
+                                <div className="font-medium">{formatFeatureName(feature.feature_name)}</div>
+                                <div className="text-sm text-orange-400">{feature.issue}</div>
+                              </div>
+                              <div className="flex items-center gap-6 text-sm">
+                                <div>
+                                  <span className="text-white/50">Opens: </span>
+                                  <span className="font-medium">{feature.opens}</span>
+                                </div>
+                                <div>
+                                  <span className="text-white/50">Completions: </span>
+                                  <span className="font-medium">{feature.completions}</span>
+                                </div>
+                                <div>
+                                  <span className="text-white/50">Rate: </span>
+                                  <span className={`font-medium ${feature.completion_rate < 20 ? 'text-red-400' : 'text-amber-400'}`}>
+                                    {feature.completion_rate}%
+                                  </span>
+                                </div>
+                                <div>
+                                  <span className="text-white/50">Users: </span>
+                                  <span className="font-medium">{feature.unique_users}</span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </Card>
+                    )}
+
+                    {/* Refresh Button */}
+                    <div className="flex justify-center">
+                      <button
+                        onClick={fetchInsights}
+                        disabled={insightsLoading}
+                        className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 rounded-lg"
+                      >
+                        <RefreshCw className={`w-4 h-4 ${insightsLoading ? 'animate-spin' : ''}`} />
+                        Refresh Insights
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-12 text-white/50">
+                    Failed to load insights. Please try again.
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>

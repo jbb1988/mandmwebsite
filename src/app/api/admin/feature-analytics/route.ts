@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { verifyAdmin } from '@/lib/admin-auth';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
-
-// Helper to verify admin password
-function verifyAdmin(request: NextRequest): boolean {
-  const authHeader = request.headers.get('X-Admin-Password');
-  return authHeader === process.env.ADMIN_DASHBOARD_PASSWORD;
-}
 
 // Feature categories for grouping
 const FEATURE_CATEGORIES: Record<string, string> = {
