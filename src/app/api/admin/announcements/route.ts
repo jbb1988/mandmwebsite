@@ -21,6 +21,7 @@ interface SystemAnnouncement {
   target_user_ids: string[] | null;
   created_at: string;
   expires_at: string | null;
+  starts_at: string | null;
   created_by: string | null;
 }
 
@@ -108,7 +109,7 @@ export async function POST(request: NextRequest) {
 
     // CREATE announcement
     if (action === 'create') {
-      const { title, message, type, priority, target_audience, target_user_ids, expires_at, created_by } = body;
+      const { title, message, type, priority, target_audience, target_user_ids, expires_at, starts_at, created_by } = body;
 
       if (!title || !message) {
         return NextResponse.json({ error: 'Title and message are required' }, { status: 400 });
@@ -125,6 +126,7 @@ export async function POST(request: NextRequest) {
           target_audience: target_audience || 'all',
           target_user_ids: target_user_ids || null,
           expires_at: expires_at || null,
+          starts_at: starts_at || null,
           created_by: created_by || 'Admin',
         })
         .select()
@@ -139,7 +141,7 @@ export async function POST(request: NextRequest) {
 
     // UPDATE announcement
     if (action === 'update') {
-      const { id, title, message, type, priority, target_audience, target_user_ids, expires_at, active } = body;
+      const { id, title, message, type, priority, target_audience, target_user_ids, expires_at, starts_at, active } = body;
 
       if (!id) {
         return NextResponse.json({ error: 'Announcement ID is required' }, { status: 400 });
@@ -153,6 +155,7 @@ export async function POST(request: NextRequest) {
       if (target_audience !== undefined) updateData.target_audience = target_audience;
       if (target_user_ids !== undefined) updateData.target_user_ids = target_user_ids;
       if (expires_at !== undefined) updateData.expires_at = expires_at;
+      if (starts_at !== undefined) updateData.starts_at = starts_at;
       if (active !== undefined) updateData.active = active;
 
       const { data, error } = await supabase

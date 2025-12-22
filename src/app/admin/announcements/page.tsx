@@ -39,6 +39,7 @@ interface SystemAnnouncement {
   target_user_ids: string[] | null;
   created_at: string;
   expires_at: string | null;
+  starts_at: string | null;
   created_by: string | null;
 }
 
@@ -92,6 +93,7 @@ export default function AnnouncementsPage() {
   const [formPriority, setFormPriority] = useState(0);
   const [formAudience, setFormAudience] = useState<SystemAnnouncement['target_audience']>('all');
   const [formExpiresAt, setFormExpiresAt] = useState('');
+  const [formStartsAt, setFormStartsAt] = useState('');
   const [formTargetUsers, setFormTargetUsers] = useState<UserSearchResult[]>([]);
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [userSearchResults, setUserSearchResults] = useState<UserSearchResult[]>([]);
@@ -128,6 +130,7 @@ export default function AnnouncementsPage() {
     setFormPriority(0);
     setFormAudience('all');
     setFormExpiresAt('');
+    setFormStartsAt('');
     setFormTargetUsers([]);
     setUserSearchQuery('');
     setUserSearchResults([]);
@@ -147,6 +150,7 @@ export default function AnnouncementsPage() {
     setFormPriority(announcement.priority);
     setFormAudience(announcement.target_audience);
     setFormExpiresAt(announcement.expires_at ? announcement.expires_at.slice(0, 16) : '');
+    setFormStartsAt(announcement.starts_at ? announcement.starts_at.slice(0, 16) : '');
     // For target users, we would need to fetch user details - simplified for now
     setFormTargetUsers([]);
     setShowModal(true);
@@ -200,6 +204,7 @@ export default function AnnouncementsPage() {
         priority: formPriority,
         target_audience: formAudience,
         expires_at: formExpiresAt || null,
+        starts_at: formStartsAt || null,
         created_by: 'Admin',
       };
 
@@ -394,6 +399,11 @@ export default function AnnouncementsPage() {
                                 Priority: {announcement.priority}
                               </span>
                             )}
+                            {announcement.starts_at && new Date(announcement.starts_at) > new Date() && (
+                              <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400 text-xs font-medium">
+                                Scheduled
+                              </span>
+                            )}
                           </div>
                           <p className="text-white/60 text-sm mb-2 line-clamp-2">{announcement.message}</p>
                           <div className="flex flex-wrap gap-3 text-xs text-white/40">
@@ -403,9 +413,15 @@ export default function AnnouncementsPage() {
                                 ? `${announcement.target_user_ids.length} specific users`
                                 : audienceLabels[announcement.target_audience]}
                             </span>
+                            {announcement.starts_at && (
+                              <span className="flex items-center gap-1 text-cyan-400/70">
+                                <Clock className="w-3 h-3" />
+                                Starts: {formatDate(announcement.starts_at)}
+                              </span>
+                            )}
                             <span className="flex items-center gap-1">
                               <Calendar className="w-3 h-3" />
-                              {formatDate(announcement.created_at)}
+                              Created: {formatDate(announcement.created_at)}
                             </span>
                             {announcement.expires_at && (
                               <span className="flex items-center gap-1">
@@ -613,18 +629,42 @@ export default function AnnouncementsPage() {
                     )}
                   </div>
 
-                  {/* Expiration */}
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-2">
-                      Expiration Date (Optional)
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={formExpiresAt}
-                      onChange={(e) => setFormExpiresAt(e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-purple-500 focus:outline-none"
-                    />
-                    <p className="text-xs text-white/40 mt-1">Leave empty for no expiration</p>
+                  {/* Scheduling */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-white/70 mb-2">
+                        Starts At (Optional)
+                      </label>
+                      <input
+                        type="datetime-local"
+                        value={formStartsAt}
+                        onChange={(e) => setFormStartsAt(e.target.value)}
+                        className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-purple-500 focus:outline-none"
+                      />
+                      <p className="text-xs text-white/40 mt-1">Schedule for future</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-white/70 mb-2">
+                        Expires At (Optional)
+                      </label>
+                      <input
+                        type="datetime-local"
+                        value={formExpiresAt}
+                        onChange={(e) => setFormExpiresAt(e.target.value)}
+                        className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-purple-500 focus:outline-none"
+                      />
+                      <p className="text-xs text-white/40 mt-1">Auto-hide after date</p>
+                    </div>
+                  </div>
+
+                  {/* Formatting Help */}
+                  <div className="bg-white/5 rounded-lg p-3 text-xs text-white/50">
+                    <div className="font-medium text-white/70 mb-1">Rich Text Formatting:</div>
+                    <div className="space-y-0.5">
+                      <div><code className="bg-white/10 px-1 rounded">**bold**</code> → <strong>bold</strong></div>
+                      <div><code className="bg-white/10 px-1 rounded">*italic*</code> → <em>italic</em></div>
+                      <div><code className="bg-white/10 px-1 rounded">[link text](https://url)</code> → clickable link</div>
+                    </div>
                   </div>
 
                   {/* Preview - Mobile App Banner */}
