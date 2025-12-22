@@ -4,11 +4,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Users, DollarSign,
-  Image, FolderOpen, Tag, Mail, UserCircle, Target, BarChart3
+  Image, FolderOpen, Tag, Mail, UserCircle, Target, BarChart3, Megaphone
 } from 'lucide-react';
 
 const adminLinks = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin/announcements', label: 'Announcements', icon: Megaphone },
   { href: '/admin/campaigns', label: 'Campaigns', icon: Mail },
   { href: '/admin/outreach-crm', label: 'Outreach CRM', icon: Target },
   { href: '/admin/finder-fees', label: 'Finder Fees', icon: DollarSign },
