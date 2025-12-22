@@ -706,30 +706,24 @@ export default function AnnouncementsPage() {
 
                             {/* Content */}
                             <div className="flex-1 min-w-0">
-                              {/* Badge row */}
-                              <div className="flex items-center justify-between mb-2.5">
+                              {/* Badge */}
+                              <div
+                                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wide w-fit mb-2.5"
+                                style={{
+                                  background: `linear-gradient(90deg, color-mix(in srgb, ${formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6'} 30%, transparent), color-mix(in srgb, ${formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6'} 15%, transparent))`,
+                                  border: `1px solid color-mix(in srgb, ${formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6'} 40%, transparent)`,
+                                  color: formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6',
+                                }}
+                              >
+                                {/* Glowing dot */}
                                 <div
-                                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold tracking-wide"
+                                  className="w-1.5 h-1.5 rounded-full"
                                   style={{
-                                    background: `linear-gradient(90deg, color-mix(in srgb, ${formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6'} 30%, transparent), color-mix(in srgb, ${formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6'} 15%, transparent))`,
-                                    border: `1px solid color-mix(in srgb, ${formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6'} 40%, transparent)`,
-                                    color: formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6',
+                                    backgroundColor: formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6',
+                                    boxShadow: `0 0 4px ${formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6'}`,
                                   }}
-                                >
-                                  {/* Glowing dot */}
-                                  <div
-                                    className="w-1.5 h-1.5 rounded-full"
-                                    style={{
-                                      backgroundColor: formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6',
-                                      boxShadow: `0 0 4px ${formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6'}`,
-                                    }}
-                                  />
-                                  {formType === 'info' ? 'INFO' : formType === 'warning' ? 'NOTICE' : formType === 'success' ? 'GOOD NEWS' : 'NEW UPDATE'}
-                                </div>
-                                {/* Close button */}
-                                <div className="w-[30px] h-[30px] rounded-[10px] bg-white/[0.08] border border-white/10 flex items-center justify-center">
-                                  <X className="w-4 h-4 text-white/60" />
-                                </div>
+                                />
+                                {formType === 'info' ? 'INFO' : formType === 'warning' ? 'NOTICE' : formType === 'success' ? 'GOOD NEWS' : 'NEW UPDATE'}
                               </div>
 
                               {/* Title */}
