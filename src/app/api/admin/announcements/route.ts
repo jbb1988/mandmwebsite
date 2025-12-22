@@ -26,15 +26,25 @@ interface SystemAnnouncement {
 
 // GET: List all announcements
 export async function GET(request: NextRequest) {
+  console.log('[Announcements API] GET request received');
+
   if (!verifyAdmin(request)) {
+    console.log('[Announcements API] Unauthorized - admin verification failed');
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+  console.log('[Announcements API] Admin verified');
 
   try {
     const { searchParams } = new URL(request.url);
     const activeOnly = searchParams.get('active') === 'true';
 
+    console.log('[Announcements API] Creating Supabase client...');
+    console.log('[Announcements API] SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'SET' : 'NOT SET');
+    console.log('[Announcements API] SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'SET' : 'NOT SET');
+
     const supabase = getSupabaseClient();
+    console.log('[Announcements API] Supabase client created, querying...');
+
     let query = supabase
       .from('system_announcements')
       .select('*')
@@ -46,8 +56,10 @@ export async function GET(request: NextRequest) {
     }
 
     const { data: announcements, error } = await query;
+    console.log('[Announcements API] Query completed. Error:', error?.message || 'none', 'Count:', announcements?.length || 0);
 
     if (error) {
+      console.error('[Announcements API] Supabase error:', error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
@@ -70,8 +82,15 @@ export async function GET(request: NextRequest) {
       stats,
     });
   } catch (error) {
-    console.error('Error fetching announcements:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    console.error('[Announcements API] CATCH ERROR:', error);
+    console.error('[Announcements API] Error type:', typeof error);
+    console.error('[Announcements API] Error name:', (error as Error)?.name);
+    console.error('[Announcements API] Error message:', (error as Error)?.message);
+    console.error('[Announcements API] Error stack:', (error as Error)?.stack);
+    return NextResponse.json({
+      error: 'Internal server error',
+      details: (error as Error)?.message
+    }, { status: 500 });
   }
 }
 
