@@ -1,11 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-// Create Supabase client with service role for rate limiting
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Lazy-initialized Supabase client for rate limiting
+let _supabase: SupabaseClient | null = null;
+
+function getSupabaseClient(): SupabaseClient {
+  if (!_supabase) {
+    _supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+  }
+  return _supabase;
+}
 
 // Rate limiting configuration
 const MAX_ATTEMPTS = 5;
@@ -44,6 +51,7 @@ function getClientIP(request: NextRequest): string {
  */
 async function checkRateLimit(ip: string, success: boolean = false): Promise<string> {
   try {
+    const supabase = getSupabaseClient();
     const { data, error } = await supabase.rpc('check_admin_rate_limit', {
       p_ip_address: ip,
       p_success: success,
