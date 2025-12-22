@@ -2,10 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifyAdmin, verifyAdminWithRateLimit } from '@/lib/admin-auth';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+// Create Supabase client inside functions to ensure env vars are available
+function getSupabaseClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 interface SystemAnnouncement {
   id: string;
@@ -31,6 +34,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const activeOnly = searchParams.get('active') === 'true';
 
+    const supabase = getSupabaseClient();
     let query = supabase
       .from('system_announcements')
       .select('*')
@@ -79,6 +83,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const supabase = getSupabaseClient();
     const body = await request.json();
     const { action } = body;
 
