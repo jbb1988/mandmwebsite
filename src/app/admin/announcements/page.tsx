@@ -361,9 +361,15 @@ export default function AnnouncementsPage() {
         body: JSON.stringify({ action: 'get-reactions', announcement_id: announcementId }),
       });
       const data = await res.json();
+      console.log('[Reactions] API response:', data);
       if (data.success) {
         setReactionStats(prev => ({ ...prev, [announcementId]: data.stats }));
         setReactionResponses(prev => ({ ...prev, [announcementId]: data.reactions }));
+      } else {
+        console.error('[Reactions] API error:', data.error);
+        // Still set empty stats so we show "no responses" instead of "failed"
+        setReactionStats(prev => ({ ...prev, [announcementId]: { total: 0, by_reaction: {} } }));
+        setReactionResponses(prev => ({ ...prev, [announcementId]: [] }));
       }
     } catch (error) {
       console.error('Failed to fetch reactions:', error);

@@ -265,6 +265,7 @@ export async function POST(request: NextRequest) {
     // GET REACTIONS for an announcement
     if (action === 'get-reactions') {
       const { announcement_id, page = 1, limit = 50 } = body;
+      console.log('[Reactions API] Getting reactions for:', announcement_id);
 
       if (!announcement_id) {
         return NextResponse.json({ error: 'Announcement ID is required' }, { status: 400 });
@@ -279,7 +280,10 @@ export async function POST(request: NextRequest) {
         .order('created_at', { ascending: false })
         .range(offset, offset + limit - 1);
 
+      console.log('[Reactions API] Reactions result:', { reactions, error: reactionsError?.message, count });
+
       if (reactionsError) {
+        console.error('[Reactions API] Error fetching reactions:', reactionsError);
         return NextResponse.json({ error: reactionsError.message }, { status: 500 });
       }
 
