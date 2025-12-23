@@ -270,23 +270,33 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Announcement ID is required' }, { status: 400 });
       }
 
-      // Get reactions with user profiles
+      // Get reactions
       const offset = (page - 1) * limit;
       const { data: reactions, error: reactionsError, count } = await supabase
         .from('announcement_reactions')
-        .select(`
-          id,
-          reaction,
-          created_at,
-          user_id,
-          profiles(id, email, name)
-        `, { count: 'exact' })
+        .select('id, reaction, created_at, user_id', { count: 'exact' })
         .eq('announcement_id', announcement_id)
         .order('created_at', { ascending: false })
         .range(offset, offset + limit - 1);
 
       if (reactionsError) {
         return NextResponse.json({ error: reactionsError.message }, { status: 500 });
+      }
+
+      // Get user profiles for reactions
+      const userIds = [...new Set((reactions || []).map(r => r.user_id))];
+      let profilesMap: Record<string, { email: string; name: string | null }> = {};
+
+      if (userIds.length > 0) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, email, name')
+          .in('id', userIds);
+
+        profilesMap = (profiles || []).reduce((acc, p) => {
+          acc[p.id] = { email: p.email, name: p.name };
+          return acc;
+        }, {} as Record<string, { email: string; name: string | null }>);
       }
 
       // Calculate aggregated stats
@@ -306,15 +316,14 @@ export async function POST(request: NextRequest) {
       });
 
       // Format reactions with user info
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const formattedReactions = (reactions || []).map((r: any) => ({
+      const formattedReactions = (reactions || []).map((r) => ({
         id: r.id,
         reaction: r.reaction,
         created_at: r.created_at,
         user: {
-          id: r.profiles?.id || r.user_id,
-          email: r.profiles?.email || 'Unknown',
-          name: r.profiles?.name || null,
+          id: r.user_id,
+          email: profilesMap[r.user_id]?.email || 'Unknown',
+          name: profilesMap[r.user_id]?.name || null,
         },
       }));
 
