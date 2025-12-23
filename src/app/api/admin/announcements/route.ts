@@ -279,7 +279,7 @@ export async function POST(request: NextRequest) {
           reaction,
           created_at,
           user_id,
-          profiles!inner(id, email, name)
+          profiles(id, email, name)
         `, { count: 'exact' })
         .eq('announcement_id', announcement_id)
         .order('created_at', { ascending: false })
