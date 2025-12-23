@@ -6,7 +6,8 @@ import AdminNav from '@/components/AdminNav';
 import {
   Mail, BarChart3, Users, Clock, Send, Eye, MousePointer,
   MessageSquare, ChevronDown, ChevronUp, ExternalLink, AlertCircle,
-  CheckCircle2, XCircle, RefreshCw
+  CheckCircle2, XCircle, RefreshCw, Calendar, Bot, UserCheck,
+  TrendingDown, ArrowRight, Lightbulb
 } from 'lucide-react';
 
 const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
@@ -139,6 +140,8 @@ interface Campaign {
     email: string;
     timestamp: string;
   }>;
+  clickBreakdown?: ClickBreakdown;
+  calendlyBreakdown?: CalendlyBreakdown;
 }
 
 interface Summary {
@@ -159,10 +162,36 @@ interface UpcomingSend {
   next_send_at: string;
 }
 
+interface ConversionFunnel {
+  contactsInApp: number;
+  usersFromDomains: number;
+  totalTrackedClicks: number;
+  humanClicks: number;
+  botClicks: number;
+  calendlyBookings: number;
+}
+
+interface ClickBreakdown {
+  cta_calendly: number;
+  logo: number;
+  unsubscribe: number;
+  other: number;
+  bot_clicks: number;
+  human_clicks: number;
+}
+
+interface CalendlyBreakdown {
+  total: number;
+  scheduled: number;
+  completed: number;
+  canceled: number;
+}
+
 export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [upcomingSends, setUpcomingSends] = useState<UpcomingSend[]>([]);
+  const [conversionFunnel, setConversionFunnel] = useState<ConversionFunnel | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedCampaign, setExpandedCampaign] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -184,6 +213,7 @@ export default function CampaignsPage() {
         setCampaigns(data.campaigns || []);
         setSummary(data.summary || null);
         setUpcomingSends(data.upcomingSends || []);
+        setConversionFunnel(data.conversionFunnel || null);
       } else {
         setError(data.message || 'Failed to fetch campaigns');
       }
@@ -285,6 +315,183 @@ export default function CampaignsPage() {
                   color="orange"
                 />
               </div>
+            )}
+
+            {/* Conversion Funnel */}
+            {conversionFunnel && (
+              <Card variant="elevated" className="mb-8 overflow-hidden" glow>
+                <div className="p-4 border-b border-white/10">
+                  <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <TrendingDown className="w-5 h-5 text-orange-400" />
+                    Conversion Funnel
+                  </h2>
+                  <p className="text-white/50 text-sm mt-1">Track clicks through to app signups</p>
+                </div>
+
+                <div className="p-6">
+                  {/* Funnel Visualization */}
+                  <div className="flex items-center justify-center gap-2 mb-8 flex-wrap">
+                    <div className="text-center px-4 py-3 bg-white/5 rounded-xl border border-white/10">
+                      <p className="text-2xl font-bold text-white">{summary?.totalSent || 0}</p>
+                      <p className="text-xs text-white/50 mt-1">Sent</p>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-white/30 flex-shrink-0" />
+                    <div className="text-center px-4 py-3 bg-white/5 rounded-xl border border-white/10">
+                      <p className="text-2xl font-bold text-emerald-400">
+                        {conversionFunnel.humanClicks}
+                        {conversionFunnel.botClicks > 0 && (
+                          <span className="text-xs text-red-400 ml-1">
+                            (+{conversionFunnel.botClicks} bot)
+                          </span>
+                        )}
+                      </p>
+                      <p className="text-xs text-white/50 mt-1">Real Clicks</p>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-white/30 flex-shrink-0" />
+                    <div className="text-center px-4 py-3 bg-white/5 rounded-xl border border-white/10">
+                      <p className="text-2xl font-bold text-blue-400">{conversionFunnel.calendlyBookings}</p>
+                      <p className="text-xs text-white/50 mt-1">Calendly Bookings</p>
+                    </div>
+                    <ArrowRight className="w-5 h-5 text-white/30 flex-shrink-0" />
+                    <div className="text-center px-4 py-3 bg-white/5 rounded-xl border border-white/10">
+                      <p className="text-2xl font-bold text-purple-400">{conversionFunnel.contactsInApp}</p>
+                      <p className="text-xs text-white/50 mt-1">Became Users</p>
+                    </div>
+                  </div>
+
+                  {/* Detail Cards */}
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {/* Bot Detection */}
+                    <div className="p-4 bg-white/[0.03] rounded-xl border border-white/5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Bot className="w-4 h-4 text-red-400" />
+                        <h4 className="text-sm font-medium text-white">Bot Detection</h4>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-white/60">Total Tracked Clicks</span>
+                          <span className="text-white">{conversionFunnel.totalTrackedClicks}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-white/60">Human Clicks</span>
+                          <span className="text-emerald-400">{conversionFunnel.humanClicks}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-white/60">Bot/Scanner Clicks</span>
+                          <span className="text-red-400">{conversionFunnel.botClicks}</span>
+                        </div>
+                        {conversionFunnel.totalTrackedClicks > 0 && (
+                          <div className="pt-2 border-t border-white/5">
+                            <div className="text-xs text-white/40">
+                              {Math.round((conversionFunnel.botClicks / conversionFunnel.totalTrackedClicks) * 100)}% filtered as bots
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Calendly Bookings */}
+                    <div className="p-4 bg-white/[0.03] rounded-xl border border-white/5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Calendar className="w-4 h-4 text-blue-400" />
+                        <h4 className="text-sm font-medium text-white">Calendly Bookings</h4>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-white/60">Total Booked</span>
+                          <span className="text-white">{conversionFunnel.calendlyBookings}</span>
+                        </div>
+                        {conversionFunnel.humanClicks > 0 && conversionFunnel.calendlyBookings > 0 && (
+                          <div className="pt-2 border-t border-white/5">
+                            <div className="text-xs text-white/40">
+                              {Math.round((conversionFunnel.calendlyBookings / conversionFunnel.humanClicks) * 100)}% click-to-booking rate
+                            </div>
+                          </div>
+                        )}
+                        {conversionFunnel.calendlyBookings === 0 && conversionFunnel.humanClicks > 0 && (
+                          <div className="pt-2 border-t border-white/5">
+                            <p className="text-xs text-orange-400 flex items-center gap-1">
+                              <AlertCircle className="w-3 h-3" />
+                              No bookings yet from clicks
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Email → User Match */}
+                    <div className="p-4 bg-white/[0.03] rounded-xl border border-white/5">
+                      <div className="flex items-center gap-2 mb-3">
+                        <UserCheck className="w-4 h-4 text-purple-400" />
+                        <h4 className="text-sm font-medium text-white">Email → User Match</h4>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-white/60">Direct Email Matches</span>
+                          <span className="text-purple-400">{conversionFunnel.contactsInApp}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span className="text-white/60">Domain Matches</span>
+                          <span className="text-cyan-400">{conversionFunnel.usersFromDomains}</span>
+                        </div>
+                        <div className="pt-2 border-t border-white/5">
+                          <p className="text-xs text-white/40">
+                            Cross-references campaign emails with registered users
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Insight / Recommendation */}
+                  {conversionFunnel.totalTrackedClicks === 0 && (
+                    <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
+                      <div className="flex items-start gap-3">
+                        <Lightbulb className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-blue-400 font-medium text-sm">Tracking Not Yet Active</p>
+                          <p className="text-white/60 text-sm mt-1">
+                            Click tracking will begin with the next emails sent. Existing click data from Resend
+                            doesn't include URL-level tracking. The new system tracks which specific link was clicked
+                            (CTA, logo, or unsubscribe) and detects bots.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {conversionFunnel.humanClicks > 0 && conversionFunnel.calendlyBookings === 0 && (
+                    <div className="mt-6 p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl">
+                      <div className="flex items-start gap-3">
+                        <Lightbulb className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-orange-400 font-medium text-sm">Funnel Drop-off Detected</p>
+                          <p className="text-white/60 text-sm mt-1">
+                            You have {conversionFunnel.humanClicks} real clicks but no Calendly bookings.
+                            Consider: (1) A/B test CTA copy, (2) Add a free trial or PDF guide as immediate value,
+                            (3) Shorten the Calendly booking flow, or (4) Add testimonials near the CTA.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {conversionFunnel.contactsInApp > 0 && (
+                    <div className="mt-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
+                      <div className="flex items-start gap-3">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-emerald-400 font-medium text-sm">Conversions Detected!</p>
+                          <p className="text-white/60 text-sm mt-1">
+                            {conversionFunnel.contactsInApp} campaign contacts have signed up for the app.
+                            {conversionFunnel.usersFromDomains > 0 && ` Plus ${conversionFunnel.usersFromDomains} additional users from their organizations.`}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </Card>
             )}
 
             {/* Campaigns Table */}
@@ -480,6 +687,75 @@ export default function CampaignsPage() {
                                     )}
                                   </div>
                                 </div>
+
+                                {/* Click & Calendly Breakdown Row */}
+                                {(campaign.clickBreakdown || campaign.calendlyBreakdown) && (
+                                  <div className="p-4 border-t border-white/5 grid md:grid-cols-2 gap-4">
+                                    {/* Click Breakdown */}
+                                    {campaign.clickBreakdown && campaign.clickBreakdown.human_clicks > 0 && (
+                                      <div>
+                                        <h4 className="text-xs font-medium text-white/40 mb-3 uppercase tracking-wide flex items-center gap-2">
+                                          <MousePointer className="w-3 h-3" />
+                                          Link Click Breakdown
+                                        </h4>
+                                        <div className="space-y-2">
+                                          <div className="flex justify-between text-sm">
+                                            <span className="text-white/60">CTA (Book a Call)</span>
+                                            <span className="text-blue-400">{campaign.clickBreakdown.cta_calendly}</span>
+                                          </div>
+                                          <div className="flex justify-between text-sm">
+                                            <span className="text-white/60">Logo Click</span>
+                                            <span className="text-white/70">{campaign.clickBreakdown.logo}</span>
+                                          </div>
+                                          <div className="flex justify-between text-sm">
+                                            <span className="text-white/60">Unsubscribe</span>
+                                            <span className="text-orange-400">{campaign.clickBreakdown.unsubscribe}</span>
+                                          </div>
+                                          <div className="flex justify-between text-sm">
+                                            <span className="text-white/60">Other</span>
+                                            <span className="text-white/50">{campaign.clickBreakdown.other}</span>
+                                          </div>
+                                          {campaign.clickBreakdown.bot_clicks > 0 && (
+                                            <div className="flex justify-between text-sm pt-2 border-t border-white/5">
+                                              <span className="text-red-400/60 flex items-center gap-1">
+                                                <Bot className="w-3 h-3" /> Bot Clicks (filtered)
+                                              </span>
+                                              <span className="text-red-400">{campaign.clickBreakdown.bot_clicks}</span>
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    )}
+
+                                    {/* Calendly Breakdown */}
+                                    {campaign.calendlyBreakdown && campaign.calendlyBreakdown.total > 0 && (
+                                      <div>
+                                        <h4 className="text-xs font-medium text-white/40 mb-3 uppercase tracking-wide flex items-center gap-2">
+                                          <Calendar className="w-3 h-3" />
+                                          Calendly Bookings
+                                        </h4>
+                                        <div className="space-y-2">
+                                          <div className="flex justify-between text-sm">
+                                            <span className="text-white/60">Total Booked</span>
+                                            <span className="text-white">{campaign.calendlyBreakdown.total}</span>
+                                          </div>
+                                          <div className="flex justify-between text-sm">
+                                            <span className="text-white/60">Scheduled</span>
+                                            <span className="text-blue-400">{campaign.calendlyBreakdown.scheduled}</span>
+                                          </div>
+                                          <div className="flex justify-between text-sm">
+                                            <span className="text-white/60">Completed</span>
+                                            <span className="text-emerald-400">{campaign.calendlyBreakdown.completed}</span>
+                                          </div>
+                                          <div className="flex justify-between text-sm">
+                                            <span className="text-white/60">Canceled</span>
+                                            <span className="text-red-400">{campaign.calendlyBreakdown.canceled}</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
                               </td>
                             </tr>
                           )}
@@ -535,7 +811,7 @@ export default function CampaignsPage() {
                 <ExternalLink className="w-5 h-5 text-white/40" />
                 Quick Links
               </h3>
-              <div className="grid md:grid-cols-3 gap-3">
+              <div className="grid md:grid-cols-4 gap-3">
                 <a
                   href="https://app.resend.com"
                   target="_blank"
@@ -549,12 +825,24 @@ export default function CampaignsPage() {
                   </div>
                 </a>
                 <a
+                  href="https://calendly.com/event_types/user/me"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] transition-colors border border-white/[0.05] hover:border-white/10"
+                >
+                  <Calendar className="w-4 h-4 text-blue-400" />
+                  <div>
+                    <p className="text-white font-medium text-sm">Calendly</p>
+                    <p className="text-xs text-white/30">View bookings & webhook</p>
+                  </div>
+                </a>
+                <a
                   href="https://us2.make.com/organization/1299298/scenarios"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] transition-colors border border-white/[0.05] hover:border-white/10"
                 >
-                  <RefreshCw className="w-4 h-4 text-blue-400" />
+                  <RefreshCw className="w-4 h-4 text-orange-400" />
                   <div>
                     <p className="text-white font-medium text-sm">Make.com</p>
                     <p className="text-xs text-white/30">Automation workflows</p>

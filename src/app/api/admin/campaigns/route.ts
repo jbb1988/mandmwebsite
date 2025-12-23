@@ -98,6 +98,47 @@ export async function GET(request: NextRequest) {
           timestamp: row.replied_at || row.clicked_at || row.opened_at,
         }));
 
+        // Get link click breakdown (from our tracking)
+        const { data: linkClicks } = await supabase
+          .from('email_link_clicks')
+          .select('link_type, is_likely_bot')
+          .eq('campaign_id', campaign.id);
+
+        const clickBreakdown = {
+          cta_calendly: 0,
+          logo: 0,
+          unsubscribe: 0,
+          other: 0,
+          bot_clicks: 0,
+          human_clicks: 0,
+        };
+        linkClicks?.forEach((click: any) => {
+          if (click.is_likely_bot) {
+            clickBreakdown.bot_clicks++;
+          } else {
+            clickBreakdown.human_clicks++;
+            const linkType = click.link_type || 'other';
+            if (linkType in clickBreakdown) {
+              clickBreakdown[linkType as keyof typeof clickBreakdown]++;
+            } else {
+              clickBreakdown.other++;
+            }
+          }
+        });
+
+        // Get Calendly bookings for this campaign
+        const { data: calendlyBookings } = await supabase
+          .from('calendly_bookings')
+          .select('status')
+          .eq('campaign_id', campaign.id);
+
+        const calendlyBreakdown = {
+          total: calendlyBookings?.length || 0,
+          scheduled: calendlyBookings?.filter((b: any) => b.status === 'scheduled').length || 0,
+          completed: calendlyBookings?.filter((b: any) => b.status === 'completed').length || 0,
+          canceled: calendlyBookings?.filter((b: any) => b.status === 'canceled').length || 0,
+        };
+
         return {
           ...campaign,
           open_rate: openRate,
@@ -106,6 +147,8 @@ export async function GET(request: NextRequest) {
           statusBreakdown,
           sequenceBreakdown,
           recentActivity: formattedActivity,
+          clickBreakdown,
+          calendlyBreakdown,
         };
       })
     );
@@ -161,6 +204,23 @@ export async function GET(request: NextRequest) {
       next_send_at: row.next_send_at,
     }));
 
+    // Email-to-user cross-reference: check if any campaign contacts are app users
+    const { data: conversionData } = await supabase.rpc('get_campaign_user_conversions');
+
+    // Get total tracked clicks vs bot clicks
+    const { data: totalClickData } = await supabase
+      .from('email_link_clicks')
+      .select('is_likely_bot');
+
+    const totalTrackedClicks = totalClickData?.length || 0;
+    const totalBotClicks = totalClickData?.filter((c: any) => c.is_likely_bot).length || 0;
+    const totalHumanClicks = totalTrackedClicks - totalBotClicks;
+
+    // Get total Calendly bookings
+    const { count: totalCalendlyBookings } = await supabase
+      .from('calendly_bookings')
+      .select('*', { count: 'exact', head: true });
+
     return NextResponse.json({
       success: true,
       campaigns: campaignsWithDetails,
@@ -173,6 +233,14 @@ export async function GET(request: NextRequest) {
         overallClickRate,
         scheduledNext24h: scheduled24h || 0,
         scheduledNext7d: scheduled7d || 0,
+      },
+      conversionFunnel: {
+        contactsInApp: conversionData?.contacts_in_app || 0,
+        usersFromDomains: conversionData?.users_from_domains || 0,
+        totalTrackedClicks,
+        humanClicks: totalHumanClicks,
+        botClicks: totalBotClicks,
+        calendlyBookings: totalCalendlyBookings || 0,
       },
       upcomingSends: formattedUpcoming,
     });
