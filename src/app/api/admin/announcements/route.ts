@@ -306,14 +306,15 @@ export async function POST(request: NextRequest) {
       });
 
       // Format reactions with user info
-      const formattedReactions = (reactions || []).map((r: AnnouncementReaction & { profiles: { id: string; email: string; name: string } }) => ({
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const formattedReactions = (reactions || []).map((r: any) => ({
         id: r.id,
         reaction: r.reaction,
         created_at: r.created_at,
         user: {
-          id: r.profiles.id,
-          email: r.profiles.email,
-          name: r.profiles.name,
+          id: r.profiles?.id || r.user_id,
+          email: r.profiles?.email || 'Unknown',
+          name: r.profiles?.name || null,
         },
       }));
 
