@@ -11,64 +11,60 @@ import '../styles/lightbox-custom.css';
 
 const screenshots = [
   {
-    src: '/assets/screenshots/2.png',
-    alt: 'Mind & Muscle App Screenshot 2',
+    src: '/assets/screenshots/1-portraitANDROID.png',
+    alt: 'Mind & Muscle App - Dashboard',
   },
   {
-    src: '/assets/screenshots/3a.png',
-    alt: 'Mind & Muscle App Screenshot 3',
+    src: '/assets/screenshots/2-portraitAPPLE.png',
+    alt: 'Mind & Muscle App - Training',
   },
   {
-    src: '/assets/screenshots/4.png',
-    alt: 'Mind & Muscle App Screenshot 4',
+    src: '/assets/screenshots/3-portraitANDROID.png',
+    alt: 'Mind & Muscle App - Mind Training',
   },
   {
-    src: '/assets/screenshots/5a.png',
-    alt: 'Mind & Muscle App Screenshot 5',
+    src: '/assets/screenshots/4-portraitAPPLE.png',
+    alt: 'Mind & Muscle App - Muscle Training',
   },
   {
-    src: '/assets/screenshots/6.png',
-    alt: 'Mind & Muscle App Screenshot 6',
+    src: '/assets/screenshots/5-portraitANDROID.png',
+    alt: 'Mind & Muscle App - Progress',
   },
   {
-    src: '/assets/screenshots/7a.png',
-    alt: 'Mind & Muscle App Screenshot 7',
+    src: '/assets/screenshots/6-portraitANDROID.png',
+    alt: 'Mind & Muscle App - Stats',
   },
   {
     src: '/assets/screenshots/8.png',
-    alt: 'Mind & Muscle App Screenshot 8',
+    alt: 'Mind & Muscle App - Features',
   },
   {
-    src: '/assets/screenshots/9a.png',
-    alt: 'Mind & Muscle App Screenshot 9',
+    src: '/assets/screenshots/9.png',
+    alt: 'Mind & Muscle App - Analysis',
   },
   {
-    src: '/assets/screenshots/10.png',
-    alt: 'Mind & Muscle App Screenshot 10',
+    src: '/assets/screenshots/11-portraitANDROID.png',
+    alt: 'Mind & Muscle App - Coaching',
   },
   {
-    src: '/assets/screenshots/11a.png',
-    alt: 'Mind & Muscle App Screenshot 11',
+    src: '/assets/screenshots/12-portraitAPPLE.png',
+    alt: 'Mind & Muscle App - Team View',
   },
   {
-    src: '/assets/screenshots/12.png',
-    alt: 'Mind & Muscle App Screenshot 12',
+    src: '/assets/screenshots/13-portraitANDROID.png',
+    alt: 'Mind & Muscle App - Goals',
   },
   {
-    src: '/assets/screenshots/14a.png',
-    alt: 'Mind & Muscle App Screenshot 13',
+    src: '/assets/screenshots/14-portraitAPPLE.png',
+    alt: 'Mind & Muscle App - Achievements',
   },
   {
-    src: '/assets/screenshots/15.png',
-    alt: 'Mind & Muscle App Screenshot 14',
+    src: '/assets/screenshots/15-portraitANDROID.png',
+    alt: 'Mind & Muscle App - Reports',
   },
   {
-    src: '/assets/screenshots/16.png',
-    alt: 'Mind & Muscle App Screenshot 15',
-  },
-  {
-    src: '/assets/screenshots/17.png',
-    alt: 'Performance Lab - Tools to elevate your game',
+    src: '/assets/screenshots/16-portraitAPPLE.png',
+    alt: 'Mind & Muscle App - Performance Lab',
   },
 ];
 
