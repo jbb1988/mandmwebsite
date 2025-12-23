@@ -6,7 +6,7 @@ import AdminNav from '@/components/AdminNav';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import {
   Users, RefreshCw, Trash2, Search, ExternalLink, CheckCircle, XCircle,
-  AlertTriangle, Mail, Calendar, Link2, Image, ChevronDown, ChevronUp
+  AlertTriangle, Mail, Calendar, Link2, Image, ChevronDown, ChevronUp, Megaphone, BarChart3
 } from 'lucide-react';
 
 // Card component matching admin styling
@@ -44,7 +44,29 @@ interface Partner {
   toltStatus?: string;
   toltEmail?: string;
   toltError?: string;
+  referral_source: string | null;
 }
+
+// Human-readable referral source labels
+const REFERRAL_SOURCE_LABELS: Record<string, string> = {
+  'google_search': 'Google Search',
+  'social_media_organic': 'Social Media (Organic)',
+  'social_media_ad': 'Social Media (Ad)',
+  'facebook': 'Facebook',
+  'instagram': 'Instagram',
+  'tiktok': 'TikTok',
+  'twitter_x': 'Twitter/X',
+  'youtube': 'YouTube',
+  'podcast': 'Podcast',
+  'referral_friend': 'Friend/Colleague',
+  'referral_coach': 'Coach Referral',
+  'referral_facility': 'Training Facility',
+  'email_outreach': 'Email Outreach',
+  'conference_event': 'Conference/Event',
+  'app_store': 'App Store',
+  'blog_article': 'Blog/Article',
+  'other': 'Other',
+};
 
 interface ToltOnlyPartner {
   id: string;
@@ -81,6 +103,8 @@ export default function AdminPartnersPage() {
   const [expandedPartner, setExpandedPartner] = useState<string | null>(null);
   const [syncDetails, setSyncDetails] = useState<SyncDetails | null>(null);
   const [showSyncModal, setShowSyncModal] = useState(false);
+  const [referralSourceFilter, setReferralSourceFilter] = useState<string>('all');
+  const [showReferralStats, setShowReferralStats] = useState(false);
 
   const { getPassword } = useAdminAuth();
   const adminPassword = getPassword();
@@ -188,10 +212,24 @@ export default function AdminPartnersPage() {
     }
   };
 
-  const filteredPartners = partners.filter(p =>
-    p.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    p.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredPartners = partners.filter(p => {
+    const matchesSearch = p.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      p.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesReferralSource = referralSourceFilter === 'all' ||
+      (referralSourceFilter === 'unknown' ? !p.referral_source : p.referral_source === referralSourceFilter);
+    return matchesSearch && matchesReferralSource;
+  });
+
+  // Calculate referral source statistics
+  const referralSourceStats = partners.reduce((acc, p) => {
+    const source = p.referral_source || 'unknown';
+    acc[source] = (acc[source] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  // Sort stats by count descending
+  const sortedReferralStats = Object.entries(referralSourceStats)
+    .sort(([, a], [, b]) => b - a);
 
   const getToltStatusBadge = (partner: Partner) => {
     if (!partner.tolt_partner_id) {
@@ -312,6 +350,60 @@ export default function AdminPartnersPage() {
               <div className="text-sm text-white/60">Not in Tolt</div>
             </Card>
           </div>
+
+          {/* Referral Source Analytics */}
+          <Card variant="elevated" className="mb-8">
+            <button
+              onClick={() => setShowReferralStats(!showReferralStats)}
+              className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors rounded-t-2xl"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-purple-500/20 rounded-lg">
+                  <BarChart3 className="w-5 h-5 text-purple-400" />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-semibold text-white">How Partners Found Us</h3>
+                  <p className="text-sm text-white/50">Marketing channel attribution</p>
+                </div>
+              </div>
+              {showReferralStats ? (
+                <ChevronUp className="w-5 h-5 text-white/60" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-white/60" />
+              )}
+            </button>
+
+            {showReferralStats && (
+              <div className="p-4 pt-0 border-t border-white/5">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 mt-4">
+                  {sortedReferralStats.map(([source, count]) => (
+                    <button
+                      key={source}
+                      onClick={() => setReferralSourceFilter(source === referralSourceFilter ? 'all' : source)}
+                      className={`p-3 rounded-lg text-left transition-all ${
+                        referralSourceFilter === source
+                          ? 'bg-purple-500/30 border-2 border-purple-500'
+                          : 'bg-white/5 border border-white/10 hover:bg-white/10'
+                      }`}
+                    >
+                      <div className="text-xl font-bold text-white">{count}</div>
+                      <div className="text-xs text-white/60 truncate">
+                        {source === 'unknown' ? 'Unknown' : (REFERRAL_SOURCE_LABELS[source] || source)}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+                {referralSourceFilter !== 'all' && (
+                  <button
+                    onClick={() => setReferralSourceFilter('all')}
+                    className="mt-3 text-sm text-purple-400 hover:text-purple-300"
+                  >
+                    Clear filter
+                  </button>
+                )}
+              </div>
+            )}
+          </Card>
 
           {/* Search */}
           <Card className="p-4 mb-6">
@@ -458,6 +550,17 @@ export default function AdminPartnersPage() {
                             <div className="text-white flex items-center gap-1">
                               <Image className="w-3 h-3" />
                               {partner.logo_url ? 'Yes' : 'No'}
+                            </div>
+                          </div>
+                          <div className="sm:col-span-2">
+                            <div className="text-white/40 mb-1">How They Found Us</div>
+                            <div className="text-white flex items-center gap-1">
+                              <Megaphone className="w-3 h-3 text-purple-400" />
+                              <span className={partner.referral_source ? 'text-purple-300' : 'text-white/40'}>
+                                {partner.referral_source
+                                  ? (REFERRAL_SOURCE_LABELS[partner.referral_source] || partner.referral_source)
+                                  : 'Not specified'}
+                              </span>
                             </div>
                           </div>
                           {partner.referral_url && (

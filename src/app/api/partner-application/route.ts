@@ -95,6 +95,7 @@ export async function POST(request: NextRequest) {
     let networkSize: string | undefined;
     let promotionChannel: string | undefined;
     let whyExcited: string | undefined;
+    let referralSource: string | undefined;
     let turnstileToken: string;
     let logoFile: File | null = null;
     let source: string | undefined;
@@ -111,6 +112,7 @@ export async function POST(request: NextRequest) {
       networkSize = formData.get('networkSize') as string || undefined;
       promotionChannel = formData.get('promotionChannel') as string || undefined;
       whyExcited = formData.get('whyExcited') as string || undefined;
+      referralSource = formData.get('referralSource') as string || undefined;
       turnstileToken = formData.get('turnstileToken') as string || '';
       logoFile = formData.get('logo') as File | null;
       source = formData.get('source') as string || undefined;
@@ -124,6 +126,7 @@ export async function POST(request: NextRequest) {
       networkSize = body.networkSize;
       promotionChannel = body.promotionChannel;
       whyExcited = body.whyExcited;
+      referralSource = body.referralSource;
       turnstileToken = body.turnstileToken || '';
       source = body.source;
     }
@@ -155,6 +158,29 @@ export async function POST(request: NextRequest) {
     const safePromotionChannel = promotionChannel ? escapeHtml(promotionChannel) : 'Not provided';
     const safeWhyExcited = whyExcited ? escapeHtml(whyExcited) : 'Not provided';
     const safeAudience = audience ? escapeHtml(audience) : 'Not provided';
+    const safeReferralSource = referralSource ? escapeHtml(referralSource) : 'Not provided';
+
+    // Human-readable referral source labels
+    const referralSourceLabels: Record<string, string> = {
+      'google_search': 'Google Search',
+      'social_media_organic': 'Social Media (Organic Post)',
+      'social_media_ad': 'Social Media (Ad)',
+      'facebook': 'Facebook',
+      'instagram': 'Instagram',
+      'tiktok': 'TikTok',
+      'twitter_x': 'Twitter/X',
+      'youtube': 'YouTube',
+      'podcast': 'Podcast',
+      'referral_friend': 'Friend or Colleague Referral',
+      'referral_coach': 'Coach Recommendation',
+      'referral_facility': 'Training Facility',
+      'email_outreach': 'Email Outreach from M&M',
+      'conference_event': 'Conference or Event',
+      'app_store': 'App Store',
+      'blog_article': 'Blog or Article',
+      'other': 'Other',
+    };
+    const referralSourceLabel = referralSource ? (referralSourceLabels[referralSource] || referralSource) : 'Not provided';
 
     // Split name into first and last for Tolt API
     const nameParts = name.trim().split(' ');
@@ -350,6 +376,7 @@ export async function POST(request: NextRequest) {
           referral_url: referralUrl,
           tolt_partner_id: toltPartnerId,
           source: source || null,
+          referral_source: referralSource || null,
         }, {
           onConflict: 'email',
         });
@@ -429,6 +456,7 @@ export async function POST(request: NextRequest) {
         <p><strong>Organization:</strong> ${safeOrganization}</p>
         <p><strong>Network Size:</strong> ${safeNetworkSize}</p>
         <p><strong>Promotion Channel:</strong> ${safePromotionChannel}</p>
+        <p><strong>How They Heard About Us:</strong> ${referralSourceLabel}</p>
 
         <h3>Why They're Excited:</h3>
         <p>${safeWhyExcited}</p>

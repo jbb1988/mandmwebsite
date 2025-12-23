@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
     // Fetch all partners from Supabase
     const { data: partners, error } = await supabase
       .from('partners')
-      .select('id, email, name, first_name, tolt_partner_id, referral_url, referral_slug, created_at, logo_url')
+      .select('id, email, name, first_name, tolt_partner_id, referral_url, referral_slug, created_at, logo_url, referral_source')
       .order('created_at', { ascending: false });
 
     if (error) {

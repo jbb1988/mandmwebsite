@@ -45,6 +45,7 @@ export default function PartnerProgramPage() {
     networkSize: '',
     promotionChannel: '',
     whyExcited: '',
+    referralSource: '',
   });
 
   const [captchaToken, setCaptchaToken] = useState<string>('');
@@ -113,6 +114,7 @@ export default function PartnerProgramPage() {
       submitData.append('networkSize', formData.networkSize);
       submitData.append('promotionChannel', formData.promotionChannel);
       submitData.append('whyExcited', formData.whyExcited);
+      submitData.append('referralSource', formData.referralSource);
       submitData.append('turnstileToken', captchaToken);
       if (source) {
         submitData.append('source', source);
@@ -129,7 +131,7 @@ export default function PartnerProgramPage() {
 
       if (response.ok) {
         setShowSuccessModal(true);
-        setFormData({ name: '', email: '', organization: '', audience: '', networkSize: '', promotionChannel: '', whyExcited: '' });
+        setFormData({ name: '', email: '', organization: '', audience: '', networkSize: '', promotionChannel: '', whyExcited: '', referralSource: '' });
         setCaptchaToken('');
         removeLogo();
       } else {
@@ -971,6 +973,38 @@ export default function PartnerProgramPage() {
                 <option value="coach">Private Coach / Instructor</option>
                 <option value="team">Team Coach / Organization</option>
                 <option value="influencer">Content Creator / Influencer</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="referralSource" className="block text-sm font-semibold mb-2">
+                How did you hear about us? *
+              </label>
+              <select
+                id="referralSource"
+                required
+                value={formData.referralSource}
+                onChange={(e) => setFormData({ ...formData, referralSource: e.target.value })}
+                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg focus:border-neon-cortex-blue focus:outline-none transition-colors backdrop-blur-md"
+              >
+                <option value="">Select how you found us...</option>
+                <option value="google_search">Google Search</option>
+                <option value="social_media_organic">Social Media (Organic Post)</option>
+                <option value="social_media_ad">Social Media (Ad)</option>
+                <option value="facebook">Facebook</option>
+                <option value="instagram">Instagram</option>
+                <option value="tiktok">TikTok</option>
+                <option value="twitter_x">Twitter/X</option>
+                <option value="youtube">YouTube</option>
+                <option value="podcast">Podcast</option>
+                <option value="referral_friend">Friend or Colleague Referral</option>
+                <option value="referral_coach">Coach Recommendation</option>
+                <option value="referral_facility">Training Facility</option>
+                <option value="email_outreach">Email Outreach from M&M</option>
+                <option value="conference_event">Conference or Event</option>
+                <option value="app_store">App Store</option>
+                <option value="blog_article">Blog or Article</option>
                 <option value="other">Other</option>
               </select>
             </div>
