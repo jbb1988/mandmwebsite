@@ -12,59 +12,71 @@ import '../styles/lightbox-custom.css';
 const screenshots = [
   {
     src: '/assets/screenshots/1-portraitANDROID.png',
-    alt: 'Mind & Muscle App - Dashboard',
+    alt: 'Mind & Muscle App Screenshot 1',
   },
   {
     src: '/assets/screenshots/2-portraitAPPLE.png',
-    alt: 'Mind & Muscle App - Training',
+    alt: 'Mind & Muscle App Screenshot 2',
   },
   {
     src: '/assets/screenshots/3-portraitANDROID.png',
-    alt: 'Mind & Muscle App - Mind Training',
+    alt: 'Mind & Muscle App Screenshot 3',
   },
   {
     src: '/assets/screenshots/4-portraitAPPLE.png',
-    alt: 'Mind & Muscle App - Muscle Training',
+    alt: 'Mind & Muscle App Screenshot 4',
   },
   {
     src: '/assets/screenshots/5-portraitANDROID.png',
-    alt: 'Mind & Muscle App - Progress',
+    alt: 'Mind & Muscle App Screenshot 5',
+  },
+  {
+    src: '/assets/screenshots/5a.png',
+    alt: 'Mind & Muscle App Screenshot 6',
   },
   {
     src: '/assets/screenshots/6-portraitANDROID.png',
-    alt: 'Mind & Muscle App - Stats',
+    alt: 'Mind & Muscle App Screenshot 7',
+  },
+  {
+    src: '/assets/screenshots/7a.png',
+    alt: 'Mind & Muscle App Screenshot 8',
   },
   {
     src: '/assets/screenshots/8.png',
-    alt: 'Mind & Muscle App - Features',
+    alt: 'Mind & Muscle App Screenshot 9',
   },
   {
     src: '/assets/screenshots/9.png',
-    alt: 'Mind & Muscle App - Analysis',
+    alt: 'Mind & Muscle App Screenshot 10',
   },
   {
     src: '/assets/screenshots/11-portraitANDROID.png',
-    alt: 'Mind & Muscle App - Coaching',
+    alt: 'Mind & Muscle App Screenshot 11',
   },
   {
     src: '/assets/screenshots/12-portraitAPPLE.png',
-    alt: 'Mind & Muscle App - Team View',
+    alt: 'Mind & Muscle App Screenshot 12',
   },
   {
     src: '/assets/screenshots/13-portraitANDROID.png',
-    alt: 'Mind & Muscle App - Goals',
+    alt: 'Mind & Muscle App Screenshot 13',
   },
   {
     src: '/assets/screenshots/14-portraitAPPLE.png',
-    alt: 'Mind & Muscle App - Achievements',
+    alt: 'Mind & Muscle App Screenshot 14',
   },
   {
     src: '/assets/screenshots/15-portraitANDROID.png',
-    alt: 'Mind & Muscle App - Reports',
+    alt: 'Mind & Muscle App Screenshot 15',
   },
   {
     src: '/assets/screenshots/16-portraitAPPLE.png',
-    alt: 'Mind & Muscle App - Performance Lab',
+    alt: 'Mind & Muscle App Screenshot 16',
+  },
+  {
+    src: '/assets/screenshots/Screenshot 2025-12-23 at 12.09.49 PM-portrait.png',
+    alt: 'Mind & Muscle App Screenshot 17',
   },
 ];
 
