@@ -7,7 +7,7 @@ import { useAdminAuth } from '@/context/AdminAuthContext';
 import {
   Megaphone, Plus, Trash2, Power, PowerOff, Edit2, X,
   Loader2, Search, Info, AlertTriangle, CheckCircle, Sparkles,
-  Users, Clock, Calendar
+  Users, Clock, Calendar, MessageCircle, ChevronDown, ChevronUp
 } from 'lucide-react';
 
 function Card({ children, className = '', variant = 'default' }: {
@@ -41,6 +41,23 @@ interface SystemAnnouncement {
   expires_at: string | null;
   starts_at: string | null;
   created_by: string | null;
+  reaction_type: 'none' | 'general' | 'usefulness' | 'bug_fix' | 'content';
+}
+
+interface ReactionStats {
+  total: number;
+  by_reaction: Record<string, number>;
+}
+
+interface ReactionResponse {
+  id: string;
+  reaction: string;
+  created_at: string;
+  user: {
+    id: string;
+    email: string;
+    name: string | null;
+  };
 }
 
 interface UserSearchResult {
@@ -75,6 +92,29 @@ const audienceLabels = {
   coach: 'Coaches',
 };
 
+const reactionTypeConfig = {
+  none: { label: 'No Reactions', description: 'Info-only announcement' },
+  general: { label: 'General Feedback', description: 'Yes / It\'s okay / Not really', options: [
+    { emoji: '\u{1F44D}', label: 'Yes', value: 'yes' },
+    { emoji: '\u{1F610}', label: "It's okay", value: 'okay' },
+    { emoji: '\u{1F44E}', label: 'Not really', value: 'no' },
+  ]},
+  usefulness: { label: 'Was This Useful?', description: 'Yes / Not sure / Not useful', options: [
+    { emoji: '\u{1F44D}', label: 'Yes', value: 'yes' },
+    { emoji: '\u{1F937}', label: 'Not sure', value: 'not_sure' },
+    { emoji: '\u{1F44E}', label: 'Not useful', value: 'not_useful' },
+  ]},
+  bug_fix: { label: 'Bug Fix Confirmation', description: 'Fixed / Still seeing it', options: [
+    { emoji: '\u{2705}', label: 'Fixed', value: 'fixed' },
+    { emoji: '\u{26A0}\u{FE0F}', label: 'Still seeing it', value: 'still_issue' },
+  ]},
+  content: { label: 'Content Interest', description: 'Yes please / Occasionally / Not my thing', options: [
+    { emoji: '\u{1F525}', label: 'Yes please', value: 'yes' },
+    { emoji: '\u{1F44C}', label: 'Occasionally', value: 'occasionally' },
+    { emoji: '\u{274C}', label: 'Not my thing', value: 'no' },
+  ]},
+};
+
 const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
 export default function AnnouncementsPage() {
@@ -98,6 +138,13 @@ export default function AnnouncementsPage() {
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [userSearchResults, setUserSearchResults] = useState<UserSearchResult[]>([]);
   const [searchingUsers, setSearchingUsers] = useState(false);
+  const [formReactionType, setFormReactionType] = useState<SystemAnnouncement['reaction_type']>('none');
+
+  // Reaction viewing state
+  const [expandedReactions, setExpandedReactions] = useState<string | null>(null);
+  const [reactionStats, setReactionStats] = useState<Record<string, ReactionStats>>({});
+  const [reactionResponses, setReactionResponses] = useState<Record<string, ReactionResponse[]>>({});
+  const [loadingReactions, setLoadingReactions] = useState<string | null>(null);
 
   const fetchAnnouncements = async () => {
     setLoading(true);
@@ -135,6 +182,7 @@ export default function AnnouncementsPage() {
     setUserSearchQuery('');
     setUserSearchResults([]);
     setEditingAnnouncement(null);
+    setFormReactionType('none');
   };
 
   const openCreateModal = () => {
@@ -151,6 +199,7 @@ export default function AnnouncementsPage() {
     setFormAudience(announcement.target_audience);
     setFormExpiresAt(announcement.expires_at ? announcement.expires_at.slice(0, 16) : '');
     setFormStartsAt(announcement.starts_at ? announcement.starts_at.slice(0, 16) : '');
+    setFormReactionType(announcement.reaction_type || 'none');
     // For target users, we would need to fetch user details - simplified for now
     setFormTargetUsers([]);
     setShowModal(true);
@@ -206,6 +255,7 @@ export default function AnnouncementsPage() {
         expires_at: formExpiresAt || null,
         starts_at: formStartsAt || null,
         created_by: 'Admin',
+        reaction_type: formReactionType,
       };
 
       if (editingAnnouncement) {
@@ -297,6 +347,48 @@ export default function AnnouncementsPage() {
       hour: 'numeric',
       minute: '2-digit',
     });
+  };
+
+  const fetchReactions = async (announcementId: string) => {
+    setLoadingReactions(announcementId);
+    try {
+      const res = await fetch('/api/admin/announcements', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': getPassword() || adminPassword,
+        },
+        body: JSON.stringify({ action: 'get-reactions', announcement_id: announcementId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setReactionStats(prev => ({ ...prev, [announcementId]: data.stats }));
+        setReactionResponses(prev => ({ ...prev, [announcementId]: data.reactions }));
+      }
+    } catch (error) {
+      console.error('Failed to fetch reactions:', error);
+    } finally {
+      setLoadingReactions(null);
+    }
+  };
+
+  const toggleReactions = async (announcementId: string) => {
+    if (expandedReactions === announcementId) {
+      setExpandedReactions(null);
+    } else {
+      setExpandedReactions(announcementId);
+      // Fetch reactions if not already loaded
+      if (!reactionStats[announcementId]) {
+        await fetchReactions(announcementId);
+      }
+    }
+  };
+
+  const getReactionLabel = (reactionType: string, value: string) => {
+    const config = reactionTypeConfig[reactionType as keyof typeof reactionTypeConfig];
+    if (!config || !('options' in config)) return value;
+    const option = config.options?.find(o => o.value === value);
+    return option ? `${option.emoji} ${option.label}` : value;
   };
 
   return (
@@ -404,6 +496,12 @@ export default function AnnouncementsPage() {
                                 Scheduled
                               </span>
                             )}
+                            {announcement.reaction_type && announcement.reaction_type !== 'none' && (
+                              <span className="px-2 py-0.5 rounded bg-pink-500/20 text-pink-400 text-xs font-medium flex items-center gap-1">
+                                <MessageCircle className="w-3 h-3" />
+                                {reactionTypeConfig[announcement.reaction_type]?.label || announcement.reaction_type}
+                              </span>
+                            )}
                           </div>
                           <p className="text-white/60 text-sm mb-2 line-clamp-2">{announcement.message}</p>
                           <div className="flex flex-wrap gap-3 text-xs text-white/40">
@@ -434,6 +532,30 @@ export default function AnnouncementsPage() {
 
                         {/* Actions */}
                         <div className="flex items-center gap-2">
+                          {announcement.reaction_type && announcement.reaction_type !== 'none' && (
+                            <button
+                              onClick={() => toggleReactions(announcement.id)}
+                              className={`p-2 rounded-lg transition-colors flex items-center gap-1 ${
+                                expandedReactions === announcement.id
+                                  ? 'bg-pink-500/20 text-pink-400'
+                                  : 'bg-white/5 text-white/60 hover:bg-white/10'
+                              }`}
+                              title="View Reactions"
+                            >
+                              {loadingReactions === announcement.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <>
+                                  <MessageCircle className="w-4 h-4" />
+                                  {expandedReactions === announcement.id ? (
+                                    <ChevronUp className="w-3 h-3" />
+                                  ) : (
+                                    <ChevronDown className="w-3 h-3" />
+                                  )}
+                                </>
+                              )}
+                            </button>
+                          )}
                           <button
                             onClick={() => handleToggle(announcement.id)}
                             disabled={actionLoading}
@@ -463,6 +585,75 @@ export default function AnnouncementsPage() {
                           </button>
                         </div>
                       </div>
+
+                      {/* Expanded Reactions Section */}
+                      {expandedReactions === announcement.id && (
+                        <div className="mt-4 pt-4 border-t border-white/10">
+                          {loadingReactions === announcement.id ? (
+                            <div className="flex items-center justify-center py-4">
+                              <Loader2 className="w-5 h-5 animate-spin text-pink-400" />
+                            </div>
+                          ) : reactionStats[announcement.id] ? (
+                            <div className="space-y-4">
+                              {/* Stats Summary */}
+                              <div className="flex flex-wrap gap-3">
+                                <div className="px-3 py-2 bg-white/5 rounded-lg">
+                                  <div className="text-lg font-bold text-pink-400">{reactionStats[announcement.id].total}</div>
+                                  <div className="text-xs text-white/50">Total Responses</div>
+                                </div>
+                                {Object.entries(reactionStats[announcement.id].by_reaction).map(([reaction, count]) => (
+                                  <div key={reaction} className="px-3 py-2 bg-white/5 rounded-lg">
+                                    <div className="text-lg font-bold text-white">{count}</div>
+                                    <div className="text-xs text-white/50">
+                                      {getReactionLabel(announcement.reaction_type, reaction)}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+
+                              {/* Individual Responses */}
+                              {reactionResponses[announcement.id]?.length > 0 && (
+                                <div>
+                                  <div className="text-sm font-medium text-white/70 mb-2">Individual Responses</div>
+                                  <div className="max-h-48 overflow-y-auto space-y-2">
+                                    {reactionResponses[announcement.id].map((response) => (
+                                      <div
+                                        key={response.id}
+                                        className="flex items-center justify-between px-3 py-2 bg-white/5 rounded-lg text-sm"
+                                      >
+                                        <div className="flex items-center gap-3">
+                                          <span className="text-white/90">{response.user.name || response.user.email}</span>
+                                          {response.user.name && (
+                                            <span className="text-white/40 text-xs">{response.user.email}</span>
+                                          )}
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <span className="px-2 py-1 bg-pink-500/20 text-pink-400 rounded text-xs">
+                                            {getReactionLabel(announcement.reaction_type, response.reaction)}
+                                          </span>
+                                          <span className="text-white/30 text-xs">
+                                            {formatDate(response.created_at)}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {reactionStats[announcement.id].total === 0 && (
+                                <div className="text-center py-4 text-white/40 text-sm">
+                                  No responses yet
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="text-center py-4 text-white/40 text-sm">
+                              Failed to load reactions
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -515,8 +706,8 @@ export default function AnnouncementsPage() {
                     />
                   </div>
 
-                  {/* Type and Priority Row */}
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* Type, Priority, and Reaction Type Row */}
+                  <div className="grid grid-cols-3 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-white/70 mb-2">Type</label>
                       <select
@@ -540,7 +731,22 @@ export default function AnnouncementsPage() {
                         max={100}
                         className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-purple-500 focus:outline-none"
                       />
-                      <p className="text-xs text-white/40 mt-1">Higher priority shows first</p>
+                      <p className="text-xs text-white/40 mt-1">Higher = first</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-white/70 mb-2">Reactions</label>
+                      <select
+                        value={formReactionType}
+                        onChange={(e) => setFormReactionType(e.target.value as SystemAnnouncement['reaction_type'])}
+                        className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-purple-500 focus:outline-none"
+                      >
+                        <option value="none">No Reactions</option>
+                        <option value="general">General Feedback</option>
+                        <option value="usefulness">Was This Useful?</option>
+                        <option value="bug_fix">Bug Fix Confirm</option>
+                        <option value="content">Content Interest</option>
+                      </select>
+                      <p className="text-xs text-white/40 mt-1">{reactionTypeConfig[formReactionType]?.description}</p>
                     </div>
                   </div>
 
@@ -736,13 +942,31 @@ export default function AnnouncementsPage() {
                                 {formMessage || 'Your announcement message will appear here...'}
                               </div>
 
-                              {/* Swipe hint */}
-                              <div className="flex items-center gap-1.5 text-white/35 text-[11px]">
-                                <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                                  <path d="M10.59 4.59A2 2 0 1 0 8.17 2.17 2 2 0 0 0 10.59 4.59zM8.5 8.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm8.5 2.5c.28 0 .5.22.5.5v4c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-4c0-.28.22-.5.5-.5zm-5-1c-.28 0-.5.22-.5.5v5c0 .28.22.5.5.5s.5-.22.5-.5v-5c0-.28-.22-.5-.5-.5zm-3 2c-.28 0-.5.22-.5.5v3c0 .28.22.5.5.5s.5-.22.5-.5v-3c0-.28-.22-.5-.5-.5z"/>
-                                </svg>
-                                Swipe to dismiss
-                              </div>
+                              {/* Reaction buttons or swipe hint */}
+                              {formReactionType !== 'none' && reactionTypeConfig[formReactionType] && 'options' in reactionTypeConfig[formReactionType] ? (
+                                <div className="flex flex-wrap gap-2">
+                                  {(reactionTypeConfig[formReactionType] as { options: { emoji: string; label: string }[] }).options.map((option, idx) => (
+                                    <div
+                                      key={idx}
+                                      className="px-3 py-1.5 rounded-full text-[12px] font-semibold flex items-center gap-1.5"
+                                      style={{
+                                        background: `linear-gradient(90deg, color-mix(in srgb, ${formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6'} 20%, transparent), color-mix(in srgb, ${formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6'} 10%, transparent))`,
+                                        border: `1px solid color-mix(in srgb, ${formType === 'info' ? '#3b82f6' : formType === 'warning' ? '#fb923c' : formType === 'success' ? '#22c55e' : '#8b5cf6'} 40%, transparent)`,
+                                      }}
+                                    >
+                                      <span>{option.emoji}</span>
+                                      <span className="text-white/90">{option.label}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-1.5 text-white/35 text-[11px]">
+                                  <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M10.59 4.59A2 2 0 1 0 8.17 2.17 2 2 0 0 0 10.59 4.59zM8.5 8.5c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm8.5 2.5c.28 0 .5.22.5.5v4c0 .28-.22.5-.5.5s-.5-.22-.5-.5v-4c0-.28.22-.5.5-.5zm-5-1c-.28 0-.5.22-.5.5v5c0 .28.22.5.5.5s.5-.22.5-.5v-5c0-.28-.22-.5-.5-.5zm-3 2c-.28 0-.5.22-.5.5v3c0 .28.22.5.5.5s.5-.22.5-.5v-3c0-.28-.22-.5-.5-.5z"/>
+                                  </svg>
+                                  Swipe to dismiss
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>

@@ -23,6 +23,15 @@ interface SystemAnnouncement {
   expires_at: string | null;
   starts_at: string | null;
   created_by: string | null;
+  reaction_type: 'none' | 'general' | 'usefulness' | 'bug_fix' | 'content';
+}
+
+interface AnnouncementReaction {
+  id: string;
+  announcement_id: string;
+  user_id: string;
+  reaction: string;
+  created_at: string;
 }
 
 // GET: List all announcements
@@ -109,7 +118,7 @@ export async function POST(request: NextRequest) {
 
     // CREATE announcement
     if (action === 'create') {
-      const { title, message, type, priority, target_audience, target_user_ids, expires_at, starts_at, created_by } = body;
+      const { title, message, type, priority, target_audience, target_user_ids, expires_at, starts_at, created_by, reaction_type } = body;
 
       if (!title || !message) {
         return NextResponse.json({ error: 'Title and message are required' }, { status: 400 });
@@ -128,6 +137,7 @@ export async function POST(request: NextRequest) {
           expires_at: expires_at || null,
           starts_at: starts_at || null,
           created_by: created_by || 'Admin',
+          reaction_type: reaction_type || 'none',
         })
         .select()
         .single();
@@ -141,7 +151,7 @@ export async function POST(request: NextRequest) {
 
     // UPDATE announcement
     if (action === 'update') {
-      const { id, title, message, type, priority, target_audience, target_user_ids, expires_at, starts_at, active } = body;
+      const { id, title, message, type, priority, target_audience, target_user_ids, expires_at, starts_at, active, reaction_type } = body;
 
       if (!id) {
         return NextResponse.json({ error: 'Announcement ID is required' }, { status: 400 });
@@ -157,6 +167,7 @@ export async function POST(request: NextRequest) {
       if (expires_at !== undefined) updateData.expires_at = expires_at;
       if (starts_at !== undefined) updateData.starts_at = starts_at;
       if (active !== undefined) updateData.active = active;
+      if (reaction_type !== undefined) updateData.reaction_type = reaction_type;
 
       const { data, error } = await supabase
         .from('system_announcements')
@@ -249,6 +260,77 @@ export async function POST(request: NextRequest) {
       }
 
       return NextResponse.json({ success: true, users: users || [] });
+    }
+
+    // GET REACTIONS for an announcement
+    if (action === 'get-reactions') {
+      const { announcement_id, page = 1, limit = 50 } = body;
+
+      if (!announcement_id) {
+        return NextResponse.json({ error: 'Announcement ID is required' }, { status: 400 });
+      }
+
+      // Get reactions with user profiles
+      const offset = (page - 1) * limit;
+      const { data: reactions, error: reactionsError, count } = await supabase
+        .from('announcement_reactions')
+        .select(`
+          id,
+          reaction,
+          created_at,
+          user_id,
+          profiles!inner(id, email, name)
+        `, { count: 'exact' })
+        .eq('announcement_id', announcement_id)
+        .order('created_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+
+      if (reactionsError) {
+        return NextResponse.json({ error: reactionsError.message }, { status: 500 });
+      }
+
+      // Calculate aggregated stats
+      const { data: allReactions, error: statsError } = await supabase
+        .from('announcement_reactions')
+        .select('reaction')
+        .eq('announcement_id', announcement_id);
+
+      if (statsError) {
+        return NextResponse.json({ error: statsError.message }, { status: 500 });
+      }
+
+      // Count by reaction type
+      const reactionCounts: Record<string, number> = {};
+      (allReactions || []).forEach((r: { reaction: string }) => {
+        reactionCounts[r.reaction] = (reactionCounts[r.reaction] || 0) + 1;
+      });
+
+      // Format reactions with user info
+      const formattedReactions = (reactions || []).map((r: AnnouncementReaction & { profiles: { id: string; email: string; name: string } }) => ({
+        id: r.id,
+        reaction: r.reaction,
+        created_at: r.created_at,
+        user: {
+          id: r.profiles.id,
+          email: r.profiles.email,
+          name: r.profiles.name,
+        },
+      }));
+
+      return NextResponse.json({
+        success: true,
+        reactions: formattedReactions,
+        stats: {
+          total: count || 0,
+          by_reaction: reactionCounts,
+        },
+        pagination: {
+          page,
+          limit,
+          total: count || 0,
+          total_pages: Math.ceil((count || 0) / limit),
+        },
+      });
     }
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
