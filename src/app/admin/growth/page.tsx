@@ -1,0 +1,764 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useAdminAuth } from '@/context/AdminAuthContext';
+import AdminSidebar from '@/components/admin/AdminSidebar';
+import {
+  TrendingUp,
+  Users,
+  Target,
+  DollarSign,
+  AlertTriangle,
+  Zap,
+  RefreshCw,
+  ArrowRight,
+  ArrowDown,
+  Mail,
+  Gift,
+  ChevronDown,
+  ChevronUp,
+  Flame,
+  UserCheck,
+  UserMinus,
+  Clock,
+  BarChart3,
+} from 'lucide-react';
+
+interface CohortData {
+  week: string;
+  signups: number;
+  d1: number;
+  d7: number;
+  d14: number;
+  d30: number;
+  converted: number;
+  d1Rate: number;
+  d7Rate: number;
+  d14Rate: number;
+  d30Rate: number;
+  conversionRate: number;
+}
+
+interface FunnelData {
+  signups: number;
+  onboarded: number;
+  trialStarted: number;
+  engaged: number;
+  converted: number;
+  onboardingRate: number;
+  trialRate: number;
+  engagementRate: number;
+  conversionRate: number;
+}
+
+interface LTVData {
+  averageLTV: number;
+  totalRevenue: number;
+  paidUsers: number;
+  bySource: Record<string, { users: number; revenue: number; avgLtv: number }>;
+}
+
+interface UserHealthData {
+  powerUsers: number;
+  activeUsers: number;
+  atRiskUsers: number;
+  dormantUsers: number;
+  total: number;
+}
+
+interface ChurnRiskUser {
+  id: string;
+  name: string;
+  email: string;
+  riskLevel: 'high' | 'medium' | 'low';
+  riskReason: string;
+  daysSinceActive: number;
+  isTrial: boolean;
+}
+
+interface QuickWin {
+  id: string;
+  name: string;
+  email: string;
+  featureCount: number;
+  engagement: number;
+  score: number;
+}
+
+interface GrowthMetrics {
+  cohorts: CohortData[];
+  funnel: FunnelData;
+  ltv: LTVData;
+  userHealth: UserHealthData;
+  churnRiskUsers: ChurnRiskUser[];
+  quickWins: QuickWin[];
+  generatedAt: string;
+}
+
+export default function GrowthCommandCenter() {
+  const [metrics, setMetrics] = useState<GrowthMetrics | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    cohorts: true,
+    funnel: true,
+    ltv: true,
+    health: true,
+    churn: true,
+    quickWins: true,
+  });
+  const { getPassword } = useAdminAuth();
+
+  const fetchMetrics = async () => {
+    setLoading(true);
+    try {
+      const password = getPassword();
+      const response = await fetch('/api/admin/growth-metrics', {
+        headers: { 'X-Admin-Password': password },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setMetrics(data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch growth metrics:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMetrics();
+  }, []);
+
+  const toggleSection = (section: string) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
+  const getRetentionColor = (rate: number) => {
+    if (rate >= 40) return 'bg-emerald-500/30 text-emerald-400';
+    if (rate >= 25) return 'bg-yellow-500/30 text-yellow-400';
+    if (rate >= 10) return 'bg-orange-500/30 text-orange-400';
+    return 'bg-red-500/30 text-red-400';
+  };
+
+  const formatWeek = (weekStr: string) => {
+    const date = new Date(weekStr);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  return (
+    <AdminSidebar>
+      <div className="p-6 max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-white flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl">
+                <Zap className="w-6 h-6 text-white" />
+              </div>
+              Growth Command Center
+            </h1>
+            <p className="text-white/50 mt-1">
+              Unified view of retention, conversion, and revenue metrics
+            </p>
+          </div>
+          <button
+            onClick={fetchMetrics}
+            disabled={loading}
+            className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/15 rounded-xl text-white/70 hover:text-white transition-colors"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
+        </div>
+
+        {loading && !metrics ? (
+          <div className="flex items-center justify-center h-64">
+            <RefreshCw className="w-8 h-8 text-white/30 animate-spin" />
+          </div>
+        ) : metrics ? (
+          <div className="space-y-6">
+            {/* Top KPIs Row */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-gradient-to-br from-emerald-900/30 to-[#1B1F39] border border-emerald-500/20 rounded-2xl p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <DollarSign className="w-5 h-5 text-emerald-400" />
+                  <span className="text-sm text-white/50">Avg LTV</span>
+                </div>
+                <p className="text-3xl font-bold text-emerald-400">
+                  ${metrics.ltv.averageLTV.toFixed(2)}
+                </p>
+                <p className="text-xs text-white/40 mt-1">per paying customer</p>
+              </div>
+
+              <div className="bg-gradient-to-br from-blue-900/30 to-[#1B1F39] border border-blue-500/20 rounded-2xl p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <Target className="w-5 h-5 text-blue-400" />
+                  <span className="text-sm text-white/50">Conversion Rate</span>
+                </div>
+                <p className="text-3xl font-bold text-blue-400">
+                  {metrics.funnel.conversionRate}%
+                </p>
+                <p className="text-xs text-white/40 mt-1">signup to paid (30d)</p>
+              </div>
+
+              <div className="bg-gradient-to-br from-purple-900/30 to-[#1B1F39] border border-purple-500/20 rounded-2xl p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <Users className="w-5 h-5 text-purple-400" />
+                  <span className="text-sm text-white/50">Active Users</span>
+                </div>
+                <p className="text-3xl font-bold text-purple-400">
+                  {metrics.userHealth.powerUsers + metrics.userHealth.activeUsers}
+                </p>
+                <p className="text-xs text-white/40 mt-1">
+                  {metrics.userHealth.powerUsers} power users
+                </p>
+              </div>
+
+              <div className="bg-gradient-to-br from-orange-900/30 to-[#1B1F39] border border-orange-500/20 rounded-2xl p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle className="w-5 h-5 text-orange-400" />
+                  <span className="text-sm text-white/50">At Risk</span>
+                </div>
+                <p className="text-3xl font-bold text-orange-400">
+                  {metrics.userHealth.atRiskUsers}
+                </p>
+                <p className="text-xs text-white/40 mt-1">
+                  {metrics.churnRiskUsers.filter(u => u.riskLevel === 'high').length} high priority
+                </p>
+              </div>
+            </div>
+
+            {/* Conversion Funnel */}
+            <div className="bg-[#0F1123] border border-white/10 rounded-2xl overflow-hidden">
+              <button
+                onClick={() => toggleSection('funnel')}
+                className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-blue-500/20 rounded-xl">
+                    <Target className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <div className="text-left">
+                    <h2 className="text-lg font-semibold text-white">Conversion Funnel</h2>
+                    <p className="text-xs text-white/40">Last 30 days signup journey</p>
+                  </div>
+                </div>
+                {expandedSections.funnel ? (
+                  <ChevronUp className="w-5 h-5 text-white/40" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-white/40" />
+                )}
+              </button>
+
+              {expandedSections.funnel && (
+                <div className="p-5 pt-0">
+                  <div className="flex items-center justify-between gap-2">
+                    {/* Signup */}
+                    <div className="flex-1 text-center">
+                      <div className="bg-white/10 rounded-xl p-4 mb-2">
+                        <p className="text-2xl font-bold text-white">{metrics.funnel.signups}</p>
+                        <p className="text-xs text-white/50">Signups</p>
+                      </div>
+                      <p className="text-xs text-white/30">100%</p>
+                    </div>
+
+                    <ArrowRight className="w-4 h-4 text-white/20 flex-shrink-0" />
+
+                    {/* Onboarded */}
+                    <div className="flex-1 text-center">
+                      <div className="bg-cyan-500/20 rounded-xl p-4 mb-2 border border-cyan-500/30">
+                        <p className="text-2xl font-bold text-cyan-400">{metrics.funnel.onboarded}</p>
+                        <p className="text-xs text-white/50">Onboarded</p>
+                      </div>
+                      <p className="text-xs text-cyan-400">{metrics.funnel.onboardingRate}%</p>
+                    </div>
+
+                    <ArrowRight className="w-4 h-4 text-white/20 flex-shrink-0" />
+
+                    {/* Trial Started */}
+                    <div className="flex-1 text-center">
+                      <div className="bg-purple-500/20 rounded-xl p-4 mb-2 border border-purple-500/30">
+                        <p className="text-2xl font-bold text-purple-400">{metrics.funnel.trialStarted}</p>
+                        <p className="text-xs text-white/50">Trial</p>
+                      </div>
+                      <p className="text-xs text-purple-400">{metrics.funnel.trialRate}%</p>
+                    </div>
+
+                    <ArrowRight className="w-4 h-4 text-white/20 flex-shrink-0" />
+
+                    {/* Engaged */}
+                    <div className="flex-1 text-center">
+                      <div className="bg-orange-500/20 rounded-xl p-4 mb-2 border border-orange-500/30">
+                        <p className="text-2xl font-bold text-orange-400">{metrics.funnel.engaged}</p>
+                        <p className="text-xs text-white/50">Engaged (3+ features)</p>
+                      </div>
+                      <p className="text-xs text-orange-400">{metrics.funnel.engagementRate}%</p>
+                    </div>
+
+                    <ArrowRight className="w-4 h-4 text-white/20 flex-shrink-0" />
+
+                    {/* Converted */}
+                    <div className="flex-1 text-center">
+                      <div className="bg-emerald-500/20 rounded-xl p-4 mb-2 border border-emerald-500/30">
+                        <p className="text-2xl font-bold text-emerald-400">{metrics.funnel.converted}</p>
+                        <p className="text-xs text-white/50">Paid</p>
+                      </div>
+                      <p className="text-xs text-emerald-400">{metrics.funnel.conversionRate}%</p>
+                    </div>
+                  </div>
+
+                  {/* Funnel Drop-off Analysis */}
+                  <div className="mt-4 grid grid-cols-4 gap-2">
+                    <div className="bg-white/5 rounded-lg p-3 text-center">
+                      <p className="text-xs text-white/40">Signup → Onboard</p>
+                      <p className="text-sm font-medium text-white">
+                        -{100 - metrics.funnel.onboardingRate}% drop
+                      </p>
+                    </div>
+                    <div className="bg-white/5 rounded-lg p-3 text-center">
+                      <p className="text-xs text-white/40">Onboard → Trial</p>
+                      <p className="text-sm font-medium text-white">
+                        -{metrics.funnel.onboardingRate > 0
+                          ? Math.round(((metrics.funnel.onboarded - metrics.funnel.trialStarted) / metrics.funnel.onboarded) * 100)
+                          : 0}% drop
+                      </p>
+                    </div>
+                    <div className="bg-white/5 rounded-lg p-3 text-center">
+                      <p className="text-xs text-white/40">Trial → Engaged</p>
+                      <p className="text-sm font-medium text-white">
+                        -{metrics.funnel.trialStarted > 0
+                          ? Math.round(((metrics.funnel.trialStarted - metrics.funnel.engaged) / metrics.funnel.trialStarted) * 100)
+                          : 0}% drop
+                      </p>
+                    </div>
+                    <div className="bg-white/5 rounded-lg p-3 text-center">
+                      <p className="text-xs text-white/40">Engaged → Paid</p>
+                      <p className="text-sm font-medium text-white">
+                        -{metrics.funnel.engaged > 0
+                          ? Math.round(((metrics.funnel.engaged - metrics.funnel.converted) / metrics.funnel.engaged) * 100)
+                          : 0}% drop
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Retention Cohorts */}
+            <div className="bg-[#0F1123] border border-white/10 rounded-2xl overflow-hidden">
+              <button
+                onClick={() => toggleSection('cohorts')}
+                className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-purple-500/20 rounded-xl">
+                    <BarChart3 className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <div className="text-left">
+                    <h2 className="text-lg font-semibold text-white">Retention Cohorts</h2>
+                    <p className="text-xs text-white/40">Weekly signup cohorts & retention rates</p>
+                  </div>
+                </div>
+                {expandedSections.cohorts ? (
+                  <ChevronUp className="w-5 h-5 text-white/40" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-white/40" />
+                )}
+              </button>
+
+              {expandedSections.cohorts && (
+                <div className="p-5 pt-0 overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-white/40 text-xs">
+                        <th className="text-left py-2 px-3">Week</th>
+                        <th className="text-center py-2 px-3">Signups</th>
+                        <th className="text-center py-2 px-3">D1</th>
+                        <th className="text-center py-2 px-3">D7</th>
+                        <th className="text-center py-2 px-3">D14</th>
+                        <th className="text-center py-2 px-3">D30</th>
+                        <th className="text-center py-2 px-3">Converted</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {metrics.cohorts.slice(-8).map((cohort) => (
+                        <tr key={cohort.week} className="border-t border-white/5">
+                          <td className="py-3 px-3 text-white font-medium">
+                            {formatWeek(cohort.week)}
+                          </td>
+                          <td className="py-3 px-3 text-center text-white/70">
+                            {cohort.signups}
+                          </td>
+                          <td className="py-3 px-3 text-center">
+                            <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getRetentionColor(cohort.d1Rate)}`}>
+                              {cohort.d1Rate}%
+                            </span>
+                          </td>
+                          <td className="py-3 px-3 text-center">
+                            <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getRetentionColor(cohort.d7Rate)}`}>
+                              {cohort.d7Rate}%
+                            </span>
+                          </td>
+                          <td className="py-3 px-3 text-center">
+                            <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getRetentionColor(cohort.d14Rate)}`}>
+                              {cohort.d14Rate}%
+                            </span>
+                          </td>
+                          <td className="py-3 px-3 text-center">
+                            <span className={`px-2 py-1 rounded-lg text-xs font-medium ${getRetentionColor(cohort.d30Rate)}`}>
+                              {cohort.d30Rate}%
+                            </span>
+                          </td>
+                          <td className="py-3 px-3 text-center">
+                            <span className="px-2 py-1 rounded-lg text-xs font-medium bg-emerald-500/20 text-emerald-400">
+                              {cohort.conversionRate}%
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+
+                  {/* Retention Legend */}
+                  <div className="flex items-center gap-4 mt-4 text-xs text-white/40">
+                    <span>Retention Quality:</span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-3 h-3 rounded bg-emerald-500/30" /> 40%+ Great
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-3 h-3 rounded bg-yellow-500/30" /> 25-40% Good
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-3 h-3 rounded bg-orange-500/30" /> 10-25% Needs Work
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <span className="w-3 h-3 rounded bg-red-500/30" /> &lt;10% Critical
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* LTV by Source */}
+            <div className="bg-[#0F1123] border border-white/10 rounded-2xl overflow-hidden">
+              <button
+                onClick={() => toggleSection('ltv')}
+                className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-emerald-500/20 rounded-xl">
+                    <DollarSign className="w-5 h-5 text-emerald-400" />
+                  </div>
+                  <div className="text-left">
+                    <h2 className="text-lg font-semibold text-white">LTV by Acquisition Source</h2>
+                    <p className="text-xs text-white/40">Lifetime value breakdown</p>
+                  </div>
+                </div>
+                {expandedSections.ltv ? (
+                  <ChevronUp className="w-5 h-5 text-white/40" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-white/40" />
+                )}
+              </button>
+
+              {expandedSections.ltv && (
+                <div className="p-5 pt-0">
+                  <div className="grid grid-cols-3 gap-4">
+                    {Object.entries(metrics.ltv.bySource).map(([source, data]) => (
+                      <div
+                        key={source}
+                        className="bg-white/5 rounded-xl p-4 border border-white/10"
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm text-white/50 capitalize">{source}</span>
+                          <span className="text-xs px-2 py-0.5 bg-white/10 rounded-full text-white/40">
+                            {data.users} users
+                          </span>
+                        </div>
+                        <p className="text-2xl font-bold text-white">
+                          ${data.avgLtv.toFixed(2)}
+                        </p>
+                        <p className="text-xs text-white/40 mt-1">
+                          ${data.revenue.toFixed(2)} total revenue
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 p-4 bg-white/5 rounded-xl border border-white/10">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm text-white/50">Total Revenue (All Time)</p>
+                        <p className="text-2xl font-bold text-emerald-400">
+                          ${metrics.ltv.totalRevenue.toFixed(2)}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm text-white/50">Paying Customers</p>
+                        <p className="text-2xl font-bold text-white">{metrics.ltv.paidUsers}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* User Health Distribution */}
+            <div className="bg-[#0F1123] border border-white/10 rounded-2xl overflow-hidden">
+              <button
+                onClick={() => toggleSection('health')}
+                className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-cyan-500/20 rounded-xl">
+                    <Users className="w-5 h-5 text-cyan-400" />
+                  </div>
+                  <div className="text-left">
+                    <h2 className="text-lg font-semibold text-white">User Health Distribution</h2>
+                    <p className="text-xs text-white/40">Engagement segments</p>
+                  </div>
+                </div>
+                {expandedSections.health ? (
+                  <ChevronUp className="w-5 h-5 text-white/40" />
+                ) : (
+                  <ChevronDown className="w-5 h-5 text-white/40" />
+                )}
+              </button>
+
+              {expandedSections.health && (
+                <div className="p-5 pt-0">
+                  <div className="grid grid-cols-4 gap-4">
+                    <div className="bg-gradient-to-br from-purple-500/20 to-purple-500/5 rounded-xl p-4 border border-purple-500/30">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Flame className="w-4 h-4 text-purple-400" />
+                        <span className="text-xs text-white/50">Power Users</span>
+                      </div>
+                      <p className="text-3xl font-bold text-purple-400">{metrics.userHealth.powerUsers}</p>
+                      <p className="text-xs text-white/40 mt-1">
+                        {metrics.userHealth.total > 0
+                          ? Math.round((metrics.userHealth.powerUsers / metrics.userHealth.total) * 100)
+                          : 0}% of base
+                      </p>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 rounded-xl p-4 border border-emerald-500/30">
+                      <div className="flex items-center gap-2 mb-2">
+                        <UserCheck className="w-4 h-4 text-emerald-400" />
+                        <span className="text-xs text-white/50">Active</span>
+                      </div>
+                      <p className="text-3xl font-bold text-emerald-400">{metrics.userHealth.activeUsers}</p>
+                      <p className="text-xs text-white/40 mt-1">
+                        {metrics.userHealth.total > 0
+                          ? Math.round((metrics.userHealth.activeUsers / metrics.userHealth.total) * 100)
+                          : 0}% of base
+                      </p>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-orange-500/20 to-orange-500/5 rounded-xl p-4 border border-orange-500/30">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Clock className="w-4 h-4 text-orange-400" />
+                        <span className="text-xs text-white/50">At Risk</span>
+                      </div>
+                      <p className="text-3xl font-bold text-orange-400">{metrics.userHealth.atRiskUsers}</p>
+                      <p className="text-xs text-white/40 mt-1">
+                        {metrics.userHealth.total > 0
+                          ? Math.round((metrics.userHealth.atRiskUsers / metrics.userHealth.total) * 100)
+                          : 0}% of base
+                      </p>
+                    </div>
+
+                    <div className="bg-gradient-to-br from-red-500/20 to-red-500/5 rounded-xl p-4 border border-red-500/30">
+                      <div className="flex items-center gap-2 mb-2">
+                        <UserMinus className="w-4 h-4 text-red-400" />
+                        <span className="text-xs text-white/50">Dormant</span>
+                      </div>
+                      <p className="text-3xl font-bold text-red-400">{metrics.userHealth.dormantUsers}</p>
+                      <p className="text-xs text-white/40 mt-1">
+                        {metrics.userHealth.total > 0
+                          ? Math.round((metrics.userHealth.dormantUsers / metrics.userHealth.total) * 100)
+                          : 0}% of base
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Health Bar */}
+                  <div className="mt-4 h-4 rounded-full overflow-hidden flex bg-white/5">
+                    <div
+                      className="bg-purple-500 transition-all"
+                      style={{
+                        width: `${metrics.userHealth.total > 0
+                          ? (metrics.userHealth.powerUsers / metrics.userHealth.total) * 100
+                          : 0}%`,
+                      }}
+                    />
+                    <div
+                      className="bg-emerald-500 transition-all"
+                      style={{
+                        width: `${metrics.userHealth.total > 0
+                          ? (metrics.userHealth.activeUsers / metrics.userHealth.total) * 100
+                          : 0}%`,
+                      }}
+                    />
+                    <div
+                      className="bg-orange-500 transition-all"
+                      style={{
+                        width: `${metrics.userHealth.total > 0
+                          ? (metrics.userHealth.atRiskUsers / metrics.userHealth.total) * 100
+                          : 0}%`,
+                      }}
+                    />
+                    <div
+                      className="bg-red-500 transition-all"
+                      style={{
+                        width: `${metrics.userHealth.total > 0
+                          ? (metrics.userHealth.dormantUsers / metrics.userHealth.total) * 100
+                          : 0}%`,
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Two Column Layout: Churn Risk + Quick Wins */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Churn Risk Users */}
+              <div className="bg-[#0F1123] border border-white/10 rounded-2xl overflow-hidden">
+                <button
+                  onClick={() => toggleSection('churn')}
+                  className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-red-500/20 rounded-xl">
+                      <AlertTriangle className="w-5 h-5 text-red-400" />
+                    </div>
+                    <div className="text-left">
+                      <h2 className="text-lg font-semibold text-white">Churn Risk</h2>
+                      <p className="text-xs text-white/40">Pro users at risk of churning</p>
+                    </div>
+                  </div>
+                  {expandedSections.churn ? (
+                    <ChevronUp className="w-5 h-5 text-white/40" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 text-white/40" />
+                  )}
+                </button>
+
+                {expandedSections.churn && (
+                  <div className="p-5 pt-0 space-y-2 max-h-80 overflow-y-auto">
+                    {metrics.churnRiskUsers.length === 0 ? (
+                      <p className="text-center text-white/40 py-4">No at-risk users found</p>
+                    ) : (
+                      metrics.churnRiskUsers.map((user) => (
+                        <div
+                          key={user.id}
+                          className="flex items-center justify-between bg-white/5 rounded-xl p-3 border border-white/10"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <p className="text-sm font-medium text-white truncate">{user.name || 'Unknown'}</p>
+                              {user.isTrial && (
+                                <span className="text-xs px-1.5 py-0.5 bg-cyan-500/20 text-cyan-400 rounded">
+                                  Trial
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-white/50 truncate">{user.email}</p>
+                          </div>
+                          <div className="flex items-center gap-2 ml-3">
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                user.riskLevel === 'high'
+                                  ? 'bg-red-500/20 text-red-400'
+                                  : 'bg-orange-500/20 text-orange-400'
+                              }`}
+                            >
+                              {user.riskReason}
+                            </span>
+                            <a
+                              href={`mailto:${user.email}`}
+                              className="p-2 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition-colors"
+                              title="Send email"
+                            >
+                              <Mail className="w-4 h-4 text-blue-400" />
+                            </a>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Quick Wins (High-Engagement Free Users) */}
+              <div className="bg-[#0F1123] border border-white/10 rounded-2xl overflow-hidden">
+                <button
+                  onClick={() => toggleSection('quickWins')}
+                  className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-emerald-500/20 rounded-xl">
+                      <TrendingUp className="w-5 h-5 text-emerald-400" />
+                    </div>
+                    <div className="text-left">
+                      <h2 className="text-lg font-semibold text-white">Quick Wins</h2>
+                      <p className="text-xs text-white/40">High-engagement free users ready to convert</p>
+                    </div>
+                  </div>
+                  {expandedSections.quickWins ? (
+                    <ChevronUp className="w-5 h-5 text-white/40" />
+                  ) : (
+                    <ChevronDown className="w-5 h-5 text-white/40" />
+                  )}
+                </button>
+
+                {expandedSections.quickWins && (
+                  <div className="p-5 pt-0 space-y-2 max-h-80 overflow-y-auto">
+                    {metrics.quickWins.length === 0 ? (
+                      <p className="text-center text-white/40 py-4">No quick wins identified</p>
+                    ) : (
+                      metrics.quickWins.map((user) => (
+                        <div
+                          key={user.id}
+                          className="flex items-center justify-between bg-white/5 rounded-xl p-3 border border-white/10"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-medium text-white truncate">{user.name || 'Unknown'}</p>
+                            <p className="text-xs text-white/50 truncate">{user.email}</p>
+                          </div>
+                          <div className="flex items-center gap-2 ml-3">
+                            <div className="text-right">
+                              <p className="text-xs text-white/40">{user.featureCount} features</p>
+                              <p className="text-xs text-emerald-400">{user.engagement} actions</p>
+                            </div>
+                            <a
+                              href={`mailto:${user.email}?subject=Special%20Offer%20for%20Mind%20%26%20Muscle%20Pro`}
+                              className="p-2 bg-emerald-500/20 hover:bg-emerald-500/30 rounded-lg transition-colors"
+                              title="Send offer"
+                            >
+                              <Gift className="w-4 h-4 text-emerald-400" />
+                            </a>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="text-center text-xs text-white/30 pt-4">
+              Data generated at {metrics.generatedAt ? new Date(metrics.generatedAt).toLocaleString() : 'N/A'}
+            </div>
+          </div>
+        ) : (
+          <div className="text-center text-white/40 py-12">
+            Failed to load growth metrics
+          </div>
+        )}
+      </div>
+    </AdminSidebar>
+  );
+}

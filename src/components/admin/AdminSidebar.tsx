@@ -21,6 +21,8 @@ import {
   Settings,
   LogOut,
   Book,
+  Zap,
+  TrendingUp,
 } from 'lucide-react';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import CommandSearch from './CommandSearch';
@@ -42,6 +44,7 @@ const NAV_SECTIONS: NavSection[] = [
     title: 'Overview',
     items: [
       { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+      { name: 'Growth Center', href: '/admin/growth', icon: Zap },
     ],
   },
   {
