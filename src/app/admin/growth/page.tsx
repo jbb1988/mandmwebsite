@@ -22,6 +22,8 @@ import {
   UserMinus,
   Clock,
   BarChart3,
+  X,
+  ExternalLink,
 } from 'lucide-react';
 
 interface CohortData {
@@ -93,7 +95,34 @@ interface GrowthMetrics {
   churnRiskUsers: ChurnRiskUser[];
   quickWins: QuickWin[];
   generatedAt: string;
+  // Drill-down data
+  userLists?: {
+    powerUsers?: DrillDownUser[];
+    activeUsers?: DrillDownUser[];
+    atRiskUsers?: DrillDownUser[];
+    dormantUsers?: DrillDownUser[];
+    trialUsers?: DrillDownUser[];
+    paidUsers?: DrillDownUser[];
+    recentSignups?: DrillDownUser[];
+  };
 }
+
+interface DrillDownUser {
+  id: string;
+  name: string;
+  email: string;
+  tier: string;
+  createdAt: string;
+  lastActive?: string;
+  engagement?: number;
+  features?: number;
+}
+
+type DrillDownType =
+  | 'powerUsers' | 'activeUsers' | 'atRiskUsers' | 'dormantUsers'
+  | 'trialUsers' | 'paidUsers' | 'recentSignups' | 'funnelSignups'
+  | 'funnelOnboarded' | 'funnelTrial' | 'funnelEngaged' | 'funnelConverted'
+  | null;
 
 export default function GrowthCommandCenter() {
   const [metrics, setMetrics] = useState<GrowthMetrics | null>(null);
@@ -106,7 +135,35 @@ export default function GrowthCommandCenter() {
     churn: true,
     quickWins: true,
   });
+  const [drillDown, setDrillDown] = useState<{
+    type: DrillDownType;
+    title: string;
+    users: DrillDownUser[];
+    loading: boolean;
+  }>({ type: null, title: '', users: [], loading: false });
   const { getPassword } = useAdminAuth();
+
+  const fetchDrillDown = async (type: DrillDownType, title: string) => {
+    if (!type) return;
+    setDrillDown({ type, title, users: [], loading: true });
+    try {
+      const password = getPassword();
+      const response = await fetch(`/api/admin/growth-metrics/drilldown?type=${type}`, {
+        headers: { 'X-Admin-Password': password },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setDrillDown({ type, title, users: data.users || [], loading: false });
+      }
+    } catch (error) {
+      console.error('Failed to fetch drill-down:', error);
+      setDrillDown(prev => ({ ...prev, loading: false }));
+    }
+  };
+
+  const closeDrillDown = () => {
+    setDrillDown({ type: null, title: '', users: [], loading: false });
+  };
 
   const fetchMetrics = async () => {
     setLoading(true);
@@ -180,7 +237,10 @@ export default function GrowthCommandCenter() {
           <div className="space-y-6">
             {/* Top KPIs Row */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-gradient-to-br from-emerald-900/30 to-[#1B1F39] border border-emerald-500/20 rounded-2xl p-5">
+              <button
+                onClick={() => fetchDrillDown('paidUsers', 'Paid Subscribers')}
+                className="bg-gradient-to-br from-emerald-900/30 to-[#1B1F39] border border-emerald-500/20 hover:border-emerald-400/40 rounded-2xl p-5 text-left transition-colors cursor-pointer"
+              >
                 <div className="flex items-center gap-2 mb-2">
                   <DollarSign className="w-5 h-5 text-emerald-400" />
                   <span className="text-sm text-white/50">Avg LTV</span>
@@ -189,9 +249,12 @@ export default function GrowthCommandCenter() {
                   ${metrics.ltv.averageLTV.toFixed(2)}
                 </p>
                 <p className="text-xs text-white/40 mt-1">per paying customer</p>
-              </div>
+              </button>
 
-              <div className="bg-gradient-to-br from-blue-900/30 to-[#1B1F39] border border-blue-500/20 rounded-2xl p-5">
+              <button
+                onClick={() => fetchDrillDown('funnelConverted', 'Converted to Paid (30d)')}
+                className="bg-gradient-to-br from-blue-900/30 to-[#1B1F39] border border-blue-500/20 hover:border-blue-400/40 rounded-2xl p-5 text-left transition-colors cursor-pointer"
+              >
                 <div className="flex items-center gap-2 mb-2">
                   <Target className="w-5 h-5 text-blue-400" />
                   <span className="text-sm text-white/50">Conversion Rate</span>
@@ -200,9 +263,12 @@ export default function GrowthCommandCenter() {
                   {metrics.funnel.conversionRate}%
                 </p>
                 <p className="text-xs text-white/40 mt-1">signup to paid (30d)</p>
-              </div>
+              </button>
 
-              <div className="bg-gradient-to-br from-purple-900/30 to-[#1B1F39] border border-purple-500/20 rounded-2xl p-5">
+              <button
+                onClick={() => fetchDrillDown('activeUsers', 'Active Users')}
+                className="bg-gradient-to-br from-purple-900/30 to-[#1B1F39] border border-purple-500/20 hover:border-purple-400/40 rounded-2xl p-5 text-left transition-colors cursor-pointer"
+              >
                 <div className="flex items-center gap-2 mb-2">
                   <Users className="w-5 h-5 text-purple-400" />
                   <span className="text-sm text-white/50">Active Users</span>
@@ -213,9 +279,12 @@ export default function GrowthCommandCenter() {
                 <p className="text-xs text-white/40 mt-1">
                   {metrics.userHealth.powerUsers} power users
                 </p>
-              </div>
+              </button>
 
-              <div className="bg-gradient-to-br from-orange-900/30 to-[#1B1F39] border border-orange-500/20 rounded-2xl p-5">
+              <button
+                onClick={() => fetchDrillDown('atRiskUsers', 'At Risk Users')}
+                className="bg-gradient-to-br from-orange-900/30 to-[#1B1F39] border border-orange-500/20 hover:border-orange-400/40 rounded-2xl p-5 text-left transition-colors cursor-pointer"
+              >
                 <div className="flex items-center gap-2 mb-2">
                   <AlertTriangle className="w-5 h-5 text-orange-400" />
                   <span className="text-sm text-white/50">At Risk</span>
@@ -226,7 +295,7 @@ export default function GrowthCommandCenter() {
                 <p className="text-xs text-white/40 mt-1">
                   {metrics.churnRiskUsers.filter(u => u.riskLevel === 'high').length} high priority
                 </p>
-              </div>
+              </button>
             </div>
 
             {/* Conversion Funnel */}
@@ -255,57 +324,72 @@ export default function GrowthCommandCenter() {
                 <div className="p-5 pt-0">
                   <div className="flex items-center justify-between gap-2">
                     {/* Signup */}
-                    <div className="flex-1 text-center">
-                      <div className="bg-white/10 rounded-xl p-4 mb-2">
+                    <button
+                      onClick={() => fetchDrillDown('funnelSignups', 'Recent Signups (30d)')}
+                      className="flex-1 text-center cursor-pointer group"
+                    >
+                      <div className="bg-white/10 rounded-xl p-4 mb-2 group-hover:bg-white/15 transition-colors">
                         <p className="text-2xl font-bold text-white">{metrics.funnel.signups}</p>
                         <p className="text-xs text-white/50">Signups</p>
                       </div>
                       <p className="text-xs text-white/30">100%</p>
-                    </div>
+                    </button>
 
                     <ArrowRight className="w-4 h-4 text-white/20 flex-shrink-0" />
 
                     {/* Onboarded */}
-                    <div className="flex-1 text-center">
-                      <div className="bg-cyan-500/20 rounded-xl p-4 mb-2 border border-cyan-500/30">
+                    <button
+                      onClick={() => fetchDrillDown('funnelOnboarded', 'Onboarded Users (30d)')}
+                      className="flex-1 text-center cursor-pointer group"
+                    >
+                      <div className="bg-cyan-500/20 rounded-xl p-4 mb-2 border border-cyan-500/30 group-hover:border-cyan-400/50 transition-colors">
                         <p className="text-2xl font-bold text-cyan-400">{metrics.funnel.onboarded}</p>
                         <p className="text-xs text-white/50">Onboarded</p>
                       </div>
                       <p className="text-xs text-cyan-400">{metrics.funnel.onboardingRate}%</p>
-                    </div>
+                    </button>
 
                     <ArrowRight className="w-4 h-4 text-white/20 flex-shrink-0" />
 
                     {/* Trial Started */}
-                    <div className="flex-1 text-center">
-                      <div className="bg-purple-500/20 rounded-xl p-4 mb-2 border border-purple-500/30">
+                    <button
+                      onClick={() => fetchDrillDown('funnelTrial', 'Trial Users (30d)')}
+                      className="flex-1 text-center cursor-pointer group"
+                    >
+                      <div className="bg-purple-500/20 rounded-xl p-4 mb-2 border border-purple-500/30 group-hover:border-purple-400/50 transition-colors">
                         <p className="text-2xl font-bold text-purple-400">{metrics.funnel.trialStarted}</p>
                         <p className="text-xs text-white/50">Trial</p>
                       </div>
                       <p className="text-xs text-purple-400">{metrics.funnel.trialRate}%</p>
-                    </div>
+                    </button>
 
                     <ArrowRight className="w-4 h-4 text-white/20 flex-shrink-0" />
 
                     {/* Engaged */}
-                    <div className="flex-1 text-center">
-                      <div className="bg-orange-500/20 rounded-xl p-4 mb-2 border border-orange-500/30">
+                    <button
+                      onClick={() => fetchDrillDown('funnelEngaged', 'Engaged Users (3+ features)')}
+                      className="flex-1 text-center cursor-pointer group"
+                    >
+                      <div className="bg-orange-500/20 rounded-xl p-4 mb-2 border border-orange-500/30 group-hover:border-orange-400/50 transition-colors">
                         <p className="text-2xl font-bold text-orange-400">{metrics.funnel.engaged}</p>
                         <p className="text-xs text-white/50">Engaged (3+ features)</p>
                       </div>
                       <p className="text-xs text-orange-400">{metrics.funnel.engagementRate}%</p>
-                    </div>
+                    </button>
 
                     <ArrowRight className="w-4 h-4 text-white/20 flex-shrink-0" />
 
                     {/* Converted */}
-                    <div className="flex-1 text-center">
-                      <div className="bg-emerald-500/20 rounded-xl p-4 mb-2 border border-emerald-500/30">
+                    <button
+                      onClick={() => fetchDrillDown('funnelConverted', 'Converted to Paid (30d)')}
+                      className="flex-1 text-center cursor-pointer group"
+                    >
+                      <div className="bg-emerald-500/20 rounded-xl p-4 mb-2 border border-emerald-500/30 group-hover:border-emerald-400/50 transition-colors">
                         <p className="text-2xl font-bold text-emerald-400">{metrics.funnel.converted}</p>
                         <p className="text-xs text-white/50">Paid</p>
                       </div>
                       <p className="text-xs text-emerald-400">{metrics.funnel.conversionRate}%</p>
-                    </div>
+                    </button>
                   </div>
 
                   {/* Funnel Drop-off Analysis */}
@@ -529,7 +613,10 @@ export default function GrowthCommandCenter() {
               {expandedSections.health && (
                 <div className="p-5 pt-0">
                   <div className="grid grid-cols-4 gap-4">
-                    <div className="bg-gradient-to-br from-purple-500/20 to-purple-500/5 rounded-xl p-4 border border-purple-500/30">
+                    <button
+                      onClick={() => fetchDrillDown('powerUsers', 'Power Users')}
+                      className="bg-gradient-to-br from-purple-500/20 to-purple-500/5 rounded-xl p-4 border border-purple-500/30 hover:border-purple-400/50 transition-colors text-left cursor-pointer"
+                    >
                       <div className="flex items-center gap-2 mb-2">
                         <Flame className="w-4 h-4 text-purple-400" />
                         <span className="text-xs text-white/50">Power Users</span>
@@ -540,9 +627,12 @@ export default function GrowthCommandCenter() {
                           ? Math.round((metrics.userHealth.powerUsers / metrics.userHealth.total) * 100)
                           : 0}% of base
                       </p>
-                    </div>
+                    </button>
 
-                    <div className="bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 rounded-xl p-4 border border-emerald-500/30">
+                    <button
+                      onClick={() => fetchDrillDown('activeUsers', 'Active Users')}
+                      className="bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 rounded-xl p-4 border border-emerald-500/30 hover:border-emerald-400/50 transition-colors text-left cursor-pointer"
+                    >
                       <div className="flex items-center gap-2 mb-2">
                         <UserCheck className="w-4 h-4 text-emerald-400" />
                         <span className="text-xs text-white/50">Active</span>
@@ -553,9 +643,12 @@ export default function GrowthCommandCenter() {
                           ? Math.round((metrics.userHealth.activeUsers / metrics.userHealth.total) * 100)
                           : 0}% of base
                       </p>
-                    </div>
+                    </button>
 
-                    <div className="bg-gradient-to-br from-orange-500/20 to-orange-500/5 rounded-xl p-4 border border-orange-500/30">
+                    <button
+                      onClick={() => fetchDrillDown('atRiskUsers', 'At Risk Users')}
+                      className="bg-gradient-to-br from-orange-500/20 to-orange-500/5 rounded-xl p-4 border border-orange-500/30 hover:border-orange-400/50 transition-colors text-left cursor-pointer"
+                    >
                       <div className="flex items-center gap-2 mb-2">
                         <Clock className="w-4 h-4 text-orange-400" />
                         <span className="text-xs text-white/50">At Risk</span>
@@ -566,9 +659,12 @@ export default function GrowthCommandCenter() {
                           ? Math.round((metrics.userHealth.atRiskUsers / metrics.userHealth.total) * 100)
                           : 0}% of base
                       </p>
-                    </div>
+                    </button>
 
-                    <div className="bg-gradient-to-br from-red-500/20 to-red-500/5 rounded-xl p-4 border border-red-500/30">
+                    <button
+                      onClick={() => fetchDrillDown('dormantUsers', 'Dormant Users')}
+                      className="bg-gradient-to-br from-red-500/20 to-red-500/5 rounded-xl p-4 border border-red-500/30 hover:border-red-400/50 transition-colors text-left cursor-pointer"
+                    >
                       <div className="flex items-center gap-2 mb-2">
                         <UserMinus className="w-4 h-4 text-red-400" />
                         <span className="text-xs text-white/50">Dormant</span>
@@ -579,7 +675,7 @@ export default function GrowthCommandCenter() {
                           ? Math.round((metrics.userHealth.dormantUsers / metrics.userHealth.total) * 100)
                           : 0}% of base
                       </p>
-                    </div>
+                    </button>
                   </div>
 
                   {/* Health Bar */}
@@ -756,6 +852,110 @@ export default function GrowthCommandCenter() {
         ) : (
           <div className="text-center text-white/40 py-12">
             Failed to load growth metrics
+          </div>
+        )}
+
+        {/* Drill-Down Modal */}
+        {drillDown.type && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-[#0F1123] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[80vh] overflow-hidden flex flex-col">
+              {/* Modal Header */}
+              <div className="flex items-center justify-between p-5 border-b border-white/10">
+                <div>
+                  <h3 className="text-lg font-semibold text-white">{drillDown.title}</h3>
+                  <p className="text-sm text-white/50">{drillDown.users.length} users</p>
+                </div>
+                <button
+                  onClick={closeDrillDown}
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-white/50" />
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div className="flex-1 overflow-y-auto p-5">
+                {drillDown.loading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <RefreshCw className="w-6 h-6 text-white/30 animate-spin" />
+                  </div>
+                ) : drillDown.users.length === 0 ? (
+                  <div className="text-center text-white/40 py-12">
+                    No users found
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {drillDown.users.map((user) => (
+                      <div
+                        key={user.id}
+                        className="flex items-center justify-between bg-white/5 rounded-xl p-4 border border-white/10 hover:bg-white/10 transition-colors"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium text-white truncate">
+                              {user.name}
+                            </p>
+                            <span className={`text-xs px-2 py-0.5 rounded-full ${
+                              user.tier === 'pro'
+                                ? 'bg-emerald-500/20 text-emerald-400'
+                                : user.tier === 'trial'
+                                ? 'bg-cyan-500/20 text-cyan-400'
+                                : 'bg-white/10 text-white/50'
+                            }`}>
+                              {user.tier}
+                            </span>
+                          </div>
+                          <p className="text-xs text-white/50 truncate">{user.email}</p>
+                        </div>
+                        <div className="flex items-center gap-4 ml-4">
+                          <div className="text-right hidden sm:block">
+                            {user.features !== undefined && (
+                              <p className="text-xs text-white/40">
+                                {user.features} features
+                              </p>
+                            )}
+                            {user.lastActive && (
+                              <p className="text-xs text-white/30">
+                                Last active: {new Date(user.lastActive).toLocaleDateString()}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <a
+                              href={`mailto:${user.email}`}
+                              className="p-2 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg transition-colors"
+                              title="Send email"
+                            >
+                              <Mail className="w-4 h-4 text-blue-400" />
+                            </a>
+                            <a
+                              href={`/admin/users?search=${encodeURIComponent(user.email)}`}
+                              className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+                              title="View user"
+                            >
+                              <ExternalLink className="w-4 h-4 text-white/50" />
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-4 border-t border-white/10 flex items-center justify-between">
+                <p className="text-xs text-white/30">
+                  Click on a user to view their full profile
+                </p>
+                <button
+                  onClick={closeDrillDown}
+                  className="px-4 py-2 bg-white/10 hover:bg-white/15 rounded-xl text-sm text-white transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </div>
