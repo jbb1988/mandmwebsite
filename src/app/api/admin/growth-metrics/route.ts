@@ -307,20 +307,28 @@ export async function GET(request: NextRequest) {
     // ===== CHURN RISK USERS =====
     const { data: proUsers } = await supabase
       .from('profiles')
-      .select('id, name, email, tier, last_login_at, promo_tier_expires_at')
+      .select('id, name, email, tier, last_login_at, updated_at, created_at, promo_tier_expires_at')
       .eq('tier', 'pro');
 
     const churnRiskUsers = (proUsers || [])
       .map(u => {
-        // Use last_login_at from profile, or check healthByUser for last activity
-        const lastLoginAt = u.last_login_at ? new Date(u.last_login_at) : null;
+        // Get best available activity date: feature engagement > last_login > updated_at > created_at
         const lastFeatureActivity = healthByUser[u.id]?.lastActive;
-        const lastActive = lastFeatureActivity && (!lastLoginAt || lastFeatureActivity > lastLoginAt)
-          ? lastFeatureActivity
-          : lastLoginAt;
+        const lastLoginAt = u.last_login_at ? new Date(u.last_login_at) : null;
+        const updatedAt = u.updated_at ? new Date(u.updated_at) : null;
+        const createdAt = u.created_at ? new Date(u.created_at) : null;
+
+        // Pick the most recent activity date
+        const activityDates = [lastFeatureActivity, lastLoginAt, updatedAt, createdAt].filter(Boolean) as Date[];
+        const lastActive = activityDates.length > 0
+          ? activityDates.reduce((latest, date) => date > latest ? date : latest)
+          : null;
+
+        // If we have no activity data at all, skip this user (don't show as 999 days)
+        const hasActivityData = lastFeatureActivity || lastLoginAt;
         const daysSinceActive = lastActive
           ? Math.floor((now.getTime() - lastActive.getTime()) / (1000 * 60 * 60 * 24))
-          : 999;
+          : null;
 
         const trialExpires = u.promo_tier_expires_at ? new Date(u.promo_tier_expires_at) : null;
         const daysUntilExpiry = trialExpires
@@ -330,13 +338,14 @@ export async function GET(request: NextRequest) {
         let riskLevel: 'high' | 'medium' | 'low' = 'low';
         let riskReason = '';
 
-        if (daysSinceActive >= 14) {
+        // Only flag as inactive risk if we have actual activity tracking data
+        if (hasActivityData && daysSinceActive !== null && daysSinceActive >= 14) {
           riskLevel = 'high';
           riskReason = `Inactive ${daysSinceActive} days`;
         } else if (daysUntilExpiry !== null && daysUntilExpiry <= 3 && daysUntilExpiry >= 0) {
           riskLevel = 'high';
           riskReason = `Trial expires in ${daysUntilExpiry} days`;
-        } else if (daysSinceActive >= 7) {
+        } else if (hasActivityData && daysSinceActive !== null && daysSinceActive >= 7) {
           riskLevel = 'medium';
           riskReason = `Inactive ${daysSinceActive} days`;
         } else if (daysUntilExpiry !== null && daysUntilExpiry <= 7) {
@@ -350,7 +359,7 @@ export async function GET(request: NextRequest) {
           email: u.email,
           riskLevel,
           riskReason,
-          daysSinceActive,
+          daysSinceActive: daysSinceActive ?? 0,
           isTrial: !!u.promo_tier_expires_at,
         };
       })
