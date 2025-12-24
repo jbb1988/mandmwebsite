@@ -24,6 +24,7 @@ import {
   BarChart3,
   X,
   ExternalLink,
+  Info,
 } from 'lucide-react';
 
 interface CohortData {
@@ -338,16 +339,25 @@ export default function GrowthCommandCenter() {
                     <ArrowRight className="w-4 h-4 text-white/20 flex-shrink-0" />
 
                     {/* Onboarded */}
-                    <button
-                      onClick={() => fetchDrillDown('funnelOnboarded', 'Onboarded Users (30d)')}
-                      className="flex-1 text-center cursor-pointer group"
-                    >
-                      <div className="bg-cyan-500/20 rounded-xl p-4 mb-2 border border-cyan-500/30 group-hover:border-cyan-400/50 transition-colors">
-                        <p className="text-2xl font-bold text-cyan-400">{metrics.funnel.onboarded}</p>
-                        <p className="text-xs text-white/50">Onboarded</p>
-                      </div>
-                      <p className="text-xs text-cyan-400">{metrics.funnel.onboardingRate}%</p>
-                    </button>
+                    <div className="flex-1 text-center relative">
+                      <button
+                        onClick={() => fetchDrillDown('funnelOnboarded', 'Onboarded Users (30d)')}
+                        className="w-full cursor-pointer group"
+                      >
+                        <div className="bg-cyan-500/20 rounded-xl p-4 mb-2 border border-cyan-500/30 group-hover:border-cyan-400/50 transition-colors relative">
+                          <p className="text-2xl font-bold text-cyan-400">{metrics.funnel.onboarded}</p>
+                          <p className="text-xs text-white/50">Onboarded</p>
+                          {/* Info tooltip */}
+                          <div className="absolute top-1 right-1 group/info">
+                            <Info className="w-3.5 h-3.5 text-white/30 hover:text-cyan-400 transition-colors" />
+                            <div className="absolute bottom-full right-0 mb-2 w-48 p-2 bg-[#1B1F39] border border-white/20 rounded-lg text-left opacity-0 invisible group-hover/info:opacity-100 group-hover/info:visible transition-all z-10 shadow-xl">
+                              <p className="text-xs text-white/70">Users who engaged with at least one feature within 24 hours of signing up.</p>
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-xs text-cyan-400">{metrics.funnel.onboardingRate}%</p>
+                      </button>
+                    </div>
 
                     <ArrowRight className="w-4 h-4 text-white/20 flex-shrink-0" />
 
