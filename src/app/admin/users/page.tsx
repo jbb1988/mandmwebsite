@@ -7,7 +7,8 @@ import { ExternalLink } from 'lucide-react';
 import {
   Users, Search, Filter, ChevronLeft, ChevronRight,
   Loader2, Mail, Calendar, Clock, Crown, User, X,
-  FileDown, Smartphone, Gift, Plus, RefreshCw, Ban
+  FileDown, Smartphone, Gift, Plus, RefreshCw, Ban,
+  Activity, Target, Shield, Zap, Heart, TrendingUp
 } from 'lucide-react';
 
 // Card component
@@ -90,6 +91,37 @@ interface Pagination {
   totalPages: number;
 }
 
+interface FeatureBreakdown {
+  feature_name: string;
+  total_opens: number;
+  total_completions: number;
+  last_used_at: string | null;
+}
+
+interface UserActivity {
+  features_used: number;
+  health_score: number;
+  risk_level: string;
+  segment: string;
+  last_activity: string | null;
+  feature_breakdown: FeatureBreakdown[];
+}
+
+interface HealthDetails {
+  feature_breadth_score: number;
+  data_depth_score: number;
+  engagement_recency_score: number;
+  streak_score: number;
+  social_score: number;
+  features_used_count: number;
+  analyses_count: number;
+  journal_entries_count: number;
+  days_since_last_activity: number;
+  current_streak: number;
+  team_memberships: number;
+  messages_sent: number;
+}
+
 type ModalTab = 'profile' | 'trial' | 'app' | 'activity';
 
 const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
@@ -115,6 +147,9 @@ export default function UsersPage() {
   const [modalTab, setModalTab] = useState<ModalTab>('profile');
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [userActivity, setUserActivity] = useState<UserActivity | null>(null);
+  const [healthDetails, setHealthDetails] = useState<HealthDetails | null>(null);
+  const [loadingActivity, setLoadingActivity] = useState(false);
 
   const fetchUsers = async (page = 1) => {
     setLoading(true);
@@ -169,6 +204,32 @@ export default function UsersPage() {
     }
   };
 
+  const fetchUserActivity = async (userId: string) => {
+    setLoadingActivity(true);
+    try {
+      const res = await fetch(`/api/admin/feature-analytics/users?userId=${userId}`, {
+        headers: { 'X-Admin-Password': getPassword() || adminPassword },
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setUserActivity({
+          features_used: data.user.features_used,
+          health_score: data.user.health_score,
+          risk_level: data.user.risk_level,
+          segment: data.user.segment,
+          last_activity: data.user.last_activity,
+          feature_breakdown: data.user.feature_breakdown || [],
+        });
+        setHealthDetails(data.healthDetails || null);
+      }
+    } catch (error) {
+      console.error('Failed to fetch user activity:', error);
+    } finally {
+      setLoadingActivity(false);
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -182,9 +243,19 @@ export default function UsersPage() {
       setDetailedUser(null);
       setTrialGrants([]);
       setPromoRedemptions([]);
+      setUserActivity(null);
+      setHealthDetails(null);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedUser]);
+
+  // Fetch activity when Activity tab is selected
+  useEffect(() => {
+    if (selectedUser && modalTab === 'activity' && !userActivity) {
+      fetchUserActivity(selectedUser.id);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedUser, modalTab]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -591,6 +662,157 @@ export default function UsersPage() {
     );
   };
 
+  const formatFeatureName = (name: string) => {
+    return name.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  };
+
+  const getRiskColor = (level: string) => {
+    switch (level) {
+      case 'low': return 'text-emerald-400';
+      case 'medium': return 'text-amber-400';
+      case 'at_risk': return 'text-orange-400';
+      case 'high_risk': return 'text-red-400';
+      default: return 'text-gray-400';
+    }
+  };
+
+  const getSegmentInfo = (segment: string) => {
+    switch (segment) {
+      case 'power_user': return { label: 'Power User', color: 'text-emerald-400', bg: 'bg-emerald-500/10 border-emerald-500/20' };
+      case 'growing': return { label: 'Growing', color: 'text-blue-400', bg: 'bg-blue-500/10 border-blue-500/20' };
+      case 'at_risk': return { label: 'At Risk', color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/20' };
+      case 'dormant': return { label: 'Dormant', color: 'text-gray-400', bg: 'bg-gray-500/10 border-gray-500/20' };
+      default: return { label: segment, color: 'text-white', bg: 'bg-white/5 border-white/10' };
+    }
+  };
+
+  const renderActivityTab = () => {
+    if (loadingActivity) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="w-6 h-6 text-white/40 animate-spin" />
+        </div>
+      );
+    }
+
+    if (!userActivity) {
+      return (
+        <div className="text-center py-12 text-white/50">
+          <Activity className="w-12 h-12 mx-auto mb-4 opacity-50" />
+          <p>No activity data available</p>
+        </div>
+      );
+    }
+
+    const segmentInfo = getSegmentInfo(userActivity.segment);
+    const activeFeatures = userActivity.feature_breakdown.filter(f => f.total_opens > 0);
+
+    return (
+      <div className="space-y-4">
+        {/* Overview Stats */}
+        <div className="grid grid-cols-4 gap-3">
+          <div className="bg-white/5 rounded-lg p-3 text-center">
+            <div className={`text-2xl font-bold ${getRiskColor(userActivity.risk_level)}`}>
+              {userActivity.health_score}
+            </div>
+            <div className="text-xs text-white/50">Health Score</div>
+          </div>
+          <div className="bg-white/5 rounded-lg p-3 text-center">
+            <div className="text-2xl font-bold text-blue-400">{userActivity.features_used}</div>
+            <div className="text-xs text-white/50">Features Used</div>
+          </div>
+          <div className="bg-white/5 rounded-lg p-3 text-center">
+            <span className={`inline-flex px-2 py-1 rounded text-sm font-medium border ${segmentInfo.bg} ${segmentInfo.color}`}>
+              {segmentInfo.label}
+            </span>
+            <div className="text-xs text-white/50 mt-1">Segment</div>
+          </div>
+          <div className="bg-white/5 rounded-lg p-3 text-center">
+            <div className="text-sm font-medium text-white">
+              {userActivity.last_activity
+                ? new Date(userActivity.last_activity).toLocaleDateString()
+                : 'Never'}
+            </div>
+            <div className="text-xs text-white/50">Last Active</div>
+          </div>
+        </div>
+
+        {/* Health Score Breakdown */}
+        {healthDetails && (
+          <div className="bg-white/5 rounded-lg p-4">
+            <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+              <Heart className="w-4 h-4 text-red-400" />
+              Health Score Breakdown
+            </h4>
+            <div className="grid grid-cols-5 gap-2">
+              {[
+                { label: 'Features', value: healthDetails.feature_breadth_score, icon: Target, desc: `${healthDetails.features_used_count} used` },
+                { label: 'Data', value: healthDetails.data_depth_score, icon: Shield, desc: `${healthDetails.analyses_count} analyses` },
+                { label: 'Recency', value: healthDetails.engagement_recency_score, icon: Clock, desc: `${healthDetails.days_since_last_activity}d ago` },
+                { label: 'Streak', value: healthDetails.streak_score, icon: Zap, desc: `${healthDetails.current_streak} days` },
+                { label: 'Social', value: healthDetails.social_score, icon: Users, desc: `${healthDetails.team_memberships} teams` },
+              ].map(item => (
+                <div key={item.label} className="bg-white/5 rounded-lg p-2 text-center">
+                  <item.icon className="w-3.5 h-3.5 mx-auto mb-1 text-white/40" />
+                  <div className="text-lg font-bold">{item.value}</div>
+                  <div className="text-xs text-white/40">{item.label}</div>
+                  <div className="text-xs text-white/30 truncate">{item.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Feature Usage */}
+        <div className="bg-white/5 rounded-lg p-4">
+          <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-cyan-400" />
+            Feature Usage ({activeFeatures.length} features)
+          </h4>
+          {activeFeatures.length > 0 ? (
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {activeFeatures
+                .sort((a, b) => b.total_opens - a.total_opens)
+                .map(f => (
+                <div
+                  key={f.feature_name}
+                  className="flex items-center justify-between p-2 bg-white/5 rounded-lg hover:bg-white/10 transition"
+                >
+                  <span className="text-sm">{formatFeatureName(f.feature_name)}</span>
+                  <div className="flex items-center gap-4 text-xs">
+                    <span className="text-white/50">{f.total_opens} opens</span>
+                    <span className="text-emerald-400">{f.total_completions} done</span>
+                    {f.last_used_at && (
+                      <span className="text-white/30">
+                        {new Date(f.last_used_at).toLocaleDateString()}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-sm text-white/40 text-center py-4">
+              This user hasn&apos;t used any features yet
+            </p>
+          )}
+        </div>
+
+        {/* Refresh Button */}
+        <button
+          onClick={() => {
+            setUserActivity(null);
+            if (selectedUser) fetchUserActivity(selectedUser.id);
+          }}
+          className="w-full py-2 text-sm text-white/50 hover:text-white hover:bg-white/5 rounded-lg transition flex items-center justify-center gap-2"
+        >
+          <RefreshCw className="w-3.5 h-3.5" />
+          Refresh Activity Data
+        </button>
+      </div>
+    );
+  };
+
   return (
     <AdminGate title="User Management" description="View and manage all users">
       <div className="min-h-screen bg-[#0A0B14] text-white">
@@ -855,6 +1077,17 @@ export default function UsersPage() {
                       >
                         App Info
                       </button>
+                      <button
+                        onClick={() => setModalTab('activity')}
+                        className={`flex-1 px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-1.5 ${
+                          modalTab === 'activity'
+                            ? 'bg-cyan-500 text-white'
+                            : 'text-white/60 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        <Activity className="w-3.5 h-3.5" />
+                        Activity
+                      </button>
                     </div>
                   </div>
 
@@ -869,6 +1102,7 @@ export default function UsersPage() {
                         {modalTab === 'profile' && renderProfileTab()}
                         {modalTab === 'trial' && renderTrialTab()}
                         {modalTab === 'app' && renderAppInfoTab()}
+                        {modalTab === 'activity' && renderActivityTab()}
                       </>
                     )}
                   </div>
