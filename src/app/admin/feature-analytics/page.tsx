@@ -1479,7 +1479,7 @@ export default function FeatureAnalyticsPage() {
                           value={labStats.analyses_this_week}
                           label="This Week"
                           icon={TrendingUp}
-                          color="pink"
+                          color="orange"
                         />
                       </div>
                     )}

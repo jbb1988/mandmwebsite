@@ -90,7 +90,7 @@ interface Pagination {
   totalPages: number;
 }
 
-type ModalTab = 'profile' | 'trial' | 'app';
+type ModalTab = 'profile' | 'trial' | 'app' | 'activity';
 
 const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
