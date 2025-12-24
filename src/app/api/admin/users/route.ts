@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { verifyAdmin, verifyAdminWithRateLimit } from '@/lib/admin-auth';
+import { logAdminAction, getRequestInfo } from '@/lib/admin-audit';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -20,11 +21,11 @@ interface UserListItem {
   organization_id: string | null;
   position: string | null;
   sport: string | null;
+  app_version: string | null;
 }
 
 // Full user profile with all fields
 interface UserProfile extends UserListItem {
-  app_version: string | null;
   app_metadata: Record<string, unknown> | null;
   affiliate_code: string | null;
   referred_at: string | null;
@@ -77,7 +78,7 @@ export async function GET(request: NextRequest) {
     // Build query
     let query = supabase
       .from('profiles')
-      .select('id, email, name, tier, status, created_at, last_login_at, promo_tier_expires_at, organization_id, position, sport', { count: 'exact' })
+      .select('id, email, name, tier, status, created_at, last_login_at, promo_tier_expires_at, organization_id, position, sport, app_version', { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
@@ -270,6 +271,18 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
 
+      // Log the action
+      const { ipAddress, userAgent } = getRequestInfo(request.headers);
+      await logAdminAction({
+        action: 'extend_trial',
+        targetType: 'user',
+        targetId: userId,
+        targetEmail: userEmail,
+        details: { days, newExpiration: newExpiration.toISOString() },
+        ipAddress,
+        userAgent,
+      });
+
       return NextResponse.json({
         success: true,
         message: `Trial extended by ${days} days`,
@@ -294,6 +307,18 @@ export async function POST(request: NextRequest) {
       if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
+
+      // Log the action
+      const { ipAddress, userAgent } = getRequestInfo(request.headers);
+      await logAdminAction({
+        action: 'revoke_trial',
+        targetType: 'user',
+        targetId: userId,
+        targetEmail: userEmail,
+        details: {},
+        ipAddress,
+        userAgent,
+      });
 
       return NextResponse.json({ success: true, message: 'Trial revoked, user set to free tier' });
     }
@@ -350,6 +375,18 @@ export async function POST(request: NextRequest) {
         console.error('Error creating trial_grant record:', grantError);
         // Don't fail the request - profile was updated, email just won't be sent
       }
+
+      // Log the action
+      const { ipAddress, userAgent } = getRequestInfo(request.headers);
+      await logAdminAction({
+        action: 'grant_trial',
+        targetType: 'user',
+        targetId: userId,
+        targetEmail: email,
+        details: { days, expiresAt: expirationDate.toISOString() },
+        ipAddress,
+        userAgent,
+      });
 
       return NextResponse.json({
         success: true,

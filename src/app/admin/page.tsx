@@ -2,13 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import AdminGate from '@/components/AdminGate';
-import AdminNav from '@/components/AdminNav';
-import { useAdminAuth } from '@/context/AdminAuthContext';
+import RevenueDashboard from '@/components/admin/RevenueDashboard';
 import Link from 'next/link';
 import {
   DollarSign, Users, Image, Facebook, Settings,
-  ExternalLink, Shield, BarChart3, FileText, LogOut,
-  Twitter, Handshake, TrendingUp
+  ExternalLink, Shield, FileText,
+  Twitter, Handshake, TrendingUp, Target, BarChart3
 } from 'lucide-react';
 
 // Card component matching FB Outreach styling
@@ -34,11 +33,12 @@ function Card({ children, className = '', variant = 'default', glow = false }: {
 }
 
 // Stat card for quick metrics
-function StatCard({ value, label, icon: Icon, color = 'white' }: {
+function StatCard({ value, label, icon: Icon, color = 'white', href }: {
   value: number | string;
   label: string;
   icon?: typeof DollarSign;
   color?: string;
+  href?: string;
 }) {
   const colorClasses: Record<string, string> = {
     white: 'text-white',
@@ -49,13 +49,27 @@ function StatCard({ value, label, icon: Icon, color = 'white' }: {
     cyan: 'text-cyan-400',
   };
 
+  const content = (
+    <div className="text-center">
+      {Icon && <Icon className={`w-5 h-5 ${colorClasses[color]} mx-auto mb-2`} />}
+      <p className={`text-2xl font-bold ${colorClasses[color]}`}>{value}</p>
+      <p className="text-xs text-white/50 mt-1">{label}</p>
+    </div>
+  );
+
+  if (href) {
+    return (
+      <Link href={href}>
+        <Card variant="elevated" className="p-4 hover:scale-[1.02] hover:border-white/20 transition-all cursor-pointer">
+          {content}
+        </Card>
+      </Link>
+    );
+  }
+
   return (
     <Card variant="elevated" className="p-4">
-      <div className="text-center">
-        {Icon && <Icon className={`w-5 h-5 ${colorClasses[color]} mx-auto mb-2`} />}
-        <p className={`text-2xl font-bold ${colorClasses[color]}`}>{value}</p>
-        <p className="text-xs text-white/50 mt-1">{label}</p>
-      </div>
+      {content}
     </Card>
   );
 }
@@ -66,49 +80,36 @@ interface AdminTool {
   href: string;
   icon: typeof DollarSign;
   color: string;
-  category: 'marketing' | 'finance' | 'tools';
 }
 
 const ADMIN_TOOLS: AdminTool[] = [
   {
-    name: 'FB Outreach Pipeline',
-    description: 'Track Facebook group admin outreach and posts',
-    href: '/admin/fb-outreach',
-    icon: Facebook,
-    color: 'blue',
-    category: 'marketing',
-  },
-  {
-    name: 'X/Twitter Outreach',
-    description: 'Track influencer DMs and partnerships',
-    href: '/admin/x-outreach',
-    icon: Twitter,
+    name: 'Outreach CRM',
+    description: 'Unified sales pipeline for all contacts',
+    href: '/admin/outreach-crm',
+    icon: Target,
     color: 'cyan',
-    category: 'marketing',
   },
   {
-    name: 'Finder Fee Management',
-    description: 'Manage finder partners and track transactions',
-    href: '/admin/finder-fees',
-    icon: DollarSign,
-    color: 'orange',
-    category: 'finance',
+    name: 'Feature Analytics',
+    description: 'Track feature usage and health scores',
+    href: '/admin/feature-analytics',
+    icon: BarChart3,
+    color: 'purple',
   },
   {
-    name: 'Partner Attribution',
-    description: 'Manually attribute sales to Tolt partners',
-    href: '/admin/partner-attribution',
+    name: 'User Management',
+    description: 'Manage users, trials, and subscriptions',
+    href: '/admin/users',
+    icon: Users,
+    color: 'blue',
+  },
+  {
+    name: 'Partner Management',
+    description: 'Manage affiliates and sync with Tolt',
+    href: '/admin/partners',
     icon: Handshake,
     color: 'green',
-    category: 'finance',
-  },
-  {
-    name: 'Partner Banner Generator',
-    description: 'Create custom QR banners for partners',
-    href: '/admin/banner-generator',
-    icon: Image,
-    color: 'purple',
-    category: 'tools',
   },
 ];
 
@@ -119,42 +120,24 @@ const QUICK_LINKS = [
     description: 'Partner portal (view as partner)',
   },
   {
-    name: 'Partner Program (Public)',
+    name: 'Partner Program',
     href: '/partner-program',
     description: 'Public partner signup page',
   },
   {
     name: 'Finder Fee Page',
     href: '/finder-fee',
-    description: 'Standard finder fee info (pw: fastball)',
+    description: 'Standard finder fee (pw: fastball)',
   },
   {
     name: 'Finder Fee VIP',
     href: '/finder-fee-vip',
-    description: 'VIP recurring finder info (pw: dominate)',
+    description: 'VIP recurring (pw: dominate)',
   },
   {
     name: 'Team Licensing',
     href: '/team-licensing',
     description: 'Team purchase page',
-  },
-  {
-    name: 'Tolt Admin',
-    href: 'https://app.tolt.io',
-    description: 'Partner program admin',
-    external: true,
-  },
-  {
-    name: 'Supabase Dashboard',
-    href: 'https://supabase.com/dashboard/project/kuswlvbjplkgrqlmqtok',
-    description: 'Database & Edge Functions',
-    external: true,
-  },
-  {
-    name: 'Vercel Dashboard',
-    href: 'https://vercel.com/jbbs-projects-99c11455/mind-muscle-website',
-    description: 'Website deployments',
-    external: true,
   },
 ];
 
@@ -168,7 +151,6 @@ interface Stats {
 const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
 export default function AdminHubPage() {
-  const { logout } = useAdminAuth();
   const [stats, setStats] = useState<Stats>({
     fbGroups: 0,
     xTargets: 0,
@@ -205,6 +187,10 @@ export default function AdminHubPage() {
     }
   }
 
+  const handleEmailUser = (email: string) => {
+    window.location.href = `mailto:${email}?subject=Your Mind %26 Muscle Trial`;
+  };
+
   const colorMap: Record<string, { bg: string; border: string; text: string }> = {
     blue: { bg: 'bg-blue-500/10', border: 'border-blue-500/30', text: 'text-blue-400' },
     orange: { bg: 'bg-orange-500/10', border: 'border-orange-500/30', text: 'text-orange-400' },
@@ -222,120 +208,139 @@ export default function AdminHubPage() {
         {/* Subtle gradient overlay */}
         <div className="fixed inset-0 bg-gradient-to-br from-blue-900/5 via-transparent to-purple-900/5 pointer-events-none" />
 
-        <div className="relative z-10 pt-28 pb-12 px-4 sm:px-6">
+        <div className="relative z-10 py-8 px-4 sm:px-6">
           <div className="max-w-6xl mx-auto">
             {/* Header */}
-            <div className="text-center mb-10">
-              <div className="w-16 h-16 bg-gradient-to-br from-orange-500/20 to-blue-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/10">
-                <Shield className="w-8 h-8 text-orange-400" />
+            <div className="mb-8">
+              <div className="flex items-center gap-4 mb-2">
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-500/20 to-blue-500/20 rounded-xl flex items-center justify-center border border-white/10">
+                  <Shield className="w-6 h-6 text-orange-400" />
+                </div>
+                <div>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                    Admin Dashboard
+                  </h1>
+                  <p className="text-white/50 text-sm">
+                    Central hub for all admin tools
+                  </p>
+                </div>
               </div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 tracking-tight">
-                Mind & Muscle Admin
-              </h1>
-              <p className="text-white/50 text-sm sm:text-base">
-                Central hub for all admin tools and dashboards
-              </p>
-              <button
-                onClick={logout}
-                className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm text-white/40 hover:text-white transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                Logout
-              </button>
             </div>
 
-            {/* Admin Navigation */}
-            <AdminNav />
+            {/* Two Column Layout */}
+            <div className="grid lg:grid-cols-3 gap-6">
+              {/* Left Column - Revenue + Quick Actions */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Revenue Dashboard */}
+                <RevenueDashboard onEmailUser={handleEmailUser} />
 
-            {/* Quick Stats Row */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-10">
-              <StatCard value={stats.fbGroups} label="FB Groups" icon={Facebook} color="blue" />
-              <StatCard value={stats.xTargets} label="X/Twitter Targets" icon={Twitter} color="cyan" />
-              <StatCard value={stats.activePartners} label="Active Partners" icon={Handshake} color="green" />
-              <StatCard value={stats.weekOutreach} label="DMs Sent" icon={TrendingUp} color="orange" />
-            </div>
+                {/* Outreach Stats Row */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <StatCard
+                    value={stats.fbGroups}
+                    label="FB Groups"
+                    icon={Facebook}
+                    color="blue"
+                    href="/admin/fb-outreach"
+                  />
+                  <StatCard
+                    value={stats.xTargets}
+                    label="X Targets"
+                    icon={Twitter}
+                    color="cyan"
+                    href="/admin/x-outreach"
+                  />
+                  <StatCard
+                    value={stats.activePartners}
+                    label="Partners"
+                    icon={Handshake}
+                    color="green"
+                    href="/admin/partners"
+                  />
+                  <StatCard
+                    value={stats.weekOutreach}
+                    label="DMs Sent"
+                    icon={TrendingUp}
+                    color="orange"
+                    href="/admin/outreach-crm"
+                  />
+                </div>
+              </div>
 
-            {/* Admin Tools Grid */}
-            <div className="mb-10">
-              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <Settings className="w-5 h-5 text-white/40" />
-                Admin Tools
-              </h2>
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {ADMIN_TOOLS.map((tool) => {
-                  const Icon = tool.icon;
-                  const colors = colorMap[tool.color] || colorMap.blue;
-                  return (
-                    <Link key={tool.href} href={tool.href}>
-                      <Card
-                        variant="elevated"
-                        className="p-5 h-full hover:scale-[1.02] hover:border-white/20 transition-all cursor-pointer group"
+              {/* Right Column - Quick Access */}
+              <div className="space-y-6">
+                {/* Quick Tools */}
+                <Card variant="default" className="p-5">
+                  <h2 className="text-base font-semibold text-white mb-4 flex items-center gap-2">
+                    <Settings className="w-4 h-4 text-white/40" />
+                    Quick Access
+                  </h2>
+                  <div className="space-y-2">
+                    {ADMIN_TOOLS.map((tool) => {
+                      const Icon = tool.icon;
+                      const colors = colorMap[tool.color] || colorMap.blue;
+                      return (
+                        <Link key={tool.href} href={tool.href}>
+                          <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] transition-colors border border-white/[0.05] hover:border-white/10 group">
+                            <div className={`w-10 h-10 ${colors.bg} rounded-xl flex items-center justify-center border ${colors.border} group-hover:scale-110 transition-transform`}>
+                              <Icon className={`w-5 h-5 ${colors.text}`} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium text-white">{tool.name}</p>
+                              <p className="text-xs text-white/40 truncate">{tool.description}</p>
+                            </div>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </Card>
+
+                {/* Quick Links */}
+                <Card variant="default" className="p-5">
+                  <h2 className="text-base font-semibold text-white mb-4 flex items-center gap-2">
+                    <ExternalLink className="w-4 h-4 text-white/40" />
+                    Quick Links
+                  </h2>
+                  <div className="space-y-2">
+                    {QUICK_LINKS.map((link) => (
+                      <a
+                        key={link.href}
+                        href={link.href}
+                        target={link.href.startsWith('http') ? '_blank' : undefined}
+                        rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                        className="flex items-center justify-between p-2 rounded-lg hover:bg-white/5 transition-colors text-sm"
                       >
-                        <div className={`w-12 h-12 ${colors.bg} rounded-xl flex items-center justify-center border ${colors.border} mb-4 group-hover:scale-110 transition-transform`}>
-                          <Icon className={`w-6 h-6 ${colors.text}`} />
-                        </div>
-                        <h3 className="text-base font-semibold text-white mb-1">{tool.name}</h3>
-                        <p className="text-sm text-white/40">{tool.description}</p>
-                      </Card>
-                    </Link>
-                  );
-                })}
+                        <span className="text-white/60 hover:text-white">{link.name}</span>
+                        <span className="text-xs text-white/30">{link.description}</span>
+                      </a>
+                    ))}
+                  </div>
+                </Card>
+
+                {/* Password Reference */}
+                <Card variant="bordered" className="p-4">
+                  <h2 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-white/40" />
+                    Passwords
+                  </h2>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-white/40">Admin</span>
+                      <code className="text-cyan-400">Brutus7862!</code>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-white/40">Finder Fee</span>
+                      <code className="text-cyan-400">fastball</code>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-white/40">VIP</span>
+                      <code className="text-cyan-400">dominate</code>
+                    </div>
+                  </div>
+                </Card>
               </div>
             </div>
-
-            {/* Quick Links */}
-            <div className="mb-10">
-              <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                <ExternalLink className="w-5 h-5 text-white/40" />
-                Quick Links
-              </h2>
-              <Card variant="default" className="p-5">
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {QUICK_LINKS.map((link) => (
-                    <a
-                      key={link.href}
-                      href={link.href}
-                      target={link.external ? '_blank' : undefined}
-                      rel={link.external ? 'noopener noreferrer' : undefined}
-                      className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] transition-colors border border-white/[0.05] hover:border-white/10"
-                    >
-                      <div className="flex-1">
-                        <p className="text-white font-medium flex items-center gap-2 text-sm">
-                          {link.name}
-                          {link.external && <ExternalLink className="w-3 h-3 text-white/30" />}
-                        </p>
-                        <p className="text-xs text-white/30">{link.description}</p>
-                      </div>
-                    </a>
-                  ))}
-                </div>
-              </Card>
-            </div>
-
-            {/* Password Reference */}
-            <Card variant="bordered" className="p-5">
-              <h2 className="text-base font-semibold text-white mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-white/40" />
-                Password Reference
-              </h2>
-              <div className="grid md:grid-cols-3 gap-3 text-sm">
-                <div className="bg-white/[0.03] rounded-xl p-3 border border-white/[0.05]">
-                  <p className="text-white/40 mb-1 text-xs">Admin Dashboard</p>
-                  <code className="text-cyan-400 text-sm">Brutus7862!</code>
-                </div>
-                <div className="bg-white/[0.03] rounded-xl p-3 border border-white/[0.05]">
-                  <p className="text-white/40 mb-1 text-xs">Finder Fee Page</p>
-                  <code className="text-cyan-400 text-sm">fastball</code>
-                </div>
-                <div className="bg-white/[0.03] rounded-xl p-3 border border-white/[0.05]">
-                  <p className="text-white/40 mb-1 text-xs">Finder Fee VIP</p>
-                  <code className="text-cyan-400 text-sm">dominate</code>
-                </div>
-              </div>
-              <p className="text-xs text-white/20 mt-4">
-                Note: Admin password is set via NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD in Vercel environment variables.
-              </p>
-            </Card>
           </div>
         </div>
       </div>

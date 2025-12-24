@@ -1,6 +1,18 @@
 'use client';
 
-import { AdminAuthProvider } from '@/context/AdminAuthContext';
+import { AdminAuthProvider, useAdminAuth } from '@/context/AdminAuthContext';
+import AdminSidebar from '@/components/admin/AdminSidebar';
+
+function AdminLayoutInner({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated } = useAdminAuth();
+
+  // Only show sidebar when authenticated
+  if (!isAuthenticated) {
+    return <>{children}</>;
+  }
+
+  return <AdminSidebar>{children}</AdminSidebar>;
+}
 
 export default function AdminLayout({
   children,
@@ -9,7 +21,7 @@ export default function AdminLayout({
 }) {
   return (
     <AdminAuthProvider>
-      {children}
+      <AdminLayoutInner>{children}</AdminLayoutInner>
     </AdminAuthProvider>
   );
 }

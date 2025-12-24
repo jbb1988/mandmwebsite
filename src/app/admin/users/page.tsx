@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import AdminGate from '@/components/AdminGate';
-import AdminNav from '@/components/AdminNav';
 import { useAdminAuth } from '@/context/AdminAuthContext';
+import { ExternalLink } from 'lucide-react';
 import {
   Users, Search, Filter, ChevronLeft, ChevronRight,
   Loader2, Mail, Calendar, Clock, Crown, User, X,
@@ -41,11 +41,11 @@ interface UserProfile {
   organization_id: string | null;
   position: string | null;
   sport: string | null;
+  app_version: string | null;
   computedStatus: string;
 }
 
 interface DetailedUser extends UserProfile {
-  app_version: string | null;
   app_metadata: Record<string, unknown> | null;
   affiliate_code: string | null;
   referred_at: string | null;
@@ -240,12 +240,13 @@ export default function UsersPage() {
 
   const exportCSV = () => {
     const csvContent = [
-      ['Email', 'Name', 'Tier', 'Status', 'Joined', 'Last Login'].join(','),
+      ['Email', 'Name', 'Tier', 'Status', 'App Version', 'Joined', 'Last Login'].join(','),
       ...users.map(u => [
         u.email,
         u.name || '',
         u.tier,
         u.computedStatus,
+        u.app_version || '',
         new Date(u.created_at).toLocaleDateString(),
         u.last_login_at ? new Date(u.last_login_at).toLocaleDateString() : 'Never',
       ].join(','))
@@ -595,22 +596,19 @@ export default function UsersPage() {
       <div className="min-h-screen bg-[#0A0B14] text-white">
         <div className="fixed inset-0 bg-gradient-to-br from-blue-900/5 via-transparent to-purple-900/5 pointer-events-none" />
 
-        <div className="relative z-10 pt-28 pb-12 px-4 sm:px-6">
+        <div className="relative z-10 py-8 px-4 sm:px-6">
           <div className="max-w-6xl mx-auto">
             {/* Header */}
-            <div className="text-center mb-10">
-              <div className="w-16 h-16 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/10">
-                <Users className="w-8 h-8 text-blue-400" />
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl flex items-center justify-center border border-white/10">
+                  <Users className="w-6 h-6 text-blue-400" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-white">User Management</h1>
+                  <p className="text-white/50 text-sm">View and manage all registered users</p>
+                </div>
               </div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2 tracking-tight">User Management</h1>
-              <p className="text-white/50 text-sm sm:text-base">View and manage all registered users</p>
-            </div>
-
-            {/* Admin Navigation */}
-            <AdminNav />
-
-            {/* Action Button */}
-            <div className="flex justify-center mb-8">
               <button
                 onClick={exportCSV}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-sm transition-colors"
@@ -709,8 +707,10 @@ export default function UsersPage() {
                         <th className="px-4 py-3 font-medium">User</th>
                         <th className="px-4 py-3 font-medium">Tier</th>
                         <th className="px-4 py-3 font-medium">Status</th>
-                        <th className="px-4 py-3 font-medium hidden md:table-cell">Joined</th>
-                        <th className="px-4 py-3 font-medium hidden lg:table-cell">Last Login</th>
+                        <th className="px-4 py-3 font-medium hidden md:table-cell">App Version</th>
+                        <th className="px-4 py-3 font-medium hidden lg:table-cell">Joined</th>
+                        <th className="px-4 py-3 font-medium hidden xl:table-cell">Last Login</th>
+                        <th className="px-4 py-3 font-medium w-16">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
@@ -740,13 +740,33 @@ export default function UsersPage() {
                           <td className="px-4 py-3">
                             {getStatusBadge(user.computedStatus)}
                           </td>
-                          <td className="px-4 py-3 text-white/50 hidden md:table-cell">
-                            {new Date(user.created_at).toLocaleDateString()}
+                          <td className="px-4 py-3 hidden md:table-cell">
+                            {user.app_version ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono bg-purple-500/10 text-purple-400 border border-purple-500/20">
+                                <Smartphone className="w-3 h-3" />
+                                {user.app_version}
+                              </span>
+                            ) : (
+                              <span className="text-white/30 text-xs">—</span>
+                            )}
                           </td>
                           <td className="px-4 py-3 text-white/50 hidden lg:table-cell">
+                            {new Date(user.created_at).toLocaleDateString()}
+                          </td>
+                          <td className="px-4 py-3 text-white/50 hidden xl:table-cell">
                             {user.last_login_at
                               ? new Date(user.last_login_at).toLocaleDateString()
                               : 'Never'}
+                          </td>
+                          <td className="px-4 py-3">
+                            <a
+                              href={`mailto:${user.email}?subject=Your Mind %26 Muscle Account`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="p-2 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg inline-flex transition-colors"
+                              title="Email user"
+                            >
+                              <Mail className="w-4 h-4 text-blue-400" />
+                            </a>
                           </td>
                         </tr>
                       ))}
@@ -855,7 +875,15 @@ export default function UsersPage() {
 
                   {/* Modal Footer */}
                   <div className="p-6 border-t border-white/10">
-                    <div className="flex justify-end">
+                    <div className="flex justify-between">
+                      <a
+                        href={`mailto:${selectedUser.email}?subject=Your Mind %26 Muscle Account`}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg text-sm transition-colors"
+                      >
+                        <Mail className="w-4 h-4" />
+                        Email User
+                        <ExternalLink className="w-3 h-3" />
+                      </a>
                       <button
                         onClick={() => setSelectedUser(null)}
                         className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors"
