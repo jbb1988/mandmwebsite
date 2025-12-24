@@ -228,7 +228,9 @@ export default function RevenueDashboard({ onEmailUser, onGrantTrial }: Props) {
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
             <div className="flex items-center gap-2 mb-2">
               <TrendingUp className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs text-white/50">Est. MRR</span>
+              <span className="text-xs text-white/50">
+                {dataSource === 'revenuecat' ? 'MRR' : 'Est. MRR'}
+              </span>
             </div>
             <p className="text-2xl font-bold text-emerald-400">${stats.estimatedMRR}</p>
             {parseFloat(stats.revenueLast28Days) > 0 && (
