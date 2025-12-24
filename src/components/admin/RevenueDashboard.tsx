@@ -13,15 +13,31 @@ import {
   Gift,
   ChevronRight,
   RefreshCw,
+  XCircle,
+  CheckCircle,
+  Database,
+  Cloud,
+  AlertCircle,
 } from 'lucide-react';
+
+interface SubscriptionRevenue {
+  total: number;
+  last30Days: number;
+  last7Days: number;
+  newSubscribers: number;
+  renewals: number;
+  cancellations: number;
+}
 
 interface RevenueStats {
   totalUsers: number;
-  paidProUsers: number;
+  paidSubscribers: number;
   activeTrials: number;
   expiringTrials: number;
   freeUsers: number;
   estimatedMRR: string;
+  revenueLast28Days: string;
+  subscriptionRevenue: SubscriptionRevenue;
   creditRevenue: {
     total: number;
     last30Days: number;
@@ -58,6 +74,8 @@ export default function RevenueDashboard({ onEmailUser, onGrantTrial }: Props) {
   const [expiringTrials, setExpiringTrials] = useState<ExpiringTrial[]>([]);
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dataSource, setDataSource] = useState<'revenuecat' | 'database' | 'estimated'>('estimated');
+  const [revenueCatConfigured, setRevenueCatConfigured] = useState(false);
   const { getPassword } = useAdminAuth();
 
   const fetchData = async () => {
@@ -72,6 +90,8 @@ export default function RevenueDashboard({ onEmailUser, onGrantTrial }: Props) {
         setStats(data.stats);
         setExpiringTrials(data.expiringTrialsDetails || []);
         setRecentActivity(data.recentActivity || []);
+        setDataSource(data.dataSource || 'estimated');
+        setRevenueCatConfigured(data.revenueCatConfigured || false);
       }
     } catch (error) {
       console.error('Failed to fetch revenue stats:', error);
@@ -83,6 +103,35 @@ export default function RevenueDashboard({ onEmailUser, onGrantTrial }: Props) {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const getDataSourceIndicator = () => {
+    switch (dataSource) {
+      case 'revenuecat':
+        return {
+          icon: Cloud,
+          label: 'RevenueCat API',
+          color: 'text-emerald-400',
+          bgColor: 'bg-emerald-500/20',
+        };
+      case 'database':
+        return {
+          icon: Database,
+          label: 'Subscription Events',
+          color: 'text-blue-400',
+          bgColor: 'bg-blue-500/20',
+        };
+      default:
+        return {
+          icon: AlertCircle,
+          label: 'Estimated (Profile Data)',
+          color: 'text-orange-400',
+          bgColor: 'bg-orange-500/20',
+        };
+    }
+  };
+
+  const sourceInfo = getDataSourceIndicator();
+  const SourceIcon = sourceInfo.icon;
 
   if (loading) {
     return (
@@ -96,6 +145,40 @@ export default function RevenueDashboard({ onEmailUser, onGrantTrial }: Props) {
 
   if (!stats) return null;
 
+  const getActivityIcon = (type: string) => {
+    switch (type) {
+      case 'subscription':
+        return <CreditCard className="w-4 h-4 text-emerald-400" />;
+      case 'renewal':
+        return <RefreshCw className="w-4 h-4 text-blue-400" />;
+      case 'cancellation':
+        return <XCircle className="w-4 h-4 text-red-400" />;
+      case 'expiration':
+        return <Clock className="w-4 h-4 text-orange-400" />;
+      case 'credit_purchase':
+        return <DollarSign className="w-4 h-4 text-purple-400" />;
+      default:
+        return <CheckCircle className="w-4 h-4 text-white/50" />;
+    }
+  };
+
+  const getActivityBgColor = (type: string) => {
+    switch (type) {
+      case 'subscription':
+        return 'bg-emerald-500/20';
+      case 'renewal':
+        return 'bg-blue-500/20';
+      case 'cancellation':
+        return 'bg-red-500/20';
+      case 'expiration':
+        return 'bg-orange-500/20';
+      case 'credit_purchase':
+        return 'bg-purple-500/20';
+      default:
+        return 'bg-white/10';
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Main Revenue Card */}
@@ -107,7 +190,12 @@ export default function RevenueDashboard({ onEmailUser, onGrantTrial }: Props) {
             </div>
             <div>
               <h2 className="text-lg font-semibold text-white">Revenue Dashboard</h2>
-              <p className="text-xs text-white/50">Subscription & purchase metrics</p>
+              <div className="flex items-center gap-2 mt-1">
+                <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full ${sourceInfo.bgColor}`}>
+                  <SourceIcon className={`w-3 h-3 ${sourceInfo.color}`} />
+                  <span className={`text-xs ${sourceInfo.color}`}>{sourceInfo.label}</span>
+                </div>
+              </div>
             </div>
           </div>
           <button
@@ -119,6 +207,22 @@ export default function RevenueDashboard({ onEmailUser, onGrantTrial }: Props) {
           </button>
         </div>
 
+        {/* Data Source Warning */}
+        {dataSource === 'estimated' && !revenueCatConfigured && (
+          <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-3 mb-4">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-orange-400 mt-0.5 flex-shrink-0" />
+              <div className="text-xs text-orange-300">
+                <p className="font-medium">Revenue data is estimated from profile data</p>
+                <p className="text-orange-400/70 mt-0.5">
+                  Add REVENUECAT_SECRET_API_KEY and REVENUECAT_PROJECT_ID to get accurate data.
+                  Future subscription events will be logged automatically.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Key Metrics Row */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
@@ -127,14 +231,24 @@ export default function RevenueDashboard({ onEmailUser, onGrantTrial }: Props) {
               <span className="text-xs text-white/50">Est. MRR</span>
             </div>
             <p className="text-2xl font-bold text-emerald-400">${stats.estimatedMRR}</p>
+            {parseFloat(stats.revenueLast28Days) > 0 && (
+              <p className="text-xs text-white/40 mt-1">
+                ${stats.revenueLast28Days} last 28d
+              </p>
+            )}
           </div>
 
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
             <div className="flex items-center gap-2 mb-2">
               <CreditCard className="w-4 h-4 text-purple-400" />
-              <span className="text-xs text-white/50">Paid Pro</span>
+              <span className="text-xs text-white/50">Paid Subscribers</span>
             </div>
-            <p className="text-2xl font-bold text-purple-400">{stats.paidProUsers}</p>
+            <p className="text-2xl font-bold text-purple-400">{stats.paidSubscribers}</p>
+            {stats.subscriptionRevenue?.newSubscribers > 0 && (
+              <p className="text-xs text-emerald-400 mt-1">
+                +{stats.subscriptionRevenue.newSubscribers} new (30d)
+              </p>
+            )}
           </div>
 
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
@@ -143,6 +257,11 @@ export default function RevenueDashboard({ onEmailUser, onGrantTrial }: Props) {
               <span className="text-xs text-white/50">Active Trials</span>
             </div>
             <p className="text-2xl font-bold text-cyan-400">{stats.activeTrials}</p>
+            {stats.expiringTrials > 0 && (
+              <p className="text-xs text-orange-400 mt-1">
+                {stats.expiringTrials} expiring soon
+              </p>
+            )}
           </div>
 
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
@@ -151,8 +270,45 @@ export default function RevenueDashboard({ onEmailUser, onGrantTrial }: Props) {
               <span className="text-xs text-white/50">Conversion</span>
             </div>
             <p className="text-2xl font-bold text-white">{stats.conversionRate}%</p>
+            {stats.subscriptionRevenue?.cancellations > 0 && (
+              <p className="text-xs text-red-400 mt-1">
+                {stats.subscriptionRevenue.cancellations} churned (30d)
+              </p>
+            )}
           </div>
         </div>
+
+        {/* Subscription Revenue Breakdown */}
+        {stats.subscriptionRevenue && stats.subscriptionRevenue.total > 0 && (
+          <div className="bg-white/5 rounded-xl p-4 border border-white/10 mb-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-medium text-white">Subscription Revenue</p>
+              <p className="text-xl font-bold text-emerald-400">
+                ${stats.subscriptionRevenue.total.toFixed(2)}
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div>
+                <p className="text-xs text-white/40">Last 7 days</p>
+                <p className="text-sm font-medium text-white">
+                  ${stats.subscriptionRevenue.last7Days.toFixed(2)}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-white/40">Last 30 days</p>
+                <p className="text-sm font-medium text-white">
+                  ${stats.subscriptionRevenue.last30Days.toFixed(2)}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs text-white/40">Renewals (30d)</p>
+                <p className="text-sm font-medium text-white">
+                  {stats.subscriptionRevenue.renewals}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Credit Revenue */}
         {stats.creditRevenue.count > 0 && (
@@ -261,16 +417,8 @@ export default function RevenueDashboard({ onEmailUser, onGrantTrial }: Props) {
                 className="flex items-center justify-between py-2 border-b border-white/5 last:border-0"
               >
                 <div className="flex items-center gap-3 min-w-0">
-                  <div className={`p-2 rounded-lg ${
-                    activity.type === 'subscription'
-                      ? 'bg-emerald-500/20'
-                      : 'bg-purple-500/20'
-                  }`}>
-                    {activity.type === 'subscription' ? (
-                      <CreditCard className="w-4 h-4 text-emerald-400" />
-                    ) : (
-                      <DollarSign className="w-4 h-4 text-purple-400" />
-                    )}
+                  <div className={`p-2 rounded-lg ${getActivityBgColor(activity.type)}`}>
+                    {getActivityIcon(activity.type)}
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm text-white truncate">{activity.user}</p>
@@ -279,8 +427,10 @@ export default function RevenueDashboard({ onEmailUser, onGrantTrial }: Props) {
                 </div>
                 <div className="text-right ml-4">
                   {activity.amount && (
-                    <p className="text-sm font-medium text-emerald-400">
-                      +${activity.amount.toFixed(2)}
+                    <p className={`text-sm font-medium ${
+                      activity.type === 'cancellation' ? 'text-red-400' : 'text-emerald-400'
+                    }`}>
+                      {activity.type === 'cancellation' ? '-' : '+'}${activity.amount.toFixed(2)}
                     </p>
                   )}
                   <p className="text-xs text-white/30">
