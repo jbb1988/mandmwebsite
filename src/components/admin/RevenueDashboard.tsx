@@ -18,6 +18,7 @@ import {
   Database,
   Cloud,
   AlertCircle,
+  UserPlus,
 } from 'lucide-react';
 
 interface SubscriptionRevenue {
@@ -45,6 +46,9 @@ interface RevenueStats {
     count: number;
   };
   conversionRate: string;
+  // New fields to match RevenueCat
+  newCustomers28d?: number;
+  activeCustomers28d?: number;
 }
 
 interface ExpiringTrial {
@@ -109,21 +113,21 @@ export default function RevenueDashboard({ onEmailUser, onGrantTrial }: Props) {
       case 'revenuecat':
         return {
           icon: Cloud,
-          label: 'RevenueCat API',
+          label: 'RevenueCat',
           color: 'text-emerald-400',
           bgColor: 'bg-emerald-500/20',
         };
       case 'database':
         return {
           icon: Database,
-          label: 'Subscription Events',
+          label: 'Database',
           color: 'text-blue-400',
           bgColor: 'bg-blue-500/20',
         };
       default:
         return {
           icon: AlertCircle,
-          label: 'Estimated (Profile Data)',
+          label: 'Estimated',
           color: 'text-orange-400',
           bgColor: 'bg-orange-500/20',
         };
@@ -181,7 +185,7 @@ export default function RevenueDashboard({ onEmailUser, onGrantTrial }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* Main Revenue Card */}
+      {/* Main Revenue Card - Matching RevenueCat Layout */}
       <div className="bg-gradient-to-br from-emerald-900/20 to-[#1B1F39] border border-emerald-500/20 rounded-2xl p-6">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
@@ -189,7 +193,7 @@ export default function RevenueDashboard({ onEmailUser, onGrantTrial }: Props) {
               <DollarSign className="w-6 h-6 text-emerald-400" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-white">Revenue Dashboard</h2>
+              <h2 className="text-lg font-semibold text-white">Revenue Overview</h2>
               <div className="flex items-center gap-2 mt-1">
                 <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full ${sourceInfo.bgColor}`}>
                   <SourceIcon className={`w-3 h-3 ${sourceInfo.color}`} />
@@ -207,122 +211,83 @@ export default function RevenueDashboard({ onEmailUser, onGrantTrial }: Props) {
           </button>
         </div>
 
-        {/* Data Source Warning */}
-        {dataSource === 'estimated' && !revenueCatConfigured && (
-          <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-3 mb-4">
-            <div className="flex items-start gap-2">
-              <AlertCircle className="w-4 h-4 text-orange-400 mt-0.5 flex-shrink-0" />
-              <div className="text-xs text-orange-300">
-                <p className="font-medium">Revenue data is estimated from profile data</p>
-                <p className="text-orange-400/70 mt-0.5">
-                  Add REVENUECAT_SECRET_API_KEY and REVENUECAT_PROJECT_ID to get accurate data.
-                  Future subscription events will be logged automatically.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Key Metrics Row */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        {/* Top Row - Trials, Subscriptions, MRR (matching RevenueCat) */}
+        <div className="grid grid-cols-3 gap-4 mb-4">
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-            <div className="flex items-center gap-2 mb-2">
-              <TrendingUp className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs text-white/50">
-                {dataSource === 'revenuecat' ? 'MRR' : 'Est. MRR'}
-              </span>
-            </div>
-            <p className="text-2xl font-bold text-emerald-400">${stats.estimatedMRR}</p>
-            {parseFloat(stats.revenueLast28Days) > 0 && (
-              <p className="text-xs text-white/40 mt-1">
-                ${stats.revenueLast28Days} last 28d
-              </p>
-            )}
-          </div>
-
-          <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-            <div className="flex items-center gap-2 mb-2">
-              <CreditCard className="w-4 h-4 text-purple-400" />
-              <span className="text-xs text-white/50">Paid Subscribers</span>
-            </div>
-            <p className="text-2xl font-bold text-purple-400">{stats.paidSubscribers}</p>
-            {stats.subscriptionRevenue?.newSubscribers > 0 && (
-              <p className="text-xs text-emerald-400 mt-1">
-                +{stats.subscriptionRevenue.newSubscribers} new (30d)
-              </p>
-            )}
-          </div>
-
-          <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-            <div className="flex items-center gap-2 mb-2">
-              <Clock className="w-4 h-4 text-cyan-400" />
+            <div className="flex items-center justify-between mb-2">
               <span className="text-xs text-white/50">Active Trials</span>
+              <Clock className="w-4 h-4 text-cyan-400" />
             </div>
-            <p className="text-2xl font-bold text-cyan-400">{stats.activeTrials}</p>
-            {stats.expiringTrials > 0 && (
-              <p className="text-xs text-orange-400 mt-1">
-                {stats.expiringTrials} expiring soon
-              </p>
-            )}
+            <p className="text-3xl font-bold text-white">{stats.activeTrials}</p>
+            <p className="text-xs text-white/40 mt-1">in total</p>
           </div>
 
           <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-            <div className="flex items-center gap-2 mb-2">
-              <Users className="w-4 h-4 text-white/60" />
-              <span className="text-xs text-white/50">Conversion</span>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-white/50">Active Subscriptions</span>
+              <CreditCard className="w-4 h-4 text-purple-400" />
             </div>
-            <p className="text-2xl font-bold text-white">{stats.conversionRate}%</p>
-            {stats.subscriptionRevenue?.cancellations > 0 && (
-              <p className="text-xs text-red-400 mt-1">
-                {stats.subscriptionRevenue.cancellations} churned (30d)
-              </p>
-            )}
+            <p className="text-3xl font-bold text-white">{stats.paidSubscribers}</p>
+            <p className="text-xs text-white/40 mt-1">in total</p>
+          </div>
+
+          <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-white/50">MRR</span>
+              <TrendingUp className="w-4 h-4 text-emerald-400" />
+            </div>
+            <p className="text-3xl font-bold text-emerald-400">${stats.estimatedMRR}</p>
+            <p className="text-xs text-white/40 mt-1">Monthly Recurring Revenue</p>
           </div>
         </div>
 
-        {/* Subscription Revenue Breakdown */}
-        {stats.subscriptionRevenue && stats.subscriptionRevenue.total > 0 && (
-          <div className="bg-white/5 rounded-xl p-4 border border-white/10 mb-4">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-medium text-white">Subscription Revenue</p>
-              <p className="text-xl font-bold text-emerald-400">
-                ${stats.subscriptionRevenue.total.toFixed(2)}
-              </p>
+        {/* Bottom Row - Revenue, New Customers, Active Customers */}
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-white/50">Revenue</span>
+              <DollarSign className="w-4 h-4 text-emerald-400" />
             </div>
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div>
-                <p className="text-xs text-white/40">Last 7 days</p>
-                <p className="text-sm font-medium text-white">
-                  ${stats.subscriptionRevenue.last7Days.toFixed(2)}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-white/40">Last 30 days</p>
-                <p className="text-sm font-medium text-white">
-                  ${stats.subscriptionRevenue.last30Days.toFixed(2)}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs text-white/40">Renewals (30d)</p>
-                <p className="text-sm font-medium text-white">
-                  {stats.subscriptionRevenue.renewals}
-                </p>
-              </div>
-            </div>
+            <p className="text-3xl font-bold text-white">
+              ${parseFloat(stats.revenueLast28Days || '0').toFixed(0)}
+            </p>
+            <p className="text-xs text-white/40 mt-1">Last 28 days</p>
           </div>
-        )}
 
-        {/* Credit Revenue */}
+          <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-white/50">New Customers</span>
+              <UserPlus className="w-4 h-4 text-blue-400" />
+            </div>
+            <p className="text-3xl font-bold text-white">
+              {stats.newCustomers28d ?? stats.subscriptionRevenue?.newSubscribers ?? 0}
+            </p>
+            <p className="text-xs text-white/40 mt-1">Last 28 days</p>
+          </div>
+
+          <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-white/50">Active Customers</span>
+              <Users className="w-4 h-4 text-cyan-400" />
+            </div>
+            <p className="text-3xl font-bold text-white">
+              {stats.activeCustomers28d ?? (stats.paidSubscribers + stats.activeTrials)}
+            </p>
+            <p className="text-xs text-white/40 mt-1">Last 28 days</p>
+          </div>
+        </div>
+
+        {/* Credit Revenue (if any) */}
         {stats.creditRevenue.count > 0 && (
-          <div className="bg-white/5 rounded-xl p-4 border border-white/10 mb-4">
+          <div className="mt-4 bg-white/5 rounded-xl p-4 border border-white/10">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-white/50 mb-1">Swing Lab Credit Revenue</p>
+                <p className="text-sm text-white/50 mb-1">Swing Lab Credits</p>
                 <p className="text-xl font-bold text-white">${stats.creditRevenue.total.toFixed(2)}</p>
               </div>
               <div className="text-right">
-                <p className="text-xs text-white/40">Last 30 days</p>
-                <p className="text-lg font-semibold text-emerald-400">
+                <p className="text-xs text-white/40">Last 28 days</p>
+                <p className="text-lg font-semibold text-purple-400">
                   ${stats.creditRevenue.last30Days.toFixed(2)}
                 </p>
               </div>
@@ -330,8 +295,8 @@ export default function RevenueDashboard({ onEmailUser, onGrantTrial }: Props) {
           </div>
         )}
 
-        {/* User Breakdown */}
-        <div className="flex items-center justify-between text-sm">
+        {/* User Summary */}
+        <div className="mt-4 pt-4 border-t border-white/10 flex items-center justify-between text-sm">
           <div className="flex items-center gap-4">
             <span className="text-white/40">
               <span className="text-white font-medium">{stats.totalUsers}</span> total users
@@ -340,6 +305,9 @@ export default function RevenueDashboard({ onEmailUser, onGrantTrial }: Props) {
               <span className="text-white font-medium">{stats.freeUsers}</span> free
             </span>
           </div>
+          <span className="text-white/40">
+            <span className="text-emerald-400 font-medium">{stats.conversionRate}%</span> conversion
+          </span>
         </div>
       </div>
 
@@ -403,7 +371,7 @@ export default function RevenueDashboard({ onEmailUser, onGrantTrial }: Props) {
       {recentActivity.length > 0 && (
         <div className="bg-[#0F1123]/80 border border-white/[0.08] rounded-2xl p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-white">Recent Activity</h3>
+            <h3 className="font-semibold text-white">Recent Transactions</h3>
             <a
               href="/admin/users"
               className="text-xs text-white/40 hover:text-white flex items-center gap-1 transition-colors"
@@ -442,6 +410,10 @@ export default function RevenueDashboard({ onEmailUser, onGrantTrial }: Props) {
               </div>
             ))}
           </div>
+
+          {recentActivity.length === 0 && (
+            <p className="text-center text-white/40 py-4 text-sm">No live transactions to show</p>
+          )}
         </div>
       )}
     </div>
