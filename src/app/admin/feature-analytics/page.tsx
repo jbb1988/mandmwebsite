@@ -10,7 +10,7 @@ import {
   Loader2, Search, X, ChevronDown, ChevronUp, ArrowUpRight,
   ArrowDownRight, Minus, RefreshCw, Activity, Heart, Target,
   Zap, Shield, Clock, Star, Gift, UserX, Wrench, Download,
-  Mail, DollarSign, AlertCircle, CheckCircle2
+  Mail, DollarSign, AlertCircle, CheckCircle2, Video, FlaskConical
 } from 'lucide-react';
 
 interface FeatureStats {
@@ -147,6 +147,28 @@ interface Insights {
   };
 }
 
+interface LabUser {
+  user_id: string;
+  email: string;
+  name: string | null;
+  app_version: string | null;
+  tier: string;
+  swing_lab_count: number;
+  pitch_lab_count: number;
+  last_swing_analysis: string | null;
+  last_pitch_analysis: string | null;
+  total_analyses: number;
+}
+
+interface LabActivityStats {
+  total_swing_analyses: number;
+  total_pitch_analyses: number;
+  unique_swing_users: number;
+  unique_pitch_users: number;
+  analyses_today: number;
+  analyses_this_week: number;
+}
+
 const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || '';
 
 export default function FeatureAnalyticsPage() {
@@ -175,9 +197,18 @@ export default function FeatureAnalyticsPage() {
   const [recalculating, setRecalculating] = useState(false);
 
   // New: Insights and actions state
-  const [activeTab, setActiveTab] = useState<'overview' | 'insights'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'insights' | 'labs'>('overview');
   const [insights, setInsights] = useState<Insights | null>(null);
   const [insightsLoading, setInsightsLoading] = useState(false);
+
+  // Lab Activity state
+  const [labUsers, setLabUsers] = useState<LabUser[]>([]);
+  const [labStats, setLabStats] = useState<LabActivityStats | null>(null);
+  const [labLoading, setLabLoading] = useState(false);
+  const [labTimeRange, setLabTimeRange] = useState('30');
+  const [labFilter, setLabFilter] = useState<'all' | 'swing' | 'pitch'>('all');
+  const [labSort, setLabSort] = useState<'last_activity' | 'total' | 'swing' | 'pitch'>('last_activity');
+  const [labSearchQuery, setLabSearchQuery] = useState('');
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
   const [actionLoading, setActionLoading] = useState(false);
   const [actionResult, setActionResult] = useState<{ success: boolean; message: string } | null>(null);
@@ -318,6 +349,32 @@ export default function FeatureAnalyticsPage() {
     }
   };
 
+  // Fetch lab activity data
+  const fetchLabActivity = async () => {
+    setLabLoading(true);
+    try {
+      const params = new URLSearchParams({
+        days: labTimeRange,
+        lab: labFilter,
+        sort: labSort,
+      });
+
+      const res = await fetch(`/api/admin/feature-analytics/lab-activity?${params}`, {
+        headers: { 'X-Admin-Password': getPassword() || adminPassword },
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        setLabStats(data.stats);
+        setLabUsers(data.users);
+      }
+    } catch (error) {
+      console.error('Failed to fetch lab activity:', error);
+    } finally {
+      setLabLoading(false);
+    }
+  };
+
   // Toggle user selection
   const toggleUserSelection = (userId: string) => {
     setSelectedUsers(prev => {
@@ -419,6 +476,14 @@ export default function FeatureAnalyticsPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
+
+  // Fetch lab activity when tab changes or filters change
+  useEffect(() => {
+    if (activeTab === 'labs') {
+      fetchLabActivity();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, labTimeRange, labFilter, labSort]);
 
   useEffect(() => {
     if (selectedFeature) {
@@ -554,6 +619,22 @@ export default function FeatureAnalyticsPage() {
                 {insights && (insights.conversion_opportunities.high_priority > 0 || insights.churn_risks.critical > 0) && (
                   <span className="bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
                     {insights.conversion_opportunities.high_priority + insights.churn_risks.critical}
+                  </span>
+                )}
+              </button>
+              <button
+                onClick={() => setActiveTab('labs')}
+                className={`px-6 py-2 rounded-lg font-medium transition flex items-center gap-2 ${
+                  activeTab === 'labs'
+                    ? 'bg-purple-600 text-white'
+                    : 'bg-white/5 text-white/70 hover:bg-white/10'
+                }`}
+              >
+                <Video className="w-4 h-4" />
+                Lab Activity
+                {labStats && labStats.analyses_today > 0 && (
+                  <span className="bg-emerald-500 text-white text-xs px-2 py-0.5 rounded-full">
+                    {labStats.analyses_today} today
                   </span>
                 )}
               </button>
@@ -1299,6 +1380,215 @@ export default function FeatureAnalyticsPage() {
                   <div className="text-center py-12 text-white/50">
                     Failed to load insights. Please try again.
                   </div>
+                )}
+              </>
+            )}
+
+            {/* LABS TAB */}
+            {activeTab === 'labs' && (
+              <>
+                {/* Filters */}
+                <div className="flex flex-wrap justify-center items-center gap-3 mb-6">
+                  <select
+                    value={labTimeRange}
+                    onChange={(e) => setLabTimeRange(e.target.value)}
+                    className="bg-[#0F1123] border border-white/10 rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="7">Last 7 days</option>
+                    <option value="14">Last 14 days</option>
+                    <option value="30">Last 30 days</option>
+                    <option value="90">Last 90 days</option>
+                    <option value="365">All time</option>
+                  </select>
+
+                  <select
+                    value={labFilter}
+                    onChange={(e) => setLabFilter(e.target.value as 'all' | 'swing' | 'pitch')}
+                    className="bg-[#0F1123] border border-white/10 rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="all">All Labs</option>
+                    <option value="swing">Swing Lab Only</option>
+                    <option value="pitch">Pitch Lab Only</option>
+                  </select>
+
+                  <select
+                    value={labSort}
+                    onChange={(e) => setLabSort(e.target.value as 'last_activity' | 'total' | 'swing' | 'pitch')}
+                    className="bg-[#0F1123] border border-white/10 rounded-lg px-3 py-2 text-sm"
+                  >
+                    <option value="last_activity">Sort by Last Activity</option>
+                    <option value="total">Sort by Total Analyses</option>
+                    <option value="swing">Sort by Swing Lab</option>
+                    <option value="pitch">Sort by Pitch Lab</option>
+                  </select>
+
+                  <button
+                    onClick={fetchLabActivity}
+                    disabled={labLoading}
+                    className="flex items-center gap-2 px-4 py-2 bg-purple-600 hover:bg-purple-700 rounded-lg text-sm disabled:opacity-50"
+                  >
+                    {labLoading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <RefreshCw className="w-4 h-4" />
+                    )}
+                    Refresh
+                  </button>
+                </div>
+
+                {labLoading && !labStats ? (
+                  <div className="flex items-center justify-center h-64">
+                    <Loader2 className="w-8 h-8 animate-spin text-purple-400" />
+                  </div>
+                ) : (
+                  <>
+                    {/* Stats Cards */}
+                    {labStats && (
+                      <div className="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
+                        <StatCard
+                          value={labStats.total_swing_analyses}
+                          label="Swing Lab Analyses"
+                          icon={Video}
+                          color="purple"
+                        />
+                        <StatCard
+                          value={labStats.total_pitch_analyses}
+                          label="Pitch Lab Analyses"
+                          icon={FlaskConical}
+                          color="blue"
+                        />
+                        <StatCard
+                          value={labStats.unique_swing_users}
+                          label="Swing Lab Users"
+                          icon={Users}
+                          color="emerald"
+                        />
+                        <StatCard
+                          value={labStats.unique_pitch_users}
+                          label="Pitch Lab Users"
+                          icon={Users}
+                          color="cyan"
+                        />
+                        <StatCard
+                          value={labStats.analyses_today}
+                          label="Today"
+                          icon={Clock}
+                          color="orange"
+                        />
+                        <StatCard
+                          value={labStats.analyses_this_week}
+                          label="This Week"
+                          icon={TrendingUp}
+                          color="pink"
+                        />
+                      </div>
+                    )}
+
+                    {/* User Table */}
+                    <Card variant="elevated" className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold flex items-center gap-2">
+                          <Video className="w-5 h-5 text-purple-400" />
+                          Lab Users ({labUsers.length})
+                        </h3>
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30" />
+                          <input
+                            type="text"
+                            placeholder="Search users..."
+                            value={labSearchQuery}
+                            onChange={(e) => setLabSearchQuery(e.target.value)}
+                            className="pl-10 pr-4 py-2 bg-[#0A0B14] border border-white/10 rounded-lg text-sm w-64"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="border-b border-white/10">
+                              <th className="text-left py-3 px-4 text-white/50 text-sm font-medium">User</th>
+                              <th className="text-left py-3 px-4 text-white/50 text-sm font-medium">Email</th>
+                              <th className="text-center py-3 px-4 text-white/50 text-sm font-medium">Swing Lab</th>
+                              <th className="text-center py-3 px-4 text-white/50 text-sm font-medium">Last Swing</th>
+                              <th className="text-center py-3 px-4 text-white/50 text-sm font-medium">Pitch Lab</th>
+                              <th className="text-center py-3 px-4 text-white/50 text-sm font-medium">Last Pitch</th>
+                              <th className="text-center py-3 px-4 text-white/50 text-sm font-medium">Total</th>
+                              <th className="text-center py-3 px-4 text-white/50 text-sm font-medium">Tier</th>
+                              <th className="text-center py-3 px-4 text-white/50 text-sm font-medium">App Version</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {labUsers
+                              .filter(user =>
+                                !labSearchQuery ||
+                                user.email.toLowerCase().includes(labSearchQuery.toLowerCase()) ||
+                                (user.name && user.name.toLowerCase().includes(labSearchQuery.toLowerCase()))
+                              )
+                              .map(user => (
+                              <tr
+                                key={user.user_id}
+                                className="border-b border-white/5 hover:bg-white/5 transition"
+                              >
+                                <td className="py-3 px-4 font-medium">{user.name || '-'}</td>
+                                <td className="py-3 px-4 text-white/70 text-sm">{user.email}</td>
+                                <td className="py-3 px-4 text-center">
+                                  {user.swing_lab_count > 0 ? (
+                                    <span className="px-2 py-1 bg-purple-500/20 text-purple-400 rounded text-sm font-medium">
+                                      {user.swing_lab_count}
+                                    </span>
+                                  ) : (
+                                    <span className="text-white/30">-</span>
+                                  )}
+                                </td>
+                                <td className="py-3 px-4 text-center text-sm text-white/50">
+                                  {user.last_swing_analysis
+                                    ? new Date(user.last_swing_analysis).toLocaleDateString()
+                                    : '-'}
+                                </td>
+                                <td className="py-3 px-4 text-center">
+                                  {user.pitch_lab_count > 0 ? (
+                                    <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-sm font-medium">
+                                      {user.pitch_lab_count}
+                                    </span>
+                                  ) : (
+                                    <span className="text-white/30">-</span>
+                                  )}
+                                </td>
+                                <td className="py-3 px-4 text-center text-sm text-white/50">
+                                  {user.last_pitch_analysis
+                                    ? new Date(user.last_pitch_analysis).toLocaleDateString()
+                                    : '-'}
+                                </td>
+                                <td className="py-3 px-4 text-center">
+                                  <span className="px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded text-sm font-bold">
+                                    {user.total_analyses}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-4 text-center">
+                                  <span className={`px-2 py-1 rounded text-xs ${
+                                    user.tier === 'pro' ? 'bg-purple-500/20 text-purple-400' :
+                                    user.tier === 'promo' ? 'bg-orange-500/20 text-orange-400' :
+                                    'bg-white/10 text-white/50'
+                                  }`}>
+                                    {user.tier}
+                                  </span>
+                                </td>
+                                <td className="py-3 px-4 text-center text-sm text-white/40">
+                                  {user.app_version || '-'}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                        {labUsers.length === 0 && (
+                          <div className="text-center py-8 text-white/50">
+                            No lab activity found in this time period
+                          </div>
+                        )}
+                      </div>
+                    </Card>
+                  </>
                 )}
               </>
             )}
