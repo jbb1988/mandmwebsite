@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import AdminGate from '@/components/AdminGate';
-import AdminNav from '@/components/AdminNav';
 import {
   Mail, BarChart3, Users, Clock, Send, Eye, MousePointer,
   MessageSquare, ChevronDown, ChevronUp, ExternalLink, AlertCircle,
@@ -264,7 +263,6 @@ export default function CampaignsPage() {
               <p className="text-white/50">Email campaign analytics and tracking</p>
             </div>
 
-            <AdminNav />
 
             {/* Refresh Button */}
             <div className="flex justify-end mb-4">

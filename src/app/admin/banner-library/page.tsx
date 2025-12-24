@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import AdminGate from '@/components/AdminGate';
-import AdminNav from '@/components/AdminNav';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import {
   FolderOpen, Search, RefreshCw, Download, Trash2, Eye, X,
@@ -201,7 +200,6 @@ export default function BannerLibraryPage() {
             </div>
 
             {/* Admin Navigation */}
-            <AdminNav />
 
             {/* Stats & Search */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">

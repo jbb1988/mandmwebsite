@@ -3,7 +3,6 @@
 import React, { useState, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import AdminGate from '@/components/AdminGate';
-import AdminNav from '@/components/AdminNav';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
 import { GradientTextReveal } from '@/components/animations';
@@ -463,7 +462,6 @@ export default function BannerGeneratorPage() {
         </div>
 
         {/* Admin Navigation */}
-        <AdminNav />
 
         {/* Instructions */}
         <LiquidGlass variant="blue" className="p-6 mb-8">

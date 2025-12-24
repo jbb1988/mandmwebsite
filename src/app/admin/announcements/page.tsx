@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import AdminGate from '@/components/AdminGate';
-import AdminNav from '@/components/AdminNav';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import {
   Megaphone, Plus, Trash2, Power, PowerOff, Edit2, X,
@@ -421,8 +420,6 @@ export default function AnnouncementsPage() {
             </button>
           </div>
 
-          {/* Navigation */}
-          <AdminNav />
 
           {/* Stats Cards */}
           {stats && (

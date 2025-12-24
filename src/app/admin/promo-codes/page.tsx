@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import AdminGate from '@/components/AdminGate';
-import AdminNav from '@/components/AdminNav';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import {
   Tag, RefreshCw, Plus, Search, Copy, Check, X, Edit2, Trash2,
@@ -206,7 +205,6 @@ export default function AdminPromoCodesPage() {
             </div>
 
             {/* Admin Navigation */}
-            <AdminNav />
 
             {/* Action Buttons */}
             <div className="flex justify-center gap-3 mb-8">

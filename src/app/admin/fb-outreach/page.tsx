@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import AdminGate from '@/components/AdminGate';
-import AdminNav from '@/components/AdminNav';
 import { Card, StatCard, TabButton } from '@/components/admin/shared';
 import {
   Users, Plus, RefreshCw, Search, MapPin, ExternalLink, MessageCircle,
@@ -285,7 +284,6 @@ export default function AdminFBOutreachPage() {
             </div>
 
             {/* Admin Navigation */}
-            <AdminNav />
 
             {/* Stats Grid - Row 1 */}
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3 mb-3">

@@ -23,6 +23,7 @@ import {
   Book,
   Zap,
   TrendingUp,
+  RefreshCw,
 } from 'lucide-react';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import CommandSearch from './CommandSearch';
@@ -67,6 +68,7 @@ const NAV_SECTIONS: NavSection[] = [
     title: 'Marketing',
     items: [
       { name: 'Announcements', href: '/admin/announcements', icon: Megaphone },
+      { name: 'Lifecycle Campaigns', href: '/admin/lifecycle-campaigns', icon: RefreshCw },
       { name: 'Promo Codes', href: '/admin/promo-codes', icon: Tag },
       { name: 'Banner Generator', href: '/admin/banner-generator', icon: Image },
     ],

@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import AdminGate from '@/components/AdminGate';
-import AdminNav from '@/components/AdminNav';
 import { Card, StatCard, SearchInput, Toast, ToastType } from '@/components/admin/shared';
 import ContactCard from '@/components/admin/ContactCard';
 import ContactDetailModal from '@/components/admin/ContactDetailModal';
@@ -644,7 +643,6 @@ function OutreachCRMContent() {
           </div>
 
           {/* Admin Navigation */}
-          <AdminNav />
 
           {/* Follow-up Queue Alert */}
           {followUpQueue.length > 0 && (

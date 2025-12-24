@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import AdminGate from '@/components/AdminGate';
-import AdminNav from '@/components/AdminNav';
 import {
   Handshake, AlertCircle, CheckCircle2, ExternalLink,
   Search, Users, FileText, ArrowRight, Info
@@ -79,7 +78,6 @@ export default function PartnerAttributionPage() {
               <p className="text-white/50">Manually attribute sales to Tolt affiliate partners</p>
             </div>
 
-            <AdminNav />
 
             {/* When to Use Info Box */}
             <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 mb-6">

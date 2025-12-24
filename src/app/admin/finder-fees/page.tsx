@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import AdminGate from '@/components/AdminGate';
-import AdminNav from '@/components/AdminNav';
 import {
   Users, DollarSign, CheckCircle, Clock, Crown, RefreshCw, Copy, UserPlus, List,
   Mail, Info, ExternalLink, Search, ToggleLeft, ToggleRight, ChevronDown, ChevronUp,
@@ -146,7 +145,6 @@ export default function AdminFinderFeesPage() {
             </div>
 
             {/* Admin Navigation */}
-            <AdminNav />
 
             {/* Stats Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-10">

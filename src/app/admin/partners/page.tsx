@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import AdminGate from '@/components/AdminGate';
-import AdminNav from '@/components/AdminNav';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import {
   Users, RefreshCw, Trash2, Search, ExternalLink, CheckCircle, XCircle,
@@ -288,7 +287,6 @@ export default function AdminPartnersPage() {
             </div>
 
             {/* Admin Navigation */}
-            <AdminNav />
 
             {/* Action Buttons */}
             <div className="flex justify-center gap-3 mb-8">

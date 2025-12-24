@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import AdminGate from '@/components/AdminGate';
-import AdminNav from '@/components/AdminNav';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import { Card } from '@/components/admin/shared/Card';
 import { StatCard } from '@/components/admin/shared/StatCard';
@@ -528,7 +527,6 @@ export default function FeatureAnalyticsPage() {
             </div>
 
             {/* Admin Navigation */}
-            <AdminNav />
 
             {/* Tab Switcher */}
             <div className="flex justify-center gap-2 mb-6">

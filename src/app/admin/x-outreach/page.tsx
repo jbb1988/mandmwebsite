@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import AdminGate from '@/components/AdminGate';
-import AdminNav from '@/components/AdminNav';
 import { Card, StatCard, TabButton } from '@/components/admin/shared';
 import {
   BarChart3, Plus, Search, Users, MessageCircle,
@@ -281,7 +280,6 @@ export default function XOutreachPage() {
             </div>
 
             {/* Admin Navigation */}
-            <AdminNav />
 
             {/* Message Toast */}
             {message && (
