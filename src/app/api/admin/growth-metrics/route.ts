@@ -26,17 +26,17 @@ export async function GET(request: NextRequest) {
 
     const { data: users, error: usersError } = await supabase
       .from('profiles')
-      .select('id, created_at, tier, promo_tier_expires_at, last_activity_at')
+      .select('id, created_at, tier, promo_tier_expires_at, last_login_at')
       .gte('created_at', twelveWeeksAgo.toISOString())
       .order('created_at', { ascending: true });
 
     if (usersError) throw usersError;
 
-    // Get activity data for retention calculation
+    // Get activity data for retention calculation from user_feature_engagement
     const { data: activities, error: actError } = await supabase
-      .from('user_activities')
-      .select('user_id, created_at')
-      .gte('created_at', twelveWeeksAgo.toISOString());
+      .from('user_feature_engagement')
+      .select('user_id, last_used_at')
+      .gte('last_used_at', twelveWeeksAgo.toISOString());
 
     // Build cohort data (weekly cohorts)
     const cohorts: Record<string, {
@@ -52,7 +52,9 @@ export async function GET(request: NextRequest) {
     const activityByUser: Record<string, Date[]> = {};
     (activities || []).forEach(a => {
       if (!activityByUser[a.user_id]) activityByUser[a.user_id] = [];
-      activityByUser[a.user_id].push(new Date(a.created_at));
+      if (a.last_used_at) {
+        activityByUser[a.user_id].push(new Date(a.last_used_at));
+      }
     });
 
     (users || []).forEach(user => {
@@ -155,13 +157,13 @@ export async function GET(request: NextRequest) {
     // Users who engaged with 3+ features
     const { data: featureEngagement } = await supabase
       .from('user_feature_engagement')
-      .select('user_id, feature_key')
+      .select('user_id, feature_name')
       .gte('last_used_at', thirtyDaysAgo.toISOString());
 
     const featuresByUser: Record<string, Set<string>> = {};
     (featureEngagement || []).forEach(e => {
       if (!featuresByUser[e.user_id]) featuresByUser[e.user_id] = new Set();
-      featuresByUser[e.user_id].add(e.feature_key);
+      featuresByUser[e.user_id].add(e.feature_name);
     });
     const engagedUsers = Object.values(featuresByUser).filter(s => s.size >= 3).length;
 
@@ -305,12 +307,17 @@ export async function GET(request: NextRequest) {
     // ===== CHURN RISK USERS =====
     const { data: proUsers } = await supabase
       .from('profiles')
-      .select('id, name, email, tier, last_activity_at, promo_tier_expires_at')
+      .select('id, name, email, tier, last_login_at, promo_tier_expires_at')
       .eq('tier', 'pro');
 
     const churnRiskUsers = (proUsers || [])
       .map(u => {
-        const lastActive = u.last_activity_at ? new Date(u.last_activity_at) : null;
+        // Use last_login_at from profile, or check healthByUser for last activity
+        const lastLoginAt = u.last_login_at ? new Date(u.last_login_at) : null;
+        const lastFeatureActivity = healthByUser[u.id]?.lastActive;
+        const lastActive = lastFeatureActivity && (!lastLoginAt || lastFeatureActivity > lastLoginAt)
+          ? lastFeatureActivity
+          : lastLoginAt;
         const daysSinceActive = lastActive
           ? Math.floor((now.getTime() - lastActive.getTime()) / (1000 * 60 * 60 * 24))
           : 999;
