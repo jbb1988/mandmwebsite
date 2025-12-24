@@ -20,6 +20,7 @@ import {
   ExternalLink,
   Settings,
   LogOut,
+  Book,
 } from 'lucide-react';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import CommandSearch from './CommandSearch';
@@ -72,6 +73,12 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { name: 'Finder Fees', href: '/admin/finder-fees', icon: DollarSign },
       { name: 'Partner Attribution', href: '/admin/partner-attribution', icon: Handshake },
+    ],
+  },
+  {
+    title: 'Help',
+    items: [
+      { name: 'Documentation', href: '/admin/docs', icon: Book },
     ],
   },
 ];
