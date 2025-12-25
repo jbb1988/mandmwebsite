@@ -370,7 +370,41 @@ export async function GET(request: NextRequest) {
     });
 
     // ========================================
-    // 4. GROSS MARGIN ANALYSIS
+    // 4. OPERATIONAL COSTS
+    // ========================================
+    const { data: operationalCostsData } = await supabase
+      .from('operational_costs')
+      .select('*')
+      .eq('is_active', true)
+      .order('monthly_cost', { ascending: false });
+
+    // Calculate operational costs aggregations
+    const operationalCosts = {
+      totalFixed: 0,
+      totalProviders: operationalCostsData?.length || 0,
+      hasVariableCosts: false,
+      byCategory: {} as Record<string, { total: number; providers: string[] }>,
+      costs: operationalCostsData || [],
+    };
+
+    operationalCostsData?.forEach(cost => {
+      if (!cost.is_variable) {
+        operationalCosts.totalFixed += parseFloat(cost.monthly_cost);
+      } else {
+        operationalCosts.hasVariableCosts = true;
+      }
+
+      if (!operationalCosts.byCategory[cost.category]) {
+        operationalCosts.byCategory[cost.category] = { total: 0, providers: [] };
+      }
+      if (!cost.is_variable) {
+        operationalCosts.byCategory[cost.category].total += parseFloat(cost.monthly_cost);
+      }
+      operationalCosts.byCategory[cost.category].providers.push(cost.provider);
+    });
+
+    // ========================================
+    // 5. GROSS MARGIN ANALYSIS
     // ========================================
     // Fee structure
     const fees = {
@@ -389,19 +423,22 @@ export async function GET(request: NextRequest) {
       ],
     };
 
-    // Current margin (actual revenue - actual costs - actual fees)
+    // Current margin (actual revenue - actual costs - actual fees - operational costs)
     const currentMargin = {
       grossRevenue: actualRevenue.total,
       // Assume average fee scenario for actual revenue
       estimatedFees: actualRevenue.total * (fees.iap + fees.partner * 0.3), // Assume 30% have partner
       netRevenue: actualRevenue.total * (1 - fees.iap - fees.partner * 0.3),
       aiCosts: costBreakdown.byAcquisition.paid,
+      operationalCosts: operationalCosts.totalFixed, // Monthly operational costs
+      totalCosts: 0, // Will be calculated below
       grossProfit: 0,
       grossMarginPercent: 0,
       // Investment costs (gifted trials)
       userAcquisitionInvestment: costBreakdown.byAcquisition.giftedTrial,
     };
-    currentMargin.grossProfit = currentMargin.netRevenue - currentMargin.aiCosts;
+    currentMargin.totalCosts = currentMargin.aiCosts + currentMargin.operationalCosts;
+    currentMargin.grossProfit = currentMargin.netRevenue - currentMargin.totalCosts;
     currentMargin.grossMarginPercent = currentMargin.grossRevenue > 0
       ? (currentMargin.grossProfit / currentMargin.grossRevenue) * 100
       : 0;
@@ -676,7 +713,10 @@ export async function GET(request: NextRequest) {
       // Costs
       costs: costBreakdown,
 
-      // Margin
+      // Operational Costs (infrastructure, services, tools)
+      operationalCosts,
+
+      // Margin (includes AI + operational costs)
       margin: currentMargin,
 
       // Projections

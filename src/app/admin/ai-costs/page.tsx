@@ -6,7 +6,7 @@ import {
   Cpu, DollarSign, TrendingUp, TrendingDown, Users, Zap,
   RefreshCw, ChevronDown, ChevronUp, X, BarChart3, PieChart,
   AlertTriangle, Target, Activity, Clock, Wallet, Building,
-  Gift, Info, ArrowRight, CheckCircle2
+  Gift, Info, ArrowRight, CheckCircle2, Settings, Plus, Pencil, Trash2
 } from 'lucide-react';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -223,9 +223,27 @@ interface FinancialAnalytics {
     estimatedFees: number;
     netRevenue: number;
     aiCosts: number;
+    operationalCosts: number;
+    totalCosts: number;
     grossProfit: number;
     grossMarginPercent: number;
     userAcquisitionInvestment: number;
+  };
+  operationalCosts: {
+    totalFixed: number;
+    totalProviders: number;
+    hasVariableCosts: boolean;
+    byCategory: Record<string, { total: number; providers: string[] }>;
+    costs: {
+      id: string;
+      provider: string;
+      monthly_cost: string;
+      category: string;
+      description: string | null;
+      notes: string | null;
+      is_variable: boolean;
+      is_active: boolean;
+    }[];
   };
   projections: {
     scenario: string;
@@ -434,6 +452,19 @@ export default function AICostsPage() {
   const [selectedUpgradeModel, setSelectedUpgradeModel] = useState<string | null>(null);
   const [expandedModelCards, setExpandedModelCards] = useState<Set<string>>(new Set());
 
+  // Operational Costs modal state
+  const [showOpsCostModal, setShowOpsCostModal] = useState(false);
+  const [editingOpsCost, setEditingOpsCost] = useState<{
+    id?: string;
+    provider: string;
+    monthly_cost: string;
+    category: string;
+    description: string;
+    notes: string;
+    is_variable: boolean;
+  } | null>(null);
+  const [opsCostSaving, setOpsCostSaving] = useState(false);
+
   // Fee toggles for margin calculation
   const [includeIAP, setIncludeIAP] = useState(true); // 15% Apple/Google
   const [includePartner, setIncludePartner] = useState(false); // 10% affiliate
@@ -537,6 +568,44 @@ export default function AICostsPage() {
       console.error('Failed to fetch user:', err);
     } finally {
       setUserLoading(false);
+    }
+  };
+
+  // Operational Costs CRUD functions
+  const saveOpsCost = async () => {
+    if (!editingOpsCost) return;
+    setOpsCostSaving(true);
+    try {
+      const method = editingOpsCost.id ? 'PUT' : 'POST';
+      const res = await fetch('/api/admin/ai-costs/operational-costs', {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': getPassword() || adminPassword
+        },
+        body: JSON.stringify(editingOpsCost)
+      });
+      if (!res.ok) throw new Error('Failed to save operational cost');
+      setEditingOpsCost(null);
+      fetchData(); // Refresh data
+    } catch (err) {
+      console.error('Failed to save ops cost:', err);
+    } finally {
+      setOpsCostSaving(false);
+    }
+  };
+
+  const deleteOpsCost = async (id: string) => {
+    if (!confirm('Are you sure you want to remove this cost?')) return;
+    try {
+      const res = await fetch(`/api/admin/ai-costs/operational-costs?id=${id}`, {
+        method: 'DELETE',
+        headers: { 'X-Admin-Password': getPassword() || adminPassword }
+      });
+      if (!res.ok) throw new Error('Failed to delete operational cost');
+      fetchData(); // Refresh data
+    } catch (err) {
+      console.error('Failed to delete ops cost:', err);
     }
   };
 
@@ -1180,7 +1249,7 @@ export default function AICostsPage() {
           </div>
 
           {/* Key Metrics Row */}
-          <div className="grid grid-cols-4 gap-4">
+          <div className="grid grid-cols-5 gap-4">
             <div className="bg-[#0F1123] rounded-2xl p-5 border border-white/5">
               <div className="flex items-center gap-3 mb-3">
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
@@ -1223,6 +1292,29 @@ export default function AICostsPage() {
               <div className="text-white/50 text-sm mt-1">Total Users</div>
               <div className="text-white/30 text-xs mt-0.5">
                 {financialData.users.byAcquisition.giftedTrialActive} gifted, {financialData.users.byAcquisition.organic} organic
+              </div>
+            </div>
+            {/* Operational Costs Card */}
+            <div className="bg-[#0F1123] rounded-2xl p-5 border border-white/5">
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center">
+                  <Building className="w-5 h-5 text-red-400" />
+                </div>
+                <button
+                  onClick={() => setShowOpsCostModal(true)}
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                  title="Manage Operational Costs"
+                >
+                  <Settings className="w-4 h-4 text-white/50 hover:text-white" />
+                </button>
+              </div>
+              <div className="text-2xl font-bold text-white">
+                {formatCost(financialData.operationalCosts?.totalFixed || 0)}/mo
+              </div>
+              <div className="text-white/50 text-sm mt-1">Ops Costs</div>
+              <div className="text-white/30 text-xs mt-0.5">
+                {financialData.operationalCosts?.totalProviders || 0} services
+                {financialData.operationalCosts?.hasVariableCosts && ' (+ variable)'}
               </div>
             </div>
           </div>
@@ -2261,6 +2353,238 @@ export default function AICostsPage() {
                   </ResponsiveContainer>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Operational Costs Management Modal */}
+      {showOpsCostModal && financialData?.operationalCosts && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#0F1123] rounded-2xl max-w-4xl w-full max-h-[85vh] overflow-hidden border border-white/10">
+            <div className="p-4 border-b border-white/10 flex items-center justify-between">
+              <div>
+                <h3 className="text-white font-semibold">Operational Costs</h3>
+                <p className="text-white/50 text-sm">Manage monthly infrastructure & service costs</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setEditingOpsCost({
+                    provider: '',
+                    monthly_cost: '',
+                    category: 'infrastructure',
+                    description: '',
+                    notes: '',
+                    is_variable: false
+                  })}
+                  className="flex items-center gap-2 px-3 py-2 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 transition-colors text-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Cost
+                </button>
+                <button
+                  onClick={() => setShowOpsCostModal(false)}
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                >
+                  <X className="w-5 h-5 text-white/50" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-4 overflow-y-auto max-h-[65vh]">
+              {/* Summary by Category */}
+              <div className="grid grid-cols-4 gap-4 mb-6">
+                {Object.entries(financialData.operationalCosts.byCategory).map(([category, data]) => (
+                  <div key={category} className="bg-[#1B1F39] rounded-xl p-4">
+                    <div className="text-white/50 text-xs uppercase mb-1">{category}</div>
+                    <div className="text-xl font-bold text-white">{formatCost(data.total)}</div>
+                    <div className="text-white/30 text-xs mt-1">{data.providers.length} services</div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Total */}
+              <div className="bg-gradient-to-r from-red-500/20 to-orange-500/20 rounded-xl p-4 mb-6 border border-red-500/30">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-white/70 text-sm">Total Fixed Monthly</div>
+                    <div className="text-2xl font-bold text-white">{formatCost(financialData.operationalCosts.totalFixed)}/mo</div>
+                  </div>
+                  {financialData.operationalCosts.hasVariableCosts && (
+                    <div className="text-orange-400 text-sm">+ variable costs (Stripe)</div>
+                  )}
+                </div>
+              </div>
+
+              {/* Costs Table */}
+              <table className="w-full">
+                <thead className="bg-[#1B1F39]">
+                  <tr>
+                    <th className="text-left text-white/50 text-sm font-medium px-4 py-3">Provider</th>
+                    <th className="text-left text-white/50 text-sm font-medium px-4 py-3">Category</th>
+                    <th className="text-right text-white/50 text-sm font-medium px-4 py-3">Monthly Cost</th>
+                    <th className="text-left text-white/50 text-sm font-medium px-4 py-3">Notes</th>
+                    <th className="text-right text-white/50 text-sm font-medium px-4 py-3">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {financialData.operationalCosts.costs.map((cost, i) => (
+                    <tr key={cost.id} className={i % 2 === 0 ? 'bg-[#0A0B14]' : 'bg-[#0F1123]'}>
+                      <td className="px-4 py-3">
+                        <div className="text-white font-medium">{cost.provider}</div>
+                        {cost.description && <div className="text-white/40 text-xs">{cost.description}</div>}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${
+                          cost.category === 'infrastructure' ? 'bg-blue-500/20 text-blue-400' :
+                          cost.category === 'services' ? 'bg-purple-500/20 text-purple-400' :
+                          cost.category === 'tools' ? 'bg-cyan-500/20 text-cyan-400' :
+                          'bg-yellow-500/20 text-yellow-400'
+                        }`}>
+                          {cost.category}
+                        </span>
+                      </td>
+                      <td className="text-right px-4 py-3">
+                        {cost.is_variable ? (
+                          <span className="text-orange-400 italic">Variable</span>
+                        ) : (
+                          <span className="text-white font-medium">{formatCost(parseFloat(cost.monthly_cost))}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-white/40 text-sm max-w-[200px] truncate">
+                        {cost.notes || '-'}
+                      </td>
+                      <td className="text-right px-4 py-3">
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => setEditingOpsCost({
+                              id: cost.id,
+                              provider: cost.provider,
+                              monthly_cost: cost.monthly_cost,
+                              category: cost.category,
+                              description: cost.description || '',
+                              notes: cost.notes || '',
+                              is_variable: cost.is_variable
+                            })}
+                            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                            title="Edit"
+                          >
+                            <Pencil className="w-4 h-4 text-white/50 hover:text-cyan-400" />
+                          </button>
+                          <button
+                            onClick={() => deleteOpsCost(cost.id)}
+                            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-4 h-4 text-white/50 hover:text-red-400" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add/Edit Operational Cost Modal */}
+      {editingOpsCost && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="bg-[#0F1123] rounded-2xl max-w-md w-full border border-white/10">
+            <div className="p-4 border-b border-white/10 flex items-center justify-between">
+              <h3 className="text-white font-semibold">
+                {editingOpsCost.id ? 'Edit Cost' : 'Add Operational Cost'}
+              </h3>
+              <button
+                onClick={() => setEditingOpsCost(null)}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-white/50" />
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="block text-white/70 text-sm mb-1">Provider</label>
+                <input
+                  type="text"
+                  value={editingOpsCost.provider}
+                  onChange={(e) => setEditingOpsCost({ ...editingOpsCost, provider: e.target.value })}
+                  className="w-full bg-[#1B1F39] border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500/50"
+                  placeholder="e.g., AWS, Stripe"
+                />
+              </div>
+              <div>
+                <label className="block text-white/70 text-sm mb-1">Monthly Cost ($)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={editingOpsCost.monthly_cost}
+                  onChange={(e) => setEditingOpsCost({ ...editingOpsCost, monthly_cost: e.target.value })}
+                  className="w-full bg-[#1B1F39] border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500/50"
+                  placeholder="0.00"
+                  disabled={editingOpsCost.is_variable}
+                />
+              </div>
+              <div>
+                <label className="block text-white/70 text-sm mb-1">Category</label>
+                <select
+                  value={editingOpsCost.category}
+                  onChange={(e) => setEditingOpsCost({ ...editingOpsCost, category: e.target.value })}
+                  className="w-full bg-[#1B1F39] border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500/50"
+                >
+                  <option value="infrastructure">Infrastructure</option>
+                  <option value="services">Services</option>
+                  <option value="tools">Tools</option>
+                  <option value="payments">Payments</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-white/70 text-sm mb-1">Description</label>
+                <input
+                  type="text"
+                  value={editingOpsCost.description}
+                  onChange={(e) => setEditingOpsCost({ ...editingOpsCost, description: e.target.value })}
+                  className="w-full bg-[#1B1F39] border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500/50"
+                  placeholder="e.g., Web hosting and deployment"
+                />
+              </div>
+              <div>
+                <label className="block text-white/70 text-sm mb-1">Notes</label>
+                <input
+                  type="text"
+                  value={editingOpsCost.notes}
+                  onChange={(e) => setEditingOpsCost({ ...editingOpsCost, notes: e.target.value })}
+                  className="w-full bg-[#1B1F39] border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500/50"
+                  placeholder="e.g., Free tier, ~2.9% per transaction"
+                />
+              </div>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={editingOpsCost.is_variable}
+                  onChange={(e) => setEditingOpsCost({ ...editingOpsCost, is_variable: e.target.checked, monthly_cost: e.target.checked ? '0' : editingOpsCost.monthly_cost })}
+                  className="w-4 h-4 rounded bg-[#1B1F39] border-white/20"
+                />
+                <span className="text-white/80">Variable cost (per-transaction)</span>
+              </label>
+            </div>
+            <div className="p-4 border-t border-white/10 flex justify-end gap-3">
+              <button
+                onClick={() => setEditingOpsCost(null)}
+                className="px-4 py-2 text-white/50 hover:text-white transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveOpsCost}
+                disabled={opsCostSaving || !editingOpsCost.provider || (!editingOpsCost.is_variable && !editingOpsCost.monthly_cost)}
+                className="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {opsCostSaving && <RefreshCw className="w-4 h-4 animate-spin" />}
+                {editingOpsCost.id ? 'Save Changes' : 'Add Cost'}
+              </button>
             </div>
           </div>
         </div>
