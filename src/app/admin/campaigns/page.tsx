@@ -6,7 +6,7 @@ import {
   Mail, BarChart3, Users, Clock, Send, Eye, MousePointer,
   MessageSquare, ChevronDown, ChevronUp, ExternalLink, AlertCircle,
   CheckCircle2, XCircle, RefreshCw, Calendar, Bot, UserCheck,
-  TrendingDown, ArrowRight, Lightbulb
+  TrendingDown, ArrowRight, Lightbulb, X, Link2, Building2
 } from 'lucide-react';
 
 const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
@@ -186,6 +186,58 @@ interface CalendlyBreakdown {
   canceled: number;
 }
 
+interface CampaignContact {
+  id: string;
+  contact_id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  title: string | null;
+  organization_name: string | null;
+  organization_id: string | null;
+  sequence_step: number;
+  status: string;
+  sent_at: string | null;
+  opened_at: string | null;
+  clicked_at: string | null;
+  replied_at: string | null;
+  bounced_at: string | null;
+  next_send_at: string | null;
+  reply_sentiment: string | null;
+  clicks: Array<{ link_type: string; clicked_at: string }>;
+}
+
+interface ClickActivity {
+  id: string;
+  contact_id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  organization_name: string | null;
+  link_type: string;
+  destination_url: string;
+  clicked_at: string;
+  is_likely_bot: boolean;
+}
+
+interface ContactsData {
+  contacts: CampaignContact[];
+  pagination: { page: number; limit: number; total: number; totalPages: number };
+  statusCounts: Record<string, number>;
+}
+
+interface ClicksData {
+  clicks: ClickActivity[];
+  stats: {
+    total: number;
+    human: number;
+    bot: number;
+    uniqueClickers: number;
+    byLinkType: Record<string, number>;
+  };
+  pagination: { page: number; limit: number; total: number; totalPages: number };
+}
+
 export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [summary, setSummary] = useState<Summary | null>(null);
@@ -194,6 +246,15 @@ export default function CampaignsPage() {
   const [loading, setLoading] = useState(true);
   const [expandedCampaign, setExpandedCampaign] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Contacts & Clicks modal state
+  const [contactsModal, setContactsModal] = useState<{ campaignId: string; campaignName: string } | null>(null);
+  const [clicksModal, setClicksModal] = useState<{ campaignId: string; campaignName: string } | null>(null);
+  const [contactsData, setContactsData] = useState<ContactsData | null>(null);
+  const [clicksData, setClicksData] = useState<ClicksData | null>(null);
+  const [contactsLoading, setContactsLoading] = useState(false);
+  const [clicksLoading, setClicksLoading] = useState(false);
+  const [contactsFilter, setContactsFilter] = useState('all');
 
   useEffect(() => {
     fetchCampaigns();
@@ -221,6 +282,52 @@ export default function CampaignsPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  async function fetchContacts(campaignId: string, status = 'all') {
+    setContactsLoading(true);
+    try {
+      const params = new URLSearchParams({ status });
+      const response = await fetch(`/api/admin/campaigns/${campaignId}/contacts?${params}`, {
+        headers: { 'X-Admin-Password': adminPassword },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setContactsData(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch contacts:', err);
+    } finally {
+      setContactsLoading(false);
+    }
+  }
+
+  async function fetchClicks(campaignId: string) {
+    setClicksLoading(true);
+    try {
+      const response = await fetch(`/api/admin/campaigns/${campaignId}/clicks`, {
+        headers: { 'X-Admin-Password': adminPassword },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setClicksData(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch clicks:', err);
+    } finally {
+      setClicksLoading(false);
+    }
+  }
+
+  function openContactsModal(campaignId: string, campaignName: string) {
+    setContactsModal({ campaignId, campaignName });
+    setContactsFilter('all');
+    fetchContacts(campaignId);
+  }
+
+  function openClicksModal(campaignId: string, campaignName: string) {
+    setClicksModal({ campaignId, campaignName });
+    fetchClicks(campaignId);
   }
 
   function formatDate(dateStr: string | null) {
@@ -754,6 +861,30 @@ export default function CampaignsPage() {
                                     )}
                                   </div>
                                 )}
+
+                                {/* Action Buttons */}
+                                <div className="p-4 border-t border-white/5 flex gap-3">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openContactsModal(campaign.id, campaign.name);
+                                    }}
+                                    className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 rounded-lg text-sm text-purple-400 transition-colors"
+                                  >
+                                    <Users className="w-4 h-4" />
+                                    View Contacts ({campaign.total_contacts})
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openClicksModal(campaign.id, campaign.name);
+                                    }}
+                                    className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/30 rounded-lg text-sm text-blue-400 transition-colors"
+                                  >
+                                    <Link2 className="w-4 h-4" />
+                                    View Click Activity
+                                  </button>
+                                </div>
                               </td>
                             </tr>
                           )}
