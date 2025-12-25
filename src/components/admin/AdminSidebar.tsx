@@ -79,6 +79,7 @@ const NAV_SECTIONS: NavSection[] = [
   {
     title: 'Finance',
     items: [
+      { name: 'Financials', href: '/admin/financials', icon: TrendingUp },
       { name: 'AI Costs', href: '/admin/ai-costs', icon: Cpu },
       { name: 'Finder Fees', href: '/admin/finder-fees', icon: DollarSign },
       { name: 'Partner Attribution', href: '/admin/partner-attribution', icon: Handshake },
