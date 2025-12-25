@@ -8,6 +8,8 @@ interface OperationalCost {
   id: string;
   provider: string;
   monthly_cost: number;
+  actual_cost: number;
+  billing_cycle: 'monthly' | 'biannual' | 'annual';
   category: string;
   description: string | null;
   notes: string | null;
@@ -15,6 +17,15 @@ interface OperationalCost {
   is_active: boolean;
   created_at: string;
   updated_at: string;
+}
+
+// Helper to normalize cost to monthly
+function normalizeToMonthly(cost: number, cycle: string): number {
+  switch (cycle) {
+    case 'annual': return cost / 12;
+    case 'biannual': return cost / 6;
+    default: return cost;
+  }
 }
 
 /**
@@ -90,11 +101,11 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { provider, monthly_cost, category, description, notes, is_variable } = body;
+    const { provider, actual_cost, billing_cycle = 'monthly', category, description, notes, is_variable } = body;
 
-    if (!provider || monthly_cost === undefined || !category) {
+    if (!provider || actual_cost === undefined || !category) {
       return NextResponse.json({
-        error: 'Missing required fields: provider, monthly_cost, category',
+        error: 'Missing required fields: provider, actual_cost, category',
       }, { status: 400 });
     }
 
@@ -105,11 +116,24 @@ export async function POST(request: NextRequest) {
       }, { status: 400 });
     }
 
+    const validCycles = ['monthly', 'biannual', 'annual'];
+    if (!validCycles.includes(billing_cycle)) {
+      return NextResponse.json({
+        error: `Invalid billing_cycle. Must be one of: ${validCycles.join(', ')}`,
+      }, { status: 400 });
+    }
+
+    // Calculate normalized monthly cost
+    const actualCostNum = parseFloat(actual_cost);
+    const monthlyCost = normalizeToMonthly(actualCostNum, billing_cycle);
+
     const { data, error } = await supabase
       .from('operational_costs')
       .insert({
         provider,
-        monthly_cost: parseFloat(monthly_cost),
+        actual_cost: actualCostNum,
+        monthly_cost: monthlyCost,
+        billing_cycle,
         category,
         description: description || null,
         notes: notes || null,
@@ -149,7 +173,7 @@ export async function PUT(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { id, provider, monthly_cost, category, description, notes, is_variable, is_active } = body;
+    const { id, provider, actual_cost, billing_cycle, category, description, notes, is_variable, is_active } = body;
 
     if (!id) {
       return NextResponse.json({ error: 'Missing required field: id' }, { status: 400 });
@@ -162,17 +186,40 @@ export async function PUT(request: NextRequest) {
       }, { status: 400 });
     }
 
-    const updateData: Partial<OperationalCost> = {
+    const validCycles = ['monthly', 'biannual', 'annual'];
+    if (billing_cycle && !validCycles.includes(billing_cycle)) {
+      return NextResponse.json({
+        error: `Invalid billing_cycle. Must be one of: ${validCycles.join(', ')}`,
+      }, { status: 400 });
+    }
+
+    const updateData: Partial<OperationalCost> & { updated_at: string } = {
       updated_at: new Date().toISOString(),
     };
 
     if (provider !== undefined) updateData.provider = provider;
-    if (monthly_cost !== undefined) updateData.monthly_cost = parseFloat(monthly_cost);
     if (category !== undefined) updateData.category = category;
     if (description !== undefined) updateData.description = description;
     if (notes !== undefined) updateData.notes = notes;
     if (is_variable !== undefined) updateData.is_variable = is_variable;
     if (is_active !== undefined) updateData.is_active = is_active;
+    if (billing_cycle !== undefined) updateData.billing_cycle = billing_cycle;
+
+    // If actual_cost or billing_cycle changes, recalculate monthly_cost
+    if (actual_cost !== undefined || billing_cycle !== undefined) {
+      // Need to fetch current record to get the other value if only one is provided
+      const { data: current } = await supabase
+        .from('operational_costs')
+        .select('actual_cost, billing_cycle')
+        .eq('id', id)
+        .single();
+
+      const finalActualCost = actual_cost !== undefined ? parseFloat(actual_cost) : parseFloat(current?.actual_cost || 0);
+      const finalBillingCycle = billing_cycle || current?.billing_cycle || 'monthly';
+
+      updateData.actual_cost = finalActualCost;
+      updateData.monthly_cost = normalizeToMonthly(finalActualCost, finalBillingCycle);
+    }
 
     const { data, error } = await supabase
       .from('operational_costs')

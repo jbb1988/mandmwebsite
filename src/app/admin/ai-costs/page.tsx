@@ -238,6 +238,8 @@ interface FinancialAnalytics {
       id: string;
       provider: string;
       monthly_cost: string;
+      actual_cost: string;
+      billing_cycle: 'monthly' | 'biannual' | 'annual';
       category: string;
       description: string | null;
       notes: string | null;
@@ -457,7 +459,8 @@ export default function AICostsPage() {
   const [editingOpsCost, setEditingOpsCost] = useState<{
     id?: string;
     provider: string;
-    monthly_cost: string;
+    actual_cost: string;
+    billing_cycle: 'monthly' | 'biannual' | 'annual';
     category: string;
     description: string;
     notes: string;
@@ -2382,7 +2385,8 @@ export default function AICostsPage() {
                 <button
                   onClick={() => setEditingOpsCost({
                     provider: '',
-                    monthly_cost: '',
+                    actual_cost: '',
+                    billing_cycle: 'monthly',
                     category: 'infrastructure',
                     description: '',
                     notes: '',
@@ -2459,7 +2463,14 @@ export default function AICostsPage() {
                         {cost.is_variable ? (
                           <span className="text-orange-400 italic">Variable</span>
                         ) : (
-                          <span className="text-white font-medium">{formatCost(parseFloat(cost.monthly_cost))}</span>
+                          <div>
+                            <span className="text-white font-medium">{formatCost(parseFloat(cost.monthly_cost))}/mo</span>
+                            {cost.billing_cycle && cost.billing_cycle !== 'monthly' && (
+                              <div className="text-white/40 text-xs">
+                                ({formatCost(parseFloat(cost.actual_cost || cost.monthly_cost))} {cost.billing_cycle === 'annual' ? 'annually' : 'bi-annually'})
+                              </div>
+                            )}
+                          </div>
                         )}
                       </td>
                       <td className="px-4 py-3 text-white/40 text-sm max-w-[200px] truncate">
@@ -2471,7 +2482,8 @@ export default function AICostsPage() {
                             onClick={() => setEditingOpsCost({
                               id: cost.id,
                               provider: cost.provider,
-                              monthly_cost: cost.monthly_cost,
+                              actual_cost: cost.actual_cost || cost.monthly_cost,
+                              billing_cycle: cost.billing_cycle || 'monthly',
                               category: cost.category,
                               description: cost.description || '',
                               notes: cost.notes || '',
@@ -2526,18 +2538,38 @@ export default function AICostsPage() {
                   placeholder="e.g., AWS, Stripe"
                 />
               </div>
-              <div>
-                <label className="block text-white/70 text-sm mb-1">Monthly Cost ($)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={editingOpsCost.monthly_cost}
-                  onChange={(e) => setEditingOpsCost({ ...editingOpsCost, monthly_cost: e.target.value })}
-                  className="w-full bg-[#1B1F39] border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500/50"
-                  placeholder="0.00"
-                  disabled={editingOpsCost.is_variable}
-                />
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-white/70 text-sm mb-1">Cost ($)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={editingOpsCost.actual_cost}
+                    onChange={(e) => setEditingOpsCost({ ...editingOpsCost, actual_cost: e.target.value })}
+                    className="w-full bg-[#1B1F39] border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500/50"
+                    placeholder="0.00"
+                    disabled={editingOpsCost.is_variable}
+                  />
+                </div>
+                <div>
+                  <label className="block text-white/70 text-sm mb-1">Billing Cycle</label>
+                  <select
+                    value={editingOpsCost.billing_cycle}
+                    onChange={(e) => setEditingOpsCost({ ...editingOpsCost, billing_cycle: e.target.value as 'monthly' | 'biannual' | 'annual' })}
+                    className="w-full bg-[#1B1F39] border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-cyan-500/50"
+                    disabled={editingOpsCost.is_variable}
+                  >
+                    <option value="monthly">Monthly</option>
+                    <option value="biannual">Bi-Annual (6 mo)</option>
+                    <option value="annual">Annual (12 mo)</option>
+                  </select>
+                </div>
               </div>
+              {editingOpsCost.billing_cycle !== 'monthly' && editingOpsCost.actual_cost && (
+                <div className="text-xs text-cyan-400 -mt-2">
+                  = ${(parseFloat(editingOpsCost.actual_cost) / (editingOpsCost.billing_cycle === 'annual' ? 12 : 6)).toFixed(2)}/month
+                </div>
+              )}
               <div>
                 <label className="block text-white/70 text-sm mb-1">Category</label>
                 <select
@@ -2575,7 +2607,7 @@ export default function AICostsPage() {
                 <input
                   type="checkbox"
                   checked={editingOpsCost.is_variable}
-                  onChange={(e) => setEditingOpsCost({ ...editingOpsCost, is_variable: e.target.checked, monthly_cost: e.target.checked ? '0' : editingOpsCost.monthly_cost })}
+                  onChange={(e) => setEditingOpsCost({ ...editingOpsCost, is_variable: e.target.checked, actual_cost: e.target.checked ? '0' : editingOpsCost.actual_cost })}
                   className="w-4 h-4 rounded bg-[#1B1F39] border-white/20"
                 />
                 <span className="text-white/80">Variable cost (per-transaction)</span>
@@ -2590,7 +2622,7 @@ export default function AICostsPage() {
               </button>
               <button
                 onClick={saveOpsCost}
-                disabled={opsCostSaving || !editingOpsCost.provider || (!editingOpsCost.is_variable && !editingOpsCost.monthly_cost)}
+                disabled={opsCostSaving || !editingOpsCost.provider || (!editingOpsCost.is_variable && !editingOpsCost.actual_cost)}
                 className="px-4 py-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {opsCostSaving && <RefreshCw className="w-4 h-4 animate-spin" />}
