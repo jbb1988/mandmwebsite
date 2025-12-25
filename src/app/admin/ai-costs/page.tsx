@@ -1693,7 +1693,18 @@ export default function AICostsPage() {
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-white font-medium font-mono text-sm">{model.model}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-white font-medium font-mono text-sm">{model.model}</span>
+                      {model.roleLabel && (
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+                          model.roleLabel === 'PRIMARY' ? 'bg-yellow-500/20 text-yellow-400' :
+                          model.roleLabel === 'SPECIALIZED' ? 'bg-purple-500/20 text-purple-400' :
+                          'bg-orange-500/20 text-orange-400'
+                        }`}>
+                          {model.roleLabel}
+                        </span>
+                      )}
+                    </div>
                     <span className={`px-2 py-0.5 rounded text-xs font-medium ${
                       model.tier === 'budget' ? 'bg-emerald-500/20 text-emerald-400' :
                       model.tier === 'standard' ? 'bg-cyan-500/20 text-cyan-400' :

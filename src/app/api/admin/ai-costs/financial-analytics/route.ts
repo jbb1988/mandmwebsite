@@ -621,12 +621,32 @@ export async function GET(request: NextRequest) {
     // ========================================
     // 8. MODEL RECOMMENDATIONS
     // ========================================
+    // Sort models: primary first, then specialized, then fallback
+    const roleOrder: Record<string, number> = { primary: 0, specialized: 1, fallback: 2 };
+
     const modelRecommendations = {
-      currentModels: Object.entries(costBreakdown.byModel).map(([name, data]) => ({
-        model: name,
-        ...data,
-        pricing: OPENROUTER_MODELS[name] || null,
-      })),
+      currentModels: Object.entries(costBreakdown.byModel)
+        .map(([name, data]) => {
+          const modelInfo = OPENROUTER_MODELS[name];
+          return {
+            model: name,
+            ...data,
+            pricing: modelInfo || null,
+            role: modelInfo?.role || 'unknown',
+            roleLabel: modelInfo?.role === 'primary' ? 'PRIMARY'
+              : modelInfo?.role === 'specialized' ? 'SPECIALIZED'
+              : modelInfo?.role === 'fallback' ? 'FALLBACK'
+              : 'UNKNOWN',
+          };
+        })
+        .sort((a, b) => {
+          // Sort by role first (primary, specialized, fallback)
+          const aOrder = roleOrder[a.role] ?? 99;
+          const bOrder = roleOrder[b.role] ?? 99;
+          if (aOrder !== bOrder) return aOrder - bOrder;
+          // Then by cost descending within same role
+          return b.cost - a.cost;
+        }),
       alternativeModels: ALTERNATIVE_MODELS.filter(alt =>
         costBreakdown.byModel[alt.current]
       ),
