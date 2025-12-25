@@ -20,6 +20,12 @@ import {
   X,
   Pencil,
   Trash2,
+  Target,
+  Users,
+  Mail,
+  MousePointer,
+  Calendar,
+  UserCheck,
 } from 'lucide-react';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 
@@ -90,6 +96,22 @@ interface OperationalCost {
   is_active: boolean;
 }
 
+interface CampaignData {
+  totalContacts: number;
+  totalSent: number;
+  openRate: number;
+  clickRate: number;
+  calendlyBookings: number;
+  contactsInApp: number;
+}
+
+interface ForecastInputs {
+  projectedSubscribers: number;
+  conversionRate: number;
+  avgRevenuePerSub: number;
+  targetNetProfit: number | null;
+}
+
 export default function FinancialsPage() {
   const { getPassword } = useAdminAuth();
   const password = getPassword();
@@ -99,6 +121,24 @@ export default function FinancialsPage() {
   const [error, setError] = useState<string | null>(null);
   const [periodDays, setPeriodDays] = useState(30);
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const [showForecast, setShowForecast] = useState(true);
+
+  // Forecasting state
+  const [campaignData, setCampaignData] = useState<CampaignData>({
+    totalContacts: 0,
+    totalSent: 0,
+    openRate: 0,
+    clickRate: 0,
+    calendlyBookings: 0,
+    contactsInApp: 0,
+  });
+  const [forecast, setForecast] = useState<ForecastInputs>({
+    projectedSubscribers: 10,
+    conversionRate: 2.0,
+    avgRevenuePerSub: 49.99,
+    targetNetProfit: null,
+  });
+  const [loadingCampaigns, setLoadingCampaigns] = useState(false);
 
   // Operational costs modal
   const [showOpsModal, setShowOpsModal] = useState(false);
@@ -140,8 +180,43 @@ export default function FinancialsPage() {
     }
   };
 
+  const fetchCampaignData = async () => {
+    setLoadingCampaigns(true);
+    try {
+      const res = await fetch('/api/admin/campaigns', {
+        headers: { 'X-Admin-Password': password },
+      });
+      if (!res.ok) throw new Error('Failed to fetch campaigns');
+      const json = await res.json();
+
+      // Extract conversion funnel data
+      const summary = json.summary || {};
+      const funnel = json.conversionFunnel || {};
+
+      setCampaignData({
+        totalContacts: summary.totalContacts || 0,
+        totalSent: summary.totalSent || 0,
+        openRate: summary.overallOpenRate || 0,
+        clickRate: summary.overallClickRate || 0,
+        calendlyBookings: funnel.calendlyBookings || 0,
+        contactsInApp: funnel.contactsInApp || 0,
+      });
+
+      // Auto-calculate conversion rate from funnel
+      if (funnel.calendlyBookings > 0 && summary.totalContacts > 0) {
+        const convRate = (funnel.contactsInApp / summary.totalContacts) * 100;
+        setForecast(prev => ({ ...prev, conversionRate: Math.round(convRate * 10) / 10 }));
+      }
+    } catch (err) {
+      console.error('Error fetching campaign data:', err);
+    } finally {
+      setLoadingCampaigns(false);
+    }
+  };
+
   useEffect(() => {
     fetchData();
+    fetchCampaignData();
   }, [periodDays, password]);
 
   const formatCurrency = (value: number) => {
@@ -520,6 +595,223 @@ export default function FinancialsPage() {
             <span className="text-white">Manage Operating Expenses</span>
             <ArrowRight className="w-4 h-4 text-white/30" />
           </button>
+        </div>
+
+        {/* Revenue Forecast Section */}
+        <div className="bg-[#1A1B2E] rounded-xl border border-white/5 overflow-hidden">
+          <button
+            onClick={() => setShowForecast(!showForecast)}
+            className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-blue-500/10 to-purple-500/10"
+          >
+            <div className="flex items-center gap-3">
+              <Target className="w-5 h-5 text-blue-400" />
+              <h3 className="text-lg font-semibold text-white">Revenue Forecast</h3>
+              <span className="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded-full">
+                Campaign-Driven
+              </span>
+            </div>
+            {showForecast ? (
+              <ChevronUp className="w-5 h-5 text-white/30" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-white/30" />
+            )}
+          </button>
+
+          {showForecast && (
+            <div className="p-6 space-y-6">
+              {/* Forecast Inputs */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-sm font-medium text-white/70 uppercase tracking-wider">Forecast Inputs</h4>
+                  <button
+                    onClick={fetchCampaignData}
+                    disabled={loadingCampaigns}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg text-sm transition-colors"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${loadingCampaigns ? 'animate-spin' : ''}`} />
+                    Refresh from Campaigns
+                  </button>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="bg-[#252642] rounded-xl p-4">
+                    <label className="block text-white/50 text-xs mb-2">
+                      <Users className="w-3 h-3 inline mr-1" />
+                      Projected New Subs
+                    </label>
+                    <input
+                      type="number"
+                      value={forecast.projectedSubscribers}
+                      onChange={e => setForecast({ ...forecast, projectedSubscribers: parseInt(e.target.value) || 0 })}
+                      className="w-full bg-transparent text-2xl font-bold text-white focus:outline-none"
+                    />
+                    <p className="text-white/30 text-xs mt-1">per month</p>
+                  </div>
+                  <div className="bg-[#252642] rounded-xl p-4">
+                    <label className="block text-white/50 text-xs mb-2">
+                      <UserCheck className="w-3 h-3 inline mr-1" />
+                      Conversion Rate
+                    </label>
+                    <div className="flex items-baseline gap-1">
+                      <input
+                        type="number"
+                        step="0.1"
+                        value={forecast.conversionRate}
+                        onChange={e => setForecast({ ...forecast, conversionRate: parseFloat(e.target.value) || 0 })}
+                        className="w-20 bg-transparent text-2xl font-bold text-white focus:outline-none"
+                      />
+                      <span className="text-white/50 text-lg">%</span>
+                    </div>
+                    <p className="text-white/30 text-xs mt-1">from campaigns</p>
+                  </div>
+                  <div className="bg-[#252642] rounded-xl p-4">
+                    <label className="block text-white/50 text-xs mb-2">
+                      <DollarSign className="w-3 h-3 inline mr-1" />
+                      Avg Revenue/Sub
+                    </label>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-white/50 text-lg">$</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={forecast.avgRevenuePerSub}
+                        onChange={e => setForecast({ ...forecast, avgRevenuePerSub: parseFloat(e.target.value) || 0 })}
+                        className="w-24 bg-transparent text-2xl font-bold text-white focus:outline-none"
+                      />
+                    </div>
+                    <p className="text-white/30 text-xs mt-1">Pro annual</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Campaign Funnel */}
+              <div>
+                <h4 className="text-sm font-medium text-white/70 uppercase tracking-wider mb-4">Campaign Funnel</h4>
+                <div className="flex items-center justify-between bg-[#252642] rounded-xl p-4">
+                  <div className="text-center flex-1">
+                    <Mail className="w-5 h-5 text-white/40 mx-auto mb-1" />
+                    <div className="text-lg font-bold text-white">{campaignData.totalContacts.toLocaleString()}</div>
+                    <div className="text-xs text-white/40">Contacts</div>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-white/20" />
+                  <div className="text-center flex-1">
+                    <Mail className="w-5 h-5 text-blue-400 mx-auto mb-1" />
+                    <div className="text-lg font-bold text-white">{campaignData.openRate.toFixed(1)}%</div>
+                    <div className="text-xs text-white/40">Open Rate</div>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-white/20" />
+                  <div className="text-center flex-1">
+                    <MousePointer className="w-5 h-5 text-cyan-400 mx-auto mb-1" />
+                    <div className="text-lg font-bold text-white">{campaignData.clickRate.toFixed(1)}%</div>
+                    <div className="text-xs text-white/40">Click Rate</div>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-white/20" />
+                  <div className="text-center flex-1">
+                    <Calendar className="w-5 h-5 text-purple-400 mx-auto mb-1" />
+                    <div className="text-lg font-bold text-white">{campaignData.calendlyBookings}</div>
+                    <div className="text-xs text-white/40">Bookings</div>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-white/20" />
+                  <div className="text-center flex-1">
+                    <UserCheck className="w-5 h-5 text-green-400 mx-auto mb-1" />
+                    <div className="text-lg font-bold text-green-400">{campaignData.contactsInApp}</div>
+                    <div className="text-xs text-white/40">Converted</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Projected P&L */}
+              {(() => {
+                const projectedRevenue = forecast.projectedSubscribers * forecast.avgRevenuePerSub;
+                const aiCostPerUser = data.summary.proUserCount > 0
+                  ? data.pnl.cogs.aiCosts / data.summary.proUserCount
+                  : 1.80;
+                const projectedAiCosts = forecast.projectedSubscribers * aiCostPerUser;
+                const projectedPaymentFees = projectedRevenue * 0.029;
+                const projectedIapFees = projectedRevenue * 0.15;
+                const fixedOpEx = data.pnl.operatingExpenses.total;
+                const projectedNetProfit = projectedRevenue - projectedAiCosts - projectedPaymentFees - projectedIapFees - fixedOpEx;
+                const projectedMargin = projectedRevenue > 0 ? (projectedNetProfit / projectedRevenue) * 100 : 0;
+
+                // Target mode calculations
+                const targetProfit = forecast.targetNetProfit;
+                const netRevenuePerSub = forecast.avgRevenuePerSub * (1 - 0.029 - 0.15) - aiCostPerUser;
+                const subscribersForTarget = targetProfit !== null && netRevenuePerSub > 0
+                  ? Math.ceil((targetProfit + fixedOpEx) / netRevenuePerSub)
+                  : null;
+
+                return (
+                  <div className="space-y-4">
+                    <h4 className="text-sm font-medium text-white/70 uppercase tracking-wider">Projected P&L (Monthly)</h4>
+                    <div className="bg-[#252642] rounded-xl overflow-hidden">
+                      <div className="px-4 py-3 flex justify-between items-center border-b border-white/5">
+                        <span className="text-white/70">Projected Revenue</span>
+                        <span className="text-white font-medium">{formatCurrency(projectedRevenue)}</span>
+                      </div>
+                      <div className="px-4 py-3 flex justify-between items-center border-b border-white/5">
+                        <span className="text-white/50 text-sm pl-4">- AI Costs ({forecast.projectedSubscribers} × {formatCurrency(aiCostPerUser)}/user)</span>
+                        <span className="text-orange-400 text-sm">-{formatCurrency(projectedAiCosts)}</span>
+                      </div>
+                      <div className="px-4 py-3 flex justify-between items-center border-b border-white/5">
+                        <span className="text-white/50 text-sm pl-4">- Payment Fees (2.9%)</span>
+                        <span className="text-orange-400 text-sm">-{formatCurrency(projectedPaymentFees)}</span>
+                      </div>
+                      <div className="px-4 py-3 flex justify-between items-center border-b border-white/5">
+                        <span className="text-white/50 text-sm pl-4">- IAP Fees (15%)</span>
+                        <span className="text-orange-400 text-sm">-{formatCurrency(projectedIapFees)}</span>
+                      </div>
+                      <div className="px-4 py-3 flex justify-between items-center border-b border-white/5">
+                        <span className="text-white/50 text-sm pl-4">- Fixed OpEx</span>
+                        <span className="text-orange-400 text-sm">-{formatCurrency(fixedOpEx)}</span>
+                      </div>
+                      <div className={`px-4 py-4 flex justify-between items-center ${projectedNetProfit >= 0 ? 'bg-green-500/10' : 'bg-red-500/10'}`}>
+                        <span className={`font-semibold ${projectedNetProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                          Projected Net Profit
+                        </span>
+                        <div className="flex items-center gap-3">
+                          <span className="text-white/50 text-sm">({projectedMargin.toFixed(1)}%)</span>
+                          <span className={`font-bold text-lg ${projectedNetProfit >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {formatCurrency(projectedNetProfit)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Target Mode */}
+                    <div className="bg-[#252642] rounded-xl p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Target className="w-4 h-4 text-purple-400" />
+                          <span className="text-white/70 text-sm">Target Net Profit</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-white/50">$</span>
+                          <input
+                            type="number"
+                            placeholder="1000"
+                            value={forecast.targetNetProfit ?? ''}
+                            onChange={e => setForecast({ ...forecast, targetNetProfit: e.target.value ? parseFloat(e.target.value) : null })}
+                            className="w-24 bg-[#1A1B2E] px-3 py-1.5 rounded-lg text-white text-right focus:outline-none focus:ring-1 focus:ring-purple-500"
+                          />
+                        </div>
+                      </div>
+                      {subscribersForTarget !== null && (
+                        <div className="mt-3 pt-3 border-t border-white/10">
+                          <p className="text-white/50 text-sm">
+                            → Need <span className="text-purple-400 font-medium">{subscribersForTarget}</span> subscribers to reach {formatCurrency(targetProfit!)} profit
+                            {subscribersForTarget > forecast.projectedSubscribers && (
+                              <span className="text-orange-400 ml-1">
+                                ({Math.round(((subscribersForTarget - forecast.projectedSubscribers) / forecast.projectedSubscribers) * 100)}% more than projected)
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
         </div>
       </div>
 
