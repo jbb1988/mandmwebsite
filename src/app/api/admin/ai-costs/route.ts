@@ -23,68 +23,69 @@ export async function GET(request: NextRequest) {
     : null;
 
   try {
-    // 1. Overview Stats
-    const { data: overviewData } = await supabase.rpc('get_ai_cost_overview', {
-      p_start_date: startDate
-    });
+    // Debug logging
+    console.log('[AI Costs] Starting query, timeRange:', timeRange, 'startDate:', startDate);
+    console.log('[AI Costs] Supabase URL:', supabaseUrl ? 'SET' : 'NOT SET');
+    console.log('[AI Costs] Service Key:', supabaseServiceKey ? 'SET' : 'NOT SET');
 
-    // If RPC doesn't exist, fall back to direct queries
-    let overview = overviewData;
-    if (!overview) {
-      // All-time totals
-      const { data: allTime } = await supabase
-        .from('ai_api_calls')
-        .select('estimated_cost, input_tokens, output_tokens, user_id')
-        .order('created_at', { ascending: false });
+    // Skip RPC and go direct to queries
+    let overview;
 
-      // This month
-      const monthStart = new Date();
-      monthStart.setDate(1);
-      monthStart.setHours(0, 0, 0, 0);
+    // All-time totals
+    const { data: allTime, error: allTimeError } = await supabase
+      .from('ai_api_calls')
+      .select('estimated_cost, input_tokens, output_tokens, user_id')
+      .order('created_at', { ascending: false });
 
-      const { data: thisMonth } = await supabase
-        .from('ai_api_calls')
-        .select('estimated_cost')
-        .gte('created_at', monthStart.toISOString());
+    console.log('[AI Costs] allTime query result:', allTime?.length || 0, 'rows, error:', allTimeError?.message || 'none');
 
-      // Last 30 days
-      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-      const { data: last30Days } = await supabase
-        .from('ai_api_calls')
-        .select('estimated_cost')
-        .gte('created_at', thirtyDaysAgo.toISOString());
+    // This month
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
 
-      // Last month for comparison
-      const lastMonthStart = new Date(monthStart);
-      lastMonthStart.setMonth(lastMonthStart.getMonth() - 1);
-      const lastMonthEnd = new Date(monthStart);
+    const { data: thisMonth } = await supabase
+      .from('ai_api_calls')
+      .select('estimated_cost')
+      .gte('created_at', monthStart.toISOString());
 
-      const { data: lastMonth } = await supabase
-        .from('ai_api_calls')
-        .select('estimated_cost')
-        .gte('created_at', lastMonthStart.toISOString())
-        .lt('created_at', lastMonthEnd.toISOString());
+    // Last 30 days
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const { data: last30Days } = await supabase
+      .from('ai_api_calls')
+      .select('estimated_cost')
+      .gte('created_at', thirtyDaysAgo.toISOString());
 
-      const totalCostAllTime = allTime?.reduce((sum, r) => sum + parseFloat(r.estimated_cost || 0), 0) || 0;
-      const totalCostThisMonth = thisMonth?.reduce((sum, r) => sum + parseFloat(r.estimated_cost || 0), 0) || 0;
-      const totalCostLast30Days = last30Days?.reduce((sum, r) => sum + parseFloat(r.estimated_cost || 0), 0) || 0;
-      const lastMonthCost = lastMonth?.reduce((sum, r) => sum + parseFloat(r.estimated_cost || 0), 0) || 0;
-      const uniqueUsers = new Set(allTime?.map(r => r.user_id)).size;
+    // Last month for comparison
+    const lastMonthStart = new Date(monthStart);
+    lastMonthStart.setMonth(lastMonthStart.getMonth() - 1);
+    const lastMonthEnd = new Date(monthStart);
 
-      overview = {
-        totalCostAllTime,
-        totalCostThisMonth,
-        totalCostLast30Days,
-        totalApiCalls: allTime?.length || 0,
-        totalInputTokens: allTime?.reduce((sum, r) => sum + (r.input_tokens || 0), 0) || 0,
-        totalOutputTokens: allTime?.reduce((sum, r) => sum + (r.output_tokens || 0), 0) || 0,
-        uniqueUsers,
-        costPerUser: uniqueUsers > 0 ? totalCostAllTime / uniqueUsers : 0,
-        monthOverMonthChange: lastMonthCost > 0
-          ? ((totalCostThisMonth - lastMonthCost) / lastMonthCost) * 100
-          : null
-      };
-    }
+    const { data: lastMonth } = await supabase
+      .from('ai_api_calls')
+      .select('estimated_cost')
+      .gte('created_at', lastMonthStart.toISOString())
+      .lt('created_at', lastMonthEnd.toISOString());
+
+    const totalCostAllTime = allTime?.reduce((sum, r) => sum + parseFloat(r.estimated_cost || 0), 0) || 0;
+    const totalCostThisMonth = thisMonth?.reduce((sum, r) => sum + parseFloat(r.estimated_cost || 0), 0) || 0;
+    const totalCostLast30Days = last30Days?.reduce((sum, r) => sum + parseFloat(r.estimated_cost || 0), 0) || 0;
+    const lastMonthCost = lastMonth?.reduce((sum, r) => sum + parseFloat(r.estimated_cost || 0), 0) || 0;
+    const uniqueUsers = new Set(allTime?.map(r => r.user_id)).size;
+
+    overview = {
+      totalCostAllTime,
+      totalCostThisMonth,
+      totalCostLast30Days,
+      totalApiCalls: allTime?.length || 0,
+      totalInputTokens: allTime?.reduce((sum, r) => sum + (r.input_tokens || 0), 0) || 0,
+      totalOutputTokens: allTime?.reduce((sum, r) => sum + (r.output_tokens || 0), 0) || 0,
+      uniqueUsers,
+      costPerUser: uniqueUsers > 0 ? totalCostAllTime / uniqueUsers : 0,
+      monthOverMonthChange: lastMonthCost > 0
+        ? ((totalCostThisMonth - lastMonthCost) / lastMonthCost) * 100
+        : null
+    };
 
     // 2. Cost by Feature
     const { data: byFeatureRaw } = await supabase
