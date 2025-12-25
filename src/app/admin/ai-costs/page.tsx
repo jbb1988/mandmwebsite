@@ -128,6 +128,8 @@ const FEATURE_COLORS: Record<string, string> = {
 
 const CHART_COLORS = ['#06b6d4', '#a855f7', '#f97316', '#10b981', '#fbbf24', '#3b82f6', '#ec4899'];
 
+const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || '';
+
 export default function AICostsPage() {
   const { getPassword } = useAdminAuth();
   const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -152,10 +154,10 @@ export default function AICostsPage() {
     try {
       const [mainRes, projRes] = await Promise.all([
         fetch(`/api/admin/ai-costs?timeRange=${timeRange}`, {
-          headers: { 'X-Admin-Password': getPassword() }
+          headers: { 'X-Admin-Password': getPassword() || adminPassword }
         }),
         fetch('/api/admin/ai-costs/projections', {
-          headers: { 'X-Admin-Password': getPassword() }
+          headers: { 'X-Admin-Password': getPassword() || adminPassword }
         })
       ]);
 
@@ -182,7 +184,7 @@ export default function AICostsPage() {
     setUserLoading(true);
     try {
       const res = await fetch(`/api/admin/ai-costs/users?userId=${userId}`, {
-        headers: { 'X-Admin-Password': getPassword() }
+        headers: { 'X-Admin-Password': getPassword() || adminPassword }
       });
       if (!res.ok) throw new Error('Failed to fetch user details');
       const data = await res.json();
