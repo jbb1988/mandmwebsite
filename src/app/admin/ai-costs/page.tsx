@@ -132,7 +132,7 @@ interface UserDetail {
   profitMargin: number;
 }
 
-type TabType = 'overview' | 'features' | 'users' | 'projections' | 'financial';
+type TabType = 'overview' | 'features' | 'users' | 'projections' | 'financial' | 'models';
 
 interface FeatureModelConfig {
   name: string;
@@ -299,6 +299,93 @@ interface FinancialAnalytics {
   };
 }
 
+interface ModelCatalogEntry {
+  provider: string;
+  displayName: string;
+  inputCost: number;
+  outputCost: number;
+  contextWindow: string;
+  capabilities: string[];
+  bestFor: string[];
+  tier: 'budget' | 'standard' | 'premium';
+  role: 'current' | 'upgrade' | 'downgrade';
+  notes: string;
+}
+
+interface UpgradeProjection {
+  modelId: string;
+  modelName: string;
+  provider: string;
+  projectedMonthlyCost: number;
+  delta: number;
+  multiplier: number;
+  isUpgrade: boolean;
+  isCostSaving: boolean;
+}
+
+interface FeatureUpgradeProjection {
+  feature: string;
+  displayName: string;
+  currentModel: string;
+  currentModelDisplay: string;
+  monthlyCalls: number;
+  currentMonthlyCost: number;
+  avgInputTokens: number;
+  avgOutputTokens: number;
+  projections: UpgradeProjection[];
+}
+
+interface ModelAnalysis {
+  summary: {
+    totalCalls: number;
+    totalCost: number;
+    avgCostPerCall: number;
+    uniqueModels: number;
+    uniqueFeatures: number;
+  };
+  currentUsageByModel: {
+    model: string;
+    displayName: string;
+    provider: string;
+    calls: number;
+    cost: number;
+    avgCostPerCall: number;
+    avgInputTokens: number;
+    avgOutputTokens: number;
+    percentOfTotal: number;
+    tier: string;
+  }[];
+  currentUsageByFeature: {
+    feature: string;
+    displayName: string;
+    currentModel: string;
+    currentModelDisplay: string;
+    monthlyCalls: number;
+    monthlyCost: number;
+    avgInputTokens: number;
+    avgOutputTokens: number;
+  }[];
+  modelCatalog: Record<string, ModelCatalogEntry>;
+  upgradeOptions: {
+    modelId: string;
+    displayName: string;
+    provider: string;
+    inputCost: number;
+    outputCost: number;
+    tier: string;
+    role: string;
+  }[];
+  upgradeProjections: FeatureUpgradeProjection[];
+  roiContext: {
+    proUserCount: number;
+    monthlyRevenuePerUser: number;
+    ltv: number;
+    currentConversionRate: number;
+    totalMonthlyRevenue: number;
+  };
+  monthlyTrend: { month: string; cost: number }[];
+}
+
 const FEATURE_COLORS: Record<string, string> = {
   muscle_coach: '#06b6d4',
   weekly_reports: '#a855f7',
@@ -337,6 +424,12 @@ export default function AICostsPage() {
   const [selectedScenario, setSelectedScenario] = useState<string>('Moderate');
   const [expandedFeatures, setExpandedFeatures] = useState<Set<string>>(new Set());
   const [customUserForecast, setCustomUserForecast] = useState<number | null>(null);
+
+  // Model Analysis state
+  const [modelAnalysis, setModelAnalysis] = useState<ModelAnalysis | null>(null);
+  const [selectedUpgradeFeature, setSelectedUpgradeFeature] = useState<string | null>(null);
+  const [selectedUpgradeModel, setSelectedUpgradeModel] = useState<string | null>(null);
+  const [expandedModelCards, setExpandedModelCards] = useState<Set<string>>(new Set());
 
   // Fee toggles for margin calculation
   const [includeIAP, setIncludeIAP] = useState(true); // 15% Apple/Google
@@ -383,7 +476,7 @@ export default function AICostsPage() {
     setLoading(true);
     setError(null);
     try {
-      const [mainRes, projRes, finRes] = await Promise.all([
+      const [mainRes, projRes, finRes, modelRes] = await Promise.all([
         fetch(`/api/admin/ai-costs?timeRange=${timeRange}`, {
           headers: { 'X-Admin-Password': getPassword() || adminPassword }
         }),
@@ -391,6 +484,9 @@ export default function AICostsPage() {
           headers: { 'X-Admin-Password': getPassword() || adminPassword }
         }),
         fetch('/api/admin/ai-costs/financial-analytics', {
+          headers: { 'X-Admin-Password': getPassword() || adminPassword }
+        }),
+        fetch('/api/admin/ai-costs/model-analysis', {
           headers: { 'X-Admin-Password': getPassword() || adminPassword }
         })
       ]);
@@ -411,6 +507,11 @@ export default function AICostsPage() {
       if (finRes.ok) {
         const finData = await finRes.json();
         setFinancialData(finData);
+      }
+
+      if (modelRes.ok) {
+        const modelData = await modelRes.json();
+        setModelAnalysis(modelData);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -513,6 +614,7 @@ export default function AICostsPage() {
           { id: 'users', label: 'By User', color: 'orange' },
           { id: 'projections', label: 'Projections', color: 'emerald' },
           { id: 'financial', label: 'Financial', color: 'yellow' },
+          { id: 'models', label: 'Model Analysis', color: 'pink' },
         ].map(tab => (
           <button
             key={tab.id}
@@ -1680,6 +1782,361 @@ export default function AICostsPage() {
           <AlertTriangle className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
           <h3 className="text-white font-semibold mb-2">Financial Analytics Unavailable</h3>
           <p className="text-white/50 text-sm">Unable to load financial analytics data. Please try refreshing.</p>
+        </div>
+      )}
+
+      {/* Model Analysis Tab */}
+      {activeTab === 'models' && modelAnalysis && (
+        <div className="space-y-6">
+          {/* Current Usage Summary */}
+          <div className="grid grid-cols-4 gap-4">
+            <div className="bg-[#0F1123] rounded-2xl border border-white/5 p-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-cyan-500/10 rounded-xl flex items-center justify-center">
+                  <Cpu className="w-5 h-5 text-cyan-400" />
+                </div>
+                <div className="text-white/50 text-sm">Total Calls (30d)</div>
+              </div>
+              <div className="text-2xl font-bold text-white">{modelAnalysis.summary.totalCalls.toLocaleString()}</div>
+            </div>
+            <div className="bg-[#0F1123] rounded-2xl border border-white/5 p-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-emerald-400" />
+                </div>
+                <div className="text-white/50 text-sm">Total Cost (30d)</div>
+              </div>
+              <div className="text-2xl font-bold text-emerald-400">{formatCost(modelAnalysis.summary.totalCost)}</div>
+            </div>
+            <div className="bg-[#0F1123] rounded-2xl border border-white/5 p-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center">
+                  <Activity className="w-5 h-5 text-purple-400" />
+                </div>
+                <div className="text-white/50 text-sm">Avg Cost/Call</div>
+              </div>
+              <div className="text-2xl font-bold text-purple-400">{formatCost(modelAnalysis.summary.avgCostPerCall)}</div>
+            </div>
+            <div className="bg-[#0F1123] rounded-2xl border border-white/5 p-4">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-10 h-10 bg-orange-500/10 rounded-xl flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-orange-400" />
+                </div>
+                <div className="text-white/50 text-sm">Active Models</div>
+              </div>
+              <div className="text-2xl font-bold text-orange-400">{modelAnalysis.summary.uniqueModels}</div>
+            </div>
+          </div>
+
+          {/* Current Model Usage */}
+          <div className="bg-[#0F1123] rounded-2xl border border-white/5 p-6">
+            <h3 className="text-white font-semibold mb-4">Current Model Usage (Last 30 Days)</h3>
+            <div className="space-y-3">
+              {modelAnalysis.currentUsageByModel.map(model => (
+                <div key={model.model} className="bg-[#1B1F39] rounded-xl p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-3 h-3 rounded-full ${
+                        model.tier === 'budget' ? 'bg-emerald-400' :
+                        model.tier === 'standard' ? 'bg-yellow-400' :
+                        'bg-red-400'
+                      }`} />
+                      <div>
+                        <div className="text-white font-medium">{model.displayName}</div>
+                        <div className="text-white/40 text-xs">{model.provider} • {model.tier}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-6 text-sm">
+                      <div className="text-center">
+                        <div className="text-white font-medium">{model.calls.toLocaleString()}</div>
+                        <div className="text-white/40 text-xs">calls</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-cyan-400 font-medium">{formatCost(model.cost)}</div>
+                        <div className="text-white/40 text-xs">total cost</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="text-purple-400 font-medium">{formatCost(model.avgCostPerCall)}</div>
+                        <div className="text-white/40 text-xs">per call</div>
+                      </div>
+                      <div className="text-center min-w-[60px]">
+                        <div className="text-white font-medium">{model.percentOfTotal.toFixed(1)}%</div>
+                        <div className="text-white/40 text-xs">of total</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Upgrade Simulator */}
+          <div className="bg-[#0F1123] rounded-2xl border border-white/5 p-6">
+            <h3 className="text-white font-semibold mb-2">Upgrade Simulator</h3>
+            <p className="text-white/50 text-sm mb-4">Select a feature and model to see projected cost impact</p>
+
+            <div className="flex gap-4 mb-6">
+              <div className="flex-1">
+                <label className="text-white/50 text-xs mb-1 block">Feature</label>
+                <select
+                  value={selectedUpgradeFeature || ''}
+                  onChange={(e) => setSelectedUpgradeFeature(e.target.value || null)}
+                  className="w-full bg-[#1B1F39] text-white rounded-lg px-3 py-2 border border-white/10 focus:border-pink-500/50 focus:outline-none"
+                >
+                  <option value="">Select a feature...</option>
+                  {modelAnalysis.upgradeProjections.map(proj => (
+                    <option key={proj.feature} value={proj.feature}>
+                      {proj.displayName} ({proj.monthlyCalls} calls/mo, {formatCost(proj.currentMonthlyCost)})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex-1">
+                <label className="text-white/50 text-xs mb-1 block">Upgrade To</label>
+                <select
+                  value={selectedUpgradeModel || ''}
+                  onChange={(e) => setSelectedUpgradeModel(e.target.value || null)}
+                  className="w-full bg-[#1B1F39] text-white rounded-lg px-3 py-2 border border-white/10 focus:border-pink-500/50 focus:outline-none"
+                >
+                  <option value="">Select a model...</option>
+                  {modelAnalysis.upgradeOptions.map(opt => (
+                    <option key={opt.modelId} value={opt.modelId}>
+                      {opt.displayName} ({opt.provider}) - ${opt.inputCost}/${opt.outputCost} per 1M
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {selectedUpgradeFeature && selectedUpgradeModel && (() => {
+              const featureProj = modelAnalysis.upgradeProjections.find(p => p.feature === selectedUpgradeFeature);
+              const modelProj = featureProj?.projections.find(p => p.modelId === selectedUpgradeModel);
+              if (!featureProj || !modelProj) return null;
+
+              const monthlyCostDelta = modelProj.delta;
+              const breakEvenConversions = Math.ceil(Math.abs(monthlyCostDelta) / (modelAnalysis.roiContext.ltv / 6));
+              const breakEvenRetentionPct = (Math.abs(monthlyCostDelta) / modelAnalysis.roiContext.totalMonthlyRevenue) * 100;
+
+              return (
+                <div className={`rounded-xl p-4 ${modelProj.isCostSaving ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-pink-500/10 border border-pink-500/20'}`}>
+                  <div className="grid grid-cols-3 gap-4 mb-4">
+                    <div className="text-center">
+                      <div className="text-white/50 text-xs mb-1">Current Cost</div>
+                      <div className="text-white font-bold text-xl">{formatCost(featureProj.currentMonthlyCost)}</div>
+                      <div className="text-white/40 text-xs">per month</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl text-white/30">→</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-white/50 text-xs mb-1">Projected Cost</div>
+                      <div className={`font-bold text-xl ${modelProj.isCostSaving ? 'text-emerald-400' : 'text-pink-400'}`}>
+                        {formatCost(modelProj.projectedMonthlyCost)}
+                      </div>
+                      <div className="text-white/40 text-xs">per month</div>
+                    </div>
+                  </div>
+
+                  <div className={`text-center mb-4 py-2 rounded-lg ${modelProj.isCostSaving ? 'bg-emerald-500/20' : 'bg-pink-500/20'}`}>
+                    <span className={`text-2xl font-bold ${modelProj.isCostSaving ? 'text-emerald-400' : 'text-pink-400'}`}>
+                      {modelProj.isCostSaving ? '-' : '+'}{formatCost(Math.abs(monthlyCostDelta))}
+                    </span>
+                    <span className="text-white/50 text-sm ml-2">
+                      ({modelProj.multiplier.toFixed(1)}x {modelProj.isCostSaving ? 'cheaper' : 'more expensive'})
+                    </span>
+                  </div>
+
+                  {!modelProj.isCostSaving && (
+                    <div className="bg-[#1B1F39] rounded-lg p-4">
+                      <div className="text-white/70 text-sm font-medium mb-3">To break even, you need ONE of:</div>
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm">
+                          <div className="w-2 h-2 bg-cyan-400 rounded-full" />
+                          <span className="text-white">+{breakEvenConversions} new conversions/month</span>
+                          <span className="text-white/40">(at $79/6mo LTV)</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <div className="w-2 h-2 bg-emerald-400 rounded-full" />
+                          <span className="text-white">+{breakEvenRetentionPct.toFixed(2)}% retention improvement</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <div className="w-2 h-2 bg-yellow-400 rounded-full" />
+                          <span className="text-white">+${(Math.abs(monthlyCostDelta) / Math.max(1, modelAnalysis.roiContext.proUserCount)).toFixed(2)}/user price increase</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* Feature Upgrade Matrix */}
+          <div className="bg-[#0F1123] rounded-2xl border border-white/5 p-6">
+            <h3 className="text-white font-semibold mb-2">Feature Upgrade Matrix</h3>
+            <p className="text-white/50 text-sm mb-4">Monthly cost projections for each feature with different models</p>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-white/10">
+                    <th className="text-left text-white/50 font-medium py-2 px-3">Feature</th>
+                    <th className="text-center text-white/50 font-medium py-2 px-3">Current</th>
+                    <th className="text-center text-white/50 font-medium py-2 px-3">Calls/Mo</th>
+                    {modelAnalysis.upgradeOptions.slice(0, 4).map(opt => (
+                      <th key={opt.modelId} className="text-center text-white/50 font-medium py-2 px-3">
+                        {opt.displayName}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {modelAnalysis.upgradeProjections.map(feature => (
+                    <tr key={feature.feature} className="border-b border-white/5 hover:bg-white/5">
+                      <td className="py-3 px-3">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className="w-2 h-2 rounded-full"
+                            style={{ backgroundColor: FEATURE_COLORS[feature.feature] || '#888' }}
+                          />
+                          <span className="text-white">{feature.displayName}</span>
+                        </div>
+                      </td>
+                      <td className="text-center py-3 px-3 text-cyan-400">{formatCost(feature.currentMonthlyCost)}</td>
+                      <td className="text-center py-3 px-3 text-white/60">{feature.monthlyCalls}</td>
+                      {modelAnalysis.upgradeOptions.slice(0, 4).map(opt => {
+                        const proj = feature.projections.find(p => p.modelId === opt.modelId);
+                        if (!proj) return <td key={opt.modelId} className="text-center py-3 px-3 text-white/30">-</td>;
+                        return (
+                          <td key={opt.modelId} className="text-center py-3 px-3">
+                            <div className={proj.isCostSaving ? 'text-emerald-400' : proj.delta > 0 ? 'text-pink-400' : 'text-white'}>
+                              {formatCost(proj.projectedMonthlyCost)}
+                            </div>
+                            <div className={`text-xs ${proj.isCostSaving ? 'text-emerald-400/60' : 'text-pink-400/60'}`}>
+                              {proj.isCostSaving ? '-' : '+'}{formatCost(Math.abs(proj.delta))}
+                            </div>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Model Capability Cards */}
+          <div className="bg-[#0F1123] rounded-2xl border border-white/5 p-6">
+            <h3 className="text-white font-semibold mb-4">Model Reference</h3>
+            <div className="grid grid-cols-2 gap-4">
+              {Object.entries(modelAnalysis.modelCatalog).slice(0, 8).map(([modelId, model]) => {
+                const isExpanded = expandedModelCards.has(modelId);
+                return (
+                  <div key={modelId} className="bg-[#1B1F39] rounded-xl overflow-hidden">
+                    <button
+                      onClick={() => {
+                        const newExpanded = new Set(expandedModelCards);
+                        if (isExpanded) {
+                          newExpanded.delete(modelId);
+                        } else {
+                          newExpanded.add(modelId);
+                        }
+                        setExpandedModelCards(newExpanded);
+                      }}
+                      className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-3 h-3 rounded-full ${
+                          model.tier === 'budget' ? 'bg-emerald-400' :
+                          model.tier === 'standard' ? 'bg-yellow-400' :
+                          'bg-red-400'
+                        }`} />
+                        <div className="text-left">
+                          <div className="text-white font-medium">{model.displayName}</div>
+                          <div className="text-white/40 text-xs">{model.provider} • {model.contextWindow}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="text-right">
+                          <div className="text-cyan-400 text-sm">${model.inputCost}/${model.outputCost}</div>
+                          <div className="text-white/40 text-xs">per 1M tokens</div>
+                        </div>
+                        {isExpanded ? (
+                          <ChevronUp className="w-4 h-4 text-white/40" />
+                        ) : (
+                          <ChevronDown className="w-4 h-4 text-white/40" />
+                        )}
+                      </div>
+                    </button>
+                    {isExpanded && (
+                      <div className="px-4 pb-4 border-t border-white/5 pt-3 space-y-3">
+                        <div>
+                          <div className="text-white/50 text-xs mb-1">Role</div>
+                          <span className={`px-2 py-0.5 rounded text-xs ${
+                            model.role === 'current' ? 'bg-cyan-500/20 text-cyan-400' :
+                            model.role === 'upgrade' ? 'bg-pink-500/20 text-pink-400' :
+                            'bg-emerald-500/20 text-emerald-400'
+                          }`}>
+                            {model.role.toUpperCase()}
+                          </span>
+                        </div>
+                        <div>
+                          <div className="text-white/50 text-xs mb-1">Best For</div>
+                          <div className="flex flex-wrap gap-1">
+                            {model.bestFor.map((use, i) => (
+                              <span key={i} className="px-2 py-0.5 bg-white/5 text-white/70 text-xs rounded">
+                                {use}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-white/50 text-xs mb-1">Notes</div>
+                          <div className="text-white/60 text-sm">{model.notes}</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ROI Context */}
+          <div className="bg-[#0F1123] rounded-2xl border border-white/5 p-6">
+            <h3 className="text-white font-semibold mb-4">ROI Context</h3>
+            <div className="grid grid-cols-5 gap-4">
+              <div className="bg-[#1B1F39] rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-white">{modelAnalysis.roiContext.proUserCount}</div>
+                <div className="text-white/40 text-xs">Pro Users</div>
+              </div>
+              <div className="bg-[#1B1F39] rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-emerald-400">${modelAnalysis.roiContext.monthlyRevenuePerUser.toFixed(2)}</div>
+                <div className="text-white/40 text-xs">Rev/User/Mo</div>
+              </div>
+              <div className="bg-[#1B1F39] rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-cyan-400">${modelAnalysis.roiContext.ltv}</div>
+                <div className="text-white/40 text-xs">6-Month LTV</div>
+              </div>
+              <div className="bg-[#1B1F39] rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-purple-400">{modelAnalysis.roiContext.currentConversionRate.toFixed(1)}%</div>
+                <div className="text-white/40 text-xs">Trial Conversion</div>
+              </div>
+              <div className="bg-[#1B1F39] rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-yellow-400">${modelAnalysis.roiContext.totalMonthlyRevenue.toFixed(0)}</div>
+                <div className="text-white/40 text-xs">Monthly Revenue</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Model Analysis Tab - No Data State */}
+      {activeTab === 'models' && !modelAnalysis && !loading && (
+        <div className="bg-[#0F1123] rounded-2xl border border-white/5 p-8 text-center">
+          <AlertTriangle className="w-12 h-12 text-pink-400 mx-auto mb-4" />
+          <h3 className="text-white font-semibold mb-2">Model Analysis Unavailable</h3>
+          <p className="text-white/50 text-sm">Unable to load model analysis data. Please try refreshing.</p>
         </div>
       )}
 
