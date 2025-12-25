@@ -994,6 +994,272 @@ export default function CampaignsPage() {
           </div>
         </div>
       </div>
+
+      {/* Contacts Modal */}
+      {contactsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-[#0F1123] border border-white/10 rounded-2xl w-full max-w-5xl max-h-[85vh] overflow-hidden shadow-2xl">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b border-white/10">
+              <div>
+                <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <Users className="w-5 h-5 text-purple-400" />
+                  Campaign Contacts
+                </h2>
+                <p className="text-white/50 text-sm mt-1">{contactsModal.campaignName}</p>
+              </div>
+              <button
+                onClick={() => {
+                  setContactsModal(null);
+                  setContactsData(null);
+                }}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-white/60" />
+              </button>
+            </div>
+
+            {/* Status Filter */}
+            <div className="p-4 border-b border-white/5 flex items-center gap-2 flex-wrap">
+              <span className="text-white/40 text-sm">Filter:</span>
+              {['all', 'pending', 'sent', 'opened', 'clicked', 'replied', 'bounced'].map((status) => (
+                <button
+                  key={status}
+                  onClick={() => {
+                    setContactsFilter(status);
+                    fetchContacts(contactsModal.campaignId, status);
+                  }}
+                  className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                    contactsFilter === status
+                      ? 'bg-purple-500/30 text-purple-300 border border-purple-500/50'
+                      : 'bg-white/5 text-white/50 border border-white/10 hover:bg-white/10'
+                  }`}
+                >
+                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                  {contactsData?.statusCounts && status !== 'all' && (
+                    <span className="ml-1">({contactsData.statusCounts[status] || 0})</span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {/* Contacts Table */}
+            <div className="overflow-auto max-h-[60vh]">
+              {contactsLoading ? (
+                <div className="p-8 text-center">
+                  <RefreshCw className="w-8 h-8 text-white/30 animate-spin mx-auto mb-3" />
+                  <p className="text-white/50">Loading contacts...</p>
+                </div>
+              ) : contactsData?.contacts.length === 0 ? (
+                <div className="p-8 text-center">
+                  <Users className="w-8 h-8 text-white/20 mx-auto mb-3" />
+                  <p className="text-white/50">No contacts found</p>
+                </div>
+              ) : (
+                <table className="w-full">
+                  <thead className="sticky top-0 bg-[#0F1123]">
+                    <tr className="text-left text-xs text-white/40 border-b border-white/5">
+                      <th className="px-4 py-3 font-medium">Contact</th>
+                      <th className="px-4 py-3 font-medium">Organization</th>
+                      <th className="px-4 py-3 font-medium">Status</th>
+                      <th className="px-4 py-3 font-medium">Step</th>
+                      <th className="px-4 py-3 font-medium">Sent</th>
+                      <th className="px-4 py-3 font-medium">Opened</th>
+                      <th className="px-4 py-3 font-medium">Clicked</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {contactsData?.contacts.map((contact) => (
+                      <tr key={contact.id} className="border-b border-white/5 hover:bg-white/[0.02]">
+                        <td className="px-4 py-3">
+                          <p className="text-white text-sm">{contact.email}</p>
+                          {(contact.first_name || contact.last_name) && (
+                            <p className="text-white/40 text-xs">
+                              {contact.first_name} {contact.last_name}
+                            </p>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          {contact.organization_name ? (
+                            <span className="text-white/60 text-sm flex items-center gap-1">
+                              <Building2 className="w-3 h-3" />
+                              {contact.organization_name}
+                            </span>
+                          ) : (
+                            <span className="text-white/30 text-sm">-</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-1 text-xs rounded-full ${
+                            contact.status === 'replied' ? 'bg-purple-500/20 text-purple-400' :
+                            contact.status === 'clicked' ? 'bg-blue-500/20 text-blue-400' :
+                            contact.status === 'opened' ? 'bg-emerald-500/20 text-emerald-400' :
+                            contact.status === 'sent' ? 'bg-cyan-500/20 text-cyan-400' :
+                            contact.status === 'bounced' ? 'bg-red-500/20 text-red-400' :
+                            'bg-white/10 text-white/50'
+                          }`}>
+                            {contact.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="w-6 h-6 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-400 text-xs font-bold">
+                            {contact.sequence_step}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-white/50 text-xs">
+                          {contact.sent_at ? formatDate(contact.sent_at) : '-'}
+                        </td>
+                        <td className="px-4 py-3 text-white/50 text-xs">
+                          {contact.opened_at ? formatDate(contact.opened_at) : '-'}
+                        </td>
+                        <td className="px-4 py-3 text-white/50 text-xs">
+                          {contact.clicked_at ? formatDate(contact.clicked_at) : '-'}
+                          {contact.clicks.length > 0 && (
+                            <span className="text-blue-400 ml-1">({contact.clicks.length})</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+
+            {/* Pagination */}
+            {contactsData && contactsData.pagination.totalPages > 1 && (
+              <div className="p-4 border-t border-white/10 flex items-center justify-between">
+                <p className="text-white/50 text-sm">
+                  Showing {contactsData.contacts.length} of {contactsData.pagination.total} contacts
+                </p>
+                <div className="flex gap-2">
+                  {Array.from({ length: Math.min(contactsData.pagination.totalPages, 5) }, (_, i) => (
+                    <button
+                      key={i}
+                      className={`w-8 h-8 rounded-lg text-sm ${
+                        contactsData.pagination.page === i + 1
+                          ? 'bg-purple-500/30 text-purple-300'
+                          : 'bg-white/5 text-white/50 hover:bg-white/10'
+                      }`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Clicks Modal */}
+      {clicksModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-[#0F1123] border border-white/10 rounded-2xl w-full max-w-4xl max-h-[85vh] overflow-hidden shadow-2xl">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b border-white/10">
+              <div>
+                <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <Link2 className="w-5 h-5 text-blue-400" />
+                  Click Activity
+                </h2>
+                <p className="text-white/50 text-sm mt-1">{clicksModal.campaignName}</p>
+              </div>
+              <button
+                onClick={() => {
+                  setClicksModal(null);
+                  setClicksData(null);
+                }}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-white/60" />
+              </button>
+            </div>
+
+            {/* Click Stats */}
+            {clicksData?.stats && (
+              <div className="p-4 border-b border-white/5 grid grid-cols-2 sm:grid-cols-5 gap-3">
+                <div className="text-center p-3 bg-white/5 rounded-lg">
+                  <p className="text-2xl font-bold text-white">{clicksData.stats.human}</p>
+                  <p className="text-xs text-white/50">Human Clicks</p>
+                </div>
+                <div className="text-center p-3 bg-white/5 rounded-lg">
+                  <p className="text-2xl font-bold text-purple-400">{clicksData.stats.uniqueClickers}</p>
+                  <p className="text-xs text-white/50">Unique Clickers</p>
+                </div>
+                <div className="text-center p-3 bg-white/5 rounded-lg">
+                  <p className="text-2xl font-bold text-blue-400">{clicksData.stats.byLinkType.cta_calendly || 0}</p>
+                  <p className="text-xs text-white/50">CTA Clicks</p>
+                </div>
+                <div className="text-center p-3 bg-white/5 rounded-lg">
+                  <p className="text-2xl font-bold text-orange-400">{clicksData.stats.byLinkType.unsubscribe || 0}</p>
+                  <p className="text-xs text-white/50">Unsubscribes</p>
+                </div>
+                <div className="text-center p-3 bg-white/5 rounded-lg">
+                  <p className="text-2xl font-bold text-red-400">{clicksData.stats.bot}</p>
+                  <p className="text-xs text-white/50">Bot (filtered)</p>
+                </div>
+              </div>
+            )}
+
+            {/* Clicks Table */}
+            <div className="overflow-auto max-h-[50vh]">
+              {clicksLoading ? (
+                <div className="p-8 text-center">
+                  <RefreshCw className="w-8 h-8 text-white/30 animate-spin mx-auto mb-3" />
+                  <p className="text-white/50">Loading clicks...</p>
+                </div>
+              ) : clicksData?.clicks.length === 0 ? (
+                <div className="p-8 text-center">
+                  <MousePointer className="w-8 h-8 text-white/20 mx-auto mb-3" />
+                  <p className="text-white/50">No click activity yet</p>
+                </div>
+              ) : (
+                <table className="w-full">
+                  <thead className="sticky top-0 bg-[#0F1123]">
+                    <tr className="text-left text-xs text-white/40 border-b border-white/5">
+                      <th className="px-4 py-3 font-medium">Contact</th>
+                      <th className="px-4 py-3 font-medium">Link Type</th>
+                      <th className="px-4 py-3 font-medium">Clicked At</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {clicksData?.clicks.map((click) => (
+                      <tr key={click.id} className="border-b border-white/5 hover:bg-white/[0.02]">
+                        <td className="px-4 py-3">
+                          <p className="text-white text-sm">{click.email}</p>
+                          {click.organization_name && (
+                            <p className="text-white/40 text-xs flex items-center gap-1">
+                              <Building2 className="w-3 h-3" />
+                              {click.organization_name}
+                            </p>
+                          )}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`px-2 py-1 text-xs rounded-full ${
+                            click.link_type === 'cta_calendly' ? 'bg-blue-500/20 text-blue-400' :
+                            click.link_type === 'unsubscribe' ? 'bg-orange-500/20 text-orange-400' :
+                            click.link_type === 'logo' ? 'bg-purple-500/20 text-purple-400' :
+                            'bg-white/10 text-white/50'
+                          }`}>
+                            {click.link_type === 'cta_calendly' ? 'Book a Call CTA' :
+                             click.link_type === 'cta_website' ? 'Website CTA' :
+                             click.link_type === 'unsubscribe' ? 'Unsubscribe' :
+                             click.link_type === 'logo' ? 'Logo' :
+                             click.link_type}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-white/50 text-sm">
+                          {formatDate(click.clicked_at)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </AdminGate>
   );
 }

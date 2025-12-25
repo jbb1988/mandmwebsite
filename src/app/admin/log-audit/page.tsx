@@ -272,7 +272,7 @@ export default function LogAuditPage() {
               </span>
               <span className="text-white/40">|</span>
               <span className="text-white/60">
-                {stats.lastAuditRun.logs_scanned.toLocaleString()} logs scanned
+                {(stats.lastAuditRun.logs_scanned ?? 0).toLocaleString()} logs scanned
               </span>
               <span className="text-white/40">|</span>
               <span className="text-white/60">
