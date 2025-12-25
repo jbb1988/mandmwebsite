@@ -263,7 +263,13 @@ export async function GET(request: NextRequest) {
       byModel,
       byMonth,
       topUsers,
-      generatedAt: new Date().toISOString()
+      generatedAt: new Date().toISOString(),
+      debug: {
+        supabaseUrl: supabaseUrl ? 'SET' : 'NOT SET',
+        serviceKey: supabaseServiceKey ? `SET (${supabaseServiceKey.substring(0, 20)}...)` : 'NOT SET',
+        allTimeError: allTimeError?.message || null,
+        allTimeCount: allTime?.length || 0
+      }
     });
 
   } catch (error) {
