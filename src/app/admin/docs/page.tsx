@@ -196,7 +196,7 @@ export default function AdminDocsPage() {
 
           <h4 className="text-white font-medium mt-4">Metrics Explained</h4>
           <ul className="space-y-2">
-            <li><strong className="text-white">Est. MRR</strong> - Monthly Recurring Revenue (paid subscribers × $5/month)</li>
+            <li><strong className="text-white">Est. MRR</strong> - Monthly Recurring Revenue (paid subscribers × $13.17/month base rate)</li>
             <li><strong className="text-white">Paid Subscribers</strong> - Users with active paid subscriptions</li>
             <li><strong className="text-white">Active Trials</strong> - Users on trial (promo_tier_expires_at in future)</li>
             <li><strong className="text-white">Conversion</strong> - Paid ÷ (Paid + Trials + Free) × 100</li>

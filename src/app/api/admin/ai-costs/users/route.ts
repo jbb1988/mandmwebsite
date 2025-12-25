@@ -89,8 +89,9 @@ export async function GET(request: NextRequest) {
     const totalCost = aiCalls?.reduce((sum, r) => sum + parseFloat(r.estimated_cost || 0), 0) || 0;
     const totalCalls = aiCalls?.length || 0;
 
-    // Subscription value (Pro = $29.99/6mo = ~$5/mo)
-    const subscriptionValue = profile.tier === 'pro' ? 5.00 : 0;
+    // Subscription value (Pro = $79/6mo = ~$13.17/mo base rate)
+    // Volume tiers: 1-11 seats ($79), 12-120 ($71.10), 121-199 ($67.15), 200+ ($63.20)
+    const subscriptionValue = profile.tier === 'pro' ? 13.17 : 0;
     const profitMargin = subscriptionValue - totalCost;
 
     return NextResponse.json({

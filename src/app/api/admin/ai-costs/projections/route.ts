@@ -87,8 +87,9 @@ export async function GET(request: NextRequest) {
       const existing = tierAnalysis.get(tier) || { users: 0, totalCost: 0, totalRevenue: 0 };
       existing.users++;
       existing.totalCost += cost;
-      // Pro = $5/mo revenue, others = $0
-      existing.totalRevenue += tier === 'pro' ? 5.00 : 0;
+      // Pro = $79/6mo = ~$13.17/mo base rate, others = $0
+      // Volume tiers: 1-11 seats ($79), 12-120 ($71.10), 121-199 ($67.15), 200+ ($63.20)
+      existing.totalRevenue += tier === 'pro' ? 13.17 : 0;
       tierAnalysis.set(tier, existing);
     });
 

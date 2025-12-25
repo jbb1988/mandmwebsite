@@ -229,8 +229,9 @@ export async function GET(request: NextRequest) {
     const topUsers = Array.from(userMap.entries())
       .map(([user_id, data]) => {
         const profile = profileMap.get(user_id);
-        // Calculate subscription revenue (Pro = $29.99/6mo = ~$5/mo)
-        const monthlyRevenue = profile?.tier === 'pro' ? 5.00 : 0;
+        // Calculate subscription revenue (Pro = $79/6mo = ~$13.17/mo base rate)
+        // Volume tiers: 1-11 seats ($79), 12-120 ($71.10), 121-199 ($67.15), 200+ ($63.20)
+        const monthlyRevenue = profile?.tier === 'pro' ? 13.17 : 0;
         return {
           user_id,
           email: profile?.email || 'Unknown',
