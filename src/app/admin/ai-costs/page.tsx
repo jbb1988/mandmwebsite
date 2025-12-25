@@ -260,6 +260,8 @@ interface FinancialAnalytics {
       cost: number;
       provider: string;
       tier: string;
+      role: string;
+      roleLabel: string;
       pricing: {
         inputCost: number;
         outputCost: number;
