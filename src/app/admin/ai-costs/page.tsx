@@ -346,7 +346,7 @@ export default function AICostsPage() {
                   <Tooltip
                     contentStyle={{ backgroundColor: '#1B1F39', border: 'none', borderRadius: '8px' }}
                     labelStyle={{ color: '#fff' }}
-                    formatter={(value: number) => [`$${value.toFixed(4)}`, 'Cost']}
+                    formatter={(value) => [`$${(value as number)?.toFixed(4) ?? '0'}`, 'Cost']}
                   />
                   <Line type="monotone" dataKey="total_cost" stroke="#06b6d4" strokeWidth={2} dot={{ fill: '#06b6d4' }} />
                 </LineChart>
@@ -365,7 +365,7 @@ export default function AICostsPage() {
                   <Tooltip
                     contentStyle={{ backgroundColor: '#1B1F39', border: 'none', borderRadius: '8px' }}
                     labelStyle={{ color: '#fff' }}
-                    formatter={(value: number) => [`$${value.toFixed(4)}`, 'Cost']}
+                    formatter={(value) => [`$${(value as number)?.toFixed(4) ?? '0'}`, 'Cost']}
                   />
                   <Bar dataKey="total_cost" radius={[0, 4, 4, 0]}>
                     {byFeature.map((entry, index) => (
@@ -740,7 +740,7 @@ export default function AICostsPage() {
                       <YAxis stroke="#ffffff50" fontSize={10} tickFormatter={(v) => `$${v.toFixed(2)}`} />
                       <Tooltip
                         contentStyle={{ backgroundColor: '#1B1F39', border: 'none', borderRadius: '8px' }}
-                        formatter={(value: number) => [`$${value.toFixed(4)}`, 'Cost']}
+                        formatter={(value) => [`$${(value as number)?.toFixed(4) ?? '0'}`, 'Cost']}
                       />
                       <Bar dataKey="cost" fill="#06b6d4" radius={[4, 4, 0, 0]} />
                     </BarChart>
