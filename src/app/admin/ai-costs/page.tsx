@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAdminAuth } from '@/components/AdminGate';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import {
   Cpu, DollarSign, TrendingUp, TrendingDown, Users, Zap,
   RefreshCw, ChevronDown, ChevronUp, X, BarChart3, PieChart,
@@ -129,7 +129,7 @@ const FEATURE_COLORS: Record<string, string> = {
 const CHART_COLORS = ['#06b6d4', '#a855f7', '#f97316', '#10b981', '#fbbf24', '#3b82f6', '#ec4899'];
 
 export default function AICostsPage() {
-  const { password } = useAdminAuth();
+  const { getPassword } = useAdminAuth();
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [timeRange, setTimeRange] = useState('30');
   const [loading, setLoading] = useState(true);
@@ -152,10 +152,10 @@ export default function AICostsPage() {
     try {
       const [mainRes, projRes] = await Promise.all([
         fetch(`/api/admin/ai-costs?timeRange=${timeRange}`, {
-          headers: { 'X-Admin-Password': password }
+          headers: { 'X-Admin-Password': getPassword() }
         }),
         fetch('/api/admin/ai-costs/projections', {
-          headers: { 'X-Admin-Password': password }
+          headers: { 'X-Admin-Password': getPassword() }
         })
       ]);
 
@@ -182,7 +182,7 @@ export default function AICostsPage() {
     setUserLoading(true);
     try {
       const res = await fetch(`/api/admin/ai-costs/users?userId=${userId}`, {
-        headers: { 'X-Admin-Password': password }
+        headers: { 'X-Admin-Password': getPassword() }
       });
       if (!res.ok) throw new Error('Failed to fetch user details');
       const data = await res.json();
