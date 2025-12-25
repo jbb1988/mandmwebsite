@@ -1294,19 +1294,16 @@ export default function AICostsPage() {
                 {financialData.users.byAcquisition.giftedTrialActive} gifted, {financialData.users.byAcquisition.organic} organic
               </div>
             </div>
-            {/* Operational Costs Card */}
-            <div className="bg-[#0F1123] rounded-2xl p-5 border border-white/5">
+            {/* Operational Costs Card - Clickable for drill-down */}
+            <div
+              onClick={() => setShowOpsCostModal(true)}
+              className="bg-[#0F1123] rounded-2xl p-5 border border-white/5 cursor-pointer hover:border-red-500/30 hover:bg-[#0F1123]/80 transition-all group"
+            >
               <div className="flex items-center justify-between mb-3">
                 <div className="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center">
                   <Building className="w-5 h-5 text-red-400" />
                 </div>
-                <button
-                  onClick={() => setShowOpsCostModal(true)}
-                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                  title="Manage Operational Costs"
-                >
-                  <Settings className="w-4 h-4 text-white/50 hover:text-white" />
-                </button>
+                <Settings className="w-4 h-4 text-white/30 group-hover:text-white/70 transition-colors" />
               </div>
               <div className="text-2xl font-bold text-white">
                 {formatCost(financialData.operationalCosts?.totalFixed || 0)}/mo
@@ -1316,6 +1313,20 @@ export default function AICostsPage() {
                 {financialData.operationalCosts?.totalProviders || 0} services
                 {financialData.operationalCosts?.hasVariableCosts && ' (+ variable)'}
               </div>
+              {/* Mini breakdown preview */}
+              {financialData.operationalCosts?.byCategory && (
+                <div className="mt-3 pt-3 border-t border-white/5 space-y-1">
+                  {Object.entries(financialData.operationalCosts.byCategory).slice(0, 3).map(([cat, data]) => (
+                    <div key={cat} className="flex justify-between text-xs">
+                      <span className="text-white/40 capitalize">{cat}</span>
+                      <span className="text-white/60">{formatCost(data.total)}</span>
+                    </div>
+                  ))}
+                  {Object.keys(financialData.operationalCosts.byCategory).length > 3 && (
+                    <div className="text-white/30 text-xs text-center">+ more</div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
