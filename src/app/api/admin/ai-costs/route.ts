@@ -23,21 +23,13 @@ export async function GET(request: NextRequest) {
     : null;
 
   try {
-    // Debug logging
-    console.log('[AI Costs] Starting query, timeRange:', timeRange, 'startDate:', startDate);
-    console.log('[AI Costs] Supabase URL:', supabaseUrl ? 'SET' : 'NOT SET');
-    console.log('[AI Costs] Service Key:', supabaseServiceKey ? 'SET' : 'NOT SET');
-
-    // Skip RPC and go direct to queries
     let overview;
 
     // All-time totals
-    const { data: allTime, error: allTimeError } = await supabase
+    const { data: allTime } = await supabase
       .from('ai_api_calls')
       .select('estimated_cost, input_tokens, output_tokens, user_id')
       .order('created_at', { ascending: false });
-
-    console.log('[AI Costs] allTime query result:', allTime?.length || 0, 'rows, error:', allTimeError?.message || 'none');
 
     // This month
     const monthStart = new Date();
@@ -263,13 +255,7 @@ export async function GET(request: NextRequest) {
       byModel,
       byMonth,
       topUsers,
-      generatedAt: new Date().toISOString(),
-      debug: {
-        supabaseUrl: supabaseUrl ? 'SET' : 'NOT SET',
-        serviceKey: supabaseServiceKey ? `SET (${supabaseServiceKey.substring(0, 20)}...)` : 'NOT SET',
-        allTimeError: allTimeError?.message || null,
-        allTimeCount: allTime?.length || 0
-      }
+      generatedAt: new Date().toISOString()
     });
 
   } catch (error) {
