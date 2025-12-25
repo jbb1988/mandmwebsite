@@ -104,14 +104,103 @@ export async function GET(request: NextRequest) {
         : -100
     }));
 
-    // Model efficiency analysis
-    const { data: modelData } = await supabase
+    // Get model/feature data for cost analysis
+    const { data: featureData } = await supabase
       .from('ai_api_calls')
       .select('feature_name, model_name, estimated_cost, input_tokens, output_tokens')
       .gte('created_at', thirtyDaysAgo.toISOString());
 
+    // Calculate actual average cost per call for each feature from real data
+    const featureCostMap = new Map<string, { totalCost: number; callCount: number }>();
+    featureData?.forEach(r => {
+      const existing = featureCostMap.get(r.feature_name) || { totalCost: 0, callCount: 0 };
+      existing.totalCost += parseFloat(r.estimated_cost || 0);
+      existing.callCount++;
+      featureCostMap.set(r.feature_name, existing);
+    });
+
+    // Heavy user monthly call estimates (these are the max credits/expected heavy usage)
+    const heavyUserCallsPerMonth: Record<string, number> = {
+      muscle_coach: 30,     // Daily AI coaching interactions
+      weekly_reports: 4,    // Weekly reports
+      fuel_ai: 10,          // Meal planning interactions
+      swing_lab: 10,        // Max 10 credits/month
+      pitch_lab: 10,        // Max 10 credits/month
+      mind_coach: 10,       // Mental training sessions
+      ai_assistant_coach: 10, // General AI assistant
+    };
+
+    // Build heavy user costs from actual data
+    const heavyUserCosts: Record<string, { calls: number; costPerCall: number; monthly: number }> = {};
+    let heavyUserMonthly = 0;
+
+    for (const [feature, callsPerMonth] of Object.entries(heavyUserCallsPerMonth)) {
+      const featureData = featureCostMap.get(feature);
+      const costPerCall = featureData && featureData.callCount > 0
+        ? featureData.totalCost / featureData.callCount
+        : 0;
+      const monthlyCost = costPerCall * callsPerMonth;
+
+      heavyUserCosts[feature] = {
+        calls: callsPerMonth,
+        costPerCall,
+        monthly: monthlyCost,
+      };
+      heavyUserMonthly += monthlyCost;
+    }
+
+    const heavyUser6Mo = heavyUserMonthly * 6;
+    const heavyUserAnnual = heavyUserMonthly * 12;
+
+    // Pricing tiers (per 6 months)
+    const pricingTiers = {
+      base: { label: '1-11 seats', price: 79.00, monthly: 13.17 },
+      tier2: { label: '12-120 seats (10% off)', price: 71.10, monthly: 11.85 },
+      tier3: { label: '121-199 seats (15% off)', price: 67.15, monthly: 11.19 },
+      tier4: { label: '200+ seats (20% off)', price: 63.20, monthly: 10.53 },
+    };
+
+    // Margin scenarios for each pricing tier with different fee combinations
+    const marginScenarios = Object.entries(pricingTiers).map(([tierKey, tier]) => {
+      const grossRevenue = tier.price; // 6-month revenue
+      const scenarios = {
+        // No fees (website direct purchase)
+        noFees: {
+          netRevenue: grossRevenue,
+          margin: grossRevenue - heavyUser6Mo,
+          marginPercent: ((grossRevenue - heavyUser6Mo) / grossRevenue) * 100,
+        },
+        // IAP only (15% Apple/Google)
+        iapOnly: {
+          netRevenue: grossRevenue * 0.85,
+          margin: (grossRevenue * 0.85) - heavyUser6Mo,
+          marginPercent: (((grossRevenue * 0.85) - heavyUser6Mo) / grossRevenue) * 100,
+        },
+        // IAP + Partner (15% + 10%)
+        iapPartner: {
+          netRevenue: grossRevenue * 0.75,
+          margin: (grossRevenue * 0.75) - heavyUser6Mo,
+          marginPercent: (((grossRevenue * 0.75) - heavyUser6Mo) / grossRevenue) * 100,
+        },
+        // IAP + Partner + Finder (15% + 10% + 10%)
+        allFees: {
+          netRevenue: grossRevenue * 0.65,
+          margin: (grossRevenue * 0.65) - heavyUser6Mo,
+          marginPercent: (((grossRevenue * 0.65) - heavyUser6Mo) / grossRevenue) * 100,
+        },
+      };
+      return {
+        tier: tierKey,
+        label: tier.label,
+        grossRevenue,
+        monthlyRevenue: tier.monthly,
+        scenarios,
+      };
+    });
+
+    // Model efficiency analysis (using featureData already fetched above)
     const modelEfficiency = new Map<string, Map<string, { calls: number; cost: number; tokens: number }>>();
-    modelData?.forEach(r => {
+    featureData?.forEach(r => {
       if (!modelEfficiency.has(r.feature_name)) {
         modelEfficiency.set(r.feature_name, new Map());
       }
@@ -146,6 +235,17 @@ export async function GET(request: NextRequest) {
       avgMonthlySignups,
       marginAnalysis,
       efficiencyAnalysis,
+      // Heavy user cost projections
+      heavyUserCosts: {
+        breakdown: heavyUserCosts,
+        monthly: heavyUserMonthly,
+        sixMonth: heavyUser6Mo,
+        annual: heavyUserAnnual,
+      },
+      // Pricing tiers
+      pricingTiers,
+      // Margin scenarios by tier with all fee combinations
+      marginScenarios,
       generatedAt: new Date().toISOString()
     });
 

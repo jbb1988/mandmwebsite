@@ -85,6 +85,25 @@ interface Projections {
       avgCostPerCall: number;
     }[];
   }[];
+  heavyUserCosts: {
+    breakdown: Record<string, { calls: number; costPerCall: number; monthly: number }>;
+    monthly: number;
+    sixMonth: number;
+    annual: number;
+  };
+  pricingTiers: Record<string, { label: string; price: number; monthly: number }>;
+  marginScenarios: {
+    tier: string;
+    label: string;
+    grossRevenue: number;
+    monthlyRevenue: number;
+    scenarios: {
+      noFees: { netRevenue: number; margin: number; marginPercent: number };
+      iapOnly: { netRevenue: number; margin: number; marginPercent: number };
+      iapPartner: { netRevenue: number; margin: number; marginPercent: number };
+      allFees: { netRevenue: number; margin: number; marginPercent: number };
+    };
+  }[];
 }
 
 interface UserDetail {
@@ -154,26 +173,31 @@ export default function AICostsPage() {
   const [includeFinderFee, setIncludeFinderFee] = useState(false); // 10% finder fee
   const [priceTier, setPriceTier] = useState<'base' | 'tier2' | 'tier3' | 'tier4'>('base');
 
-  // Pricing tiers (per 6 months)
-  const PRICING_TIERS = {
+  // Use API data for pricing tiers, with fallback
+  const PRICING_TIERS = projections?.pricingTiers || {
     base: { label: '1-11 seats', price: 79.00, monthly: 13.17 },
     tier2: { label: '12-120 seats (10% off)', price: 71.10, monthly: 11.85 },
     tier3: { label: '121-199 seats (15% off)', price: 67.15, monthly: 11.19 },
     tier4: { label: '200+ seats (20% off)', price: 63.20, monthly: 10.53 },
   };
 
-  // Heavy user cost estimates based on actual data
-  const HEAVY_USER_COSTS = {
-    muscle_coach: { calls: 30, costPerCall: 0.00245, monthly: 0.0735 },
-    weekly_reports: { calls: 4, costPerCall: 0.00053, monthly: 0.0021 },
-    fuel_ai: { calls: 10, costPerCall: 0.00076, monthly: 0.0076 },
-    swing_lab: { calls: 10, costPerCall: 0.00293, monthly: 0.0293 },
-    pitch_lab: { calls: 10, costPerCall: 0.00293, monthly: 0.0293 },
+  // Use API data for heavy user costs, with fallback
+  const heavyUserData = projections?.heavyUserCosts || {
+    breakdown: {
+      muscle_coach: { calls: 30, costPerCall: 0.00245, monthly: 0.0735 },
+      weekly_reports: { calls: 4, costPerCall: 0.00053, monthly: 0.0021 },
+      fuel_ai: { calls: 10, costPerCall: 0.00076, monthly: 0.0076 },
+      swing_lab: { calls: 10, costPerCall: 0.00293, monthly: 0.0293 },
+      pitch_lab: { calls: 10, costPerCall: 0.00293, monthly: 0.0293 },
+    },
+    monthly: 0.1418,
+    sixMonth: 0.8508,
+    annual: 1.7016,
   };
 
-  const heavyUserMonthly = Object.values(HEAVY_USER_COSTS).reduce((sum, f) => sum + f.monthly, 0);
-  const heavyUser6Mo = heavyUserMonthly * 6;
-  const heavyUserAnnual = heavyUserMonthly * 12;
+  const heavyUserMonthly = heavyUserData.monthly;
+  const heavyUser6Mo = heavyUserData.sixMonth;
+  const heavyUserAnnual = heavyUserData.annual;
 
   // Calculate true margin with all deductions
   const calculateTrueMargin = (grossRevenue: number, aiCost: number) => {
@@ -656,12 +680,13 @@ export default function AICostsPage() {
             </div>
 
             <div className="bg-[#1B1F39] rounded-xl p-4">
-              <div className="text-white/70 text-sm font-medium mb-2">Usage Breakdown:</div>
-              <div className="grid grid-cols-5 gap-2 text-xs">
-                {Object.entries(HEAVY_USER_COSTS).map(([feature, data]) => (
+              <div className="text-white/70 text-sm font-medium mb-2">Usage Breakdown (from actual data):</div>
+              <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-2 text-xs">
+                {Object.entries(heavyUserData.breakdown).map(([feature, data]) => (
                   <div key={feature} className="text-center">
                     <div className="text-white/50">{formatFeatureName(feature)}</div>
                     <div className="text-white">{data.calls} calls</div>
+                    <div className="text-purple-400">{formatCost(data.costPerCall)}/call</div>
                     <div className="text-cyan-400">{formatCost(data.monthly)}/mo</div>
                   </div>
                 ))}
