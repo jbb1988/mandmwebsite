@@ -426,6 +426,7 @@ export default function AICostsPage() {
   const [selectedScenario, setSelectedScenario] = useState<string>('Moderate');
   const [expandedFeatures, setExpandedFeatures] = useState<Set<string>>(new Set());
   const [customUserForecast, setCustomUserForecast] = useState<number | null>(null);
+  const [customChurnRate, setCustomChurnRate] = useState<number | null>(null);
 
   // Model Analysis state
   const [modelAnalysis, setModelAnalysis] = useState<ModelAnalysis | null>(null);
@@ -1498,28 +1499,44 @@ export default function AICostsPage() {
                 <h3 className="text-white font-semibold">Scenario-Based Projections</h3>
                 <p className="text-white/50 text-sm">Toggle scenarios or enter custom user numbers to see projections</p>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 flex-wrap">
                 <div className="flex items-center gap-2">
-                  <label className="text-white/50 text-sm">Custom Users/Mo:</label>
+                  <label className="text-white/50 text-sm">Users/Mo:</label>
                   <input
                     type="number"
                     min="0"
-                    max="1000"
+                    max="10000"
                     value={customUserForecast ?? ''}
                     onChange={(e) => setCustomUserForecast(e.target.value ? parseInt(e.target.value) : null)}
                     placeholder="Auto"
                     className="w-20 bg-[#1B1F39] text-white rounded-lg px-2 py-1 text-sm border border-white/10 focus:border-yellow-500/50 focus:outline-none"
                   />
-                  {customUserForecast !== null && (
-                    <button
-                      onClick={() => setCustomUserForecast(null)}
-                      className="text-white/40 hover:text-white/60"
-                      title="Reset to scenario default"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
                 </div>
+                <div className="flex items-center gap-2">
+                  <label className="text-white/50 text-sm">Churn %:</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="1"
+                    value={customChurnRate ?? ''}
+                    onChange={(e) => setCustomChurnRate(e.target.value ? parseFloat(e.target.value) : null)}
+                    placeholder="Auto"
+                    className="w-16 bg-[#1B1F39] text-white rounded-lg px-2 py-1 text-sm border border-white/10 focus:border-purple-500/50 focus:outline-none"
+                  />
+                </div>
+                {(customUserForecast !== null || customChurnRate !== null) && (
+                  <button
+                    onClick={() => {
+                      setCustomUserForecast(null);
+                      setCustomChurnRate(null);
+                    }}
+                    className="text-white/40 hover:text-white/60 flex items-center gap-1 text-xs"
+                    title="Reset to scenario defaults"
+                  >
+                    <X className="w-3 h-3" /> Reset
+                  </button>
+                )}
                 <div className="flex gap-2">
                   {financialData.projections.map(proj => (
                     <button
@@ -1527,11 +1544,12 @@ export default function AICostsPage() {
                       onClick={() => {
                         setSelectedScenario(proj.scenario);
                         setCustomUserForecast(null);
+                        setCustomChurnRate(null);
                       }}
                       className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                        selectedScenario === proj.scenario && customUserForecast === null
+                        selectedScenario === proj.scenario && customUserForecast === null && customChurnRate === null
                           ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-                          : customUserForecast !== null
+                          : (customUserForecast !== null || customChurnRate !== null)
                           ? 'bg-[#1B1F39] text-white/40'
                           : 'bg-[#1B1F39] text-white/60 hover:text-white/80'
                       }`}
@@ -1546,11 +1564,12 @@ export default function AICostsPage() {
             {financialData.projections
               .filter(p => p.scenario === selectedScenario)
               .map(scenarioData => {
-                // Calculate projections with custom user numbers if set
+                // Calculate projections with custom values if set
                 const monthlyUsers = customUserForecast ?? scenarioData.assumptions.monthlyNewPaidUsers;
-                const isCustom = customUserForecast !== null;
+                const effectiveChurnRate = customChurnRate ?? parseFloat(scenarioData.assumptions.churnRate);
+                const isCustom = customUserForecast !== null || customChurnRate !== null;
 
-                // Calculate custom projections if user number is overridden
+                // Calculate custom projections if any custom value is set
                 const calculateCustomProjections = (months: number[]) => {
                   const monthlyRevenue = financialData.pricingConfig.subscription.pro6Months / 6;
                   const feeMultipliers: Record<string, number> = {
@@ -1560,7 +1579,7 @@ export default function AICostsPage() {
                     allFees: 0.65,
                   };
                   const feeMultiplier = feeMultipliers[scenarioData.assumptions.feeProfile] || 0.75;
-                  const churnRate = parseFloat(scenarioData.assumptions.churnRate) / 100;
+                  const churnRate = effectiveChurnRate / 100;
                   const avgCostPerUser = projections?.avgCostPerUser || 0.05;
 
                   return months.map(month => {
@@ -1593,17 +1612,27 @@ export default function AICostsPage() {
                       {isCustom && (
                         <div className="flex items-center gap-2 mb-2">
                           <Target className="w-4 h-4 text-yellow-400" />
-                          <span className="text-yellow-400 text-sm font-medium">Custom Forecast: {customUserForecast} users/month</span>
+                          <span className="text-yellow-400 text-sm font-medium">
+                            Custom Forecast: {monthlyUsers} users/month, {effectiveChurnRate}% churn
+                          </span>
                         </div>
                       )}
                       <p className="text-white/60 text-sm">{scenarioData.description}</p>
                       <div className="flex gap-4 mt-2 text-xs text-white/40">
-                        <span className={isCustom ? 'text-yellow-400' : ''}>
+                        <span className={customUserForecast !== null ? 'text-yellow-400' : ''}>
                           New users/mo: {monthlyUsers}
                         </span>
-                        <span>Churn: {scenarioData.assumptions.churnRate}</span>
+                        <span className={customChurnRate !== null ? 'text-purple-400' : ''}>
+                          Churn: {effectiveChurnRate}%
+                        </span>
                         <span>Trial conversion: {scenarioData.assumptions.trialConversion}</span>
                         <span>Net revenue: {scenarioData.assumptions.netRevenueRate}</span>
+                      </div>
+                      <div className="mt-2 p-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                        <p className="text-blue-400 text-xs flex items-center gap-1">
+                          <Info className="w-3 h-3" />
+                          User counts reflect monthly churn. E.g., {monthlyUsers} users/mo × 6mo with {effectiveChurnRate}% churn = {displayProjections.find(p => p.month === 6)?.paidUsers || 0} active users (not {monthlyUsers * 6}).
+                        </p>
                       </div>
                     </div>
 
