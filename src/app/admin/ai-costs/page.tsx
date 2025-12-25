@@ -5,7 +5,8 @@ import { useAdminAuth } from '@/context/AdminAuthContext';
 import {
   Cpu, DollarSign, TrendingUp, TrendingDown, Users, Zap,
   RefreshCw, ChevronDown, ChevronUp, X, BarChart3, PieChart,
-  AlertTriangle, Target, Activity, Clock
+  AlertTriangle, Target, Activity, Clock, Wallet, Building,
+  Gift, Info, ArrowRight, CheckCircle2
 } from 'lucide-react';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid,
@@ -131,7 +132,70 @@ interface UserDetail {
   profitMargin: number;
 }
 
-type TabType = 'overview' | 'features' | 'users' | 'projections';
+type TabType = 'overview' | 'features' | 'users' | 'projections' | 'financial';
+
+interface FinancialAnalytics {
+  currentPhase: {
+    phase: string;
+    description: string;
+    recommendation: string;
+  };
+  revenue: {
+    total: number;
+    thisMonth: number;
+    lastMonth: number;
+    hasRevenue: boolean;
+    subscriptionCount: number;
+    activeSubscriptions: number;
+  };
+  users: {
+    total: number;
+    byAcquisition: {
+      gifted_trial: number;
+      organic: number;
+      paid: number;
+    };
+    byTier: Record<string, number>;
+  };
+  costs: {
+    total: number;
+    byAcquisition: {
+      gifted_trial: { cost: number; users: number; avgCost: number };
+      organic: { cost: number; users: number; avgCost: number };
+      paid: { cost: number; users: number; avgCost: number };
+    };
+    byModel: Record<string, { cost: number; calls: number; avgCost: number }>;
+    byFeature: Record<string, { cost: number; calls: number; avgCost: number }>;
+  };
+  margin: {
+    grossMargin: number;
+    netMargin: number;
+    marginPercent: number;
+    aiCostRatio: number;
+  };
+  projections: {
+    scenario: string;
+    paidUsers: number;
+    monthlyRevenue: number;
+    monthlyAICost: number;
+    grossMargin: number;
+    afterIAP: number;
+    afterPartner: number;
+    afterAllFees: number;
+    annualRevenue: number;
+    annualProfit: number;
+    breakEvenMonths: number;
+  }[];
+  models: {
+    name: string;
+    provider: string;
+    tier: 'budget' | 'standard' | 'premium';
+    inputCost: number;
+    outputCost: number;
+    notes: string;
+    recommendation?: string;
+  }[];
+}
 
 const FEATURE_COLORS: Record<string, string> = {
   muscle_coach: '#06b6d4',
@@ -166,6 +230,9 @@ export default function AICostsPage() {
   const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null);
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [userLoading, setUserLoading] = useState(false);
+
+  const [financialData, setFinancialData] = useState<FinancialAnalytics | null>(null);
+  const [selectedScenario, setSelectedScenario] = useState<string>('moderate');
 
   // Fee toggles for margin calculation
   const [includeIAP, setIncludeIAP] = useState(true); // 15% Apple/Google
@@ -212,11 +279,14 @@ export default function AICostsPage() {
     setLoading(true);
     setError(null);
     try {
-      const [mainRes, projRes] = await Promise.all([
+      const [mainRes, projRes, finRes] = await Promise.all([
         fetch(`/api/admin/ai-costs?timeRange=${timeRange}`, {
           headers: { 'X-Admin-Password': getPassword() || adminPassword }
         }),
         fetch('/api/admin/ai-costs/projections', {
+          headers: { 'X-Admin-Password': getPassword() || adminPassword }
+        }),
+        fetch('/api/admin/ai-costs/financial-analytics', {
           headers: { 'X-Admin-Password': getPassword() || adminPassword }
         })
       ]);
@@ -233,6 +303,11 @@ export default function AICostsPage() {
       setByMonth(mainData.byMonth);
       setTopUsers(mainData.topUsers);
       setProjections(projData);
+
+      if (finRes.ok) {
+        const finData = await finRes.json();
+        setFinancialData(finData);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
@@ -333,6 +408,7 @@ export default function AICostsPage() {
           { id: 'features', label: 'By Feature', color: 'purple' },
           { id: 'users', label: 'By User', color: 'orange' },
           { id: 'projections', label: 'Projections', color: 'emerald' },
+          { id: 'financial', label: 'Financial', color: 'yellow' },
         ].map(tab => (
           <button
             key={tab.id}
@@ -346,14 +422,17 @@ export default function AICostsPage() {
               backgroundColor: tab.color === 'cyan' ? 'rgba(6, 182, 212, 0.2)' :
                               tab.color === 'purple' ? 'rgba(168, 85, 247, 0.2)' :
                               tab.color === 'orange' ? 'rgba(249, 115, 22, 0.2)' :
+                              tab.color === 'yellow' ? 'rgba(234, 179, 8, 0.2)' :
                               'rgba(16, 185, 129, 0.2)',
               color: tab.color === 'cyan' ? '#22d3ee' :
                      tab.color === 'purple' ? '#c084fc' :
                      tab.color === 'orange' ? '#fb923c' :
+                     tab.color === 'yellow' ? '#facc15' :
                      '#34d399',
               borderColor: tab.color === 'cyan' ? 'rgba(6, 182, 212, 0.3)' :
                            tab.color === 'purple' ? 'rgba(168, 85, 247, 0.3)' :
                            tab.color === 'orange' ? 'rgba(249, 115, 22, 0.3)' :
+                           tab.color === 'yellow' ? 'rgba(234, 179, 8, 0.3)' :
                            'rgba(16, 185, 129, 0.3)',
             } : {}}
           >
@@ -863,6 +942,350 @@ export default function AICostsPage() {
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Financial Tab */}
+      {activeTab === 'financial' && financialData && (
+        <div className="space-y-6">
+          {/* Current Phase Banner */}
+          <div className="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-2xl p-6 border border-yellow-500/30">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-xl bg-yellow-500/20 flex items-center justify-center">
+                <Building className="w-6 h-6 text-yellow-400" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="text-lg font-semibold text-white">{financialData.currentPhase.phase}</h3>
+                  <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 text-xs rounded-full">Current Stage</span>
+                </div>
+                <p className="text-white/70 text-sm mb-2">{financialData.currentPhase.description}</p>
+                <div className="flex items-start gap-2 bg-black/20 rounded-lg p-3">
+                  <Info className="w-4 h-4 text-cyan-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-cyan-400 text-sm">{financialData.currentPhase.recommendation}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Key Metrics Row */}
+          <div className="grid grid-cols-4 gap-4">
+            <div className="bg-[#0F1123] rounded-2xl p-5 border border-white/5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                  <Wallet className="w-5 h-5 text-emerald-400" />
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-white">{formatCost(financialData.revenue.total)}</div>
+              <div className="text-white/50 text-sm mt-1">Total Revenue</div>
+              <div className="text-white/30 text-xs mt-0.5">
+                {financialData.revenue.hasRevenue ? `${financialData.revenue.subscriptionCount} subscriptions` : 'Pre-revenue phase'}
+              </div>
+            </div>
+            <div className="bg-[#0F1123] rounded-2xl p-5 border border-white/5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-orange-400" />
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-white">{formatCost(financialData.costs.total)}</div>
+              <div className="text-white/50 text-sm mt-1">Total AI Spend</div>
+              <div className="text-white/30 text-xs mt-0.5">All time investment</div>
+            </div>
+            <div className="bg-[#0F1123] rounded-2xl p-5 border border-white/5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                  <Gift className="w-5 h-5 text-purple-400" />
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-white">{formatCost(financialData.costs.byAcquisition.gifted_trial.cost)}</div>
+              <div className="text-white/50 text-sm mt-1">Gifted Trial Investment</div>
+              <div className="text-white/30 text-xs mt-0.5">{financialData.costs.byAcquisition.gifted_trial.users} users acquired</div>
+            </div>
+            <div className="bg-[#0F1123] rounded-2xl p-5 border border-white/5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center">
+                  <Users className="w-5 h-5 text-cyan-400" />
+                </div>
+              </div>
+              <div className="text-2xl font-bold text-white">{financialData.users.total}</div>
+              <div className="text-white/50 text-sm mt-1">Total Users</div>
+              <div className="text-white/30 text-xs mt-0.5">
+                {financialData.users.byAcquisition.gifted_trial} gifted, {financialData.users.byAcquisition.organic} organic
+              </div>
+            </div>
+          </div>
+
+          {/* User Acquisition Investment */}
+          <div className="bg-[#0F1123] rounded-2xl border border-white/5 p-6">
+            <h3 className="text-white font-semibold mb-4">User Acquisition Investment</h3>
+            <p className="text-white/50 text-sm mb-4">
+              AI costs represent your investment in acquiring and retaining users. Track the ROI of different acquisition channels.
+            </p>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-[#1B1F39] rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Gift className="w-4 h-4 text-purple-400" />
+                  <span className="text-white font-medium">Gifted Trials</span>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-white/50">Users</span>
+                    <span className="text-white">{financialData.costs.byAcquisition.gifted_trial.users}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/50">Total Cost</span>
+                    <span className="text-orange-400">{formatCost(financialData.costs.byAcquisition.gifted_trial.cost)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/50">Cost per User</span>
+                    <span className="text-cyan-400">{formatCost(financialData.costs.byAcquisition.gifted_trial.avgCost)}</span>
+                  </div>
+                  <div className="pt-2 border-t border-white/10">
+                    <div className="text-purple-400 text-xs">Marketing investment for user adoption</div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-[#1B1F39] rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <TrendingUp className="w-4 h-4 text-emerald-400" />
+                  <span className="text-white font-medium">Organic Users</span>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-white/50">Users</span>
+                    <span className="text-white">{financialData.costs.byAcquisition.organic.users}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/50">Total Cost</span>
+                    <span className="text-orange-400">{formatCost(financialData.costs.byAcquisition.organic.cost)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/50">Cost per User</span>
+                    <span className="text-cyan-400">{formatCost(financialData.costs.byAcquisition.organic.avgCost)}</span>
+                  </div>
+                  <div className="pt-2 border-t border-white/10">
+                    <div className="text-emerald-400 text-xs">Users who signed up independently</div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-[#1B1F39] rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Wallet className="w-4 h-4 text-yellow-400" />
+                  <span className="text-white font-medium">Paid Subscribers</span>
+                </div>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-white/50">Users</span>
+                    <span className="text-white">{financialData.costs.byAcquisition.paid.users}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/50">Total Cost</span>
+                    <span className="text-orange-400">{formatCost(financialData.costs.byAcquisition.paid.cost)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-white/50">Cost per User</span>
+                    <span className="text-cyan-400">{formatCost(financialData.costs.byAcquisition.paid.avgCost)}</span>
+                  </div>
+                  <div className="pt-2 border-t border-white/10">
+                    <div className="text-yellow-400 text-xs">Revenue-generating users</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Scenario Projections */}
+          <div className="bg-[#0F1123] rounded-2xl border border-white/5 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-white font-semibold">Scenario-Based Projections</h3>
+                <p className="text-white/50 text-sm">Toggle scenarios to see net profit projections based on paid user growth</p>
+              </div>
+              <div className="flex gap-2">
+                {financialData.projections.map(proj => (
+                  <button
+                    key={proj.scenario}
+                    onClick={() => setSelectedScenario(proj.scenario)}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      selectedScenario === proj.scenario
+                        ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                        : 'bg-[#1B1F39] text-white/60 hover:text-white/80'
+                    }`}
+                  >
+                    {proj.scenario.charAt(0).toUpperCase() + proj.scenario.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {financialData.projections
+              .filter(p => p.scenario === selectedScenario)
+              .map(proj => (
+                <div key={proj.scenario} className="space-y-4">
+                  <div className="grid grid-cols-4 gap-4">
+                    <div className="bg-[#1B1F39] rounded-xl p-4 text-center">
+                      <div className="text-3xl font-bold text-white">{proj.paidUsers}</div>
+                      <div className="text-white/50 text-sm mt-1">Paid Users</div>
+                    </div>
+                    <div className="bg-[#1B1F39] rounded-xl p-4 text-center">
+                      <div className="text-3xl font-bold text-emerald-400">${proj.monthlyRevenue.toFixed(2)}</div>
+                      <div className="text-white/50 text-sm mt-1">Monthly Revenue</div>
+                    </div>
+                    <div className="bg-[#1B1F39] rounded-xl p-4 text-center">
+                      <div className="text-3xl font-bold text-orange-400">${proj.monthlyAICost.toFixed(2)}</div>
+                      <div className="text-white/50 text-sm mt-1">Monthly AI Cost</div>
+                    </div>
+                    <div className="bg-[#1B1F39] rounded-xl p-4 text-center">
+                      <div className={`text-3xl font-bold ${proj.grossMargin >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                        ${proj.grossMargin.toFixed(2)}
+                      </div>
+                      <div className="text-white/50 text-sm mt-1">Gross Margin</div>
+                    </div>
+                  </div>
+
+                  <div className="bg-[#1B1F39] rounded-xl p-4">
+                    <h4 className="text-white font-medium mb-3">Margin After Fees</h4>
+                    <div className="grid grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <div className="text-white/50 mb-1">No Fees (Direct)</div>
+                        <div className={`text-lg font-bold ${proj.grossMargin >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          ${proj.grossMargin.toFixed(2)}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-white/50 mb-1">After IAP (15%)</div>
+                        <div className={`text-lg font-bold ${proj.afterIAP >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          ${proj.afterIAP.toFixed(2)}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-white/50 mb-1">+ Partner (10%)</div>
+                        <div className={`text-lg font-bold ${proj.afterPartner >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          ${proj.afterPartner.toFixed(2)}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-white/50 mb-1">+ Finder (10%)</div>
+                        <div className={`text-lg font-bold ${proj.afterAllFees >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          ${proj.afterAllFees.toFixed(2)}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-[#1B1F39] rounded-xl p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-white/50 text-sm">Annual Revenue</div>
+                          <div className="text-2xl font-bold text-emerald-400">${proj.annualRevenue.toLocaleString()}</div>
+                        </div>
+                        <ArrowRight className="w-5 h-5 text-white/30" />
+                        <div>
+                          <div className="text-white/50 text-sm">Annual Profit (after all fees)</div>
+                          <div className={`text-2xl font-bold ${proj.annualProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                            ${proj.annualProfit.toLocaleString()}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-[#1B1F39] rounded-xl p-4">
+                      <div className="text-white/50 text-sm">Break-even Timeline</div>
+                      <div className="text-2xl font-bold text-yellow-400">
+                        {proj.breakEvenMonths > 0 ? `${proj.breakEvenMonths} months` : 'Already profitable'}
+                      </div>
+                      <div className="text-white/30 text-xs mt-1">To recover current AI investment</div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+
+          {/* OpenRouter Models */}
+          <div className="bg-[#0F1123] rounded-2xl border border-white/5 p-6">
+            <h3 className="text-white font-semibold mb-2">OpenRouter Models in Use</h3>
+            <p className="text-white/50 text-sm mb-4">
+              All AI features use models through OpenRouter. Pricing is per 1M tokens.
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              {financialData.models.map(model => (
+                <div
+                  key={model.name}
+                  className={`bg-[#1B1F39] rounded-xl p-4 border ${
+                    model.tier === 'budget' ? 'border-emerald-500/30' :
+                    model.tier === 'standard' ? 'border-cyan-500/30' :
+                    'border-red-500/30'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-white font-medium font-mono text-sm">{model.name}</span>
+                    <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                      model.tier === 'budget' ? 'bg-emerald-500/20 text-emerald-400' :
+                      model.tier === 'standard' ? 'bg-cyan-500/20 text-cyan-400' :
+                      'bg-red-500/20 text-red-400'
+                    }`}>
+                      {model.tier}
+                    </span>
+                  </div>
+                  <div className="text-white/50 text-xs mb-3">{model.provider}</div>
+                  <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+                    <div>
+                      <div className="text-white/40 text-xs">Input</div>
+                      <div className="text-cyan-400">${model.inputCost.toFixed(2)}/1M</div>
+                    </div>
+                    <div>
+                      <div className="text-white/40 text-xs">Output</div>
+                      <div className="text-purple-400">${model.outputCost.toFixed(2)}/1M</div>
+                    </div>
+                  </div>
+                  <div className="text-white/60 text-xs">{model.notes}</div>
+                  {model.recommendation && (
+                    <div className="mt-2 flex items-start gap-2 bg-yellow-500/10 rounded p-2">
+                      <AlertTriangle className="w-3 h-3 text-yellow-400 mt-0.5 flex-shrink-0" />
+                      <span className="text-yellow-400 text-xs">{model.recommendation}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Cost by Model */}
+          <div className="bg-[#0F1123] rounded-2xl border border-white/5 overflow-hidden">
+            <div className="p-4 border-b border-white/5">
+              <h3 className="text-white font-semibold">Actual Spend by Model</h3>
+            </div>
+            <table className="w-full">
+              <thead className="bg-[#1B1F39]">
+                <tr>
+                  <th className="text-left text-white/50 text-sm font-medium px-4 py-3">Model</th>
+                  <th className="text-right text-white/50 text-sm font-medium px-4 py-3">Calls</th>
+                  <th className="text-right text-white/50 text-sm font-medium px-4 py-3">Total Cost</th>
+                  <th className="text-right text-white/50 text-sm font-medium px-4 py-3">Avg/Call</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(financialData.costs.byModel).map(([model, data], i) => (
+                  <tr key={model} className={i % 2 === 0 ? 'bg-[#0A0B14]' : 'bg-[#0F1123]'}>
+                    <td className="px-4 py-3 text-white font-mono text-sm">{model}</td>
+                    <td className="text-right text-white/80 px-4 py-3">{data.calls.toLocaleString()}</td>
+                    <td className="text-right text-cyan-400 font-medium px-4 py-3">{formatCost(data.cost)}</td>
+                    <td className="text-right text-white/60 px-4 py-3">{formatCost(data.avgCost)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Financial Tab - No Data State */}
+      {activeTab === 'financial' && !financialData && !loading && (
+        <div className="bg-[#0F1123] rounded-2xl border border-white/5 p-8 text-center">
+          <AlertTriangle className="w-12 h-12 text-yellow-400 mx-auto mb-4" />
+          <h3 className="text-white font-semibold mb-2">Financial Analytics Unavailable</h3>
+          <p className="text-white/50 text-sm">Unable to load financial analytics data. Please try refreshing.</p>
         </div>
       )}
 

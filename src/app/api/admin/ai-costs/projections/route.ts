@@ -119,15 +119,38 @@ export async function GET(request: NextRequest) {
       featureCostMap.set(r.feature_name, existing);
     });
 
-    // Heavy user monthly call estimates (these are the max credits/expected heavy usage)
+    // Fetch real-time pricing from model_pricing table (source of truth)
+    const { data: pricingData } = await supabase
+      .from('model_pricing')
+      .select('provider, model_name, input_cost_per_million, output_cost_per_million, cached_cost_per_million, effective_from')
+      .lte('effective_from', new Date().toISOString())
+      .order('effective_from', { ascending: false });
+
+    // Build pricing lookup map (most recent pricing per model)
+    const pricingMap = new Map<string, { input: number; output: number; cached: number }>();
+    pricingData?.forEach(p => {
+      const key = `${p.provider}:${p.model_name}`;
+      if (!pricingMap.has(key)) { // Only take most recent
+        pricingMap.set(key, {
+          input: parseFloat(p.input_cost_per_million),
+          output: parseFloat(p.output_cost_per_million),
+          cached: parseFloat(p.cached_cost_per_million) || 0,
+        });
+      }
+    });
+
+    // Heavy user monthly call estimates (VERIFIED: Dec 25, 2025)
+    // muscle_coach, weekly_reports, fuel_ai, mind_coach: 2 calls/week = 8/month
+    // ai_assistant_coach: 3 calls/week = 12/month
+    // swing_lab, pitch_lab: 10 credits/month (max)
     const heavyUserCallsPerMonth: Record<string, number> = {
-      muscle_coach: 30,     // Daily AI coaching interactions
-      weekly_reports: 4,    // Weekly reports
-      fuel_ai: 10,          // Meal planning interactions
-      swing_lab: 10,        // Max 10 credits/month
-      pitch_lab: 10,        // Max 10 credits/month
-      mind_coach: 10,       // Mental training sessions
-      ai_assistant_coach: 10, // General AI assistant
+      muscle_coach: 8,        // 2/week
+      weekly_reports: 8,      // 2/week
+      fuel_ai: 8,             // 2/week
+      mind_coach: 8,          // 2/week
+      ai_assistant_coach: 12, // 3/week
+      swing_lab: 10,          // 10 credits/month
+      pitch_lab: 10,          // 10 credits/month
     };
 
     // Build heavy user costs from actual data
@@ -161,32 +184,38 @@ export async function GET(request: NextRequest) {
     };
 
     // Margin scenarios for each pricing tier with different fee combinations
+    // NOTE: Only Pro tier users have AI access - free/core users have NO AI costs
     const marginScenarios = Object.entries(pricingTiers).map(([tierKey, tier]) => {
       const grossRevenue = tier.price; // 6-month revenue
+      // Pro users incur AI costs, free/core users do NOT (no AI access)
+      const aiCost = tierKey === 'base' || tierKey === 'tier2' || tierKey === 'tier3' || tierKey === 'tier4'
+        ? heavyUser6Mo
+        : 0;
+
       const scenarios = {
         // No fees (website direct purchase)
         noFees: {
           netRevenue: grossRevenue,
-          margin: grossRevenue - heavyUser6Mo,
-          marginPercent: ((grossRevenue - heavyUser6Mo) / grossRevenue) * 100,
+          margin: grossRevenue - aiCost,
+          marginPercent: ((grossRevenue - aiCost) / grossRevenue) * 100,
         },
         // IAP only (15% Apple/Google)
         iapOnly: {
           netRevenue: grossRevenue * 0.85,
-          margin: (grossRevenue * 0.85) - heavyUser6Mo,
-          marginPercent: (((grossRevenue * 0.85) - heavyUser6Mo) / grossRevenue) * 100,
+          margin: (grossRevenue * 0.85) - aiCost,
+          marginPercent: (((grossRevenue * 0.85) - aiCost) / grossRevenue) * 100,
         },
         // IAP + Partner (15% + 10%)
         iapPartner: {
           netRevenue: grossRevenue * 0.75,
-          margin: (grossRevenue * 0.75) - heavyUser6Mo,
-          marginPercent: (((grossRevenue * 0.75) - heavyUser6Mo) / grossRevenue) * 100,
+          margin: (grossRevenue * 0.75) - aiCost,
+          marginPercent: (((grossRevenue * 0.75) - aiCost) / grossRevenue) * 100,
         },
         // IAP + Partner + Finder (15% + 10% + 10%)
         allFees: {
           netRevenue: grossRevenue * 0.65,
-          margin: (grossRevenue * 0.65) - heavyUser6Mo,
-          marginPercent: (((grossRevenue * 0.65) - heavyUser6Mo) / grossRevenue) * 100,
+          margin: (grossRevenue * 0.65) - aiCost,
+          marginPercent: (((grossRevenue * 0.65) - aiCost) / grossRevenue) * 100,
         },
       };
       return {
@@ -194,6 +223,7 @@ export async function GET(request: NextRequest) {
         label: tier.label,
         grossRevenue,
         monthlyRevenue: tier.monthly,
+        aiCost, // Include AI cost breakdown per tier
         scenarios,
       };
     });
@@ -223,6 +253,18 @@ export async function GET(request: NextRequest) {
       }))
     }));
 
+    // Build real-time pricing response from database
+    const modelPricing = Array.from(pricingMap.entries()).map(([key, pricing]) => {
+      const [provider, modelName] = key.split(':');
+      return {
+        provider,
+        modelName,
+        inputCostPerMillion: pricing.input,
+        outputCostPerMillion: pricing.output,
+        cachedCostPerMillion: pricing.cached,
+      };
+    });
+
     return NextResponse.json({
       success: true,
       currentMonthlyRun: dailyAvgCost * 30,
@@ -241,7 +283,11 @@ export async function GET(request: NextRequest) {
         monthly: heavyUserMonthly,
         sixMonth: heavyUser6Mo,
         annual: heavyUserAnnual,
+        callLimits: heavyUserCallsPerMonth, // Include verified call limits
       },
+      // Real-time pricing from database (source of truth)
+      modelPricing,
+      pricingLastUpdated: pricingData?.[0]?.effective_from || null,
       // Pricing tiers
       pricingTiers,
       // Margin scenarios by tier with all fee combinations
