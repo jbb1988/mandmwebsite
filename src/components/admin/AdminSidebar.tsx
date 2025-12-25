@@ -26,6 +26,7 @@ import {
   RefreshCw,
   Mail,
   Cpu,
+  AlertTriangle,
 } from 'lucide-react';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import CommandSearch from './CommandSearch';
@@ -83,6 +84,12 @@ const NAV_SECTIONS: NavSection[] = [
       { name: 'AI Costs', href: '/admin/ai-costs', icon: Cpu },
       { name: 'Finder Fees', href: '/admin/finder-fees', icon: DollarSign },
       { name: 'Partner Attribution', href: '/admin/partner-attribution', icon: Handshake },
+    ],
+  },
+  {
+    title: 'System',
+    items: [
+      { name: 'Log Audit', href: '/admin/log-audit', icon: AlertTriangle },
     ],
   },
   {
