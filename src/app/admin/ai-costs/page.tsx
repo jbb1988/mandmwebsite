@@ -136,22 +136,34 @@ type TabType = 'overview' | 'features' | 'users' | 'projections' | 'financial';
 
 interface FinancialAnalytics {
   currentPhase: {
-    phase: string;
+    stage: string;
     description: string;
-    recommendation: string;
+    recommendations: string[];
+    metrics: {
+      totalInvestment: number;
+      giftedTrialInvestment: number;
+      organicCosts: number;
+      costPerTrialUser: number;
+      activeTrials: number;
+      potentialConversions: number;
+    };
   };
   revenue: {
-    total: number;
-    thisMonth: number;
-    lastMonth: number;
+    actual: {
+      total: number;
+      byStore: { apple: number; google: number };
+      byProduct: Record<string, number>;
+      transactions: any[];
+      lastUpdated: string | null;
+    };
     hasRevenue: boolean;
-    subscriptionCount: number;
-    activeSubscriptions: number;
+    status: string;
   };
   users: {
     total: number;
     byAcquisition: {
-      gifted_trial: number;
+      giftedTrialActive: number;
+      giftedTrialExpired: number;
       organic: number;
       paid: number;
     };
@@ -160,41 +172,97 @@ interface FinancialAnalytics {
   costs: {
     total: number;
     byAcquisition: {
-      gifted_trial: { cost: number; users: number; avgCost: number };
-      organic: { cost: number; users: number; avgCost: number };
-      paid: { cost: number; users: number; avgCost: number };
+      giftedTrial: number;
+      organic: number;
+      paid: number;
     };
-    byModel: Record<string, { cost: number; calls: number; avgCost: number }>;
-    byFeature: Record<string, { cost: number; calls: number; avgCost: number }>;
+    byModel: Record<string, {
+      calls: number;
+      inputTokens: number;
+      outputTokens: number;
+      cost: number;
+      provider: string;
+      tier: string;
+    }>;
+    byFeature: Record<string, {
+      calls: number;
+      cost: number;
+      avgCostPerCall: number;
+    }>;
+    last30Days: number;
+    last7Days: number;
   };
   margin: {
-    grossMargin: number;
-    netMargin: number;
-    marginPercent: number;
-    aiCostRatio: number;
+    grossRevenue: number;
+    estimatedFees: number;
+    netRevenue: number;
+    aiCosts: number;
+    grossProfit: number;
+    grossMarginPercent: number;
+    userAcquisitionInvestment: number;
   };
   projections: {
     scenario: string;
-    paidUsers: number;
-    monthlyRevenue: number;
-    monthlyAICost: number;
-    grossMargin: number;
-    afterIAP: number;
-    afterPartner: number;
-    afterAllFees: number;
-    annualRevenue: number;
-    annualProfit: number;
-    breakEvenMonths: number;
+    description: string;
+    assumptions: {
+      monthlyNewPaidUsers: number;
+      churnRate: string;
+      trialConversion: string;
+      feeProfile: string;
+      netRevenueRate: string;
+    };
+    projections: {
+      month: number;
+      paidUsers: number;
+      grossRevenue: number;
+      netRevenue: number;
+      aiCosts: number;
+      grossProfit: number;
+      grossMarginPercent: number;
+    }[];
   }[];
   models: {
-    name: string;
-    provider: string;
-    tier: 'budget' | 'standard' | 'premium';
-    inputCost: number;
-    outputCost: number;
-    notes: string;
-    recommendation?: string;
-  }[];
+    currentModels: {
+      model: string;
+      calls: number;
+      cost: number;
+      provider: string;
+      tier: string;
+      pricing: {
+        inputCost: number;
+        outputCost: number;
+        provider: string;
+        tier: string;
+        notes: string;
+      } | null;
+    }[];
+    alternativeModels: {
+      current: string;
+      alternative: string;
+      savingsPercent: number;
+      tradeoff: string;
+    }[];
+    pricingReference: Record<string, {
+      inputCost: number;
+      outputCost: number;
+      provider: string;
+      tier: string;
+      notes: string;
+    }>;
+    lastVerified: string;
+    pricingSource: string;
+  };
+  pricingConfig: {
+    subscription: {
+      pro6Months: number;
+      volumeTiers: { seats: string; price: number; discount: number }[];
+    };
+    fees: {
+      iap: number;
+      partner: number;
+      finderFee: number;
+    };
+  };
 }
 
 const FEATURE_COLORS: Record<string, string> = {
@@ -232,7 +300,7 @@ export default function AICostsPage() {
   const [userLoading, setUserLoading] = useState(false);
 
   const [financialData, setFinancialData] = useState<FinancialAnalytics | null>(null);
-  const [selectedScenario, setSelectedScenario] = useState<string>('moderate');
+  const [selectedScenario, setSelectedScenario] = useState<string>('Moderate');
 
   // Fee toggles for margin calculation
   const [includeIAP, setIncludeIAP] = useState(true); // 15% Apple/Google
@@ -956,14 +1024,16 @@ export default function AICostsPage() {
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-lg font-semibold text-white">{financialData.currentPhase.phase}</h3>
+                  <h3 className="text-lg font-semibold text-white">{financialData.currentPhase.stage}</h3>
                   <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 text-xs rounded-full">Current Stage</span>
                 </div>
                 <p className="text-white/70 text-sm mb-2">{financialData.currentPhase.description}</p>
-                <div className="flex items-start gap-2 bg-black/20 rounded-lg p-3">
-                  <Info className="w-4 h-4 text-cyan-400 mt-0.5 flex-shrink-0" />
-                  <p className="text-cyan-400 text-sm">{financialData.currentPhase.recommendation}</p>
-                </div>
+                {financialData.currentPhase.recommendations.length > 0 && (
+                  <div className="flex items-start gap-2 bg-black/20 rounded-lg p-3">
+                    <Info className="w-4 h-4 text-cyan-400 mt-0.5 flex-shrink-0" />
+                    <p className="text-cyan-400 text-sm">{financialData.currentPhase.recommendations[0]}</p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -976,10 +1046,10 @@ export default function AICostsPage() {
                   <Wallet className="w-5 h-5 text-emerald-400" />
                 </div>
               </div>
-              <div className="text-2xl font-bold text-white">{formatCost(financialData.revenue.total)}</div>
+              <div className="text-2xl font-bold text-white">{formatCost(financialData.revenue.actual.total)}</div>
               <div className="text-white/50 text-sm mt-1">Total Revenue</div>
               <div className="text-white/30 text-xs mt-0.5">
-                {financialData.revenue.hasRevenue ? `${financialData.revenue.subscriptionCount} subscriptions` : 'Pre-revenue phase'}
+                {financialData.revenue.hasRevenue ? financialData.revenue.status : 'Pre-revenue phase'}
               </div>
             </div>
             <div className="bg-[#0F1123] rounded-2xl p-5 border border-white/5">
@@ -998,9 +1068,9 @@ export default function AICostsPage() {
                   <Gift className="w-5 h-5 text-purple-400" />
                 </div>
               </div>
-              <div className="text-2xl font-bold text-white">{formatCost(financialData.costs.byAcquisition.gifted_trial.cost)}</div>
+              <div className="text-2xl font-bold text-white">{formatCost(financialData.costs.byAcquisition.giftedTrial)}</div>
               <div className="text-white/50 text-sm mt-1">Gifted Trial Investment</div>
-              <div className="text-white/30 text-xs mt-0.5">{financialData.costs.byAcquisition.gifted_trial.users} users acquired</div>
+              <div className="text-white/30 text-xs mt-0.5">{financialData.users.byAcquisition.giftedTrialActive} active trials</div>
             </div>
             <div className="bg-[#0F1123] rounded-2xl p-5 border border-white/5">
               <div className="flex items-center gap-3 mb-3">
@@ -1011,7 +1081,7 @@ export default function AICostsPage() {
               <div className="text-2xl font-bold text-white">{financialData.users.total}</div>
               <div className="text-white/50 text-sm mt-1">Total Users</div>
               <div className="text-white/30 text-xs mt-0.5">
-                {financialData.users.byAcquisition.gifted_trial} gifted, {financialData.users.byAcquisition.organic} organic
+                {financialData.users.byAcquisition.giftedTrialActive} gifted, {financialData.users.byAcquisition.organic} organic
               </div>
             </div>
           </div>
@@ -1030,16 +1100,16 @@ export default function AICostsPage() {
                 </div>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-white/50">Users</span>
-                    <span className="text-white">{financialData.costs.byAcquisition.gifted_trial.users}</span>
+                    <span className="text-white/50">Active Users</span>
+                    <span className="text-white">{financialData.users.byAcquisition.giftedTrialActive}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/50">Total Cost</span>
-                    <span className="text-orange-400">{formatCost(financialData.costs.byAcquisition.gifted_trial.cost)}</span>
+                    <span className="text-orange-400">{formatCost(financialData.costs.byAcquisition.giftedTrial)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/50">Cost per User</span>
-                    <span className="text-cyan-400">{formatCost(financialData.costs.byAcquisition.gifted_trial.avgCost)}</span>
+                    <span className="text-cyan-400">{formatCost(financialData.currentPhase.metrics.costPerTrialUser)}</span>
                   </div>
                   <div className="pt-2 border-t border-white/10">
                     <div className="text-purple-400 text-xs">Marketing investment for user adoption</div>
@@ -1054,15 +1124,19 @@ export default function AICostsPage() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-white/50">Users</span>
-                    <span className="text-white">{financialData.costs.byAcquisition.organic.users}</span>
+                    <span className="text-white">{financialData.users.byAcquisition.organic}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/50">Total Cost</span>
-                    <span className="text-orange-400">{formatCost(financialData.costs.byAcquisition.organic.cost)}</span>
+                    <span className="text-orange-400">{formatCost(financialData.costs.byAcquisition.organic)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/50">Cost per User</span>
-                    <span className="text-cyan-400">{formatCost(financialData.costs.byAcquisition.organic.avgCost)}</span>
+                    <span className="text-cyan-400">
+                      {financialData.users.byAcquisition.organic > 0
+                        ? formatCost(financialData.costs.byAcquisition.organic / financialData.users.byAcquisition.organic)
+                        : '$0.00'}
+                    </span>
                   </div>
                   <div className="pt-2 border-t border-white/10">
                     <div className="text-emerald-400 text-xs">Users who signed up independently</div>
@@ -1077,15 +1151,19 @@ export default function AICostsPage() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-white/50">Users</span>
-                    <span className="text-white">{financialData.costs.byAcquisition.paid.users}</span>
+                    <span className="text-white">{financialData.users.byAcquisition.paid}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/50">Total Cost</span>
-                    <span className="text-orange-400">{formatCost(financialData.costs.byAcquisition.paid.cost)}</span>
+                    <span className="text-orange-400">{formatCost(financialData.costs.byAcquisition.paid)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-white/50">Cost per User</span>
-                    <span className="text-cyan-400">{formatCost(financialData.costs.byAcquisition.paid.avgCost)}</span>
+                    <span className="text-cyan-400">
+                      {financialData.users.byAcquisition.paid > 0
+                        ? formatCost(financialData.costs.byAcquisition.paid / financialData.users.byAcquisition.paid)
+                        : '$0.00'}
+                    </span>
                   </div>
                   <div className="pt-2 border-t border-white/10">
                     <div className="text-yellow-400 text-xs">Revenue-generating users</div>
@@ -1113,7 +1191,7 @@ export default function AICostsPage() {
                         : 'bg-[#1B1F39] text-white/60 hover:text-white/80'
                     }`}
                   >
-                    {proj.scenario.charAt(0).toUpperCase() + proj.scenario.slice(1)}
+                    {proj.scenario}
                   </button>
                 ))}
               </div>
@@ -1121,97 +1199,104 @@ export default function AICostsPage() {
 
             {financialData.projections
               .filter(p => p.scenario === selectedScenario)
-              .map(proj => (
-                <div key={proj.scenario} className="space-y-4">
-                  <div className="grid grid-cols-4 gap-4">
-                    <div className="bg-[#1B1F39] rounded-xl p-4 text-center">
-                      <div className="text-3xl font-bold text-white">{proj.paidUsers}</div>
-                      <div className="text-white/50 text-sm mt-1">Paid Users</div>
-                    </div>
-                    <div className="bg-[#1B1F39] rounded-xl p-4 text-center">
-                      <div className="text-3xl font-bold text-emerald-400">${proj.monthlyRevenue.toFixed(2)}</div>
-                      <div className="text-white/50 text-sm mt-1">Monthly Revenue</div>
-                    </div>
-                    <div className="bg-[#1B1F39] rounded-xl p-4 text-center">
-                      <div className="text-3xl font-bold text-orange-400">${proj.monthlyAICost.toFixed(2)}</div>
-                      <div className="text-white/50 text-sm mt-1">Monthly AI Cost</div>
-                    </div>
-                    <div className="bg-[#1B1F39] rounded-xl p-4 text-center">
-                      <div className={`text-3xl font-bold ${proj.grossMargin >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                        ${proj.grossMargin.toFixed(2)}
-                      </div>
-                      <div className="text-white/50 text-sm mt-1">Gross Margin</div>
-                    </div>
-                  </div>
+              .map(scenarioData => {
+                // Get 6-month projection for display
+                const proj6Mo = scenarioData.projections.find(p => p.month === 6) || scenarioData.projections[scenarioData.projections.length - 1];
+                const proj12Mo = scenarioData.projections.find(p => p.month === 12);
 
-                  <div className="bg-[#1B1F39] rounded-xl p-4">
-                    <h4 className="text-white font-medium mb-3">Margin After Fees</h4>
-                    <div className="grid grid-cols-4 gap-4 text-sm">
-                      <div>
-                        <div className="text-white/50 mb-1">No Fees (Direct)</div>
-                        <div className={`text-lg font-bold ${proj.grossMargin >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                          ${proj.grossMargin.toFixed(2)}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-white/50 mb-1">After IAP (15%)</div>
-                        <div className={`text-lg font-bold ${proj.afterIAP >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                          ${proj.afterIAP.toFixed(2)}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-white/50 mb-1">+ Partner (10%)</div>
-                        <div className={`text-lg font-bold ${proj.afterPartner >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                          ${proj.afterPartner.toFixed(2)}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-white/50 mb-1">+ Finder (10%)</div>
-                        <div className={`text-lg font-bold ${proj.afterAllFees >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                          ${proj.afterAllFees.toFixed(2)}
-                        </div>
+                return (
+                  <div key={scenarioData.scenario} className="space-y-4">
+                    <div className="bg-[#1B1F39] rounded-xl p-3 mb-4">
+                      <p className="text-white/60 text-sm">{scenarioData.description}</p>
+                      <div className="flex gap-4 mt-2 text-xs text-white/40">
+                        <span>New users/mo: {scenarioData.assumptions.monthlyNewPaidUsers}</span>
+                        <span>Churn: {scenarioData.assumptions.churnRate}</span>
+                        <span>Trial conversion: {scenarioData.assumptions.trialConversion}</span>
+                        <span>Net revenue: {scenarioData.assumptions.netRevenueRate}</span>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-4 gap-4">
+                      <div className="bg-[#1B1F39] rounded-xl p-4 text-center">
+                        <div className="text-3xl font-bold text-white">{proj6Mo?.paidUsers || 0}</div>
+                        <div className="text-white/50 text-sm mt-1">Paid Users (6mo)</div>
+                      </div>
+                      <div className="bg-[#1B1F39] rounded-xl p-4 text-center">
+                        <div className="text-3xl font-bold text-emerald-400">${(proj6Mo?.grossRevenue || 0).toFixed(0)}</div>
+                        <div className="text-white/50 text-sm mt-1">Gross Revenue (6mo)</div>
+                      </div>
+                      <div className="bg-[#1B1F39] rounded-xl p-4 text-center">
+                        <div className="text-3xl font-bold text-orange-400">${(proj6Mo?.aiCosts || 0).toFixed(2)}</div>
+                        <div className="text-white/50 text-sm mt-1">AI Cost (6mo)</div>
+                      </div>
+                      <div className="bg-[#1B1F39] rounded-xl p-4 text-center">
+                        <div className={`text-3xl font-bold ${(proj6Mo?.grossProfit || 0) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          ${(proj6Mo?.grossProfit || 0).toFixed(0)}
+                        </div>
+                        <div className="text-white/50 text-sm mt-1">Net Profit (6mo)</div>
+                      </div>
+                    </div>
+
                     <div className="bg-[#1B1F39] rounded-xl p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="text-white/50 text-sm">Annual Revenue</div>
-                          <div className="text-2xl font-bold text-emerald-400">${proj.annualRevenue.toLocaleString()}</div>
-                        </div>
-                        <ArrowRight className="w-5 h-5 text-white/30" />
-                        <div>
-                          <div className="text-white/50 text-sm">Annual Profit (after all fees)</div>
-                          <div className={`text-2xl font-bold ${proj.annualProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                            ${proj.annualProfit.toLocaleString()}
+                      <h4 className="text-white font-medium mb-3">Projection Timeline</h4>
+                      <div className="grid grid-cols-4 gap-4 text-sm">
+                        {scenarioData.projections.map(p => (
+                          <div key={p.month}>
+                            <div className="text-white/50 mb-1">{p.month} Month{p.month > 1 ? 's' : ''}</div>
+                            <div className="text-white font-medium">{p.paidUsers} users</div>
+                            <div className="text-emerald-400">${p.grossRevenue.toFixed(0)} rev</div>
+                            <div className={p.grossProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}>
+                              ${p.grossProfit.toFixed(0)} profit
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {proj12Mo && (
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="bg-[#1B1F39] rounded-xl p-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="text-white/50 text-sm">Annual Revenue (12mo)</div>
+                              <div className="text-2xl font-bold text-emerald-400">${proj12Mo.grossRevenue.toLocaleString()}</div>
+                            </div>
+                            <ArrowRight className="w-5 h-5 text-white/30" />
+                            <div>
+                              <div className="text-white/50 text-sm">Annual Profit</div>
+                              <div className={`text-2xl font-bold ${proj12Mo.grossProfit >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                                ${proj12Mo.grossProfit.toLocaleString()}
+                              </div>
+                            </div>
                           </div>
                         </div>
+                        <div className="bg-[#1B1F39] rounded-xl p-4">
+                          <div className="text-white/50 text-sm">Gross Margin</div>
+                          <div className="text-2xl font-bold text-yellow-400">
+                            {proj12Mo.grossMarginPercent.toFixed(1)}%
+                          </div>
+                          <div className="text-white/30 text-xs mt-1">After fees and AI costs</div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="bg-[#1B1F39] rounded-xl p-4">
-                      <div className="text-white/50 text-sm">Break-even Timeline</div>
-                      <div className="text-2xl font-bold text-yellow-400">
-                        {proj.breakEvenMonths > 0 ? `${proj.breakEvenMonths} months` : 'Already profitable'}
-                      </div>
-                      <div className="text-white/30 text-xs mt-1">To recover current AI investment</div>
-                    </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
           </div>
 
           {/* OpenRouter Models */}
           <div className="bg-[#0F1123] rounded-2xl border border-white/5 p-6">
-            <h3 className="text-white font-semibold mb-2">OpenRouter Models in Use</h3>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-white font-semibold">OpenRouter Models in Use</h3>
+              <span className="text-white/40 text-xs">Last verified: {financialData.models.lastVerified}</span>
+            </div>
             <p className="text-white/50 text-sm mb-4">
               All AI features use models through OpenRouter. Pricing is per 1M tokens.
             </p>
             <div className="grid grid-cols-2 gap-4">
-              {financialData.models.map(model => (
+              {financialData.models.currentModels.map(model => (
                 <div
-                  key={model.name}
+                  key={model.model}
                   className={`bg-[#1B1F39] rounded-xl p-4 border ${
                     model.tier === 'budget' ? 'border-emerald-500/30' :
                     model.tier === 'standard' ? 'border-cyan-500/30' :
@@ -1219,7 +1304,7 @@ export default function AICostsPage() {
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-white font-medium font-mono text-sm">{model.name}</span>
+                    <span className="text-white font-medium font-mono text-sm">{model.model}</span>
                     <span className={`px-2 py-0.5 rounded text-xs font-medium ${
                       model.tier === 'budget' ? 'bg-emerald-500/20 text-emerald-400' :
                       model.tier === 'standard' ? 'bg-cyan-500/20 text-cyan-400' :
@@ -1229,29 +1314,51 @@ export default function AICostsPage() {
                     </span>
                   </div>
                   <div className="text-white/50 text-xs mb-3">{model.provider}</div>
-                  <div className="grid grid-cols-2 gap-2 text-sm mb-3">
-                    <div>
-                      <div className="text-white/40 text-xs">Input</div>
-                      <div className="text-cyan-400">${model.inputCost.toFixed(2)}/1M</div>
+                  {model.pricing && (
+                    <div className="grid grid-cols-2 gap-2 text-sm mb-3">
+                      <div>
+                        <div className="text-white/40 text-xs">Input</div>
+                        <div className="text-cyan-400">${model.pricing.inputCost.toFixed(2)}/1M</div>
+                      </div>
+                      <div>
+                        <div className="text-white/40 text-xs">Output</div>
+                        <div className="text-purple-400">${model.pricing.outputCost.toFixed(2)}/1M</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-white/40 text-xs">Output</div>
-                      <div className="text-purple-400">${model.outputCost.toFixed(2)}/1M</div>
-                    </div>
+                  )}
+                  <div className="flex justify-between text-xs">
+                    <span className="text-white/40">{model.calls} calls</span>
+                    <span className="text-cyan-400">{formatCost(model.cost)} total</span>
                   </div>
-                  <div className="text-white/60 text-xs">{model.notes}</div>
-                  {model.recommendation && (
-                    <div className="mt-2 flex items-start gap-2 bg-yellow-500/10 rounded p-2">
-                      <AlertTriangle className="w-3 h-3 text-yellow-400 mt-0.5 flex-shrink-0" />
-                      <span className="text-yellow-400 text-xs">{model.recommendation}</span>
-                    </div>
+                  {model.pricing?.notes && (
+                    <div className="text-white/60 text-xs mt-2">{model.pricing.notes}</div>
                   )}
                 </div>
               ))}
             </div>
+
+            {/* Alternative Models Recommendations */}
+            {financialData.models.alternativeModels.length > 0 && (
+              <div className="mt-4 p-4 bg-yellow-500/10 rounded-xl border border-yellow-500/30">
+                <div className="flex items-center gap-2 mb-2">
+                  <AlertTriangle className="w-4 h-4 text-yellow-400" />
+                  <span className="text-yellow-400 font-medium text-sm">Cost Optimization Opportunities</span>
+                </div>
+                {financialData.models.alternativeModels.map(alt => (
+                  <div key={alt.current} className="text-sm mt-2">
+                    <span className="text-white/70">Switch from </span>
+                    <span className="text-red-400 font-mono">{alt.current}</span>
+                    <span className="text-white/70"> to </span>
+                    <span className="text-emerald-400 font-mono">{alt.alternative}</span>
+                    <span className="text-emerald-400"> ({alt.savingsPercent}% savings)</span>
+                    <div className="text-white/50 text-xs mt-1">{alt.tradeoff}</div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Cost by Model */}
+          {/* Cost by Model Table */}
           <div className="bg-[#0F1123] rounded-2xl border border-white/5 overflow-hidden">
             <div className="p-4 border-b border-white/5">
               <h3 className="text-white font-semibold">Actual Spend by Model</h3>
@@ -1271,7 +1378,7 @@ export default function AICostsPage() {
                     <td className="px-4 py-3 text-white font-mono text-sm">{model}</td>
                     <td className="text-right text-white/80 px-4 py-3">{data.calls.toLocaleString()}</td>
                     <td className="text-right text-cyan-400 font-medium px-4 py-3">{formatCost(data.cost)}</td>
-                    <td className="text-right text-white/60 px-4 py-3">{formatCost(data.avgCost)}</td>
+                    <td className="text-right text-white/60 px-4 py-3">{formatCost(data.calls > 0 ? data.cost / data.calls : 0)}</td>
                   </tr>
                 ))}
               </tbody>
