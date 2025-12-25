@@ -134,6 +134,32 @@ interface UserDetail {
 
 type TabType = 'overview' | 'features' | 'users' | 'projections' | 'financial';
 
+interface FeatureModelConfig {
+  name: string;
+  description: string;
+  primaryModel: string;
+  fallbackModels: string[];
+  category: 'coaching' | 'analysis' | 'goals' | 'reports';
+  callLimit: string;
+}
+
+interface FeatureUsageDetail {
+  config: FeatureModelConfig;
+  actualUsage: {
+    totalCalls: number;
+    totalCost: number;
+    avgCostPerCall: number;
+    byModel: {
+      model: string;
+      calls: number;
+      cost: number;
+      percentage: number;
+      isPrimary: boolean;
+      isFallback: boolean;
+    }[];
+  };
+}
+
 interface FinancialAnalytics {
   currentPhase: {
     stage: string;
@@ -221,6 +247,12 @@ interface FinancialAnalytics {
       grossMarginPercent: number;
     }[];
   }[];
+  featureUsage: Record<string, FeatureUsageDetail>;
+  modelHealth: {
+    primaryModelUsage: number;
+    fallbackUsage: number;
+    recommendation: string;
+  };
   models: {
     currentModels: {
       model: string;
@@ -234,6 +266,7 @@ interface FinancialAnalytics {
         provider: string;
         tier: string;
         notes: string;
+        role?: string;
       } | null;
     }[];
     alternativeModels: {
@@ -248,6 +281,7 @@ interface FinancialAnalytics {
       provider: string;
       tier: string;
       notes: string;
+      role?: string;
     }>;
     lastVerified: string;
     pricingSource: string;
@@ -301,6 +335,8 @@ export default function AICostsPage() {
 
   const [financialData, setFinancialData] = useState<FinancialAnalytics | null>(null);
   const [selectedScenario, setSelectedScenario] = useState<string>('Moderate');
+  const [expandedFeatures, setExpandedFeatures] = useState<Set<string>>(new Set());
+  const [customUserForecast, setCustomUserForecast] = useState<number | null>(null);
 
   // Fee toggles for margin calculation
   const [includeIAP, setIncludeIAP] = useState(true); // 15% Apple/Google
@@ -1173,43 +1209,294 @@ export default function AICostsPage() {
             </div>
           </div>
 
+          {/* Model Health Summary */}
+          {financialData.modelHealth && (
+            <div className={`rounded-2xl p-4 border ${
+              financialData.modelHealth.fallbackUsage > 10
+                ? 'bg-yellow-500/10 border-yellow-500/30'
+                : 'bg-emerald-500/10 border-emerald-500/30'
+            }`}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                    financialData.modelHealth.fallbackUsage > 10
+                      ? 'bg-yellow-500/20'
+                      : 'bg-emerald-500/20'
+                  }`}>
+                    <CheckCircle2 className={`w-5 h-5 ${
+                      financialData.modelHealth.fallbackUsage > 10
+                        ? 'text-yellow-400'
+                        : 'text-emerald-400'
+                    }`} />
+                  </div>
+                  <div>
+                    <div className="text-white font-medium">Model Health</div>
+                    <div className="text-white/50 text-sm">{financialData.modelHealth.recommendation}</div>
+                  </div>
+                </div>
+                <div className="flex gap-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-emerald-400">{financialData.modelHealth.primaryModelUsage}%</div>
+                    <div className="text-white/40 text-xs">Primary Model</div>
+                  </div>
+                  <div className="text-center">
+                    <div className={`text-2xl font-bold ${
+                      financialData.modelHealth.fallbackUsage > 10 ? 'text-yellow-400' : 'text-white/40'
+                    }`}>{financialData.modelHealth.fallbackUsage}%</div>
+                    <div className="text-white/40 text-xs">Fallback</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Feature → Model Mapping */}
+          {financialData.featureUsage && (
+            <div className="bg-[#0F1123] rounded-2xl border border-white/5 p-6">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-white font-semibold">AI Features → Model Mapping</h3>
+                <div className="flex gap-2">
+                  <span className="px-2 py-1 bg-emerald-500/20 text-emerald-400 text-xs rounded">Primary</span>
+                  <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded">Fallback</span>
+                  <span className="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded">Specialized</span>
+                </div>
+              </div>
+              <p className="text-white/50 text-sm mb-4">
+                Click any feature to see actual model usage breakdown. gpt-4o-mini is the primary model; gpt-4-turbo and claude-3-haiku are fallbacks only.
+              </p>
+
+              <div className="space-y-2">
+                {Object.entries(financialData.featureUsage).map(([featureName, feature]) => {
+                  const isExpanded = expandedFeatures.has(featureName);
+                  const hasUsage = feature.actualUsage.totalCalls > 0;
+
+                  return (
+                    <div key={featureName} className="bg-[#1B1F39] rounded-xl overflow-hidden">
+                      <button
+                        onClick={() => {
+                          const newExpanded = new Set(expandedFeatures);
+                          if (isExpanded) {
+                            newExpanded.delete(featureName);
+                          } else {
+                            newExpanded.add(featureName);
+                          }
+                          setExpandedFeatures(newExpanded);
+                        }}
+                        className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-3 h-3 rounded-full"
+                            style={{ backgroundColor: FEATURE_COLORS[featureName] || '#888' }}
+                          />
+                          <div className="text-left">
+                            <div className="text-white font-medium">{feature.config.name}</div>
+                            <div className="text-white/40 text-xs">{feature.config.description}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <div className={`text-sm font-mono ${
+                              feature.config.primaryModel.includes('gemini')
+                                ? 'text-purple-400'
+                                : 'text-emerald-400'
+                            }`}>
+                              {feature.config.primaryModel}
+                            </div>
+                            <div className="text-white/30 text-xs">{feature.config.callLimit}</div>
+                          </div>
+                          {hasUsage && (
+                            <div className="text-right min-w-[80px]">
+                              <div className="text-cyan-400 text-sm">{feature.actualUsage.totalCalls} calls</div>
+                              <div className="text-white/40 text-xs">{formatCost(feature.actualUsage.totalCost)}</div>
+                            </div>
+                          )}
+                          {isExpanded ? (
+                            <ChevronUp className="w-4 h-4 text-white/40" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4 text-white/40" />
+                          )}
+                        </div>
+                      </button>
+
+                      {isExpanded && (
+                        <div className="px-4 pb-4 border-t border-white/5">
+                          <div className="pt-4 space-y-3">
+                            {/* Expected Model */}
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-white/50">Expected Primary:</span>
+                              <span className="text-emerald-400 font-mono">{feature.config.primaryModel}</span>
+                            </div>
+                            {feature.config.fallbackModels.length > 0 && (
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-white/50">Fallback Chain:</span>
+                                <span className="text-yellow-400 font-mono text-xs">
+                                  {feature.config.fallbackModels.join(' → ')}
+                                </span>
+                              </div>
+                            )}
+
+                            {/* Actual Usage */}
+                            {hasUsage ? (
+                              <div className="mt-4">
+                                <div className="text-white/70 text-sm font-medium mb-2">Actual Usage:</div>
+                                <div className="space-y-2">
+                                  {feature.actualUsage.byModel.map(model => (
+                                    <div
+                                      key={model.model}
+                                      className={`flex items-center justify-between p-2 rounded-lg ${
+                                        model.isPrimary
+                                          ? 'bg-emerald-500/10 border border-emerald-500/20'
+                                          : model.isFallback
+                                          ? 'bg-yellow-500/10 border border-yellow-500/20'
+                                          : 'bg-white/5'
+                                      }`}
+                                    >
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-mono text-sm text-white">{model.model}</span>
+                                        {model.isPrimary && (
+                                          <span className="px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs rounded">PRIMARY</span>
+                                        )}
+                                        {model.isFallback && (
+                                          <span className="px-1.5 py-0.5 bg-yellow-500/20 text-yellow-400 text-xs rounded">FALLBACK</span>
+                                        )}
+                                      </div>
+                                      <div className="flex items-center gap-4 text-sm">
+                                        <span className="text-white">{model.calls} calls</span>
+                                        <span className="text-white/40">({model.percentage}%)</span>
+                                        <span className="text-cyan-400">{formatCost(model.cost)}</span>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                                <div className="mt-2 text-right">
+                                  <span className="text-white/40 text-xs">Avg cost per call: </span>
+                                  <span className="text-cyan-400 text-sm">{formatCost(feature.actualUsage.avgCostPerCall)}</span>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="mt-4 text-white/30 text-sm italic">No usage data yet</div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Scenario Projections */}
           <div className="bg-[#0F1123] rounded-2xl border border-white/5 p-6">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h3 className="text-white font-semibold">Scenario-Based Projections</h3>
-                <p className="text-white/50 text-sm">Toggle scenarios to see net profit projections based on paid user growth</p>
+                <p className="text-white/50 text-sm">Toggle scenarios or enter custom user numbers to see projections</p>
               </div>
-              <div className="flex gap-2">
-                {financialData.projections.map(proj => (
-                  <button
-                    key={proj.scenario}
-                    onClick={() => setSelectedScenario(proj.scenario)}
-                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                      selectedScenario === proj.scenario
-                        ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
-                        : 'bg-[#1B1F39] text-white/60 hover:text-white/80'
-                    }`}
-                  >
-                    {proj.scenario}
-                  </button>
-                ))}
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <label className="text-white/50 text-sm">Custom Users/Mo:</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="1000"
+                    value={customUserForecast ?? ''}
+                    onChange={(e) => setCustomUserForecast(e.target.value ? parseInt(e.target.value) : null)}
+                    placeholder="Auto"
+                    className="w-20 bg-[#1B1F39] text-white rounded-lg px-2 py-1 text-sm border border-white/10 focus:border-yellow-500/50 focus:outline-none"
+                  />
+                  {customUserForecast !== null && (
+                    <button
+                      onClick={() => setCustomUserForecast(null)}
+                      className="text-white/40 hover:text-white/60"
+                      title="Reset to scenario default"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  {financialData.projections.map(proj => (
+                    <button
+                      key={proj.scenario}
+                      onClick={() => {
+                        setSelectedScenario(proj.scenario);
+                        setCustomUserForecast(null);
+                      }}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                        selectedScenario === proj.scenario && customUserForecast === null
+                          ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30'
+                          : customUserForecast !== null
+                          ? 'bg-[#1B1F39] text-white/40'
+                          : 'bg-[#1B1F39] text-white/60 hover:text-white/80'
+                      }`}
+                    >
+                      {proj.scenario}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
             {financialData.projections
               .filter(p => p.scenario === selectedScenario)
               .map(scenarioData => {
+                // Calculate projections with custom user numbers if set
+                const monthlyUsers = customUserForecast ?? scenarioData.assumptions.monthlyNewPaidUsers;
+                const isCustom = customUserForecast !== null;
+
+                // Calculate custom projections if user number is overridden
+                const calculateCustomProjections = (months: number[]) => {
+                  const monthlyRevenue = financialData.pricingConfig.subscription.pro6Months / 6;
+                  const feeMultipliers: Record<string, number> = {
+                    noFees: 1.00,
+                    iapOnly: 0.85,
+                    iapPartner: 0.75,
+                    allFees: 0.65,
+                  };
+                  const feeMultiplier = feeMultipliers[scenarioData.assumptions.feeProfile] || 0.75;
+                  const churnRate = parseFloat(scenarioData.assumptions.churnRate) / 100;
+                  const avgCostPerUser = projections?.avgCostPerUser || 0.05;
+
+                  return months.map(month => {
+                    let paidUsers = 0;
+                    for (let m = 1; m <= month; m++) {
+                      paidUsers += monthlyUsers;
+                      paidUsers = Math.round(paidUsers * (1 - churnRate));
+                    }
+                    const grossRevenue = paidUsers * monthlyRevenue * month;
+                    const netRevenue = grossRevenue * feeMultiplier;
+                    const aiCosts = paidUsers * avgCostPerUser * month;
+                    const grossProfit = netRevenue - aiCosts;
+                    const grossMarginPercent = grossRevenue > 0 ? (grossProfit / grossRevenue) * 100 : 0;
+
+                    return { month, paidUsers, grossRevenue, netRevenue, aiCosts, grossProfit, grossMarginPercent };
+                  });
+                };
+
+                const displayProjections = isCustom
+                  ? calculateCustomProjections([1, 3, 6, 12])
+                  : scenarioData.projections;
+
                 // Get 6-month projection for display
-                const proj6Mo = scenarioData.projections.find(p => p.month === 6) || scenarioData.projections[scenarioData.projections.length - 1];
-                const proj12Mo = scenarioData.projections.find(p => p.month === 12);
+                const proj6Mo = displayProjections.find(p => p.month === 6) || displayProjections[displayProjections.length - 1];
+                const proj12Mo = displayProjections.find(p => p.month === 12);
 
                 return (
                   <div key={scenarioData.scenario} className="space-y-4">
-                    <div className="bg-[#1B1F39] rounded-xl p-3 mb-4">
+                    <div className={`rounded-xl p-3 mb-4 ${isCustom ? 'bg-yellow-500/10 border border-yellow-500/20' : 'bg-[#1B1F39]'}`}>
+                      {isCustom && (
+                        <div className="flex items-center gap-2 mb-2">
+                          <Target className="w-4 h-4 text-yellow-400" />
+                          <span className="text-yellow-400 text-sm font-medium">Custom Forecast: {customUserForecast} users/month</span>
+                        </div>
+                      )}
                       <p className="text-white/60 text-sm">{scenarioData.description}</p>
                       <div className="flex gap-4 mt-2 text-xs text-white/40">
-                        <span>New users/mo: {scenarioData.assumptions.monthlyNewPaidUsers}</span>
+                        <span className={isCustom ? 'text-yellow-400' : ''}>
+                          New users/mo: {monthlyUsers}
+                        </span>
                         <span>Churn: {scenarioData.assumptions.churnRate}</span>
                         <span>Trial conversion: {scenarioData.assumptions.trialConversion}</span>
                         <span>Net revenue: {scenarioData.assumptions.netRevenueRate}</span>
@@ -1240,7 +1527,7 @@ export default function AICostsPage() {
                     <div className="bg-[#1B1F39] rounded-xl p-4">
                       <h4 className="text-white font-medium mb-3">Projection Timeline</h4>
                       <div className="grid grid-cols-4 gap-4 text-sm">
-                        {scenarioData.projections.map(p => (
+                        {displayProjections.map(p => (
                           <div key={p.month}>
                             <div className="text-white/50 mb-1">{p.month} Month{p.month > 1 ? 's' : ''}</div>
                             <div className="text-white font-medium">{p.paidUsers} users</div>

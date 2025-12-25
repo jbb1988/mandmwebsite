@@ -18,6 +18,94 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
  * All costs during this phase are investment in user growth
  */
 
+// ========================================
+// FEATURE TO MODEL MAPPING (Source of Truth)
+// ========================================
+// This documents which AI model each feature uses
+// Primary model is used first, fallbacks are tried if primary fails
+
+const FEATURE_MODEL_CONFIG: Record<string, {
+  name: string;
+  description: string;
+  primaryModel: string;
+  fallbackModels: string[];
+  category: 'coaching' | 'analysis' | 'goals' | 'reports';
+  callLimit: string;
+}> = {
+  muscle_coach: {
+    name: 'Muscle Coach',
+    description: 'AI-powered workout recommendations and training guidance',
+    primaryModel: 'openai/gpt-4o-mini',
+    fallbackModels: ['openai/gpt-4-turbo', 'anthropic/claude-3-haiku'],
+    category: 'coaching',
+    callLimit: '2 calls/week',
+  },
+  mind_coach: {
+    name: 'Mind Coach',
+    description: 'Mental performance and mindset coaching',
+    primaryModel: 'openai/gpt-4o-mini',
+    fallbackModels: ['openai/gpt-4-turbo', 'anthropic/claude-3-haiku'],
+    category: 'coaching',
+    callLimit: '2 calls/week',
+  },
+  fuel_ai: {
+    name: 'Fuel AI',
+    description: 'Nutrition planning and meal recommendations',
+    primaryModel: 'openai/gpt-4o-mini',
+    fallbackModels: ['openai/gpt-4-turbo', 'anthropic/claude-3-haiku'],
+    category: 'coaching',
+    callLimit: '2 calls/week',
+  },
+  ai_assistant_coach: {
+    name: 'AI Assistant',
+    description: 'General AI assistant for questions and guidance',
+    primaryModel: 'openai/gpt-4o-mini',
+    fallbackModels: ['openai/gpt-4-turbo', 'anthropic/claude-3-haiku'],
+    category: 'coaching',
+    callLimit: '3 calls/week',
+  },
+  weekly_reports: {
+    name: 'Weekly Reports',
+    description: 'Automated weekly progress summaries',
+    primaryModel: 'openai/gpt-4o-mini',
+    fallbackModels: ['openai/gpt-4-turbo', 'anthropic/claude-3-haiku'],
+    category: 'reports',
+    callLimit: '2 reports/week',
+  },
+  swing_lab: {
+    name: 'Swing Lab',
+    description: 'Video analysis for baseball/softball swings',
+    primaryModel: 'gemini-2.5-flash',
+    fallbackModels: [],
+    category: 'analysis',
+    callLimit: '10 credits/month',
+  },
+  pitch_lab: {
+    name: 'Pitch Lab',
+    description: 'Video analysis for pitching mechanics',
+    primaryModel: 'gemini-2.5-flash',
+    fallbackModels: [],
+    category: 'analysis',
+    callLimit: '10 credits/month',
+  },
+  mind_goals: {
+    name: 'Mind Goals',
+    description: 'AI feedback on mental performance goals',
+    primaryModel: 'gpt-4o-mini',
+    fallbackModels: [],
+    category: 'goals',
+    callLimit: 'Unlimited',
+  },
+  muscle_goals: {
+    name: 'Muscle Goals',
+    description: 'AI feedback on training goals',
+    primaryModel: 'gpt-4o-mini',
+    fallbackModels: [],
+    category: 'goals',
+    callLimit: 'Unlimited',
+  },
+};
+
 // OpenRouter model pricing (per 1M tokens) - VERIFIED Dec 25, 2025
 // Source: https://openrouter.ai/docs/models
 const OPENROUTER_MODELS: Record<string, {
@@ -26,41 +114,47 @@ const OPENROUTER_MODELS: Record<string, {
   provider: string;
   tier: 'budget' | 'standard' | 'premium';
   notes: string;
+  role: 'primary' | 'fallback' | 'specialized';
 }> = {
   'openai/gpt-4o-mini': {
     inputCost: 0.15,
     outputCost: 0.60,
     provider: 'OpenAI',
     tier: 'budget',
-    notes: 'Best value for general AI tasks. Primary model for coaching features.',
+    notes: 'PRIMARY model for all coaching features. Best value for general AI tasks.',
+    role: 'primary',
+  },
+  'gpt-4o-mini': {
+    inputCost: 0.15,
+    outputCost: 0.60,
+    provider: 'OpenAI',
+    tier: 'budget',
+    notes: 'Same as openai/gpt-4o-mini (alternate naming).',
+    role: 'primary',
   },
   'openai/gpt-4-turbo': {
     inputCost: 10.00,
     outputCost: 30.00,
     provider: 'OpenAI',
     tier: 'premium',
-    notes: 'High-quality but expensive. Consider migrating to gpt-4o-mini.',
+    notes: 'FALLBACK only - used when gpt-4o-mini fails. 50x more expensive.',
+    role: 'fallback',
   },
   'anthropic/claude-3-haiku': {
     inputCost: 0.25,
     outputCost: 1.25,
     provider: 'Anthropic',
     tier: 'budget',
-    notes: 'Fast and affordable. Good for simple tasks.',
-  },
-  'anthropic/claude-3-sonnet': {
-    inputCost: 3.00,
-    outputCost: 15.00,
-    provider: 'Anthropic',
-    tier: 'standard',
-    notes: 'Balanced quality/cost. Consider for complex tasks.',
+    notes: 'FALLBACK only - tertiary fallback if OpenAI models fail.',
+    role: 'fallback',
   },
   'gemini-2.5-flash': {
     inputCost: 0.30,
     outputCost: 2.50,
     provider: 'Google',
     tier: 'budget',
-    notes: 'Used for Swing Lab & Pitch Lab video analysis. Good multimodal performance.',
+    notes: 'SPECIALIZED for Swing Lab & Pitch Lab video analysis. Direct Google API.',
+    role: 'specialized',
   },
 };
 
@@ -70,19 +164,7 @@ const ALTERNATIVE_MODELS = [
     current: 'openai/gpt-4-turbo',
     alternative: 'openai/gpt-4o-mini',
     savingsPercent: 98,
-    tradeoff: 'Slightly less capable but 50x cheaper. Test quality first.',
-  },
-  {
-    current: 'gemini-2.5-flash',
-    alternative: 'gemini-2.5-flash-lite',
-    savingsPercent: 67,
-    tradeoff: 'Faster, cheaper ($0.10/$0.40), but may reduce video analysis quality.',
-  },
-  {
-    current: 'anthropic/claude-3-haiku',
-    alternative: 'openai/gpt-4o-mini',
-    savingsPercent: 40,
-    tradeoff: 'Similar tier, OpenAI may be slightly cheaper for your use case.',
+    tradeoff: 'GPT-4-turbo is only used as fallback. Consider improving primary model reliability to reduce fallback usage.',
   },
 ];
 
@@ -464,7 +546,80 @@ export async function GET(request: NextRequest) {
     };
 
     // ========================================
-    // 7. MODEL RECOMMENDATIONS
+    // 7. FEATURE USAGE WITH MODEL BREAKDOWN
+    // ========================================
+    // Build detailed feature usage including which models are actually being used
+    const featureUsageDetails: Record<string, {
+      config: typeof FEATURE_MODEL_CONFIG[string];
+      actualUsage: {
+        totalCalls: number;
+        totalCost: number;
+        avgCostPerCall: number;
+        byModel: {
+          model: string;
+          calls: number;
+          cost: number;
+          percentage: number;
+          isPrimary: boolean;
+          isFallback: boolean;
+        }[];
+      };
+    }> = {};
+
+    // Group AI costs by feature and model
+    const featureModelStats = new Map<string, Map<string, { calls: number; cost: number }>>();
+    aiCosts?.forEach(cost => {
+      if (!featureModelStats.has(cost.feature_name)) {
+        featureModelStats.set(cost.feature_name, new Map());
+      }
+      const modelMap = featureModelStats.get(cost.feature_name)!;
+      const existing = modelMap.get(cost.model_name) || { calls: 0, cost: 0 };
+      existing.calls++;
+      existing.cost += parseFloat(cost.estimated_cost || 0);
+      modelMap.set(cost.model_name, existing);
+    });
+
+    // Build feature usage details
+    for (const [featureName, config] of Object.entries(FEATURE_MODEL_CONFIG)) {
+      const modelStats = featureModelStats.get(featureName);
+      let totalCalls = 0;
+      let totalCost = 0;
+      const byModel: typeof featureUsageDetails[string]['actualUsage']['byModel'] = [];
+
+      if (modelStats) {
+        for (const [model, stats] of modelStats.entries()) {
+          totalCalls += stats.calls;
+          totalCost += stats.cost;
+          byModel.push({
+            model,
+            calls: stats.calls,
+            cost: stats.cost,
+            percentage: 0, // Will calculate after totals
+            isPrimary: model === config.primaryModel || model.includes(config.primaryModel.replace('openai/', '')),
+            isFallback: config.fallbackModels.some(f => model.includes(f.replace('openai/', '').replace('anthropic/', ''))),
+          });
+        }
+        // Calculate percentages
+        byModel.forEach(m => {
+          m.percentage = totalCalls > 0 ? Math.round((m.calls / totalCalls) * 100) : 0;
+        });
+        // Sort by calls descending
+        byModel.sort((a, b) => b.calls - a.calls);
+      }
+
+      featureUsageDetails[featureName] = {
+        config,
+        actualUsage: {
+          totalCalls,
+          totalCost,
+          avgCostPerCall: totalCalls > 0 ? totalCost / totalCalls : 0,
+          byModel,
+        },
+      };
+    }
+
+    // ========================================
+    // 8. MODEL RECOMMENDATIONS
     // ========================================
     const modelRecommendations = {
       currentModels: Object.entries(costBreakdown.byModel).map(([name, data]) => ({
@@ -479,6 +634,19 @@ export async function GET(request: NextRequest) {
       lastVerified: 'December 25, 2025',
       pricingSource: 'https://openrouter.ai/docs/models',
     };
+
+    // Calculate fallback usage percentage
+    let totalPrimaryCalls = 0;
+    let totalFallbackCalls = 0;
+    Object.values(featureUsageDetails).forEach(feature => {
+      feature.actualUsage.byModel.forEach(m => {
+        if (m.isPrimary) totalPrimaryCalls += m.calls;
+        if (m.isFallback) totalFallbackCalls += m.calls;
+      });
+    });
+    const fallbackPercentage = (totalPrimaryCalls + totalFallbackCalls) > 0
+      ? Math.round((totalFallbackCalls / (totalPrimaryCalls + totalFallbackCalls)) * 100)
+      : 0;
 
     return NextResponse.json({
       success: true,
@@ -505,6 +673,18 @@ export async function GET(request: NextRequest) {
 
       // Context
       currentPhase,
+
+      // Feature usage with model breakdown (NEW)
+      featureUsage: featureUsageDetails,
+
+      // Model health metrics (NEW)
+      modelHealth: {
+        primaryModelUsage: 100 - fallbackPercentage,
+        fallbackUsage: fallbackPercentage,
+        recommendation: fallbackPercentage > 10
+          ? `${fallbackPercentage}% of calls are using expensive fallback models. Consider investigating primary model failures.`
+          : 'Primary model usage is healthy.',
+      },
 
       // Models
       models: modelRecommendations,
