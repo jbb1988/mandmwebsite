@@ -148,6 +148,42 @@ export default function AICostsPage() {
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [userLoading, setUserLoading] = useState(false);
 
+  // Fee toggles for margin calculation
+  const [includeIAP, setIncludeIAP] = useState(true); // 15% Apple/Google
+  const [includePartner, setIncludePartner] = useState(false); // 10% affiliate
+  const [includeFinderFee, setIncludeFinderFee] = useState(false); // 10% finder fee
+  const [priceTier, setPriceTier] = useState<'base' | 'tier2' | 'tier3' | 'tier4'>('base');
+
+  // Pricing tiers (per 6 months)
+  const PRICING_TIERS = {
+    base: { label: '1-11 seats', price: 79.00, monthly: 13.17 },
+    tier2: { label: '12-120 seats (10% off)', price: 71.10, monthly: 11.85 },
+    tier3: { label: '121-199 seats (15% off)', price: 67.15, monthly: 11.19 },
+    tier4: { label: '200+ seats (20% off)', price: 63.20, monthly: 10.53 },
+  };
+
+  // Heavy user cost estimates based on actual data
+  const HEAVY_USER_COSTS = {
+    muscle_coach: { calls: 30, costPerCall: 0.00245, monthly: 0.0735 },
+    weekly_reports: { calls: 4, costPerCall: 0.00053, monthly: 0.0021 },
+    fuel_ai: { calls: 10, costPerCall: 0.00076, monthly: 0.0076 },
+    swing_lab: { calls: 10, costPerCall: 0.00293, monthly: 0.0293 },
+    pitch_lab: { calls: 10, costPerCall: 0.00293, monthly: 0.0293 },
+  };
+
+  const heavyUserMonthly = Object.values(HEAVY_USER_COSTS).reduce((sum, f) => sum + f.monthly, 0);
+  const heavyUser6Mo = heavyUserMonthly * 6;
+  const heavyUserAnnual = heavyUserMonthly * 12;
+
+  // Calculate true margin with all deductions
+  const calculateTrueMargin = (grossRevenue: number, aiCost: number) => {
+    let netRevenue = grossRevenue;
+    if (includeIAP) netRevenue -= grossRevenue * 0.15;
+    if (includePartner) netRevenue -= grossRevenue * 0.10;
+    if (includeFinderFee) netRevenue -= grossRevenue * 0.10;
+    return netRevenue - aiCost;
+  };
+
   const fetchData = async () => {
     setLoading(true);
     setError(null);
@@ -599,11 +635,146 @@ export default function AICostsPage() {
             </div>
           </div>
 
+          {/* Heavy User Cost Projection */}
+          <div className="bg-[#0F1123] rounded-2xl border border-white/5 p-6">
+            <h3 className="text-white font-semibold mb-2">Heavy User AI Cost Projection</h3>
+            <p className="text-white/50 text-sm mb-4">User who maxes out all AI features + 10 Swing/Pitch Lab credits monthly</p>
+
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              <div className="bg-[#1B1F39] rounded-xl p-4 text-center">
+                <div className="text-3xl font-bold text-cyan-400">{formatCost(heavyUserMonthly)}</div>
+                <div className="text-white/50 text-sm mt-1">Per Month</div>
+              </div>
+              <div className="bg-[#1B1F39] rounded-xl p-4 text-center">
+                <div className="text-3xl font-bold text-purple-400">{formatCost(heavyUser6Mo)}</div>
+                <div className="text-white/50 text-sm mt-1">Per 6 Months (License Term)</div>
+              </div>
+              <div className="bg-[#1B1F39] rounded-xl p-4 text-center">
+                <div className="text-3xl font-bold text-orange-400">{formatCost(heavyUserAnnual)}</div>
+                <div className="text-white/50 text-sm mt-1">Per Year</div>
+              </div>
+            </div>
+
+            <div className="bg-[#1B1F39] rounded-xl p-4">
+              <div className="text-white/70 text-sm font-medium mb-2">Usage Breakdown:</div>
+              <div className="grid grid-cols-5 gap-2 text-xs">
+                {Object.entries(HEAVY_USER_COSTS).map(([feature, data]) => (
+                  <div key={feature} className="text-center">
+                    <div className="text-white/50">{formatFeatureName(feature)}</div>
+                    <div className="text-white">{data.calls} calls</div>
+                    <div className="text-cyan-400">{formatCost(data.monthly)}/mo</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* True Margin Calculator */}
+          <div className="bg-[#0F1123] rounded-2xl border border-white/5 p-6">
+            <h3 className="text-white font-semibold mb-2">True Margin Calculator</h3>
+            <p className="text-white/50 text-sm mb-4">Calculate actual profit after all fees and costs</p>
+
+            <div className="grid grid-cols-2 gap-6">
+              {/* Controls */}
+              <div className="space-y-4">
+                <div>
+                  <label className="text-white/70 text-sm font-medium block mb-2">Pricing Tier</label>
+                  <select
+                    value={priceTier}
+                    onChange={(e) => setPriceTier(e.target.value as typeof priceTier)}
+                    className="w-full bg-[#1B1F39] text-white rounded-lg px-3 py-2 border border-white/10"
+                  >
+                    {Object.entries(PRICING_TIERS).map(([key, tier]) => (
+                      <option key={key} value={key}>{tier.label} - ${tier.price}/6mo</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-white/70 text-sm font-medium block">Fee Deductions</label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={includeIAP}
+                      onChange={(e) => setIncludeIAP(e.target.checked)}
+                      className="w-4 h-4 rounded bg-[#1B1F39] border-white/20"
+                    />
+                    <span className="text-white/80">IAP Fee (15% - Apple/Google)</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={includePartner}
+                      onChange={(e) => setIncludePartner(e.target.checked)}
+                      className="w-4 h-4 rounded bg-[#1B1F39] border-white/20"
+                    />
+                    <span className="text-white/80">Partner Program (10%)</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={includeFinderFee}
+                      onChange={(e) => setIncludeFinderFee(e.target.checked)}
+                      className="w-4 h-4 rounded bg-[#1B1F39] border-white/20"
+                    />
+                    <span className="text-white/80">Finder Fee (10%)</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Calculation Results */}
+              <div className="bg-[#1B1F39] rounded-xl p-4">
+                <div className="space-y-3">
+                  <div className="flex justify-between border-b border-white/10 pb-2">
+                    <span className="text-white/70">Gross Revenue (6mo)</span>
+                    <span className="text-white font-medium">${PRICING_TIERS[priceTier].price.toFixed(2)}</span>
+                  </div>
+                  {includeIAP && (
+                    <div className="flex justify-between text-red-400">
+                      <span>- IAP Fee (15%)</span>
+                      <span>-${(PRICING_TIERS[priceTier].price * 0.15).toFixed(2)}</span>
+                    </div>
+                  )}
+                  {includePartner && (
+                    <div className="flex justify-between text-red-400">
+                      <span>- Partner Commission (10%)</span>
+                      <span>-${(PRICING_TIERS[priceTier].price * 0.10).toFixed(2)}</span>
+                    </div>
+                  )}
+                  {includeFinderFee && (
+                    <div className="flex justify-between text-red-400">
+                      <span>- Finder Fee (10%)</span>
+                      <span>-${(PRICING_TIERS[priceTier].price * 0.10).toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-orange-400">
+                    <span>- Heavy User AI Cost (6mo)</span>
+                    <span>-${heavyUser6Mo.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between border-t border-white/10 pt-2 text-lg font-bold">
+                    <span className="text-white">Net Margin (6mo)</span>
+                    <span className={calculateTrueMargin(PRICING_TIERS[priceTier].price, heavyUser6Mo) >= 0 ? 'text-emerald-400' : 'text-red-400'}>
+                      ${calculateTrueMargin(PRICING_TIERS[priceTier].price, heavyUser6Mo).toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-white/50 text-sm">
+                    <span>Monthly equivalent</span>
+                    <span>${(calculateTrueMargin(PRICING_TIERS[priceTier].price, heavyUser6Mo) / 6).toFixed(2)}/mo</span>
+                  </div>
+                  <div className="flex justify-between text-white/50 text-sm">
+                    <span>Margin %</span>
+                    <span>{((calculateTrueMargin(PRICING_TIERS[priceTier].price, heavyUser6Mo) / PRICING_TIERS[priceTier].price) * 100).toFixed(1)}%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Margin Analysis by Tier */}
           <div className="bg-[#0F1123] rounded-2xl border border-white/5 overflow-hidden">
             <div className="p-4 border-b border-white/5">
-              <h3 className="text-white font-semibold">Profit Margin by Tier</h3>
-              <p className="text-white/50 text-sm">AI cost vs subscription revenue</p>
+              <h3 className="text-white font-semibold">Profit Margin by Tier (Actual Users)</h3>
+              <p className="text-white/50 text-sm">Based on actual AI usage - gross margin before fees</p>
             </div>
             <table className="w-full">
               <thead className="bg-[#1B1F39]">
