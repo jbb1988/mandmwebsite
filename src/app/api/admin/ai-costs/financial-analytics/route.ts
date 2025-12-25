@@ -158,15 +158,8 @@ const OPENROUTER_MODELS: Record<string, {
   },
 };
 
-// Alternative models to consider for cost optimization
-const ALTERNATIVE_MODELS = [
-  {
-    current: 'openai/gpt-4-turbo',
-    alternative: 'openai/gpt-4o-mini',
-    savingsPercent: 98,
-    tradeoff: 'GPT-4-turbo is only used as fallback. Consider improving primary model reliability to reduce fallback usage.',
-  },
-];
+// No misleading "switch" recommendations - architecture is already optimal
+// gpt-4o-mini is primary, gpt-4-turbo is fallback only
 
 export async function GET(request: NextRequest) {
   const adminPassword = request.headers.get('X-Admin-Password');
@@ -647,9 +640,7 @@ export async function GET(request: NextRequest) {
           // Then by cost descending within same role
           return b.cost - a.cost;
         }),
-      alternativeModels: ALTERNATIVE_MODELS.filter(alt =>
-        costBreakdown.byModel[alt.current]
-      ),
+      alternativeModels: [], // Architecture is already optimal - no switch recommendations
       pricingReference: OPENROUTER_MODELS,
       lastVerified: 'December 25, 2025',
       pricingSource: 'https://openrouter.ai/docs/models',
