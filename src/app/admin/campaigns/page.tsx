@@ -643,8 +643,8 @@ export default function CampaignsPage() {
                         <th className="px-4 py-3 font-medium">Campaign</th>
                         <th className="px-4 py-3 font-medium">Segment</th>
                         <th className="px-4 py-3 font-medium">Status</th>
+                        <th className="px-4 py-3 font-medium text-right">Contacts</th>
                         <th className="px-4 py-3 font-medium text-right">Sent</th>
-                        <th className="px-4 py-3 font-medium text-right">Open %</th>
                         <th className="px-4 py-3 font-medium text-right">Click %</th>
                         <th className="px-4 py-3 font-medium text-right">Replies</th>
                         <th className="px-4 py-3 font-medium"></th>
@@ -673,16 +673,10 @@ export default function CampaignsPage() {
                               <StatusBadge status={campaign.status} />
                             </td>
                             <td className="px-4 py-4 text-right text-white/70 text-sm">
-                              {campaign.emails_sent}
+                              {campaign.total_contacts}
                             </td>
-                            <td className="px-4 py-4 text-right">
-                              <span className={`text-sm font-medium ${
-                                campaign.open_rate >= 25 ? 'text-emerald-400' :
-                                campaign.open_rate >= 15 ? 'text-yellow-400' :
-                                campaign.open_rate > 0 ? 'text-orange-400' : 'text-white/40'
-                              }`}>
-                                {campaign.open_rate}%
-                              </span>
+                            <td className="px-4 py-4 text-right text-white/70 text-sm">
+                              {campaign.emails_sent}
                             </td>
                             <td className="px-4 py-4 text-right">
                               <span className={`text-sm font-medium ${
