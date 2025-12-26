@@ -103,7 +103,14 @@ export async function GET(request: Request) {
           continue;
         }
 
-        const logs = await response.json();
+        const data = await response.json();
+        const logs = data.result || data || [];
+
+        if (!Array.isArray(logs)) {
+          console.error(`Unexpected log format for ${service}:`, typeof logs);
+          continue;
+        }
+
         totalLogsScanned += logs.length;
 
         for (const log of logs) {
