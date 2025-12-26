@@ -133,7 +133,7 @@ function getDayOfYearCentral(): number {
 async function sendWelcomeEmail(
   email: string,
   unsubscribeToken: string,
-  supabase: ReturnType<typeof createClient>
+  supabase: ReturnType<typeof createClient<unknown>>
 ) {
   const resendApiKey = process.env.RESEND_API_KEY;
   if (!resendApiKey) {
