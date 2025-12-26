@@ -130,10 +130,11 @@ function getDayOfYearCentral(): number {
 }
 
 // Send welcome email
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function sendWelcomeEmail(
   email: string,
   unsubscribeToken: string,
-  supabase: ReturnType<typeof createClient<unknown>>
+  supabase: any
 ) {
   const resendApiKey = process.env.RESEND_API_KEY;
   if (!resendApiKey) {
