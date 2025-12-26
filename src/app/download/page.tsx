@@ -3,9 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { LiquidGlass } from '@/components/LiquidGlass';
 import { GradientTextReveal, FadeInWhenVisible } from '@/components/animations';
-import { Check, Brain, Dumbbell, Video, Target, Zap, CircleDot, Timer, Gauge, Flame, Wind, Mic, Users } from 'lucide-react';
+import { Check, Dumbbell, Target, Gauge, Flame, Wind, Mic } from 'lucide-react';
 
 const aiCoaches = [
   {
@@ -111,7 +110,7 @@ export default function DownloadPage() {
 
         {/* Download CTA */}
         <FadeInWhenVisible delay={0.2} direction="up" className="mb-12">
-          <LiquidGlass variant="blue" glow={true} className="p-8">
+          <div className="p-8 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-sm">
             <h2 className="text-2xl font-black mb-2 text-center">Download Now — It&apos;s Free</h2>
             <p className="text-gray-400 text-center mb-6">
               Join thousands of athletes who train smarter between practices and games.
@@ -156,7 +155,7 @@ export default function DownloadPage() {
             <p className="text-center text-sm text-gray-500">
               Available on iOS and Android. No credit card required.
             </p>
-          </LiquidGlass>
+          </div>
         </FadeInWhenVisible>
 
         {/* 8 AI Coaches */}
@@ -198,7 +197,7 @@ export default function DownloadPage() {
 
         {/* Free Features */}
         <FadeInWhenVisible delay={0.4} direction="up" className="mb-12">
-          <LiquidGlass variant="neutral" className="p-8">
+          <div className="p-8 rounded-2xl bg-white/[0.02] border border-white/10">
             <h3 className="text-2xl font-black text-center mb-2">
               <span className="text-green-400">FREE</span> Features Included
             </h3>
@@ -220,7 +219,7 @@ export default function DownloadPage() {
                 );
               })}
             </div>
-          </LiquidGlass>
+          </div>
         </FadeInWhenVisible>
 
         {/* Why Mind & Muscle */}
