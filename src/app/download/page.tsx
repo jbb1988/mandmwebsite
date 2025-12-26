@@ -23,7 +23,7 @@ const aiCoaches = [
   {
     name: 'Swing Lab',
     description: 'AI video analysis',
-    icon: '/assets/images/Swing Lab.png',
+    icon: '/assets/images/Swing Lab1.png',
     gradient: 'from-green-500/30 to-emerald-500/30',
   },
   {
@@ -35,7 +35,7 @@ const aiCoaches = [
   {
     name: 'Fuel AI',
     description: 'Personalized nutrition',
-    icon: '/assets/images/fuel_ai.png',
+    icon: '/assets/images/Fuel.png',
     gradient: 'from-yellow-500/30 to-amber-500/30',
   },
   {
