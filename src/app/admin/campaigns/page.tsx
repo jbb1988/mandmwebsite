@@ -168,6 +168,7 @@ interface ConversionFunnel {
   humanClicks: number;
   botClicks: number;
   calendlyBookings: number;
+  clickDataSource?: 'detailed' | 'resend';
 }
 
 interface ClickBreakdown {
@@ -234,6 +235,7 @@ interface ClicksData {
     bot: number;
     uniqueClickers: number;
     byLinkType: Record<string, number>;
+    dataSource?: 'detailed' | 'resend';
   };
   pagination: { page: number; limit: number; total: number; totalPages: number };
 }
@@ -548,17 +550,32 @@ export default function CampaignsPage() {
                     </div>
                   </div>
 
-                  {/* Insight / Recommendation */}
+                  {/* Data Source Info */}
+                  {conversionFunnel.clickDataSource === 'resend' && conversionFunnel.humanClicks > 0 && (
+                    <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
+                      <div className="flex items-start gap-3">
+                        <Lightbulb className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-blue-400 font-medium text-sm">Using Resend Click Data</p>
+                          <p className="text-white/60 text-sm mt-1">
+                            Click data is from Resend webhooks. This shows unique clickers but doesn't include
+                            URL-level tracking (which link was clicked) or bot detection. Enable detailed tracking
+                            for future emails to see CTA vs logo clicks and filter bots.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   {conversionFunnel.totalTrackedClicks === 0 && (
                     <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl">
                       <div className="flex items-start gap-3">
                         <Lightbulb className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
                         <div>
-                          <p className="text-blue-400 font-medium text-sm">Tracking Not Yet Active</p>
+                          <p className="text-blue-400 font-medium text-sm">No Click Data Yet</p>
                           <p className="text-white/60 text-sm mt-1">
-                            Click tracking will begin with the next emails sent. Existing click data from Resend
-                            doesn't include URL-level tracking. The new system tracks which specific link was clicked
-                            (CTA, logo, or unsubscribe) and detects bots.
+                            No click events have been recorded. Click data will appear after emails are sent
+                            and recipients interact with links.
                           </p>
                         </div>
                       </div>
@@ -1177,26 +1194,39 @@ export default function CampaignsPage() {
 
             {/* Click Stats */}
             {clicksData?.stats && (
-              <div className="p-4 border-b border-white/5 grid grid-cols-2 sm:grid-cols-5 gap-3">
-                <div className="text-center p-3 bg-white/5 rounded-lg">
-                  <p className="text-2xl font-bold text-white">{clicksData.stats.human}</p>
-                  <p className="text-xs text-white/50">Human Clicks</p>
-                </div>
-                <div className="text-center p-3 bg-white/5 rounded-lg">
-                  <p className="text-2xl font-bold text-purple-400">{clicksData.stats.uniqueClickers}</p>
-                  <p className="text-xs text-white/50">Unique Clickers</p>
-                </div>
-                <div className="text-center p-3 bg-white/5 rounded-lg">
-                  <p className="text-2xl font-bold text-blue-400">{clicksData.stats.byLinkType.cta_calendly || 0}</p>
-                  <p className="text-xs text-white/50">CTA Clicks</p>
-                </div>
-                <div className="text-center p-3 bg-white/5 rounded-lg">
-                  <p className="text-2xl font-bold text-orange-400">{clicksData.stats.byLinkType.unsubscribe || 0}</p>
-                  <p className="text-xs text-white/50">Unsubscribes</p>
-                </div>
-                <div className="text-center p-3 bg-white/5 rounded-lg">
-                  <p className="text-2xl font-bold text-red-400">{clicksData.stats.bot}</p>
-                  <p className="text-xs text-white/50">Bot (filtered)</p>
+              <div className="p-4 border-b border-white/5">
+                {clicksData.stats.dataSource === 'resend' && (
+                  <div className="mb-3 px-3 py-2 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                    <p className="text-xs text-blue-400">
+                      Data from Resend webhooks. Link types unavailable for historical emails.
+                    </p>
+                  </div>
+                )}
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                  <div className="text-center p-3 bg-white/5 rounded-lg">
+                    <p className="text-2xl font-bold text-white">{clicksData.stats.total}</p>
+                    <p className="text-xs text-white/50">Total Clicks</p>
+                  </div>
+                  <div className="text-center p-3 bg-white/5 rounded-lg">
+                    <p className="text-2xl font-bold text-purple-400">{clicksData.stats.uniqueClickers}</p>
+                    <p className="text-xs text-white/50">Unique Clickers</p>
+                  </div>
+                  {clicksData.stats.dataSource !== 'resend' && (
+                    <>
+                      <div className="text-center p-3 bg-white/5 rounded-lg">
+                        <p className="text-2xl font-bold text-blue-400">{clicksData.stats.byLinkType.cta_calendly || 0}</p>
+                        <p className="text-xs text-white/50">CTA Clicks</p>
+                      </div>
+                      <div className="text-center p-3 bg-white/5 rounded-lg">
+                        <p className="text-2xl font-bold text-orange-400">{clicksData.stats.byLinkType.unsubscribe || 0}</p>
+                        <p className="text-xs text-white/50">Unsubscribes</p>
+                      </div>
+                      <div className="text-center p-3 bg-white/5 rounded-lg">
+                        <p className="text-2xl font-bold text-red-400">{clicksData.stats.bot}</p>
+                        <p className="text-xs text-white/50">Bot (filtered)</p>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             )}
@@ -1239,12 +1269,14 @@ export default function CampaignsPage() {
                             click.link_type === 'cta_calendly' ? 'bg-blue-500/20 text-blue-400' :
                             click.link_type === 'unsubscribe' ? 'bg-orange-500/20 text-orange-400' :
                             click.link_type === 'logo' ? 'bg-purple-500/20 text-purple-400' :
+                            click.link_type === 'unknown' ? 'bg-gray-500/20 text-gray-400' :
                             'bg-white/10 text-white/50'
                           }`}>
                             {click.link_type === 'cta_calendly' ? 'Book a Call CTA' :
                              click.link_type === 'cta_website' ? 'Website CTA' :
                              click.link_type === 'unsubscribe' ? 'Unsubscribe' :
                              click.link_type === 'logo' ? 'Logo' :
+                             click.link_type === 'unknown' ? 'Email Link' :
                              click.link_type}
                           </span>
                         </td>

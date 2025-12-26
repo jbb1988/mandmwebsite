@@ -207,14 +207,38 @@ export async function GET(request: NextRequest) {
     // Email-to-user cross-reference: check if any campaign contacts are app users
     const { data: conversionData } = await supabase.rpc('get_campaign_user_conversions');
 
-    // Get total tracked clicks vs bot clicks
-    const { data: totalClickData } = await supabase
+    // Get total tracked clicks vs bot clicks from new tracking system
+    const { data: detailedClickData } = await supabase
       .from('email_link_clicks')
       .select('is_likely_bot');
 
-    const totalTrackedClicks = totalClickData?.length || 0;
-    const totalBotClicks = totalClickData?.filter((c: any) => c.is_likely_bot).length || 0;
-    const totalHumanClicks = totalTrackedClicks - totalBotClicks;
+    // Also get clicks from Resend webhook data (marketing_outreach_activities)
+    const { data: resendClickData } = await supabase
+      .from('marketing_outreach_activities')
+      .select('contact_id')
+      .eq('activity_type', 'email_clicked');
+
+    // Use detailed tracking if available, otherwise use Resend data
+    const hasDetailedTracking = (detailedClickData?.length || 0) > 0;
+
+    let totalTrackedClicks: number;
+    let totalBotClicks: number;
+    let totalHumanClicks: number;
+    let clickDataSource: string;
+
+    if (hasDetailedTracking) {
+      // Use detailed tracking with bot detection
+      totalTrackedClicks = detailedClickData?.length || 0;
+      totalBotClicks = detailedClickData?.filter((c: any) => c.is_likely_bot).length || 0;
+      totalHumanClicks = totalTrackedClicks - totalBotClicks;
+      clickDataSource = 'detailed';
+    } else {
+      // Fall back to Resend webhook data (no bot detection)
+      totalTrackedClicks = resendClickData?.length || 0;
+      totalBotClicks = 0; // Resend doesn't distinguish bots
+      totalHumanClicks = new Set(resendClickData?.map((c: any) => c.contact_id)).size; // Unique clickers
+      clickDataSource = 'resend';
+    }
 
     // Get total Calendly bookings
     const { count: totalCalendlyBookings } = await supabase
@@ -241,6 +265,7 @@ export async function GET(request: NextRequest) {
         humanClicks: totalHumanClicks,
         botClicks: totalBotClicks,
         calendlyBookings: totalCalendlyBookings || 0,
+        clickDataSource, // 'detailed' = new tracking, 'resend' = webhook data
       },
       upcomingSends: formattedUpcoming,
     });
