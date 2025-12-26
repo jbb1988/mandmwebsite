@@ -23,146 +23,155 @@ export async function GET(
 
   const { id: campaignId } = await params;
   const { searchParams } = new URL(request.url);
-  const includeBots = searchParams.get('includeBots') === 'true';
-  const linkType = searchParams.get('linkType');
   const page = parseInt(searchParams.get('page') || '1');
   const limit = parseInt(searchParams.get('limit') || '100');
   const offset = (page - 1) * limit;
 
   try {
-    // First check for detailed clicks in email_link_clicks (new tracking system with bot detection)
-    let detailedQuery = supabase
+    // First check for detailed clicks in email_link_clicks (new tracking with bot detection)
+    const { data: detailedClicks, count: detailedCount } = await supabase
       .from('email_link_clicks')
-      .select(`
-        id,
-        link_type,
-        destination_url,
-        clicked_at,
-        is_likely_bot,
-        user_agent,
-        contact:marketing_contacts(
-          id,
-          email,
-          first_name,
-          last_name,
-          organization:marketing_organizations(
-            name
-          )
-        )
-      `, { count: 'exact' })
-      .eq('campaign_id', campaignId)
-      .order('clicked_at', { ascending: false })
-      .range(offset, offset + limit - 1);
+      .select('id', { count: 'exact', head: true })
+      .eq('campaign_id', campaignId);
 
-    // Filter out bots by default
-    if (!includeBots) {
-      detailedQuery = detailedQuery.eq('is_likely_bot', false);
-    }
-
-    // Filter by link type if provided
-    if (linkType && linkType !== 'all') {
-      detailedQuery = detailedQuery.eq('link_type', linkType);
-    }
-
-    const { data: detailedClicks, error: detailedError, count: detailedCount } = await detailedQuery;
-
-    // Check if we have detailed tracking data
-    const hasDetailedClicks = (detailedClicks?.length || 0) > 0;
-
-    let clicks: any[] = [];
-    let count = 0;
-    let stats: any;
+    const hasDetailedClicks = (detailedCount || 0) > 0;
 
     if (hasDetailedClicks) {
-      // Use detailed tracking data
-      clicks = detailedClicks || [];
-      count = detailedCount || 0;
-
-      // Get stats from detailed clicks
-      const { data: allDetailedClicks } = await supabase
+      // Use detailed tracking with bot detection
+      const { data: clicks, error, count } = await supabase
         .from('email_link_clicks')
-        .select('link_type, is_likely_bot, contact_id')
-        .eq('campaign_id', campaignId);
-
-      stats = {
-        total: allDetailedClicks?.length || 0,
-        human: allDetailedClicks?.filter((c: any) => !c.is_likely_bot).length || 0,
-        bot: allDetailedClicks?.filter((c: any) => c.is_likely_bot).length || 0,
-        uniqueClickers: new Set(allDetailedClicks?.filter((c: any) => !c.is_likely_bot).map((c: any) => c.contact_id)).size,
-        byLinkType: {
-          cta_calendly: allDetailedClicks?.filter((c: any) => !c.is_likely_bot && c.link_type === 'cta_calendly').length || 0,
-          cta_website: allDetailedClicks?.filter((c: any) => !c.is_likely_bot && c.link_type === 'cta_website').length || 0,
-          logo: allDetailedClicks?.filter((c: any) => !c.is_likely_bot && c.link_type === 'logo').length || 0,
-          unsubscribe: allDetailedClicks?.filter((c: any) => !c.is_likely_bot && c.link_type === 'unsubscribe').length || 0,
-          other: allDetailedClicks?.filter((c: any) => !c.is_likely_bot && !['cta_calendly', 'cta_website', 'logo', 'unsubscribe'].includes(c.link_type)).length || 0,
-        },
-        dataSource: 'detailed' as const,
-      };
-    } else {
-      // Fall back to campaign_contacts with clicked_at (from Resend webhooks)
-      const { data: clickedContacts, error: clickedError, count: clickedCount } = await supabase
-        .from('marketing_campaign_contacts')
         .select(`
           id,
+          contact_id,
+          link_type,
+          destination_url,
           clicked_at,
-          contact:marketing_contacts(
-            id,
-            email,
-            first_name,
-            last_name,
-            organization:marketing_organizations(
-              name
-            )
-          )
+          is_likely_bot
         `, { count: 'exact' })
         .eq('campaign_id', campaignId)
-        .not('clicked_at', 'is', null)
+        .eq('is_likely_bot', false)
         .order('clicked_at', { ascending: false })
         .range(offset, offset + limit - 1);
 
-      if (clickedError) throw clickedError;
+      if (error) throw error;
 
-      clicks = clickedContacts || [];
-      count = clickedCount || 0;
+      // Get contact details separately
+      const contactIds = [...new Set(clicks?.map(c => c.contact_id).filter(Boolean))];
+      const { data: contacts } = await supabase
+        .from('marketing_contacts')
+        .select('id, email, first_name, last_name, organization_id')
+        .in('id', contactIds.length > 0 ? contactIds : ['00000000-0000-0000-0000-000000000000']);
 
-      stats = {
-        total: clickedCount || 0,
-        human: clickedCount || 0, // Resend doesn't distinguish bots
-        bot: 0,
-        uniqueClickers: clickedCount || 0, // Each row is a unique contact
-        byLinkType: {}, // Resend doesn't provide link type
-        dataSource: 'resend' as const,
-      };
-    }
+      // Get organization names
+      const orgIds = [...new Set(contacts?.map(c => c.organization_id).filter(Boolean))];
+      const { data: orgs } = await supabase
+        .from('marketing_organizations')
+        .select('id, name')
+        .in('id', orgIds.length > 0 ? orgIds : ['00000000-0000-0000-0000-000000000000']);
 
-    if (detailedError) throw detailedError;
+      const contactMap = new Map(contacts?.map(c => [c.id, c]) || []);
+      const orgMap = new Map(orgs?.map(o => [o.id, o.name]) || []);
 
-    // Format response based on data source
-    const formattedClicks = hasDetailedClicks
-      ? clicks.map((click: any) => ({
+      const formattedClicks = clicks?.map(click => {
+        const contact = contactMap.get(click.contact_id);
+        return {
           id: click.id,
-          contact_id: click.contact?.id,
-          email: click.contact?.email,
-          first_name: click.contact?.first_name,
-          last_name: click.contact?.last_name,
-          organization_name: click.contact?.organization?.name,
+          contact_id: click.contact_id,
+          email: contact?.email || 'Unknown',
+          first_name: contact?.first_name || '',
+          last_name: contact?.last_name || '',
+          organization_name: contact?.organization_id ? orgMap.get(contact.organization_id) : null,
           link_type: click.link_type,
           destination_url: click.destination_url,
           clicked_at: click.clicked_at,
           is_likely_bot: click.is_likely_bot,
-        }))
-      : clicks.map((click: any) => ({
-          id: click.id,
-          contact_id: click.contact?.id,
-          email: click.contact?.email,
-          first_name: click.contact?.first_name,
-          last_name: click.contact?.last_name,
-          organization_name: click.contact?.organization?.name,
-          link_type: 'unknown', // Resend doesn't track which link
-          destination_url: null,
-          clicked_at: click.clicked_at,
-          is_likely_bot: false,
-        }));
+        };
+      }) || [];
+
+      // Get stats
+      const { data: allClicks } = await supabase
+        .from('email_link_clicks')
+        .select('link_type, is_likely_bot, contact_id')
+        .eq('campaign_id', campaignId);
+
+      const stats = {
+        total: allClicks?.length || 0,
+        human: allClicks?.filter(c => !c.is_likely_bot).length || 0,
+        bot: allClicks?.filter(c => c.is_likely_bot).length || 0,
+        uniqueClickers: new Set(allClicks?.filter(c => !c.is_likely_bot).map(c => c.contact_id)).size,
+        byLinkType: {
+          cta_calendly: allClicks?.filter(c => !c.is_likely_bot && c.link_type === 'cta_calendly').length || 0,
+          logo: allClicks?.filter(c => !c.is_likely_bot && c.link_type === 'logo').length || 0,
+          unsubscribe: allClicks?.filter(c => !c.is_likely_bot && c.link_type === 'unsubscribe').length || 0,
+        },
+        dataSource: 'detailed' as const,
+      };
+
+      return NextResponse.json({
+        success: true,
+        clicks: formattedClicks,
+        stats,
+        pagination: {
+          page,
+          limit,
+          total: count || 0,
+          totalPages: Math.ceil((count || 0) / limit),
+        },
+      });
+    }
+
+    // Fall back to campaign_contacts with clicked_at (from Resend webhooks)
+    const { data: clickedContacts, error, count } = await supabase
+      .from('marketing_campaign_contacts')
+      .select('id, contact_id, clicked_at', { count: 'exact' })
+      .eq('campaign_id', campaignId)
+      .not('clicked_at', 'is', null)
+      .order('clicked_at', { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) throw error;
+
+    // Get contact details separately
+    const contactIds = [...new Set(clickedContacts?.map(c => c.contact_id).filter(Boolean))];
+    const { data: contacts } = await supabase
+      .from('marketing_contacts')
+      .select('id, email, first_name, last_name, organization_id')
+      .in('id', contactIds.length > 0 ? contactIds : ['00000000-0000-0000-0000-000000000000']);
+
+    // Get organization names
+    const orgIds = [...new Set(contacts?.map(c => c.organization_id).filter(Boolean))];
+    const { data: orgs } = await supabase
+      .from('marketing_organizations')
+      .select('id, name')
+      .in('id', orgIds.length > 0 ? orgIds : ['00000000-0000-0000-0000-000000000000']);
+
+    const contactMap = new Map(contacts?.map(c => [c.id, c]) || []);
+    const orgMap = new Map(orgs?.map(o => [o.id, o.name]) || []);
+
+    const formattedClicks = clickedContacts?.map(click => {
+      const contact = contactMap.get(click.contact_id);
+      return {
+        id: click.id,
+        contact_id: click.contact_id,
+        email: contact?.email || 'Unknown',
+        first_name: contact?.first_name || '',
+        last_name: contact?.last_name || '',
+        organization_name: contact?.organization_id ? orgMap.get(contact.organization_id) : null,
+        link_type: 'unknown',
+        destination_url: null,
+        clicked_at: click.clicked_at,
+        is_likely_bot: false,
+      };
+    }) || [];
+
+    const stats = {
+      total: count || 0,
+      human: count || 0,
+      bot: 0,
+      uniqueClickers: count || 0,
+      byLinkType: {},
+      dataSource: 'resend' as const,
+    };
 
     return NextResponse.json({
       success: true,
