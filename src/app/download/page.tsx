@@ -29,7 +29,7 @@ const aiCoaches = [
   {
     name: 'Game Lab',
     description: '186 real game scenarios',
-    icon: '/assets/images/game-lab.png',
+    icon: '/assets/images/game_lab_icon copy.png',
     gradient: 'from-purple-500/30 to-violet-500/30',
   },
   {
