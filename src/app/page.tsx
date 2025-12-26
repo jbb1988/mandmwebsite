@@ -21,6 +21,25 @@ export default function HomePage() {
   const [isDailyHitPlaying, setIsDailyHitPlaying] = useState(false);
   const dailyHitVideoRef = useRef<HTMLVideoElement>(null);
 
+  // Daily Hit dynamic content
+  interface DailyHitData {
+    id: string;
+    title: string;
+    headline: string;
+    body: string;
+    challenge: string;
+    videoUrl: string;
+    thumbnailUrl: string;
+    tags: string[];
+    dayOfYear: number;
+  }
+  const [dailyHitData, setDailyHitData] = useState<DailyHitData | null>(null);
+
+  // Email subscription state
+  const [dailyHitEmail, setDailyHitEmail] = useState('');
+  const [emailSubscribeStatus, setEmailSubscribeStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [emailSubscribeMessage, setEmailSubscribeMessage] = useState('');
+
   // Handle auth redirects from Supabase
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -76,6 +95,50 @@ export default function HomePage() {
       };
     }
   }, [activeFeature]);
+
+  // Fetch today's Daily Hit
+  useEffect(() => {
+    async function fetchDailyHit() {
+      try {
+        const response = await fetch('/api/daily-hit');
+        const data = await response.json();
+        if (data.dailyHit) {
+          setDailyHitData(data.dailyHit);
+        }
+      } catch (error) {
+        console.error('Error fetching daily hit:', error);
+      }
+    }
+    fetchDailyHit();
+  }, []);
+
+  // Handle Daily Hit email subscription
+  const handleDailyHitEmailSubscribe = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!dailyHitEmail) return;
+
+    setEmailSubscribeStatus('loading');
+    try {
+      const response = await fetch('/api/daily-hit/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: dailyHitEmail }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
+        setEmailSubscribeStatus('success');
+        setEmailSubscribeMessage(data.message);
+        setDailyHitEmail('');
+      } else {
+        setEmailSubscribeStatus('error');
+        setEmailSubscribeMessage(data.error || 'Something went wrong');
+      }
+    } catch {
+      setEmailSubscribeStatus('error');
+      setEmailSubscribeMessage('Failed to subscribe. Please try again.');
+    }
+  };
 
   // Hide browser chrome (URL bar and navigation) on tap
   const handleModalTap = () => {
@@ -1360,7 +1423,8 @@ export default function HomePage() {
                 {/* Video */}
                 <video
                   ref={dailyHitVideoRef}
-                  src="/assets/videos/daily_hit_example.mp4"
+                  src={dailyHitData?.videoUrl || "/assets/videos/daily_hit_example.mp4"}
+                  poster={dailyHitData?.thumbnailUrl}
                   className="w-full h-full object-cover"
                   playsInline
                   onEnded={() => setIsDailyHitPlaying(false)}
@@ -1382,10 +1446,52 @@ export default function HomePage() {
                 </div>
 
                 {/* Corner Badge */}
-                <div className="absolute top-4 left-4 px-4 py-2 bg-black/60 backdrop-blur-sm rounded-lg border border-solar-surge-orange/40">
-                  <span className="text-sm font-bold text-solar-surge-orange">🔥 Daily Hit Example: Unbreakable Minds</span>
+                <div className="absolute top-4 left-4 right-4 px-4 py-2 bg-black/60 backdrop-blur-sm rounded-lg border border-solar-surge-orange/40">
+                  <span className="text-sm font-bold text-solar-surge-orange">
+                    🔥 {dailyHitData ? `Today: ${dailyHitData.title}` : 'Daily Hit Example: Unbreakable Minds'}
+                  </span>
                 </div>
               </div>
+            </div>
+          </FadeInWhenVisible>
+
+          {/* Email Signup - Get Daily Hit in Inbox */}
+          <FadeInWhenVisible delay={0.35} direction="up" className="mb-12">
+            <div className="max-w-lg mx-auto">
+              <LiquidGlass variant="blue" glow={true} className="p-6 text-center">
+                <h3 className="text-xl font-black text-white mb-2">Get the Daily Hit in Your Inbox</h3>
+                <p className="text-gray-300 text-sm mb-4">
+                  Start each day with 2 minutes of mental training. Delivered at 8 AM Central.
+                </p>
+
+                {emailSubscribeStatus === 'success' ? (
+                  <div className="p-3 bg-green-500/20 border border-green-500/40 rounded-xl">
+                    <p className="text-green-400 font-medium text-sm">{emailSubscribeMessage}</p>
+                  </div>
+                ) : (
+                  <form onSubmit={handleDailyHitEmailSubscribe} className="flex flex-col sm:flex-row gap-3">
+                    <input
+                      type="email"
+                      value={dailyHitEmail}
+                      onChange={(e) => setDailyHitEmail(e.target.value)}
+                      placeholder="Enter your email"
+                      className="flex-1 px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:border-solar-surge-orange/50 transition-colors text-sm"
+                      required
+                    />
+                    <LiquidButton
+                      variant="orange"
+                      className="px-6 py-3 font-bold whitespace-nowrap text-sm"
+                      disabled={emailSubscribeStatus === 'loading'}
+                    >
+                      {emailSubscribeStatus === 'loading' ? 'Subscribing...' : 'Subscribe Free'}
+                    </LiquidButton>
+                  </form>
+                )}
+
+                {emailSubscribeStatus === 'error' && (
+                  <p className="mt-3 text-red-400 text-xs">{emailSubscribeMessage}</p>
+                )}
+              </LiquidGlass>
             </div>
           </FadeInWhenVisible>
 
