@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
+import { Resend } from 'resend';
 
 const subscribeSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
