@@ -195,7 +195,7 @@ export default function DailyHitPage() {
 
                   {/* Progress Bar */}
                   <div
-                    className="absolute bottom-0 left-0 right-0 h-1 bg-white/20 cursor-pointer"
+                    className="absolute bottom-2 left-4 right-4 h-1.5 bg-white/30 rounded-full cursor-pointer"
                     onClick={(e) => {
                       e.stopPropagation();
                       if (videoRef.current) {

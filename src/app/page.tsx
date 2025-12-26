@@ -1467,7 +1467,7 @@ export default function HomePage() {
 
                 {/* Progress Bar */}
                 <div
-                  className="absolute bottom-0 left-0 right-0 h-1 bg-white/20 cursor-pointer"
+                  className="absolute bottom-2 left-4 right-4 h-1.5 bg-white/30 rounded-full cursor-pointer"
                   onClick={(e) => {
                     e.stopPropagation();
                     if (dailyHitVideoRef.current) {
@@ -1479,7 +1479,7 @@ export default function HomePage() {
                   }}
                 >
                   <div
-                    className="h-full bg-gradient-to-r from-solar-surge-orange to-solar-surge-orange/80 transition-all duration-100"
+                    className="h-full bg-gradient-to-r from-solar-surge-orange to-solar-surge-orange/80 rounded-full transition-all duration-100"
                     style={{ width: `${dailyHitProgress}%` }}
                   />
                 </div>
