@@ -1464,7 +1464,7 @@ export default function HomePage() {
               <LiquidGlass variant="blue" glow={true} className="p-6 text-center">
                 <h3 className="text-xl font-black text-white mb-2">Get the Daily Hit in Your Inbox</h3>
                 <p className="text-gray-300 text-sm mb-4">
-                  Start each day with 2 minutes of mental training. Delivered at 8 AM Central.
+                  Start each day with 2 minutes of mental training. Delivered to your inbox every morning.
                 </p>
 
                 {emailSubscribeStatus === 'success' ? (

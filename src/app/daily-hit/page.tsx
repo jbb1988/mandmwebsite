@@ -202,7 +202,7 @@ export default function DailyHitPage() {
             <LiquidGlass variant="blue" glow={true} className="p-8 max-w-lg mx-auto text-center">
               <h3 className="text-2xl font-black text-white mb-2">Get the Daily Hit in Your Inbox</h3>
               <p className="text-gray-300 mb-6">
-                Start each day with 2 minutes of mental training. Delivered at 8 AM Central.
+                Start each day with 2 minutes of mental training. Delivered to your inbox every morning.
               </p>
 
               {subscribeStatus === 'success' ? (

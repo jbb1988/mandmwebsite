@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
         // Already subscribed
         return NextResponse.json({
           success: true,
-          message: "You're already subscribed! Check your inbox tomorrow at 8 AM.",
+          message: "You're already subscribed! Check your inbox tomorrow morning.",
           alreadySubscribed: true,
         });
       } else {
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "You're in! Your first Daily Hit arrives tomorrow at 8 AM Central.",
+      message: "You're in! Your first Daily Hit arrives tomorrow morning.",
     });
   } catch (error) {
     console.error('Unexpected error in subscribe API:', error);
