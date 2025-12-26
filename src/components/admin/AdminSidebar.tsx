@@ -27,6 +27,7 @@ import {
   Mail,
   Cpu,
   AlertTriangle,
+  FileText,
 } from 'lucide-react';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import CommandSearch from './CommandSearch';
@@ -73,6 +74,7 @@ const NAV_SECTIONS: NavSection[] = [
       { name: 'Announcements', href: '/admin/announcements', icon: Megaphone },
       { name: 'Outreach Campaigns', href: '/admin/campaigns', icon: Mail },
       { name: 'Lifecycle Campaigns', href: '/admin/lifecycle-campaigns', icon: RefreshCw },
+      { name: 'Email Templates', href: '/admin/templates', icon: FileText },
       { name: 'Promo Codes', href: '/admin/promo-codes', icon: Tag },
       { name: 'Banner Generator', href: '/admin/banner-generator', icon: Image },
     ],
@@ -89,6 +91,7 @@ const NAV_SECTIONS: NavSection[] = [
   {
     title: 'System',
     items: [
+      { name: 'System Monitor', href: '/admin/system', icon: Settings },
       { name: 'Log Audit', href: '/admin/log-audit', icon: AlertTriangle },
     ],
   },
