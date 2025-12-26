@@ -25,6 +25,7 @@ export default function DailyHitPage() {
   const [dailyHit, setDailyHit] = useState<DailyHit | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [email, setEmail] = useState('');
   const [subscribeStatus, setSubscribeStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -155,7 +156,16 @@ export default function DailyHitPage() {
                     poster={dailyHit?.thumbnailUrl}
                     className="w-full h-full object-cover"
                     playsInline
-                    onEnded={() => setIsPlaying(false)}
+                    onEnded={() => {
+                      setIsPlaying(false);
+                      setProgress(0);
+                    }}
+                    onTimeUpdate={(e) => {
+                      const video = e.currentTarget;
+                      if (video.duration) {
+                        setProgress((video.currentTime / video.duration) * 100);
+                      }
+                    }}
                   />
 
                   {/* Play/Pause Overlay */}
@@ -181,6 +191,25 @@ export default function DailyHitPage() {
                     <span className="text-sm font-bold text-solar-surge-orange">
                       🔥 {dailyHit?.title || 'Daily Mental Reps'}
                     </span>
+                  </div>
+
+                  {/* Progress Bar */}
+                  <div
+                    className="absolute bottom-0 left-0 right-0 h-1 bg-white/20 cursor-pointer"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (videoRef.current) {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        const clickX = e.clientX - rect.left;
+                        const percentage = clickX / rect.width;
+                        videoRef.current.currentTime = percentage * videoRef.current.duration;
+                      }
+                    }}
+                  >
+                    <div
+                      className="h-full bg-gradient-to-r from-solar-surge-orange to-solar-surge-orange/80 transition-all duration-100"
+                      style={{ width: `${progress}%` }}
+                    />
                   </div>
                 </div>
               )}
@@ -220,6 +249,7 @@ export default function DailyHitPage() {
                     required
                   />
                   <LiquidButton
+                    type="submit"
                     variant="orange"
                     className="px-6 py-3 font-bold whitespace-nowrap"
                     disabled={subscribeStatus === 'loading'}

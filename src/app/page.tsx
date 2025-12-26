@@ -19,6 +19,7 @@ export default function HomePage() {
 
   // Daily Hit video player state
   const [isDailyHitPlaying, setIsDailyHitPlaying] = useState(false);
+  const [dailyHitProgress, setDailyHitProgress] = useState(0);
   const dailyHitVideoRef = useRef<HTMLVideoElement>(null);
 
   // Daily Hit dynamic content
@@ -1427,7 +1428,16 @@ export default function HomePage() {
                   poster={dailyHitData?.thumbnailUrl}
                   className="w-full h-full object-cover"
                   playsInline
-                  onEnded={() => setIsDailyHitPlaying(false)}
+                  onEnded={() => {
+                    setIsDailyHitPlaying(false);
+                    setDailyHitProgress(0);
+                  }}
+                  onTimeUpdate={(e) => {
+                    const video = e.currentTarget;
+                    if (video.duration) {
+                      setDailyHitProgress((video.currentTime / video.duration) * 100);
+                    }
+                  }}
                 />
 
                 {/* Play/Pause Overlay */}
@@ -1453,6 +1463,25 @@ export default function HomePage() {
                   <span className="text-sm font-bold text-solar-surge-orange">
                     🔥 {dailyHitData ? dailyHitData.title : 'Daily Hit Example: Unbreakable Minds'}
                   </span>
+                </div>
+
+                {/* Progress Bar */}
+                <div
+                  className="absolute bottom-0 left-0 right-0 h-1 bg-white/20 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (dailyHitVideoRef.current) {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      const clickX = e.clientX - rect.left;
+                      const percentage = clickX / rect.width;
+                      dailyHitVideoRef.current.currentTime = percentage * dailyHitVideoRef.current.duration;
+                    }
+                  }}
+                >
+                  <div
+                    className="h-full bg-gradient-to-r from-solar-surge-orange to-solar-surge-orange/80 transition-all duration-100"
+                    style={{ width: `${dailyHitProgress}%` }}
+                  />
                 </div>
               </div>
             </div>
@@ -1482,6 +1511,7 @@ export default function HomePage() {
                       required
                     />
                     <LiquidButton
+                      type="submit"
                       variant="orange"
                       className="px-6 py-3 font-bold whitespace-nowrap text-sm"
                       disabled={emailSubscribeStatus === 'loading'}
