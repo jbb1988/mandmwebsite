@@ -143,11 +143,22 @@ function OnboardingVideosContent() {
 
       {/* Video Grid */}
       <div className="grid gap-6">
-        <div className="rounded-xl bg-white/5 border border-white/10 p-8 text-center">
-          <Video className="w-12 h-12 text-text-secondary mx-auto mb-4 opacity-50" />
-          <p className="text-text-secondary">
-            Tutorial videos coming soon!
-          </p>
+        {/* Create Team and Events Tutorial */}
+        <div className="rounded-xl bg-white/5 border border-white/10 overflow-hidden">
+          <video
+            controls
+            className="w-full aspect-video"
+            poster="/assets/images/logo.png"
+          >
+            <source src="/assets/videos/create_team_and_events.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          <div className="p-4">
+            <h3 className="text-xl font-bold mb-2">Create a Free Team & Schedule Events</h3>
+            <p className="text-text-secondary text-sm">
+              Learn how to create your free team and set up events to get your players training together.
+            </p>
+          </div>
         </div>
       </div>
     </div>
