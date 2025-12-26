@@ -174,11 +174,14 @@ export default function DailyHitPage() {
                   </div>
 
                   {/* Title Badge */}
-                  {dailyHit?.title && (
-                    <div className="absolute top-4 left-4 right-4 px-4 py-2 bg-black/60 backdrop-blur-sm rounded-lg border border-solar-surge-orange/40">
-                      <span className="text-sm font-bold text-solar-surge-orange">🔥 {dailyHit.title}</span>
+                  <div className="absolute top-4 left-4 right-4 px-4 py-2 bg-black/60 backdrop-blur-sm rounded-lg border border-solar-surge-orange/40">
+                    <div className="text-xs text-gray-400 mb-1">
+                      {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
                     </div>
-                  )}
+                    <span className="text-sm font-bold text-solar-surge-orange">
+                      🔥 {dailyHit?.title || 'Daily Mental Reps'}
+                    </span>
+                  </div>
                 </div>
               )}
             </div>

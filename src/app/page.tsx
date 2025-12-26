@@ -1447,8 +1447,11 @@ export default function HomePage() {
 
                 {/* Corner Badge */}
                 <div className="absolute top-4 left-4 right-4 px-4 py-2 bg-black/60 backdrop-blur-sm rounded-lg border border-solar-surge-orange/40">
+                  <div className="text-xs text-gray-400 mb-1">
+                    {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                  </div>
                   <span className="text-sm font-bold text-solar-surge-orange">
-                    🔥 {dailyHitData ? `Today: ${dailyHitData.title}` : 'Daily Hit Example: Unbreakable Minds'}
+                    🔥 {dailyHitData ? dailyHitData.title : 'Daily Hit Example: Unbreakable Minds'}
                   </span>
                 </div>
               </div>
