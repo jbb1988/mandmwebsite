@@ -766,7 +766,7 @@ export default function DailyHitBuilderPage() {
             <div>
               <label className="block text-sm text-white/60 mb-2">From Topic Library</label>
               <select
-                value={selectedTopic?.id || ''}
+                value=""
                 onChange={(e) => {
                   const topic = filteredTopics.find(t => t.id === e.target.value);
                   setSelectedTopic(topic || null);
