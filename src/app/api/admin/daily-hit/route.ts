@@ -35,6 +35,24 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ calendar: data, stats })
     }
 
+    if (view === 'content') {
+      // Get published content with audio URL for a specific day
+      if (!dayOfYear) {
+        return NextResponse.json({ error: 'dayOfYear required for content view' }, { status: 400 })
+      }
+
+      const { data, error } = await supabase
+        .from('motivation_content')
+        .select('id, title, push_text, headline, body, challenge, audio_url, thumbnail_url, day_of_year, status, tags, key_takeaway')
+        .eq('day_of_year', parseInt(dayOfYear))
+        .eq('status', 'active')
+        .single()
+
+      if (error && error.code !== 'PGRST116') throw error
+
+      return NextResponse.json({ content: data })
+    }
+
     if (view === 'gaps') {
       // Get only empty days
       const { data, error } = await supabase

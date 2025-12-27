@@ -21,8 +21,7 @@ export async function GET(request: NextRequest) {
     const { data: published } = await supabase
       .from('motivation_content')
       .select('day_of_year')
-      .eq('content_type', 'daily_hit')
-      .eq('status', 'published')
+      .eq('status', 'active')
       .gte('day_of_year', todayDOY)
       .lte('day_of_year', todayDOY + lookahead)
 

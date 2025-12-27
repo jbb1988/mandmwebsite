@@ -267,6 +267,22 @@ export default function DailyHitBuilderPage() {
   // Enhancement #6: Image Prompt State
   const [imagePromptResult, setImagePromptResult] = useState<ImagePromptResult | null>(null);
   const [isGeneratingImagePrompt, setIsGeneratingImagePrompt] = useState(false);
+
+  // Audio Preview State for Published Content
+  const [selectedContent, setSelectedContent] = useState<{
+    id: string;
+    title: string;
+    push_text: string;
+    headline: string;
+    body: string;
+    challenge: string;
+    audio_url: string | null;
+    thumbnail_url: string | null;
+    day_of_year: number;
+    tags: string[];
+    key_takeaway: string;
+  } | null>(null);
+  const [isLoadingContent, setIsLoadingContent] = useState(false);
   const [selectedImageStyle, setSelectedImageStyle] = useState('cinematic_silhouette');
   const [customImageElements, setCustomImageElements] = useState('');
   const [copiedPrompt, setCopiedPrompt] = useState<string | null>(null);
@@ -433,6 +449,22 @@ export default function DailyHitBuilderPage() {
       }
     } catch (err) {
       console.error('Failed to fetch models:', err);
+    }
+  }, []);
+
+  // Fetch published content details for audio preview
+  const fetchContent = useCallback(async (dayOfYear: number) => {
+    setIsLoadingContent(true);
+    try {
+      const res = await fetch(`/api/admin/daily-hit?view=content&dayOfYear=${dayOfYear}`);
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setSelectedContent(data.content || null);
+    } catch (err) {
+      console.error('Failed to fetch content:', err);
+      setSelectedContent(null);
+    } finally {
+      setIsLoadingContent(false);
     }
   }, []);
 
@@ -814,9 +846,13 @@ export default function DailyHitBuilderPage() {
                 key={day.day_of_year}
                 onClick={() => {
                   setSelectedDay(day);
+                  setSelectedContent(null);
                   if (day.slot_status === 'empty') {
                     setTargetDayOfYear(day.day_of_year);
                     setActiveTab('create');
+                  } else if (day.slot_status === 'published') {
+                    // Fetch full content with audio URL for published days
+                    fetchContent(day.day_of_year);
                   }
                 }}
                 className={`p-2 rounded-lg border text-center transition-all hover:scale-105 ${
@@ -850,6 +886,61 @@ export default function DailyHitBuilderPage() {
                 <Plus className="w-4 h-4" />
                 Create Content for Day {selectedDay.day_of_year}
               </button>
+            ) : selectedDay.slot_status === 'published' ? (
+              <div className="space-y-4">
+                {isLoadingContent ? (
+                  <div className="flex items-center gap-2 text-white/60">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Loading content...
+                  </div>
+                ) : selectedContent ? (
+                  <>
+                    {/* Audio Preview */}
+                    {selectedContent.audio_url && (
+                      <div className="flex items-center gap-4 p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                        <button
+                          onClick={() => isPlaying ? stopAudio() : playAudio(selectedContent.audio_url!)}
+                          className="flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500 text-white hover:bg-emerald-600 transition-colors"
+                        >
+                          {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
+                        </button>
+                        <div className="flex-1">
+                          <p className="font-medium text-emerald-400">{selectedContent.title}</p>
+                          <p className="text-sm text-white/50">Click to preview audio</p>
+                        </div>
+                        <a
+                          href={selectedContent.audio_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white"
+                          title="Open audio in new tab"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                      </div>
+                    )}
+
+                    {/* Content Details */}
+                    <div className="space-y-2 text-sm">
+                      <p><span className="text-white/50">Push:</span> <span className="text-white/80">{selectedContent.push_text}</span></p>
+                      <p><span className="text-white/50">Headline:</span> <span className="text-white/80">{selectedContent.headline}</span></p>
+                      {selectedContent.challenge && (
+                        <p><span className="text-white/50">Challenge:</span> <span className="text-white/80">{selectedContent.challenge}</span></p>
+                      )}
+                      {selectedContent.tags?.length > 0 && (
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-white/50">Tags:</span>
+                          {selectedContent.tags.map((tag, i) => (
+                            <span key={i} className="px-2 py-0.5 bg-white/10 rounded text-xs">{tag}</span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <p className="text-white/60 text-sm">No content details available</p>
+                )}
+              </div>
             ) : (
               <p className="text-white/60 text-sm">
                 {selectedDay.content_title || selectedDay.draft_title}
