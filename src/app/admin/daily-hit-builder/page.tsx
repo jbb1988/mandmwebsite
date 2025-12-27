@@ -807,13 +807,13 @@ export default function DailyHitBuilderPage() {
   // Enhancement #6: Generate image prompt
   const generateImagePrompt = async () => {
     // Use content from selected draft or createForm
-    const contentSource = selectedDraftForImage || createForm;
     const contentTitle = selectedDraftForImage?.title || createForm.title;
     const contentBody = selectedDraftForImage?.body || createForm.body;
+    const contentAudioScript = selectedDraftForImage?.audio_script || createForm.audioScript;
     const contentChallenge = selectedDraftForImage?.challenge || createForm.challenge;
     const contentTags = selectedDraftForImage?.tags || createForm.tags;
 
-    if (!contentTitle && !contentBody) {
+    if (!contentTitle && !contentBody && !contentAudioScript) {
       setError('Select a draft or generate content first before creating image prompt');
       return;
     }
@@ -828,12 +828,9 @@ export default function DailyHitBuilderPage() {
         body: JSON.stringify({
           title: contentTitle,
           body: contentBody,
+          audioScript: contentAudioScript, // This is the main content - most important!
           challenge: contentChallenge,
           tags: contentTags,
-          theme: selectedTopic?.main_theme,
-          targetRole: selectedTopic?.sport_context || 'general',
-          customElements: customImageElements,
-          stylePreset: selectedImageStyle,
           // Pass draftId for auto-save
           draftId: selectedDraftForImage?.id,
         }),

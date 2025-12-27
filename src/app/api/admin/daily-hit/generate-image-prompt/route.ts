@@ -5,108 +5,72 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-/**
- * OpenAI DALL-E Optimized Image Prompt Generator
- *
- * Based on analysis of high-quality baseball imagery:
- * - Cinematic silhouettes of baseball players
- * - Dramatic lighting (sunset orange, stadium lights, golden hour)
- * - Orange/amber/deep blue color palette
- * - Atmospheric effects (smoke, particles, fire, aurora)
- * - Epic/heroic framing
- * - Painterly to photorealistic styles
- */
+// OpenRouter for AI-powered prompt generation
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
-// Style presets for consistent visual language
-const STYLE_PRESETS = {
-  cinematic_silhouette: {
-    base: 'cinematic silhouette photograph',
-    lighting: 'dramatic sunset backlight with golden hour rays streaming through',
-    atmosphere: 'atmospheric haze, lens flare, volumetric light rays',
-    colors: 'deep orange and amber tones against dark blue twilight sky',
-    quality: 'ultra high resolution, 8k, photorealistic, professional sports photography',
-  },
-  epic_hero: {
-    base: 'epic heroic sports portrait',
-    lighting: 'dramatic rim lighting with stadium spotlights creating halo effect',
-    atmosphere: 'smoke and dust particles floating in the air, shallow depth of field',
-    colors: 'warm orange highlights against cool blue shadows, high contrast',
-    quality: 'cinematic quality, award-winning sports photography, hyperrealistic',
-  },
-  fiery_determination: {
-    base: 'intense action sports photograph',
-    lighting: 'fiery orange and red backlighting with sparks and embers',
-    atmosphere: 'fire effects, smoke trails, dynamic motion blur on background',
-    colors: 'blazing orange and red against dark shadowy background',
-    quality: 'dramatic composition, high-end advertising quality, photorealistic',
-  },
-  aurora_mystical: {
-    base: 'ethereal sports photograph with fantasy elements',
-    lighting: 'northern lights aurora borealis in the background',
-    atmosphere: 'magical particles, starfield, cosmic energy effects',
-    colors: 'purple and teal aurora with orange warm highlights on subject',
-    quality: 'dreamlike quality, artistic sports photography, hyperdetailed',
-  },
-  gritty_determination: {
-    base: 'raw powerful sports photograph',
-    lighting: 'harsh single spotlight creating dramatic shadows',
-    atmosphere: 'rain or sweat droplets frozen in motion, dust kicked up',
-    colors: 'high contrast black and white with selective orange color splash',
-    quality: 'documentary style, grain texture, emotionally impactful',
-  },
-  golden_triumph: {
-    base: 'triumphant victory sports photograph',
-    lighting: 'golden hour sunlight streaming in from side',
-    atmosphere: 'dust motes floating in light beams, lens flare',
-    colors: 'warm golden tones, amber highlights, rich earth tones',
-    quality: 'inspirational, magazine cover quality, masterful composition',
+const IMAGE_PROMPT_SYSTEM = `You are an expert at creating DALL-E image prompts for baseball/softball motivational content.
+
+Given the content of a Daily Hit (title, body, audio script), create a cinematic image prompt that VISUALLY REPRESENTS the core message.
+
+VISUAL STYLE REQUIREMENTS:
+- Cinematic silhouette or dramatic sports photography
+- Dramatic lighting: sunset orange, golden hour, stadium lights
+- Color palette: deep orange, amber, dark blue twilight
+- Atmospheric effects: haze, lens flare, volumetric light
+- Epic/heroic framing
+- Youth baseball/softball athletes (ages 12-20)
+
+PROMPT STRUCTURE:
+1. Main subject and action (must match the content's theme)
+2. Emotional state/expression that matches the message
+3. Lighting description
+4. Atmosphere and effects
+5. Color palette
+6. Quality markers
+
+IMPORTANT RULES:
+- The image MUST visually represent the specific theme of the content
+- If content is about "bouncing back from failure" → show player getting up from dirt
+- If content is about "focus" → show intense concentration, locked eyes
+- If content is about "confidence" → show powerful stance, commanding presence
+- If content is about "preparation" → show early morning training
+- NO text, watermarks, or logos in the image
+- Keep prompt under 200 words
+
+Respond with ONLY the image prompt, nothing else.`
+
+async function generateWithAI(content: string): Promise<string> {
+  const apiKey = process.env.OPENROUTER_API_KEY
+  if (!apiKey) {
+    throw new Error('OPENROUTER_API_KEY not configured')
   }
-}
 
-// Baseball-specific action poses
-const ACTION_POSES = {
-  batter: [
-    'baseball player in powerful batting stance, mid-swing follow-through',
-    'batter loading up before swing, intense focus',
-    'baseball player watching ball leave bat, triumphant pose',
-    'youth baseball player practicing swing in batting cage',
-    'softball player in aggressive batting stance',
-  ],
-  pitcher: [
-    'pitcher in dramatic wind-up motion, leg high',
-    'baseball pitcher mid-delivery, arm cocked back',
-    'pitcher following through after release, dynamic pose',
-    'youth pitcher on mound, determined expression',
-    'softball pitcher in windmill motion',
-  ],
-  fielder: [
-    'baseball player making diving catch, fully extended',
-    'outfielder running back for catch, looking over shoulder',
-    'infielder ready position, athletic stance',
-    'shortstop turning double play, mid-throw',
-    'catcher in full gear, blocking position',
-  ],
-  general: [
-    'baseball player silhouette against dramatic sky',
-    'athlete walking onto field at sunset',
-    'player standing alone on diamond, contemplative',
-    'youth athlete training with determination',
-    'baseball player looking up at stadium lights',
-  ]
-}
+  const response = await fetch(OPENROUTER_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+      'HTTP-Referer': 'https://mindandmuscle.ai',
+      'X-Title': 'Mind & Muscle Image Prompt Generator',
+    },
+    body: JSON.stringify({
+      model: 'openai/gpt-4o-mini',
+      messages: [
+        { role: 'system', content: IMAGE_PROMPT_SYSTEM },
+        { role: 'user', content },
+      ],
+      temperature: 0.7,
+      max_tokens: 500,
+    }),
+  })
 
-// Theme-specific enhancements
-const THEME_MODIFIERS = {
-  confidence: 'powerful stance, chest out, commanding presence',
-  resilience: 'getting up from dirt, dust on uniform, determined expression',
-  focus: 'intense concentration, narrowed eyes, locked on target',
-  preparation: 'early morning training session, fog on field, dedication',
-  teamwork: 'high-five moment, teammates celebrating',
-  mental_strength: 'calm composed expression amid chaos, zen-like focus',
-  pressure: 'stadium packed with fans, bright lights, high-stakes moment',
-  victory: 'arms raised in celebration, emotional triumph',
-  failure_recovery: 'head down moment transforming to head up, phoenix rising',
-  growth: 'young athlete looking up at professional player silhouette',
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(`OpenRouter API error: ${error}`)
+  }
+
+  const data = await response.json()
+  return data.choices[0].message.content.trim()
 }
 
 export async function POST(request: NextRequest) {
@@ -114,83 +78,44 @@ export async function POST(request: NextRequest) {
     const {
       title,
       body,
+      audioScript,
       challenge,
       tags,
-      theme,
-      targetRole,
-      customElements,
-      stylePreset,
       draftId,
     } = await request.json()
 
-    if (!title && !body && !theme) {
+    if (!title && !body && !audioScript) {
       return NextResponse.json(
-        { error: 'Must provide title, body, or theme for prompt generation' },
+        { error: 'Must provide title, body, or audioScript for prompt generation' },
         { status: 400 }
       )
     }
 
-    // Select style preset
-    const style = STYLE_PRESETS[stylePreset as keyof typeof STYLE_PRESETS] || STYLE_PRESETS.cinematic_silhouette
+    // Build content summary for AI to analyze
+    const contentSummary = `
+DAILY HIT CONTENT:
 
-    // Determine action pose based on target role or random
-    const roleKey = (targetRole === 'hitter' ? 'batter' : targetRole) as keyof typeof ACTION_POSES || 'general'
-    const poses = ACTION_POSES[roleKey] || ACTION_POSES.general
-    const selectedPose = poses[Math.floor(Math.random() * poses.length)]
+Title: ${title || 'Not provided'}
 
-    // Get theme modifier if theme matches
-    let themeModifier = ''
-    const themeLower = (theme || title || '').toLowerCase()
-    for (const [key, modifier] of Object.entries(THEME_MODIFIERS)) {
-      if (themeLower.includes(key) || tags?.some((t: string) => t.toLowerCase().includes(key))) {
-        themeModifier = modifier
-        break
-      }
-    }
+Audio Script (main content):
+${audioScript || body || 'Not provided'}
 
-    // Build the OpenAI-optimized prompt
-    const promptParts = [
-      style.base,
-      selectedPose,
-      themeModifier,
-      customElements,
-      style.lighting,
-      style.atmosphere,
-      style.colors,
-      style.quality,
-      'no text, no watermarks, no logos, clean composition',
-    ].filter(Boolean)
+Challenge: ${challenge || 'Not provided'}
 
-    const fullPrompt = promptParts.join(', ')
+Tags: ${tags?.join(', ') || 'Not provided'}
 
-    // Generate alternative prompts with different styles
-    const styleKeys = Object.keys(STYLE_PRESETS)
-    const alternativePrompts = styleKeys
-      .filter(key => key !== (stylePreset || 'cinematic_silhouette'))
-      .slice(0, 3)
-      .map(key => {
-        const altStyle = STYLE_PRESETS[key as keyof typeof STYLE_PRESETS]
-        return {
-          style: key,
-          prompt: [
-            altStyle.base,
-            selectedPose,
-            themeModifier,
-            altStyle.lighting,
-            altStyle.atmosphere,
-            altStyle.colors,
-            altStyle.quality,
-            'no text, no watermarks, no logos, clean composition',
-          ].filter(Boolean).join(', ')
-        }
-      })
+Based on this content, create a DALL-E image prompt that visually represents the core message and theme.
+`
+
+    // Generate contextual prompt using AI
+    const generatedPrompt = await generateWithAI(contentSummary)
 
     // Save prompt to draft if draftId provided
     if (draftId) {
       await supabase
         .from('daily_hit_drafts')
         .update({
-          image_prompt: fullPrompt,
+          image_prompt: generatedPrompt,
           image_generation_status: 'prompt_ready',
         })
         .eq('id', draftId)
@@ -198,24 +123,23 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      prompt: fullPrompt,
-      alternatives: alternativePrompts,
-      metadata: {
-        style: stylePreset || 'cinematic_silhouette',
-        pose: selectedPose,
-        themeModifier: themeModifier || null,
-        targetRole: targetRole || 'general',
+      prompt: generatedPrompt,
+      contentAnalyzed: {
+        title,
+        hasAudioScript: !!audioScript,
+        hasBody: !!body,
+        tags: tags || [],
       },
       instructions: {
-        platform: 'OpenAI DALL-E 3',
-        size: '1792x1024 (landscape) or 1024x1792 (portrait) recommended',
+        platform: 'OpenAI DALL-E 3 or Midjourney',
+        recommendedSize: '1792x1024 (landscape)',
         quality: 'hd',
         style: 'vivid',
         tips: [
-          'Use 1792x1024 for wide cinematic shots',
-          'Use 1024x1024 for balanced compositions',
-          'Enable "vivid" style for maximum drama',
-          'Run 2-3 generations and pick the best one',
+          'This prompt was AI-generated to match your content',
+          'Use DALL-E 3 for best results',
+          'Try 2-3 generations and pick the best',
+          'You can modify the prompt if needed',
         ]
       }
     })
@@ -229,15 +153,12 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// GET - Get all style presets and options
+// GET - Return info about the service
 export async function GET() {
   return NextResponse.json({
-    stylePresets: Object.keys(STYLE_PRESETS).map(key => ({
-      id: key,
-      name: key.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
-      description: STYLE_PRESETS[key as keyof typeof STYLE_PRESETS].base,
-    })),
-    actionPoses: Object.keys(ACTION_POSES),
-    themeModifiers: Object.keys(THEME_MODIFIERS),
+    service: 'AI-Powered Image Prompt Generator',
+    description: 'Analyzes Daily Hit content and generates contextual DALL-E prompts',
+    requiredFields: ['title', 'body or audioScript'],
+    optionalFields: ['challenge', 'tags', 'draftId'],
   })
 }
