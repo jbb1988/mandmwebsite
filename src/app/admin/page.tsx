@@ -6,7 +6,7 @@ import RevenueDashboard from '@/components/admin/RevenueDashboard';
 import Link from 'next/link';
 import {
   DollarSign, Users, Image, Facebook, Settings,
-  ExternalLink, Shield, FileText,
+  ExternalLink, Shield, FileText, Mic,
   Twitter, Handshake, TrendingUp, Target, BarChart3
 } from 'lucide-react';
 
@@ -83,6 +83,13 @@ interface AdminTool {
 }
 
 const ADMIN_TOOLS: AdminTool[] = [
+  {
+    name: 'Daily Hit Builder',
+    description: 'Create and manage Daily Hit content',
+    href: '/admin/daily-hit-builder',
+    icon: Mic,
+    color: 'orange',
+  },
   {
     name: 'Outreach CRM',
     description: 'Unified sales pipeline for all contacts',
