@@ -20,140 +20,143 @@ interface CategoryRecommendation {
   suggestedTopics: { id: string; title: string }[]
 }
 
-// GET - Fetch category balance analytics
+// Primary categories we want to track balance for
+const PRIMARY_CATEGORIES = [
+  'Mindset',
+  'Mental Game',
+  'Goal Setting',
+  'Work Ethic',
+  'Recovery',
+  'Training',
+  'Hitting',
+  'Pitching',
+  'Fielding',
+  'Leadership',
+  'Resilience',
+  'Focus',
+  'Discipline',
+  'Athlete',
+  'Life Skills',
+]
+
+// GET - Fetch category balance analytics from motivation_content tags
 export async function GET() {
   try {
-    // 1. Get total published content count
-    const { count: totalCount } = await supabase
+    // 1. Get all published content with tags
+    const { data: content, error: contentError } = await supabase
       .from('motivation_content')
-      .select('*', { count: 'exact', head: true })
+      .select('id, title, tags, day_of_year')
       .eq('status', 'active')
+      .order('day_of_year', { ascending: false })
 
-    // 2. Get content distribution by category from topic library
-    // Join through drafts to get source topic category
-    const { data: categoryData, error: categoryError } = await supabase
-      .from('daily_hit_topic_library')
-      .select(`
-        category,
-        id,
-        daily_hit_drafts!inner (
-          day_of_year,
-          status
+    if (contentError) throw contentError
+
+    // 2. Count tags across all content
+    const tagCounts: Record<string, { count: number; lastDay: number | null }> = {}
+
+    content?.forEach(item => {
+      const tags = item.tags as string[] || []
+      tags.forEach(tag => {
+        // Normalize tag (capitalize first letter)
+        const normalizedTag = tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase()
+
+        // Only count primary categories (skip things like 'mental-toughness' slug variants)
+        const matchedCategory = PRIMARY_CATEGORIES.find(
+          cat => cat.toLowerCase() === tag.toLowerCase() ||
+                 cat.toLowerCase().replace(/\s+/g, '-') === tag.toLowerCase()
         )
-      `)
-      .not('daily_hit_drafts', 'is', null)
 
-    if (categoryError) throw categoryError
-
-    // Count by category
-    const categoryCounts: Record<string, { count: number; lastDay: number | null }> = {}
-    const allCategories = new Set<string>()
-
-    // First, get all unique categories from topic library
-    const { data: allTopicsData } = await supabase
-      .from('daily_hit_topic_library')
-      .select('category')
-      .order('category')
-
-    allTopicsData?.forEach(t => allCategories.add(t.category))
-
-    // Count drafts per category
-    categoryData?.forEach(topic => {
-      const cat = topic.category
-      if (!categoryCounts[cat]) {
-        categoryCounts[cat] = { count: 0, lastDay: null }
-      }
-      const drafts = topic.daily_hit_drafts as any[]
-      if (drafts) {
-        categoryCounts[cat].count += drafts.length
-        drafts.forEach(d => {
-          if (d.day_of_year && (!categoryCounts[cat].lastDay || d.day_of_year > categoryCounts[cat].lastDay)) {
-            categoryCounts[cat].lastDay = d.day_of_year
+        if (matchedCategory) {
+          if (!tagCounts[matchedCategory]) {
+            tagCounts[matchedCategory] = { count: 0, lastDay: null }
           }
-        })
-      }
+          tagCounts[matchedCategory].count++
+          if (item.day_of_year && (!tagCounts[matchedCategory].lastDay || item.day_of_year > tagCounts[matchedCategory].lastDay)) {
+            tagCounts[matchedCategory].lastDay = item.day_of_year
+          }
+        }
+      })
     })
 
-    // 3. Calculate stats for each category
-    const total = Object.values(categoryCounts).reduce((sum, c) => sum + c.count, 0) || 1
-    const numCategories = allCategories.size || 1
+    // 3. Calculate stats for each primary category
+    const totalTags = Object.values(tagCounts).reduce((sum, c) => sum + c.count, 0) || 1
+    const numCategories = PRIMARY_CATEGORIES.length
     const targetPercentage = Math.round(100 / numCategories)
 
-    const categories: CategoryStats[] = []
-
-    allCategories.forEach(categoryName => {
-      const data = categoryCounts[categoryName] || { count: 0, lastDay: null }
-      const percentage = Math.round((data.count / total) * 100)
+    const categories: CategoryStats[] = PRIMARY_CATEGORIES.map(categoryName => {
+      const data = tagCounts[categoryName] || { count: 0, lastDay: null }
+      const percentage = Math.round((data.count / totalTags) * 100)
 
       let status: 'balanced' | 'over' | 'under' = 'balanced'
-      if (percentage > targetPercentage + 5) status = 'over'
-      else if (percentage < targetPercentage - 5) status = 'under'
+      if (percentage > targetPercentage + 3) status = 'over'
+      else if (percentage < targetPercentage - 3 || data.count === 0) status = 'under'
 
-      categories.push({
+      return {
         name: categoryName,
         count: data.count,
         percentage,
         target: targetPercentage,
         status,
         lastUsed: data.lastDay ? `Day ${data.lastDay}` : null
-      })
+      }
     })
 
-    // Sort by percentage (under-represented first)
-    categories.sort((a, b) => a.percentage - b.percentage)
+    // Sort by count (lowest first to highlight under-represented)
+    categories.sort((a, b) => a.count - b.count)
 
     // 4. Generate recommendations for under-represented categories
     const recommendations: CategoryRecommendation[] = []
-
     const underCategories = categories.filter(c => c.status === 'under')
 
     for (const cat of underCategories.slice(0, 3)) {
-      // Get available topics from this category
+      // Get available topics from topic library matching this category
       const { data: topics } = await supabase
         .from('daily_hit_topic_library')
         .select('id, title, use_count')
-        .eq('category', cat.name)
+        .ilike('category', `%${cat.name}%`)
         .eq('status', 'available')
         .order('use_count', { ascending: true, nullsFirst: true })
         .limit(3)
 
       recommendations.push({
         category: cat.name,
-        reason: `Under-represented by ${cat.target - cat.percentage}%`,
+        reason: cat.count === 0
+          ? 'No content with this tag yet'
+          : `Only ${cat.count} items (${cat.percentage}% vs ${cat.target}% target)`,
         suggestedTopics: (topics || []).map(t => ({ id: t.id, title: t.title }))
       })
     }
 
-    // 5. Get upcoming 30 days distribution
+    // 5. Get recent 30 days tag distribution
     const today = new Date()
     const startOfYear = new Date(today.getFullYear(), 0, 0)
     const diff = today.getTime() - startOfYear.getTime()
     const todayDOY = Math.floor(diff / (1000 * 60 * 60 * 24))
 
-    const { data: upcomingDrafts } = await supabase
-      .from('daily_hit_drafts')
-      .select(`
-        day_of_year,
-        source_topic_id,
-        daily_hit_topic_library!inner (category)
-      `)
-      .gte('day_of_year', todayDOY)
-      .lte('day_of_year', todayDOY + 30)
+    const recentContent = content?.filter(c =>
+      c.day_of_year && c.day_of_year >= todayDOY - 30 && c.day_of_year <= todayDOY
+    ) || []
 
-    const upcomingDistribution: Record<string, number> = {}
-    upcomingDrafts?.forEach(d => {
-      const topic = d.daily_hit_topic_library as any
-      if (topic?.category) {
-        upcomingDistribution[topic.category] = (upcomingDistribution[topic.category] || 0) + 1
-      }
+    const recentDistribution: Record<string, number> = {}
+    recentContent.forEach(item => {
+      const tags = item.tags as string[] || []
+      tags.forEach(tag => {
+        const matchedCategory = PRIMARY_CATEGORIES.find(
+          cat => cat.toLowerCase() === tag.toLowerCase()
+        )
+        if (matchedCategory) {
+          recentDistribution[matchedCategory] = (recentDistribution[matchedCategory] || 0) + 1
+        }
+      })
     })
 
     return NextResponse.json({
       success: true,
-      totalContent: totalCount || 0,
+      totalContent: content?.length || 0,
+      totalTags,
       categories,
       recommendations,
-      upcomingDistribution,
+      recentDistribution,
       summary: {
         balanced: categories.filter(c => c.status === 'balanced').length,
         over: categories.filter(c => c.status === 'over').length,
