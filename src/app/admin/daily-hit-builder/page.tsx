@@ -1210,18 +1210,11 @@ export default function DailyHitBuilderPage() {
                   </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
+                <div className="mt-4 pt-3 border-t border-white/10">
                   <p className="text-xs text-white/40">
                     <Lightbulb className="w-3 h-3 inline mr-1" />
-                    Tip: Click an empty day on the calendar to auto-fill the target day
+                    Tip: Click an empty day on the calendar to auto-fill the target day. Topics auto-refresh monthly via cron job.
                   </p>
-                  <a
-                    href="/docs/DAILY_HIT_MASTER_GUIDE.md"
-                    target="_blank"
-                    className="text-xs text-blue-400 hover:text-blue-300"
-                  >
-                    View Full Guide →
-                  </a>
                 </div>
               </Card>
             )}
