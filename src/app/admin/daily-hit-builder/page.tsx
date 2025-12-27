@@ -124,6 +124,33 @@ interface RatingSummary {
   avgListenSeconds: number;
 }
 
+interface CategoryStats {
+  name: string;
+  count: number;
+  percentage: number;
+  target: number;
+  status: 'balanced' | 'over' | 'under';
+  lastUsed: string | null;
+}
+
+interface CategoryRecommendation {
+  category: string;
+  reason: string;
+  suggestedTopics: { id: string; title: string }[];
+}
+
+interface CategoryBalanceData {
+  categories: CategoryStats[];
+  recommendations: CategoryRecommendation[];
+  upcomingDistribution: Record<string, number>;
+  summary: {
+    balanced: number;
+    over: number;
+    under: number;
+    totalCategories: number;
+  };
+}
+
 interface ImagePromptResult {
   prompt: string;
   alternatives: { style: string; prompt: string }[];
@@ -260,6 +287,10 @@ export default function DailyHitBuilderPage() {
   const [topPerformers, setTopPerformers] = useState<any[]>([]);
   const [dropOffs, setDropOffs] = useState<any[]>([]);
 
+  // Category Balance State
+  const [categoryBalance, setCategoryBalance] = useState<CategoryBalanceData | null>(null);
+  const [isLoadingCategoryBalance, setIsLoadingCategoryBalance] = useState(false);
+
   // Enhancement #5: Distribution State
   const [channelStats, setChannelStats] = useState<ChannelStats[]>([]);
   const [distributionOverview, setDistributionOverview] = useState<any>(null);
@@ -286,6 +317,7 @@ export default function DailyHitBuilderPage() {
   const [selectedImageStyle, setSelectedImageStyle] = useState('cinematic_silhouette');
   const [customImageElements, setCustomImageElements] = useState('');
   const [copiedPrompt, setCopiedPrompt] = useState<string | null>(null);
+  const [selectedDraftForImage, setSelectedDraftForImage] = useState<Draft | null>(null);
 
   // AI Model Selection State
   const [selectedModel, setSelectedModel] = useState<'gpt-4o' | 'claude' | 'gemini'>('gpt-4o');
@@ -422,6 +454,21 @@ export default function DailyHitBuilderPage() {
     }
   }, []);
 
+  // Fetch category balance data
+  const fetchCategoryBalance = useCallback(async () => {
+    setIsLoadingCategoryBalance(true);
+    try {
+      const res = await fetch('/api/admin/daily-hit/category-balance');
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setCategoryBalance(data);
+    } catch (err) {
+      console.error('Failed to fetch category balance:', err);
+    } finally {
+      setIsLoadingCategoryBalance(false);
+    }
+  }, []);
+
   // Enhancement #5: Fetch distribution
   const fetchDistribution = useCallback(async () => {
     try {
@@ -484,10 +531,16 @@ export default function DailyHitBuilderPage() {
       fetchBatches();
     } else if (activeTab === 'analytics') {
       fetchRatings();
+      fetchCategoryBalance();
     } else if (activeTab === 'distribution') {
       fetchDistribution();
+    } else if (activeTab === 'create') {
+      // Load category balance to show recommendations when creating content
+      if (!categoryBalance) {
+        fetchCategoryBalance();
+      }
     }
-  }, [activeTab, fetchGaps, fetchBatches, fetchRatings, fetchDistribution]);
+  }, [activeTab, fetchGaps, fetchBatches, fetchRatings, fetchDistribution, fetchCategoryBalance, categoryBalance]);
 
   // Generate content from AI
   const generateContent = async () => {
@@ -691,8 +744,15 @@ export default function DailyHitBuilderPage() {
 
   // Enhancement #6: Generate image prompt
   const generateImagePrompt = async () => {
-    if (!createForm.title && !createForm.body) {
-      setError('Generate content first before creating image prompt');
+    // Use content from selected draft or createForm
+    const contentSource = selectedDraftForImage || createForm;
+    const contentTitle = selectedDraftForImage?.title || createForm.title;
+    const contentBody = selectedDraftForImage?.body || createForm.body;
+    const contentChallenge = selectedDraftForImage?.challenge || createForm.challenge;
+    const contentTags = selectedDraftForImage?.tags || createForm.tags;
+
+    if (!contentTitle && !contentBody) {
+      setError('Select a draft or generate content first before creating image prompt');
       return;
     }
 
@@ -704,14 +764,16 @@ export default function DailyHitBuilderPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title: createForm.title,
-          body: createForm.body,
-          challenge: createForm.challenge,
-          tags: createForm.tags,
+          title: contentTitle,
+          body: contentBody,
+          challenge: contentChallenge,
+          tags: contentTags,
           theme: selectedTopic?.main_theme,
           targetRole: selectedTopic?.sport_context || 'general',
           customElements: customImageElements,
           stylePreset: selectedImageStyle,
+          // Pass draftId for auto-save
+          draftId: selectedDraftForImage?.id,
         }),
       });
 
@@ -719,6 +781,12 @@ export default function DailyHitBuilderPage() {
       if (data.error) throw new Error(data.error);
 
       setImagePromptResult(data);
+
+      // If we saved to a draft, show success message
+      if (selectedDraftForImage?.id) {
+        // Refresh drafts to show updated image_prompt status
+        fetchDrafts();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate image prompt');
     } finally {
@@ -1107,6 +1175,53 @@ export default function DailyHitBuilderPage() {
           >
             Browse all topics <ArrowRight className="w-3 h-3" />
           </button>
+        </Card>
+      )}
+
+      {/* Category Balance Recommendations - Show categories that need content */}
+      {!selectedTopic && !createForm.title && categoryBalance && categoryBalance.recommendations.length > 0 && (
+        <Card className="p-4 border-l-4 border-l-red-500">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Target className="w-4 h-4 text-red-400" />
+              <h3 className="font-medium text-red-400">Categories Needing Content</h3>
+            </div>
+            <button
+              onClick={() => setActiveTab('analytics')}
+              className="text-xs text-white/40 hover:text-white/60 flex items-center gap-1"
+            >
+              View full balance <ArrowRight className="w-3 h-3" />
+            </button>
+          </div>
+          <p className="text-xs text-white/50 mb-3">
+            These categories are under-represented in your content. Creating content for them helps maintain balanced coverage.
+          </p>
+          <div className="grid sm:grid-cols-3 gap-3">
+            {categoryBalance.recommendations.map((rec) => (
+              <div key={rec.category} className="p-3 bg-red-500/10 rounded-lg border border-red-500/20">
+                <p className="font-medium text-sm text-red-400">{rec.category}</p>
+                <p className="text-xs text-white/50 mt-1">{rec.reason}</p>
+                {rec.suggestedTopics.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {rec.suggestedTopics.slice(0, 2).map((topic) => (
+                      <button
+                        key={topic.id}
+                        onClick={() => {
+                          const topicObj = topics.find(t => t.id === topic.id);
+                          if (topicObj) {
+                            setSelectedTopic(topicObj);
+                          }
+                        }}
+                        className="w-full text-left text-xs p-2 bg-white/5 rounded hover:bg-white/10 transition-colors text-white/70 hover:text-white truncate"
+                      >
+                        {topic.title}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </Card>
       )}
 
@@ -1512,6 +1627,114 @@ export default function DailyHitBuilderPage() {
         </div>
       )}
 
+      {/* Category Balance Distribution */}
+      {categoryBalance && (
+        <Card className="p-4">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold flex items-center gap-2">
+              <Layers className="w-4 h-4 text-purple-400" />
+              Content Category Balance
+            </h3>
+            <div className="flex items-center gap-3 text-xs">
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                Balanced ({categoryBalance.summary.balanced})
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
+                Over ({categoryBalance.summary.over})
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-red-500"></span>
+                Under ({categoryBalance.summary.under})
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {categoryBalance.categories.map((cat) => {
+              const barColor = cat.status === 'balanced'
+                ? 'bg-emerald-500'
+                : cat.status === 'over'
+                  ? 'bg-yellow-500'
+                  : 'bg-red-500';
+              const textColor = cat.status === 'balanced'
+                ? 'text-emerald-400'
+                : cat.status === 'over'
+                  ? 'text-yellow-400'
+                  : 'text-red-400';
+
+              return (
+                <div key={cat.name} className="space-y-1">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-white/80">{cat.name}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-white/40">{cat.count} items</span>
+                      <span className={`font-medium ${textColor}`}>{cat.percentage}%</span>
+                      <span className="text-white/30 text-xs">(target: {cat.target}%)</span>
+                    </div>
+                  </div>
+                  <div className="h-2 bg-white/10 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${barColor} rounded-full transition-all duration-500`}
+                      style={{ width: `${Math.min(cat.percentage, 100)}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Recommendations */}
+          {categoryBalance.recommendations.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-white/10">
+              <h4 className="text-sm font-medium text-white/70 mb-3 flex items-center gap-2">
+                <Lightbulb className="w-4 h-4 text-yellow-400" />
+                Recommended Categories to Focus On
+              </h4>
+              <div className="grid sm:grid-cols-3 gap-3">
+                {categoryBalance.recommendations.map((rec) => (
+                  <div key={rec.category} className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                    <p className="font-medium text-red-400 text-sm">{rec.category}</p>
+                    <p className="text-xs text-white/50 mt-1">{rec.reason}</p>
+                    {rec.suggestedTopics.length > 0 && (
+                      <div className="mt-2">
+                        <p className="text-xs text-white/40 mb-1">Suggested topics:</p>
+                        {rec.suggestedTopics.slice(0, 2).map((topic) => (
+                          <button
+                            key={topic.id}
+                            onClick={() => {
+                              const topicObj = topics.find(t => t.id === topic.id);
+                              if (topicObj) {
+                                setSelectedTopic(topicObj);
+                                setActiveTab('create');
+                              }
+                            }}
+                            className="text-xs text-blue-400 hover:text-blue-300 block truncate"
+                          >
+                            • {topic.title}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
+
+      {/* Loading state for category balance */}
+      {isLoadingCategoryBalance && !categoryBalance && (
+        <Card className="p-4">
+          <div className="flex items-center gap-2 text-white/50">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span>Loading category balance...</span>
+          </div>
+        </Card>
+      )}
+
       {/* Top Performers */}
       {topPerformers.length > 0 && (
         <Card className="p-4">
@@ -1682,6 +1905,56 @@ export default function DailyHitBuilderPage() {
             Generate optimized prompts for creating high-quality baseball imagery that matches your Daily Hit content.
           </p>
 
+          {/* Draft Selector */}
+          <div className="mb-4">
+            <label className="block text-sm text-white/60 mb-2">Content Source</label>
+            <select
+              value={selectedDraftForImage?.id || 'createForm'}
+              onChange={(e) => {
+                if (e.target.value === 'createForm') {
+                  setSelectedDraftForImage(null);
+                } else {
+                  const draft = drafts.find(d => d.id === e.target.value);
+                  setSelectedDraftForImage(draft || null);
+                }
+                setImagePromptResult(null);
+              }}
+              className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white"
+            >
+              <option value="createForm">
+                {createForm.title ? `Current: ${createForm.title}` : 'Create tab content (unsaved)'}
+              </option>
+              <optgroup label="Saved Drafts">
+                {drafts.filter(d => d.title).map((draft) => (
+                  <option key={draft.id} value={draft.id}>
+                    {draft.title} {draft.day_of_year ? `(Day ${draft.day_of_year})` : ''} - {draft.status}
+                  </option>
+                ))}
+              </optgroup>
+            </select>
+            {selectedDraftForImage && (
+              <p className="text-xs text-emerald-400 mt-1 flex items-center gap-1">
+                <CheckCircle className="w-3 h-3" />
+                Prompt will be auto-saved to this draft
+              </p>
+            )}
+          </div>
+
+          {/* Selected Content Preview */}
+          {selectedDraftForImage && (
+            <div className="mb-4 p-3 bg-white/5 rounded-lg border border-white/10">
+              <p className="text-sm font-medium text-white/80">{selectedDraftForImage.title}</p>
+              <p className="text-xs text-white/40 mt-1 line-clamp-2">{selectedDraftForImage.body?.substring(0, 150)}...</p>
+              <div className="flex items-center gap-2 mt-2">
+                {selectedDraftForImage.tags?.map((tag) => (
+                  <span key={tag} className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] rounded">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Style Selection */}
           <div className="mb-4">
             <label className="block text-sm text-white/60 mb-2">Visual Style</label>
@@ -1718,7 +1991,7 @@ export default function DailyHitBuilderPage() {
           {/* Generate Button */}
           <button
             onClick={generateImagePrompt}
-            disabled={isGeneratingImagePrompt || (!createForm.title && !createForm.body)}
+            disabled={isGeneratingImagePrompt || (!selectedDraftForImage?.title && !createForm.title && !createForm.body)}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg disabled:opacity-50"
           >
             {isGeneratingImagePrompt ? (
@@ -1734,9 +2007,9 @@ export default function DailyHitBuilderPage() {
             )}
           </button>
 
-          {!createForm.title && !createForm.body && (
+          {!selectedDraftForImage && !createForm.title && !createForm.body && (
             <p className="text-xs text-yellow-400 mt-2">
-              Create content first in the Create tab to generate matching image prompts.
+              Select a draft above or create content in the Create tab to generate matching image prompts.
             </p>
           )}
         </Card>
