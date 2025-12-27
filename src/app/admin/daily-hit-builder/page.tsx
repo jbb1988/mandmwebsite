@@ -1326,11 +1326,20 @@ export default function DailyHitBuilderPage() {
                       <button
                         onClick={() => generateAudio(draft)}
                         disabled={isGeneratingAudio}
-                        className="px-3 py-1 bg-orange-500/20 text-orange-400 rounded text-xs hover:bg-orange-500/30 disabled:opacity-50"
+                        className="px-3 py-1 bg-orange-500/20 text-orange-400 rounded text-xs hover:bg-orange-500/30 disabled:opacity-50 flex items-center gap-1"
                         title="Generate Audio"
                       >
-                        <Mic className="w-3 h-3 inline mr-1" />
-                        Generate
+                        {isGeneratingAudio ? (
+                          <>
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            Generating...
+                          </>
+                        ) : (
+                          <>
+                            <Mic className="w-3 h-3" />
+                            Generate
+                          </>
+                        )}
                       </button>
                     )}
                     {draft.audio_generation_status === 'failed' && (
@@ -1345,27 +1354,41 @@ export default function DailyHitBuilderPage() {
                 </div>
 
                 {/* Step 3: Audio Approval */}
-                <div className={`flex items-center justify-between p-2 rounded-lg ${draft.audio_url ? 'bg-white/5' : 'bg-white/[0.02] opacity-50'}`}>
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">3</span>
-                    <span className="text-sm">Review Audio</span>
-                    {draft.audio_approved ? (
-                      <span className="flex items-center gap-1 text-emerald-400 text-xs">
-                        <CheckCircle className="w-3 h-3" /> Approved
-                      </span>
-                    ) : draft.audio_url ? (
-                      <span className="text-yellow-400 text-xs">Listen & Approve</span>
-                    ) : (
-                      <span className="text-white/40 text-xs">Waiting for audio</span>
+                <div className={`p-2 rounded-lg ${draft.audio_url ? 'bg-white/5' : 'bg-white/[0.02] opacity-50'}`}>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">3</span>
+                      <span className="text-sm">Review Audio</span>
+                      {draft.audio_approved ? (
+                        <span className="flex items-center gap-1 text-emerald-400 text-xs">
+                          <CheckCircle className="w-3 h-3" /> Approved
+                        </span>
+                      ) : draft.audio_url ? (
+                        <span className="text-yellow-400 text-xs">Listen & Approve</span>
+                      ) : (
+                        <span className="text-white/40 text-xs">Waiting for audio</span>
+                      )}
+                    </div>
+                    {draft.audio_url && !draft.audio_approved && (
+                      <button
+                        onClick={() => approveAudio(draft)}
+                        className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded text-xs hover:bg-emerald-500/30"
+                      >
+                        Approve Audio
+                      </button>
                     )}
                   </div>
-                  {draft.audio_url && !draft.audio_approved && (
-                    <button
-                      onClick={() => approveAudio(draft)}
-                      className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded text-xs hover:bg-emerald-500/30"
-                    >
-                      Approve Audio
-                    </button>
+                  {/* Audio Player */}
+                  {draft.audio_url && (
+                    <div className="mt-2 p-2 bg-black/20 rounded">
+                      <audio
+                        controls
+                        src={draft.audio_url}
+                        className="w-full h-8"
+                        style={{ filter: 'invert(1)' }}
+                      />
+                      <p className="text-xs text-white/40 mt-1 truncate">{draft.audio_url.split('/').pop()}</p>
+                    </div>
                   )}
                 </div>
 

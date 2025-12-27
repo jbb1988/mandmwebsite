@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { FFmpeg } from '@ffmpeg/ffmpeg'
+import { toBlobURL } from '@ffmpeg/util'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -20,6 +22,78 @@ const ELEVENLABS_CONFIG = {
 // Intro/outro audio file URLs in daily-motivation-audio bucket
 const INTRO_URL = `${supabaseUrl}/storage/v1/object/public/daily-motivation-audio/dhintro.mp3`
 const OUTRO_URL = `${supabaseUrl}/storage/v1/object/public/daily-motivation-audio/dhoutro.mp3`
+
+// Merge audio files using FFmpeg WASM
+async function mergeAudioWithFFmpeg(
+  introUrl: string,
+  ttsUrl: string,
+  outroUrl: string
+): Promise<Buffer> {
+  const ffmpeg = new FFmpeg()
+
+  // Load FFmpeg WASM from CDN
+  const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd'
+  await ffmpeg.load({
+    coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
+    wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+  })
+
+  console.log('FFmpeg loaded, fetching audio files...')
+
+  // Fetch all audio files
+  const [introData, ttsData, outroData] = await Promise.all([
+    fetch(introUrl).then(r => r.arrayBuffer()),
+    fetch(ttsUrl).then(r => r.arrayBuffer()),
+    fetch(outroUrl).then(r => r.arrayBuffer()),
+  ])
+
+  console.log(`Audio files fetched: intro=${introData.byteLength}, tts=${ttsData.byteLength}, outro=${outroData.byteLength}`)
+
+  // Write input files to FFmpeg virtual filesystem
+  await ffmpeg.writeFile('intro.mp3', new Uint8Array(introData))
+  await ffmpeg.writeFile('tts.mp3', new Uint8Array(ttsData))
+  await ffmpeg.writeFile('outro.mp3', new Uint8Array(outroData))
+
+  // Create concat list file
+  await ffmpeg.writeFile('list.txt',
+    "file 'intro.mp3'\nfile 'tts.mp3'\nfile 'outro.mp3'"
+  )
+
+  console.log('Running FFmpeg concat...')
+
+  // Merge using FFmpeg concat demuxer
+  // Using -c copy for stream copy (no re-encoding) when formats match
+  // If that fails, we'll re-encode
+  try {
+    await ffmpeg.exec([
+      '-f', 'concat',
+      '-safe', '0',
+      '-i', 'list.txt',
+      '-c', 'copy',
+      'output.mp3'
+    ])
+  } catch (e) {
+    console.log('Stream copy failed, re-encoding...')
+    // Fallback: re-encode if stream copy doesn't work
+    await ffmpeg.exec([
+      '-f', 'concat',
+      '-safe', '0',
+      '-i', 'list.txt',
+      '-acodec', 'libmp3lame',
+      '-q:a', '2',
+      'output.mp3'
+    ])
+  }
+
+  // Read the output file
+  const data = await ffmpeg.readFile('output.mp3')
+  console.log(`FFmpeg merge complete: ${data.length} bytes`)
+
+  // Terminate FFmpeg to free memory
+  await ffmpeg.terminate()
+
+  return Buffer.from(data as Uint8Array)
+}
 
 // POST - Generate audio for a draft using ElevenLabs
 export async function POST(request: NextRequest) {
@@ -115,51 +189,12 @@ export async function POST(request: NextRequest) {
       .eq('id', draftId)
 
     if (!combineWithIntroOutro) {
-      return NextResponse.json({
-        success: true,
-        draftId,
-        ttsAudioUrl,
-        message: 'TTS audio generated successfully (no intro/outro)',
-      })
-    }
-
-    // Step 3: Call the merge-audio Edge Function to combine intro + TTS + outro
-    console.log('Calling merge-audio edge function...')
-
-    // Generate output filename with day_of_year prefix if available
-    // Format: "365. title_here_complete.mp4" to match existing entries
-    const dayPrefix = dayOfYear ? `${dayOfYear}. ` : ''
-    const outputFileName = `${dayPrefix}${sanitizedTitle}_complete.mp4`
-
-    const combineResponse = await fetch(
-      `${supabaseUrl}/functions/v1/merge-audio`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${supabaseServiceKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          introUrl: INTRO_URL,
-          speechUrl: ttsAudioUrl,
-          outroUrl: OUTRO_URL,
-          outputFileName,
-        }),
-      }
-    )
-
-    if (!combineResponse.ok) {
-      // Combination failed, but TTS was successful
-      const errorData = await combineResponse.json().catch(() => ({ error: 'Unknown error' }))
-      console.warn('Audio combination failed, falling back to TTS only:', errorData)
-
-      // Use TTS audio as the final audio
+      // Just use TTS audio directly
       await supabase
         .from('daily_hit_drafts')
         .update({
           audio_url: ttsAudioUrl,
           audio_generation_status: 'complete',
-          audio_error: 'Combination with intro/outro failed, using TTS audio only',
         })
         .eq('id', draftId)
 
@@ -168,31 +203,82 @@ export async function POST(request: NextRequest) {
         draftId,
         ttsAudioUrl,
         completeAudioUrl: ttsAudioUrl,
-        message: 'TTS audio generated (combination with intro/outro failed)',
-        warning: errorData.error,
+        message: 'TTS audio generated successfully (no intro/outro)',
       })
     }
 
-    const combineData = await combineResponse.json()
+    // Step 3: Merge intro + TTS + outro using FFmpeg WASM
+    console.log('Merging audio with FFmpeg WASM...')
 
-    // Update draft with final combined audio URL
-    const completeAudioUrl = combineData.url
-    await supabase
-      .from('daily_hit_drafts')
-      .update({
-        audio_url: completeAudioUrl,
-        audio_generation_status: 'complete',
+    try {
+      const mergedBuffer = await mergeAudioWithFFmpeg(
+        INTRO_URL,
+        ttsAudioUrl,
+        OUTRO_URL
+      )
+
+      // Generate output filename with day_of_year prefix if available
+      const dayPrefix = dayOfYear ? `${dayOfYear}. ` : ''
+      const outputFileName = `${dayPrefix}${sanitizedTitle}_complete.mp3`
+
+      // Upload merged audio
+      const { error: uploadError } = await supabase.storage
+        .from('daily-motivation-audio')
+        .upload(outputFileName, mergedBuffer, {
+          contentType: 'audio/mpeg',
+          upsert: true,
+        })
+
+      if (uploadError) {
+        throw new Error(`Failed to upload merged audio: ${uploadError.message}`)
+      }
+
+      const { data: mergedUrlData } = supabase.storage
+        .from('daily-motivation-audio')
+        .getPublicUrl(outputFileName)
+
+      const completeAudioUrl = mergedUrlData.publicUrl
+
+      // Update draft with final combined audio URL
+      await supabase
+        .from('daily_hit_drafts')
+        .update({
+          audio_url: completeAudioUrl,
+          audio_generation_status: 'complete',
+        })
+        .eq('id', draftId)
+
+      return NextResponse.json({
+        success: true,
+        draftId,
+        ttsAudioUrl,
+        completeAudioUrl,
+        outputFileName,
+        message: 'Audio generated and merged successfully with intro/outro',
       })
-      .eq('id', draftId)
 
-    return NextResponse.json({
-      success: true,
-      draftId,
-      ttsAudioUrl,
-      completeAudioUrl,
-      outputFileName,
-      message: 'Audio generated and combined successfully',
-    })
+    } catch (mergeError) {
+      // FFmpeg merge failed, fall back to TTS only
+      console.error('FFmpeg merge failed:', mergeError)
+
+      await supabase
+        .from('daily_hit_drafts')
+        .update({
+          audio_url: ttsAudioUrl,
+          audio_generation_status: 'complete',
+          audio_error: `Merge failed (using TTS only): ${mergeError instanceof Error ? mergeError.message : 'Unknown error'}`,
+        })
+        .eq('id', draftId)
+
+      return NextResponse.json({
+        success: true,
+        draftId,
+        ttsAudioUrl,
+        completeAudioUrl: ttsAudioUrl,
+        message: 'TTS audio generated (merge with intro/outro failed)',
+        warning: mergeError instanceof Error ? mergeError.message : 'Merge failed',
+      })
+    }
 
   } catch (error) {
     console.error('Error generating audio:', error)
