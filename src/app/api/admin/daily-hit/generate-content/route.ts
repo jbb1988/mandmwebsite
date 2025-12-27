@@ -106,7 +106,7 @@ async function generateWithClaude(systemPrompt: string, userPrompt: string): Pro
       'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: 'claude-3-opus-20240229',
       max_tokens: 4096,
       system: systemPrompt,
       messages: [
@@ -183,8 +183,8 @@ export async function GET() {
         available: availableModels.includes('gpt-4o'),
       },
       'claude': {
-        name: 'Claude (Anthropic)',
-        description: 'Great for structured, polished prose with clarity and coherence',
+        name: 'Claude Opus (Anthropic)',
+        description: 'Best for structured, uplifting prose with exceptional clarity and coherence',
         available: availableModels.includes('claude'),
       },
       'gemini': {
