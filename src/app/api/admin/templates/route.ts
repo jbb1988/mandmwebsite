@@ -32,7 +32,7 @@ interface Template {
   stats?: TemplateStats;
 }
 
-// File-based system templates
+// File-based system templates with embedded HTML content
 const SYSTEM_TEMPLATES = [
   {
     id: 'system-daily-hit-website',
@@ -40,14 +40,73 @@ const SYSTEM_TEMPLATES = [
     segment: 'user',
     sequence_step: 0,
     subject_line: 'Your Daily Hit is Ready!',
-    body_template: '', // Will be loaded from file
+    body_template: `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding: 40px 20px; background-color: #f3f4f6;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="border-radius: 16px; overflow: hidden; max-width: 600px; background: linear-gradient(to bottom, #ffffff, #f9fafb);">
+          <tr>
+            <td align="center" style="padding: 40px 40px 20px;">
+              <a href="https://www.mindandmuscle.ai" style="display: block; text-decoration: none;">
+                <img src="https://api.mindandmuscle.ai/storage/v1/object/public/media-thumbnails/New%20MM%20Logo-transparent%20(1).png" alt="Mind & Muscle" width="120" style="display: block; max-width: 120px; height: auto;">
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 20px 40px; text-align: center;">
+              <h1 style="margin: 0 0 16px; font-size: 32px; font-weight: 900; color: #111827;">
+                Your Daily Hit is Ready! 🎯
+              </h1>
+              <p style="margin: 0 0 8px; font-size: 18px; line-height: 1.6; color: #374151;">
+                Start your day with 2 minutes of mental reps
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 0 40px 20px;">
+              <div style="border-left: 4px solid #22c55e; padding: 20px; border-radius: 8px; text-align: center; background: rgba(34, 197, 94, 0.08);">
+                <p style="margin: 0 0 12px; font-size: 20px; font-weight: 700; color: #15803d;">
+                  {{ contentTitle }}
+                </p>
+                <img src="{{ contentThumbnail }}" alt="Daily Hit" style="width: 100%; max-width: 400px; border-radius: 12px; margin-top: 12px; display: block; margin-left: auto; margin-right: auto;">
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding: 30px 40px;">
+              <a href="https://www.mindandmuscle.ai/daily-hit" style="display: inline-block; background: linear-gradient(to right, #3b82f6, #fb923c); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 12px; font-weight: 700; font-size: 16px;">
+                🎧 Listen Now
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 30px 40px 40px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 8px; font-size: 16px; font-weight: 700;">
+                <span style="color: #3b82f6;">Discipline the Mind.</span> <span style="color: #fb923c;">Dominate the Game.</span>
+              </p>
+              <p style="margin: 0; font-size: 12px; color: #6b7280;">
+                © 2025 Mind & Muscle Performance. All rights reserved.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`,
     is_triggered: false,
     trigger_type: null,
     created_at: '2024-12-01T00:00:00Z',
     updated_at: '2024-12-01T00:00:00Z',
     category: 'system' as const,
     source: 'file' as const,
-    file_path: 'daily_hit_website.html',
   },
   {
     id: 'system-daily-hit-followup',
@@ -55,29 +114,160 @@ const SYSTEM_TEMPLATES = [
     segment: 'user',
     sequence_step: 0,
     subject_line: 'Great job completing your Daily Hit!',
-    body_template: '',
+    body_template: `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding: 40px 20px; background-color: #f3f4f6;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="border-radius: 16px; overflow: hidden; max-width: 600px; background: linear-gradient(to bottom, #ffffff, #f9fafb);">
+          <tr>
+            <td align="center" style="padding: 40px 40px 20px;">
+              <a href="https://www.mindandmuscle.ai" style="display: block; text-decoration: none;">
+                <img src="https://api.mindandmuscle.ai/storage/v1/object/public/media-thumbnails/New%20MM%20Logo-transparent%20(1).png" alt="Mind & Muscle" width="120" style="display: block; max-width: 120px; height: auto;">
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 20px 40px; text-align: center;">
+              <h1 style="margin: 0 0 16px; font-size: 32px; font-weight: 900; color: #111827;">
+                Great Job! 🎯
+              </h1>
+              <p style="margin: 0 0 8px; font-size: 18px; line-height: 1.6; color: #374151;">
+                You completed today's Daily Hit
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 0 40px 20px;">
+              <div style="border-left: 4px solid #22c55e; padding: 20px; border-radius: 8px; text-align: center; background: rgba(34, 197, 94, 0.08);">
+                <p style="margin: 0 0 12px; font-size: 20px; font-weight: 700; color: #15803d;">
+                  {{ contentTitle }}
+                </p>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 20px 40px;">
+              <div style="border-left: 4px solid #3b82f6; padding: 16px; border-radius: 8px; background: rgba(59, 130, 246, 0.08);">
+                <p style="margin: 0 0 12px; font-size: 14px; font-weight: 700; color: #1e40af;">
+                  💭 Got thoughts on this session?
+                </p>
+                <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #374151;">
+                  Share your reflections in Dugout Talk and get personalized insights from your AI coach.
+                </p>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding: 30px 40px;">
+              <a href="https://mindandmuscle.ai/dugout-talk" style="display: inline-block; background: linear-gradient(to right, #3b82f6, #fb923c); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 12px; font-weight: 700; font-size: 16px;">
+                🗣️ Add Your Thoughts
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 30px 40px 40px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 8px; font-size: 16px; font-weight: 700;">
+                <span style="color: #3b82f6;">Discipline the Mind.</span> <span style="color: #fb923c;">Dominate the Game.</span>
+              </p>
+              <p style="margin: 0; font-size: 12px; color: #6b7280;">
+                © 2025 Mind & Muscle Performance. All rights reserved.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`,
     is_triggered: false,
     trigger_type: null,
     created_at: '2024-12-01T00:00:00Z',
     updated_at: '2024-12-01T00:00:00Z',
     category: 'system' as const,
     source: 'file' as const,
-    file_path: 'daily_hit_followup.html',
   },
   {
     id: 'system-content-reflection',
     name: 'Content Reflection',
     segment: 'user',
     sequence_step: 0,
-    subject_line: 'Time to reflect on your session',
-    body_template: '',
+    subject_line: 'Reflect on Today\'s Session',
+    body_template: `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding: 40px 20px; background-color: #f3f4f6;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="border-radius: 16px; overflow: hidden; max-width: 600px; background: linear-gradient(to bottom, #ffffff, #f9fafb);">
+          <tr>
+            <td align="center" style="padding: 40px 40px 20px;">
+              <a href="https://www.mindandmuscle.ai" style="display: block; text-decoration: none;">
+                <img src="https://api.mindandmuscle.ai/storage/v1/object/public/media-thumbnails/New%20MM%20Logo-transparent%20(1).png" alt="Mind & Muscle" width="120" style="display: block; max-width: 120px; height: auto;">
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 20px 40px; text-align: center;">
+              <h1 style="margin: 0 0 16px; font-size: 28px; font-weight: 900; color: #111827;">
+                Reflect on Today's Session 🌅
+              </h1>
+              <p style="margin: 0 0 8px; font-size: 18px; line-height: 1.6; color: #374151;">
+                {{ contentTitle }}
+              </p>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 20px 40px;">
+              <div style="border-left: 4px solid #3b82f6; padding: 16px; border-radius: 8px; background: rgba(59, 130, 246, 0.08);">
+                <p style="margin: 0 0 12px; font-size: 14px; font-weight: 700; color: #1e40af;">
+                  💭 Take a moment to reflect:
+                </p>
+                <p style="margin: 0; font-size: 14px; line-height: 1.8; color: #374151;">
+                  Process today's session with your personal AI coach in Dugout Talk. It's free and helps cement your mental training.
+                </p>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding: 30px 40px;">
+              <a href="mindmuscle://dugout-talk?source=reflection&content={{ contentId }}" style="display: inline-block; background: linear-gradient(to right, #3b82f6, #1e40af); color: #ffffff; text-decoration: none; padding: 16px 48px; border-radius: 12px; font-weight: 700; font-size: 16px;">
+                🗣️ Open Dugout Talk
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 30px 40px 40px; text-align: center; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 8px; font-size: 16px; font-weight: 700;">
+                <span style="color: #3b82f6;">Discipline the Mind.</span> <span style="color: #fb923c;">Dominate the Game.</span>
+              </p>
+              <p style="margin: 0; font-size: 12px; color: #6b7280;">
+                © 2025 Mind & Muscle Performance. All rights reserved.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`,
     is_triggered: false,
     trigger_type: null,
     created_at: '2024-12-01T00:00:00Z',
     updated_at: '2024-12-01T00:00:00Z',
     category: 'system' as const,
     source: 'file' as const,
-    file_path: 'content_reflection.html',
   },
 ];
 
