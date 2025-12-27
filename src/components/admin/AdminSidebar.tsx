@@ -26,7 +26,6 @@ import {
   RefreshCw,
   Mail,
   Cpu,
-  AlertTriangle,
   FileText,
 } from 'lucide-react';
 import { useAdminAuth } from '@/context/AdminAuthContext';
@@ -92,7 +91,6 @@ const NAV_SECTIONS: NavSection[] = [
     title: 'System',
     items: [
       { name: 'System Monitor', href: '/admin/system', icon: Settings },
-      { name: 'Log Audit', href: '/admin/log-audit', icon: AlertTriangle },
     ],
   },
   {
