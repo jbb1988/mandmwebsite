@@ -21,19 +21,21 @@ export default function DBatPartnerPage() {
   const [retentionLift, setRetentionLift] = useState(10); // % of members who stay longer
   const [conversionRate, setConversionRate] = useState(5); // % of lesson-only athletes who become members
 
-  // D-BAT specific costs (researched)
-  const avgLessonPrice = 100; // $100/hour average (user confirmed)
-  const avgMembershipPrice = 68; // $48-88/mo, using average
-  const lessonsPerMonth = 4; // Typical lessons per month
+  // D-BAT specific costs (conservative estimates based on published rates)
+  // Gold: $48-58/mo, Platinum: $68-78/mo → weighted avg assumes 70% Gold, 30% Platinum
+  const avgMembershipPrice = 55; // Conservative: (0.7 × $53) + (0.3 × $73) ≈ $55
+  const avgLessonPrice = 85; // $75-100/hr range, using conservative midpoint
+  const lessonsPerMemberPerMonth = 2; // Members typically take 2 lessons/mo (not 4)
   const extraMonths = 3; // How many extra months retained members stay
 
   // Assume 30% of athletes are lesson-only (not members)
   const lessonOnlyAthletes = Math.round(athleteCount * 0.3);
 
-  // Retention value: X% of members stay 3 extra months = (lessons + membership) × 3
+  // Retention value: X% of members stay 3 extra months
+  // Value = membership + lesson revenue (members typically continue lessons)
   const retainedMembers = Math.round(athleteCount * 0.7 * (retentionLift / 100));
-  const monthlyValuePerMember = (lessonsPerMonth * avgLessonPrice) + avgMembershipPrice;
-  const retentionValue = Math.round(retainedMembers * monthlyValuePerMember * extraMonths);
+  const monthlyMemberValue = avgMembershipPrice + (lessonsPerMemberPerMonth * avgLessonPrice); // $55 + $170 = $225/mo
+  const retentionValue = Math.round(retainedMembers * monthlyMemberValue * extraMonths);
 
   // New member conversion: Y% of lesson-only athletes become members
   const newMembers = Math.round(lessonOnlyAthletes * (conversionRate / 100));
@@ -534,7 +536,7 @@ export default function DBatPartnerPage() {
                 {/* Assumptions callout */}
                 <div className="mb-6 p-4 bg-white/5 rounded-lg border border-white/10">
                   <p className="text-sm text-text-secondary">
-                    <span className="font-bold text-white">Based on D-BAT averages:</span> $100/hr lessons, $68/mo membership (Gold $48, Platinum $88), 4 lessons/month
+                    <span className="font-bold text-white">Based on D-BAT averages:</span> $85/hr lessons (range: $75-100), $55/mo membership (Gold $48-58, Platinum $68-78), 2 lessons/month per member
                   </p>
                 </div>
 
