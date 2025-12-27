@@ -215,13 +215,21 @@ export async function PATCH(request: NextRequest) {
       dayOfYear: 'day_of_year',
       audioScript: 'audio_script',
       audioUrl: 'audio_url',
+      audio_url: 'audio_url',
       ttsAudioUrl: 'tts_audio_url',
       thumbnailUrl: 'thumbnail_url',
       status: 'status',
       reviewNotes: 'review_notes',
       rejectionReason: 'rejection_reason',
       audioGenerationStatus: 'audio_generation_status',
+      audio_generation_status: 'audio_generation_status',
       audioError: 'audio_error',
+      audio_error: 'audio_error',
+      // Approval workflow fields
+      script_approved: 'script_approved',
+      script_approved_at: 'script_approved_at',
+      audio_approved: 'audio_approved',
+      audio_approved_at: 'audio_approved_at',
     }
 
     for (const [key, value] of Object.entries(updates)) {

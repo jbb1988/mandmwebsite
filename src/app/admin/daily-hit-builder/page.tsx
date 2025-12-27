@@ -64,6 +64,11 @@ interface Draft {
   source_topic_id: string | null;
   key_takeaway: string | null;
   thumbnail_url: string | null;
+  // Approval workflow
+  script_approved: boolean;
+  script_approved_at: string | null;
+  audio_approved: boolean;
+  audio_approved_at: string | null;
 }
 
 interface GeneratedContent {
@@ -653,10 +658,87 @@ export default function DailyHitBuilderPage() {
     }
   };
 
-  // Publish draft
+  // Approve script (required before generating audio)
+  const approveScript = async (draft: Draft) => {
+    try {
+      const res = await fetch('/api/admin/daily-hit', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: draft.id,
+          script_approved: true,
+          script_approved_at: new Date().toISOString(),
+        }),
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      await fetchDrafts();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to approve script');
+    }
+  };
+
+  // Approve audio (required before publishing)
+  const approveAudio = async (draft: Draft) => {
+    try {
+      const res = await fetch('/api/admin/daily-hit', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: draft.id,
+          audio_approved: true,
+          audio_approved_at: new Date().toISOString(),
+        }),
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      await fetchDrafts();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to approve audio');
+    }
+  };
+
+  // Reset audio to regenerate
+  const resetAudio = async (draft: Draft) => {
+    try {
+      const res = await fetch('/api/admin/daily-hit', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: draft.id,
+          audio_url: null,
+          audio_generation_status: null,
+          audio_error: null,
+          audio_approved: false,
+          audio_approved_at: null,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      await fetchDrafts();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to reset audio');
+    }
+  };
+
+  // Publish draft (requires audio_approved)
   const publishDraft = async (draft: Draft) => {
     if (!draft.audio_url) {
       setError('Generate audio before publishing');
+      return;
+    }
+    if (!draft.audio_approved) {
+      setError('Audio must be approved before publishing');
+      return;
+    }
+    if (!draft.day_of_year) {
+      setError('Set day of year before publishing');
       return;
     }
 
@@ -1147,9 +1229,9 @@ export default function DailyHitBuilderPage() {
         <div className="space-y-3">
           {drafts.map((draft) => (
             <Card key={draft.id} className="p-4">
-              <div className="flex items-start justify-between">
+              <div className="flex items-start justify-between mb-3">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-semibold">{draft.title}</h3>
                     <StatusBadge status={draft.status} />
                     {draft.day_of_year && (
@@ -1158,39 +1240,9 @@ export default function DailyHitBuilderPage() {
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-white/60 mb-2">{draft.push_text}</p>
-                  <div className="flex items-center gap-2">
-                    {draft.audio_url ? (
-                      <button
-                        onClick={() => isPlaying ? stopAudio() : playAudio(draft.audio_url!)}
-                        className="flex items-center gap-1 px-2 py-1 bg-emerald-500/20 text-emerald-400 rounded text-xs"
-                      >
-                        {isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-                        {isPlaying ? 'Stop' : 'Play'}
-                      </button>
-                    ) : draft.audio_generation_status === 'generating' || draft.audio_generation_status === 'combining' ? (
-                      <span className="flex items-center gap-1 px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                        Generating...
-                      </span>
-                    ) : draft.audio_generation_status === 'failed' ? (
-                      <span className="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs">
-                        Audio failed: {draft.audio_error}
-                      </span>
-                    ) : (
-                      <button
-                        onClick={() => generateAudio(draft)}
-                        disabled={isGeneratingAudio || !draft.audio_script}
-                        className="flex items-center gap-1 px-2 py-1 bg-orange-500/20 text-orange-400 rounded text-xs disabled:opacity-50"
-                      >
-                        <Mic className="w-3 h-3" />
-                        Generate Audio
-                      </button>
-                    )}
-                  </div>
+                  <p className="text-sm text-white/60">{draft.push_text}</p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {/* Edit/Review Button */}
                   <button
                     onClick={() => editDraft(draft)}
                     className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
@@ -1198,16 +1250,6 @@ export default function DailyHitBuilderPage() {
                   >
                     <Edit3 className="w-4 h-4" />
                   </button>
-                  {/* Publish Button - only if has audio */}
-                  {draft.status !== 'published' && draft.audio_url && (
-                    <button
-                      onClick={() => publishDraft(draft)}
-                      className="p-2 rounded-lg bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
-                      title="Publish"
-                    >
-                      <Send className="w-4 h-4" />
-                    </button>
-                  )}
                   <button
                     onClick={() => deleteDraft(draft.id)}
                     className="p-2 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30"
@@ -1215,6 +1257,145 @@ export default function DailyHitBuilderPage() {
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
+                </div>
+              </div>
+
+              {/* Approval Workflow Steps */}
+              <div className="border-t border-white/10 pt-3 space-y-2">
+                {/* Step 1: Script Approval */}
+                <div className="flex items-center justify-between p-2 bg-white/5 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">1</span>
+                    <span className="text-sm">Script</span>
+                    {draft.script_approved ? (
+                      <span className="flex items-center gap-1 text-emerald-400 text-xs">
+                        <CheckCircle className="w-3 h-3" /> Approved
+                      </span>
+                    ) : (
+                      <span className="text-yellow-400 text-xs">Pending Review</span>
+                    )}
+                  </div>
+                  {!draft.script_approved && draft.audio_script && (
+                    <button
+                      onClick={() => approveScript(draft)}
+                      className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded text-xs hover:bg-emerald-500/30"
+                    >
+                      Approve Script
+                    </button>
+                  )}
+                </div>
+
+                {/* Step 2: Audio Generation */}
+                <div className={`flex items-center justify-between p-2 rounded-lg ${draft.script_approved ? 'bg-white/5' : 'bg-white/[0.02] opacity-50'}`}>
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">2</span>
+                    <span className="text-sm">Audio</span>
+                    {draft.audio_url ? (
+                      <span className="flex items-center gap-1 text-emerald-400 text-xs">
+                        <CheckCircle className="w-3 h-3" /> Generated
+                      </span>
+                    ) : draft.audio_generation_status === 'generating' || draft.audio_generation_status === 'combining' ? (
+                      <span className="flex items-center gap-1 text-blue-400 text-xs">
+                        <Loader2 className="w-3 h-3 animate-spin" /> Generating...
+                      </span>
+                    ) : draft.audio_generation_status === 'failed' ? (
+                      <span className="text-red-400 text-xs">Failed</span>
+                    ) : (
+                      <span className="text-white/40 text-xs">Not generated</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {draft.audio_url && (
+                      <>
+                        <button
+                          onClick={() => isPlaying ? stopAudio() : playAudio(draft.audio_url!)}
+                          className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs"
+                        >
+                          {isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+                        </button>
+                        <button
+                          onClick={() => resetAudio(draft)}
+                          className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded text-xs"
+                          title="Reset & Regenerate"
+                        >
+                          <RefreshCw className="w-3 h-3" />
+                        </button>
+                      </>
+                    )}
+                    {!draft.audio_url && draft.script_approved && !draft.audio_generation_status && (
+                      <button
+                        onClick={() => generateAudio(draft)}
+                        disabled={isGeneratingAudio || !draft.day_of_year}
+                        className="px-3 py-1 bg-orange-500/20 text-orange-400 rounded text-xs hover:bg-orange-500/30 disabled:opacity-50"
+                        title={!draft.day_of_year ? 'Set day of year first' : 'Generate Audio'}
+                      >
+                        <Mic className="w-3 h-3 inline mr-1" />
+                        Generate
+                      </button>
+                    )}
+                    {draft.audio_generation_status === 'failed' && (
+                      <button
+                        onClick={() => resetAudio(draft)}
+                        className="px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded text-xs"
+                      >
+                        Retry
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Step 3: Audio Approval */}
+                <div className={`flex items-center justify-between p-2 rounded-lg ${draft.audio_url ? 'bg-white/5' : 'bg-white/[0.02] opacity-50'}`}>
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">3</span>
+                    <span className="text-sm">Review Audio</span>
+                    {draft.audio_approved ? (
+                      <span className="flex items-center gap-1 text-emerald-400 text-xs">
+                        <CheckCircle className="w-3 h-3" /> Approved
+                      </span>
+                    ) : draft.audio_url ? (
+                      <span className="text-yellow-400 text-xs">Listen & Approve</span>
+                    ) : (
+                      <span className="text-white/40 text-xs">Waiting for audio</span>
+                    )}
+                  </div>
+                  {draft.audio_url && !draft.audio_approved && (
+                    <button
+                      onClick={() => approveAudio(draft)}
+                      className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded text-xs hover:bg-emerald-500/30"
+                    >
+                      Approve Audio
+                    </button>
+                  )}
+                </div>
+
+                {/* Step 4: Publish */}
+                <div className={`flex items-center justify-between p-2 rounded-lg ${draft.audio_approved ? 'bg-white/5' : 'bg-white/[0.02] opacity-50'}`}>
+                  <div className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">4</span>
+                    <span className="text-sm">Publish</span>
+                    {draft.status === 'published' ? (
+                      <span className="flex items-center gap-1 text-emerald-400 text-xs">
+                        <CheckCircle className="w-3 h-3" /> Published
+                      </span>
+                    ) : draft.audio_approved ? (
+                      <span className="text-purple-400 text-xs">Ready to publish</span>
+                    ) : (
+                      <span className="text-white/40 text-xs">Approve audio first</span>
+                    )}
+                  </div>
+                  {draft.status !== 'published' && draft.audio_approved && draft.day_of_year && (
+                    <button
+                      onClick={() => publishDraft(draft)}
+                      className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded text-xs hover:bg-purple-500/30"
+                    >
+                      <Send className="w-3 h-3 inline mr-1" />
+                      Publish Day {draft.day_of_year}
+                    </button>
+                  )}
+                  {!draft.day_of_year && draft.audio_approved && (
+                    <span className="text-yellow-400 text-xs">Set day of year first</span>
+                  )}
                 </div>
               </div>
             </Card>
