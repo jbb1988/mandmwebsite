@@ -1324,7 +1324,7 @@ export default function DailyHitBuilderPage() {
             </div>
             {availableModels.length === 0 && (
               <p className="text-xs text-red-400 mt-2">
-                No AI models configured. Set OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY.
+                No AI models configured. Set OPENROUTER_API_KEY in your environment variables.
               </p>
             )}
           </div>
