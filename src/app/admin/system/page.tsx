@@ -10,7 +10,7 @@ import {
   ArrowRight, AlertCircle, Timer, TrendingUp, Box
 } from 'lucide-react';
 
-type TabType = 'cron' | 'functions' | 'database' | 'queues' | 'flags' | 'webhooks';
+type TabType = 'cron' | 'functions' | 'database' | 'queues' | 'flags' | 'webhooks' | 'errors';
 
 interface CronJob {
   jobid: number;
@@ -33,6 +33,8 @@ interface EdgeFunction {
   avg_duration_ms: number;
   last_invoked: string | null;
   last_status: string | null;
+  last_error_message?: string;
+  last_error_time?: string;
 }
 
 interface TableStat {
@@ -76,6 +78,17 @@ interface WebhookStats {
   last_received: string;
 }
 
+interface SystemError {
+  id: string;
+  error_type: string;
+  source: string;
+  error_message: string;
+  error_details: any;
+  severity: string;
+  created_at: string;
+  acknowledged_at: string | null;
+}
+
 export default function SystemDashboardPage() {
   const { isAuthenticated } = useAdminAuth();
   const [activeTab, setActiveTab] = useState<TabType>('cron');
@@ -105,6 +118,10 @@ export default function SystemDashboardPage() {
   // Webhooks state
   const [webhookStats, setWebhookStats] = useState<WebhookStats[]>([]);
   const [webhookLogs, setWebhookLogs] = useState<any[]>([]);
+
+  // Errors state
+  const [systemErrors, setSystemErrors] = useState<SystemError[]>([]);
+  const [errorStats, setErrorStats] = useState({ total: 0, critical: 0, unacknowledged: 0 });
 
   // Search
   const [searchQuery, setSearchQuery] = useState('');
@@ -136,6 +153,9 @@ export default function SystemDashboardPage() {
           break;
         case 'webhooks':
           await loadWebhookData();
+          break;
+        case 'errors':
+          await loadErrorData();
           break;
       }
     } catch (error) {
@@ -190,6 +210,24 @@ export default function SystemDashboardPage() {
     }
   }
 
+  async function loadErrorData() {
+    const res = await fetch('/api/admin/system/errors?hours=24');
+    if (res.ok) {
+      const data = await res.json();
+      setSystemErrors(data.errors || []);
+      setErrorStats(data.stats || { total: 0, critical: 0, unacknowledged: 0 });
+    }
+  }
+
+  async function acknowledgeErrors(errorIds: string[]) {
+    const res = await fetch('/api/admin/system/errors', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'acknowledge', errorIds })
+    });
+    if (res.ok) loadErrorData();
+  }
+
   async function toggleCronJob(jobId: number) {
     const res = await fetch('/api/admin/system/cron-jobs', {
       method: 'POST',
@@ -221,6 +259,7 @@ export default function SystemDashboardPage() {
     { id: 'queues' as TabType, label: 'Queues', icon: Layers, count: queues.reduce((a, q) => a + q.pending, 0) },
     { id: 'flags' as TabType, label: 'Feature Flags', icon: Flag, count: flags.filter(f => f.enabled).length },
     { id: 'webhooks' as TabType, label: 'Webhooks', icon: Webhook },
+    { id: 'errors' as TabType, label: 'Error Log', icon: AlertCircle, count: errorStats.unacknowledged, alert: errorStats.critical > 0 },
   ];
 
   if (!isAuthenticated) {
@@ -314,6 +353,14 @@ export default function SystemDashboardPage() {
           {activeTab === 'webhooks' && (
             <WebhooksTab stats={webhookStats} logs={webhookLogs} />
           )}
+          {activeTab === 'errors' && (
+            <ErrorLogTab
+              errors={systemErrors}
+              stats={errorStats}
+              onAcknowledge={acknowledgeErrors}
+              onRefresh={loadErrorData}
+            />
+          )}
         </>
       )}
     </div>
@@ -342,6 +389,7 @@ function CronJobsTab({
 
   const failingJobs = jobs.filter(j => j.failed_24h > 0);
   const activeJobs = jobs.filter(j => j.active);
+  const recentFailures = history.filter(h => h.status === 'failed').slice(0, 10);
 
   return (
     <div className="space-y-6">
@@ -351,6 +399,53 @@ function CronJobsTab({
         <StatCard label="Active" value={activeJobs.length} icon={Play} color="green" />
         <StatCard label="Failing (24h)" value={failingJobs.length} icon={AlertTriangle} color={failingJobs.length > 0 ? 'red' : 'green'} />
         <StatCard label="Runs (24h)" value={history.length} icon={Activity} />
+      </div>
+
+      {/* Recent Failures Alert - Shows prominently if there are failures */}
+      {recentFailures.length > 0 && (
+        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle className="w-5 h-5 text-red-400" />
+            <h3 className="text-red-400 font-semibold">Recent Failures ({recentFailures.length})</h3>
+          </div>
+          <div className="space-y-2 max-h-60 overflow-y-auto">
+            {recentFailures.map((failure, i) => (
+              <div key={failure.runid || i} className="bg-black/20 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-white font-medium">{failure.jobname}</span>
+                  <span className="text-white/40 text-xs">
+                    {new Date(failure.start_time).toLocaleString()}
+                  </span>
+                </div>
+                {failure.return_message && (
+                  <pre className="text-xs text-red-300/80 bg-black/30 p-2 rounded overflow-x-auto whitespace-pre-wrap break-words font-mono max-h-24 overflow-y-auto">
+                    {failure.return_message}
+                  </pre>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Legend for status colors */}
+      <div className="flex flex-wrap gap-4 text-xs text-white/60 bg-white/5 rounded-lg p-3">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-green-500" />
+          <span>Running successfully</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-red-500" />
+          <span>Has failures in 24h</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-yellow-500" />
+          <span>Active but no runs yet in 24h</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-gray-500" />
+          <span>Disabled/Inactive</span>
+        </div>
       </div>
 
       {/* Search */}
@@ -513,9 +608,14 @@ function EdgeFunctionsTab({
   searchQuery: string;
   setSearchQuery: (q: string) => void;
 }) {
-  const filtered = functions.filter(f =>
-    f.function_name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const [expandedFunction, setExpandedFunction] = useState<string | null>(null);
+  const [showErrorsOnly, setShowErrorsOnly] = useState(false);
+
+  const filtered = functions.filter(f => {
+    const matchesSearch = f.function_name.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesErrorFilter = !showErrorsOnly || f.error_count > 0;
+    return matchesSearch && matchesErrorFilter;
+  });
 
   return (
     <div className="space-y-6">
@@ -527,16 +627,29 @@ function EdgeFunctionsTab({
         <StatCard label="Total Calls" value={functions.reduce((a, f) => a + f.total_calls, 0)} icon={TrendingUp} />
       </div>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-        <input
-          type="text"
-          placeholder="Search functions..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/40"
-        />
+      {/* Search and Filters */}
+      <div className="flex gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+          <input
+            type="text"
+            placeholder="Search functions..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/40"
+          />
+        </div>
+        <button
+          onClick={() => setShowErrorsOnly(!showErrorsOnly)}
+          className={`px-4 py-2 rounded-xl flex items-center gap-2 transition-colors ${
+            showErrorsOnly
+              ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+              : 'bg-white/5 text-white/60 border border-white/10 hover:bg-white/10'
+          }`}
+        >
+          <AlertTriangle className="w-4 h-4" />
+          Errors Only
+        </button>
       </div>
 
       {/* Functions Grid */}
@@ -544,44 +657,76 @@ function EdgeFunctionsTab({
         {filtered.map((fn) => (
           <div
             key={fn.function_name}
-            className={`bg-white/5 border rounded-xl p-4 ${
+            className={`bg-white/5 border rounded-xl overflow-hidden transition-all ${
               fn.error_count > 0 ? 'border-red-500/30' : 'border-white/10'
             }`}
           >
-            <div className="flex items-start justify-between mb-3">
-              <h4 className="text-white font-medium text-sm truncate flex-1">{fn.function_name}</h4>
-              {fn.error_count > 0 && (
-                <span className="px-2 py-0.5 bg-red-500/20 text-red-400 text-xs rounded">
-                  {fn.error_count} errors
-                </span>
+            <div
+              className={`p-4 ${fn.error_count > 0 ? 'cursor-pointer hover:bg-white/5' : ''}`}
+              onClick={() => fn.error_count > 0 && setExpandedFunction(
+                expandedFunction === fn.function_name ? null : fn.function_name
               )}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <h4 className="text-white font-medium text-sm truncate flex-1">{fn.function_name}</h4>
+                <div className="flex items-center gap-2">
+                  {fn.error_count > 0 && (
+                    <span className="px-2 py-0.5 bg-red-500/20 text-red-400 text-xs rounded flex items-center gap-1">
+                      {fn.error_count} errors
+                      {expandedFunction === fn.function_name ? (
+                        <ChevronUp className="w-3 h-3" />
+                      ) : (
+                        <ChevronDown className="w-3 h-3" />
+                      )}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <p className="text-white/40">Calls (24h)</p>
+                  <p className="text-white font-medium">{fn.total_calls}</p>
+                </div>
+                <div>
+                  <p className="text-white/40">Success Rate</p>
+                  <p className={`font-medium ${
+                    fn.total_calls === 0 ? 'text-white/40' :
+                    fn.success_count / fn.total_calls > 0.95 ? 'text-green-400' :
+                    fn.success_count / fn.total_calls > 0.8 ? 'text-yellow-400' : 'text-red-400'
+                  }`}>
+                    {fn.total_calls > 0 ? `${Math.round((fn.success_count / fn.total_calls) * 100)}%` : 'N/A'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-white/40">Avg Duration</p>
+                  <p className="text-white">{fn.avg_duration_ms ? `${Math.round(fn.avg_duration_ms)}ms` : 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-white/40">Last Run</p>
+                  <p className="text-white/60 text-xs">
+                    {fn.last_invoked ? new Date(fn.last_invoked).toLocaleTimeString() : 'Never'}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <div>
-                <p className="text-white/40">Calls (24h)</p>
-                <p className="text-white font-medium">{fn.total_calls}</p>
+
+            {/* Error Details Panel */}
+            {expandedFunction === fn.function_name && fn.last_error_message && (
+              <div className="border-t border-red-500/20 bg-red-500/5 p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <XCircle className="w-4 h-4 text-red-400" />
+                  <span className="text-red-400 text-xs font-medium">Latest Error</span>
+                  {fn.last_error_time && (
+                    <span className="text-white/40 text-xs">
+                      {new Date(fn.last_error_time).toLocaleString()}
+                    </span>
+                  )}
+                </div>
+                <pre className="text-xs text-red-300/80 bg-black/20 p-3 rounded-lg overflow-x-auto max-h-48 overflow-y-auto whitespace-pre-wrap break-words font-mono">
+                  {fn.last_error_message}
+                </pre>
               </div>
-              <div>
-                <p className="text-white/40">Success Rate</p>
-                <p className={`font-medium ${
-                  fn.total_calls === 0 ? 'text-white/40' :
-                  fn.success_count / fn.total_calls > 0.95 ? 'text-green-400' :
-                  fn.success_count / fn.total_calls > 0.8 ? 'text-yellow-400' : 'text-red-400'
-                }`}>
-                  {fn.total_calls > 0 ? `${Math.round((fn.success_count / fn.total_calls) * 100)}%` : 'N/A'}
-                </p>
-              </div>
-              <div>
-                <p className="text-white/40">Avg Duration</p>
-                <p className="text-white">{fn.avg_duration_ms ? `${Math.round(fn.avg_duration_ms)}ms` : 'N/A'}</p>
-              </div>
-              <div>
-                <p className="text-white/40">Last Run</p>
-                <p className="text-white/60 text-xs">
-                  {fn.last_invoked ? new Date(fn.last_invoked).toLocaleTimeString() : 'Never'}
-                </p>
-              </div>
-            </div>
+            )}
           </div>
         ))}
       </div>
@@ -947,6 +1092,169 @@ function WebhooksTab({ stats, logs }: { stats: WebhookStats[]; logs: any[] }) {
               </table>
             </div>
           </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============ ERROR LOG TAB ============
+function ErrorLogTab({
+  errors,
+  stats,
+  onAcknowledge,
+  onRefresh
+}: {
+  errors: SystemError[];
+  stats: { total: number; critical: number; unacknowledged: number };
+  onAcknowledge: (ids: string[]) => void;
+  onRefresh: () => void;
+}) {
+  const [selectedErrors, setSelectedErrors] = useState<string[]>([]);
+  const [expandedError, setExpandedError] = useState<string | null>(null);
+
+  const severityColors = {
+    critical: { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/30' },
+    error: { bg: 'bg-orange-500/20', text: 'text-orange-400', border: 'border-orange-500/30' },
+    warning: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', border: 'border-yellow-500/30' },
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard label="Total Errors (24h)" value={stats.total} icon={AlertCircle} />
+        <StatCard label="Critical" value={stats.critical} icon={XCircle} color={stats.critical > 0 ? 'red' : 'green'} />
+        <StatCard label="Unacknowledged" value={stats.unacknowledged} icon={AlertTriangle} color={stats.unacknowledged > 0 ? 'yellow' : 'green'} />
+        <StatCard label="Acknowledged" value={stats.total - stats.unacknowledged} icon={CheckCircle2} color="green" />
+      </div>
+
+      {/* Bulk Actions */}
+      {selectedErrors.length > 0 && (
+        <div className="flex items-center gap-4 p-3 bg-white/5 border border-white/10 rounded-xl">
+          <span className="text-white/60 text-sm">{selectedErrors.length} selected</span>
+          <button
+            onClick={() => {
+              onAcknowledge(selectedErrors);
+              setSelectedErrors([]);
+            }}
+            className="px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg text-sm hover:bg-green-500/30"
+          >
+            Acknowledge Selected
+          </button>
+          <button
+            onClick={() => setSelectedErrors([])}
+            className="px-3 py-1.5 bg-white/10 text-white/60 rounded-lg text-sm hover:bg-white/20"
+          >
+            Clear Selection
+          </button>
+        </div>
+      )}
+
+      {/* Errors List */}
+      {errors.length === 0 ? (
+        <div className="text-center py-12 text-white/40">
+          <CheckCircle2 className="w-12 h-12 mx-auto mb-3 opacity-40" />
+          <p>No errors in the last 24 hours</p>
+          <p className="text-sm mt-2">System is running smoothly!</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {errors.map((error) => {
+            const colors = severityColors[error.severity as keyof typeof severityColors] || severityColors.error;
+            const isExpanded = expandedError === error.id;
+            const isSelected = selectedErrors.includes(error.id);
+
+            return (
+              <div
+                key={error.id}
+                className={`bg-white/5 border rounded-xl overflow-hidden ${
+                  error.acknowledged_at ? 'border-white/10 opacity-60' : colors.border
+                }`}
+              >
+                <div
+                  className="p-4 cursor-pointer hover:bg-white/5"
+                  onClick={() => setExpandedError(isExpanded ? null : error.id)}
+                >
+                  <div className="flex items-start gap-3">
+                    {/* Checkbox */}
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        setSelectedErrors(prev =>
+                          isSelected ? prev.filter(id => id !== error.id) : [...prev, error.id]
+                        );
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                      className="mt-1"
+                    />
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className={`px-2 py-0.5 rounded text-xs ${colors.bg} ${colors.text}`}>
+                          {error.severity}
+                        </span>
+                        <span className="px-2 py-0.5 bg-white/10 text-white/60 rounded text-xs">
+                          {error.error_type}
+                        </span>
+                        <span className="text-white font-medium text-sm">{error.source}</span>
+                        {error.acknowledged_at && (
+                          <span className="px-2 py-0.5 bg-green-500/20 text-green-400 rounded text-xs">
+                            Acknowledged
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-white/80 text-sm truncate">{error.error_message}</p>
+                      <p className="text-white/40 text-xs mt-1">
+                        {new Date(error.created_at).toLocaleString()}
+                      </p>
+                    </div>
+
+                    {/* Expand Icon */}
+                    {isExpanded ? (
+                      <ChevronUp className="w-4 h-4 text-white/40" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-white/40" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Expanded Details */}
+                {isExpanded && (
+                  <div className="border-t border-white/10 p-4 bg-white/[0.02]">
+                    <div className="mb-3">
+                      <p className="text-white/40 text-xs mb-1">Full Error Message</p>
+                      <pre className="text-sm text-white/80 bg-black/20 p-3 rounded-lg overflow-x-auto whitespace-pre-wrap break-words font-mono">
+                        {error.error_message}
+                      </pre>
+                    </div>
+                    {error.error_details && (
+                      <div className="mb-3">
+                        <p className="text-white/40 text-xs mb-1">Error Details</p>
+                        <pre className="text-xs text-white/60 bg-black/20 p-3 rounded-lg overflow-x-auto whitespace-pre-wrap break-words font-mono max-h-48 overflow-y-auto">
+                          {JSON.stringify(error.error_details, null, 2)}
+                        </pre>
+                      </div>
+                    )}
+                    {!error.acknowledged_at && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAcknowledge([error.id]);
+                        }}
+                        className="px-3 py-1.5 bg-green-500/20 text-green-400 rounded-lg text-sm hover:bg-green-500/30"
+                      >
+                        Acknowledge
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

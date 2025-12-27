@@ -174,6 +174,33 @@ export async function GET(request: NextRequest) {
       `
     });
 
+    // Fetch recent error messages for each function
+    const { data: recentErrors } = await supabase.rpc('exec_sql', {
+      sql: `
+        SELECT DISTINCT ON (function_name)
+          SUBSTRING(j.command FROM 'functions/v1/([^''\"]+)') as function_name,
+          r.return_message as error_message,
+          r.start_time as error_time
+        FROM cron.job_run_details r
+        JOIN cron.job j ON j.jobid = r.jobid
+        WHERE r.start_time > NOW() - INTERVAL '24 hours'
+          AND j.command LIKE '%functions/v1/%'
+          AND r.status = 'failed'
+        ORDER BY function_name, r.start_time DESC
+      `
+    });
+
+    // Create error message map
+    const errorMap = new Map<string, { error_message: string; error_time: string }>();
+    recentErrors?.forEach((err: any) => {
+      if (err.function_name && err.error_message) {
+        errorMap.set(err.function_name, {
+          error_message: err.error_message,
+          error_time: err.error_time
+        });
+      }
+    });
+
     // Merge cron data
     cronData?.forEach((cron: any) => {
       if (cron.function_name) {
@@ -184,6 +211,12 @@ export async function GET(request: NextRequest) {
           existing.error_count += cron.cron_failed || 0;
           if (!existing.last_invoked || (cron.last_cron_run && cron.last_cron_run > existing.last_invoked)) {
             existing.last_invoked = cron.last_cron_run;
+          }
+          // Add error details if available
+          const errorInfo = errorMap.get(cron.function_name);
+          if (errorInfo) {
+            (existing as any).last_error_message = errorInfo.error_message;
+            (existing as any).last_error_time = errorInfo.error_time;
           }
         }
       }
