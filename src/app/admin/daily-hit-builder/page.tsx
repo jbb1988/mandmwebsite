@@ -7,7 +7,9 @@ import {
   ChevronLeft, ChevronRight, AlertCircle, RefreshCw, Trash2,
   Eye, Edit3, Send, Clock, CheckCircle, XCircle, Loader2,
   Volume2, Download, Plus, Search, Filter, BarChart3, Wand2,
-  BookOpen, ArrowRight, Circle, CheckCircle2, Zap, Info, Lightbulb
+  BookOpen, ArrowRight, Circle, CheckCircle2, Zap, Info, Lightbulb,
+  Layers, Image, Share2, TrendingUp, AlertTriangle, Users, Target,
+  Mail, MessageSquare, Facebook, Twitter, Copy, ExternalLink
 } from 'lucide-react';
 
 // Types
@@ -71,6 +73,73 @@ interface GeneratedContent {
   audioScript: string;
   tags: string[];
   keyTakeaway: string;
+}
+
+// New Enhancement Types
+interface Gap {
+  dayOfYear: number;
+  gapType: 'critical' | 'warning' | 'upcoming';
+  daysUntil: number;
+  hasDraft: boolean;
+  draftStatus?: string;
+}
+
+interface GapSummary {
+  critical: number;
+  warning: number;
+  upcoming: number;
+  totalGaps: number;
+  withDrafts: number;
+  needsContent: number;
+}
+
+interface Batch {
+  id: string;
+  created_at: string;
+  target_days: number[];
+  status: 'pending' | 'generating' | 'complete' | 'failed' | 'partial';
+  total_items: number;
+  completed_items: number;
+  failed_items: number;
+  error_message?: string;
+}
+
+interface ChannelStats {
+  channel: string;
+  total: number;
+  sent: number;
+  failed: number;
+  pending: number;
+  totalEngagement: number;
+  totalClicks: number;
+  avgEngagement: number;
+}
+
+interface RatingSummary {
+  totalRatings: number;
+  homeRunRate: number;
+  goodHitRate: number;
+  didntHitRate: number;
+  avgCompletion: number;
+  avgListenSeconds: number;
+}
+
+interface ImagePromptResult {
+  prompt: string;
+  alternatives: { style: string; prompt: string }[];
+  metadata: {
+    style: string;
+    pose: string;
+    themeModifier: string | null;
+    targetRole: string;
+  };
+  instructions: {
+    platform: string;
+    size: string;
+    quality: string;
+    style: string;
+    tips: string[];
+  };
 }
 
 // Card Component
@@ -152,7 +221,7 @@ const MONTHS = [
 
 export default function DailyHitBuilderPage() {
   // State
-  const [activeTab, setActiveTab] = useState<'calendar' | 'drafts' | 'create' | 'topics'>('calendar');
+  const [activeTab, setActiveTab] = useState<'calendar' | 'drafts' | 'create' | 'topics' | 'batch' | 'analytics' | 'distribution' | 'images'>('calendar');
   const [calendar, setCalendar] = useState<CalendarDay[]>([]);
   const [stats, setStats] = useState<CalendarStats | null>(null);
   const [drafts, setDrafts] = useState<Draft[]>([]);
@@ -178,6 +247,34 @@ export default function DailyHitBuilderPage() {
   const [recommendedTopics, setRecommendedTopics] = useState<Topic[]>([]);
   const [topicSearchQuery, setTopicSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+  // Enhancement #1: Batch Generation State
+  const [gaps, setGaps] = useState<Gap[]>([]);
+  const [gapSummary, setGapSummary] = useState<GapSummary | null>(null);
+  const [batches, setBatches] = useState<Batch[]>([]);
+  const [isBatchGenerating, setIsBatchGenerating] = useState(false);
+  const [selectedGapsForBatch, setSelectedGapsForBatch] = useState<number[]>([]);
+
+  // Enhancement #2 & #3: Analytics State
+  const [ratingSummary, setRatingSummary] = useState<RatingSummary | null>(null);
+  const [topPerformers, setTopPerformers] = useState<any[]>([]);
+  const [dropOffs, setDropOffs] = useState<any[]>([]);
+
+  // Enhancement #5: Distribution State
+  const [channelStats, setChannelStats] = useState<ChannelStats[]>([]);
+  const [distributionOverview, setDistributionOverview] = useState<any>(null);
+
+  // Enhancement #6: Image Prompt State
+  const [imagePromptResult, setImagePromptResult] = useState<ImagePromptResult | null>(null);
+  const [isGeneratingImagePrompt, setIsGeneratingImagePrompt] = useState(false);
+  const [selectedImageStyle, setSelectedImageStyle] = useState('cinematic_silhouette');
+  const [customImageElements, setCustomImageElements] = useState('');
+  const [copiedPrompt, setCopiedPrompt] = useState<string | null>(null);
+
+  // AI Model Selection State
+  const [selectedModel, setSelectedModel] = useState<'gpt-4o' | 'claude' | 'gemini'>('gpt-4o');
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
+  const [modelInfo, setModelInfo] = useState<Record<string, { name: string; description: string; available: boolean }>>({});
 
   // Fetch data
   const fetchCalendar = useCallback(async () => {
@@ -264,14 +361,101 @@ export default function DailyHitBuilderPage() {
     return matchesSearch && matchesCategory && isAvailable;
   });
 
+  // Enhancement #1 & #4: Fetch gaps and batches
+  const fetchGaps = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/daily-hit/gaps?lookahead=30');
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setGaps(data.gaps || []);
+      setGapSummary(data.summary || null);
+    } catch (err) {
+      console.error('Failed to fetch gaps:', err);
+    }
+  }, []);
+
+  const fetchBatches = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/daily-hit/batch-generate');
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setBatches(data.batches || []);
+    } catch (err) {
+      console.error('Failed to fetch batches:', err);
+    }
+  }, []);
+
+  // Enhancement #2: Fetch ratings
+  const fetchRatings = useCallback(async () => {
+    try {
+      const [summaryRes, topRes, dropRes] = await Promise.all([
+        fetch('/api/admin/daily-hit/ratings'),
+        fetch('/api/admin/daily-hit/ratings?view=top_performers'),
+        fetch('/api/admin/daily-hit/ratings?view=drop_offs'),
+      ]);
+
+      const summaryData = await summaryRes.json();
+      const topData = await topRes.json();
+      const dropData = await dropRes.json();
+
+      if (summaryData.summary) setRatingSummary(summaryData.summary);
+      if (topData.topContent) setTopPerformers(topData.topContent);
+      if (dropData.dropOffs) setDropOffs(dropData.dropOffs);
+    } catch (err) {
+      console.error('Failed to fetch ratings:', err);
+    }
+  }, []);
+
+  // Enhancement #5: Fetch distribution
+  const fetchDistribution = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/daily-hit/distribution');
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setChannelStats(data.channelStats || []);
+      setDistributionOverview(data.overview || null);
+    } catch (err) {
+      console.error('Failed to fetch distribution:', err);
+    }
+  }, []);
+
+  // Fetch available AI models
+  const fetchModels = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/daily-hit/generate-content');
+      const data = await res.json();
+      setAvailableModels(data.availableModels || []);
+      setModelInfo(data.modelInfo || {});
+      if (data.recommended && data.availableModels?.includes(data.recommended)) {
+        setSelectedModel(data.recommended);
+      } else if (data.availableModels?.length > 0) {
+        setSelectedModel(data.availableModels[0]);
+      }
+    } catch (err) {
+      console.error('Failed to fetch models:', err);
+    }
+  }, []);
+
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
-      await Promise.all([fetchCalendar(), fetchDrafts(), fetchTopics()]);
+      await Promise.all([fetchCalendar(), fetchDrafts(), fetchTopics(), fetchModels()]);
       setIsLoading(false);
     };
     loadData();
-  }, [fetchCalendar, fetchDrafts, fetchTopics]);
+  }, [fetchCalendar, fetchDrafts, fetchTopics, fetchModels]);
+
+  // Load enhancement data when switching tabs
+  useEffect(() => {
+    if (activeTab === 'batch') {
+      fetchGaps();
+      fetchBatches();
+    } else if (activeTab === 'analytics') {
+      fetchRatings();
+    } else if (activeTab === 'distribution') {
+      fetchDistribution();
+    }
+  }, [activeTab, fetchGaps, fetchBatches, fetchRatings, fetchDistribution]);
 
   // Generate content from AI
   const generateContent = async () => {
@@ -286,6 +470,7 @@ export default function DailyHitBuilderPage() {
           topicId: selectedTopic?.id,
           sourceContent: sourceContent || undefined,
           prompt: customPrompt || undefined,
+          model: selectedModel,
         }),
       });
 
@@ -420,6 +605,100 @@ export default function DailyHitBuilderPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete draft');
     }
+  };
+
+  // Enhancement #1: Batch generation
+  const startBatchGeneration = async () => {
+    if (selectedGapsForBatch.length === 0) {
+      setError('Select at least one day to generate content for');
+      return;
+    }
+
+    setIsBatchGenerating(true);
+    setError(null);
+
+    try {
+      const res = await fetch('/api/admin/daily-hit/batch-generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          targetDays: selectedGapsForBatch,
+          autoSelectTopics: true,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      // Refresh data
+      await Promise.all([fetchGaps(), fetchBatches(), fetchDrafts(), fetchCalendar()]);
+      setSelectedGapsForBatch([]);
+
+      alert(`Batch generation complete! ${data.summary.successful}/${data.summary.total} succeeded`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Batch generation failed');
+    } finally {
+      setIsBatchGenerating(false);
+    }
+  };
+
+  // Toggle gap selection
+  const toggleGapSelection = (dayOfYear: number) => {
+    setSelectedGapsForBatch(prev =>
+      prev.includes(dayOfYear)
+        ? prev.filter(d => d !== dayOfYear)
+        : [...prev, dayOfYear]
+    );
+  };
+
+  // Select next 7 gaps
+  const selectNextWeek = () => {
+    const next7 = gaps.filter(g => !g.hasDraft).slice(0, 7).map(g => g.dayOfYear);
+    setSelectedGapsForBatch(next7);
+  };
+
+  // Enhancement #6: Generate image prompt
+  const generateImagePrompt = async () => {
+    if (!createForm.title && !createForm.body) {
+      setError('Generate content first before creating image prompt');
+      return;
+    }
+
+    setIsGeneratingImagePrompt(true);
+    setError(null);
+
+    try {
+      const res = await fetch('/api/admin/daily-hit/generate-image-prompt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: createForm.title,
+          body: createForm.body,
+          challenge: createForm.challenge,
+          tags: createForm.tags,
+          theme: selectedTopic?.main_theme,
+          targetRole: selectedTopic?.sport_context || 'general',
+          customElements: customImageElements,
+          stylePreset: selectedImageStyle,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      setImagePromptResult(data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to generate image prompt');
+    } finally {
+      setIsGeneratingImagePrompt(false);
+    }
+  };
+
+  // Copy prompt to clipboard
+  const copyToClipboard = async (text: string, id: string) => {
+    await navigator.clipboard.writeText(text);
+    setCopiedPrompt(id);
+    setTimeout(() => setCopiedPrompt(null), 2000);
   };
 
   // Play audio preview
@@ -806,20 +1085,58 @@ export default function DailyHitBuilderPage() {
             />
           </div>
 
+          {/* AI Model Selection */}
+          <div className="p-3 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-lg border border-white/10">
+            <label className="block text-sm text-white/60 mb-2">AI Model</label>
+            <div className="grid grid-cols-3 gap-2">
+              {(['gpt-4o', 'claude', 'gemini'] as const).map((model) => {
+                const info = modelInfo[model];
+                const isAvailable = availableModels.includes(model);
+                return (
+                  <button
+                    key={model}
+                    onClick={() => isAvailable && setSelectedModel(model)}
+                    disabled={!isAvailable}
+                    className={`p-2 rounded-lg text-left transition-all ${
+                      selectedModel === model
+                        ? 'bg-blue-500/30 border-2 border-blue-500'
+                        : isAvailable
+                        ? 'bg-white/5 border border-white/10 hover:border-white/20'
+                        : 'bg-white/5 border border-white/5 opacity-50 cursor-not-allowed'
+                    }`}
+                  >
+                    <p className="text-xs font-medium text-white">
+                      {info?.name || model}
+                      {selectedModel === model && ' ✓'}
+                    </p>
+                    <p className="text-[10px] text-white/40 mt-0.5 line-clamp-2">
+                      {isAvailable ? (info?.description || '') : 'Not configured'}
+                    </p>
+                  </button>
+                );
+              })}
+            </div>
+            {availableModels.length === 0 && (
+              <p className="text-xs text-red-400 mt-2">
+                No AI models configured. Set OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY.
+              </p>
+            )}
+          </div>
+
           <button
             onClick={generateContent}
-            disabled={isGenerating || (!selectedTopic && !sourceContent && !customPrompt)}
+            disabled={isGenerating || (!selectedTopic && !sourceContent && !customPrompt) || availableModels.length === 0}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg disabled:opacity-50"
           >
             {isGenerating ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Generating...
+                Generating with {modelInfo[selectedModel]?.name || selectedModel}...
               </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4" />
-                Generate Content
+                Generate with {modelInfo[selectedModel]?.name || selectedModel}
               </>
             )}
           </button>
@@ -923,6 +1240,487 @@ export default function DailyHitBuilderPage() {
       )}
     </div>
   );
+
+  // Enhancement #1 & #4: Batch Generation + Predictive Calendar
+  const renderBatch = () => (
+    <div className="space-y-6">
+      {/* Gap Summary */}
+      {gapSummary && (
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <Card className={`p-4 text-center ${gapSummary.critical > 0 ? 'border-red-500/50' : ''}`}>
+            <p className="text-2xl font-bold text-red-400">{gapSummary.critical}</p>
+            <p className="text-xs text-white/50">Critical (≤2 days)</p>
+          </Card>
+          <Card className={`p-4 text-center ${gapSummary.warning > 0 ? 'border-yellow-500/50' : ''}`}>
+            <p className="text-2xl font-bold text-yellow-400">{gapSummary.warning}</p>
+            <p className="text-xs text-white/50">Warning (3-7 days)</p>
+          </Card>
+          <Card className="p-4 text-center">
+            <p className="text-2xl font-bold text-blue-400">{gapSummary.upcoming}</p>
+            <p className="text-xs text-white/50">Upcoming (8-30 days)</p>
+          </Card>
+          <Card className="p-4 text-center">
+            <p className="text-2xl font-bold text-emerald-400">{gapSummary.withDrafts}</p>
+            <p className="text-xs text-white/50">With Drafts</p>
+          </Card>
+        </div>
+      )}
+
+      {/* Batch Controls */}
+      <Card className="p-4">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="font-semibold flex items-center gap-2">
+              <Layers className="w-4 h-4 text-purple-400" />
+              Batch Generate Content
+            </h3>
+            <p className="text-sm text-white/50">Select gaps and generate content for multiple days at once</p>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={selectNextWeek}
+              className="px-3 py-1.5 bg-blue-500/20 text-blue-400 rounded-lg text-sm hover:bg-blue-500/30"
+            >
+              Select Next 7
+            </button>
+            <button
+              onClick={() => setSelectedGapsForBatch([])}
+              className="px-3 py-1.5 bg-white/10 text-white/60 rounded-lg text-sm hover:bg-white/20"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+
+        {/* Gap List */}
+        <div className="max-h-80 overflow-y-auto space-y-2 mb-4">
+          {gaps.filter(g => !g.hasDraft).length === 0 ? (
+            <div className="text-center py-8 text-white/40">
+              <CheckCircle className="w-8 h-8 mx-auto mb-2 text-emerald-400" />
+              <p>No gaps without drafts in the next 30 days!</p>
+            </div>
+          ) : (
+            gaps.filter(g => !g.hasDraft).map((gap) => (
+              <button
+                key={gap.dayOfYear}
+                onClick={() => toggleGapSelection(gap.dayOfYear)}
+                className={`w-full flex items-center justify-between p-3 rounded-lg transition-all ${
+                  selectedGapsForBatch.includes(gap.dayOfYear)
+                    ? 'bg-purple-500/20 border border-purple-500/50'
+                    : 'bg-white/5 border border-white/10 hover:border-white/20'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className={`w-5 h-5 rounded flex items-center justify-center ${
+                    selectedGapsForBatch.includes(gap.dayOfYear)
+                      ? 'bg-purple-500'
+                      : 'bg-white/10'
+                  }`}>
+                    {selectedGapsForBatch.includes(gap.dayOfYear) && (
+                      <Check className="w-3 h-3 text-white" />
+                    )}
+                  </div>
+                  <span className="font-medium">Day {gap.dayOfYear}</span>
+                  <span className={`px-2 py-0.5 rounded text-xs ${
+                    gap.gapType === 'critical' ? 'bg-red-500/20 text-red-400' :
+                    gap.gapType === 'warning' ? 'bg-yellow-500/20 text-yellow-400' :
+                    'bg-blue-500/20 text-blue-400'
+                  }`}>
+                    {gap.daysUntil === 0 ? 'Today' : gap.daysUntil === 1 ? 'Tomorrow' : `${gap.daysUntil} days`}
+                  </span>
+                </div>
+              </button>
+            ))
+          )}
+        </div>
+
+        {/* Generate Button */}
+        <button
+          onClick={startBatchGeneration}
+          disabled={isBatchGenerating || selectedGapsForBatch.length === 0}
+          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg disabled:opacity-50"
+        >
+          {isBatchGenerating ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Generating {selectedGapsForBatch.length} Daily Hits...
+            </>
+          ) : (
+            <>
+              <Zap className="w-5 h-5" />
+              Generate {selectedGapsForBatch.length} Daily Hits
+            </>
+          )}
+        </button>
+      </Card>
+
+      {/* Recent Batches */}
+      {batches.length > 0 && (
+        <Card className="p-4">
+          <h3 className="font-semibold mb-3">Recent Batches</h3>
+          <div className="space-y-2">
+            {batches.slice(0, 5).map((batch) => (
+              <div key={batch.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium">{batch.target_days.length} days</p>
+                  <p className="text-xs text-white/40">
+                    {new Date(batch.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className={`px-2 py-0.5 rounded text-xs ${
+                    batch.status === 'complete' ? 'bg-emerald-500/20 text-emerald-400' :
+                    batch.status === 'failed' ? 'bg-red-500/20 text-red-400' :
+                    batch.status === 'partial' ? 'bg-yellow-500/20 text-yellow-400' :
+                    'bg-blue-500/20 text-blue-400'
+                  }`}>
+                    {batch.status}
+                  </span>
+                  <span className="text-xs text-white/40">
+                    {batch.completed_items}/{batch.total_items}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+
+  // Enhancement #2 & #3: Analytics + Quality Feedback
+  const renderAnalytics = () => (
+    <div className="space-y-6">
+      {/* Rating Summary */}
+      {ratingSummary && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          <Card className="p-4 text-center">
+            <p className="text-2xl font-bold text-white">{ratingSummary.totalRatings}</p>
+            <p className="text-xs text-white/50">Total Ratings</p>
+          </Card>
+          <Card className="p-4 text-center">
+            <p className="text-2xl font-bold text-emerald-400">{ratingSummary.homeRunRate}%</p>
+            <p className="text-xs text-white/50">Home Run Rate</p>
+          </Card>
+          <Card className="p-4 text-center">
+            <p className="text-2xl font-bold text-blue-400">{ratingSummary.goodHitRate}%</p>
+            <p className="text-xs text-white/50">Good Hit Rate</p>
+          </Card>
+          <Card className="p-4 text-center">
+            <p className="text-2xl font-bold text-red-400">{ratingSummary.didntHitRate}%</p>
+            <p className="text-xs text-white/50">Didn't Hit Rate</p>
+          </Card>
+          <Card className="p-4 text-center">
+            <p className="text-2xl font-bold text-purple-400">{ratingSummary.avgCompletion}%</p>
+            <p className="text-xs text-white/50">Avg Completion</p>
+          </Card>
+          <Card className="p-4 text-center">
+            <p className="text-2xl font-bold text-orange-400">{ratingSummary.avgListenSeconds}s</p>
+            <p className="text-xs text-white/50">Avg Listen Time</p>
+          </Card>
+        </div>
+      )}
+
+      {/* Top Performers */}
+      {topPerformers.length > 0 && (
+        <Card className="p-4">
+          <h3 className="font-semibold mb-3 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-emerald-400" />
+            Top Performers
+          </h3>
+          <div className="space-y-2">
+            {topPerformers.map((content) => (
+              <div key={content.content_id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium">{content.title}</p>
+                  <p className="text-xs text-white/40">Day {content.day_of_year}</p>
+                </div>
+                <div className="flex items-center gap-3 text-sm">
+                  <span className="text-emerald-400">{content.home_runs} HRs</span>
+                  <span className="text-blue-400">{content.avg_completion}% comp</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Drop-offs (Low Completion) */}
+      {dropOffs.length > 0 && (
+        <Card className="p-4">
+          <h3 className="font-semibold mb-3 flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-yellow-400" />
+            Needs Improvement (Low Completion)
+          </h3>
+          <div className="space-y-2">
+            {dropOffs.map((content) => (
+              <div key={content.content_id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                <div>
+                  <p className="text-sm font-medium">{content.title}</p>
+                  <p className="text-xs text-white/40">Day {content.day_of_year}</p>
+                </div>
+                <div className="flex items-center gap-3 text-sm">
+                  <span className="text-red-400">{content.didnt_hits} misses</span>
+                  <span className="text-yellow-400">{content.avg_completion}% comp</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
+      {/* Empty State */}
+      {!ratingSummary && topPerformers.length === 0 && (
+        <Card className="p-8 text-center">
+          <BarChart3 className="w-12 h-12 text-white/20 mx-auto mb-4" />
+          <p className="text-white/60">No analytics data yet</p>
+          <p className="text-sm text-white/40 mt-2">
+            Ratings will appear as users interact with Daily Hits
+          </p>
+        </Card>
+      )}
+    </div>
+  );
+
+  // Enhancement #5: Multi-Channel Distribution
+  const renderDistribution = () => {
+    const channelIcons: Record<string, typeof Mail> = {
+      push: Target,
+      email: Mail,
+      x: Twitter,
+      facebook: Facebook,
+      instagram: MessageSquare,
+    };
+
+    return (
+      <div className="space-y-6">
+        {/* Overview */}
+        {distributionOverview && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <Card className="p-4 text-center">
+              <p className="text-2xl font-bold text-white">{distributionOverview.totalPublished}</p>
+              <p className="text-xs text-white/50">Published Content</p>
+            </Card>
+            <Card className="p-4 text-center">
+              <p className="text-2xl font-bold text-emerald-400">{distributionOverview.coverageRate}%</p>
+              <p className="text-xs text-white/50">Distribution Coverage</p>
+            </Card>
+            <Card className="p-4 text-center">
+              <p className="text-2xl font-bold text-blue-400">{distributionOverview.pushViews}</p>
+              <p className="text-xs text-white/50">Push Views</p>
+            </Card>
+            <Card className="p-4 text-center">
+              <p className="text-2xl font-bold text-purple-400">{distributionOverview.emailSubscribers}</p>
+              <p className="text-xs text-white/50">Email Subscribers</p>
+            </Card>
+          </div>
+        )}
+
+        {/* Channel Stats */}
+        <Card className="p-4">
+          <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <Share2 className="w-4 h-4 text-blue-400" />
+            Channel Performance
+          </h3>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {channelStats.map((channel) => {
+              const Icon = channelIcons[channel.channel] || MessageSquare;
+              return (
+                <div key={channel.channel} className="p-4 bg-white/5 rounded-lg">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Icon className="w-5 h-5 text-blue-400" />
+                    <span className="font-medium capitalize">{channel.channel}</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <p className="text-white/40">Sent</p>
+                      <p className="font-medium">{channel.sent}</p>
+                    </div>
+                    <div>
+                      <p className="text-white/40">Engagement</p>
+                      <p className="font-medium">{channel.totalEngagement}</p>
+                    </div>
+                    <div>
+                      <p className="text-white/40">Clicks</p>
+                      <p className="font-medium">{channel.totalClicks}</p>
+                    </div>
+                    <div>
+                      <p className="text-white/40">Failed</p>
+                      <p className="font-medium text-red-400">{channel.failed}</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+
+        {/* Empty State */}
+        {channelStats.length === 0 && !distributionOverview && (
+          <Card className="p-8 text-center">
+            <Share2 className="w-12 h-12 text-white/20 mx-auto mb-4" />
+            <p className="text-white/60">No distribution data yet</p>
+            <p className="text-sm text-white/40 mt-2">
+              Distribution tracking will appear as content is published
+            </p>
+          </Card>
+        )}
+      </div>
+    );
+  };
+
+  // Enhancement #6: Image Prompt Generator
+  const renderImages = () => {
+    const styleOptions = [
+      { id: 'cinematic_silhouette', name: 'Cinematic Silhouette', desc: 'Dramatic backlit player silhouettes' },
+      { id: 'epic_hero', name: 'Epic Hero', desc: 'Stadium lights, heroic poses' },
+      { id: 'fiery_determination', name: 'Fiery Determination', desc: 'Fire effects, intense action' },
+      { id: 'aurora_mystical', name: 'Aurora Mystical', desc: 'Northern lights, cosmic energy' },
+      { id: 'gritty_determination', name: 'Gritty Determination', desc: 'Raw, powerful, documentary style' },
+      { id: 'golden_triumph', name: 'Golden Triumph', desc: 'Golden hour, victory moments' },
+    ];
+
+    return (
+      <div className="space-y-6">
+        <Card className="p-4">
+          <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <Image className="w-4 h-4 text-orange-400" />
+            OpenAI DALL-E Image Prompt Generator
+          </h3>
+          <p className="text-sm text-white/60 mb-4">
+            Generate optimized prompts for creating high-quality baseball imagery that matches your Daily Hit content.
+          </p>
+
+          {/* Style Selection */}
+          <div className="mb-4">
+            <label className="block text-sm text-white/60 mb-2">Visual Style</label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {styleOptions.map((style) => (
+                <button
+                  key={style.id}
+                  onClick={() => setSelectedImageStyle(style.id)}
+                  className={`p-3 rounded-lg text-left transition-all ${
+                    selectedImageStyle === style.id
+                      ? 'bg-orange-500/20 border-2 border-orange-500'
+                      : 'bg-white/5 border border-white/10 hover:border-white/20'
+                  }`}
+                >
+                  <p className="text-xs font-medium">{style.name}</p>
+                  <p className="text-[10px] text-white/40 mt-0.5">{style.desc}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Custom Elements */}
+          <div className="mb-4">
+            <label className="block text-sm text-white/60 mb-2">Custom Elements (optional)</label>
+            <input
+              type="text"
+              value={customImageElements}
+              onChange={(e) => setCustomImageElements(e.target.value)}
+              placeholder="e.g., female pitcher, catching gear, batting cage..."
+              className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white"
+            />
+          </div>
+
+          {/* Generate Button */}
+          <button
+            onClick={generateImagePrompt}
+            disabled={isGeneratingImagePrompt || (!createForm.title && !createForm.body)}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg disabled:opacity-50"
+          >
+            {isGeneratingImagePrompt ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Generating Prompt...
+              </>
+            ) : (
+              <>
+                <Wand2 className="w-4 h-4" />
+                Generate Image Prompt
+              </>
+            )}
+          </button>
+
+          {!createForm.title && !createForm.body && (
+            <p className="text-xs text-yellow-400 mt-2">
+              Create content first in the Create tab to generate matching image prompts.
+            </p>
+          )}
+        </Card>
+
+        {/* Generated Prompt Result */}
+        {imagePromptResult && (
+          <Card className="p-4">
+            <h3 className="font-semibold mb-4 flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-yellow-400" />
+              Generated Prompts
+            </h3>
+
+            {/* Main Prompt */}
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm text-white/60">Primary Prompt ({imagePromptResult.metadata.style})</label>
+                <button
+                  onClick={() => copyToClipboard(imagePromptResult.prompt, 'main')}
+                  className="flex items-center gap-1 px-2 py-1 bg-white/10 rounded text-xs hover:bg-white/20"
+                >
+                  {copiedPrompt === 'main' ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                  {copiedPrompt === 'main' ? 'Copied!' : 'Copy'}
+                </button>
+              </div>
+              <div className="p-3 bg-white/5 rounded-lg border border-white/10 text-sm text-white/80 font-mono">
+                {imagePromptResult.prompt}
+              </div>
+            </div>
+
+            {/* Alternative Prompts */}
+            <div className="mb-4">
+              <label className="text-sm text-white/60 mb-2 block">Alternative Styles</label>
+              <div className="space-y-2">
+                {imagePromptResult.alternatives.map((alt) => (
+                  <div key={alt.style} className="p-3 bg-white/5 rounded-lg border border-white/10">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs font-medium text-white/60 capitalize">
+                        {alt.style.replace(/_/g, ' ')}
+                      </span>
+                      <button
+                        onClick={() => copyToClipboard(alt.prompt, alt.style)}
+                        className="flex items-center gap-1 px-2 py-0.5 bg-white/10 rounded text-xs hover:bg-white/20"
+                      >
+                        {copiedPrompt === alt.style ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                      </button>
+                    </div>
+                    <p className="text-xs text-white/60 font-mono line-clamp-2">{alt.prompt}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Instructions */}
+            <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+              <h4 className="text-sm font-medium text-blue-400 mb-2">OpenAI DALL-E Instructions</h4>
+              <ul className="text-xs text-white/60 space-y-1">
+                {imagePromptResult.instructions.tips.map((tip, i) => (
+                  <li key={i}>• {tip}</li>
+                ))}
+              </ul>
+              <a
+                href="https://platform.openai.com/playground/images"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 mt-3 text-xs text-blue-400 hover:text-blue-300"
+              >
+                <ExternalLink className="w-3 h-3" />
+                Open OpenAI Image Playground
+              </a>
+            </div>
+          </Card>
+        )}
+      </div>
+    );
+  };
 
   // Render topics browser
   const renderTopics = () => (
@@ -1103,7 +1901,24 @@ export default function DailyHitBuilderPage() {
                   Create
                 </TabButton>
                 <TabButton active={activeTab === 'topics'} onClick={() => setActiveTab('topics')} icon={Sparkles}>
-                  Topics ({filteredTopics.length})
+                  Topics
+                </TabButton>
+                <TabButton active={activeTab === 'batch'} onClick={() => setActiveTab('batch')} icon={Layers}>
+                  Batch
+                  {gapSummary && gapSummary.critical > 0 && (
+                    <span className="ml-1 px-1.5 py-0.5 bg-red-500 text-white text-[10px] rounded-full">
+                      {gapSummary.critical}
+                    </span>
+                  )}
+                </TabButton>
+                <TabButton active={activeTab === 'analytics'} onClick={() => setActiveTab('analytics')} icon={BarChart3}>
+                  Analytics
+                </TabButton>
+                <TabButton active={activeTab === 'distribution'} onClick={() => setActiveTab('distribution')} icon={Share2}>
+                  Distribution
+                </TabButton>
+                <TabButton active={activeTab === 'images'} onClick={() => setActiveTab('images')} icon={Image}>
+                  Images
                 </TabButton>
               </div>
             </div>
@@ -1240,6 +2055,10 @@ export default function DailyHitBuilderPage() {
                 {activeTab === 'drafts' && renderDrafts()}
                 {activeTab === 'create' && renderCreate()}
                 {activeTab === 'topics' && renderTopics()}
+                {activeTab === 'batch' && renderBatch()}
+                {activeTab === 'analytics' && renderAnalytics()}
+                {activeTab === 'distribution' && renderDistribution()}
+                {activeTab === 'images' && renderImages()}
               </>
             )}
           </div>
