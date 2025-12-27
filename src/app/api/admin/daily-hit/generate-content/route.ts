@@ -6,8 +6,20 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
-// Supported AI models
+// OpenRouter configuration
+const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
+const APP_REFERER = 'https://mindandmuscle.ai'
+const APP_TITLE = 'Mind & Muscle Daily Hit Builder'
+
+// Supported AI models via OpenRouter
 type AIModel = 'gpt-4o' | 'claude' | 'gemini'
+
+// Map friendly names to OpenRouter model IDs
+const MODEL_MAP: Record<AIModel, string> = {
+  'gpt-4o': 'openai/gpt-4o',
+  'claude': 'anthropic/claude-3-opus',
+  'gemini': 'google/gemini-2.0-flash-exp',
+}
 
 const SYSTEM_PROMPT = `You are the Mind & Muscle Daily Hit content creator for youth baseball/softball athletes (ages 12-20).
 
@@ -62,19 +74,27 @@ Respond with a JSON object containing:
   "keyTakeaway": "One sentence key takeaway"
 }`
 
-// Generate with OpenAI GPT-4o
-async function generateWithOpenAI(systemPrompt: string, userPrompt: string): Promise<string> {
-  const apiKey = process.env.OPENAI_API_KEY
-  if (!apiKey) throw new Error('OPENAI_API_KEY not configured')
+// Generate content via OpenRouter (unified API for all models)
+async function generateWithOpenRouter(
+  systemPrompt: string,
+  userPrompt: string,
+  model: AIModel
+): Promise<string> {
+  const apiKey = process.env.OPENROUTER_API_KEY
+  if (!apiKey) throw new Error('OPENROUTER_API_KEY not configured')
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+  const openRouterModel = MODEL_MAP[model]
+
+  const response = await fetch(OPENROUTER_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${apiKey}`,
+      'HTTP-Referer': APP_REFERER,
+      'X-Title': APP_TITLE,
     },
     body: JSON.stringify({
-      model: 'gpt-4o',
+      model: openRouterModel,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
@@ -86,111 +106,47 @@ async function generateWithOpenAI(systemPrompt: string, userPrompt: string): Pro
 
   if (!response.ok) {
     const error = await response.text()
-    throw new Error(`OpenAI API error: ${error}`)
+    throw new Error(`OpenRouter API error (${openRouterModel}): ${error}`)
   }
 
   const data = await response.json()
   return data.choices[0].message.content
 }
 
-// Generate with Claude (Anthropic)
-async function generateWithClaude(systemPrompt: string, userPrompt: string): Promise<string> {
-  const apiKey = process.env.ANTHROPIC_API_KEY
-  if (!apiKey) throw new Error('ANTHROPIC_API_KEY not configured')
-
-  const response = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': apiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-3-opus-20240229',
-      max_tokens: 4096,
-      system: systemPrompt,
-      messages: [
-        { role: 'user', content: userPrompt },
-      ],
-    }),
-  })
-
-  if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`Claude API error: ${error}`)
-  }
-
-  const data = await response.json()
-  return data.content[0].text
-}
-
-// Generate with Gemini
-async function generateWithGemini(systemPrompt: string, userPrompt: string): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY
-  if (!apiKey) throw new Error('GEMINI_API_KEY not configured')
-
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{
-          parts: [
-            { text: systemPrompt },
-            { text: userPrompt }
-          ]
-        }],
-        generationConfig: {
-          temperature: 0.8,
-          topK: 40,
-          topP: 0.95,
-          maxOutputTokens: 4096,
-        }
-      })
-    }
-  )
-
-  if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`Gemini API error: ${error}`)
-  }
-
-  const data = await response.json()
-  return data.candidates[0].content.parts[0].text
-}
-
-// Check which models are available
-function getAvailableModels(): AIModel[] {
-  const models: AIModel[] = []
-  if (process.env.OPENAI_API_KEY) models.push('gpt-4o')
-  if (process.env.ANTHROPIC_API_KEY) models.push('claude')
-  if (process.env.GEMINI_API_KEY) models.push('gemini')
-  return models
+// Check if OpenRouter is configured
+function isOpenRouterAvailable(): boolean {
+  return !!process.env.OPENROUTER_API_KEY
 }
 
 // GET - Return available models
 export async function GET() {
-  const availableModels = getAvailableModels()
+  const hasOpenRouter = isOpenRouterAvailable()
+
+  // All models available if OpenRouter is configured
+  const availableModels: AIModel[] = hasOpenRouter ? ['gpt-4o', 'claude', 'gemini'] : []
 
   return NextResponse.json({
     availableModels,
-    recommended: availableModels.includes('gpt-4o') ? 'gpt-4o' : availableModels[0] || null,
+    recommended: hasOpenRouter ? 'gpt-4o' : null,
+    provider: 'OpenRouter',
     modelInfo: {
       'gpt-4o': {
         name: 'GPT-4o (OpenAI)',
         description: 'Best for creative writing, nuanced emotion, and narrative flair',
-        available: availableModels.includes('gpt-4o'),
+        available: hasOpenRouter,
+        openRouterId: MODEL_MAP['gpt-4o'],
       },
       'claude': {
         name: 'Claude Opus (Anthropic)',
         description: 'Best for structured, uplifting prose with exceptional clarity and coherence',
-        available: availableModels.includes('claude'),
+        available: hasOpenRouter,
+        openRouterId: MODEL_MAP['claude'],
       },
       'gemini': {
-        name: 'Gemini 2.0 (Google)',
+        name: 'Gemini 2.0 Flash (Google)',
         description: 'Fast and efficient with good creative output',
-        available: availableModels.includes('gemini'),
+        available: hasOpenRouter,
+        openRouterId: MODEL_MAP['gemini'],
       },
     },
   })
@@ -208,18 +164,18 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Determine which model to use
-    const availableModels = getAvailableModels()
-    const selectedModel: AIModel = model && availableModels.includes(model)
-      ? model
-      : availableModels[0]
-
-    if (!selectedModel) {
+    // Check OpenRouter availability
+    if (!isOpenRouterAvailable()) {
       return NextResponse.json(
-        { error: 'No AI models configured. Please set OPENAI_API_KEY, ANTHROPIC_API_KEY, or GEMINI_API_KEY' },
+        { error: 'OPENROUTER_API_KEY not configured. Add it in Vercel environment variables.' },
         { status: 500 }
       )
     }
+
+    // Default to gpt-4o if no model specified
+    const selectedModel: AIModel = model && ['gpt-4o', 'claude', 'gemini'].includes(model)
+      ? model
+      : 'gpt-4o'
 
     // Get topic details if topicId provided
     let topic = null
@@ -249,21 +205,8 @@ ${sourceContent}`
       : `Create a Daily Hit based on this prompt:
 ${prompt}`
 
-    // Call the selected AI model
-    let responseText: string
-    switch (selectedModel) {
-      case 'gpt-4o':
-        responseText = await generateWithOpenAI(SYSTEM_PROMPT, userPrompt)
-        break
-      case 'claude':
-        responseText = await generateWithClaude(SYSTEM_PROMPT, userPrompt)
-        break
-      case 'gemini':
-        responseText = await generateWithGemini(SYSTEM_PROMPT, userPrompt)
-        break
-      default:
-        throw new Error(`Unknown model: ${selectedModel}`)
-    }
+    // Generate via OpenRouter
+    const responseText = await generateWithOpenRouter(SYSTEM_PROMPT, userPrompt, selectedModel)
 
     // Extract JSON from response
     let jsonText = responseText
@@ -280,6 +223,7 @@ ${prompt}`
       content: generatedContent,
       topicId: topicId || null,
       model: selectedModel,
+      openRouterId: MODEL_MAP[selectedModel],
     })
 
   } catch (error) {
