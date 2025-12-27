@@ -707,7 +707,7 @@ export default function DailyHitBuilderPage() {
       challenge: draft.challenge,
       audioScript: draft.audio_script,
       tags: draft.tags,
-      keyTakeaway: draft.key_takeaway,
+      keyTakeaway: draft.key_takeaway || undefined,
     });
     setTargetDayOfYear(draft.day_of_year || null);
     setActiveTab('create');
