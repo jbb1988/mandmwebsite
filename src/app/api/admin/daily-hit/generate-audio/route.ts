@@ -1,22 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import ffmpeg from 'fluent-ffmpeg'
-import ffmpegPath from 'ffmpeg-static'
-import { writeFile, unlink, readFile, mkdir } from 'fs/promises'
-import { join } from 'path'
-import { tmpdir } from 'os'
-import { randomUUID } from 'crypto'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 const elevenLabsApiKey = process.env.ELEVENLABS_API_KEY!
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
-
-// Set FFmpeg path from ffmpeg-static
-if (ffmpegPath) {
-  ffmpeg.setFfmpegPath(ffmpegPath)
-}
 
 // ElevenLabs Configuration
 const ELEVENLABS_CONFIG = {
@@ -32,80 +21,118 @@ const ELEVENLABS_CONFIG = {
 const INTRO_URL = `${supabaseUrl}/storage/v1/object/public/daily-motivation-audio/dhintro.mp3`
 const OUTRO_URL = `${supabaseUrl}/storage/v1/object/public/daily-motivation-audio/dhoutro.mp3`
 
-// Merge audio files using FFmpeg (Node.js version)
-async function mergeAudioWithFFmpeg(
+/**
+ * Pure JavaScript MP3 concatenation
+ *
+ * MP3 files can be concatenated if we handle the metadata correctly:
+ * 1. ID3v2 tags appear at the start (variable length, starts with "ID3")
+ * 2. MP3 audio frames start with sync word (0xFF followed by 0xE0-0xFF)
+ * 3. ID3v1 tags appear at the end (fixed 128 bytes, starts with "TAG")
+ *
+ * For concatenation, we:
+ * - Keep the first file's ID3v2 header (if present)
+ * - Extract only the MP3 frame data from each file
+ * - Skip ID3v1 tags from all files
+ */
+
+function findID3v2End(data: Uint8Array): number {
+  // Check for ID3v2 header: "ID3"
+  if (data[0] === 0x49 && data[1] === 0x44 && data[2] === 0x33) {
+    // ID3v2 header found
+    // Bytes 6-9 contain the size (syncsafe integer)
+    const size = ((data[6] & 0x7F) << 21) |
+                 ((data[7] & 0x7F) << 14) |
+                 ((data[8] & 0x7F) << 7) |
+                 (data[9] & 0x7F)
+    // Total header size = 10 bytes header + size
+    return 10 + size
+  }
+  return 0
+}
+
+function findMP3FrameStart(data: Uint8Array, startOffset: number = 0): number {
+  // Look for MP3 frame sync: 0xFF followed by 0xE0 or higher (11 sync bits)
+  for (let i = startOffset; i < data.length - 1; i++) {
+    if (data[i] === 0xFF && (data[i + 1] & 0xE0) === 0xE0) {
+      return i
+    }
+  }
+  return startOffset
+}
+
+function findID3v1Start(data: Uint8Array): number {
+  // ID3v1 tag is exactly 128 bytes at the end, starting with "TAG"
+  if (data.length >= 128) {
+    const tagStart = data.length - 128
+    if (data[tagStart] === 0x54 && data[tagStart + 1] === 0x41 && data[tagStart + 2] === 0x47) {
+      return tagStart
+    }
+  }
+  return data.length
+}
+
+function extractMP3Frames(data: Uint8Array, keepHeader: boolean = false): Uint8Array {
+  const id3v2End = findID3v2End(data)
+  const frameStart = findMP3FrameStart(data, id3v2End)
+  const id3v1Start = findID3v1Start(data)
+
+  if (keepHeader && id3v2End > 0) {
+    // Keep the ID3v2 header for the first file
+    const header = data.slice(0, id3v2End)
+    const frames = data.slice(frameStart, id3v1Start)
+    const result = new Uint8Array(header.length + frames.length)
+    result.set(header, 0)
+    result.set(frames, header.length)
+    return result
+  }
+
+  // Just return the MP3 frames
+  return data.slice(frameStart, id3v1Start)
+}
+
+async function mergeMP3Files(
   introUrl: string,
   ttsUrl: string,
   outroUrl: string
 ): Promise<Buffer> {
-  // Create temp directory for this operation
-  const tempDir = join(tmpdir(), `audio-merge-${randomUUID()}`)
-  await mkdir(tempDir, { recursive: true })
+  console.log('Fetching audio files for merge...')
 
-  const introPath = join(tempDir, 'intro.mp3')
-  const ttsPath = join(tempDir, 'tts.mp3')
-  const outroPath = join(tempDir, 'outro.mp3')
-  const listPath = join(tempDir, 'list.txt')
-  const outputPath = join(tempDir, 'output.mp3')
+  // Fetch all audio files
+  const [introData, ttsData, outroData] = await Promise.all([
+    fetch(introUrl).then(r => r.arrayBuffer()),
+    fetch(ttsUrl).then(r => r.arrayBuffer()),
+    fetch(outroUrl).then(r => r.arrayBuffer()),
+  ])
 
-  try {
-    console.log('Fetching audio files...')
+  console.log(`Audio files fetched: intro=${introData.byteLength}, tts=${ttsData.byteLength}, outro=${outroData.byteLength}`)
 
-    // Fetch all audio files
-    const [introData, ttsData, outroData] = await Promise.all([
-      fetch(introUrl).then(r => r.arrayBuffer()),
-      fetch(ttsUrl).then(r => r.arrayBuffer()),
-      fetch(outroUrl).then(r => r.arrayBuffer()),
-    ])
+  // Convert to Uint8Arrays
+  const introBytes = new Uint8Array(introData)
+  const ttsBytes = new Uint8Array(ttsData)
+  const outroBytes = new Uint8Array(outroData)
 
-    console.log(`Audio files fetched: intro=${introData.byteLength}, tts=${ttsData.byteLength}, outro=${outroData.byteLength}`)
+  // Extract MP3 frames from each file
+  // Keep the header from the intro file
+  const introFrames = extractMP3Frames(introBytes, true)
+  const ttsFrames = extractMP3Frames(ttsBytes, false)
+  const outroFrames = extractMP3Frames(outroBytes, false)
 
-    // Write input files to temp directory
-    await writeFile(introPath, Buffer.from(introData))
-    await writeFile(ttsPath, Buffer.from(ttsData))
-    await writeFile(outroPath, Buffer.from(outroData))
+  console.log(`Extracted frames: intro=${introFrames.length}, tts=${ttsFrames.length}, outro=${outroFrames.length}`)
 
-    // Create concat list file
-    await writeFile(listPath, `file '${introPath}'\nfile '${ttsPath}'\nfile '${outroPath}'`)
+  // Concatenate all frames
+  const totalLength = introFrames.length + ttsFrames.length + outroFrames.length
+  const merged = new Uint8Array(totalLength)
 
-    console.log('Running FFmpeg concat...')
+  let offset = 0
+  merged.set(introFrames, offset)
+  offset += introFrames.length
+  merged.set(ttsFrames, offset)
+  offset += ttsFrames.length
+  merged.set(outroFrames, offset)
 
-    // Merge using FFmpeg concat demuxer
-    await new Promise<void>((resolve, reject) => {
-      ffmpeg()
-        .input(listPath)
-        .inputOptions(['-f', 'concat', '-safe', '0'])
-        .outputOptions(['-c', 'copy'])
-        .output(outputPath)
-        .on('start', (cmd) => console.log('FFmpeg command:', cmd))
-        .on('error', (err) => {
-          console.error('FFmpeg error:', err)
-          reject(err)
-        })
-        .on('end', () => {
-          console.log('FFmpeg merge complete')
-          resolve()
-        })
-        .run()
-    })
+  console.log(`Merged MP3 size: ${merged.length} bytes`)
 
-    // Read the output file
-    const outputBuffer = await readFile(outputPath)
-    console.log(`Merged audio size: ${outputBuffer.length} bytes`)
-
-    return outputBuffer
-  } finally {
-    // Cleanup temp files
-    try {
-      await unlink(introPath).catch(() => {})
-      await unlink(ttsPath).catch(() => {})
-      await unlink(outroPath).catch(() => {})
-      await unlink(listPath).catch(() => {})
-      await unlink(outputPath).catch(() => {})
-    } catch {
-      // Ignore cleanup errors
-    }
-  }
+  return Buffer.from(merged)
 }
 
 // POST - Generate audio for a draft using ElevenLabs
@@ -220,11 +247,11 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Step 3: Merge intro + TTS + outro using FFmpeg
-    console.log('Merging audio with FFmpeg...')
+    // Step 3: Merge intro + TTS + outro using pure JS MP3 concatenation
+    console.log('Merging audio files...')
 
     try {
-      const mergedBuffer = await mergeAudioWithFFmpeg(
+      const mergedBuffer = await mergeMP3Files(
         INTRO_URL,
         ttsAudioUrl,
         OUTRO_URL
@@ -271,8 +298,8 @@ export async function POST(request: NextRequest) {
       })
 
     } catch (mergeError) {
-      // FFmpeg merge failed, fall back to TTS only
-      console.error('FFmpeg merge failed:', mergeError)
+      // Merge failed, fall back to TTS only
+      console.error('MP3 merge failed:', mergeError)
 
       await supabase
         .from('daily_hit_drafts')
