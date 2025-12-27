@@ -1222,205 +1222,47 @@ export default function DailyHitBuilderPage() {
                 </div>
               </div>
 
-              {/* Approval Workflow Steps */}
-              <div className="border-t border-white/10 pt-3 space-y-2">
-                {/* Step 1: Script Approval */}
-                <div className="flex items-center justify-between p-2 bg-white/5 rounded-lg">
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">1</span>
-                    <span className="text-sm">Script</span>
+              {/* Script Approval */}
+              <div className="border-t border-white/10 pt-3">
+                <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium">Script</span>
                     {draft.script_approved ? (
                       <span className="flex items-center gap-1 text-emerald-400 text-xs">
-                        <CheckCircle className="w-3 h-3" /> Approved
+                        <CheckCircle className="w-4 h-4" /> Approved
                       </span>
                     ) : (
-                      <span className="text-yellow-400 text-xs">Pending Review</span>
+                      <span className="text-yellow-400 text-xs">Pending Approval</span>
                     )}
                   </div>
                   {!draft.script_approved && draft.audio_script && (
                     <button
                       onClick={() => approveScript(draft)}
-                      className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded text-xs hover:bg-emerald-500/30"
+                      className="px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-lg text-sm hover:bg-emerald-500/30 font-medium"
                     >
                       Approve Script
                     </button>
                   )}
                 </div>
 
-                {/* Step 2: Audio Generation */}
-                <div className={`flex items-center justify-between p-2 rounded-lg ${draft.script_approved ? 'bg-white/5' : 'bg-white/[0.02] opacity-50'}`}>
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">2</span>
-                    <span className="text-sm">Audio</span>
-                    {draft.audio_url ? (
-                      <span className="flex items-center gap-1 text-emerald-400 text-xs">
-                        <CheckCircle className="w-3 h-3" /> Generated
-                      </span>
-                    ) : draft.audio_generation_status === 'generating' || draft.audio_generation_status === 'combining' ? (
-                      <span className="flex items-center gap-1 text-blue-400 text-xs">
-                        <Loader2 className="w-3 h-3 animate-spin" /> Generating...
-                      </span>
-                    ) : draft.audio_generation_status === 'failed' ? (
-                      <span className="text-red-400 text-xs">Failed</span>
-                    ) : (
-                      <span className="text-white/40 text-xs">Not generated</span>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {draft.audio_url && (
-                      <>
-                        <button
-                          onClick={() => isPlaying ? stopAudio() : playAudio(draft.audio_url!)}
-                          className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs"
-                        >
-                          {isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-                        </button>
-                        <button
-                          onClick={() => {
-                            if (window.confirm('Reset audio? You will need to regenerate (uses ElevenLabs credits).')) {
-                              resetAudio(draft);
-                            }
-                          }}
-                          className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded text-xs"
-                          title="Reset & Regenerate"
-                        >
-                          <RefreshCw className="w-3 h-3" />
-                        </button>
-                      </>
-                    )}
-                    {!draft.audio_url && draft.script_approved && !draft.audio_generation_status && (
-                      <span className="text-blue-400 text-xs flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        Run Python script
-                      </span>
-                    )}
-                    {draft.audio_generation_status === 'failed' && (
-                      <button
-                        onClick={() => resetAudio(draft)}
-                        className="px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded text-xs"
-                      >
-                        Retry
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                {/* Step 3: Audio Approval */}
-                <div className={`p-2 rounded-lg ${draft.audio_url ? 'bg-white/5' : 'bg-white/[0.02] opacity-50'}`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">3</span>
-                      <span className="text-sm">Review Audio</span>
-                      {draft.audio_approved ? (
-                        <span className="flex items-center gap-1 text-emerald-400 text-xs">
-                          <CheckCircle className="w-3 h-3" /> Approved
-                        </span>
-                      ) : draft.audio_url ? (
-                        <span className="text-yellow-400 text-xs">Listen & Approve</span>
-                      ) : (
-                        <span className="text-white/40 text-xs">Waiting for audio</span>
-                      )}
-                    </div>
-                    {draft.audio_url && !draft.audio_approved && (
-                      <button
-                        onClick={() => approveAudio(draft)}
-                        className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded text-xs hover:bg-emerald-500/30"
-                      >
-                        Approve Audio
-                      </button>
-                    )}
-                  </div>
-                  {/* Audio Player */}
-                  {draft.audio_url && (
-                    <div className="mt-2 p-2 bg-black/20 rounded">
-                      <audio
-                        controls
-                        src={draft.audio_url}
-                        className="w-full h-8"
-                        style={{ filter: 'invert(1)' }}
-                      />
-                      <p className="text-xs text-white/40 mt-1 truncate">{draft.audio_url.split('/').pop()}</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Step 4: Publish */}
-                <div className={`flex items-center justify-between p-2 rounded-lg ${draft.audio_approved ? 'bg-white/5' : 'bg-white/[0.02] opacity-50'}`}>
-                  <div className="flex items-center gap-2">
-                    <span className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-xs font-bold">4</span>
-                    <span className="text-sm">Publish</span>
+                {/* Status indicator */}
+                {draft.script_approved && (
+                  <div className="mt-2 p-2 rounded-lg bg-white/[0.02] text-xs text-white/50">
                     {draft.status === 'published' ? (
-                      <span className="flex items-center gap-1 text-emerald-400 text-xs">
-                        <CheckCircle className="w-3 h-3" /> Published
+                      <span className="text-emerald-400 flex items-center gap-1">
+                        <CheckCircle className="w-3 h-3" /> Published to Day {draft.day_of_year}
                       </span>
-                    ) : draft.audio_approved ? (
-                      <span className="text-purple-400 text-xs">Ready to publish</span>
+                    ) : draft.audio_url ? (
+                      <span className="text-blue-400">Audio ready - run script with --publish to publish</span>
+                    ) : draft.audio_generation_status === 'generating' ? (
+                      <span className="text-blue-400 flex items-center gap-1">
+                        <Loader2 className="w-3 h-3 animate-spin" /> Generating audio...
+                      </span>
                     ) : (
-                      <span className="text-white/40 text-xs">Approve audio first</span>
+                      <span>Waiting for Python script to generate audio...</span>
                     )}
                   </div>
-                  {draft.status !== 'published' && draft.audio_approved && draft.day_of_year && (
-                    <span className="text-purple-400 text-xs flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      Run --publish
-                    </span>
-                  )}
-                  {!draft.day_of_year && draft.audio_approved && (
-                    editingDayForDraftId === draft.id ? (
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          min="1"
-                          max="365"
-                          value={inlineDayValue}
-                          onChange={(e) => setInlineDayValue(e.target.value)}
-                          placeholder="1-365"
-                          className="w-20 px-2 py-1 bg-white/5 border border-white/20 rounded text-xs text-white"
-                          autoFocus
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && inlineDayValue) {
-                              setDraftDayOfYear(draft.id, parseInt(inlineDayValue));
-                            } else if (e.key === 'Escape') {
-                              setEditingDayForDraftId(null);
-                              setInlineDayValue('');
-                            }
-                          }}
-                        />
-                        <button
-                          onClick={() => {
-                            if (inlineDayValue) {
-                              setDraftDayOfYear(draft.id, parseInt(inlineDayValue));
-                            }
-                          }}
-                          disabled={!inlineDayValue}
-                          className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs hover:bg-blue-500/30 disabled:opacity-50"
-                        >
-                          Set
-                        </button>
-                        <button
-                          onClick={() => {
-                            setEditingDayForDraftId(null);
-                            setInlineDayValue('');
-                          }}
-                          className="px-2 py-1 text-white/40 hover:text-white/60 text-xs"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setEditingDayForDraftId(draft.id);
-                          setInlineDayValue('');
-                        }}
-                        className="px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded text-xs hover:bg-yellow-500/30 flex items-center gap-1"
-                      >
-                        <Calendar className="w-3 h-3" />
-                        Set Day
-                      </button>
-                    )
-                  )}
-                </div>
+                )}
               </div>
             </Card>
           ))}
