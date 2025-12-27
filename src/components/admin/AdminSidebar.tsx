@@ -23,6 +23,7 @@ import {
   DollarSign,
   Pin,
   PinOff,
+  Mic,
 } from 'lucide-react';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import CommandSearch from './CommandSearch';
@@ -69,6 +70,7 @@ const NAV_SECTIONS: NavSection[] = [
     title: 'Marketing',
     icon: '📢',
     items: [
+      { id: 'daily-hit', name: 'Daily Hit', href: '/admin/daily-hit-builder', icon: Mic, shortcut: 'H' },
       { id: 'campaigns', name: 'Campaigns', href: '/admin/campaigns', icon: Megaphone, shortcut: 'C' },
       { id: 'announcements', name: 'Announcements', href: '/admin/announcements', icon: Megaphone },
       { id: 'templates', name: 'Templates', href: '/admin/templates', icon: Mail },
