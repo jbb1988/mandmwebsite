@@ -297,6 +297,9 @@ export default function DailyHitBuilderPage() {
 
   // Enhancement #6: Image Prompt State
   const [imagePromptResult, setImagePromptResult] = useState<ImagePromptResult | null>(null);
+
+  // Draft Review/Edit State
+  const [editingDraft, setEditingDraft] = useState<Draft | null>(null);
   const [isGeneratingImagePrompt, setIsGeneratingImagePrompt] = useState(false);
 
   // Audio Preview State for Published Content
@@ -689,6 +692,64 @@ export default function DailyHitBuilderPage() {
       await fetchCalendar();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete draft');
+    }
+  };
+
+  // Edit/Review draft - load into create form
+  const editDraft = (draft: Draft) => {
+    setEditingDraft(draft);
+    setCreateForm({
+      title: draft.title,
+      pushText: draft.push_text,
+      headline: draft.headline || `Mind & Muscle Daily Hit: ${draft.title}`,
+      body: draft.body,
+      challenge: draft.challenge,
+      audioScript: draft.audio_script,
+      tags: draft.tags,
+      keyTakeaway: draft.key_takeaway,
+    });
+    setTargetDayOfYear(draft.day_of_year || null);
+    setActiveTab('create');
+  };
+
+  // Update existing draft
+  const updateDraft = async (status: 'draft' | 'pending_review' | 'approved' = 'draft') => {
+    if (!editingDraft) return;
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      const res = await fetch('/api/admin/daily-hit', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: editingDraft.id,
+          title: createForm.title,
+          pushText: createForm.pushText,
+          headline: createForm.headline,
+          body: createForm.body,
+          challenge: createForm.challenge,
+          tags: createForm.tags,
+          dayOfYear: targetDayOfYear,
+          audioScript: createForm.audioScript,
+          status,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      // Clear form and refresh
+      setEditingDraft(null);
+      setCreateForm({});
+      setTargetDayOfYear(null);
+      await fetchDrafts();
+      await fetchCalendar();
+      setActiveTab('drafts');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to update draft');
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -1091,6 +1152,15 @@ export default function DailyHitBuilderPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  {/* Edit/Review Button */}
+                  <button
+                    onClick={() => editDraft(draft)}
+                    className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+                    title="Edit / Review"
+                  >
+                    <Edit3 className="w-4 h-4" />
+                  </button>
+                  {/* Publish Button - only if has audio */}
                   {draft.status !== 'published' && draft.audio_url && (
                     <button
                       onClick={() => publishDraft(draft)}
@@ -1120,7 +1190,23 @@ export default function DailyHitBuilderPage() {
   const renderCreate = () => (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-2">
-        <h2 className="text-lg font-semibold">Create Daily Hit</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-lg font-semibold">
+            {editingDraft ? 'Edit Draft' : 'Create Daily Hit'}
+          </h2>
+          {editingDraft && (
+            <button
+              onClick={() => {
+                setEditingDraft(null);
+                setCreateForm({});
+                setTargetDayOfYear(null);
+              }}
+              className="text-sm text-white/40 hover:text-white/60 flex items-center gap-1"
+            >
+              <X className="w-4 h-4" /> Cancel Edit
+            </button>
+          )}
+        </div>
         <div className="flex items-center gap-2">
           {targetDayOfYear && (
             <span className="px-3 py-1 bg-blue-500/20 text-blue-400 rounded-lg flex items-center gap-2">
@@ -1468,23 +1554,58 @@ export default function DailyHitBuilderPage() {
               />
             </div>
 
-            <div className="flex gap-3">
-              <button
-                onClick={() => saveDraft('draft')}
-                disabled={isSaving}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-500/20 text-gray-400 rounded-lg hover:bg-gray-500/30 disabled:opacity-50"
-              >
-                <FileText className="w-4 h-4" />
-                Save as Draft
-              </button>
-              <button
-                onClick={() => saveDraft('pending_review')}
-                disabled={isSaving}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 disabled:opacity-50"
-              >
-                <Clock className="w-4 h-4" />
-                Submit for Review
-              </button>
+            <div className="flex gap-3 flex-wrap">
+              {editingDraft ? (
+                <>
+                  {/* Editing Mode Buttons */}
+                  <button
+                    onClick={() => updateDraft('draft')}
+                    disabled={isSaving}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-500/20 text-gray-400 rounded-lg hover:bg-gray-500/30 disabled:opacity-50"
+                  >
+                    <FileText className="w-4 h-4" />
+                    {isSaving ? 'Saving...' : 'Update Draft'}
+                  </button>
+                  <button
+                    onClick={() => updateDraft('approved')}
+                    disabled={isSaving}
+                    className="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 disabled:opacity-50"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    Approve
+                  </button>
+                  {editingDraft.audio_url && (
+                    <button
+                      onClick={() => publishDraft(editingDraft)}
+                      disabled={isSaving}
+                      className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30 disabled:opacity-50"
+                    >
+                      <Send className="w-4 h-4" />
+                      Publish Now
+                    </button>
+                  )}
+                </>
+              ) : (
+                <>
+                  {/* Create Mode Buttons */}
+                  <button
+                    onClick={() => saveDraft('draft')}
+                    disabled={isSaving}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-500/20 text-gray-400 rounded-lg hover:bg-gray-500/30 disabled:opacity-50"
+                  >
+                    <FileText className="w-4 h-4" />
+                    Save as Draft
+                  </button>
+                  <button
+                    onClick={() => saveDraft('pending_review')}
+                    disabled={isSaving}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-500/20 text-blue-400 rounded-lg hover:bg-blue-500/30 disabled:opacity-50"
+                  >
+                    <Clock className="w-4 h-4" />
+                    Submit for Review
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </Card>
