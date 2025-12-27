@@ -62,6 +62,7 @@ interface Draft {
   status: string;
   created_at: string;
   source_topic_id: string | null;
+  key_takeaway: string | null;
 }
 
 interface GeneratedContent {
