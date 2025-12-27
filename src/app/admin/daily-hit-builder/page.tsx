@@ -270,7 +270,6 @@ export default function DailyHitBuilderPage() {
   const [sourceContent, setSourceContent] = useState('');
   const [customPrompt, setCustomPrompt] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isGeneratingAudio, setIsGeneratingAudio] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [audioPlayer, setAudioPlayer] = useState<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -633,44 +632,7 @@ export default function DailyHitBuilderPage() {
     }
   };
 
-  // Generate audio for draft
-  const generateAudio = async (draft: Draft, skipConfirm = false) => {
-    // Confirm if regenerating (TTS already exists)
-    if (!skipConfirm && draft.tts_audio_url) {
-      const confirmed = window.confirm(
-        'Audio has already been generated. Regenerating will use additional ElevenLabs credits. Continue?'
-      );
-      if (!confirmed) return;
-    }
-
-    setIsGeneratingAudio(true);
-    setError(null);
-
-    try {
-      const res = await fetch('/api/admin/daily-hit/generate-audio', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          draftId: draft.id,
-          script: draft.audio_script,
-          title: draft.title,
-          dayOfYear: draft.day_of_year, // Pass day for proper file naming
-          combineWithIntroOutro: true,
-        }),
-      });
-
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-
-      await fetchDrafts();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to generate audio');
-    } finally {
-      setIsGeneratingAudio(false);
-    }
-  };
-
-  // Approve script (required before generating audio)
+  // Approve script (required before generating audio via Python script)
   const approveScript = async (draft: Draft) => {
     try {
       const res = await fetch('/api/admin/daily-hit', {
@@ -759,41 +721,6 @@ export default function DailyHitBuilderPage() {
       await fetchDrafts();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to set day of year');
-    }
-  };
-
-  // Publish draft (requires audio_approved)
-  const publishDraft = async (draft: Draft) => {
-    if (!draft.audio_url) {
-      setError('Generate audio before publishing');
-      return;
-    }
-    if (!draft.audio_approved) {
-      setError('Audio must be approved before publishing');
-      return;
-    }
-    if (!draft.day_of_year) {
-      setError('Set day of year before publishing');
-      return;
-    }
-
-    try {
-      const res = await fetch('/api/admin/daily-hit/publish', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          draftId: draft.id,
-          dayOfYear: draft.day_of_year,
-        }),
-      });
-
-      const data = await res.json();
-      if (data.error) throw new Error(data.error);
-
-      await fetchDrafts();
-      await fetchCalendar();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to publish');
     }
   };
 
@@ -1362,29 +1289,10 @@ export default function DailyHitBuilderPage() {
                       </>
                     )}
                     {!draft.audio_url && draft.script_approved && !draft.audio_generation_status && (
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => generateAudio(draft)}
-                          disabled={isGeneratingAudio}
-                          className="px-3 py-1 bg-orange-500/20 text-orange-400 rounded text-xs hover:bg-orange-500/30 disabled:opacity-50 flex items-center gap-1"
-                          title={`Generate Audio (${draft.audio_script?.length || 0} chars)`}
-                        >
-                          {isGeneratingAudio ? (
-                            <>
-                              <Loader2 className="w-3 h-3 animate-spin" />
-                              Generating...
-                            </>
-                          ) : (
-                            <>
-                              <Mic className="w-3 h-3" />
-                              Generate
-                            </>
-                          )}
-                        </button>
-                        <span className="text-white/30 text-xs">
-                          {draft.audio_script?.length || 0} chars
-                        </span>
-                      </div>
+                      <span className="text-blue-400 text-xs flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        Run Python script
+                      </span>
                     )}
                     {draft.audio_generation_status === 'failed' && (
                       <button
@@ -1452,13 +1360,10 @@ export default function DailyHitBuilderPage() {
                     )}
                   </div>
                   {draft.status !== 'published' && draft.audio_approved && draft.day_of_year && (
-                    <button
-                      onClick={() => publishDraft(draft)}
-                      className="px-3 py-1 bg-purple-500/20 text-purple-400 rounded text-xs hover:bg-purple-500/30"
-                    >
-                      <Send className="w-3 h-3 inline mr-1" />
-                      Publish Day {draft.day_of_year}
-                    </button>
+                    <span className="text-purple-400 text-xs flex items-center gap-1">
+                      <Clock className="w-3 h-3" />
+                      Run --publish
+                    </span>
                   )}
                   {!draft.day_of_year && draft.audio_approved && (
                     editingDayForDraftId === draft.id ? (
@@ -1912,15 +1817,11 @@ export default function DailyHitBuilderPage() {
                     <CheckCircle className="w-4 h-4" />
                     Approve
                   </button>
-                  {editingDraft.audio_url && (
-                    <button
-                      onClick={() => publishDraft(editingDraft)}
-                      disabled={isSaving}
-                      className="flex items-center gap-2 px-4 py-2 bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30 disabled:opacity-50"
-                    >
-                      <Send className="w-4 h-4" />
-                      Publish Now
-                    </button>
+                  {editingDraft.audio_url && editingDraft.audio_approved && (
+                    <span className="flex items-center gap-2 px-4 py-2 text-purple-400 text-sm">
+                      <Clock className="w-4 h-4" />
+                      Run Python --publish
+                    </span>
                   )}
                 </>
               ) : (
