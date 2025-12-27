@@ -1325,9 +1325,9 @@ export default function DailyHitBuilderPage() {
                     {!draft.audio_url && draft.script_approved && !draft.audio_generation_status && (
                       <button
                         onClick={() => generateAudio(draft)}
-                        disabled={isGeneratingAudio || !draft.day_of_year}
+                        disabled={isGeneratingAudio}
                         className="px-3 py-1 bg-orange-500/20 text-orange-400 rounded text-xs hover:bg-orange-500/30 disabled:opacity-50"
-                        title={!draft.day_of_year ? 'Set day of year first' : 'Generate Audio'}
+                        title="Generate Audio"
                       >
                         <Mic className="w-3 h-3 inline mr-1" />
                         Generate
