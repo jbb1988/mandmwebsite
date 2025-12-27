@@ -105,11 +105,8 @@ const SYSTEM_TEMPLATES: Record<string, {
                   Get daily notifications at 8 AM, track your streaks, and access the full library of mental training content.
                 </p>
                 <div style="text-align: center;">
-                  <a href="https://apps.apple.com/app/mind-muscle-baseball/id6737125498" style="display: inline-block; margin: 0 8px;">
-                    <img src="https://api.mindandmuscle.ai/storage/v1/object/public/media-thumbnails/app-store-badge.png" alt="Download on App Store" style="height: 40px;">
-                  </a>
-                  <a href="https://play.google.com/store/apps/details?id=ai.mindandmuscle.app" style="display: inline-block; margin: 0 8px;">
-                    <img src="https://api.mindandmuscle.ai/storage/v1/object/public/media-thumbnails/google-play-badge.png" alt="Get it on Google Play" style="height: 40px;">
+                  <a href="https://www.mindandmuscle.ai/download" style="display: inline-block; background: linear-gradient(to right, #1e40af, #3b82f6); color: #ffffff; text-decoration: none; padding: 12px 32px; border-radius: 8px; font-weight: 600; font-size: 14px;">
+                    📲 Download the App
                   </a>
                 </div>
               </div>
