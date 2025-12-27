@@ -61,22 +61,28 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Insert into motivation_content
+    // Insert into motivation_content (exact format matching existing entries)
+    const now = new Date().toISOString()
     const { data: published, error: publishError } = await supabase
       .from('motivation_content')
       .insert({
         title: draft.title,
         push_text: draft.push_text,
-        headline: draft.headline,
+        headline: draft.headline || `Mind & Muscle Daily Hit: ${draft.title}`,
         body: draft.body,
         challenge: draft.challenge,
         audio_url: draft.audio_url,
         thumbnail_url: draft.thumbnail_url,
-        tags: draft.tags,
+        tags: draft.tags || [],
         day_of_year: targetDayOfYear,
         media_type: draft.media_type || 'audio',
         key_takeaway: draft.key_takeaway,
         status: 'active',
+        created_at: now,
+        delivery_date: now,
+        target_role: 'general',
+        difficulty_level: 'intermediate',
+        image_generation_status: 'none',
       })
       .select()
       .single()

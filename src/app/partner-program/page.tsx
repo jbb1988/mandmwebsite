@@ -1099,16 +1099,11 @@ export default function PartnerProgramPage() {
             onClick={() => scrollToSection('apply')}
             className="!bg-gradient-to-r !from-solar-surge-orange !to-muscle-primary !shadow-[0_0_30px_rgba(251,146,60,0.6)] hover:!shadow-[0_0_40px_rgba(251,146,60,0.8)]"
           >
-            Become a Partner
+            Get Your Partner Link
           </LiquidButton>
-          <a
-            href="https://calendly.com/jeff-mindandmuscle/mind-muscle-discovery-call"
-            target="_blank"
-            className="text-neon-cortex-blue hover:text-white transition-colors font-medium flex items-center gap-2"
-          >
-            Schedule a 15-Minute Walkthrough
-            <ArrowRight className="w-4 h-4" />
-          </a>
+          <p className="text-gray-400 text-sm">
+            Questions? <a href="mailto:jeff@mindandmuscle.ai" className="text-neon-cortex-blue hover:text-white transition-colors">jeff@mindandmuscle.ai</a>
+          </p>
         </div>
       </div>
 

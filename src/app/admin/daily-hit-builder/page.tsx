@@ -676,6 +676,37 @@ export default function DailyHitBuilderPage() {
     }
   };
 
+  // Publish draft to motivation_content table
+  const publishDraft = async (draft: Draft) => {
+    if (!draft.audio_url) {
+      setError('Audio must be generated before publishing');
+      return;
+    }
+    if (!draft.day_of_year) {
+      setError('Day of year must be set before publishing');
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/admin/daily-hit/publish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          draftId: draft.id,
+          dayOfYear: draft.day_of_year,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      await fetchDrafts();
+      await fetchCalendar();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to publish');
+    }
+  };
+
   // Reset audio to regenerate
   const resetAudio = async (draft: Draft) => {
     try {
@@ -1245,21 +1276,40 @@ export default function DailyHitBuilderPage() {
                   )}
                 </div>
 
-                {/* Status indicator */}
+                {/* Status and Publish */}
                 {draft.script_approved && (
-                  <div className="mt-2 p-2 rounded-lg bg-white/[0.02] text-xs text-white/50">
+                  <div className="mt-2 space-y-2">
                     {draft.status === 'published' ? (
-                      <span className="text-emerald-400 flex items-center gap-1">
+                      <div className="p-2 rounded-lg bg-emerald-500/10 text-xs text-emerald-400 flex items-center gap-1">
                         <CheckCircle className="w-3 h-3" /> Published to Day {draft.day_of_year}
-                      </span>
+                      </div>
                     ) : draft.audio_url ? (
-                      <span className="text-blue-400">Audio ready - run script with --publish to publish</span>
+                      <div className="p-3 rounded-lg bg-white/5 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <audio
+                            controls
+                            src={draft.audio_url}
+                            className="h-8"
+                            style={{ filter: 'invert(1)' }}
+                          />
+                          <span className="text-xs text-white/50">{draft.audio_url.split('/').pop()}</span>
+                        </div>
+                        <button
+                          onClick={() => publishDraft(draft)}
+                          disabled={!draft.day_of_year}
+                          className="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-lg text-sm hover:bg-purple-500/30 font-medium disabled:opacity-50"
+                        >
+                          Publish Day {draft.day_of_year || '?'}
+                        </button>
+                      </div>
                     ) : draft.audio_generation_status === 'generating' ? (
-                      <span className="text-blue-400 flex items-center gap-1">
+                      <div className="p-2 rounded-lg bg-white/[0.02] text-xs text-blue-400 flex items-center gap-1">
                         <Loader2 className="w-3 h-3 animate-spin" /> Generating audio...
-                      </span>
+                      </div>
                     ) : (
-                      <span>Waiting for Python script to generate audio...</span>
+                      <div className="p-2 rounded-lg bg-white/[0.02] text-xs text-white/50">
+                        Waiting for Python script to generate audio...
+                      </div>
                     )}
                   </div>
                 )}

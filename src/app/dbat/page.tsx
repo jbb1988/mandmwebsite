@@ -149,15 +149,15 @@ export default function DBatPartnerPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Section 1: Hero */}
-      <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      {/* Section 1: Hero - ROI First */}
+      <section className="relative pt-24 pb-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-neon-cortex-blue/20 via-[#0F1123] to-transparent" />
 
         <div className="max-w-6xl mx-auto relative z-10">
-          {/* Logo */}
+          {/* Logo - Smaller */}
           <FadeInWhenVisible delay={0} direction="down">
-            <div className="flex flex-col items-center justify-center mb-10">
-              <div className="relative w-32 h-32 sm:w-40 sm:h-40">
+            <div className="flex flex-col items-center justify-center mb-6">
+              <div className="relative w-24 h-24 sm:w-28 sm:h-28">
                 <Image
                   src="/assets/images/logo.png"
                   alt="Mind & Muscle"
@@ -169,37 +169,54 @@ export default function DBatPartnerPage() {
             </div>
           </FadeInWhenVisible>
 
-          {/* Headline */}
+          {/* ROI-First Headline */}
           <div className="text-center">
+            <FadeInWhenVisible delay={0.1} direction="up">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-solar-surge-orange/20 text-solar-surge-orange text-sm font-bold mb-6">
+                <DollarSign className="w-4 h-4" />
+                D-BAT FACILITY PARTNERSHIP
+              </div>
+            </FadeInWhenVisible>
+
             <FadeInWhenVisible delay={0.2} direction="up">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-6 leading-tight">
-                <span className="text-white">A Partnership Built for</span>
-                <br />
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black mb-4 leading-tight">
                 <span className="bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">
-                  D-BAT Facility Owners.
+                  ${totalAnnualValue.toLocaleString()}+
                 </span>
+                <br />
+                <span className="text-white text-3xl sm:text-4xl lg:text-5xl">in annual value for your D-BAT.</span>
               </h1>
             </FadeInWhenVisible>
 
             <FadeInWhenVisible delay={0.3} direction="up">
-              <p className="text-xl sm:text-2xl text-gray-300 max-w-3xl mx-auto font-medium mb-4">
-                Mind & Muscle helps D-BAT locations extend lesson impact, keep athletes engaged between visits, and increase long-term retention.
+              <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto font-medium mb-2">
+                Retention + conversion + partner revenue.
+              </p>
+              <p className="text-base text-gray-400 max-w-2xl mx-auto mb-6">
+                Zero staff time. Zero equipment. Zero risk.
               </p>
             </FadeInWhenVisible>
 
             <FadeInWhenVisible delay={0.4} direction="up">
-              <div className="flex flex-col items-center mt-8">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
                 <a
-                  href="#calculator"
-                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange hover:from-neon-cortex-blue/90 hover:to-solar-surge-orange/90 text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl mb-4"
+                  href="/partner-program?source=dbat&type=facility"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange hover:from-neon-cortex-blue/90 hover:to-solar-surge-orange/90 text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl"
                 >
                   <ArrowRight className="w-5 h-5" />
-                  Explore the Partner Program
+                  Get Your Partner Link
                 </a>
-                <p className="text-white/50 text-sm">
-                  Questions? <a href="mailto:partners@mindandmuscle.ai" className="text-white/70 hover:text-white underline underline-offset-4 transition-colors">partners@mindandmuscle.ai</a>
-                </p>
+                <a
+                  href="#calculator"
+                  className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-white/30 hover:border-white/50 text-white font-bold text-lg rounded-xl transition-all"
+                >
+                  <DollarSign className="w-5 h-5" />
+                  Run Your Numbers
+                </a>
               </div>
+              <p className="text-white/40 text-sm mt-4">
+                Based on 200 athletes · Adjust below to see your facility
+              </p>
             </FadeInWhenVisible>
           </div>
         </div>
@@ -492,11 +509,15 @@ export default function DBatPartnerPage() {
       <section id="calculator" className="py-20 px-4 sm:px-6 lg:px-8 scroll-mt-20">
         <div className="max-w-4xl mx-auto">
           <FadeInWhenVisible delay={0} direction="up" className="text-center mb-10">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neon-cortex-blue/20 text-neon-cortex-blue text-sm font-bold mb-6">
+              <DollarSign className="w-4 h-4" />
+              RUN YOUR NUMBERS
+            </div>
             <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
-              What If Every Lesson Created More Long-Term Value?
+              What&apos;s This Actually Worth to Your D-BAT?
             </h2>
             <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-              Facilities use Mind & Muscle to increase engagement and retention—not replace lessons.
+              Drag the sliders. See the math. The real value isn&apos;t the commission.
             </p>
           </FadeInWhenVisible>
 
@@ -697,25 +718,39 @@ export default function DBatPartnerPage() {
               }}
             >
               <div className="p-8 sm:p-12">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-solar-surge-orange/30 text-solar-surge-orange text-sm font-bold mb-6">
+                  <Zap className="w-4 h-4" />
+                  LIMITED CAPACITY
+                </div>
+
                 <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
-                  Ready to Extend the Value of Every Lesson?
+                  Ready to Be First in Your Market?
                 </h2>
-                <p className="text-xl text-white/80 mb-8 max-w-xl mx-auto">
-                  Sign up takes 2 minutes. Get your referral link, QR code, and co-branded materials instantly.
+                <p className="text-lg text-white/80 mb-4 max-w-xl mx-auto">
+                  The D-BAT across town doesn&apos;t have this yet.
+                </p>
+                <p className="text-base text-white/60 mb-8 max-w-lg mx-auto">
+                  Setup takes 10 minutes. Get your referral link, QR poster, and co-branded materials instantly.
                 </p>
 
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
                   <a
-                    href="/partner-program?source=dbat&type=facility#apply"
-                    className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange hover:from-neon-cortex-blue/90 hover:to-solar-surge-orange/90 text-white font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl"
+                    href="/partner-program?source=dbat&type=facility"
+                    className="inline-flex items-center gap-2 px-10 py-5 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange hover:from-neon-cortex-blue/90 hover:to-solar-surge-orange/90 text-white font-bold text-xl rounded-xl transition-all shadow-lg hover:shadow-xl"
                   >
-                    <ArrowRight className="w-5 h-5" />
-                    Become a Partner
+                    Get Your Partner Link
+                    <ArrowRight className="w-6 h-6" />
                   </a>
                 </div>
 
-                <p className="text-white/40 text-sm">
-                  Questions? <a href="mailto:partners@mindandmuscle.ai" className="text-white/60 hover:text-white underline">partners@mindandmuscle.ai</a>
+                <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-white/50">
+                  <span className="flex items-center gap-1"><CheckCircle className="w-4 h-4 text-green-400" /> No contracts</span>
+                  <span className="flex items-center gap-1"><CheckCircle className="w-4 h-4 text-green-400" /> No staff time</span>
+                  <span className="flex items-center gap-1"><CheckCircle className="w-4 h-4 text-green-400" /> Start earning immediately</span>
+                </div>
+
+                <p className="text-white/40 text-sm mt-6">
+                  Or email directly: <a href="mailto:jeff@mindandmuscle.ai" className="text-white/60 hover:text-white underline">jeff@mindandmuscle.ai</a>
                 </p>
               </div>
             </div>
