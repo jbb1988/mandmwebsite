@@ -1,13 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
-import { FFmpeg } from '@ffmpeg/ffmpeg'
-import { toBlobURL } from '@ffmpeg/util'
+import ffmpeg from 'fluent-ffmpeg'
+import ffmpegPath from 'ffmpeg-static'
+import { writeFile, unlink, readFile, mkdir } from 'fs/promises'
+import { join } from 'path'
+import { tmpdir } from 'os'
+import { randomUUID } from 'crypto'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
 const elevenLabsApiKey = process.env.ELEVENLABS_API_KEY!
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey)
+
+// Set FFmpeg path from ffmpeg-static
+if (ffmpegPath) {
+  ffmpeg.setFfmpegPath(ffmpegPath)
+}
 
 // ElevenLabs Configuration
 const ELEVENLABS_CONFIG = {
@@ -23,76 +32,80 @@ const ELEVENLABS_CONFIG = {
 const INTRO_URL = `${supabaseUrl}/storage/v1/object/public/daily-motivation-audio/dhintro.mp3`
 const OUTRO_URL = `${supabaseUrl}/storage/v1/object/public/daily-motivation-audio/dhoutro.mp3`
 
-// Merge audio files using FFmpeg WASM
+// Merge audio files using FFmpeg (Node.js version)
 async function mergeAudioWithFFmpeg(
   introUrl: string,
   ttsUrl: string,
   outroUrl: string
 ): Promise<Buffer> {
-  const ffmpeg = new FFmpeg()
+  // Create temp directory for this operation
+  const tempDir = join(tmpdir(), `audio-merge-${randomUUID()}`)
+  await mkdir(tempDir, { recursive: true })
 
-  // Load FFmpeg WASM from CDN
-  const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/umd'
-  await ffmpeg.load({
-    coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-    wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
-  })
+  const introPath = join(tempDir, 'intro.mp3')
+  const ttsPath = join(tempDir, 'tts.mp3')
+  const outroPath = join(tempDir, 'outro.mp3')
+  const listPath = join(tempDir, 'list.txt')
+  const outputPath = join(tempDir, 'output.mp3')
 
-  console.log('FFmpeg loaded, fetching audio files...')
-
-  // Fetch all audio files
-  const [introData, ttsData, outroData] = await Promise.all([
-    fetch(introUrl).then(r => r.arrayBuffer()),
-    fetch(ttsUrl).then(r => r.arrayBuffer()),
-    fetch(outroUrl).then(r => r.arrayBuffer()),
-  ])
-
-  console.log(`Audio files fetched: intro=${introData.byteLength}, tts=${ttsData.byteLength}, outro=${outroData.byteLength}`)
-
-  // Write input files to FFmpeg virtual filesystem
-  await ffmpeg.writeFile('intro.mp3', new Uint8Array(introData))
-  await ffmpeg.writeFile('tts.mp3', new Uint8Array(ttsData))
-  await ffmpeg.writeFile('outro.mp3', new Uint8Array(outroData))
-
-  // Create concat list file
-  await ffmpeg.writeFile('list.txt',
-    "file 'intro.mp3'\nfile 'tts.mp3'\nfile 'outro.mp3'"
-  )
-
-  console.log('Running FFmpeg concat...')
-
-  // Merge using FFmpeg concat demuxer
-  // Using -c copy for stream copy (no re-encoding) when formats match
-  // If that fails, we'll re-encode
   try {
-    await ffmpeg.exec([
-      '-f', 'concat',
-      '-safe', '0',
-      '-i', 'list.txt',
-      '-c', 'copy',
-      'output.mp3'
+    console.log('Fetching audio files...')
+
+    // Fetch all audio files
+    const [introData, ttsData, outroData] = await Promise.all([
+      fetch(introUrl).then(r => r.arrayBuffer()),
+      fetch(ttsUrl).then(r => r.arrayBuffer()),
+      fetch(outroUrl).then(r => r.arrayBuffer()),
     ])
-  } catch (e) {
-    console.log('Stream copy failed, re-encoding...')
-    // Fallback: re-encode if stream copy doesn't work
-    await ffmpeg.exec([
-      '-f', 'concat',
-      '-safe', '0',
-      '-i', 'list.txt',
-      '-acodec', 'libmp3lame',
-      '-q:a', '2',
-      'output.mp3'
-    ])
+
+    console.log(`Audio files fetched: intro=${introData.byteLength}, tts=${ttsData.byteLength}, outro=${outroData.byteLength}`)
+
+    // Write input files to temp directory
+    await writeFile(introPath, Buffer.from(introData))
+    await writeFile(ttsPath, Buffer.from(ttsData))
+    await writeFile(outroPath, Buffer.from(outroData))
+
+    // Create concat list file
+    await writeFile(listPath, `file '${introPath}'\nfile '${ttsPath}'\nfile '${outroPath}'`)
+
+    console.log('Running FFmpeg concat...')
+
+    // Merge using FFmpeg concat demuxer
+    await new Promise<void>((resolve, reject) => {
+      ffmpeg()
+        .input(listPath)
+        .inputOptions(['-f', 'concat', '-safe', '0'])
+        .outputOptions(['-c', 'copy'])
+        .output(outputPath)
+        .on('start', (cmd) => console.log('FFmpeg command:', cmd))
+        .on('error', (err) => {
+          console.error('FFmpeg error:', err)
+          reject(err)
+        })
+        .on('end', () => {
+          console.log('FFmpeg merge complete')
+          resolve()
+        })
+        .run()
+    })
+
+    // Read the output file
+    const outputBuffer = await readFile(outputPath)
+    console.log(`Merged audio size: ${outputBuffer.length} bytes`)
+
+    return outputBuffer
+  } finally {
+    // Cleanup temp files
+    try {
+      await unlink(introPath).catch(() => {})
+      await unlink(ttsPath).catch(() => {})
+      await unlink(outroPath).catch(() => {})
+      await unlink(listPath).catch(() => {})
+      await unlink(outputPath).catch(() => {})
+    } catch {
+      // Ignore cleanup errors
+    }
   }
-
-  // Read the output file
-  const data = await ffmpeg.readFile('output.mp3')
-  console.log(`FFmpeg merge complete: ${data.length} bytes`)
-
-  // Terminate FFmpeg to free memory
-  await ffmpeg.terminate()
-
-  return Buffer.from(data as Uint8Array)
 }
 
 // POST - Generate audio for a draft using ElevenLabs
@@ -207,8 +220,8 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Step 3: Merge intro + TTS + outro using FFmpeg WASM
-    console.log('Merging audio with FFmpeg WASM...')
+    // Step 3: Merge intro + TTS + outro using FFmpeg
+    console.log('Merging audio with FFmpeg...')
 
     try {
       const mergedBuffer = await mergeAudioWithFFmpeg(
