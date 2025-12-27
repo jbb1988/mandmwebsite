@@ -1,16 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import {
   Clock, Database, Zap, Flag, Webhook, Server,
   RefreshCw, Play, Pause, CheckCircle2, XCircle, AlertTriangle,
   ChevronDown, ChevronUp, Search, Filter, Plus, Trash2, Edit2,
-  Activity, HardDrive, Layers, ToggleLeft, ToggleRight, Eye,
-  ArrowRight, AlertCircle, Timer, TrendingUp, Box
+  Activity, HardDrive, Layers, ToggleLeft, ToggleRight, Eye, EyeOff,
+  ArrowRight, AlertCircle, Timer, TrendingUp, Box, FileSearch, Shield
 } from 'lucide-react';
 
-type TabType = 'cron' | 'functions' | 'database' | 'queues' | 'flags' | 'webhooks' | 'errors';
+type TabType = 'cron' | 'functions' | 'database' | 'queues' | 'flags' | 'webhooks' | 'errors' | 'log-audit';
 
 interface CronJob {
   jobid: number;
@@ -89,9 +90,51 @@ interface SystemError {
   acknowledged_at: string | null;
 }
 
+interface LogAuditIssue {
+  id: string;
+  error_signature: string;
+  path: string;
+  method: string;
+  status_code: number;
+  error_pattern: string;
+  service: string;
+  first_seen_at: string;
+  last_seen_at: string;
+  occurrence_count: number;
+  status: 'new' | 'investigating' | 'resolved' | 'ignored' | 'recurring';
+  resolution_notes: string | null;
+  resolved_at: string | null;
+  alert_sent_at: string | null;
+  suppress_alerts: boolean;
+}
+
+interface AuditRun {
+  id: string;
+  started_at: string;
+  completed_at: string | null;
+  logs_scanned: number;
+  errors_found: number;
+  new_issues: number;
+  recurring_issues: number;
+  services_checked: string[];
+  audit_error: string | null;
+}
+
+interface AuditStats {
+  totalIssues: number;
+  newIssues: number;
+  investigatingIssues: number;
+  resolvedIssues: number;
+  ignoredIssues: number;
+  recurringIssues: number;
+  lastAuditRun: AuditRun | null;
+}
+
 export default function SystemDashboardPage() {
   const { isAuthenticated } = useAdminAuth();
-  const [activeTab, setActiveTab] = useState<TabType>('cron');
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get('tab') as TabType) || 'cron';
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -123,8 +166,21 @@ export default function SystemDashboardPage() {
   const [systemErrors, setSystemErrors] = useState<SystemError[]>([]);
   const [errorStats, setErrorStats] = useState({ total: 0, critical: 0, unacknowledged: 0 });
 
+  // Log Audit state
+  const [auditIssues, setAuditIssues] = useState<LogAuditIssue[]>([]);
+  const [auditStats, setAuditStats] = useState<AuditStats | null>(null);
+  const [auditRuns, setAuditRuns] = useState<AuditRun[]>([]);
+
   // Search
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Sync with URL param changes
+  useEffect(() => {
+    const tabParam = searchParams.get('tab') as TabType;
+    if (tabParam && tabParam !== activeTab) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -156,6 +212,9 @@ export default function SystemDashboardPage() {
           break;
         case 'errors':
           await loadErrorData();
+          break;
+        case 'log-audit':
+          await loadLogAuditData();
           break;
       }
     } catch (error) {
@@ -219,6 +278,17 @@ export default function SystemDashboardPage() {
     }
   }
 
+  async function loadLogAuditData() {
+    const [issuesRes, statsRes, runsRes] = await Promise.all([
+      fetch('/api/admin/log-audit/issues'),
+      fetch('/api/admin/log-audit/stats'),
+      fetch('/api/admin/log-audit/runs'),
+    ]);
+    if (issuesRes.ok) setAuditIssues(await issuesRes.json());
+    if (statsRes.ok) setAuditStats(await statsRes.json());
+    if (runsRes.ok) setAuditRuns(await runsRes.json());
+  }
+
   async function acknowledgeErrors(errorIds: string[]) {
     const res = await fetch('/api/admin/system/errors', {
       method: 'POST',
@@ -260,6 +330,7 @@ export default function SystemDashboardPage() {
     { id: 'flags' as TabType, label: 'Feature Flags', icon: Flag, count: flags.filter(f => f.enabled).length },
     { id: 'webhooks' as TabType, label: 'Webhooks', icon: Webhook },
     { id: 'errors' as TabType, label: 'Error Log', icon: AlertCircle, count: errorStats.unacknowledged, alert: errorStats.critical > 0 },
+    { id: 'log-audit' as TabType, label: 'Log Audit', icon: FileSearch, count: auditStats?.newIssues || 0, alert: (auditStats?.newIssues || 0) > 0 },
   ];
 
   if (!isAuthenticated) {
@@ -361,6 +432,13 @@ export default function SystemDashboardPage() {
               onRefresh={loadErrorData}
             />
           )}
+          {activeTab === 'log-audit' && (
+            <LogAuditTab
+              issues={auditIssues}
+              stats={auditStats}
+              onRefresh={loadLogAuditData}
+            />
+          )}
         </>
       )}
     </div>
@@ -382,24 +460,45 @@ function CronJobsTab({
   setSearchQuery: (q: string) => void;
 }) {
   const [expandedJob, setExpandedJob] = useState<number | null>(null);
-
-  const filteredJobs = jobs.filter(job =>
-    job.jobname.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const [showFailingOnly, setShowFailingOnly] = useState(false);
 
   const failingJobs = jobs.filter(j => j.failed_24h > 0);
   const activeJobs = jobs.filter(j => j.active);
   const recentFailures = history.filter(h => h.status === 'failed').slice(0, 10);
 
+  const filteredJobs = jobs.filter(job => {
+    const matchesSearch = job.jobname.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFailingFilter = !showFailingOnly || job.failed_24h > 0;
+    return matchesSearch && matchesFailingFilter;
+  });
+
   return (
     <div className="space-y-6">
-      {/* Stats */}
+      {/* Stats - Clickable */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard label="Total Jobs" value={jobs.length} icon={Clock} />
+        <div onClick={() => setShowFailingOnly(false)} className="cursor-pointer">
+          <StatCard label="Total Jobs" value={jobs.length} icon={Clock} />
+        </div>
         <StatCard label="Active" value={activeJobs.length} icon={Play} color="green" />
-        <StatCard label="Failing (24h)" value={failingJobs.length} icon={AlertTriangle} color={failingJobs.length > 0 ? 'red' : 'green'} />
+        <div
+          onClick={() => setShowFailingOnly(!showFailingOnly)}
+          className={`cursor-pointer rounded-xl transition-all ${showFailingOnly ? 'ring-2 ring-red-500' : ''}`}
+        >
+          <StatCard label="Failing (24h) ←Click" value={failingJobs.length} icon={AlertTriangle} color={failingJobs.length > 0 ? 'red' : 'green'} />
+        </div>
         <StatCard label="Runs (24h)" value={history.length} icon={Activity} />
       </div>
+
+      {/* Filter indicator */}
+      {showFailingOnly && (
+        <div className="flex items-center gap-2 p-2 bg-red-500/10 border border-red-500/30 rounded-lg">
+          <AlertTriangle className="w-4 h-4 text-red-400" />
+          <span className="text-red-400 text-sm">Showing only failing jobs</span>
+          <button onClick={() => setShowFailingOnly(false)} className="ml-auto text-white/60 hover:text-white text-sm">
+            Clear filter
+          </button>
+        </div>
+      )}
 
       {/* Recent Failures Alert - Shows prominently if there are failures */}
       {recentFailures.length > 0 && (
@@ -832,7 +931,27 @@ function DatabaseTab({ stats }: { stats: any }) {
 }
 
 // ============ QUEUES TAB ============
-function QueuesTab({ queues, onRefresh }: { queues: QueueStats[]; onRefresh: () => void }) {
+function QueuesTab({ queues, onRefresh }: { queues: (QueueStats & { recentItems?: any[] })[]; onRefresh: () => void }) {
+  const [expandedQueue, setExpandedQueue] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+  async function handleQueueAction(queueName: string, action: string, itemIds?: string[]) {
+    setActionLoading(`${queueName}-${action}`);
+    try {
+      const res = await fetch('/api/admin/system/queues', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, queueName, itemIds })
+      });
+      if (res.ok) {
+        onRefresh();
+      }
+    } catch (e) {
+      console.error('Queue action failed:', e);
+    }
+    setActionLoading(null);
+  }
+
   return (
     <div className="space-y-6">
       {/* Overview */}
@@ -864,45 +983,152 @@ function QueuesTab({ queues, onRefresh }: { queues: QueueStats[]; onRefresh: () 
       </div>
 
       {/* Queue Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {queues.map((queue) => (
-          <div
-            key={queue.queue_name}
-            className="bg-white/5 border border-white/10 rounded-xl p-5"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-white font-medium">{queue.display_name}</h4>
-              <span className="text-white/40 text-xs font-mono">{queue.queue_name}</span>
-            </div>
+      <div className="space-y-4">
+        {queues.map((queue) => {
+          const isExpanded = expandedQueue === queue.queue_name;
+          const failedItems = queue.recentItems?.filter((item: any) => item.status === 'failed' || item.status === 'error') || [];
 
-            <div className="grid grid-cols-4 gap-4 mb-4">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-yellow-400">{queue.pending || 0}</p>
-                <p className="text-xs text-white/40">Pending</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-blue-400">{queue.processing || 0}</p>
-                <p className="text-xs text-white/40">Processing</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-green-400">{queue.completed || 0}</p>
-                <p className="text-xs text-white/40">Done</p>
-              </div>
-              <div className="text-center">
-                <p className={`text-2xl font-bold ${(queue.failed || 0) > 0 ? 'text-red-400' : 'text-white/40'}`}>
-                  {queue.failed || 0}
-                </p>
-                <p className="text-xs text-white/40">Failed</p>
-              </div>
-            </div>
+          return (
+            <div
+              key={queue.queue_name}
+              className={`bg-white/5 border rounded-xl overflow-hidden ${
+                (queue.failed || 0) > 0 ? 'border-red-500/30' : 'border-white/10'
+              }`}
+            >
+              {/* Queue Header */}
+              <div
+                className="p-5 cursor-pointer hover:bg-white/5"
+                onClick={() => setExpandedQueue(isExpanded ? null : queue.queue_name)}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <h4 className="text-white font-medium">{queue.display_name}</h4>
+                    <span className="text-white/40 text-xs font-mono">{queue.queue_name}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {(queue.failed || 0) > 0 && (
+                      <span className="px-2 py-1 bg-red-500/20 text-red-400 text-xs rounded">
+                        {queue.failed} failed
+                      </span>
+                    )}
+                    {isExpanded ? <ChevronUp className="w-4 h-4 text-white/40" /> : <ChevronDown className="w-4 h-4 text-white/40" />}
+                  </div>
+                </div>
 
-            {queue.oldest_pending && (
-              <p className="text-xs text-white/40">
-                Oldest pending: {new Date(queue.oldest_pending).toLocaleString()}
-              </p>
-            )}
-          </div>
-        ))}
+                <div className="grid grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-yellow-400">{queue.pending || 0}</p>
+                    <p className="text-xs text-white/40">Pending</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-blue-400">{queue.processing || 0}</p>
+                    <p className="text-xs text-white/40">Processing</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-green-400">{queue.completed || 0}</p>
+                    <p className="text-xs text-white/40">Done</p>
+                  </div>
+                  <div className="text-center">
+                    <p className={`text-2xl font-bold ${(queue.failed || 0) > 0 ? 'text-red-400' : 'text-white/40'}`}>
+                      {queue.failed || 0}
+                    </p>
+                    <p className="text-xs text-white/40">Failed</p>
+                  </div>
+                </div>
+
+                {queue.oldest_pending && (
+                  <p className="text-xs text-white/40 mt-3">
+                    Oldest pending: {new Date(queue.oldest_pending).toLocaleString()}
+                  </p>
+                )}
+              </div>
+
+              {/* Expanded Section */}
+              {isExpanded && (
+                <div className="border-t border-white/10 p-4 bg-white/[0.02]">
+                  {/* Actions */}
+                  <div className="flex gap-2 mb-4">
+                    {(queue.failed || 0) > 0 && (
+                      <>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleQueueAction(queue.queue_name, 'retry', failedItems.map((i: any) => i.id));
+                          }}
+                          disabled={actionLoading === `${queue.queue_name}-retry`}
+                          className="px-3 py-1.5 bg-yellow-500/20 text-yellow-400 rounded-lg text-sm hover:bg-yellow-500/30 disabled:opacity-50"
+                        >
+                          {actionLoading === `${queue.queue_name}-retry` ? 'Retrying...' : 'Retry Failed'}
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleQueueAction(queue.queue_name, 'clear_failed');
+                          }}
+                          disabled={actionLoading === `${queue.queue_name}-clear_failed`}
+                          className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg text-sm hover:bg-red-500/30 disabled:opacity-50"
+                        >
+                          {actionLoading === `${queue.queue_name}-clear_failed` ? 'Clearing...' : 'Clear Failed'}
+                        </button>
+                      </>
+                    )}
+                    {(queue.completed || 0) > 0 && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleQueueAction(queue.queue_name, 'clear_completed');
+                        }}
+                        disabled={actionLoading === `${queue.queue_name}-clear_completed`}
+                        className="px-3 py-1.5 bg-white/10 text-white/60 rounded-lg text-sm hover:bg-white/20 disabled:opacity-50"
+                      >
+                        {actionLoading === `${queue.queue_name}-clear_completed` ? 'Clearing...' : 'Clear Old Completed'}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Recent Items */}
+                  {queue.recentItems && queue.recentItems.length > 0 ? (
+                    <div>
+                      <h5 className="text-white/60 text-sm mb-2">Recent Items</h5>
+                      <div className="space-y-2 max-h-64 overflow-y-auto">
+                        {queue.recentItems.slice(0, 10).map((item: any, i: number) => (
+                          <div key={item.id || i} className="bg-black/20 rounded-lg p-3 text-sm">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className={`px-2 py-0.5 rounded text-xs ${
+                                item.status === 'completed' || item.status === 'done' ? 'bg-green-500/20 text-green-400' :
+                                item.status === 'failed' || item.status === 'error' ? 'bg-red-500/20 text-red-400' :
+                                item.status === 'processing' || item.status === 'in_progress' ? 'bg-blue-500/20 text-blue-400' :
+                                'bg-yellow-500/20 text-yellow-400'
+                              }`}>
+                                {item.status}
+                              </span>
+                              <span className="text-white/40 text-xs">
+                                {new Date(item.created_at).toLocaleString()}
+                              </span>
+                            </div>
+                            {item.error_message && (
+                              <pre className="text-xs text-red-300/80 bg-black/30 p-2 rounded mt-2 overflow-x-auto whitespace-pre-wrap">
+                                {item.error_message}
+                              </pre>
+                            )}
+                            {item.generation_type && (
+                              <p className="text-white/60 text-xs mt-1">Type: {item.generation_type}</p>
+                            )}
+                            {item.user_id && (
+                              <p className="text-white/40 text-xs mt-1 font-mono">User: {item.user_id.slice(0, 8)}...</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-white/40 text-sm">No recent items</p>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -1250,6 +1476,425 @@ function ErrorLogTab({
                         Acknowledge
                       </button>
                     )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============ LOG AUDIT TAB ============
+const STATUS_CONFIG = {
+  new: { label: 'New', color: 'bg-red-500/20 text-red-400', icon: AlertTriangle },
+  investigating: { label: 'Investigating', color: 'bg-yellow-500/20 text-yellow-400', icon: Eye },
+  resolved: { label: 'Resolved', color: 'bg-green-500/20 text-green-400', icon: CheckCircle2 },
+  ignored: { label: 'Ignored', color: 'bg-gray-500/20 text-gray-400', icon: EyeOff },
+  recurring: { label: 'Recurring', color: 'bg-orange-500/20 text-orange-400', icon: RefreshCw },
+};
+
+const SERVICE_ICONS: Record<string, typeof Server> = {
+  api: Server,
+  'edge-function': Zap,
+  auth: Shield,
+  postgres: Database,
+};
+
+function LogAuditTab({
+  issues,
+  stats,
+  onRefresh
+}: {
+  issues: LogAuditIssue[];
+  stats: AuditStats | null;
+  onRefresh: () => void;
+}) {
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [selectedService, setSelectedService] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [expandedIssue, setExpandedIssue] = useState<string | null>(null);
+  const [editingNotes, setEditingNotes] = useState<string | null>(null);
+  const [notesValue, setNotesValue] = useState('');
+  const [runningAudit, setRunningAudit] = useState(false);
+
+  async function runAudit() {
+    setRunningAudit(true);
+    try {
+      const res = await fetch('/api/admin/log-audit/run', { method: 'POST' });
+      if (res.ok) {
+        const result = await res.json();
+        alert(`Audit complete: ${result.new_issues} new issues, ${result.recurring_issues} recurring`);
+        onRefresh();
+      } else {
+        alert('Audit failed');
+      }
+    } catch (error) {
+      console.error('Audit error:', error);
+      alert('Audit failed');
+    }
+    setRunningAudit(false);
+  }
+
+  async function updateIssueStatus(issueId: string, newStatus: string) {
+    try {
+      const res = await fetch(`/api/admin/log-audit/issues/${issueId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (res.ok) {
+        onRefresh();
+      }
+    } catch (error) {
+      console.error('Error updating issue:', error);
+    }
+  }
+
+  async function updateIssueNotes(issueId: string, notes: string) {
+    try {
+      const res = await fetch(`/api/admin/log-audit/issues/${issueId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resolution_notes: notes }),
+      });
+      if (res.ok) {
+        onRefresh();
+        setEditingNotes(null);
+      }
+    } catch (error) {
+      console.error('Error updating notes:', error);
+    }
+  }
+
+  async function toggleSuppressAlerts(issueId: string, suppress: boolean) {
+    try {
+      const res = await fetch(`/api/admin/log-audit/issues/${issueId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ suppress_alerts: suppress }),
+      });
+      if (res.ok) {
+        onRefresh();
+      }
+    } catch (error) {
+      console.error('Error toggling alerts:', error);
+    }
+  }
+
+  const filteredIssues = issues.filter(issue => {
+    if (selectedStatus !== 'all' && issue.status !== selectedStatus) return false;
+    if (selectedService !== 'all' && issue.service !== selectedService) return false;
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      return (
+        issue.path.toLowerCase().includes(query) ||
+        issue.error_pattern?.toLowerCase().includes(query) ||
+        issue.method.toLowerCase().includes(query)
+      );
+    }
+    return true;
+  });
+
+  const uniqueServices = [...new Set(issues.map(i => i.service))];
+
+  return (
+    <div className="space-y-6">
+      {/* Header with Run Audit button */}
+      <div className="flex items-center justify-between">
+        <p className="text-white/60 text-sm">Track and resolve API errors by pattern</p>
+        <button
+          onClick={runAudit}
+          disabled={runningAudit}
+          className="px-4 py-2 bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/30 rounded-xl text-cyan-400 flex items-center gap-2 transition-colors disabled:opacity-50"
+        >
+          {runningAudit ? (
+            <RefreshCw className="w-4 h-4 animate-spin" />
+          ) : (
+            <Play className="w-4 h-4" />
+          )}
+          Run Audit Now
+        </button>
+      </div>
+
+      {/* Stats Cards */}
+      {stats && (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          <StatCard label="Total Issues" value={stats.totalIssues} icon={AlertCircle} />
+          <StatCard label="New" value={stats.newIssues} icon={AlertTriangle} color={stats.newIssues > 0 ? 'red' : 'green'} />
+          <StatCard label="Investigating" value={stats.investigatingIssues} icon={Eye} color="yellow" />
+          <StatCard label="Resolved" value={stats.resolvedIssues} icon={CheckCircle2} color="green" />
+          <StatCard label="Recurring" value={stats.recurringIssues} icon={RefreshCw} color={stats.recurringIssues > 0 ? 'yellow' : 'green'} />
+          <StatCard label="Ignored" value={stats.ignoredIssues} icon={EyeOff} color="gray" />
+        </div>
+      )}
+
+      {/* Last Audit Run */}
+      {stats?.lastAuditRun && (
+        <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Activity className="w-5 h-5 text-cyan-400" />
+              <span className="text-white/80">Last Audit Run</span>
+            </div>
+            <div className="flex items-center gap-6 text-sm">
+              <span className="text-white/60">
+                {new Date(stats.lastAuditRun.started_at).toLocaleString()}
+              </span>
+              <span className="text-white/40">|</span>
+              <span className="text-white/60">
+                {(stats.lastAuditRun.logs_scanned ?? 0).toLocaleString()} logs scanned
+              </span>
+              <span className="text-white/40">|</span>
+              <span className="text-white/60">
+                {stats.lastAuditRun.errors_found} errors found
+              </span>
+              {stats.lastAuditRun.new_issues > 0 && (
+                <>
+                  <span className="text-white/40">|</span>
+                  <span className="text-red-400">
+                    {stats.lastAuditRun.new_issues} new
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+          <input
+            type="text"
+            placeholder="Search paths, errors..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-cyan-500/50 w-64"
+          />
+        </div>
+
+        <select
+          value={selectedStatus}
+          onChange={(e) => setSelectedStatus(e.target.value)}
+          className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500/50"
+        >
+          <option value="all">All Statuses</option>
+          {Object.entries(STATUS_CONFIG).map(([key, config]) => (
+            <option key={key} value={key}>{config.label}</option>
+          ))}
+        </select>
+
+        <select
+          value={selectedService}
+          onChange={(e) => setSelectedService(e.target.value)}
+          className="px-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-cyan-500/50"
+        >
+          <option value="all">All Services</option>
+          {uniqueServices.map(service => (
+            <option key={service} value={service}>{service}</option>
+          ))}
+        </select>
+
+        <span className="text-white/40 text-sm ml-auto">
+          {filteredIssues.length} issues
+        </span>
+      </div>
+
+      {/* Issues List */}
+      {filteredIssues.length === 0 ? (
+        <div className="text-center py-12">
+          <CheckCircle2 className="w-12 h-12 text-green-400 mx-auto mb-4" />
+          <p className="text-white/60">No issues found</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filteredIssues.map((issue) => {
+            const StatusIcon = STATUS_CONFIG[issue.status].icon;
+            const ServiceIcon = SERVICE_ICONS[issue.service] || Server;
+            const isExpanded = expandedIssue === issue.id;
+
+            return (
+              <div
+                key={issue.id}
+                className="bg-white/5 border border-white/10 rounded-xl overflow-hidden"
+              >
+                {/* Main Row */}
+                <div
+                  className="p-4 cursor-pointer hover:bg-white/5 transition-colors"
+                  onClick={() => setExpandedIssue(isExpanded ? null : issue.id)}
+                >
+                  <div className="flex items-center gap-4">
+                    {/* Status Badge */}
+                    <span className={`px-3 py-1 rounded-full text-xs font-medium flex items-center gap-1.5 ${STATUS_CONFIG[issue.status].color}`}>
+                      <StatusIcon className="w-3 h-3" />
+                      {STATUS_CONFIG[issue.status].label}
+                    </span>
+
+                    {/* Status Code */}
+                    <span className={`px-2 py-1 rounded text-xs font-mono ${
+                      issue.status_code >= 500 ? 'bg-red-500/20 text-red-400' :
+                      issue.status_code >= 400 ? 'bg-yellow-500/20 text-yellow-400' :
+                      'bg-gray-500/20 text-gray-400'
+                    }`}>
+                      {issue.status_code}
+                    </span>
+
+                    {/* Method */}
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${
+                      issue.method === 'GET' ? 'bg-blue-500/20 text-blue-400' :
+                      issue.method === 'POST' ? 'bg-green-500/20 text-green-400' :
+                      issue.method === 'DELETE' ? 'bg-red-500/20 text-red-400' :
+                      'bg-gray-500/20 text-gray-400'
+                    }`}>
+                      {issue.method}
+                    </span>
+
+                    {/* Path */}
+                    <span className="text-white font-mono text-sm flex-1 truncate">
+                      {issue.path}
+                    </span>
+
+                    {/* Service */}
+                    <span className="flex items-center gap-1.5 text-white/40 text-xs">
+                      <ServiceIcon className="w-3 h-3" />
+                      {issue.service}
+                    </span>
+
+                    {/* Count */}
+                    <span className="text-white/60 text-sm">
+                      {issue.occurrence_count}x
+                    </span>
+
+                    {/* Last Seen */}
+                    <span className="text-white/40 text-xs">
+                      {new Date(issue.last_seen_at).toLocaleDateString()}
+                    </span>
+
+                    {/* Expand Icon */}
+                    {isExpanded ? (
+                      <ChevronUp className="w-4 h-4 text-white/40" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 text-white/40" />
+                    )}
+                  </div>
+                </div>
+
+                {/* Expanded Details */}
+                {isExpanded && (
+                  <div className="border-t border-white/10 p-4 bg-white/[0.02]">
+                    <div className="grid grid-cols-2 gap-6">
+                      {/* Error Pattern */}
+                      <div>
+                        <p className="text-white/40 text-xs uppercase mb-2">Error Pattern</p>
+                        <p className="text-white/80 text-sm font-mono bg-black/30 p-3 rounded-lg overflow-x-auto">
+                          {issue.error_pattern || 'No pattern captured'}
+                        </p>
+                      </div>
+
+                      {/* Timeline */}
+                      <div>
+                        <p className="text-white/40 text-xs uppercase mb-2">Timeline</p>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-white/60">First seen:</span>
+                            <span className="text-white">{new Date(issue.first_seen_at).toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-white/60">Last seen:</span>
+                            <span className="text-white">{new Date(issue.last_seen_at).toLocaleString()}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-white/60">Total occurrences:</span>
+                            <span className="text-white">{issue.occurrence_count}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Notes */}
+                    <div className="mt-4">
+                      <p className="text-white/40 text-xs uppercase mb-2">Resolution Notes</p>
+                      {editingNotes === issue.id ? (
+                        <div className="flex gap-2">
+                          <textarea
+                            value={notesValue}
+                            onChange={(e) => setNotesValue(e.target.value)}
+                            className="flex-1 bg-black/30 border border-white/10 rounded-lg p-3 text-white text-sm focus:outline-none focus:border-cyan-500/50"
+                            rows={3}
+                            placeholder="Add notes about this issue..."
+                          />
+                          <div className="flex flex-col gap-2">
+                            <button
+                              onClick={() => updateIssueNotes(issue.id, notesValue)}
+                              className="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded-lg text-sm hover:bg-cyan-500/30"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={() => setEditingNotes(null)}
+                              className="px-3 py-1 bg-white/5 text-white/60 rounded-lg text-sm hover:bg-white/10"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div
+                          onClick={() => {
+                            setEditingNotes(issue.id);
+                            setNotesValue(issue.resolution_notes || '');
+                          }}
+                          className="bg-black/30 p-3 rounded-lg text-sm text-white/60 cursor-pointer hover:bg-black/40"
+                        >
+                          {issue.resolution_notes || 'Click to add notes...'}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
+                      <div className="flex items-center gap-2">
+                        <span className="text-white/40 text-xs">Change status:</span>
+                        {Object.entries(STATUS_CONFIG).map(([key, config]) => (
+                          <button
+                            key={key}
+                            onClick={() => updateIssueStatus(issue.id, key)}
+                            className={`px-3 py-1 rounded-full text-xs transition-colors ${
+                              issue.status === key
+                                ? config.color
+                                : 'bg-white/5 text-white/40 hover:bg-white/10'
+                            }`}
+                          >
+                            {config.label}
+                          </button>
+                        ))}
+                      </div>
+
+                      <button
+                        onClick={() => toggleSuppressAlerts(issue.id, !issue.suppress_alerts)}
+                        className={`flex items-center gap-2 px-3 py-1 rounded-full text-xs transition-colors ${
+                          issue.suppress_alerts
+                            ? 'bg-yellow-500/20 text-yellow-400'
+                            : 'bg-white/5 text-white/40 hover:bg-white/10'
+                        }`}
+                      >
+                        {issue.suppress_alerts ? (
+                          <>
+                            <EyeOff className="w-3 h-3" />
+                            Alerts Suppressed
+                          </>
+                        ) : (
+                          <>
+                            <Eye className="w-3 h-3" />
+                            Suppress Alerts
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
