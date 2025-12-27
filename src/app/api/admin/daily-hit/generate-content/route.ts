@@ -32,26 +32,18 @@ VOICE & STYLE:
 - Rhythmic Flow: Sentences build on each other with a cadence that's easy to listen to
 
 AUDIO SCRIPT FORMAT (CRITICAL - must be 400+ words, 2-3 minutes of audio):
-The audioScript MUST follow this EXACT structure:
+DO NOT include intro or outro - those are separate audio files added via FFmpeg.
+The audioScript is ONLY the core teaching content.
 
-1. OPENING (always start with this):
-"This is your Mind and Muscle Daily Hit.
-Mind right.
-Muscle ready.
-Let's lock in."
-
-2. CORE CONTENT (350+ words):
-- Hook statement to grab attention
+CORE CONTENT REQUIREMENTS (400+ words):
+- Hook statement to grab attention immediately
 - Core teaching with specific baseball examples
 - Use SHORT punchy sentences. Many just 3-6 words.
 - Include specific scenarios (at-bats, fielding, pressure moments)
 - Build momentum with repetition and rhythm
 - Mindset reframes and perspective shifts
 - Direct address to the player ("You're going to..." "When you...")
-
-3. CLOSING (always end with this):
-"That's your daily hit.
-This is Mind and Muscle where you discipline the mind and dominate the game."
+- End with a powerful closing statement (but NOT the show outro)
 
 WRITING PATTERNS TO USE:
 - Question Hooks: "You know what separates..."
@@ -84,7 +76,7 @@ Respond with a JSON object containing:
   "headline": "Mind & Muscle Daily Hit: [Title]",
   "body": "Full body content with emojis as specified",
   "challenge": "Specific actionable challenge",
-  "audioScript": "MUST be 400+ words including the intro and outro. Full 2-3 minute script.",
+  "audioScript": "MUST be 400+ words of CORE CONTENT ONLY. No intro/outro. Full 2-3 minute script.",
   "tags": ["tag1", "tag2", "tag3", "tag4"],
   "keyTakeaway": "One sentence key takeaway"
 }`
