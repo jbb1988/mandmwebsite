@@ -63,6 +63,7 @@ interface Draft {
   created_at: string;
   source_topic_id: string | null;
   key_takeaway: string | null;
+  thumbnail_url: string | null;
 }
 
 interface GeneratedContent {
@@ -154,16 +155,15 @@ interface CategoryBalanceData {
 
 interface ImagePromptResult {
   prompt: string;
-  alternatives: { style: string; prompt: string }[];
-  metadata: {
-    style: string;
-    pose: string;
-    themeModifier: string | null;
-    targetRole: string;
+  contentAnalyzed: {
+    title: string;
+    hasAudioScript: boolean;
+    hasBody: boolean;
+    tags: string[];
   };
   instructions: {
     platform: string;
-    size: string;
+    recommendedSize: string;
     quality: string;
     style: string;
     tips: string[];
@@ -322,6 +322,8 @@ export default function DailyHitBuilderPage() {
   const [customImageElements, setCustomImageElements] = useState('');
   const [copiedPrompt, setCopiedPrompt] = useState<string | null>(null);
   const [selectedDraftForImage, setSelectedDraftForImage] = useState<Draft | null>(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null);
 
   // AI Model Selection State
   const [selectedModel, setSelectedModel] = useState<'gpt-4o' | 'claude' | 'gemini'>('gpt-4o');
@@ -635,6 +637,7 @@ export default function DailyHitBuilderPage() {
           draftId: draft.id,
           script: draft.audio_script,
           title: draft.title,
+          dayOfYear: draft.day_of_year, // Pass day for proper file naming
           combineWithIntroOutro: true,
         }),
       });
@@ -858,6 +861,43 @@ export default function DailyHitBuilderPage() {
     await navigator.clipboard.writeText(text);
     setCopiedPrompt(id);
     setTimeout(() => setCopiedPrompt(null), 2000);
+  };
+
+  // Upload image to media-thumbnails bucket
+  const uploadImage = async (file: File) => {
+    const draft = selectedDraftForImage;
+    const title = draft?.title || createForm.title || 'daily_hit';
+    const dayOfYear = draft?.day_of_year || targetDayOfYear;
+
+    setIsUploadingImage(true);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      formData.append('title', title);
+      if (dayOfYear) formData.append('dayOfYear', String(dayOfYear));
+      if (draft?.id) formData.append('draftId', draft.id);
+
+      const res = await fetch('/api/admin/daily-hit/upload-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      setUploadedImageUrl(data.url);
+
+      // Refresh drafts to show updated thumbnail
+      if (draft?.id) {
+        fetchDrafts();
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to upload image');
+    } finally {
+      setIsUploadingImage(false);
+    }
   };
 
   // Play audio preview
@@ -2047,26 +2087,17 @@ export default function DailyHitBuilderPage() {
     );
   };
 
-  // Enhancement #6: Image Prompt Generator
+  // Enhancement #6: Image Prompt Generator (AI-powered)
   const renderImages = () => {
-    const styleOptions = [
-      { id: 'cinematic_silhouette', name: 'Cinematic Silhouette', desc: 'Dramatic backlit player silhouettes' },
-      { id: 'epic_hero', name: 'Epic Hero', desc: 'Stadium lights, heroic poses' },
-      { id: 'fiery_determination', name: 'Fiery Determination', desc: 'Fire effects, intense action' },
-      { id: 'aurora_mystical', name: 'Aurora Mystical', desc: 'Northern lights, cosmic energy' },
-      { id: 'gritty_determination', name: 'Gritty Determination', desc: 'Raw, powerful, documentary style' },
-      { id: 'golden_triumph', name: 'Golden Triumph', desc: 'Golden hour, victory moments' },
-    ];
-
     return (
       <div className="space-y-6">
         <Card className="p-4">
           <h3 className="font-semibold mb-4 flex items-center gap-2">
             <Image className="w-4 h-4 text-orange-400" />
-            OpenAI DALL-E Image Prompt Generator
+            AI-Powered Image Prompt Generator
           </h3>
           <p className="text-sm text-white/60 mb-4">
-            Generate optimized prompts for creating high-quality baseball imagery that matches your Daily Hit content.
+            Generate contextual DALL-E prompts that match your Daily Hit content. The AI analyzes your title, audio script, and tags to create visually matching image prompts.
           </p>
 
           {/* Draft Selector */}
@@ -2108,8 +2139,8 @@ export default function DailyHitBuilderPage() {
           {selectedDraftForImage && (
             <div className="mb-4 p-3 bg-white/5 rounded-lg border border-white/10">
               <p className="text-sm font-medium text-white/80">{selectedDraftForImage.title}</p>
-              <p className="text-xs text-white/40 mt-1 line-clamp-2">{selectedDraftForImage.body?.substring(0, 150)}...</p>
-              <div className="flex items-center gap-2 mt-2">
+              <p className="text-xs text-white/40 mt-1 line-clamp-2">{selectedDraftForImage.audio_script?.substring(0, 200) || selectedDraftForImage.body?.substring(0, 150)}...</p>
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
                 {selectedDraftForImage.tags?.map((tag) => (
                   <span key={tag} className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-[10px] rounded">
                     {tag}
@@ -2119,59 +2150,26 @@ export default function DailyHitBuilderPage() {
             </div>
           )}
 
-          {/* Style Selection */}
-          <div className="mb-4">
-            <label className="block text-sm text-white/60 mb-2">Visual Style</label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {styleOptions.map((style) => (
-                <button
-                  key={style.id}
-                  onClick={() => setSelectedImageStyle(style.id)}
-                  className={`p-3 rounded-lg text-left transition-all ${
-                    selectedImageStyle === style.id
-                      ? 'bg-orange-500/20 border-2 border-orange-500'
-                      : 'bg-white/5 border border-white/10 hover:border-white/20'
-                  }`}
-                >
-                  <p className="text-xs font-medium">{style.name}</p>
-                  <p className="text-[10px] text-white/40 mt-0.5">{style.desc}</p>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Custom Elements */}
-          <div className="mb-4">
-            <label className="block text-sm text-white/60 mb-2">Custom Elements (optional)</label>
-            <input
-              type="text"
-              value={customImageElements}
-              onChange={(e) => setCustomImageElements(e.target.value)}
-              placeholder="e.g., female pitcher, catching gear, batting cage..."
-              className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white"
-            />
-          </div>
-
           {/* Generate Button */}
           <button
             onClick={generateImagePrompt}
-            disabled={isGeneratingImagePrompt || (!selectedDraftForImage?.title && !createForm.title && !createForm.body)}
+            disabled={isGeneratingImagePrompt || (!selectedDraftForImage?.title && !createForm.title && !createForm.audioScript && !createForm.body)}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg disabled:opacity-50"
           >
             {isGeneratingImagePrompt ? (
               <>
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Generating Prompt...
+                AI Analyzing Content...
               </>
             ) : (
               <>
                 <Wand2 className="w-4 h-4" />
-                Generate Image Prompt
+                Generate Image Prompt from Content
               </>
             )}
           </button>
 
-          {!selectedDraftForImage && !createForm.title && !createForm.body && (
+          {!selectedDraftForImage && !createForm.title && !createForm.audioScript && !createForm.body && (
             <p className="text-xs text-yellow-400 mt-2">
               Select a draft above or create content in the Create tab to generate matching image prompts.
             </p>
@@ -2183,13 +2181,27 @@ export default function DailyHitBuilderPage() {
           <Card className="p-4">
             <h3 className="font-semibold mb-4 flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-yellow-400" />
-              Generated Prompts
+              AI-Generated Image Prompt
             </h3>
+
+            {/* Content Analysis Summary */}
+            {imagePromptResult.contentAnalyzed && (
+              <div className="mb-4 p-3 bg-purple-500/10 rounded-lg border border-purple-500/20">
+                <h4 className="text-sm font-medium text-purple-400 mb-2">Content Analyzed</h4>
+                <div className="text-xs text-white/60 space-y-1">
+                  <p><strong>Title:</strong> {imagePromptResult.contentAnalyzed.title || 'N/A'}</p>
+                  <p><strong>Audio Script:</strong> {imagePromptResult.contentAnalyzed.hasAudioScript ? 'Yes' : 'No'}</p>
+                  {imagePromptResult.contentAnalyzed.tags.length > 0 && (
+                    <p><strong>Tags:</strong> {imagePromptResult.contentAnalyzed.tags.join(', ')}</p>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Main Prompt */}
             <div className="mb-4">
               <div className="flex items-center justify-between mb-2">
-                <label className="text-sm text-white/60">Primary Prompt ({imagePromptResult.metadata.style})</label>
+                <label className="text-sm text-white/60">DALL-E Prompt (Contextual)</label>
                 <button
                   onClick={() => copyToClipboard(imagePromptResult.prompt, 'main')}
                   className="flex items-center gap-1 px-2 py-1 bg-white/10 rounded text-xs hover:bg-white/20"
@@ -2198,38 +2210,21 @@ export default function DailyHitBuilderPage() {
                   {copiedPrompt === 'main' ? 'Copied!' : 'Copy'}
                 </button>
               </div>
-              <div className="p-3 bg-white/5 rounded-lg border border-white/10 text-sm text-white/80 font-mono">
+              <div className="p-3 bg-white/5 rounded-lg border border-white/10 text-sm text-white/80 font-mono whitespace-pre-wrap">
                 {imagePromptResult.prompt}
-              </div>
-            </div>
-
-            {/* Alternative Prompts */}
-            <div className="mb-4">
-              <label className="text-sm text-white/60 mb-2 block">Alternative Styles</label>
-              <div className="space-y-2">
-                {imagePromptResult.alternatives.map((alt) => (
-                  <div key={alt.style} className="p-3 bg-white/5 rounded-lg border border-white/10">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-white/60 capitalize">
-                        {alt.style.replace(/_/g, ' ')}
-                      </span>
-                      <button
-                        onClick={() => copyToClipboard(alt.prompt, alt.style)}
-                        className="flex items-center gap-1 px-2 py-0.5 bg-white/10 rounded text-xs hover:bg-white/20"
-                      >
-                        {copiedPrompt === alt.style ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                      </button>
-                    </div>
-                    <p className="text-xs text-white/60 font-mono line-clamp-2">{alt.prompt}</p>
-                  </div>
-                ))}
               </div>
             </div>
 
             {/* Instructions */}
             <div className="p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
-              <h4 className="text-sm font-medium text-blue-400 mb-2">OpenAI DALL-E Instructions</h4>
-              <ul className="text-xs text-white/60 space-y-1">
+              <h4 className="text-sm font-medium text-blue-400 mb-2">Generation Instructions</h4>
+              <div className="text-xs text-white/60 mb-2">
+                <p><strong>Platform:</strong> {imagePromptResult.instructions.platform}</p>
+                <p><strong>Size:</strong> {imagePromptResult.instructions.recommendedSize}</p>
+                <p><strong>Quality:</strong> {imagePromptResult.instructions.quality}</p>
+                <p><strong>Style:</strong> {imagePromptResult.instructions.style}</p>
+              </div>
+              <ul className="text-xs text-white/60 space-y-1 mt-2">
                 {imagePromptResult.instructions.tips.map((tip, i) => (
                   <li key={i}>• {tip}</li>
                 ))}
@@ -2246,6 +2241,93 @@ export default function DailyHitBuilderPage() {
             </div>
           </Card>
         )}
+
+        {/* Image Upload Section */}
+        <Card className="p-4">
+          <h3 className="font-semibold mb-4 flex items-center gap-2">
+            <Download className="w-4 h-4 text-emerald-400" />
+            Upload Generated Image
+          </h3>
+          <p className="text-sm text-white/60 mb-4">
+            After generating your image in DALL-E, upload it here. It will be saved to the media-thumbnails bucket with proper naming for use in motivation_content.
+          </p>
+
+          {/* File Input */}
+          <div className="mb-4">
+            <label className="block text-sm text-white/60 mb-2">Select Image File</label>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) uploadImage(file);
+              }}
+              disabled={isUploadingImage}
+              className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-orange-500/20 file:text-orange-400 hover:file:bg-orange-500/30 disabled:opacity-50"
+            />
+            <p className="text-xs text-white/40 mt-1">
+              Accepted: JPEG, PNG, WebP, GIF (max 5MB)
+            </p>
+          </div>
+
+          {/* Upload Status */}
+          {isUploadingImage && (
+            <div className="flex items-center gap-2 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20 mb-4">
+              <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
+              <span className="text-sm text-blue-400">Uploading image...</span>
+            </div>
+          )}
+
+          {/* Uploaded Image Preview */}
+          {uploadedImageUrl && !isUploadingImage && (
+            <div className="mb-4 p-3 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+              <div className="flex items-center gap-2 mb-2">
+                <CheckCircle className="w-4 h-4 text-emerald-400" />
+                <span className="text-sm font-medium text-emerald-400">Image Uploaded Successfully</span>
+              </div>
+              <div className="relative aspect-video bg-black/20 rounded-lg overflow-hidden mb-2">
+                <img
+                  src={uploadedImageUrl}
+                  alt="Uploaded thumbnail"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={uploadedImageUrl}
+                  readOnly
+                  className="flex-1 px-2 py-1 bg-white/5 border border-white/10 rounded text-xs text-white/60 font-mono"
+                />
+                <button
+                  onClick={() => copyToClipboard(uploadedImageUrl, 'imageUrl')}
+                  className="px-2 py-1 bg-white/10 rounded text-xs hover:bg-white/20"
+                >
+                  {copiedPrompt === 'imageUrl' ? 'Copied!' : 'Copy URL'}
+                </button>
+              </div>
+              {selectedDraftForImage && (
+                <p className="text-xs text-emerald-400 mt-2">
+                  Thumbnail URL saved to draft: {selectedDraftForImage.title}
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Show existing thumbnail if draft has one */}
+          {selectedDraftForImage?.thumbnail_url && !uploadedImageUrl && (
+            <div className="p-3 bg-white/5 rounded-lg border border-white/10">
+              <p className="text-xs text-white/60 mb-2">Current thumbnail for this draft:</p>
+              <div className="relative aspect-video bg-black/20 rounded-lg overflow-hidden">
+                <img
+                  src={selectedDraftForImage.thumbnail_url}
+                  alt="Current thumbnail"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            </div>
+          )}
+        </Card>
       </div>
     );
   };

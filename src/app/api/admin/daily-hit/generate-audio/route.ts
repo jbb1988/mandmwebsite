@@ -17,10 +17,14 @@ const ELEVENLABS_CONFIG = {
   speed: 0.92,
 }
 
+// Intro/outro audio file URLs in daily-motivation-audio bucket
+const INTRO_URL = `${supabaseUrl}/storage/v1/object/public/daily-motivation-audio/dhintro.mp3`
+const OUTRO_URL = `${supabaseUrl}/storage/v1/object/public/daily-motivation-audio/dhoutro.mp3`
+
 // POST - Generate audio for a draft using ElevenLabs
 export async function POST(request: NextRequest) {
   try {
-    const { draftId, script, title, combineWithIntroOutro = true } = await request.json()
+    const { draftId, script, title, dayOfYear, combineWithIntroOutro = true } = await request.json()
 
     if (!draftId || !script || !title) {
       return NextResponse.json(
@@ -29,7 +33,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    console.log(`Generating audio for draft: ${draftId}, title: ${title}`)
+    console.log(`Generating audio for draft: ${draftId}, title: ${title}, day: ${dayOfYear}`)
 
     // Update draft status to generating
     await supabase
@@ -119,12 +123,16 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Step 3: Call the Edge Function for FFmpeg-based combination
-    // This keeps the heavy processing on Supabase infrastructure
-    console.log('Calling combine-audio edge function...')
+    // Step 3: Call the merge-audio Edge Function to combine intro + TTS + outro
+    console.log('Calling merge-audio edge function...')
+
+    // Generate output filename with day_of_year prefix if available
+    // Format: "365. title_here_complete.mp4" to match existing entries
+    const dayPrefix = dayOfYear ? `${dayOfYear}. ` : ''
+    const outputFileName = `${dayPrefix}${sanitizedTitle}_complete.mp4`
 
     const combineResponse = await fetch(
-      `${supabaseUrl}/functions/v1/combine-daily-hit-audio`,
+      `${supabaseUrl}/functions/v1/merge-audio`,
       {
         method: 'POST',
         headers: {
@@ -132,9 +140,10 @@ export async function POST(request: NextRequest) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          draftId,
-          ttsFileName,
-          outputFileName: `${sanitizedTitle}_complete.mp3`,
+          introUrl: INTRO_URL,
+          speechUrl: ttsAudioUrl,
+          outroUrl: OUTRO_URL,
+          outputFileName,
         }),
       }
     )
@@ -166,11 +175,22 @@ export async function POST(request: NextRequest) {
 
     const combineData = await combineResponse.json()
 
+    // Update draft with final combined audio URL
+    const completeAudioUrl = combineData.url
+    await supabase
+      .from('daily_hit_drafts')
+      .update({
+        audio_url: completeAudioUrl,
+        audio_generation_status: 'complete',
+      })
+      .eq('id', draftId)
+
     return NextResponse.json({
       success: true,
       draftId,
       ttsAudioUrl,
-      completeAudioUrl: combineData.completeAudioUrl,
+      completeAudioUrl,
+      outputFileName,
       message: 'Audio generated and combined successfully',
     })
 
