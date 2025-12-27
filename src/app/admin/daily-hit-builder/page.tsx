@@ -308,6 +308,10 @@ export default function DailyHitBuilderPage() {
   const [editingDraft, setEditingDraft] = useState<Draft | null>(null);
   const [isGeneratingImagePrompt, setIsGeneratingImagePrompt] = useState(false);
 
+  // Inline Day of Year editing
+  const [editingDayForDraftId, setEditingDayForDraftId] = useState<string | null>(null);
+  const [inlineDayValue, setInlineDayValue] = useState<string>('');
+
   // Audio Preview State for Published Content
   const [selectedContent, setSelectedContent] = useState<{
     id: string;
@@ -724,6 +728,29 @@ export default function DailyHitBuilderPage() {
       await fetchDrafts();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to reset audio');
+    }
+  };
+
+  // Set day of year for a draft (inline from workflow view)
+  const setDraftDayOfYear = async (draftId: string, dayOfYear: number) => {
+    try {
+      const res = await fetch('/api/admin/daily-hit', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: draftId,
+          dayOfYear,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      setEditingDayForDraftId(null);
+      setInlineDayValue('');
+      await fetchDrafts();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to set day of year');
     }
   };
 
@@ -1417,7 +1444,59 @@ export default function DailyHitBuilderPage() {
                     </button>
                   )}
                   {!draft.day_of_year && draft.audio_approved && (
-                    <span className="text-yellow-400 text-xs">Set day of year first</span>
+                    editingDayForDraftId === draft.id ? (
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="number"
+                          min="1"
+                          max="365"
+                          value={inlineDayValue}
+                          onChange={(e) => setInlineDayValue(e.target.value)}
+                          placeholder="1-365"
+                          className="w-20 px-2 py-1 bg-white/5 border border-white/20 rounded text-xs text-white"
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && inlineDayValue) {
+                              setDraftDayOfYear(draft.id, parseInt(inlineDayValue));
+                            } else if (e.key === 'Escape') {
+                              setEditingDayForDraftId(null);
+                              setInlineDayValue('');
+                            }
+                          }}
+                        />
+                        <button
+                          onClick={() => {
+                            if (inlineDayValue) {
+                              setDraftDayOfYear(draft.id, parseInt(inlineDayValue));
+                            }
+                          }}
+                          disabled={!inlineDayValue}
+                          className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs hover:bg-blue-500/30 disabled:opacity-50"
+                        >
+                          Set
+                        </button>
+                        <button
+                          onClick={() => {
+                            setEditingDayForDraftId(null);
+                            setInlineDayValue('');
+                          }}
+                          className="px-2 py-1 text-white/40 hover:text-white/60 text-xs"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setEditingDayForDraftId(draft.id);
+                          setInlineDayValue('');
+                        }}
+                        className="px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded text-xs hover:bg-yellow-500/30 flex items-center gap-1"
+                      >
+                        <Calendar className="w-3 h-3" />
+                        Set Day
+                      </button>
+                    )
                   )}
                 </div>
               </div>
