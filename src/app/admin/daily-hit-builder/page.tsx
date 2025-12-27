@@ -1199,7 +1199,21 @@ export default function DailyHitBuilderPage() {
           <div className="grid sm:grid-cols-3 gap-3">
             {categoryBalance.recommendations.map((rec) => (
               <div key={rec.category} className="p-3 bg-red-500/10 rounded-lg border border-red-500/20">
-                <p className="font-medium text-sm text-red-400">{rec.category}</p>
+                <button
+                  onClick={() => {
+                    // Find matching category in topics (case-insensitive partial match)
+                    const matchingCat = getCategories().find(
+                      cat => cat.toLowerCase().includes(rec.category.toLowerCase()) ||
+                             rec.category.toLowerCase().includes(cat.toLowerCase())
+                    );
+                    if (matchingCat) {
+                      setSelectedCategory(matchingCat);
+                    }
+                  }}
+                  className="font-medium text-sm text-red-400 hover:text-red-300 text-left"
+                >
+                  {rec.category} →
+                </button>
                 <p className="text-xs text-white/50 mt-1">{rec.reason}</p>
                 {rec.suggestedTopics.length > 0 && (
                   <div className="mt-2 space-y-1">
@@ -1210,6 +1224,13 @@ export default function DailyHitBuilderPage() {
                           const topicObj = topics.find(t => t.id === topic.id);
                           if (topicObj) {
                             setSelectedTopic(topicObj);
+                          } else {
+                            // If topic not in current list, filter by category
+                            const matchingCat = getCategories().find(
+                              cat => cat.toLowerCase().includes(rec.category.toLowerCase()) ||
+                                     rec.category.toLowerCase().includes(cat.toLowerCase())
+                            );
+                            if (matchingCat) setSelectedCategory(matchingCat);
                           }
                         }}
                         className="w-full text-left text-xs p-2 bg-white/5 rounded hover:bg-white/10 transition-colors text-white/70 hover:text-white truncate"
@@ -1246,10 +1267,34 @@ export default function DailyHitBuilderPage() {
             </div>
           )}
 
-          {/* Topic Selection Dropdown */}
+          {/* Topic Selection with Category Filter */}
           {!selectedTopic && (
-            <div>
-              <label className="block text-sm text-white/60 mb-2">From Topic Library</label>
+            <div className="space-y-3">
+              <label className="block text-sm text-white/60">From Topic Library</label>
+
+              {/* Category Filter */}
+              <div className="flex gap-2">
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white text-sm"
+                >
+                  <option value="all">All Categories</option>
+                  {getCategories().map((cat) => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+                {selectedCategory !== 'all' && (
+                  <button
+                    onClick={() => setSelectedCategory('all')}
+                    className="px-2 py-1 text-xs text-white/40 hover:text-white/60"
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+
+              {/* Topic Dropdown */}
               <select
                 value=""
                 onChange={(e) => {
@@ -1258,7 +1303,7 @@ export default function DailyHitBuilderPage() {
                 }}
                 className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-white"
               >
-                <option value="">Select a topic...</option>
+                <option value="">Select a topic... ({filteredTopics.length} available)</option>
                 {filteredTopics.map((topic) => (
                   <option key={topic.id} value={topic.id}>
                     {topic.title} ({topic.category})
