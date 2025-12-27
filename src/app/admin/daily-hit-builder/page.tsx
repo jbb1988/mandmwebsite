@@ -634,7 +634,15 @@ export default function DailyHitBuilderPage() {
   };
 
   // Generate audio for draft
-  const generateAudio = async (draft: Draft) => {
+  const generateAudio = async (draft: Draft, skipConfirm = false) => {
+    // Confirm if regenerating (TTS already exists)
+    if (!skipConfirm && draft.tts_audio_url) {
+      const confirmed = window.confirm(
+        'Audio has already been generated. Regenerating will use additional ElevenLabs credits. Continue?'
+      );
+      if (!confirmed) return;
+    }
+
     setIsGeneratingAudio(true);
     setError(null);
 
@@ -1341,7 +1349,11 @@ export default function DailyHitBuilderPage() {
                           {isPlaying ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
                         </button>
                         <button
-                          onClick={() => resetAudio(draft)}
+                          onClick={() => {
+                            if (window.confirm('Reset audio? You will need to regenerate (uses ElevenLabs credits).')) {
+                              resetAudio(draft);
+                            }
+                          }}
                           className="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded text-xs"
                           title="Reset & Regenerate"
                         >
@@ -1350,24 +1362,29 @@ export default function DailyHitBuilderPage() {
                       </>
                     )}
                     {!draft.audio_url && draft.script_approved && !draft.audio_generation_status && (
-                      <button
-                        onClick={() => generateAudio(draft)}
-                        disabled={isGeneratingAudio}
-                        className="px-3 py-1 bg-orange-500/20 text-orange-400 rounded text-xs hover:bg-orange-500/30 disabled:opacity-50 flex items-center gap-1"
-                        title="Generate Audio"
-                      >
-                        {isGeneratingAudio ? (
-                          <>
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                            Generating...
-                          </>
-                        ) : (
-                          <>
-                            <Mic className="w-3 h-3" />
-                            Generate
-                          </>
-                        )}
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => generateAudio(draft)}
+                          disabled={isGeneratingAudio}
+                          className="px-3 py-1 bg-orange-500/20 text-orange-400 rounded text-xs hover:bg-orange-500/30 disabled:opacity-50 flex items-center gap-1"
+                          title={`Generate Audio (${draft.audio_script?.length || 0} chars)`}
+                        >
+                          {isGeneratingAudio ? (
+                            <>
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                              Generating...
+                            </>
+                          ) : (
+                            <>
+                              <Mic className="w-3 h-3" />
+                              Generate
+                            </>
+                          )}
+                        </button>
+                        <span className="text-white/30 text-xs">
+                          {draft.audio_script?.length || 0} chars
+                        </span>
+                      </div>
                     )}
                     {draft.audio_generation_status === 'failed' && (
                       <button
