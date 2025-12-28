@@ -1221,7 +1221,7 @@ function TeamLicensingContent() {
                 'Chatter: Full team communication',
                 'Events: Team scheduling & calendar',
                 'Daily Hit: Motivational content',
-                'Dugout Talk: Personal journal tracker',
+                'Dugout Talk: Field notes (performance log)',
                 'Game Lab Level 1: Baseball IQ basics',
                 'Breathwork: Guided breathing exercises',
                 'Arm Builder: Arm care & throwing routines',

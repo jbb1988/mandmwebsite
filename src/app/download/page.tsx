@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { GradientTextReveal, FadeInWhenVisible } from '@/components/animations';
-import { Check, Dumbbell, Target, Gauge, Flame, Wind, Mic } from 'lucide-react';
+import { Check, Dumbbell, Target, Gauge, Flame, Wind, Mic, MessageCircle, Calendar, BookOpen } from 'lucide-react';
 
 const aiCoaches = [
   {
@@ -58,12 +58,14 @@ const aiCoaches = [
 ];
 
 const freeFeatures = [
+  { name: 'Chatter', icon: MessageCircle, color: 'text-blue-500', description: 'Full team communication' },
+  { name: 'Events', icon: Calendar, color: 'text-purple-500', description: 'Team scheduling & calendar' },
   { name: 'Daily Hit', icon: Flame, color: 'text-orange-500', description: 'Mental reps every morning' },
-  { name: 'Game Lab Level 1', icon: Target, color: 'text-purple-500', description: 'Test your baseball IQ' },
-  { name: 'Arm Builder', icon: Dumbbell, color: 'text-red-500', description: 'Arm health & velocity' },
-  { name: 'Speed Lab', icon: Gauge, color: 'text-pink-500', description: 'Sprint & agility drills' },
+  { name: 'Dugout Talk', icon: BookOpen, color: 'text-indigo-500', description: 'Field notes & performance log' },
+  { name: 'Game Lab Level 1', icon: Target, color: 'text-violet-500', description: 'Baseball IQ basics' },
+  { name: 'Arm Builder', icon: Dumbbell, color: 'text-red-500', description: 'Arm care & throwing routines' },
+  { name: 'Speed Lab', icon: Gauge, color: 'text-pink-500', description: 'Baserunning intelligence' },
   { name: 'Breathwork', icon: Wind, color: 'text-cyan-500', description: 'Pre-game focus routines' },
-  { name: "Coach's Corner", icon: Mic, color: 'text-green-500', description: 'Expert coaching tips' },
 ];
 
 export default function DownloadPage() {
@@ -199,13 +201,13 @@ export default function DownloadPage() {
         <FadeInWhenVisible delay={0.4} direction="up" className="mb-12">
           <div className="p-8 rounded-2xl bg-white/[0.02] border border-white/10">
             <h3 className="text-2xl font-black text-center mb-2">
-              <span className="text-green-400">FREE</span> Features Included
+              <span className="text-green-400">Free Forever</span> — 8 Features at $0
             </h3>
             <p className="text-gray-400 text-center mb-8">
               Start training today — no subscription required
             </p>
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
               {freeFeatures.map((feature) => {
                 const IconComponent = feature.icon;
                 return (

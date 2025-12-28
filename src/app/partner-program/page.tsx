@@ -510,6 +510,24 @@ export default function PartnerProgramPage() {
           </div>
         </LiquidGlass>
 
+        {/* Free Forever Value Prop for Partners */}
+        <LiquidGlass variant="blue" className="p-6 mb-8">
+          <div className="flex items-start gap-4">
+            <div className="flex-shrink-0 p-3 rounded-xl bg-neon-cortex-green/20">
+              <Gift className="w-6 h-6 text-neon-cortex-green" />
+            </div>
+            <div>
+              <h4 className="font-bold text-lg mb-2">Start with FREE — No Cost to Families</h4>
+              <p className="text-sm text-text-secondary mb-3">
+                Mind & Muscle's Free Forever tier includes 8 features at $0: team chat, events calendar, Daily Hit mental training, field notes, Game Lab basics, arm care, baserunning, and breathwork.
+              </p>
+              <p className="text-sm text-white font-semibold">
+                Your athletes get real value before anyone pays a dime. PRO unlocks AI coaches and advanced training.
+              </p>
+            </div>
+          </div>
+        </LiquidGlass>
+
         {/* ROI Calculator */}
         <div className="mb-8">
           <p className="text-center text-lg text-gray-300 mb-6">
