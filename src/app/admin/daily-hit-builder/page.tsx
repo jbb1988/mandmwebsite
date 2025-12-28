@@ -338,6 +338,12 @@ export default function DailyHitBuilderPage() {
   const [availableModels, setAvailableModels] = useState<string[]>([]);
   const [modelInfo, setModelInfo] = useState<Record<string, { name: string; description: string; available: boolean }>>({});
 
+  // Final URL Editing State (for audiogram/thumbnail updates before publish)
+  const [editingUrlsForDraftId, setEditingUrlsForDraftId] = useState<string | null>(null);
+  const [editableAudioUrl, setEditableAudioUrl] = useState<string>('');
+  const [editableThumbnailUrl, setEditableThumbnailUrl] = useState<string>('');
+  const [isSavingUrls, setIsSavingUrls] = useState(false);
+
   // Fetch data
   const fetchCalendar = useCallback(async () => {
     try {
@@ -730,6 +736,43 @@ export default function DailyHitBuilderPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to reset audio');
     }
+  };
+
+  // Save final URLs (for audiogram MP4 and numbered thumbnail)
+  const saveFinalUrls = async (draftId: string) => {
+    setIsSavingUrls(true);
+    setError(null);
+
+    try {
+      const res = await fetch('/api/admin/daily-hit', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: draftId,
+          audio_url: editableAudioUrl || undefined,
+          thumbnail_url: editableThumbnailUrl || undefined,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+
+      setEditingUrlsForDraftId(null);
+      setEditableAudioUrl('');
+      setEditableThumbnailUrl('');
+      await fetchDrafts();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save URLs');
+    } finally {
+      setIsSavingUrls(false);
+    }
+  };
+
+  // Start editing URLs for a draft
+  const startEditingUrls = (draft: Draft) => {
+    setEditingUrlsForDraftId(draft.id);
+    setEditableAudioUrl(draft.audio_url || '');
+    setEditableThumbnailUrl(draft.thumbnail_url || '');
   };
 
   // Set day of year for a draft (inline from workflow view)
@@ -1284,7 +1327,8 @@ export default function DailyHitBuilderPage() {
                         <CheckCircle className="w-3 h-3" /> Published to Day {draft.day_of_year}
                       </div>
                     ) : draft.audio_url ? (
-                      <div className="p-3 rounded-lg bg-white/5 flex items-center justify-between">
+                      <div className="p-3 rounded-lg bg-white/5 space-y-3">
+                        {/* Audio Player */}
                         <div className="flex items-center gap-2">
                           <audio
                             controls
@@ -1294,13 +1338,72 @@ export default function DailyHitBuilderPage() {
                           />
                           <span className="text-xs text-white/50">{draft.audio_url.split('/').pop()}</span>
                         </div>
-                        <button
-                          onClick={() => publishDraft(draft)}
-                          disabled={!draft.day_of_year}
-                          className="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-lg text-sm hover:bg-purple-500/30 font-medium disabled:opacity-50"
-                        >
-                          Publish Day {draft.day_of_year || '?'}
-                        </button>
+
+                        {/* URL Editing Section */}
+                        {editingUrlsForDraftId === draft.id ? (
+                          <div className="space-y-2 p-2 rounded-lg bg-white/[0.03] border border-white/10">
+                            <div>
+                              <label className="text-xs text-white/50 block mb-1">Audio/Video URL (MP3 or MP4)</label>
+                              <input
+                                type="text"
+                                value={editableAudioUrl}
+                                onChange={(e) => setEditableAudioUrl(e.target.value)}
+                                className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded text-xs text-white/90 focus:outline-none focus:border-blue-500/50"
+                                placeholder="https://..."
+                              />
+                            </div>
+                            <div>
+                              <label className="text-xs text-white/50 block mb-1">Thumbnail URL</label>
+                              <input
+                                type="text"
+                                value={editableThumbnailUrl}
+                                onChange={(e) => setEditableThumbnailUrl(e.target.value)}
+                                className="w-full px-2 py-1.5 bg-white/5 border border-white/10 rounded text-xs text-white/90 focus:outline-none focus:border-blue-500/50"
+                                placeholder="https://..."
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => saveFinalUrls(draft.id)}
+                                disabled={isSavingUrls}
+                                className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 rounded text-xs hover:bg-emerald-500/30 font-medium flex items-center gap-1 disabled:opacity-50"
+                              >
+                                {isSavingUrls ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
+                                Save URLs
+                              </button>
+                              <button
+                                onClick={() => setEditingUrlsForDraftId(null)}
+                                className="px-3 py-1.5 bg-white/10 text-white/60 rounded text-xs hover:bg-white/20"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => startEditingUrls(draft)}
+                            className="w-full px-3 py-1.5 bg-blue-500/10 text-blue-400 rounded-lg text-xs hover:bg-blue-500/20 font-medium flex items-center justify-center gap-1 border border-blue-500/20"
+                          >
+                            <Edit3 className="w-3 h-3" /> Edit Final URLs (Audiogram/Thumbnail)
+                          </button>
+                        )}
+
+                        {/* Action Buttons */}
+                        <div className="flex items-center justify-between gap-2">
+                          <button
+                            onClick={() => resetAudio(draft)}
+                            className="px-3 py-1.5 bg-orange-500/20 text-orange-400 rounded-lg text-xs hover:bg-orange-500/30 font-medium flex items-center gap-1"
+                          >
+                            <RefreshCw className="w-3 h-3" /> Regenerate
+                          </button>
+                          <button
+                            onClick={() => publishDraft(draft)}
+                            disabled={!draft.day_of_year}
+                            className="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-lg text-sm hover:bg-purple-500/30 font-medium disabled:opacity-50"
+                          >
+                            Publish Day {draft.day_of_year || '?'}
+                          </button>
+                        </div>
                       </div>
                     ) : draft.audio_generation_status === 'generating' ? (
                       <div className="p-2 rounded-lg bg-white/[0.02] text-xs text-blue-400 flex items-center gap-1">

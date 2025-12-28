@@ -218,6 +218,7 @@ export async function PATCH(request: NextRequest) {
       audio_url: 'audio_url',
       ttsAudioUrl: 'tts_audio_url',
       thumbnailUrl: 'thumbnail_url',
+      thumbnail_url: 'thumbnail_url',
       status: 'status',
       reviewNotes: 'review_notes',
       rejectionReason: 'rejection_reason',
