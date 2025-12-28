@@ -571,16 +571,16 @@ export default function DBatPartnerPage() {
                   </p>
                   <input
                     type="range"
-                    min="5"
-                    max="25"
+                    min="10"
+                    max="30"
                     step="5"
                     value={retentionLift}
                     onChange={(e) => setRetentionLift(Number(e.target.value))}
                     className="w-full h-3 bg-white/10 rounded-lg appearance-none cursor-pointer accent-neon-cortex-blue"
                   />
                   <div className="flex justify-between text-sm text-text-secondary mt-2">
-                    <span>5%</span>
-                    <span>25%</span>
+                    <span>10% (conservative)</span>
+                    <span>30%</span>
                   </div>
                 </div>
 
@@ -594,16 +594,16 @@ export default function DBatPartnerPage() {
                   </p>
                   <input
                     type="range"
-                    min="0"
-                    max="20"
+                    min="5"
+                    max="25"
                     step="5"
                     value={conversionRate}
                     onChange={(e) => setConversionRate(Number(e.target.value))}
                     className="w-full h-3 bg-white/10 rounded-lg appearance-none cursor-pointer accent-solar-surge-orange"
                   />
                   <div className="flex justify-between text-sm text-text-secondary mt-2">
-                    <span>0%</span>
-                    <span>20%</span>
+                    <span>5% (conservative)</span>
+                    <span>25%</span>
                   </div>
                 </div>
 
