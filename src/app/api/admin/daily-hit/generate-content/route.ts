@@ -238,22 +238,86 @@ ${prompt}`
       }
     }
 
+    // Helper to fix common JSON issues from AI output
+    const repairJson = (str: string): string => {
+      // Strategy: Process the string character by character to properly escape newlines inside strings
+      let result = ''
+      let inString = false
+      let escaped = false
+
+      for (let i = 0; i < str.length; i++) {
+        const char = str[i]
+
+        if (escaped) {
+          result += char
+          escaped = false
+          continue
+        }
+
+        if (char === '\\') {
+          escaped = true
+          result += char
+          continue
+        }
+
+        if (char === '"') {
+          inString = !inString
+          result += char
+          continue
+        }
+
+        if (inString) {
+          // Inside a string - escape newlines and other control chars
+          if (char === '\n') {
+            result += '\\n'
+          } else if (char === '\r') {
+            result += '\\r'
+          } else if (char === '\t') {
+            result += '\\t'
+          } else {
+            result += char
+          }
+        } else {
+          result += char
+        }
+      }
+
+      // Remove trailing commas before } or ]
+      result = result.replace(/,(\s*[}\]])/g, '$1')
+
+      return result
+    }
+
     try {
       generatedContent = JSON.parse(jsonText)
     } catch (parseError) {
-      // Last resort: try to find any valid JSON object
-      const jsonStartIndex = responseText.indexOf('{')
-      const jsonEndIndex = responseText.lastIndexOf('}')
+      // Try repairing the JSON (fix unescaped newlines, etc.)
+      try {
+        const repaired = repairJson(jsonText)
+        generatedContent = JSON.parse(repaired)
+      } catch {
+        // Last resort: extract from { to } and try again
+        const jsonStartIndex = responseText.indexOf('{')
+        const jsonEndIndex = responseText.lastIndexOf('}')
 
-      if (jsonStartIndex !== -1 && jsonEndIndex !== -1 && jsonEndIndex > jsonStartIndex) {
-        const extractedJson = responseText.substring(jsonStartIndex, jsonEndIndex + 1)
-        try {
-          generatedContent = JSON.parse(extractedJson)
-        } catch {
-          throw new Error(`Failed to parse AI response as JSON. Response started with: "${responseText.substring(0, 100)}..."`)
+        if (jsonStartIndex !== -1 && jsonEndIndex !== -1 && jsonEndIndex > jsonStartIndex) {
+          const extractedJson = responseText.substring(jsonStartIndex, jsonEndIndex + 1)
+          try {
+            generatedContent = JSON.parse(extractedJson)
+          } catch {
+            // Try repairing the extracted JSON
+            try {
+              const repairedExtracted = repairJson(extractedJson)
+              generatedContent = JSON.parse(repairedExtracted)
+            } catch (finalError) {
+              console.error('JSON parse error:', finalError)
+              console.error('Raw response (first 500 chars):', responseText.substring(0, 500))
+              throw new Error(`Failed to parse AI response as JSON. Response started with: "${responseText.substring(0, 100)}..."`)
+            }
+          }
+        } else {
+          throw new Error(`AI did not return valid JSON. Response started with: "${responseText.substring(0, 100)}..."`)
         }
-      } else {
-        throw new Error(`AI did not return valid JSON. Response started with: "${responseText.substring(0, 100)}..."`)
       }
     }
 
