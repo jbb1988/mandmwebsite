@@ -29,6 +29,8 @@ interface UserProfile extends UserListItem {
   app_metadata: Record<string, unknown> | null;
   affiliate_code: string | null;
   referred_at: string | null;
+  platform: string | null;
+  device_name: string | null;
 }
 
 interface TrialGrant {
@@ -206,6 +208,15 @@ export async function POST(request: NextRequest) {
       const { data: authData } = await supabase.auth.admin.getUserById(userId);
       const lastSignInAt = authData?.user?.last_sign_in_at || null;
 
+      // Fetch platform/device info from user_sessions
+      const { data: sessionData } = await supabase
+        .from('user_sessions')
+        .select('platform, device_name, last_activity_at')
+        .eq('user_id', userId)
+        .order('last_activity_at', { ascending: false })
+        .limit(1)
+        .single();
+
       // Fetch trial grants for this user
       const { data: trialGrants } = await supabase
         .from('trial_grants')
@@ -225,6 +236,8 @@ export async function POST(request: NextRequest) {
         user: {
           ...user,
           last_sign_in_at: lastSignInAt,
+          platform: sessionData?.platform || null,
+          device_name: sessionData?.device_name || null,
         },
         trialGrants: trialGrants || [],
         promoRedemptions: promoRedemptions || [],

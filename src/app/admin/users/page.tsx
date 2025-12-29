@@ -51,6 +51,8 @@ interface DetailedUser extends UserProfile {
   affiliate_code: string | null;
   referred_at: string | null;
   last_sign_in_at: string | null;
+  platform: string | null;
+  device_name: string | null;
 }
 
 interface TrialGrant {
@@ -604,8 +606,6 @@ export default function UsersPage() {
   };
 
   const renderAppInfoTab = () => {
-    const appMetadata = detailedUser?.app_metadata || {};
-
     return (
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
@@ -629,34 +629,31 @@ export default function UsersPage() {
           </div>
         </div>
 
-        {/* Platform Info from app_metadata */}
-        {Object.keys(appMetadata).length > 0 ? (
-          <div className="bg-white/5 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-white mb-3">App Metadata</h4>
-            <div className="space-y-2">
-              {Object.entries(appMetadata).map(([key, value]) => (
-                <div key={key} className="flex justify-between text-sm">
-                  <span className="text-white/50">{key}</span>
-                  <span className="text-white font-mono text-xs">
-                    {typeof value === 'object' ? JSON.stringify(value) : String(value)}
-                  </span>
-                </div>
-              ))}
+        {/* Platform & Device Info */}
+        <div className="bg-white/5 rounded-lg p-4">
+          <h4 className="text-sm font-medium text-white mb-3">Device Info</h4>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <p className="text-xs text-white/40 mb-1">Platform</p>
+              <p className="text-white capitalize flex items-center gap-2">
+                {detailedUser?.platform === 'ios' && (
+                  <span className="inline-block w-4 h-4 bg-white/10 rounded text-center text-xs leading-4"></span>
+                )}
+                {detailedUser?.platform === 'android' && (
+                  <span className="inline-block w-4 h-4 bg-green-500/20 rounded text-center text-xs leading-4 text-green-400"></span>
+                )}
+                {detailedUser?.platform || 'Not available'}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs text-white/40 mb-1">Device</p>
+              <p className="text-white text-sm">{detailedUser?.device_name || 'Not available'}</p>
             </div>
           </div>
-        ) : (
-          <div className="bg-white/5 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-white mb-3">App Metadata</h4>
-            <p className="text-sm text-white/40">No app metadata available</p>
-            <p className="text-xs text-white/30 mt-2">
-              App metadata will be populated when the user logs in from the mobile app.
-            </p>
-          </div>
-        )}
+        </div>
 
         <div className="bg-white/[0.02] rounded-lg p-3 text-xs text-white/30">
-          Note: App version and platform info is populated by the mobile app when users log in.
-          Users who haven&apos;t updated to the latest app version may not have this data.
+          Device info is recorded from the user&apos;s most recent app session.
         </div>
       </div>
     );
