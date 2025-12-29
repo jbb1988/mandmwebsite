@@ -69,7 +69,8 @@ BODY FORMAT (for app display):
 
 That's Mind & Muscle.
 
-Respond with a JSON object containing:
+CRITICAL: You must respond with ONLY a valid JSON object. No explanation, no introduction, no "Here is..." - ONLY the JSON.
+
 {
   "title": "Short punchy title (5 words max)",
   "pushText": "One powerful sentence (8-12 words)",
@@ -79,7 +80,9 @@ Respond with a JSON object containing:
   "audioScript": "MUST be 400+ words of CORE CONTENT ONLY. No intro/outro. Full 2-3 minute script.",
   "tags": ["tag1", "tag2", "tag3", "tag4"],
   "keyTakeaway": "One sentence key takeaway"
-}`
+}
+
+IMPORTANT: Start your response with { and end with }. Nothing else.`
 
 // Generate content via OpenRouter (unified API for all models)
 async function generateWithOpenRouter(
@@ -215,15 +218,44 @@ ${prompt}`
     // Generate via OpenRouter
     const responseText = await generateWithOpenRouter(SYSTEM_PROMPT, userPrompt, selectedModel)
 
-    // Extract JSON from response
+    // Extract JSON from response - try multiple approaches
     let jsonText = responseText
+    let generatedContent = null
+
+    // Approach 1: Look for ```json code block
     if (responseText.includes('```json')) {
       jsonText = responseText.split('```json')[1].split('```')[0].trim()
-    } else if (responseText.includes('```')) {
+    }
+    // Approach 2: Look for any ``` code block
+    else if (responseText.includes('```')) {
       jsonText = responseText.split('```')[1].split('```')[0].trim()
     }
+    // Approach 3: Look for JSON object pattern anywhere in response
+    else {
+      const jsonMatch = responseText.match(/\{[\s\S]*"title"[\s\S]*"audioScript"[\s\S]*\}/)
+      if (jsonMatch) {
+        jsonText = jsonMatch[0]
+      }
+    }
 
-    const generatedContent = JSON.parse(jsonText)
+    try {
+      generatedContent = JSON.parse(jsonText)
+    } catch (parseError) {
+      // Last resort: try to find any valid JSON object
+      const jsonStartIndex = responseText.indexOf('{')
+      const jsonEndIndex = responseText.lastIndexOf('}')
+
+      if (jsonStartIndex !== -1 && jsonEndIndex !== -1 && jsonEndIndex > jsonStartIndex) {
+        const extractedJson = responseText.substring(jsonStartIndex, jsonEndIndex + 1)
+        try {
+          generatedContent = JSON.parse(extractedJson)
+        } catch {
+          throw new Error(`Failed to parse AI response as JSON. Response started with: "${responseText.substring(0, 100)}..."`)
+        }
+      } else {
+        throw new Error(`AI did not return valid JSON. Response started with: "${responseText.substring(0, 100)}..."`)
+      }
+    }
 
     return NextResponse.json({
       success: true,
