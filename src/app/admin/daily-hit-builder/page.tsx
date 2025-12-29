@@ -1750,10 +1750,25 @@ export default function DailyHitBuilderPage() {
       {/* Content Editor */}
       {createForm.title && (
         <Card className="p-4">
-          <h3 className="font-medium mb-4 flex items-center gap-2">
-            <Edit3 className="w-4 h-4 text-blue-400" />
-            Edit Content
-          </h3>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-medium flex items-center gap-2">
+              <Edit3 className="w-4 h-4 text-blue-400" />
+              Edit Content
+            </h3>
+            <button
+              onClick={() => {
+                if (confirm('Clear all generated content and start over?')) {
+                  setCreateForm({});
+                  setSelectedTopic(null);
+                  setSourceContent('');
+                  setCustomPrompt('');
+                }
+              }}
+              className="px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg text-xs hover:bg-red-500/30 font-medium flex items-center gap-1"
+            >
+              <Trash2 className="w-3 h-3" /> Clear & Start Over
+            </button>
+          </div>
 
           <div className="space-y-4">
             <div>
