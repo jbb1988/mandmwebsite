@@ -209,13 +209,17 @@ export async function POST(request: NextRequest) {
       const lastSignInAt = authData?.user?.last_sign_in_at || null;
 
       // Fetch platform/device info from user_sessions
-      const { data: sessionData } = await supabase
+      const { data: sessionData, error: sessionError } = await supabase
         .from('user_sessions')
         .select('platform, device_name, last_activity_at')
         .eq('user_id', userId)
         .order('last_activity_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
+
+      if (sessionError) {
+        console.error('Error fetching session data:', sessionError);
+      }
 
       // Fetch trial grants for this user
       const { data: trialGrants } = await supabase
