@@ -219,6 +219,8 @@ export async function PATCH(request: NextRequest) {
       ttsAudioUrl: 'tts_audio_url',
       thumbnailUrl: 'thumbnail_url',
       thumbnail_url: 'thumbnail_url',
+      media_type: 'media_type',
+      mediaType: 'media_type',
       status: 'status',
       reviewNotes: 'review_notes',
       rejectionReason: 'rejection_reason',

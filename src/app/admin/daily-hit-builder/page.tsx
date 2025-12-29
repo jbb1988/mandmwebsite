@@ -342,6 +342,7 @@ export default function DailyHitBuilderPage() {
   const [editingUrlsForDraftId, setEditingUrlsForDraftId] = useState<string | null>(null);
   const [editableAudioUrl, setEditableAudioUrl] = useState<string>('');
   const [editableThumbnailUrl, setEditableThumbnailUrl] = useState<string>('');
+  const [editableMediaType, setEditableMediaType] = useState<'audio' | 'video'>('audio');
   const [isSavingUrls, setIsSavingUrls] = useState(false);
 
   // Fetch data
@@ -751,6 +752,7 @@ export default function DailyHitBuilderPage() {
           id: draftId,
           audio_url: editableAudioUrl || undefined,
           thumbnail_url: editableThumbnailUrl || undefined,
+          media_type: editableMediaType,
         }),
       });
 
@@ -760,6 +762,7 @@ export default function DailyHitBuilderPage() {
       setEditingUrlsForDraftId(null);
       setEditableAudioUrl('');
       setEditableThumbnailUrl('');
+      setEditableMediaType('audio');
       await fetchDrafts();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save URLs');
@@ -773,6 +776,7 @@ export default function DailyHitBuilderPage() {
     setEditingUrlsForDraftId(draft.id);
     setEditableAudioUrl(draft.audio_url || '');
     setEditableThumbnailUrl(draft.thumbnail_url || '');
+    setEditableMediaType((draft as any).media_type || 'audio');
   };
 
   // Set day of year for a draft (inline from workflow view)
@@ -1362,6 +1366,31 @@ export default function DailyHitBuilderPage() {
                                 placeholder="https://..."
                               />
                             </div>
+                            <div>
+                              <label className="text-xs text-white/50 block mb-1">Media Type</label>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => setEditableMediaType('audio')}
+                                  className={`px-3 py-1.5 rounded text-xs font-medium flex items-center gap-1 ${
+                                    editableMediaType === 'audio'
+                                      ? 'bg-blue-500/30 text-blue-400 border border-blue-500/50'
+                                      : 'bg-white/5 text-white/50 border border-white/10 hover:bg-white/10'
+                                  }`}
+                                >
+                                  <Volume2 className="w-3 h-3" /> Audio
+                                </button>
+                                <button
+                                  onClick={() => setEditableMediaType('video')}
+                                  className={`px-3 py-1.5 rounded text-xs font-medium flex items-center gap-1 ${
+                                    editableMediaType === 'video'
+                                      ? 'bg-purple-500/30 text-purple-400 border border-purple-500/50'
+                                      : 'bg-white/5 text-white/50 border border-white/10 hover:bg-white/10'
+                                  }`}
+                                >
+                                  <Play className="w-3 h-3" /> Video
+                                </button>
+                              </div>
+                            </div>
                             <div className="flex gap-2">
                               <button
                                 onClick={() => saveFinalUrls(draft.id)}
@@ -1369,7 +1398,7 @@ export default function DailyHitBuilderPage() {
                                 className="px-3 py-1.5 bg-emerald-500/20 text-emerald-400 rounded text-xs hover:bg-emerald-500/30 font-medium flex items-center gap-1 disabled:opacity-50"
                               >
                                 {isSavingUrls ? <Loader2 className="w-3 h-3 animate-spin" /> : <Check className="w-3 h-3" />}
-                                Save URLs
+                                Save
                               </button>
                               <button
                                 onClick={() => setEditingUrlsForDraftId(null)}
