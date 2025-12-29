@@ -13,7 +13,8 @@ import {
 import {
   TrendingDown, UserX, Target, Repeat, Video, Brain, Gamepad2,
   Dumbbell, DollarSign, Users, TrendingUp, Mail,
-  CheckCircle, ArrowRight, Play, Award, Building2, Zap, UserPlus
+  CheckCircle, ArrowRight, Play, Award, Building2, Zap, UserPlus,
+  Youtube, Heart, MessageSquare, Handshake
 } from 'lucide-react';
 
 export default function DBatPartnerPage() {
@@ -129,10 +130,10 @@ export default function DBatPartnerPage() {
       role: 'Coaches & Instructors',
       icon: Award,
       benefits: [
-        'Athletes arrive prepared with 5-min pre-lesson focus',
-        'They practice what you taught (not random swings)',
+        'Athletes arrive more prepared — they\'ve been reinforcing YOUR drills',
+        'Parents see visible progress between sessions — they credit YOU',
+        'The app extends your coaching, it doesn\'t compete with it',
         'Faster progress = you look good = more referrals',
-        'AI handles mental coaching so you can focus on mechanics',
       ],
       color: 'orange',
     },
@@ -194,8 +195,11 @@ export default function DBatPartnerPage() {
               <p className="text-lg sm:text-xl text-gray-300 max-w-2xl mx-auto font-medium mb-2">
                 Retention + conversion + partner revenue.
               </p>
-              <p className="text-base text-gray-400 max-w-2xl mx-auto mb-6">
+              <p className="text-base text-gray-400 max-w-2xl mx-auto mb-4">
                 Zero staff time. Zero equipment. Zero risk.
+              </p>
+              <p className="text-sm text-neon-cortex-blue/80 max-w-xl mx-auto mb-6 italic">
+                Designed to work alongside professional instruction — not replace it.
               </p>
             </FadeInWhenVisible>
 
@@ -334,6 +338,129 @@ export default function DBatPartnerPage() {
         </div>
       </section>
 
+      {/* Section: Why YouTube Isn't Enough */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <FadeInWhenVisible delay={0} direction="up">
+            <div
+              className="rounded-2xl p-8"
+              style={{
+                background: 'linear-gradient(135deg, rgba(15, 17, 35, 0.9) 0%, rgba(27, 31, 57, 0.9) 100%)',
+                border: '1px solid rgba(14, 165, 233, 0.3)',
+              }}
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 rounded-xl bg-red-500/20">
+                  <Youtube className="w-6 h-6 text-red-400" />
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-black text-white">
+                  Why YouTube Isn&apos;t Enough
+                </h2>
+              </div>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="text-center p-4 bg-white/5 rounded-xl">
+                  <p className="text-3xl font-black text-red-400 mb-2">YouTube</p>
+                  <p className="text-white/70">Shows <span className="text-white font-bold">what</span> to do</p>
+                </div>
+                <div className="text-center p-4 bg-white/5 rounded-xl">
+                  <p className="text-3xl font-black text-solar-surge-orange mb-2">Instructors</p>
+                  <p className="text-white/70">Correct <span className="text-white font-bold">how</span> it&apos;s done</p>
+                </div>
+                <div className="text-center p-4 bg-neon-cortex-blue/10 rounded-xl border border-neon-cortex-blue/30">
+                  <p className="text-3xl font-black text-neon-cortex-blue mb-2">Mind & Muscle</p>
+                  <p className="text-white/70">Connects the two <span className="text-white font-bold">between lessons</span></p>
+                </div>
+              </div>
+              <p className="text-center text-white/60 text-sm mt-6">
+                Athletes can upload videos for feedback — but the app gives after-the-fact guidance, not real-time correction.
+                Instructors adjust athletes mid-rep, physically reposition them, and coach feel — not just form.
+              </p>
+            </div>
+          </FadeInWhenVisible>
+        </div>
+      </section>
+
+      {/* Section: Feel > Mechanics */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <FadeInWhenVisible delay={0} direction="up">
+            <div
+              className="rounded-2xl p-8 text-center"
+              style={{
+                background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%)',
+                border: '1px solid rgba(249, 115, 22, 0.3)',
+              }}
+            >
+              <div className="flex justify-center mb-4">
+                <div className="p-3 rounded-xl bg-solar-surge-orange/20">
+                  <Heart className="w-8 h-8 text-solar-surge-orange" />
+                </div>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-black text-white mb-4">
+                It&apos;s Not Just Mechanics
+              </h2>
+              <p className="text-lg text-white/80 max-w-2xl mx-auto mb-6">
+                Every instructor knows: a player who&apos;s confident outperforms a player with perfect form who&apos;s nervous.
+              </p>
+              <div className="grid sm:grid-cols-2 gap-4 max-w-xl mx-auto mb-6">
+                <div className="p-4 bg-white/5 rounded-lg">
+                  <p className="text-white/60 text-sm">Mechanics are</p>
+                  <p className="text-white font-bold">Visible</p>
+                </div>
+                <div className="p-4 bg-white/5 rounded-lg">
+                  <p className="text-white/60 text-sm">Confidence, timing, pressure response are</p>
+                  <p className="text-solar-surge-orange font-bold">Not</p>
+                </div>
+              </div>
+              <p className="text-lg font-bold bg-gradient-to-r from-solar-surge-orange to-neon-cortex-blue bg-clip-text text-transparent">
+                Your instructors teach the swing. We help them own the moment.
+              </p>
+            </div>
+          </FadeInWhenVisible>
+        </div>
+      </section>
+
+      {/* Section: Instructor Force Multiplier */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          <FadeInWhenVisible delay={0} direction="up">
+            <div
+              className="rounded-2xl p-8"
+              style={{
+                background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(14, 165, 233, 0.1) 100%)',
+                border: '2px solid rgba(34, 197, 94, 0.4)',
+              }}
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 rounded-xl bg-green-500/20">
+                  <Handshake className="w-6 h-6 text-green-400" />
+                </div>
+                <h2 className="text-xl sm:text-2xl font-black text-white">
+                  For Facilities: This Extends Your Coaching, Not Competes With It
+                </h2>
+              </div>
+              <p className="text-lg text-white/80 mb-4">
+                Mind & Muscle <span className="text-green-400 font-bold">reinforces</span> your drills, your instruction, and your coaching philosophy between sessions — so athletes show up more prepared and parents see more value.
+              </p>
+              <div className="grid sm:grid-cols-3 gap-4">
+                <div className="flex items-center gap-2 p-3 bg-white/5 rounded-lg">
+                  <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+                  <p className="text-white/80 text-sm">Athletes reinforce YOUR drills</p>
+                </div>
+                <div className="flex items-center gap-2 p-3 bg-white/5 rounded-lg">
+                  <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+                  <p className="text-white/80 text-sm">Parents credit YOU for progress</p>
+                </div>
+                <div className="flex items-center gap-2 p-3 bg-white/5 rounded-lg">
+                  <CheckCircle className="w-5 h-5 text-green-400 flex-shrink-0" />
+                  <p className="text-white/80 text-sm">Retention goes UP, not down</p>
+                </div>
+              </div>
+            </div>
+          </FadeInWhenVisible>
+        </div>
+      </section>
+
       {/* Section 3: The Solution - Features */}
       <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-[#1A1F3A] via-[#0F1123] to-[#1A1F3A]" />
@@ -454,6 +581,19 @@ export default function DBatPartnerPage() {
                     <p className="text-white/80 text-sm">{item}</p>
                   </div>
                 ))}
+              </div>
+
+              {/* Optional Chatter Feature */}
+              <div className="mt-6 p-4 bg-neon-cortex-blue/10 rounded-lg border border-neon-cortex-blue/30">
+                <div className="flex items-start gap-3">
+                  <MessageSquare className="w-5 h-5 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-neon-cortex-blue font-bold text-sm">Optional: In-App Team Space</p>
+                    <p className="text-white/70 text-sm">
+                      A private team space for facility announcements, polls, and updates — no email chains, no parent group texts.
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           </FadeInWhenVisible>
