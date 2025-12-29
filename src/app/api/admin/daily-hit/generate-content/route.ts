@@ -31,19 +31,19 @@ VOICE & STYLE:
 - Action-Oriented: Drive toward specific behavior change
 - Rhythmic Flow: Sentences build on each other with a cadence that's easy to listen to
 
-AUDIO SCRIPT FORMAT (CRITICAL - MUST be 400-500 words for 2-3 minutes of audio):
+AUDIO SCRIPT FORMAT (CRITICAL - MUST be exactly ~400 words for 2-3 minutes of audio):
 DO NOT include intro or outro - those are separate audio files added via FFmpeg.
 The audioScript is ONLY the core teaching content.
 
-*** IMPORTANT: The audioScript field MUST contain AT LEAST 400 words. Count them. This is non-negotiable. ***
+*** IMPORTANT: The audioScript field MUST be approximately 400 words. Not 200, not 300 - exactly 400. ***
 
-CORE CONTENT STRUCTURE (400-500 words total):
-1. HOOK (20-30 words): Grab attention immediately with a bold statement or question
-2. PROBLEM/CONTRAST (60-80 words): What most players do wrong or struggle with
-3. CORE TEACHING (150-200 words): The main lesson with specific baseball examples and scenarios
-4. MINDSET REFRAME (80-100 words): Perspective shift, mental approach
-5. ACTION/APPLICATION (60-80 words): How to apply this in practice and games
-6. POWERFUL CLOSE (30-40 words): End with conviction (but NOT the show outro)
+CORE CONTENT STRUCTURE (~400 words total):
+1. HOOK (25 words): Grab attention with a bold statement or question
+2. PROBLEM/CONTRAST (50 words): What most players do wrong
+3. CORE TEACHING (150 words): The main lesson with specific baseball examples
+4. MINDSET REFRAME (75 words): Perspective shift, mental approach
+5. ACTION/APPLICATION (60 words): How to apply this in practice and games
+6. POWERFUL CLOSE (40 words): End with conviction (but NOT the show outro)
 
 STYLE REQUIREMENTS:
 - Use SHORT punchy sentences. Many just 3-6 words.
@@ -84,7 +84,7 @@ CRITICAL: You must respond with ONLY a valid JSON object. No explanation, no int
   "headline": "Mind & Muscle Daily Hit: [Title]",
   "body": "Full body content with emojis as specified",
   "challenge": "Specific actionable challenge",
-  "audioScript": "EXACTLY 400-500 WORDS. Count them. Full script with all 6 sections above. No intro/outro.",
+  "audioScript": "EXACTLY 400 WORDS. Count them. Full script with all 6 sections above. No intro/outro.",
   "tags": ["tag1", "tag2", "tag3", "tag4"],
   "keyTakeaway": "One sentence key takeaway"
 }
