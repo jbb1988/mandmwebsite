@@ -958,6 +958,8 @@ export default function DailyHitBuilderPage() {
           tags: contentTags,
           // Pass draftId for auto-save
           draftId: selectedDraftForImage?.id,
+          // Pass selected style
+          style: selectedImageStyle,
         }),
       });
 
@@ -2403,6 +2405,39 @@ export default function DailyHitBuilderPage() {
               </div>
             </div>
           )}
+
+          {/* Image Style Selector */}
+          <div className="mb-4">
+            <label className="block text-sm text-white/60 mb-2">Image Style</label>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              {[
+                { key: 'cinematic_silhouette', name: 'Cinematic Silhouette', description: 'Dramatic silhouettes against sunset/twilight sky', icon: '🌅' },
+                { key: 'action_photography', name: 'Action Photography', description: 'Dynamic frozen-motion sports shots', icon: '⚡' },
+                { key: 'gritty_training', name: 'Gritty Training', description: 'Raw, authentic practice & workout moments', icon: '💪' },
+                { key: 'stadium_epic', name: 'Stadium Epic', description: 'Grand stadium atmospheres with dramatic lighting', icon: '🏟️' },
+                { key: 'intimate_focus', name: 'Intimate Focus', description: 'Close-up emotional portraits and details', icon: '🔍' },
+                { key: 'vintage_baseball', name: 'Vintage Baseball', description: 'Nostalgic, timeless baseball aesthetic', icon: '📷' },
+              ].map((style) => (
+                <button
+                  key={style.key}
+                  onClick={() => setSelectedImageStyle(style.key)}
+                  className={`p-3 rounded-lg border text-left transition-all ${
+                    selectedImageStyle === style.key
+                      ? 'bg-orange-500/20 border-orange-500/50 ring-1 ring-orange-500/30'
+                      : 'bg-white/5 border-white/10 hover:bg-white/10'
+                  }`}
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-lg">{style.icon}</span>
+                    <span className={`text-sm font-medium ${selectedImageStyle === style.key ? 'text-orange-400' : 'text-white/80'}`}>
+                      {style.name}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-white/50 line-clamp-2">{style.description}</p>
+                </button>
+              ))}
+            </div>
+          </div>
 
           {/* Generate Button */}
           <button
