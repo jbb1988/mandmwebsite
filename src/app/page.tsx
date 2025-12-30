@@ -278,7 +278,7 @@ export default function HomePage() {
       id: 'the-zone',
       title: 'The Zone',
       icon: Brain,
-      iconImage: null,
+      iconImage: '/assets/images/the_zone_icon.png',
       color: 'blue',
       image: '/assets/mind/the_zone.png',
       videoUrl: '/assets/videos/the_zone.mp4',

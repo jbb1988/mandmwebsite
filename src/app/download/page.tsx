@@ -10,7 +10,7 @@ const aiCoaches = [
   {
     name: 'The Zone',
     description: 'Master the moment',
-    icon: '/assets/images/Mind AI Coach.png',
+    icon: '/assets/images/the_zone_icon.png',
     gradient: 'from-neon-cortex-blue/30 to-mind-primary/30',
   },
   {
