@@ -1309,7 +1309,7 @@ function TeamLicensingContent() {
               </li>
 
               {[
-                'The Zone: Audio-first mental training',
+                'The Zone: Master the moment',
                 'Muscle AI Coach: All workouts',
                 'Swing Lab: AI swing analysis',
                 'Pitch Lab: AI pitching analysis + arm health',

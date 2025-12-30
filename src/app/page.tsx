@@ -282,9 +282,9 @@ export default function HomePage() {
       color: 'blue',
       image: '/assets/mind/the_zone.png',
       videoUrl: '/assets/videos/the_zone.mp4',
-      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/mindcoachai_ob.mp3',
+      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/thezone_ob.mp3',
       tagline: 'Your Mental Edge. Audio-First Training for Peak Performance.',
-      description: 'Enter The Zone. Dominate The Moment.',
+      description: 'Master the moment.',
       modalDescription: 'The Zone is your mental command center.\n\nThat clutch player who never gets rattled? They trained their mind to enter The Zone on demand.\n\n**Audio-First Mental Training** - Pre-game calm, in-game focus, post-mistake recovery. Sessions designed for exactly when you need them.\n\n**Four Mental Archetypes:**\n• CALM - Center yourself before competition\n• FOCUS - Lock in when it matters most\n• EDGE - Bounce back after mistakes\n• ENERGY - Activate your confident self\n\n**Built for Game Day** - Quick sessions you can use on-deck, in the dugout, or before stepping into the box.\n\nWhile other athletes hope their mental game shows up, yours gets trained to dominate every moment.\n\n**This is The Zone. Your mental edge.**',
     },
     {

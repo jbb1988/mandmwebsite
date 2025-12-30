@@ -9,7 +9,7 @@ import { Check, Dumbbell, Target, Gauge, Flame, Wind, Mic, MessageCircle, Calend
 const aiCoaches = [
   {
     name: 'The Zone',
-    description: 'Audio-first mental training',
+    description: 'Master the moment',
     icon: '/assets/images/Mind AI Coach.png',
     gradient: 'from-neon-cortex-blue/30 to-mind-primary/30',
   },
