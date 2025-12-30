@@ -85,7 +85,7 @@ export default function FAQPage() {
         },
         {
           question: 'How does AI personalization work across the platform?',
-          answer: 'Mind & Muscle\'s AI creates a complete profile of you as a player:\n\n• Position-Specific Intelligence: Pitchers get rotational power workouts. Catchers get explosive leg training. Outfielders get sprint mechanics.\n• Learning From Feedback: After each mental training session, workout, or swing analysis, the AI asks for feedback and adjusts future recommendations.\n• Cross-Feature Insights: Your swing analysis identifies timing issues → Mind Coach recommends focus training → Goals AI suggests practice milestones → Muscle Coach designs bat speed workouts. Everything connects.\n• Adaptive Difficulty: Game Lab scenarios get harder as your mental batting average improves. Workouts progress as you get stronger.\n\nThe system learns your strengths, identifies your gaps, and engineers development plans that actually work—because it sees the complete picture of who you are as a player.'
+          answer: 'Mind & Muscle\'s AI creates a complete profile of you as a player:\n\n• Position-Specific Intelligence: Pitchers get rotational power recommendations. Catchers get explosive leg training. Outfielders get sprint mechanics.\n• Learning From Feedback: After each mental training session, workout, or swing analysis, the AI asks for feedback and adjusts future recommendations.\n• Cross-Feature Insights: Your swing analysis identifies timing issues → The Zone recommends focus training → Goals AI suggests practice milestones → The Vault provides drills from verified instructors. Everything connects.\n• Adaptive Difficulty: Game Lab scenarios get harder as your mental batting average improves. Training progresses as you get stronger.\n\nThe system learns your strengths, identifies your gaps, and engineers development plans that actually work—because it sees the complete picture of who you are as a player.'
         },
         {
           question: 'Does Mind & Muscle require internet connection?',
@@ -94,62 +94,62 @@ export default function FAQPage() {
       ]
     },
     {
-      id: 'mind-coach',
-      title: 'Mind Coach AI - Mental Training',
-      iconImage: '/assets/images/Mind AI Coach.png',
+      id: 'the-zone',
+      title: 'The Zone - Mental Training',
+      iconImage: '/assets/mind/the_zone.png',
       color: 'blue',
       faqs: [
         {
-          question: 'What is Mind Coach AI?',
-          answer: 'Mind Coach AI is your personal mental training coach that creates personalized sessions to build mental toughness, focus, confidence, and pressure management. It learns from your feedback after each session and adapts to your needs.'
+          question: 'What is The Zone?',
+          answer: 'The Zone is your mental command center—audio-first training designed to engineer peak performance states. It combines visualization, focus training, breathwork, and mental conditioning into powerful sessions that help you perform when it matters most.'
         },
         {
           question: 'How do I start a mental training session?',
-          answer: 'Go to the Mind tab → Mind Coach AI. New exercises are generated each week, or you can browse sessions you\'ve favorited or custom sessions you\'ve created. Tap a session to start and follow the guided exercises. After completing, provide feedback so the AI can personalize future sessions.'
+          answer: 'Go to the Mind tab → The Zone. Browse content by archetype (CALM, FOCUS, ENERGY, EDGE) or explore curated collections. Tap a session to start and follow the guided audio experience. Sessions range from 3-20 minutes depending on your available time.'
         },
         {
-          question: 'What types of mental training are available?',
-          answer: 'Mind Coach AI offers sessions in:\n\n• Focus Training - Eliminate distractions and lock in\n• Pressure Management - Stay calm in clutch moments\n• Confidence Building - Develop unshakeable self-belief\n• Visualization - Mental rehearsal for game situations\n• Mindfulness - Present-moment awareness for peak performance\n\nEach type has multiple sessions tailored to your experience level.'
+          question: 'What are the Zone archetypes?',
+          answer: 'The Zone offers sessions across four performance archetypes:\n\n• CALM - Deep relaxation and nervous system reset\n• FOCUS - Laser concentration and distraction elimination\n• ENERGY - Amp up intensity and competitive fire\n• EDGE - Pressure management and clutch performance\n\nEach archetype has multiple sessions tailored to different situations and experience levels.'
         },
         {
-          question: 'Can I create custom mental training sessions?',
-          answer: 'Yes! In Mind Coach AI, tap "Create Custom Session". You can build your own session by selecting exercises and customizing the focus areas that matter most to you (e.g., pre-game anxiety, staying confident after an error). Your custom sessions are saved for easy access anytime.'
+          question: 'When should I use The Zone?',
+          answer: 'Use The Zone strategically:\n\n• Before Training: 5-10 minutes to lock in focus\n• Pre-Game: 3-5 minutes for mental preparation\n• Between Innings: Quick mental resets\n• Before Sleep: Recovery and next-day visualization\n• Anytime: Build mental skills through consistent practice\n\nThe more you train, the faster you can access peak performance states.'
         },
         {
           question: 'How do I track my mental training progress?',
-          answer: 'Your mental training progress is tracked in multiple places:\n\n• Mind Coach dashboard shows completed sessions and current streak\n• Goals section tracks mental training goals\n• Dashboard displays daily mental training check-ins\n• Reports section shows weekly mental training summaries'
+          answer: 'Your mental training progress is tracked in multiple places:\n\n• The Zone shows completed sessions and favorites\n• Goals section tracks mental training goals\n• Dashboard displays daily mental training check-ins\n• Reports section shows weekly mental training summaries'
         },
         {
           question: 'What are session streaks?',
-          answer: 'Build a streak by completing mental training sessions on consecutive days. Streaks motivate consistency and help build lasting mental skills. Your current streak is displayed in the Mind Coach section. Miss a day and your streak resets, but your progress and completed sessions remain.'
+          answer: 'Build a streak by completing mental training sessions on consecutive days. Streaks motivate consistency and help build lasting mental skills. Your current streak is displayed in The Zone. Miss a day and your streak resets, but your progress and completed sessions remain.'
         }
       ]
     },
     {
-      id: 'muscle-coach',
-      title: 'Muscle Coach AI - Strength Training',
-      iconImage: '/assets/images/Muscle AI Coach Icon.png',
+      id: 'the-vault',
+      title: 'The Vault - Professional Drill Library',
+      iconImage: '/assets/images/the_vault.png',
       color: 'orange',
       faqs: [
         {
-          question: 'What is Muscle Coach AI?',
-          answer: 'Muscle Coach AI is your baseball and softball-specific strength training system. It provides position-specific power training, tracks progressive overload, and offers hundreds of exercises designed by professional coaches. Build explosive bat speed, throwing velocity, and game-ready endurance.'
+          question: 'What is The Vault?',
+          answer: 'The Vault is your professional drill library—curated training content from verified instructors and top facilities. Stop searching YouTube for random drills. Get professional video demonstrations from certified coaches with real credentials.'
         },
         {
-          question: 'What are the three training zones?',
-          answer: 'AI Coach Tab: Smart workout recommendations based on your position, goals, and progress. Just tap and start.\n\nExercise Vault: Library of hundreds of baseball-specific exercises with video demonstrations. Browse by muscle group, equipment, or training goal.\n\nBuild Tab: Create custom workout plans. Select exercises, set sets/reps, track your workouts over time.'
+          question: 'Who creates the drills?',
+          answer: 'Every drill in The Vault comes from verified instructors with real coaching credentials. Instructors are verified by facility affiliation (like DBAT, Extra Innings, etc.) or independent verification of their coaching background. You can see instructor profiles, credentials, and other drills they\'ve created.'
         },
         {
-          question: 'How do I log a workout?',
-          answer: 'Go to Muscle tab → Start a recommended workout from AI Coach, or create your own in Build Tab. As you complete each exercise, log sets, reps, and weight used. The app tracks your progressive overload automatically and suggests when to increase weight.'
+          question: 'How do I find drills?',
+          answer: 'Browse The Vault by category (hitting, pitching, fielding, etc.), difficulty level, equipment needed, or instructor. Use the search to find specific drills or techniques. Filter by what you have available—some drills need equipment, others can be done anywhere.'
         },
         {
-          question: 'How does position-specific training work?',
-          answer: 'When you set your position (pitcher, catcher, infield, outfield), Muscle Coach AI prioritizes exercises that develop the power systems most important for your role:\n\n• Pitchers: Rotational power, shoulder stability, explosive leg drive\n• Catchers: Lower body strength, quick feet, throwing power\n• Infielders: Explosive first step, quick hands, throwing accuracy\n• Outfielders: Sprint speed, throwing distance, tracking ability'
+          question: 'Can I save favorite drills?',
+          answer: 'Yes! Tap the heart icon on any drill to add it to your favorites. Access your saved drills anytime from the My Drills tab. Build your personal drill library organized by your training focus areas.'
         },
         {
-          question: 'How do I create a custom workout plan?',
-          answer: 'Go to Muscle → Build Tab → Create New Plan. Name your plan, select exercises from the vault, set target sets/reps for each. Save the plan to reuse it. Track your progress each time you complete the plan. The app automatically suggests progressive overload.'
+          question: 'Can I upload my own drills?',
+          answer: 'Yes, if you\'re a verified instructor! Coaches with verified profiles can upload drills to share with the community. Apply for instructor verification through the app to share your expertise with thousands of athletes.'
         }
       ]
     },
@@ -450,6 +450,10 @@ export default function FAQPage() {
         {
           question: 'Can parents see team events?',
           answer: 'Yes! Parents linked to their athlete see all team events on their calendar. They can view event details, location, and RSVP for their athlete. Parents stay informed without needing Premium access. Plus, all users (Apple and Android) can sync events to their phone\'s calendar—either single events or the full team schedule.'
+        },
+        {
+          question: 'How do parents link to their athlete?',
+          answer: 'Parents connect to their athlete by entering their child\'s email address in the app. Go to Parent Dashboard → tap "Link Athlete" and enter the email your child used to create their Mind & Muscle account. Your child will receive a request and can approve or deny the connection. Once approved, you\'ll see their shared Goals and Reports. This is independent of team membership—the link stays active even if your athlete changes teams!'
         }
       ]
     },
@@ -517,7 +521,7 @@ export default function FAQPage() {
       faqs: [
         {
           question: 'What are streaks and how do I build them?',
-          answer: 'Streaks track consecutive days you complete activities:\n\n• Daily Hit Streak: Complete your daily content\n• Mind Coach Streak: Complete Mind Coach AI exercises daily\n• Muscle Coach Streak: Log Muscle Coach AI exercises daily\n• Dugout Talk Streak: Make Dugout Talk entries daily\n\nLonger streaks earn bonus XP and special badges. Miss a day? Your streak resets, but your progress and total completions remain. Streaks motivate consistency—the key to real improvement.'
+          answer: 'Streaks track consecutive days you complete activities:\n\n• Daily Hit Streak: Complete your daily content\n• Zone Streak: Complete The Zone mental training sessions daily\n• Vault Streak: Watch drills and add favorites in The Vault daily\n• Dugout Talk Streak: Make Dugout Talk entries daily\n\nLonger streaks earn bonus XP and special badges. Miss a day? Your streak resets, but your progress and total completions remain. Streaks motivate consistency—the key to real improvement.'
         },
         {
           question: 'How do I earn XP?',

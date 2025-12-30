@@ -21,6 +21,10 @@ export const TOP_FAQS = [
     answer: 'NO! Parents get FREE read-only access to their athlete\'s Goals and Reports without consuming any license seats. Only Athletes and Coaches consume seats.',
   },
   {
+    question: 'How do parents connect with their athlete?',
+    answer: 'Parents link to their athlete by entering their child\'s email address in the app. The athlete receives a connection request and can approve it. This is independent of teams—the connection stays active even if your athlete changes teams.',
+  },
+  {
     question: 'What devices are supported?',
     answer: 'Mind & Muscle is available on iOS (iPhone and iPad running iOS 14.0+) and Android (phones and tablets running Android 8.0+).',
   },
@@ -30,7 +34,7 @@ export const TOP_FAQS = [
   },
   {
     question: 'What is included in Premium access?',
-    answer: 'Premium includes: Mind Coach AI (mental training), Muscle Coach AI (strength training), Swing Lab & Plate IQ (video analysis + pitch anticipation training), Game Lab (baseball IQ), Sound Lab (mental state engineering), Goals AI, Fuel AI (nutrition), AI Assistant Coach, and team communication features.',
+    answer: 'Premium includes: The Zone (audio-first mental training), The Vault (professional drills from verified instructors), Swing Lab & Plate IQ (video analysis + pitch anticipation training), Game Lab (baseball IQ), Sound Lab (mental state engineering), Goals AI, Fuel AI (nutrition), AI Assistant Coach, and team communication features.',
   },
   {
     question: 'Can I cancel anytime?',

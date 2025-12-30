@@ -272,7 +272,7 @@ export default function HomePage() {
     },
   ];
 
-  // Row 3: 3 cards - The Zone, Muscle Coach AI, Goals AI
+  // Row 3: 3 cards - The Zone, The Vault, Goals AI
   const row3Features = [
     {
       id: 'the-zone',
@@ -288,17 +288,17 @@ export default function HomePage() {
       modalDescription: 'The Zone is your mental command center.\n\nThat clutch player who never gets rattled? They trained their mind to enter The Zone on demand.\n\n**Audio-First Mental Training** - Pre-game calm, in-game focus, post-mistake recovery. Sessions designed for exactly when you need them.\n\n**Four Mental Archetypes:**\n• CALM - Center yourself before competition\n• FOCUS - Lock in when it matters most\n• EDGE - Bounce back after mistakes\n• ENERGY - Activate your confident self\n\n**Built for Game Day** - Quick sessions you can use on-deck, in the dugout, or before stepping into the box.\n\nWhile other athletes hope their mental game shows up, yours gets trained to dominate every moment.\n\n**This is The Zone. Your mental edge.**',
     },
     {
-      id: 'muscle-training',
-      title: 'Muscle Coach AI',
+      id: 'the-vault',
+      title: 'The Vault',
       icon: Dumbbell,
-      iconImage: '/assets/images/Muscle AI Coach Icon.png',
+      iconImage: '/assets/images/the_vault_icon.png',
       color: 'orange',
-      image: '/assets/muscle/Muscle AI Coach Hero.png',
-      videoUrl: '/assets/videos/muscle_coachai.mp4',
-      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/musclecoachai_ob.mp3',
-      tagline: 'Your Elite Strength Engineer That Builds Baseball and Softball Power',
-      description: 'Build the Strength That Gets You Noticed.',
-      modalDescription: 'Muscle Coach AI doesn\'t guess your strength needs. It engineers baseball and softball-specific power.\n\nMLB-level strength training, personalized for your position and power profile.\n\nThree Training Zones - AI Coach (smart recommendations), Exercise Vault (hundreds of baseball and softball-specific exercises), Build Tab (custom workout plan creator).\n\nPosition-Specific Power - Explosive power for bat speed. Rotational strength for throwing velocity. Endurance for clutch moments. All engineered for your position.\n\nAI-Driven Progression - Every set logged. Every workout analyzed. Progressive overload tracked automatically.\n\nCreate Custom Plans - Build workout routines with targeted exercises, track sets/reps, monitor strength gains.\n\nWhile other players hope their strength shows up, yours gets systematically engineered for peak performance.\n\n**This is strength training. Built for baseball and softball.**',
+      image: '/assets/muscle/the_vault.png',
+      videoUrl: '/assets/videos/the_vault.mp4',
+      audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/thevault_ob.mp3',
+      tagline: 'Your Drills. Your System. Everywhere.',
+      description: 'Professional drills from verified instructors.',
+      modalDescription: 'The Vault is your professional drill library.\n\nStop searching YouTube for random drills. Get curated content from verified instructors and top facilities.\n\n**Netflix-Style Browsing** - Find drills by category, difficulty, equipment needed, and instructor credentials.\n\n**Verified Instructors** - Every drill comes from certified coaches and professional trainers with real credentials.\n\n**Build Your System** - Save favorites, create playlists, and build your personal training library.\n\n**Access Anywhere** - Your drills sync across devices. Train at home, at the field, or on the road.\n\nWhile other athletes piece together random drills, yours follow a system built by pros.\n\n**This is The Vault. Your drills. Your system. Everywhere.**',
     },
     {
       id: 'goals-ai',
@@ -793,7 +793,7 @@ export default function HomePage() {
             })}
           </StaggerChildren>
 
-          {/* Row 3 - 3 Cards: The Zone, Muscle Coach AI, Goals AI */}
+          {/* Row 3 - 3 Cards: The Zone, The Vault, Goals AI */}
           <StaggerChildren staggerDelay={0.12} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {row3Features.map((feature, i) => {
               const Icon = feature.icon;
