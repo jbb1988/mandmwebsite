@@ -25,6 +25,7 @@ import {
   PinOff,
   Mic,
   Database,
+  Video,
 } from 'lucide-react';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import CommandSearch from './CommandSearch';
@@ -65,6 +66,7 @@ const NAV_SECTIONS: NavSection[] = [
       { id: 'partners', name: 'Partners', href: '/admin/partners', icon: Handshake, shortcut: 'P' },
       { id: 'outreach', name: 'Outreach', href: '/admin/outreach-crm', icon: Target },
       { id: 'enrichment', name: 'Enrichment', href: '/admin/enrichment', icon: Database, shortcut: 'E' },
+      { id: 'vault', name: 'The Vault', href: '/admin/vault-moderation', icon: Video, shortcut: 'V' },
     ],
   },
   {
