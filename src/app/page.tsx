@@ -2108,7 +2108,7 @@ export default function HomePage() {
                       <div className="space-y-4">
                         {[
                           { num: '1', name: 'The Zone', icon: Brain, desc: 'Audio-first mental training' },
-                          { num: '2', name: 'Muscle AI Coach', icon: Dumbbell, desc: 'Position-specific workouts' },
+                          { num: '2', name: 'The Vault', icon: Dumbbell, desc: 'Pro drill library' },
                           { num: '3', name: 'Swing Lab', icon: Video, desc: 'AI swing analysis' },
                           { num: '4', name: 'Pitch Lab', icon: TrendingUp, desc: 'AI pitching analysis + arm health' },
                           { num: '5', name: 'Plate IQ', icon: TrendingUp, desc: 'Pitch anticipation training' },
@@ -2435,7 +2435,7 @@ export default function HomePage() {
                 {[
                   'Everything in Free',
                   'The Zone: Audio-first mental training',
-                  'Muscle AI Coach: All workouts',
+                  'The Vault: Pro drill library',
                   'Swing Lab: AI swing analysis',
                   'Pitch Lab: AI pitching analysis + arm health',
                   'Plate IQ: Pitch anticipation training',

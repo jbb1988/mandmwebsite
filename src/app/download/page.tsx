@@ -14,9 +14,9 @@ const aiCoaches = [
     gradient: 'from-neon-cortex-blue/30 to-mind-primary/30',
   },
   {
-    name: 'Muscle AI',
-    description: 'Position-specific strength',
-    icon: '/assets/images/Muscle AI Coach Icon.png',
+    name: 'The Vault',
+    description: 'Pro drill library',
+    icon: '/assets/images/the_vault_icon.png',
     gradient: 'from-solar-surge-orange/30 to-muscle-primary/30',
   },
   {

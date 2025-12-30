@@ -1310,7 +1310,7 @@ function TeamLicensingContent() {
 
               {[
                 'The Zone: Master the moment',
-                'Muscle AI Coach: All workouts',
+                'The Vault: Pro drill library',
                 'Swing Lab: AI swing analysis',
                 'Pitch Lab: AI pitching analysis + arm health',
                 'Plate IQ: Pitch anticipation training',
@@ -1643,7 +1643,7 @@ function TeamLicensingContent() {
               question: 'What features do Pro codes enable?',
               answer: (
                 <p className="text-text-secondary text-sm leading-relaxed">
-                  Pro team codes enable access to <span className="text-neon-cortex-blue font-semibold">ALL Pro features</span> for your athletes: Goals AI coaching, coach feedback, Mind & Muscle AI coaches, Fuel AI nutrition, Swing Lab & Plate IQ (video analysis + pitch anticipation), Sound Lab music library, Game Lab (all levels), weekly AI reports, and advanced analytics.
+                  Pro team codes enable access to <span className="text-neon-cortex-blue font-semibold">ALL Pro features</span> for your athletes: The Zone mental training, The Vault drill library, Goals AI coaching, coach feedback, Fuel AI nutrition, Swing Lab & Plate IQ (video analysis + pitch anticipation), Sound Lab music library, Game Lab (all levels), weekly AI reports, and advanced analytics.
                 </p>
               ),
             },
