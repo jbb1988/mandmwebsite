@@ -86,7 +86,15 @@ export async function GET(request: NextRequest) {
 
     // Apply search filter
     if (search) {
-      query = query.or(`email.ilike.%${search}%,name.ilike.%${search}%`);
+      // Check if search looks like a UUID (user ID)
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+      if (uuidRegex.test(search)) {
+        // Search by exact user ID
+        query = query.eq('id', search);
+      } else {
+        // Search by email or name
+        query = query.or(`email.ilike.%${search}%,name.ilike.%${search}%`);
+      }
     }
 
     // Apply tier filter
