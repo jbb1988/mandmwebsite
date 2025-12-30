@@ -272,20 +272,20 @@ export default function HomePage() {
     },
   ];
 
-  // Row 3: 3 cards - Mind Coach AI, Muscle Coach AI, Goals AI
+  // Row 3: 3 cards - The Zone, Muscle Coach AI, Goals AI
   const row3Features = [
     {
-      id: 'mind-coach',
-      title: 'Mind Coach AI',
+      id: 'the-zone',
+      title: 'The Zone',
       icon: Brain,
-      iconImage: '/assets/images/Mind AI Coach.png',
+      iconImage: null,
       color: 'blue',
-      image: '/assets/mind/Mind AI Coach Hero.png',
-      videoUrl: '/assets/videos/mind_coachai.mp4',
+      image: '/assets/mind/the_zone.png',
+      videoUrl: '/assets/videos/the_zone.mp4',
       audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/mindcoachai_ob.mp3',
-      tagline: 'Your Elite Mental Training Coach That Actually Knows You',
-      description: 'Where Mental Toughness Becomes Mental Dominance.',
-      modalDescription: 'Mind Coach AI doesn\'t guess your mental game. It engineers it.\n\nThat clutch player who never gets rattled? They trained their mind like you train your body.\n\nAI-Powered Mental Training - Personalized sessions in focus, pressure management, confidence, visualization, and mindfulness. Each designed for your mental profile.\n\nLearns From Every Session - Feedback after each session makes the next one smarter. Your mental training evolves with you.\n\nCreate Custom Sessions - Need something specific? Build sessions tailored to your exact mental challenges.\n\nTrack Your Progress - Complete sessions, build streaks, watch your mental game level up.\n\nWhile other athletes hope their mental game shows up, yours gets engineered for peak performance.\n\n**This is your mind. Fully trained.**',
+      tagline: 'Your Mental Edge. Audio-First Training for Peak Performance.',
+      description: 'Enter The Zone. Dominate The Moment.',
+      modalDescription: 'The Zone is your mental command center.\n\nThat clutch player who never gets rattled? They trained their mind to enter The Zone on demand.\n\n**Audio-First Mental Training** - Pre-game calm, in-game focus, post-mistake recovery. Sessions designed for exactly when you need them.\n\n**Four Mental Archetypes:**\n• CALM - Center yourself before competition\n• FOCUS - Lock in when it matters most\n• EDGE - Bounce back after mistakes\n• ENERGY - Activate your confident self\n\n**Built for Game Day** - Quick sessions you can use on-deck, in the dugout, or before stepping into the box.\n\nWhile other athletes hope their mental game shows up, yours gets trained to dominate every moment.\n\n**This is The Zone. Your mental edge.**',
     },
     {
       id: 'muscle-training',
@@ -793,7 +793,7 @@ export default function HomePage() {
             })}
           </StaggerChildren>
 
-          {/* Row 3 - 3 Cards: Mind Coach AI, Muscle Coach AI, Goals AI */}
+          {/* Row 3 - 3 Cards: The Zone, Muscle Coach AI, Goals AI */}
           <StaggerChildren staggerDelay={0.12} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {row3Features.map((feature, i) => {
               const Icon = feature.icon;
@@ -2107,7 +2107,7 @@ export default function HomePage() {
                       <h4 className="text-sm font-bold text-neon-cortex-blue mb-4 tracking-wide drop-shadow-[0_0_8px_rgba(14,165,233,0.4)]">STARTERS</h4>
                       <div className="space-y-4">
                         {[
-                          { num: '1', name: 'Mind AI Coach + Library', icon: Brain, desc: 'Baseball and softball mental training' },
+                          { num: '1', name: 'The Zone', icon: Brain, desc: 'Audio-first mental training' },
                           { num: '2', name: 'Muscle AI Coach', icon: Dumbbell, desc: 'Position-specific workouts' },
                           { num: '3', name: 'Swing Lab', icon: Video, desc: 'AI swing analysis' },
                           { num: '4', name: 'Pitch Lab', icon: TrendingUp, desc: 'AI pitching analysis + arm health' },
@@ -2169,7 +2169,7 @@ export default function HomePage() {
                       <h4 className="text-sm font-bold text-solar-surge-orange mb-3 tracking-wide drop-shadow-[0_0_8px_rgba(249,115,22,0.6)]">COACHING STAFF</h4>
                       <ul className="space-y-2 text-sm text-white">
                         <li className="flex items-center gap-2">
-                          <Zap className="w-3 h-3 text-solar-surge-orange drop-shadow-[0_0_6px_rgba(249,115,22,0.5)]" /> 8 AI coaches learn YOUR game
+                          <Zap className="w-3 h-3 text-solar-surge-orange drop-shadow-[0_0_6px_rgba(249,115,22,0.5)]" /> 7 AI coaches + The Zone
                         </li>
                         <li className="flex items-center gap-2">
                           <Zap className="w-3 h-3 text-solar-surge-orange drop-shadow-[0_0_6px_rgba(249,115,22,0.5)]" /> Position-specific training plans
@@ -2260,7 +2260,7 @@ export default function HomePage() {
                         </div>
                         <ul className="space-y-3 text-base text-white">
                           <li className="flex items-start gap-2">
-                            <span className="text-neon-cortex-blue mt-1 font-black">✓</span> 8 AI coaches learn YOUR game
+                            <span className="text-neon-cortex-blue mt-1 font-black">✓</span> 7 AI coaches + The Zone
                           </li>
                           <li className="flex items-start gap-2">
                             <span className="text-neon-cortex-blue mt-1 font-black">✓</span> Everything syncs together
@@ -2430,11 +2430,11 @@ export default function HomePage() {
                 </Link>
               </div>
 
-              <p className="text-text-secondary mb-8 text-lg md:text-xl">Everything free has, plus 8 AI coaches and unlimited access</p>
+              <p className="text-text-secondary mb-8 text-lg md:text-xl">Everything free has, plus 7 AI coaches, The Zone, and unlimited access</p>
               <ul className="space-y-4 mb-8">
                 {[
                   'Everything in Free',
-                  'Mind AI Coach: Mental toughness training',
+                  'The Zone: Audio-first mental training',
                   'Muscle AI Coach: All workouts',
                   'Swing Lab: AI swing analysis',
                   'Pitch Lab: AI pitching analysis + arm health',

@@ -8,8 +8,8 @@ import { Check, Dumbbell, Target, Gauge, Flame, Wind, Mic, MessageCircle, Calend
 
 const aiCoaches = [
   {
-    name: 'Mind AI',
-    description: 'Mental toughness & confidence',
+    name: 'The Zone',
+    description: 'Audio-first mental training',
     icon: '/assets/images/Mind AI Coach.png',
     gradient: 'from-neon-cortex-blue/30 to-mind-primary/30',
   },
@@ -160,11 +160,11 @@ export default function DownloadPage() {
           </div>
         </FadeInWhenVisible>
 
-        {/* 8 AI Coaches */}
+        {/* 7 AI Coaches + The Zone */}
         <FadeInWhenVisible delay={0.3} direction="up" className="mb-12">
           <div className="text-center mb-8">
             <h3 className="text-3xl font-black mb-3">
-              <span className="text-neon-cortex-blue">8 AI Coaches.</span>{' '}
+              <span className="text-neon-cortex-blue">7 AI Coaches + The Zone.</span>{' '}
               <span className="text-solar-surge-orange">One App.</span>
             </h3>
             <p className="text-gray-300 text-lg">

@@ -1309,7 +1309,7 @@ function TeamLicensingContent() {
               </li>
 
               {[
-                'Mind AI Coach: Mental toughness training',
+                'The Zone: Audio-first mental training',
                 'Muscle AI Coach: All workouts',
                 'Swing Lab: AI swing analysis',
                 'Pitch Lab: AI pitching analysis + arm health',
@@ -1730,7 +1730,7 @@ function TeamLicensingContent() {
                     </li>
                   </ul>
                   <p className="bg-white/5 rounded-lg p-3 border border-white/10">
-                    💡 Parents link to their athlete using the team code, but they don't count toward your paid user limit and don't get full Pro features—just visibility into their athlete's progress.
+                    💡 Parents link to their athlete by entering their child's email address in the app. They don't count toward your paid user limit and don't get full Pro features—just visibility into their athlete's progress.
                   </p>
                 </div>
               ),
