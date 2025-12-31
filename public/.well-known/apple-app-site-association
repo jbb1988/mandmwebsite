@@ -6,6 +6,7 @@
         "appID": "XMP4UF8X2C.com.mindandmuscle.app",
         "paths": [
           "/share/*",
+          "/d/*",
           "/settings",
           "/settings/",
           "/dugout-talk",
