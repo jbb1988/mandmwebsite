@@ -7,8 +7,6 @@
         "paths": [
           "/share/*",
           "/d/*",
-          "/swing-lab/analysis/*",
-          "/pitch-lab/analysis/*",
           "/settings",
           "/settings/",
           "/dugout-talk",
