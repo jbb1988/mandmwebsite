@@ -39,11 +39,12 @@ async function getPitchAnalysisData(id: string): Promise<PitchAnalysisData> {
       return { analysis: null, error: 'Invalid analysis link' };
     }
 
-    // Fetch the shared analysis with owner profile
+    // Fetch the shared analysis (without profile join to avoid RLS complexity)
     const { data: analysis, error: fetchError } = await supabase
       .from('pitch_lab_analyses')
       .select(`
         id,
+        user_id,
         summary,
         overall_rating,
         thumbnail_urls,
@@ -55,22 +56,37 @@ async function getPitchAnalysisData(id: string): Promise<PitchAnalysisData> {
         arm_health_score,
         arm_health_zone,
         created_at,
-        is_shared,
-        profiles!pitch_lab_analyses_user_id_fkey(name, avatar_url)
+        is_shared
       `)
       .eq('id', id)
       .eq('is_shared', true)
       .single();
 
-    if (fetchError || !analysis) {
+    if (fetchError) {
+      console.error('Supabase error:', fetchError);
       return { analysis: null, error: 'Analysis not found or not shared' };
     }
 
-    // Extract profile data - handle both single object and array returns from join
-    const profileData = analysis.profiles;
-    const profile = Array.isArray(profileData)
-      ? profileData[0] as { name: string | null; avatar_url: string | null } | undefined
-      : profileData as { name: string | null; avatar_url: string | null } | null;
+    if (!analysis) {
+      return { analysis: null, error: 'Analysis not found or not shared' };
+    }
+
+    // Fetch profile separately (optional - won't fail if not found)
+    let ownerName: string | null = null;
+    let ownerAvatarUrl: string | null = null;
+
+    if (analysis.user_id) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('name, avatar_url')
+        .eq('id', analysis.user_id)
+        .single();
+
+      if (profile) {
+        ownerName = profile.name;
+        ownerAvatarUrl = profile.avatar_url;
+      }
+    }
 
     return {
       analysis: {
@@ -86,8 +102,8 @@ async function getPitchAnalysisData(id: string): Promise<PitchAnalysisData> {
         arm_health_score: analysis.arm_health_score,
         arm_health_zone: analysis.arm_health_zone,
         created_at: analysis.created_at,
-        owner_name: profile?.name || null,
-        owner_avatar_url: profile?.avatar_url || null,
+        owner_name: ownerName,
+        owner_avatar_url: ownerAvatarUrl,
       },
       error: null,
     };
