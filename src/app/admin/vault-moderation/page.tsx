@@ -49,6 +49,12 @@ interface Pagination {
   totalPages: number;
 }
 
+interface FilterOptions {
+  instructors: string[];
+  categories: string[];
+  ageRanges: string[];
+}
+
 type FilterType = 'all' | 'pending' | 'published' | 'private';
 
 function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
@@ -284,7 +290,11 @@ function VaultModerationContent() {
   const [drills, setDrills] = useState<Drill[]>([]);
   const [stats, setStats] = useState<Stats>({ total: 0, published: 0, pending: 0, private: 0 });
   const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, totalPages: 0 });
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({ instructors: [], categories: [], ageRanges: [] });
   const [filter, setFilter] = useState<FilterType>('all');
+  const [instructorFilter, setInstructorFilter] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [ageRangeFilter, setAgeRangeFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
@@ -293,7 +303,16 @@ function VaultModerationContent() {
   const fetchDrills = async (page = 1) => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/admin/vault?filter=${filter}&page=${page}&limit=20`);
+      const params = new URLSearchParams({
+        filter,
+        page: page.toString(),
+        limit: '20',
+      });
+      if (instructorFilter) params.set('instructor', instructorFilter);
+      if (categoryFilter) params.set('category', categoryFilter);
+      if (ageRangeFilter) params.set('ageRange', ageRangeFilter);
+
+      const response = await fetch(`/api/admin/vault?${params.toString()}`);
       const data = await response.json();
 
       if (data.error) {
@@ -304,6 +323,9 @@ function VaultModerationContent() {
       setDrills(data.drills || []);
       setStats(data.stats);
       setPagination(data.pagination);
+      if (data.filterOptions) {
+        setFilterOptions(data.filterOptions);
+      }
     } catch (error) {
       console.error('Fetch error:', error);
     } finally {
@@ -314,7 +336,7 @@ function VaultModerationContent() {
   useEffect(() => {
     fetchDrills();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filter]);
+  }, [filter, instructorFilter, categoryFilter, ageRangeFilter]);
 
   const handleAction = async (action: string, drillId?: string) => {
     const targetIds = drillId ? [drillId] : Array.from(selectedIds);
@@ -433,63 +455,121 @@ function VaultModerationContent() {
 
       {/* Toolbar */}
       <Card className="p-4 mb-4">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            {/* Search */}
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
-              <input
-                type="text"
-                placeholder="Search drills..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-white/20 w-64"
-              />
-            </div>
+        <div className="flex flex-col gap-4">
+          {/* Filter dropdowns */}
+          <div className="flex items-center gap-3 flex-wrap">
+            <Filter className="w-4 h-4 text-white/40" />
 
-            {/* Select all */}
-            <button
-              onClick={selectAll}
-              className="text-sm text-white/60 hover:text-white transition"
+            {/* Instructor filter */}
+            <select
+              value={instructorFilter}
+              onChange={(e) => setInstructorFilter(e.target.value)}
+              className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-white/20 min-w-[160px]"
             >
-              {selectedIds.size === drills.length && drills.length > 0 ? 'Deselect All' : 'Select All'}
-            </button>
+              <option value="">All Instructors</option>
+              {filterOptions.instructors.map(name => (
+                <option key={name} value={name}>{name}</option>
+              ))}
+            </select>
+
+            {/* Category filter */}
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-white/20 min-w-[140px]"
+            >
+              <option value="">All Categories</option>
+              {filterOptions.categories.map(cat => (
+                <option key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</option>
+              ))}
+            </select>
+
+            {/* Age range filter */}
+            <select
+              value={ageRangeFilter}
+              onChange={(e) => setAgeRangeFilter(e.target.value)}
+              className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-white/20 min-w-[130px]"
+            >
+              <option value="">All Ages</option>
+              {filterOptions.ageRanges.map(age => (
+                <option key={age} value={age}>{age}</option>
+              ))}
+            </select>
+
+            {/* Clear filters button */}
+            {(instructorFilter || categoryFilter || ageRangeFilter) && (
+              <button
+                onClick={() => {
+                  setInstructorFilter('');
+                  setCategoryFilter('');
+                  setAgeRangeFilter('');
+                }}
+                className="text-sm text-cyan-400 hover:text-cyan-300 transition"
+              >
+                Clear filters
+              </button>
+            )}
           </div>
 
-          {/* Bulk actions */}
-          {selectedIds.size > 0 && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-white/50">{selectedIds.size} selected</span>
-              {filter === 'pending' && (
-                <>
-                  <button
-                    onClick={() => handleAction('approve')}
-                    disabled={actionLoading}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 transition text-sm disabled:opacity-50"
-                  >
-                    <CheckCircle2 className="w-4 h-4" />
-                    Approve All
-                  </button>
-                  <button
-                    onClick={() => handleAction('reject')}
-                    disabled={actionLoading}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-white/5 text-white/60 rounded-lg hover:bg-white/10 transition text-sm disabled:opacity-50"
-                  >
-                    <XCircle className="w-4 h-4" />
-                    Reject All
-                  </button>
-                </>
-              )}
+          {/* Search and actions row */}
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              {/* Search */}
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/40" />
+                <input
+                  type="text"
+                  placeholder="Search drills..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 py-2 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/40 focus:outline-none focus:border-white/20 w-64"
+                />
+              </div>
+
+              {/* Select all */}
               <button
-                onClick={() => handleAction('delete')}
-                disabled={actionLoading}
-                className="flex items-center gap-2 px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition text-sm disabled:opacity-50"
+                onClick={selectAll}
+                className="text-sm text-white/60 hover:text-white transition"
               >
-                <Trash2 className="w-4 h-4" />
-                Delete
+                {selectedIds.size === drills.length && drills.length > 0 ? 'Deselect All' : 'Select All'}
               </button>
             </div>
-          )}
+
+            {/* Bulk actions */}
+            {selectedIds.size > 0 && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-white/50">{selectedIds.size} selected</span>
+                {filter === 'pending' && (
+                  <>
+                    <button
+                      onClick={() => handleAction('approve')}
+                      disabled={actionLoading}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg hover:bg-emerald-500/30 transition text-sm disabled:opacity-50"
+                    >
+                      <CheckCircle2 className="w-4 h-4" />
+                      Approve All
+                    </button>
+                    <button
+                      onClick={() => handleAction('reject')}
+                      disabled={actionLoading}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-white/5 text-white/60 rounded-lg hover:bg-white/10 transition text-sm disabled:opacity-50"
+                    >
+                      <XCircle className="w-4 h-4" />
+                      Reject All
+                    </button>
+                  </>
+                )}
+                <button
+                  onClick={() => handleAction('delete')}
+                  disabled={actionLoading}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition text-sm disabled:opacity-50"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </Card>
 

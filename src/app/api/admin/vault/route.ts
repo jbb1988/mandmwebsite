@@ -11,6 +11,9 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const filter = searchParams.get('filter') || 'all'; // all, pending, published, private
+    const instructor = searchParams.get('instructor') || '';
+    const category = searchParams.get('category') || '';
+    const ageRange = searchParams.get('ageRange') || '';
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '20');
     const offset = (page - 1) * limit;
@@ -22,7 +25,7 @@ export async function GET(request: NextRequest) {
         owner:profiles!drills_owner_id_fkey(id, name, email, avatar_url)
       `, { count: 'exact' });
 
-    // Apply filters
+    // Apply status filter
     switch (filter) {
       case 'pending':
         query = query.eq('publish_requested', true).eq('is_published', false);
@@ -36,6 +39,17 @@ export async function GET(request: NextRequest) {
       // 'all' doesn't need additional filter
     }
 
+    // Apply additional filters
+    if (instructor) {
+      query = query.eq('owner_name', instructor);
+    }
+    if (category) {
+      query = query.eq('skill_category', category);
+    }
+    if (ageRange) {
+      query = query.eq('age_range', ageRange);
+    }
+
     const { data: drills, count, error } = await query
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
@@ -45,21 +59,29 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Get stats
-    const { data: statsData } = await supabase
+    // Get stats and filter options
+    const { data: allDrills } = await supabase
       .from('drills')
-      .select('is_published, publish_requested, is_private');
+      .select('is_published, publish_requested, is_private, owner_name, skill_category, age_range');
 
     const stats = {
-      total: statsData?.length || 0,
-      published: statsData?.filter(d => d.is_published).length || 0,
-      pending: statsData?.filter(d => d.publish_requested && !d.is_published).length || 0,
-      private: statsData?.filter(d => d.is_private && !d.is_published).length || 0,
+      total: allDrills?.length || 0,
+      published: allDrills?.filter(d => d.is_published).length || 0,
+      pending: allDrills?.filter(d => d.publish_requested && !d.is_published).length || 0,
+      private: allDrills?.filter(d => d.is_private && !d.is_published).length || 0,
+    };
+
+    // Get unique filter options
+    const filterOptions = {
+      instructors: [...new Set(allDrills?.map(d => d.owner_name).filter(Boolean))].sort(),
+      categories: [...new Set(allDrills?.map(d => d.skill_category).filter(Boolean))].sort(),
+      ageRanges: [...new Set(allDrills?.map(d => d.age_range).filter(Boolean))].sort(),
     };
 
     return NextResponse.json({
       drills,
       stats,
+      filterOptions,
       pagination: {
         page,
         limit,
