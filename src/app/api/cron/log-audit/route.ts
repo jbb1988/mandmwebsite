@@ -115,12 +115,19 @@ export async function GET(request: Request) {
 
         for (const log of logs) {
           const statusCode = log.status_code || log.metadata?.response?.[0]?.status_code;
-          if (!statusCode || statusCode < 400) continue;
+          const errorSeverity = log.error_severity;
 
-          const path = normalizePath(log.path || log.metadata?.request?.[0]?.path || '/unknown');
-          const method = log.method || log.metadata?.request?.[0]?.method || 'UNKNOWN';
+          // Check for HTTP errors (status >= 400) OR postgres errors (error_severity = ERROR/FATAL/PANIC)
+          const isHttpError = statusCode && statusCode >= 400;
+          const isPostgresError = errorSeverity && ['ERROR', 'FATAL', 'PANIC'].includes(errorSeverity);
+
+          if (!isHttpError && !isPostgresError) continue;
+
+          const path = normalizePath(log.path || log.metadata?.request?.[0]?.path || '/postgres');
+          const method = log.method || log.metadata?.request?.[0]?.method || (isPostgresError ? 'SQL' : 'UNKNOWN');
           const errorPattern = extractErrorPattern(log.event_message);
-          const signature = generateSignature(path, method, statusCode, errorPattern);
+          const effectiveStatusCode = statusCode || (isPostgresError ? 500 : 0);
+          const signature = generateSignature(path, method, effectiveStatusCode, errorPattern);
 
           if (errorGroups.has(signature)) {
             const group = errorGroups.get(signature)!;
@@ -131,7 +138,7 @@ export async function GET(request: Request) {
               signature,
               path,
               method,
-              statusCode,
+              statusCode: effectiveStatusCode,
               errorPattern,
               service,
               count: 1,
@@ -229,6 +236,28 @@ export async function GET(request: Request) {
         } catch (notifError) {
           console.error(`Failed to notify admin ${admin.id}:`, notifError);
         }
+      }
+
+      // Also send email alert for critical issues
+      try {
+        await supabase.functions.invoke('send-admin-alert-email', {
+          body: {
+            alertId: `log_audit_${Date.now()}`,
+            alertType: 'error',
+            message: `Log audit detected ${alertableIssues.length} error(s) in the last hour that require attention.`,
+            metadata: {
+              'New Issues': newIssues,
+              'Recurring Issues': recurringIssues,
+              'Top Errors': alertableIssues.slice(0, 5).map(e =>
+                `${e.statusCode} ${e.method} ${e.path} (${e.count}x)`
+              ).join(', '),
+              'View Details': 'https://mindandmuscle.ai/admin/system → Log Audit tab'
+            }
+          }
+        });
+        console.log('Log audit email alert sent');
+      } catch (emailError) {
+        console.error('Failed to send log audit email:', emailError);
       }
 
       const signatures = alertableIssues.map(e => e.signature);
