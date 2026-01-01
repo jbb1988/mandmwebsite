@@ -81,11 +81,20 @@ export async function GET(request: Request) {
     const errorGroups = new Map<string, ErrorGroup>();
     let totalLogsScanned = 0;
 
-    // Fetch logs from Management API
+    // Map service names to Supabase log endpoint names
+    const serviceEndpointMap: Record<string, string> = {
+      'api': 'logs.edge.reports',
+      'edge-function': 'logs.edge.functions',
+      'auth': 'logs.auth.reports',
+      'postgres': 'logs.postgres.reports',
+    };
+
+    // Fetch logs from Management API - use service-specific endpoints
     for (const service of SERVICES_TO_CHECK) {
       try {
+        const endpoint = serviceEndpointMap[service] || 'logs.all';
         const response = await fetch(
-          `https://api.supabase.com/v1/projects/${PROJECT_REF}/analytics/endpoints/logs.all?` +
+          `https://api.supabase.com/v1/projects/${PROJECT_REF}/analytics/endpoints/${endpoint}?` +
           new URLSearchParams({
             iso_timestamp_start: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
             iso_timestamp_end: new Date().toISOString(),
