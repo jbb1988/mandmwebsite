@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { FadeInWhenVisible } from '@/components/animations';
@@ -38,38 +38,12 @@ const categoryColors: Record<string, { bg: string; text: string; border: string 
 };
 
 export default function DrillShareClient({ code, drill, error }: DrillShareClientProps) {
-  const [isAppInstalled, setIsAppInstalled] = useState<boolean | null>(null);
-  const [attemptedOpen, setAttemptedOpen] = useState(false);
-
   const appLink = `mindmuscle://d/${code}`;
-  const universalLink = `https://mindandmuscle.ai/d/${code}`;
-
-  useEffect(() => {
-    // Try to detect if the app is installed by attempting to open it
-    const checkApp = () => {
-      // On mobile, we'll try opening the app
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        setIsAppInstalled(null); // Unknown on mobile
-      } else {
-        setIsAppInstalled(false); // Desktop doesn't have app
-      }
-    };
-    checkApp();
-  }, []);
 
   const handleOpenInApp = () => {
-    setAttemptedOpen(true);
-
-    // Try Universal Link first (works better with app installed)
-    window.location.href = universalLink;
-
-    // If app doesn't open after 2s, scroll to download section
-    setTimeout(() => {
-      const downloadSection = document.getElementById('download-section');
-      if (downloadSection) {
-        downloadSection.scrollIntoView({ behavior: 'smooth' });
-      }
-    }, 2000);
+    // Try custom URL scheme to open the app
+    // This works on both iOS and Android when app is installed
+    window.location.href = appLink;
   };
 
   // Error state
@@ -127,6 +101,7 @@ export default function DrillShareClient({ code, drill, error }: DrillShareClien
                   alt={drill.title}
                   fill
                   className="object-cover"
+                  unoptimized
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-solar-surge-orange/20 to-solar-surge-orange/5">
@@ -201,62 +176,14 @@ export default function DrillShareClient({ code, drill, error }: DrillShareClien
 
         {/* Info text */}
         <FadeInWhenVisible delay={0.15} direction="up">
-          <p className="text-center text-gray-400 text-sm mb-8">
-            {attemptedOpen
-              ? "Don't have the app? Download it below to access this drill."
-              : 'Tap to open this drill in the app. Pro subscription required.'}
+          <p className="text-center text-gray-400 text-sm mb-4">
+            Tap to open this drill in the app. Pro subscription required.
           </p>
         </FadeInWhenVisible>
 
-        {/* Download Section */}
-        <FadeInWhenVisible delay={0.2} direction="up">
-          <div id="download-section" className="p-6 rounded-2xl bg-white/[0.02] border border-white/10">
-            <h2 className="text-xl font-black text-center mb-2">Get Mind & Muscle</h2>
-            <p className="text-gray-400 text-center text-sm mb-6">
-              Access The Vault and 1,000+ pro drills
-            </p>
-
-            {/* App Store Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link
-                href="https://apps.apple.com/app/mind-muscle-baseball/id6737125498"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block"
-              >
-                <div className="px-6 py-3 bg-black rounded-xl border border-white/20 hover:border-white/40 transition-all hover:scale-105 flex items-center gap-3">
-                  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-                  </svg>
-                  <div className="text-left">
-                    <div className="text-xs text-gray-400">Download on the</div>
-                    <div className="text-base font-semibold -mt-0.5">App Store</div>
-                  </div>
-                </div>
-              </Link>
-              <Link
-                href="https://play.google.com/store/apps/details?id=ai.mindandmuscle.app"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block"
-              >
-                <div className="px-6 py-3 bg-black rounded-xl border border-white/20 hover:border-white/40 transition-all hover:scale-105 flex items-center gap-3">
-                  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.5,12.92 20.16,13.19L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
-                  </svg>
-                  <div className="text-left">
-                    <div className="text-xs text-gray-400">GET IT ON</div>
-                    <div className="text-base font-semibold -mt-0.5">Google Play</div>
-                  </div>
-                </div>
-              </Link>
-            </div>
-          </div>
-        </FadeInWhenVisible>
-
         {/* Pro requirement note */}
-        <FadeInWhenVisible delay={0.25} direction="up">
-          <div className="mt-6 p-4 rounded-xl bg-neon-cortex-blue/10 border border-neon-cortex-blue/30">
+        <FadeInWhenVisible delay={0.2} direction="up">
+          <div className="p-4 rounded-xl bg-neon-cortex-blue/10 border border-neon-cortex-blue/30">
             <p className="text-sm text-center text-neon-cortex-blue">
               <span className="font-bold">Pro subscription required</span> to access The Vault and shared drills.
             </p>
