@@ -2,6 +2,10 @@ import { createClient } from '@supabase/supabase-js';
 import { Metadata } from 'next';
 import DrillShareClient from './DrillShareClient';
 
+// Disable caching - always fetch fresh data for share links
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 // Initialize Supabase
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
