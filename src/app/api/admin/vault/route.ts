@@ -19,8 +19,7 @@ export async function GET(request: NextRequest) {
       .from('drills')
       .select(`
         *,
-        owner:profiles!drills_owner_id_fkey(id, name, email, avatar_url),
-        instructor:instructor_profiles!drills_owner_id_fkey(id, role, affiliation, facility_name)
+        owner:profiles!drills_owner_id_fkey(id, name, email, avatar_url)
       `, { count: 'exact' });
 
     // Apply filters
