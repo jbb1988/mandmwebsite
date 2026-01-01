@@ -2,10 +2,11 @@ import { createClient } from '@supabase/supabase-js';
 import { Metadata } from 'next';
 import SwingAnalysisClient from './SwingAnalysisClient';
 
-// Initialize Supabase
+// Initialize Supabase with service role for server-side queries
+// This bypasses RLS but we still filter by is_shared=true
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 interface SwingAnalysisPageProps {
   params: Promise<{ id: string }>;

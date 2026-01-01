@@ -355,19 +355,19 @@ Know what to do before the ball is hit: {referral_link}`,
   },
   {
     id: 'f5',
-    title: 'Mind Coach AI - Mental Training',
+    title: 'The Zone - Mental Training',
     category: 'feature',
     platform: 'all',
     body: `The mental game separates good from great.
 
-Mind Coach AI trains:
+The Zone trains:
 - Focus under pressure
 - Confidence building
 - Pre-game visualization
 - Bounce-back strategies
 
 Your mind is a muscle. Train it: {referral_link}`,
-    hashtags: ['MentalGame', 'SportsPerformance', 'MindCoach', 'AthletesMindset'],
+    hashtags: ['MentalGame', 'SportsPerformance', 'TheZone', 'AthletesMindset'],
   },
   {
     id: 'f6',
@@ -411,10 +411,10 @@ Protect your arm. Build velocity: {referral_link}`,
 Mind & Muscle covers:
 - Hitting (Swing Lab AI analysis)
 - Pitching (Pitch Lab breakdown)
-- Mental game (Mind Coach AI)
+- Mental game (The Zone)
 - Baseball IQ (186 scenarios)
 - Nutrition (Fuel AI)
-- Strength (Muscle Coach AI)
+- Drills (The Vault)
 - Arm care (FREE)
 
 Stop juggling 5 different apps: {referral_link}`,
@@ -461,8 +461,8 @@ Data-driven development: {referral_link}`,
     body: `Mind & Muscle has AI coaches for:
 - Hitting (Swing Lab)
 - Pitching (Pitch Lab)
-- Mental game (Mind Coach AI)
-- Workouts (Muscle Coach AI)
+- Mental game (The Zone)
+- Drills (The Vault)
 - Nutrition (Fuel AI)
 - Practice planning (AI Assistant)
 
@@ -507,7 +507,7 @@ The combination of physical + mental training shows: {referral_link}`,
 
 My answer: Mind & Muscle.
 
-They can work on pitch recognition (Plate IQ), review swings (Swing Lab), train their mental game (Mind Coach AI), and do arm care (Arm Builder).
+They can work on pitch recognition (Plate IQ), review swings (Swing Lab), train their mental game (The Zone), and do arm care (Arm Builder).
 
 All from their phone: {referral_link}`,
     hashtags: ['AtHomeTraining', 'ParentTips', 'YouthBaseball', 'GetBetter'],
@@ -524,7 +524,7 @@ All from their phone: {referral_link}`,
 - Pitch Lab (pitching breakdown)
 - Plate IQ (pitch anticipation)
 - Game Lab (186 baseball IQ scenarios)
-- Mind Coach AI (mental training)
+- The Zone (mental training)
 - Sound Lab (focus audio)
 - Arm Builder (FREE arm care)
 - Weekly Reports
@@ -573,7 +573,7 @@ Everyone's taking ground balls.
 
 Few are training pitch anticipation (Plate IQ).
 Few are doing AI swing analysis (Swing Lab).
-Few are building mental toughness (Mind Coach AI).
+Few are building mental toughness (The Zone).
 
 That's your edge: {referral_link}`,
     hashtags: ['CompetitiveEdge', 'TrainDifferent', 'NextLevel', 'BaseballTraining'],

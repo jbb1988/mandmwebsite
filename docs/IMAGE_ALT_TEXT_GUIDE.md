@@ -88,13 +88,13 @@ Images that convey information or function should have descriptive alt text:
 **Examples**:
 ```tsx
 // Bad
-<Image src="/mind-coach-icon.png" alt="Icon" />
+<Image src="/the-zone-icon.png" alt="Icon" />
 
 // Good
-<Image src="/mind-coach-icon.png" alt="Mind Coach AI - mental training and focus development" />
+<Image src="/the-zone-icon.png" alt="The Zone - mental training and focus development" />
 
 // Also acceptable
-<Image src="/mind-coach-icon.png" alt="Brain icon representing mental training features" />
+<Image src="/the-zone-icon.png" alt="Brain icon representing mental training features" />
 ```
 
 ### 3. Logo (Non-decorative)

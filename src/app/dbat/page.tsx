@@ -82,13 +82,13 @@ export default function DBatPartnerPage() {
       forInstructor: 'Athletes come prepared. They remember what you worked on.',
     },
     {
-      id: 'mind-coach',
+      id: 'the-zone',
       title: 'Build Confidence Between Visits',
-      tagline: 'Mind Coach AI',
+      tagline: 'The Zone',
       description: 'Pre-lesson focus routine. Post-game reflection. Confidence building between sessions. Finally, structured mental training.',
       color: 'blue',
-      videoUrl: '/assets/videos/mind_coachai.mp4',
-      iconImage: '/assets/images/Mind AI Coach.png',
+      videoUrl: '/assets/videos/the_zone.mp4',
+      iconImage: '/assets/mind/the_zone.png',
       forInstructor: 'You coach mechanics. AI coaches mindset. Complete player.',
     },
     {

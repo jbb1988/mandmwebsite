@@ -117,15 +117,15 @@ export default function USAPrimePage() {
   // Pro features (the pilot unlocks these) - with videos and rich media
   const proFeatures = [
     {
-      id: "mind-coach",
-      title: "Mind Coach AI",
-      iconImage: "/assets/images/Mind AI Coach.png",
+      id: "the-zone",
+      title: "The Zone",
+      iconImage: "/assets/mind/the_zone.png",
       tagline: "This is what we pitched you on.",
       description:
-        "Personalized mental training sessions. Pressure management, focus, visualization - all engineered for each player's mental profile.",
+        "Audio-first mental training for peak performance. Pressure management, focus, visualization - sessions engineered to get your players in the zone when it matters most.",
       color: "blue",
-      videoUrl: "/assets/videos/mind_coachai.mp4",
-      image: "/assets/mind/Mind AI Coach Hero.png",
+      videoUrl: "/assets/videos/the_zone.mp4",
+      image: "/assets/mind/the_zone.png",
     },
     {
       id: "swing-lab",
@@ -608,7 +608,7 @@ export default function USAPrimePage() {
                         boxShadow: "0 2px 8px rgba(14, 165, 233, 0.2)",
                       }}
                     >
-                      feeds Mind Coach AI
+                      feeds The Zone
                     </span>
                     <ArrowRight className="w-5 h-5 text-white/50 hidden sm:block" />
                     <span

@@ -22,8 +22,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { organization_ids, segment, limit = 10, create_contacts = true } = body;
 
-    // Call the edge function
-    const { data, error } = await supabase.functions.invoke('scrape-organization-email', {
+    // Call the enhanced smart discovery edge function
+    const { data, error } = await supabase.functions.invoke('smart-contact-discovery', {
       body: {
         organization_ids,
         segment_filter: segment,

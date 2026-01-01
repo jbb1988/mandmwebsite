@@ -168,17 +168,17 @@ const FEATURE_TEMPLATES: SocialImageTemplate[] = [
     bestFor: ['linkedin', 'facebook', 'twitter'],
   },
 
-  // 5. Mind Coach AI - Mental Training
+  // 5. The Zone - Mental Training
   {
-    id: 'feature_mind_coach',
-    name: 'Mind Coach AI - Mental Training',
+    id: 'feature_the_zone',
+    name: 'The Zone - Mental Training',
     category: 'feature',
     style: 'clean_minimal',
-    headline: 'Train Your\nMental Game',
-    subheadline: 'Confidence. Focus. Composure.',
-    ctaText: 'Build Mental Strength',
-    featureName: 'Mind Coach AI',
-    featureIcon: '🧘',
+    headline: 'Enter\nThe Zone',
+    subheadline: 'Audio-first training for peak performance.',
+    ctaText: 'Find Your Edge',
+    featureName: 'The Zone',
+    featureIcon: '🧠',
     primaryColor: COLORS.deepPurple,
     accentColor: COLORS.cortexBlue,
     backgroundType: 'gradient',
@@ -212,17 +212,17 @@ const FEATURE_TEMPLATES: SocialImageTemplate[] = [
     bestFor: ['instagram', 'tiktok'],
   },
 
-  // 7. Muscle Coach AI - Strength Training
+  // 7. The Vault - Professional Drill Library
   {
-    id: 'feature_muscle_coach',
-    name: 'Muscle Coach AI - Strength Training',
+    id: 'feature_the_vault',
+    name: 'The Vault - Professional Drills',
     category: 'feature',
     style: 'bold_impact',
-    headline: 'Build\nAthletic Power',
-    subheadline: 'Position-specific strength programs.',
-    ctaText: 'Get Stronger',
-    featureName: 'Muscle Coach AI',
-    featureIcon: '💪',
+    headline: 'Professional\nDrill Library',
+    subheadline: 'Drills from verified instructors.',
+    ctaText: 'Access Drills',
+    featureName: 'The Vault',
+    featureIcon: '🎬',
     primaryColor: COLORS.energyRed,
     accentColor: COLORS.solarOrange,
     backgroundType: 'gradient',
@@ -230,7 +230,7 @@ const FEATURE_TEMPLATES: SocialImageTemplate[] = [
     includeQR: true,
     includePartnerBadge: true,
     includeFeatureBadge: true,
-    badgeText: 'STRENGTH',
+    badgeText: 'DRILLS',
     bestFor: ['instagram', 'facebook', 'tiktok'],
   },
 
