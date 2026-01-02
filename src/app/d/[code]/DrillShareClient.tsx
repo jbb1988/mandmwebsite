@@ -149,6 +149,7 @@ export default function DrillShareClient({ code, drill, error }: DrillShareClien
                       width={48}
                       height={48}
                       className="object-cover"
+                      unoptimized
                     />
                   ) : (
                     <User className="w-6 h-6 text-solar-surge-orange" />
