@@ -16,7 +16,7 @@ const proFeatures = [
   { name: 'Game Lab', description: '186 scenarios', icon: '🎮' },
   { name: 'Fuel AI', description: 'Nutrition plans', icon: '🍎' },
   { name: 'Sound Lab', description: 'Mental state', icon: '🎵' },
-  { name: 'Pitch Lab', description: 'Pitching analysis', icon: '🥎' },
+  { name: 'Pitch Lab', description: 'AI + Arm Health', icon: '🥎' },
   { name: 'Goals AI', description: 'Personalized', icon: '📈' },
   { name: 'AI Assistant', description: 'Custom drills', icon: '🤖' },
 ];
@@ -85,7 +85,7 @@ export default function DownloadPage() {
           <LiquidGlass variant="blue" glow={true} className="p-8 max-w-xl mx-auto">
             <div className="text-center mb-6">
               <h2 className="text-2xl font-black text-white mb-2">Download Now</h2>
-              <p className="text-gray-400">Join thousands training smarter between practices</p>
+              <p className="text-gray-400">Train smarter between practices and games</p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -122,6 +122,14 @@ export default function DownloadPage() {
                   </div>
                 </div>
               </Link>
+            </div>
+          <div className="text-center mt-6 pt-6 border-t border-white/10">
+              <p className="text-2xl font-black text-white">
+                <span className="text-solar-surge-orange">$79</span> for 6 months
+              </p>
+              <p className="text-gray-400 text-sm">
+                That&apos;s $13.17/month — less than ONE hitting lesson
+              </p>
             </div>
           </LiquidGlass>
         </FadeInWhenVisible>
@@ -163,7 +171,35 @@ export default function DownloadPage() {
                 </p>
               </div>
             </div>
+
+            <div className="p-4 rounded-xl bg-gradient-to-r from-red-500/10 to-orange-500/5 border border-red-500/20 mt-4">
+              <p className="text-white font-medium">
+                <span className="text-red-400 font-bold">⚠️ 35% of MLB pitchers</span> have had Tommy John surgery.
+                Pitch Lab monitors arm health — analysis that costs $200/session at biomechanics labs.
+              </p>
+            </div>
           </LiquidGlass>
+        </FadeInWhenVisible>
+
+        {/* Value Comparison */}
+        <FadeInWhenVisible delay={0.22} direction="up" className="mb-8">
+          <div className="p-6 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/5 border border-green-500/20">
+            <h4 className="text-xl font-black text-white mb-4 text-center">10 Apps. Or Just One.</h4>
+            <div className="flex flex-wrap justify-center gap-2 text-sm text-gray-400 mb-4">
+              <span className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">Team Chat</span>
+              <span className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">Video Analysis</span>
+              <span className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">Drills</span>
+              <span className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">Mental Training</span>
+              <span className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">Nutrition</span>
+              <span className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">Goals</span>
+              <span className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">Game IQ</span>
+              <span className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">Arm Care</span>
+              <span className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">Sound</span>
+              <span className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">AI Coach</span>
+            </div>
+            <p className="text-center text-gray-500 text-sm">Buying separately? <span className="line-through">$300+</span> for 6 months</p>
+            <p className="text-center text-green-400 font-bold text-lg mt-1">Mind & Muscle: $79 — everything integrated</p>
+          </div>
         </FadeInWhenVisible>
 
         {/* Free Features */}

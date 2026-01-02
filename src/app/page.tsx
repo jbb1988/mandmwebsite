@@ -211,7 +211,7 @@ export default function HomePage() {
       videoUrl: '/assets/videos/pitch_lab.mp4',
       audioUrl: 'https://api.mindandmuscle.ai/storage/v1/object/public/onboarding/pitchlab_ob.mp3',
       tagline: 'Design Filthy Pitches. Protect Your Arm.',
-      description: 'Design filthy pitches. Protect your arm.',
+      description: 'AI analysis + arm health monitoring.',
       modalDescription: '**Design filthy pitches. Protect your arm.**\n\nPitch Lab delivers AI coaching analysis that breaks down your delivery like a veteran pitching coach—instant, actionable, precise.\n\n**Elite AI Pitching Analysis:**\n\n- **8-Component Technical Breakdown** - Every phase of your delivery analyzed\n- **Arm Health Assessment** - Injury prevention insights to keep you on the mound\n- **Power Opportunities** - Unlock hidden velocity in your mechanics\n- **Custom Drill Recommendations** - Targeted fixes for your exact issues\n- **Progress Tracking** - Save and compare analyses over time\n\n**What You\'ll Get:**\n\n✅ Full mechanics breakdown (wind-up through follow-through)\n🩺 Arm health risk assessment\n🔥 Strengths to keep building\n⚠️ Areas for improvement\n🎯 Personalized drill recommendations\n\n**Works for Baseball & Softball**\n\nWhile other pitchers guess what\'s wrong, you\'ll KNOW exactly what to fix.\n\n**This is pitching analysis. Engineered for dominance.**',
     },
     {
@@ -1807,6 +1807,18 @@ export default function HomePage() {
                   </div>
                 </div>
 
+                {/* Row 5: Arm Health - Unique Differentiator */}
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="backdrop-blur-sm bg-white/5 border-2 border-red-500/30 rounded-2xl p-8">
+                    <div className="text-red-400 font-bold text-sm uppercase tracking-wider mb-3">Their Arm Health</div>
+                    <p className="text-2xl text-gray-400 font-medium">Not available</p>
+                  </div>
+                  <div className="backdrop-blur-sm bg-white/5 border-2 border-neon-cortex-blue/50 rounded-2xl p-8">
+                    <div className="text-neon-cortex-blue font-bold text-sm uppercase tracking-wider mb-3">Our Arm Health</div>
+                    <p className="text-2xl text-white font-black">AI injury risk assessment — $200/session value at biomechanics labs</p>
+                  </div>
+                </div>
+
               </div>
             </div>
 
@@ -2411,7 +2423,26 @@ export default function HomePage() {
                   <div className="text-sm text-text-secondary mt-1">Individual License</div>
                 </div>
               </div>
-              <p className="text-center text-gray-400 italic text-sm mb-6">This is how serious athletes train.</p>
+              <p className="text-center text-gray-400 italic text-sm mb-4">This is how serious athletes train.</p>
+
+              {/* 10 Apps in 1 Value Proposition */}
+              <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/5 border border-green-500/20">
+                <h4 className="text-lg font-black text-white mb-3 text-center">10 Apps. Or Just One.</h4>
+                <div className="flex flex-wrap justify-center gap-2 text-xs text-gray-400 mb-3">
+                  <span className="px-2 py-1 bg-white/5 rounded-lg border border-white/10">Team Chat</span>
+                  <span className="px-2 py-1 bg-white/5 rounded-lg border border-white/10">Video Analysis</span>
+                  <span className="px-2 py-1 bg-white/5 rounded-lg border border-white/10">Drills</span>
+                  <span className="px-2 py-1 bg-white/5 rounded-lg border border-white/10">Mental Training</span>
+                  <span className="px-2 py-1 bg-white/5 rounded-lg border border-white/10">Nutrition</span>
+                  <span className="px-2 py-1 bg-white/5 rounded-lg border border-white/10">Goals</span>
+                  <span className="px-2 py-1 bg-white/5 rounded-lg border border-white/10">Game IQ</span>
+                  <span className="px-2 py-1 bg-white/5 rounded-lg border border-white/10">Arm Care</span>
+                  <span className="px-2 py-1 bg-white/5 rounded-lg border border-white/10">Sound</span>
+                  <span className="px-2 py-1 bg-white/5 rounded-lg border border-white/10">AI Coach</span>
+                </div>
+                <p className="text-center text-gray-500 text-xs">Buying separately? <span className="line-through">$300+</span> for 6 months</p>
+                <p className="text-center text-green-400 font-bold text-sm mt-1">Mind & Muscle: $79 — everything integrated</p>
+              </div>
 
               {/* Team Licensing Callout */}
               <div className="mb-6 p-4 rounded-xl bg-gradient-to-br from-neon-cortex-blue/20 via-solar-surge-orange/10 to-transparent border-2 border-neon-cortex-blue/40">

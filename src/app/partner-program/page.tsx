@@ -755,24 +755,35 @@ export default function PartnerProgramPage() {
           ))}
         </div>
 
+        {/* Best-in-Class Terms Banner */}
+        <div className="mb-8 p-4 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/5 border border-green-500/30">
+          <p className="text-center text-gray-300">
+            <span className="font-bold text-green-400">Best-in-Class Affiliate Terms:</span>{' '}
+            10-15% commission (vs 5-8% industry avg) • 90-day cookie (vs 30-day standard) • Instant approval
+          </p>
+        </div>
+
         {/* Revenue Share Details */}
         <div className="grid md:grid-cols-3 gap-6 mb-12">
           <LiquidGlass variant="blue" className="p-6 text-center">
-            <div className="text-3xl font-bold text-white mb-2">10%</div>
-            <div className="text-base font-medium mb-1">Base Commission</div>
-            <div className="text-sm text-text-secondary">On every subscription payment</div>
-          </LiquidGlass>
-
-          <LiquidGlass variant="blue" className="p-6 text-center">
-            <div className="text-3xl font-bold text-white mb-2">15%</div>
-            <div className="text-base font-medium mb-1">Volume Bonus</div>
-            <div className="text-sm text-text-secondary">On users 101+ for large organizations</div>
+            <div className="text-3xl font-bold text-white mb-2">10-15%</div>
+            <div className="text-base font-medium mb-1">Commission</div>
+            <div className="text-sm text-text-secondary">Industry avg: 5-8%</div>
+            <div className="text-xs text-neon-cortex-green mt-1">2x better</div>
           </LiquidGlass>
 
           <LiquidGlass variant="blue" className="p-6 text-center">
             <div className="text-3xl font-bold text-white mb-2">90 Days</div>
             <div className="text-base font-medium mb-1">Cookie Duration</div>
-            <div className="text-sm text-text-secondary">Credit for clicks up to 90 days before signup</div>
+            <div className="text-sm text-text-secondary">Industry avg: 30 days</div>
+            <div className="text-xs text-neon-cortex-green mt-1">3x longer</div>
+          </LiquidGlass>
+
+          <LiquidGlass variant="blue" className="p-6 text-center">
+            <div className="text-3xl font-bold text-white mb-2">$1,400+</div>
+            <div className="text-base font-medium mb-1">Annual Potential</div>
+            <div className="text-sm text-text-secondary">100-athlete facility</div>
+            <div className="text-xs text-neon-cortex-green mt-1">Passive income</div>
           </LiquidGlass>
         </div>
 

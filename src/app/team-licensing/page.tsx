@@ -336,6 +336,52 @@ function TeamLicensingContent() {
           One platform built exclusively for baseball and softball programs — supporting coaches, athletes, and parents with intelligent training, communication, and development.
         </p>
 
+        {/* Key Differentiators Grid */}
+        <div className="max-w-5xl mx-auto mt-10 grid md:grid-cols-3 gap-4">
+          {/* Parent-Free */}
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-green-500/10 to-emerald-500/5 border border-green-500/30">
+            <div className="flex items-center gap-2 mb-2">
+              <Heart className="w-5 h-5 text-green-400" />
+              <h3 className="text-lg font-black text-white">Parents FREE</h3>
+            </div>
+            <p className="text-gray-400 text-sm">
+              25 athletes + 50 parents? <span className="text-green-400 font-bold">Pay for 25.</span>
+            </p>
+          </div>
+
+          {/* Team Comms Angle */}
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-neon-cortex-blue/10 to-neon-cortex-blue/5 border border-neon-cortex-blue/30">
+            <div className="flex items-center gap-2 mb-2">
+              <MessageCircle className="w-5 h-5 text-neon-cortex-blue" />
+              <h3 className="text-lg font-black text-white">Team Chat FREE</h3>
+            </div>
+            <p className="text-gray-400 text-sm">
+              Chatter + Events + 8 training features. <span className="text-neon-cortex-blue font-bold">Not just chat.</span>
+            </p>
+          </div>
+
+          {/* Accountability */}
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-solar-surge-orange/10 to-solar-surge-orange/5 border border-solar-surge-orange/30">
+            <div className="flex items-center gap-2 mb-2">
+              <TrendingUp className="w-5 h-5 text-solar-surge-orange" />
+              <h3 className="text-lg font-black text-white">Accountability</h3>
+            </div>
+            <p className="text-gray-400 text-sm">
+              Assign drill → Athlete records → AI analyzes → <span className="text-solar-surge-orange font-bold">Coach sees proof.</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Price Lock Guarantee */}
+        <div className="max-w-2xl mx-auto mt-6 p-4 rounded-xl bg-white/5 border border-white/10">
+          <div className="flex items-center justify-center gap-2">
+            <Shield className="w-5 h-5 text-neon-cortex-green" />
+            <p className="text-gray-300 text-center">
+              <span className="font-bold text-neon-cortex-green">Price Lock:</span> Your rate is locked forever. Add seats mid-season at the same rate.
+            </p>
+          </div>
+        </div>
+
         {/* Credibility Line */}
         <p className="text-base text-text-secondary mt-6 font-medium">
           Built specifically for serious baseball & softball development.

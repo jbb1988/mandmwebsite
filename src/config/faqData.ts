@@ -10,7 +10,11 @@ export const TOP_FAQS = [
   },
   {
     question: 'What makes Mind & Muscle different from other baseball apps?',
-    answer: 'Mind & Muscle is the first AI platform built exclusively for baseball and softball that integrates all aspects of player development. Instead of juggling 7+ different apps, you get one intelligent system where everything connects. The AI learns from your swing videos, workouts, mental training, and goals—continuously improving recommendations across all areas.',
+    answer: 'Mind & Muscle replaces 10+ separate apps with one integrated platform built exclusively for baseball and softball. Team chat, video analysis, drills, mental training, nutrition, goals, game IQ, arm care, sound engineering, AI coaching—all connected by a single AI that learns how you train. Plus, we\'re the ONLY app with AI arm health monitoring for pitchers—analysis that typically costs $200/session at biomechanics labs. All for $13.17/month.',
+  },
+  {
+    question: 'Why use Mind & Muscle instead of a team chat app?',
+    answer: 'Most teams use generic chat apps that do one thing. Mind & Muscle gives you team chat AND Events AND 8 training features—all FREE. Daily mental reps, Game IQ training, arm care, speed lab, breathwork, performance logging—included at no cost. When you\'re ready for AI video analysis and advanced coaching, upgrade to Pro.',
   },
   {
     question: 'How do I redeem my team code?',
