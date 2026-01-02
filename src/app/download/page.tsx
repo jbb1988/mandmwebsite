@@ -5,8 +5,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { GradientTextReveal, FadeInWhenVisible, StaggerChildren, staggerItemVariants } from '@/components/animations';
+import { AppScreenshotCarousel } from '@/components/AppScreenshotCarousel';
 import { motion } from 'framer-motion';
-import { Check, Zap, MessageCircle, Calendar, Flame, BookOpen, Target, Dumbbell, Wind } from 'lucide-react';
+import { Check, Zap, MessageCircle, Calendar, Flame, BookOpen, Target, Dumbbell, Wind, Star } from 'lucide-react';
 
 // Pro features - matches the app exactly
 const proFeatures = [
@@ -35,107 +36,203 @@ const freeFeatures = [
 
 export default function DownloadPage() {
   return (
-    <div className="min-h-screen pt-28 pb-20 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen">
 
-        {/* Hero Section */}
-        <FadeInWhenVisible delay={0} direction="up" className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-full mb-6">
-            <span className="text-green-400 font-bold text-sm">FREE DOWNLOAD</span>
-            <span className="text-gray-400">•</span>
-            <span className="text-gray-300 text-sm">No credit card required</span>
-          </div>
+      {/* ========== HERO SECTION WITH VIDEO BACKGROUND ========== */}
+      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
+        {/* Video Background */}
+        <div className="absolute inset-0 z-0">
+          <video
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="w-full h-full object-cover opacity-40"
+          >
+            <source src="/assets/videos/the_zone.mp4" type="video/mp4" />
+          </video>
+          {/* Gradient Overlays */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a12]/80 via-[#0a0a12]/60 to-[#0a0a12]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-neon-cortex-blue/10 via-transparent to-solar-surge-orange/10" />
+        </div>
 
-          <GradientTextReveal
-            text="Mind & Muscle"
-            className="text-5xl sm:text-6xl md:text-7xl font-black mb-4 leading-tight"
-            gradientFrom="#0EA5E9"
-            gradientTo="#F97316"
-            delay={0.1}
-          />
+        {/* Hero Content */}
+        <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-16">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
 
-          <p className="text-xl sm:text-2xl text-solar-surge-orange font-bold max-w-2xl mx-auto mb-3">
-            Not adapted. Purpose-built for baseball and softball.
-          </p>
-          <p className="text-lg text-gray-400 max-w-xl mx-auto">
-            Every feature, every lesson, every AI insight — made specifically for the diamond.
-          </p>
-        </FadeInWhenVisible>
+            {/* Left: Text Content */}
+            <div className="text-center lg:text-left">
+              <FadeInWhenVisible delay={0} direction="up">
+                {/* Badge */}
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30 rounded-full mb-6 backdrop-blur-sm">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                  </span>
+                  <span className="text-green-400 font-bold text-sm">FREE DOWNLOAD</span>
+                  <span className="text-gray-500">•</span>
+                  <span className="text-gray-300 text-sm">No credit card</span>
+                </div>
+              </FadeInWhenVisible>
 
-        {/* App Logo with Premium Glow */}
-        <FadeInWhenVisible delay={0.1} direction="up" className="flex justify-center mb-10">
-          <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-neon-cortex-blue to-solar-surge-orange opacity-30 blur-3xl rounded-full scale-150" />
-            <div className="relative w-32 h-32 rounded-3xl bg-gradient-to-br from-neon-cortex-blue/20 to-solar-surge-orange/20 p-[2px] shadow-[0_0_60px_rgba(14,165,233,0.3),0_0_60px_rgba(249,115,22,0.2)]">
-              <div className="w-full h-full rounded-3xl bg-[#0a0a12] flex items-center justify-center overflow-hidden backdrop-blur-xl">
-                <Image
-                  src="/assets/images/logo.png"
-                  alt="Mind & Muscle Logo"
-                  width={100}
-                  height={100}
-                  className="object-contain"
-                />
+              <FadeInWhenVisible delay={0.1} direction="up">
+                <h1
+                  className="text-5xl sm:text-6xl lg:text-7xl font-black mb-4 leading-[0.9] tracking-tight"
+                  style={{
+                    background: 'linear-gradient(135deg, #0EA5E9 0%, #fff 50%, #F97316 100%)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    textShadow: '0 0 80px rgba(14,165,233,0.5), 0 0 120px rgba(249,115,22,0.3)',
+                  }}
+                >
+                  Mind & Muscle
+                </h1>
+              </FadeInWhenVisible>
+
+              <FadeInWhenVisible delay={0.15} direction="up">
+                <p
+                  className="text-xl sm:text-2xl font-bold text-white mb-3"
+                  style={{ textShadow: '0 0 40px rgba(249,115,22,0.4)' }}
+                >
+                  <span className="text-solar-surge-orange">Purpose-built</span> for baseball & softball.
+                </p>
+                <p className="text-lg text-gray-400 max-w-md mx-auto lg:mx-0 mb-8">
+                  The complete training system — mental, physical, video analysis, and team communication.
+                </p>
+              </FadeInWhenVisible>
+
+              {/* Download Buttons with Shimmer */}
+              <FadeInWhenVisible delay={0.2} direction="up">
+                <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-6">
+                  <Link
+                    href="https://apps.apple.com/app/mind-muscle-baseball/id6737125498"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative overflow-hidden"
+                  >
+                    <div className="relative px-6 py-4 bg-white/10 hover:bg-white/15 rounded-2xl border border-white/20 hover:border-white/40 transition-all duration-300 flex items-center gap-3 justify-center hover:scale-105 backdrop-blur-sm">
+                      {/* Shimmer Effect */}
+                      <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                      <svg className="w-8 h-8 text-white relative z-10" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                      </svg>
+                      <div className="text-left relative z-10">
+                        <div className="text-xs text-gray-300">Download on the</div>
+                        <div className="text-lg font-bold text-white -mt-1">App Store</div>
+                      </div>
+                    </div>
+                  </Link>
+
+                  <Link
+                    href="https://play.google.com/store/apps/details?id=ai.mindandmuscle.app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group relative overflow-hidden"
+                  >
+                    <div className="relative px-6 py-4 bg-white/10 hover:bg-white/15 rounded-2xl border border-white/20 hover:border-white/40 transition-all duration-300 flex items-center gap-3 justify-center hover:scale-105 backdrop-blur-sm">
+                      {/* Shimmer Effect */}
+                      <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                      <svg className="w-8 h-8 text-white relative z-10" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.5,12.92 20.16,13.19L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
+                      </svg>
+                      <div className="text-left relative z-10">
+                        <div className="text-xs text-gray-300">GET IT ON</div>
+                        <div className="text-lg font-bold text-white -mt-1">Google Play</div>
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              </FadeInWhenVisible>
+
+              {/* 5.0 Star Rating Badge */}
+              <FadeInWhenVisible delay={0.25} direction="up">
+                <div className="flex items-center justify-center lg:justify-start gap-3">
+                  <div className="flex gap-0.5">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                    ))}
+                  </div>
+                  <span className="text-white font-bold text-lg">5.0</span>
+                  <span className="text-gray-400 text-sm">on App Store</span>
+                </div>
+              </FadeInWhenVisible>
+            </div>
+
+            {/* Right: Phone Mockup */}
+            <FadeInWhenVisible delay={0.3} direction="left" className="hidden lg:block">
+              <div className="relative mx-auto max-w-[320px]">
+                {/* Glow Background */}
+                <div className="absolute -inset-8 bg-gradient-to-br from-neon-cortex-blue via-purple-500/30 to-solar-surge-orange opacity-40 blur-[80px] rounded-full" />
+
+                {/* Phone Frame */}
+                <div className="relative">
+                  {/* Outer Ring Glow */}
+                  <div className="absolute -inset-1 bg-gradient-to-br from-neon-cortex-blue to-solar-surge-orange rounded-[3.5rem] opacity-50 blur-sm" />
+
+                  {/* Phone Body */}
+                  <div className="relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-[3rem] p-2 shadow-2xl shadow-black/50">
+                    {/* Screen */}
+                    <div className="relative bg-[#0a0a12] rounded-[2.5rem] overflow-hidden">
+                      {/* Notch */}
+                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10" />
+
+                      {/* Screenshot */}
+                      <Image
+                        src="/assets/screenshots/2-portraitAPPLE.png"
+                        alt="Mind & Muscle App"
+                        width={300}
+                        height={650}
+                        className="w-full h-auto"
+                        priority
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
+            </FadeInWhenVisible>
+          </div>
+        </div>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
+          <motion.div
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+            className="w-6 h-10 border-2 border-white/30 rounded-full flex items-start justify-center p-2"
+          >
+            <div className="w-1.5 h-3 bg-white/50 rounded-full" />
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ========== MAIN CONTENT ========== */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+
+        {/* Value Comparison - "10 Apps or Just One" */}
+        <FadeInWhenVisible delay={0} direction="up" className="mb-16 -mt-8">
+          <div className="p-8 rounded-2xl bg-gradient-to-r from-green-500/10 to-emerald-500/5 border border-green-500/20 backdrop-blur-sm">
+            <h2 className="text-2xl sm:text-3xl font-black text-white mb-6 text-center" style={{ textShadow: '0 0 30px rgba(16,185,129,0.4)' }}>
+              10 Apps. Or Just One.
+            </h2>
+            <div className="flex flex-wrap justify-center gap-2 text-sm text-gray-300 mb-6">
+              {['Team Chat', 'Video Analysis', 'Drills', 'Mental Training', 'Nutrition', 'Goals', 'Game IQ', 'Arm Care', 'Sound', 'AI Coach'].map((item) => (
+                <span key={item} className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10 backdrop-blur-sm">
+                  {item}
+                </span>
+              ))}
+            </div>
+            <div className="text-center">
+              <p className="text-gray-500 text-sm mb-2">Buying separately? <span className="line-through text-gray-600">$300+</span> for 6 months</p>
+              <p className="text-green-400 font-black text-2xl">
+                Mind & Muscle: <span className="text-white">$79</span> — everything integrated
+              </p>
+              <p className="text-gray-400 text-sm mt-1">That&apos;s $13.17/month — less than ONE hitting lesson</p>
             </div>
           </div>
-        </FadeInWhenVisible>
-
-        {/* Download Buttons - Premium Glass */}
-        <FadeInWhenVisible delay={0.15} direction="up" className="mb-16">
-          <LiquidGlass variant="blue" glow={true} className="p-8 max-w-xl mx-auto">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-black text-white mb-2">Download Now</h2>
-              <p className="text-gray-400">Train smarter between practices and games</p>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href="https://apps.apple.com/app/mind-muscle-baseball/id6737125498"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group"
-              >
-                <div className="px-6 py-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 hover:border-white/30 transition-all duration-300 flex items-center gap-3 justify-center hover:scale-105">
-                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
-                  </svg>
-                  <div className="text-left">
-                    <div className="text-xs text-gray-400">Download on the</div>
-                    <div className="text-lg font-bold -mt-1">App Store</div>
-                  </div>
-                </div>
-              </Link>
-
-              <Link
-                href="https://play.google.com/store/apps/details?id=ai.mindandmuscle.app"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group"
-              >
-                <div className="px-6 py-3 bg-white/5 hover:bg-white/10 rounded-xl border border-white/10 hover:border-white/30 transition-all duration-300 flex items-center gap-3 justify-center hover:scale-105">
-                  <svg className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.5,12.92 20.16,13.19L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
-                  </svg>
-                  <div className="text-left">
-                    <div className="text-xs text-gray-400">GET IT ON</div>
-                    <div className="text-lg font-bold -mt-1">Google Play</div>
-                  </div>
-                </div>
-              </Link>
-            </div>
-          <div className="text-center mt-6 pt-6 border-t border-white/10">
-              <p className="text-2xl font-black text-white">
-                <span className="text-solar-surge-orange">$79</span> for 6 months
-              </p>
-              <p className="text-gray-400 text-sm">
-                That&apos;s $13.17/month — less than ONE hitting lesson
-              </p>
-            </div>
-          </LiquidGlass>
         </FadeInWhenVisible>
 
         {/* Pro Features - Premium Card */}
-        <FadeInWhenVisible delay={0.2} direction="up" className="mb-16">
+        <FadeInWhenVisible delay={0.1} direction="up" className="mb-16">
           <LiquidGlass variant="orange" glow={true} className="p-8">
             <div className="flex flex-wrap items-center gap-3 mb-6">
               <span className="px-4 py-1.5 bg-gradient-to-r from-solar-surge-orange to-amber-500 rounded-lg text-sm font-black text-white shadow-lg shadow-orange-500/30">
@@ -146,15 +243,23 @@ export default function DownloadPage() {
               </span>
             </div>
 
-            <h3 className="text-3xl font-black text-white mb-2">All Pro Features</h3>
+            <h3
+              className="text-3xl sm:text-4xl font-black text-white mb-2"
+              style={{ textShadow: '0 0 40px rgba(249,115,22,0.4)' }}
+            >
+              All Pro Features
+            </h3>
             <p className="text-solar-surge-orange font-bold text-lg mb-8">
               Not adapted. Purpose-built for baseball and softball.
             </p>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
               {proFeatures.map((feature) => (
-                <div key={feature.name} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10">
-                  <span className="text-2xl">{feature.icon}</span>
+                <div
+                  key={feature.name}
+                  className="group flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/10 hover:border-solar-surge-orange/40 hover:bg-white/10 transition-all duration-300"
+                >
+                  <span className="text-3xl group-hover:scale-110 transition-transform">{feature.icon}</span>
                   <div>
                     <div className="font-bold text-white text-sm">{feature.name}</div>
                     <div className="text-xs text-gray-400">{feature.description}</div>
@@ -165,9 +270,11 @@ export default function DownloadPage() {
 
             <div className="p-4 rounded-xl bg-gradient-to-r from-solar-surge-orange/20 to-amber-500/10 border border-solar-surge-orange/30">
               <div className="flex items-center gap-3">
-                <Zap className="w-5 h-5 text-solar-surge-orange" />
+                <div className="w-10 h-10 rounded-full bg-solar-surge-orange/20 flex items-center justify-center">
+                  <Zap className="w-5 h-5 text-solar-surge-orange" />
+                </div>
                 <p className="text-white font-medium">
-                  Gets smarter with every session. <span className="text-solar-surge-orange">Your AI learns YOU.</span>
+                  Gets smarter with every session. <span className="text-solar-surge-orange font-bold">Your AI learns YOU.</span>
                 </p>
               </div>
             </div>
@@ -181,34 +288,32 @@ export default function DownloadPage() {
           </LiquidGlass>
         </FadeInWhenVisible>
 
-        {/* Value Comparison */}
-        <FadeInWhenVisible delay={0.22} direction="up" className="mb-8">
-          <div className="p-6 rounded-xl bg-gradient-to-r from-green-500/10 to-emerald-500/5 border border-green-500/20">
-            <h4 className="text-xl font-black text-white mb-4 text-center">10 Apps. Or Just One.</h4>
-            <div className="flex flex-wrap justify-center gap-2 text-sm text-gray-400 mb-4">
-              <span className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">Team Chat</span>
-              <span className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">Video Analysis</span>
-              <span className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">Drills</span>
-              <span className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">Mental Training</span>
-              <span className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">Nutrition</span>
-              <span className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">Goals</span>
-              <span className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">Game IQ</span>
-              <span className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">Arm Care</span>
-              <span className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">Sound</span>
-              <span className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/10">AI Coach</span>
-            </div>
-            <p className="text-center text-gray-500 text-sm">Buying separately? <span className="line-through">$300+</span> for 6 months</p>
-            <p className="text-center text-green-400 font-bold text-lg mt-1">Mind & Muscle: $79 — everything integrated</p>
+        {/* App Screenshot Carousel */}
+        <FadeInWhenVisible delay={0.15} direction="up" className="mb-16">
+          <div className="text-center mb-8">
+            <h3
+              className="text-2xl sm:text-3xl font-black text-white mb-2"
+              style={{ textShadow: '0 0 30px rgba(14,165,233,0.4)' }}
+            >
+              See It In Action
+            </h3>
+            <p className="text-gray-400">Tap any screenshot to view full size</p>
           </div>
+          <AppScreenshotCarousel />
         </FadeInWhenVisible>
 
         {/* Free Features */}
-        <FadeInWhenVisible delay={0.25} direction="up" className="mb-16">
+        <FadeInWhenVisible delay={0.2} direction="up" className="mb-16">
           <div className="text-center mb-8">
             <span className="inline-block px-4 py-1.5 bg-green-500/20 border border-green-500/30 rounded-full text-green-400 font-bold text-sm mb-4">
               FREE FOREVER
             </span>
-            <h3 className="text-2xl font-black text-white">8 Features at $0</h3>
+            <h3
+              className="text-2xl sm:text-3xl font-black text-white"
+              style={{ textShadow: '0 0 30px rgba(16,185,129,0.4)' }}
+            >
+              8 Features at $0
+            </h3>
             <p className="text-gray-400 mt-2">Start training today — no subscription required</p>
           </div>
 
@@ -217,9 +322,9 @@ export default function DownloadPage() {
               const IconComponent = feature.icon;
               return (
                 <motion.div key={feature.name} variants={staggerItemVariants}>
-                  <div className="p-4 rounded-xl bg-white/[0.03] border border-white/10 hover:border-white/20 transition-all text-center">
-                    <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-white/5 flex items-center justify-center">
-                      <IconComponent className="w-6 h-6 text-green-400" />
+                  <div className="group p-5 rounded-xl bg-white/[0.03] border border-white/10 hover:border-green-500/30 hover:bg-white/[0.06] transition-all text-center">
+                    <div className="w-14 h-14 mx-auto mb-3 rounded-xl bg-gradient-to-br from-green-500/10 to-emerald-500/5 border border-green-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <IconComponent className="w-7 h-7 text-green-400" />
                     </div>
                     <div className="font-bold text-white text-sm mb-1">{feature.name}</div>
                     <div className="text-xs text-gray-500">{feature.description}</div>
@@ -231,9 +336,12 @@ export default function DownloadPage() {
         </FadeInWhenVisible>
 
         {/* Why Mind & Muscle - Clean List */}
-        <FadeInWhenVisible delay={0.3} direction="up" className="mb-16">
+        <FadeInWhenVisible delay={0.25} direction="up" className="mb-16">
           <LiquidGlass variant="blue" glow={true} className="p-8">
-            <h3 className="text-2xl font-black text-white text-center mb-8">
+            <h3
+              className="text-2xl sm:text-3xl font-black text-white text-center mb-8"
+              style={{ textShadow: '0 0 30px rgba(14,165,233,0.4)' }}
+            >
               This Wasn&apos;t Adapted. It Was Purpose-Built.
             </h3>
 
@@ -244,8 +352,8 @@ export default function DownloadPage() {
                 { text: 'AI learns from every swing, journal entry, and workout', sub: 'Continuously improving with baseball-specific data' },
                 { text: 'Mental scenarios pulled from real game situations', sub: 'Not generic "focus and confidence" — real baseball pressure' },
               ].map((item, i) => (
-                <div key={i} className="flex items-start gap-4 p-4 rounded-xl bg-white/5">
-                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-neon-cortex-blue/20 flex items-center justify-center">
+                <div key={i} className="group flex items-start gap-4 p-4 rounded-xl bg-white/5 hover:bg-white/10 transition-all">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-neon-cortex-blue/20 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Check className="w-5 h-5 text-neon-cortex-blue" />
                   </div>
                   <div>
@@ -259,18 +367,61 @@ export default function DownloadPage() {
         </FadeInWhenVisible>
 
         {/* Final Statement */}
-        <FadeInWhenVisible delay={0.35} direction="up">
-          <div className="text-center py-8">
-            <p className="text-xl sm:text-2xl text-gray-400 mb-2">
+        <FadeInWhenVisible delay={0.3} direction="up">
+          <div className="text-center py-12">
+            <p className="text-xl sm:text-2xl text-gray-400 mb-3">
               Every other app tried to be everything to everyone.
             </p>
             <p className="text-2xl sm:text-3xl font-black mb-4">
               <span className="text-white">We became obsessed with </span>
-              <span className="text-solar-surge-orange" style={{textShadow: '0 0 20px rgba(249,115,22,0.6)'}}>one thing.</span>
+              <span
+                className="text-solar-surge-orange"
+                style={{ textShadow: '0 0 30px rgba(249,115,22,0.6)' }}
+              >
+                one thing.
+              </span>
             </p>
-            <p className="text-3xl sm:text-4xl font-black text-neon-cortex-blue" style={{textShadow: '0 0 30px rgba(14,165,233,0.8)'}}>
+            <p
+              className="text-4xl sm:text-5xl font-black text-neon-cortex-blue mb-10"
+              style={{ textShadow: '0 0 40px rgba(14,165,233,0.8)' }}
+            >
               Baseball & Softball.
             </p>
+
+            {/* Final CTA Buttons */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="https://apps.apple.com/app/mind-muscle-baseball/id6737125498"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative overflow-hidden"
+              >
+                <div className="relative px-8 py-4 bg-gradient-to-r from-neon-cortex-blue to-blue-600 rounded-2xl border border-neon-cortex-blue/50 transition-all duration-300 flex items-center gap-3 justify-center hover:scale-105 shadow-lg shadow-neon-cortex-blue/20">
+                  {/* Shimmer Effect */}
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+                  <svg className="w-7 h-7 text-white relative z-10" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/>
+                  </svg>
+                  <span className="text-lg font-bold text-white relative z-10">Download for iOS</span>
+                </div>
+              </Link>
+
+              <Link
+                href="https://play.google.com/store/apps/details?id=ai.mindandmuscle.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group relative overflow-hidden"
+              >
+                <div className="relative px-8 py-4 bg-gradient-to-r from-solar-surge-orange to-amber-500 rounded-2xl border border-solar-surge-orange/50 transition-all duration-300 flex items-center gap-3 justify-center hover:scale-105 shadow-lg shadow-solar-surge-orange/20">
+                  {/* Shimmer Effect */}
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+                  <svg className="w-7 h-7 text-white relative z-10" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.5,12.92 20.16,13.19L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
+                  </svg>
+                  <span className="text-lg font-bold text-white relative z-10">Download for Android</span>
+                </div>
+              </Link>
+            </div>
           </div>
         </FadeInWhenVisible>
 
