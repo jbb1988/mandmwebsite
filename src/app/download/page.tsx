@@ -182,23 +182,13 @@ export default function DownloadPage() {
           </div>
         </div>
 
-        {/* Scroll Indicator */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
-          <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="w-6 h-10 border-2 border-white/30 rounded-full flex items-start justify-center p-2"
-          >
-            <div className="w-1.5 h-3 bg-white/50 rounded-full" />
-          </motion.div>
-        </div>
       </section>
 
       {/* ========== MAIN CONTENT ========== */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
 
         {/* Value Comparison - "10 Apps or Just One" */}
-        <FadeInWhenVisible delay={0} direction="up" className="mb-16 -mt-8">
+        <FadeInWhenVisible delay={0} direction="up" className="mb-16 pt-8">
           <div className="p-8 rounded-2xl bg-gradient-to-r from-green-500/10 to-emerald-500/5 border border-green-500/20 backdrop-blur-sm">
             <h2 className="text-2xl sm:text-3xl font-black text-white mb-6 text-center" style={{ textShadow: '0 0 30px rgba(16,185,129,0.4)' }}>
               10 Apps. Or Just One.
