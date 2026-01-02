@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Play, Smartphone, AlertCircle, CheckCircle } from 'lucide-react';
 import { FadeInWhenVisible } from '@/components/animations';
 
@@ -38,6 +39,8 @@ const categoryColors: Record<string, { color: string; bg: string; border: string
 
 export default function DrillShareClient({ code, drill, error }: DrillShareClientProps) {
   const appLink = `mindmuscle://d/${code}`;
+  const [thumbnailError, setThumbnailError] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
 
   const handleOpenInApp = () => {
     window.location.href = appLink;
@@ -86,12 +89,17 @@ export default function DrillShareClient({ code, drill, error }: DrillShareClien
           <div className={`backdrop-blur-sm bg-white/[0.02] rounded-2xl border-2 ${categoryStyle.border} ${categoryStyle.shadow} overflow-hidden`}>
 
             {/* Thumbnail/Video */}
-            <div className="relative aspect-video bg-black">
-              {drill.thumbnail_url ? (
-                <img
+            <div className="relative aspect-video bg-black overflow-hidden">
+              {drill.thumbnail_url && !thumbnailError ? (
+                <Image
                   src={drill.thumbnail_url}
                   alt={drill.title}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  fill
+                  unoptimized
+                  priority
+                  onError={() => setThumbnailError(true)}
+                  className="object-cover"
+                  sizes="(max-width: 640px) 100vw, 576px"
                 />
               ) : (
                 <div className={`w-full h-full flex items-center justify-center ${categoryStyle.bg}`}>
@@ -142,10 +150,14 @@ export default function DrillShareClient({ code, drill, error }: DrillShareClien
               {drill.owner_name && (
                 <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/10 mb-6">
                   <div className={`w-12 h-12 rounded-full overflow-hidden border-2 ${categoryStyle.border} flex items-center justify-center ${categoryStyle.bg}`}>
-                    {drill.owner_avatar_url ? (
-                      <img
+                    {drill.owner_avatar_url && !avatarError ? (
+                      <Image
                         src={drill.owner_avatar_url}
                         alt={drill.owner_name}
+                        width={48}
+                        height={48}
+                        unoptimized
+                        onError={() => setAvatarError(true)}
                         className="w-full h-full object-cover"
                       />
                     ) : (

@@ -10,6 +10,10 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'mindandmuscle.ai',
       },
+      {
+        protocol: 'https',
+        hostname: 'api.mindandmuscle.ai',
+      },
     ],
   },
   async headers() {
