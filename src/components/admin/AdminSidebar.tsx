@@ -26,6 +26,7 @@ import {
   Mic,
   Database,
   Video,
+  Send,
 } from 'lucide-react';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import CommandSearch from './CommandSearch';
@@ -76,6 +77,7 @@ const NAV_SECTIONS: NavSection[] = [
     items: [
       { id: 'daily-hit', name: 'Daily Hit', href: '/admin/daily-hit-builder', icon: Mic, shortcut: 'H' },
       { id: 'campaigns', name: 'Campaigns', href: '/admin/campaigns', icon: Megaphone, shortcut: 'C' },
+      { id: 'email-sender', name: 'Email Sender', href: '/admin/email-sender', icon: Send },
       { id: 'announcements', name: 'Announcements', href: '/admin/announcements', icon: Megaphone },
       { id: 'templates', name: 'Templates', href: '/admin/templates', icon: Mail },
       { id: 'promos', name: 'Promos', href: '/admin/promo-codes', icon: Tag },
