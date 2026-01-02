@@ -2,7 +2,6 @@
 
 import React from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Play, Smartphone, AlertCircle, CheckCircle } from 'lucide-react';
 import { FadeInWhenVisible } from '@/components/animations';
 
@@ -89,13 +88,10 @@ export default function DrillShareClient({ code, drill, error }: DrillShareClien
             {/* Thumbnail/Video */}
             <div className="relative aspect-video bg-black">
               {drill.thumbnail_url ? (
-                <Image
+                <img
                   src={drill.thumbnail_url}
                   alt={drill.title}
-                  fill
-                  className="object-cover"
-                  unoptimized
-                  priority
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
               ) : (
                 <div className={`w-full h-full flex items-center justify-center ${categoryStyle.bg}`}>
@@ -147,13 +143,10 @@ export default function DrillShareClient({ code, drill, error }: DrillShareClien
                 <div className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/10 mb-6">
                   <div className={`w-12 h-12 rounded-full overflow-hidden border-2 ${categoryStyle.border} flex items-center justify-center ${categoryStyle.bg}`}>
                     {drill.owner_avatar_url ? (
-                      <Image
+                      <img
                         src={drill.owner_avatar_url}
                         alt={drill.owner_name}
-                        width={48}
-                        height={48}
-                        className="object-cover"
-                        unoptimized
+                        className="w-full h-full object-cover"
                       />
                     ) : (
                       <span className={`text-lg font-bold ${categoryStyle.color}`}>
