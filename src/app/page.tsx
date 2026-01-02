@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
-import { Brain, Dumbbell, Users, TrendingUp, Award, Zap, X, Play, Pause, MousePointerClick, Check, Video, Apple, MessageCircle, Music } from 'lucide-react';
+import { Brain, Dumbbell, Users, TrendingUp, Award, Zap, X, Play, Pause, MousePointerClick, Check, Video, Apple, MessageCircle, Music, Star } from 'lucide-react';
 import { FadeInWhenVisible, StaggerChildren, TextReveal, GradientTextReveal, ScaleInWhenVisible, staggerItemVariants } from '@/components/animations';
 import { AppScreenshotCarousel } from '@/components/AppScreenshotCarousel';
 import { motion } from 'framer-motion';
@@ -492,6 +492,19 @@ export default function HomePage() {
                   </div>
                 </div>
               </Link>
+            </FadeInWhenVisible>
+
+            {/* 5.0 Star Rating */}
+            <FadeInWhenVisible delay={1.1} direction="up">
+              <div className="flex items-center gap-3 mt-4">
+                <div className="flex gap-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                  ))}
+                </div>
+                <span className="text-white font-bold text-lg">5.0</span>
+                <span className="text-gray-400 text-sm">on App Store</span>
+              </div>
             </FadeInWhenVisible>
 
           </div>
