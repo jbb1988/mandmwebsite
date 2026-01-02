@@ -7,7 +7,7 @@ import { LiquidGlass } from '@/components/LiquidGlass';
 import { SocialProofBar } from '@/components/SocialProofBar';
 import { GradientTextReveal } from '@/components/animations';
 import Link from 'next/link';
-import { Check, X, Users, TrendingUp, Award, Sparkles, Calculator, AlertCircle, ChevronDown, Heart, CreditCard, HelpCircle, ArrowRight, Shield, Info } from 'lucide-react';
+import { Check, X, Users, TrendingUp, Award, Sparkles, Calculator, AlertCircle, ChevronDown, Heart, CreditCard, HelpCircle, ArrowRight, Shield, Info, MessageCircle } from 'lucide-react';
 
 // Single-team mode caps at 20 users to guide multi-team orgs to the right flow
 const MAX_SINGLE_TEAM_SEATS = 20;
