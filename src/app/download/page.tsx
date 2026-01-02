@@ -38,21 +38,23 @@ export default function DownloadPage() {
   return (
     <div className="min-h-screen">
 
-      {/* ========== HERO SECTION WITH VIDEO BACKGROUND ========== */}
+      {/* ========== HERO SECTION WITH BACKGROUND IMAGE ========== */}
       <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-        {/* Video Background */}
+        {/* Background Image - Same as Homepage */}
         <div className="absolute inset-0 z-0">
-          <video
-            autoPlay
-            muted
-            loop
-            playsInline
-            className="w-full h-full object-cover opacity-40"
-          >
-            <source src="/assets/videos/the_zone.mp4" type="video/mp4" />
-          </video>
+          <picture>
+            <source srcSet="/assets/images/baseball_field_dusk.webp" type="image/webp" />
+            <Image
+              src="/assets/images/baseball_field_dusk.png"
+              alt="Baseball Field at Dusk"
+              fill
+              className="object-cover object-center"
+              priority
+              quality={90}
+            />
+          </picture>
           {/* Gradient Overlays */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a12]/80 via-[#0a0a12]/60 to-[#0a0a12]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-[#0a0a12]" />
           <div className="absolute inset-0 bg-gradient-to-r from-neon-cortex-blue/10 via-transparent to-solar-surge-orange/10" />
         </div>
 
@@ -158,35 +160,22 @@ export default function DownloadPage() {
               </FadeInWhenVisible>
             </div>
 
-            {/* Right: Phone Mockup */}
+            {/* Right: Phone Mockup (screenshot already has phone shell) */}
             <FadeInWhenVisible delay={0.3} direction="left" className="hidden lg:block">
               <div className="relative mx-auto max-w-[320px]">
                 {/* Glow Background */}
                 <div className="absolute -inset-8 bg-gradient-to-br from-neon-cortex-blue via-purple-500/30 to-solar-surge-orange opacity-40 blur-[80px] rounded-full" />
 
-                {/* Phone Frame */}
+                {/* Screenshot (already mocked up with phone) */}
                 <div className="relative">
-                  {/* Outer Ring Glow */}
-                  <div className="absolute -inset-1 bg-gradient-to-br from-neon-cortex-blue to-solar-surge-orange rounded-[3.5rem] opacity-50 blur-sm" />
-
-                  {/* Phone Body */}
-                  <div className="relative bg-gradient-to-br from-gray-800 to-gray-900 rounded-[3rem] p-2 shadow-2xl shadow-black/50">
-                    {/* Screen */}
-                    <div className="relative bg-[#0a0a12] rounded-[2.5rem] overflow-hidden">
-                      {/* Notch */}
-                      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-10" />
-
-                      {/* Screenshot */}
-                      <Image
-                        src="/assets/screenshots/2-portraitAPPLE.png"
-                        alt="Mind & Muscle App"
-                        width={300}
-                        height={650}
-                        className="w-full h-auto"
-                        priority
-                      />
-                    </div>
-                  </div>
+                  <Image
+                    src="/assets/screenshots/2-portraitAPPLE.png"
+                    alt="Mind & Muscle App"
+                    width={300}
+                    height={650}
+                    className="w-full h-auto drop-shadow-2xl"
+                    priority
+                  />
                 </div>
               </div>
             </FadeInWhenVisible>
