@@ -86,7 +86,7 @@ export default function VaultGuidePage() {
             'Generate a unique shareable link',
             'Send via text, email, or any messaging app',
             'Athletes open the link to claim the drill',
-            'Pro subscribers can access - encourages app downloads!'
+            'Great for athletes not yet on your team roster'
           ]
         }
       ]
