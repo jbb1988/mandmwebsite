@@ -137,7 +137,7 @@ export default function FAQPage() {
         },
         {
           question: 'Who creates the drills?',
-          answer: 'Every drill in The Vault comes from verified instructors with real coaching credentials. Instructors are verified by facility affiliation (like DBAT, Extra Innings, etc.) or independent verification of their coaching background. You can see instructor profiles, credentials, and other drills they\'ve created.'
+          answer: 'Every drill in The Vault comes from verified instructors with real coaching credentials. Instructors are verified by facility affiliation or independent verification of their coaching background. You can see instructor profiles, credentials, and other drills they\'ve created.'
         },
         {
           question: 'How do I find drills?',
@@ -150,6 +150,14 @@ export default function FAQPage() {
         {
           question: 'Can I upload my own drills?',
           answer: 'Yes, if you\'re a verified instructor! Coaches with verified profiles can upload drills to share with the community. Apply for instructor verification through the app to share your expertise with thousands of athletes.'
+        },
+        {
+          question: 'How do assigned drills work with Swing Lab and Pitch Lab?',
+          answer: 'Coaches can assign drills to athletes from The Vault. When an athlete taps "Practice This Drill", the app automatically routes them to the right AI lab:\n\n• Hitting/Batting Drills → Swing Lab\n• Pitching Drills → Pitch Lab\n\nAthletes record their practice video and get instant AI analysis. The coach receives a push notification when practice is complete and can view the submission with AI feedback in The Vault\'s Submissions tab.'
+        },
+        {
+          question: 'How do coaches assign drills to athletes?',
+          answer: 'From any drill in The Vault, tap the "Assign" button. Select athletes from your team roster, add an optional note with coaching instructions, and send. Athletes receive a push notification and can view their assigned drills in the "Assigned to Me" tab. Track completion status and view practice submissions all in one place.'
         }
       ]
     },
@@ -210,6 +218,10 @@ export default function FAQPage() {
         {
           question: 'How do I view my analysis history?',
           answer: 'Go to Swing Lab → tap "History" to see all your past analyses. Filter by date, view your favorited swings, or search by the feedback you received (e.g., "timing"). Track your progress by comparing recent swings to older ones.'
+        },
+        {
+          question: 'Can I practice assigned drills in Swing Lab?',
+          answer: 'Yes! When your coach assigns you a hitting drill from The Vault, tap "Practice This Drill" to automatically open Swing Lab. Record your practice video and get AI analysis. Your coach is notified when you complete the practice and can view your submission with AI feedback. This creates a complete feedback loop between drill assignment and practice verification.'
         }
       ]
     },
@@ -270,6 +282,10 @@ export default function FAQPage() {
         {
           question: 'How do analysis credits work?',
           answer: 'Analysis credits are shared between Swing Lab and Pitch Lab. Pro subscribers get monthly credits. Each video analysis uses 1 credit. You can purchase additional credit packs if needed, or upgrade your plan for more monthly credits.'
+        },
+        {
+          question: 'Can I practice assigned pitching drills in Pitch Lab?',
+          answer: 'Yes! When your coach assigns you a pitching drill from The Vault, tap "Practice This Drill" to automatically open Pitch Lab. Record your practice video and get AI mechanics analysis. Your coach is notified when you complete the practice and can view your submission with AI feedback on your pitching mechanics, including arm health assessment.'
         }
       ]
     },

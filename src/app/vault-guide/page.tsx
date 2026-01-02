@@ -15,7 +15,9 @@ import {
   CheckCircle2,
   ArrowRight,
   Smartphone,
-  Bell
+  Bell,
+  Link2,
+  Share2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -26,6 +28,12 @@ interface WorkflowStep {
   icon: React.ReactNode;
   details: string[];
   color: string;
+  // For steps with multiple options
+  options?: {
+    title: string;
+    icon: React.ReactNode;
+    details: string[];
+  }[];
 }
 
 interface FAQ {
@@ -54,16 +62,34 @@ export default function VaultGuidePage() {
     {
       number: 2,
       title: 'Assign to Athletes',
-      description: 'Select athletes from your team to receive the drill assignment.',
+      description: 'Two ways to get your drill to athletes - assign directly or share a link.',
       icon: <UserPlus className="w-8 h-8" />,
-      details: [
-        'From your drill, tap "Assign to Athletes"',
-        'Select athletes from your team roster',
-        'Add optional instructions or notes',
-        'Athletes receive a push notification',
-        'The drill appears in their "For You" tab'
-      ],
-      color: '#3B82F6'
+      details: [],
+      color: '#3B82F6',
+      options: [
+        {
+          title: 'Option A: Direct Assignment',
+          icon: <Users className="w-5 h-5" />,
+          details: [
+            'From your drill, tap "Assign to Athletes"',
+            'Select athletes from your team roster',
+            'Add optional instructions or notes',
+            'Athletes receive a push notification',
+            'The drill appears in their "For You" tab'
+          ]
+        },
+        {
+          title: 'Option B: Share Link',
+          icon: <Link2 className="w-5 h-5" />,
+          details: [
+            'From your drill, tap the share icon',
+            'Generate a unique shareable link',
+            'Send via text, email, or any messaging app',
+            'Athletes open the link to claim the drill',
+            'Pro subscribers can access - encourages app downloads!'
+          ]
+        }
+      ]
     },
     {
       number: 3,
@@ -117,6 +143,10 @@ export default function VaultGuidePage() {
     {
       question: 'Can I assign the same drill to multiple athletes?',
       answer: 'Absolutely! When assigning a drill, you can select as many athletes as you want. Each athlete receives their own assignment and can submit their own practice video.'
+    },
+    {
+      question: 'How do share links work?',
+      answer: 'Share links let you distribute drills to athletes who aren\'t on your team roster yet. Generate a unique link from any drill and send it via text, email, or messaging apps. When athletes open the link, they\'ll be prompted to download the app (if needed) and claim the drill. Note: Athletes need a Pro subscription to access shared drills, which helps convert new users!'
     },
     {
       question: 'What\'s the difference between The Vault and Swing Lab?',
@@ -211,18 +241,57 @@ export default function VaultGuidePage() {
                       {step.description}
                     </p>
 
-                    {/* Step Details */}
-                    <ul className="space-y-2">
-                      {step.details.map((detail, i) => (
-                        <li key={i} className="flex items-start gap-3">
-                          <CheckCircle2
-                            className="w-5 h-5 mt-0.5 flex-shrink-0"
-                            style={{ color: step.color }}
-                          />
-                          <span className="text-gray-300">{detail}</span>
-                        </li>
-                      ))}
-                    </ul>
+                    {/* Step Details (regular) */}
+                    {step.details.length > 0 && (
+                      <ul className="space-y-2">
+                        {step.details.map((detail, i) => (
+                          <li key={i} className="flex items-start gap-3">
+                            <CheckCircle2
+                              className="w-5 h-5 mt-0.5 flex-shrink-0"
+                              style={{ color: step.color }}
+                            />
+                            <span className="text-gray-300">{detail}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {/* Step Options (for steps with multiple paths) */}
+                    {step.options && (
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {step.options.map((option, optIndex) => (
+                          <div
+                            key={optIndex}
+                            className="p-4 rounded-xl bg-white/5 border border-white/10"
+                          >
+                            <div className="flex items-center gap-2 mb-3">
+                              <div
+                                className="p-2 rounded-lg"
+                                style={{ backgroundColor: `${step.color}20` }}
+                              >
+                                <div style={{ color: step.color }}>
+                                  {option.icon}
+                                </div>
+                              </div>
+                              <h4 className="font-bold" style={{ color: step.color }}>
+                                {option.title}
+                              </h4>
+                            </div>
+                            <ul className="space-y-2">
+                              {option.details.map((detail, i) => (
+                                <li key={i} className="flex items-start gap-2 text-sm">
+                                  <CheckCircle2
+                                    className="w-4 h-4 mt-0.5 flex-shrink-0"
+                                    style={{ color: step.color }}
+                                  />
+                                  <span className="text-gray-300">{detail}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   {/* Arrow to next step */}
