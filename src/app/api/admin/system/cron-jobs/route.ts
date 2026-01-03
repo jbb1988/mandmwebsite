@@ -13,21 +13,42 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Get cron jobs with stats using exec_sql RPC (only method that works)
+    // Get cron jobs with stats using exec_sql RPC (optimized with CTEs)
     const { data: cronData, error: cronError } = await supabase.rpc('exec_sql', {
       sql: `
+        WITH run_stats AS (
+          SELECT
+            jobid,
+            COUNT(*) FILTER (WHERE status = 'succeeded' AND start_time > NOW() - INTERVAL '24 hours') as success_24h,
+            COUNT(*) FILTER (WHERE status = 'failed' AND start_time > NOW() - INTERVAL '24 hours') as failed_24h,
+            ROUND(AVG(EXTRACT(EPOCH FROM (end_time - start_time)) * 1000) FILTER (WHERE end_time IS NOT NULL))::int as avg_duration_ms
+          FROM cron.job_run_details
+          WHERE start_time > NOW() - INTERVAL '7 days'
+          GROUP BY jobid
+        ),
+        last_runs AS (
+          SELECT DISTINCT ON (jobid)
+            jobid,
+            start_time as last_run,
+            status as last_status,
+            return_message as last_message
+          FROM cron.job_run_details
+          ORDER BY jobid, start_time DESC
+        )
         SELECT
           j.jobid,
           j.jobname,
           j.schedule,
           j.active,
-          (SELECT COUNT(*) FROM cron.job_run_details WHERE jobid = j.jobid AND status = 'succeeded' AND start_time > NOW() - INTERVAL '24 hours')::int as success_24h,
-          (SELECT COUNT(*) FROM cron.job_run_details WHERE jobid = j.jobid AND status = 'failed' AND start_time > NOW() - INTERVAL '24 hours')::int as failed_24h,
-          (SELECT start_time FROM cron.job_run_details WHERE jobid = j.jobid ORDER BY start_time DESC LIMIT 1) as last_run,
-          (SELECT status FROM cron.job_run_details WHERE jobid = j.jobid ORDER BY start_time DESC LIMIT 1) as last_status,
-          (SELECT return_message FROM cron.job_run_details WHERE jobid = j.jobid ORDER BY start_time DESC LIMIT 1) as last_message,
-          (SELECT ROUND(AVG(EXTRACT(EPOCH FROM (end_time - start_time)) * 1000)) FROM cron.job_run_details WHERE jobid = j.jobid AND end_time IS NOT NULL AND start_time > NOW() - INTERVAL '7 days')::int as avg_duration_ms
+          COALESCE(rs.success_24h, 0)::int as success_24h,
+          COALESCE(rs.failed_24h, 0)::int as failed_24h,
+          lr.last_run,
+          lr.last_status,
+          lr.last_message,
+          rs.avg_duration_ms
         FROM cron.job j
+        LEFT JOIN run_stats rs ON rs.jobid = j.jobid
+        LEFT JOIN last_runs lr ON lr.jobid = j.jobid
         ORDER BY j.jobname
       `
     });
