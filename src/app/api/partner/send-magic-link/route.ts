@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
         <span style="color:#fb923c;">Dominate the Game.</span>
       </p>
       <p style="margin:12px 0 0;font-size:12px;color:rgba(255,255,255,0.4);">
-        © 2025 Mind & Muscle Performance. All rights reserved.
+        © 2026 Mind & Muscle Performance. All rights reserved.
       </p>
     </div>
   </div>

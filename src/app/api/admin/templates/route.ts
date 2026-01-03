@@ -91,7 +91,7 @@ const SYSTEM_TEMPLATES = [
                 <span style="color: #3b82f6;">Discipline the Mind.</span> <span style="color: #fb923c;">Dominate the Game.</span>
               </p>
               <p style="margin: 0; font-size: 12px; color: #6b7280;">
-                © 2025 Mind & Muscle Performance. All rights reserved.
+                © 2026 Mind & Muscle Performance. All rights reserved.
               </p>
             </td>
           </tr>
@@ -176,7 +176,7 @@ const SYSTEM_TEMPLATES = [
                 <span style="color: #3b82f6;">Discipline the Mind.</span> <span style="color: #fb923c;">Dominate the Game.</span>
               </p>
               <p style="margin: 0; font-size: 12px; color: #6b7280;">
-                © 2025 Mind & Muscle Performance. All rights reserved.
+                © 2026 Mind & Muscle Performance. All rights reserved.
               </p>
             </td>
           </tr>
@@ -252,7 +252,7 @@ const SYSTEM_TEMPLATES = [
                 <span style="color: #3b82f6;">Discipline the Mind.</span> <span style="color: #fb923c;">Dominate the Game.</span>
               </p>
               <p style="margin: 0; font-size: 12px; color: #6b7280;">
-                © 2025 Mind & Muscle Performance. All rights reserved.
+                © 2026 Mind & Muscle Performance. All rights reserved.
               </p>
             </td>
           </tr>

@@ -95,7 +95,7 @@ const getWelcomeEmailHtml = (unsubscribeToken: string, todayContent?: { title: s
     <div class="footer">
       <p style="margin: 0 0 8px; font-size: 16px; font-weight: 700;"><span style="color: #3b82f6;">Discipline the Mind.</span> <span style="color: #fb923c;">Dominate the Game.</span></p>
       <p style="margin: 0 0 16px; font-size: 14px; color: #4b5563;">100% Baseball. Zero Generic Content.</p>
-      <p style="margin: 0 0 8px; font-size: 12px; color: #6b7280;">© 2025 Mind & Muscle Performance. All rights reserved.</p>
+      <p style="margin: 0 0 8px; font-size: 12px; color: #6b7280;">© 2026 Mind & Muscle Performance. All rights reserved.</p>
       <p style="margin: 0 0 8px; font-size: 11px; color: #9ca3af;">
         <a href="https://www.mindandmuscle.ai/unsubscribe?token=${unsubscribeToken}" style="color: #ef4444; text-decoration: underline;">Unsubscribe from Daily Hit emails</a>
       </p>

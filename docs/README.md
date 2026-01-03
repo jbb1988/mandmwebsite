@@ -219,7 +219,7 @@ This is a private project for Mind & Muscle. For any changes or updates, contact
 
 ## 📄 License
 
-Proprietary - Mind & Muscle © 2025
+Proprietary - Mind & Muscle © 2026
 
 ## 🐛 Troubleshooting
 

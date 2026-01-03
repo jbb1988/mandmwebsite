@@ -121,7 +121,7 @@ const SYSTEM_TEMPLATES: Record<string, {
                 100% Baseball. Zero Generic Content.
               </p>
               <p class="muted-text" style="margin: 0 0 8px; font-size: 12px; color: #6b7280;">
-                © 2025 Mind & Muscle Performance. All rights reserved.
+                © 2026 Mind & Muscle Performance. All rights reserved.
               </p>
               <p class="muted-text" style="margin: 0 0 8px; font-size: 11px; color: #6b7280;">
                 <a href="https://www.mindandmuscle.ai/unsubscribe?token={{ unsubscribeToken }}" style="color: #3b82f6; text-decoration: underline;">Unsubscribe from Daily Hit emails</a>
@@ -228,7 +228,7 @@ const SYSTEM_TEMPLATES: Record<string, {
                 100% Baseball. Zero Generic Content.
               </p>
               <p style="margin: 0 0 8px; font-size: 12px; color: #6b7280;">
-                © 2025 Mind & Muscle Performance. All rights reserved.
+                © 2026 Mind & Muscle Performance. All rights reserved.
               </p>
             </td>
           </tr>
@@ -323,7 +323,7 @@ const SYSTEM_TEMPLATES: Record<string, {
                 100% Baseball. Zero Generic Content.
               </p>
               <p style="margin: 0; font-size: 12px; color: #6b7280;">
-                © 2025 Mind & Muscle Performance. All rights reserved.
+                © 2026 Mind & Muscle Performance. All rights reserved.
               </p>
             </td>
           </tr>

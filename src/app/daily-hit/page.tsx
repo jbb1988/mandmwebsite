@@ -315,7 +315,7 @@ export default function DailyHitPage() {
             <span className="text-solar-surge-orange font-bold">Dominate the Game.</span>
           </p>
           <p className="text-gray-500 text-xs mt-2">
-            © 2025 Mind & Muscle Performance. All rights reserved.
+            © 2026 Mind & Muscle Performance. All rights reserved.
           </p>
         </div>
       </footer>

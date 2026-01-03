@@ -173,7 +173,7 @@ export default function PartnerLoginPage() {
             <span className="text-orange-400">Dominate the Game.</span>
           </p>
           <p className="text-xs text-white/30 mt-2">
-            © 2025 Mind & Muscle Performance. All rights reserved.
+            © 2026 Mind & Muscle Performance. All rights reserved.
           </p>
         </div>
       </footer>

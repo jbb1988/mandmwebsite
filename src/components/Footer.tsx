@@ -149,7 +149,7 @@ export function Footer() {
         </div>
 
         {/* Copyright */}
-        <p className="text-text-secondary">&copy; 2025 Mind and Muscle Performance. All Rights reserved.</p>
+        <p className="text-text-secondary">&copy; 2026 Mind and Muscle Performance. All Rights reserved.</p>
       </div>
     </footer>
   );
