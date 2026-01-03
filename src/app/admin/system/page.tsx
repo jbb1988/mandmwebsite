@@ -489,7 +489,14 @@ function getExpectedIntervalMs(schedule: string): number {
 // Check if a job has missed its scheduled run
 function hasMissedScheduledRun(job: CronJob): boolean {
   if (!job.active) return false;
-  if (!job.last_run) return true; // Never run = missed
+
+  // If job has never run, it's not "missed" - it's pending first run
+  // Only consider it missed if it has a history of runs but stopped
+  if (!job.last_run) {
+    // Job has never run - only consider missed if it has recorded failures
+    // Otherwise it's just waiting for its first scheduled run
+    return job.failed_24h > 0;
+  }
 
   const expectedInterval = getExpectedIntervalMs(job.schedule);
   const lastRunTime = new Date(job.last_run).getTime();
