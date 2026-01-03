@@ -132,7 +132,13 @@ export async function GET(request: Request) {
 
       if (edgeResponse.ok) {
         const edgeData = await edgeResponse.json();
-        const edgeLogs = edgeData.result || edgeData || [];
+        // Ensure edgeLogs is always an array
+        let edgeLogs: any[] = [];
+        if (Array.isArray(edgeData.result)) {
+          edgeLogs = edgeData.result;
+        } else if (Array.isArray(edgeData)) {
+          edgeLogs = edgeData;
+        }
 
         console.log(`Found ${edgeLogs.length} HTTP errors from edge_logs`);
         totalLogsScanned += edgeLogs.length;
@@ -222,7 +228,13 @@ export async function GET(request: Request) {
 
       if (pgResponse.ok) {
         const pgData = await pgResponse.json();
-        const pgLogs = pgData.result || pgData || [];
+        // Ensure pgLogs is always an array
+        let pgLogs: any[] = [];
+        if (Array.isArray(pgData.result)) {
+          pgLogs = pgData.result;
+        } else if (Array.isArray(pgData)) {
+          pgLogs = pgData;
+        }
 
         console.log(`Found ${pgLogs.length} Postgres errors`);
         totalLogsScanned += pgLogs.length;
@@ -279,7 +291,13 @@ export async function GET(request: Request) {
 
       if (response.ok) {
         const data = await response.json();
-        const logs = data.result || data || [];
+        // Ensure logs is always an array
+        let logs: any[] = [];
+        if (Array.isArray(data.result)) {
+          logs = data.result;
+        } else if (Array.isArray(data)) {
+          logs = data;
+        }
         // Add to total logs scanned for stats (SQL queries counted errors directly)
         if (logs.length > totalLogsScanned) {
           totalLogsScanned = logs.length;
