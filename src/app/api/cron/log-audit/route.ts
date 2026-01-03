@@ -9,6 +9,14 @@ const supabase = createClient(
 const PROJECT_REF = 'kuswlvbjplkgrqlmqtok';
 const SERVICES_TO_CHECK = ['api', 'edge-function', 'auth', 'postgres'];
 
+// Paths to ignore - deprecated tables/endpoints that don't need alerts
+const IGNORED_PATHS = [
+  '/rest/v1/user_notifications',
+  '/rest/v1/feature_usage',
+  '/rest/v1/log_audit_issues',  // Don't alert on our own audit table
+  '/rest/v1/log_audit_runs',
+];
+
 interface ErrorGroup {
   signature: string;
   path: string;
@@ -22,8 +30,9 @@ interface ErrorGroup {
   sampleMessage: string;
 }
 
-function generateSignature(path: string, method: string, statusCode: number, errorPattern: string): string {
-  const input = `${path}:${method}:${statusCode}:${errorPattern}`;
+function generateSignature(path: string, method: string, statusCode: number): string {
+  // Use only path/method/statusCode for stable signatures (not error pattern which varies)
+  const input = `${path}:${method}:${statusCode}`;
   let hash = 0;
   for (let i = 0; i < input.length; i++) {
     const char = input.charCodeAt(i);
@@ -131,6 +140,12 @@ export async function GET(request: Request) {
         for (const log of edgeLogs) {
           const statusCode = log.status_code;
           const rawPath = normalizePath(log.path || '/unknown');
+
+          // Skip ignored paths (deprecated tables, etc.)
+          if (IGNORED_PATHS.some(ignored => rawPath.startsWith(ignored))) {
+            continue;
+          }
+
           const method = log.method || 'UNKNOWN';
           const errorPattern = extractErrorPattern(log.event_message);
 
@@ -146,7 +161,7 @@ export async function GET(request: Request) {
           logsPerService[service].scanned++;
           logsPerService[service].errors++;
 
-          const signature = generateSignature(rawPath, method, statusCode, errorPattern);
+          const signature = generateSignature(rawPath, method, statusCode);
 
           if (errorGroups.has(signature)) {
             const group = errorGroups.get(signature)!;
@@ -218,7 +233,7 @@ export async function GET(request: Request) {
           const method = 'SQL';
           const statusCode = 500;
           const errorPattern = extractErrorPattern(log.event_message);
-          const signature = generateSignature(path, method, statusCode, errorPattern);
+          const signature = generateSignature(path, method, statusCode);
 
           if (errorGroups.has(signature)) {
             const group = errorGroups.get(signature)!;
