@@ -224,16 +224,18 @@ export default function SystemDashboardPage() {
   }
 
   async function loadCronData() {
+    const headers = { 'X-Admin-Password': getPassword() };
     const [jobsRes, historyRes] = await Promise.all([
-      fetch('/api/admin/system/cron-jobs'),
-      fetch('/api/admin/system/cron-jobs/history?limit=50')
+      fetch('/api/admin/system/cron-jobs', { headers }),
+      fetch('/api/admin/system/cron-jobs/history?limit=50', { headers })
     ]);
     if (jobsRes.ok) setCronJobs(await jobsRes.json());
     if (historyRes.ok) setCronHistory(await historyRes.json());
   }
 
   async function loadFunctionData() {
-    const res = await fetch('/api/admin/system/edge-functions');
+    const headers = { 'X-Admin-Password': getPassword() };
+    const res = await fetch('/api/admin/system/edge-functions', { headers });
     if (res.ok) {
       const data = await res.json();
       setEdgeFunctions(data.functions || []);
@@ -246,22 +248,26 @@ export default function SystemDashboardPage() {
   }
 
   async function loadDatabaseData() {
-    const res = await fetch('/api/admin/system/database');
+    const headers = { 'X-Admin-Password': getPassword() };
+    const res = await fetch('/api/admin/system/database', { headers });
     if (res.ok) setDbStats(await res.json());
   }
 
   async function loadQueueData() {
-    const res = await fetch('/api/admin/system/queues');
+    const headers = { 'X-Admin-Password': getPassword() };
+    const res = await fetch('/api/admin/system/queues', { headers });
     if (res.ok) setQueues(await res.json());
   }
 
   async function loadFlagData() {
-    const res = await fetch('/api/admin/system/feature-flags');
+    const headers = { 'X-Admin-Password': getPassword() };
+    const res = await fetch('/api/admin/system/feature-flags', { headers });
     if (res.ok) setFlags(await res.json());
   }
 
   async function loadWebhookData() {
-    const res = await fetch('/api/admin/system/webhooks');
+    const headers = { 'X-Admin-Password': getPassword() };
+    const res = await fetch('/api/admin/system/webhooks', { headers });
     if (res.ok) {
       const data = await res.json();
       setWebhookStats(data.stats || []);
@@ -270,7 +276,8 @@ export default function SystemDashboardPage() {
   }
 
   async function loadErrorData() {
-    const res = await fetch('/api/admin/system/errors?hours=24');
+    const headers = { 'X-Admin-Password': getPassword() };
+    const res = await fetch('/api/admin/system/errors?hours=24', { headers });
     if (res.ok) {
       const data = await res.json();
       setSystemErrors(data.errors || []);
