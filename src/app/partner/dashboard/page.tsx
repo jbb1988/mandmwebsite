@@ -1605,7 +1605,7 @@ function DashboardContent() {
                             {paymentAcknowledgments.paypalSetup && <Check className="w-4 h-4 text-emerald-400" />}
                           </div>
                           <p className="text-xs text-white/60 mt-1">
-                            Go to <a href="https://mind-and-muscle.tolt.io" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Tolt Dashboard</a> → Settings → Payment → Enter your PayPal email
+                            Go to <a href="https://mind-and-muscle.tolt.io" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Tolt Dashboard</a> → Settings → Update payment details
                           </p>
                         </div>
                       </label>
