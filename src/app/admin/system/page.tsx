@@ -131,7 +131,7 @@ interface AuditStats {
 }
 
 export default function SystemDashboardPage() {
-  const { isAuthenticated } = useAdminAuth();
+  const { isAuthenticated, getPassword } = useAdminAuth();
   const searchParams = useSearchParams();
   const initialTab = (searchParams.get('tab') as TabType) || 'cron';
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
@@ -279,10 +279,11 @@ export default function SystemDashboardPage() {
   }
 
   async function loadLogAuditData() {
+    const headers = { 'X-Admin-Password': getPassword() };
     const [issuesRes, statsRes, runsRes] = await Promise.all([
-      fetch('/api/admin/log-audit/issues'),
-      fetch('/api/admin/log-audit/stats'),
-      fetch('/api/admin/log-audit/runs'),
+      fetch('/api/admin/log-audit/issues', { headers }),
+      fetch('/api/admin/log-audit/stats', { headers }),
+      fetch('/api/admin/log-audit/runs', { headers }),
     ]);
     if (issuesRes.ok) setAuditIssues(await issuesRes.json());
     if (statsRes.ok) setAuditStats(await statsRes.json());
@@ -437,6 +438,7 @@ export default function SystemDashboardPage() {
               issues={auditIssues}
               stats={auditStats}
               onRefresh={loadLogAuditData}
+              getPassword={getPassword}
             />
           )}
         </>
@@ -1592,11 +1594,13 @@ const SERVICE_ICONS: Record<string, typeof Server> = {
 function LogAuditTab({
   issues,
   stats,
-  onRefresh
+  onRefresh,
+  getPassword
 }: {
   issues: LogAuditIssue[];
   stats: AuditStats | null;
   onRefresh: () => void;
+  getPassword: () => string;
 }) {
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedService, setSelectedService] = useState<string>('all');
@@ -1609,7 +1613,10 @@ function LogAuditTab({
   async function runAudit() {
     setRunningAudit(true);
     try {
-      const res = await fetch('/api/admin/log-audit/run', { method: 'POST' });
+      const res = await fetch('/api/admin/log-audit/run', {
+        method: 'POST',
+        headers: { 'X-Admin-Password': getPassword() }
+      });
       if (res.ok) {
         const result = await res.json();
         alert(`Audit complete: ${result.new_issues} new issues, ${result.recurring_issues} recurring`);
@@ -1628,7 +1635,7 @@ function LogAuditTab({
     try {
       const res = await fetch(`/api/admin/log-audit/issues/${issueId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': getPassword() },
         body: JSON.stringify({ status: newStatus }),
       });
       if (res.ok) {
@@ -1643,7 +1650,7 @@ function LogAuditTab({
     try {
       const res = await fetch(`/api/admin/log-audit/issues/${issueId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': getPassword() },
         body: JSON.stringify({ resolution_notes: notes }),
       });
       if (res.ok) {
@@ -1659,7 +1666,7 @@ function LogAuditTab({
     try {
       const res = await fetch(`/api/admin/log-audit/issues/${issueId}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': getPassword() },
         body: JSON.stringify({ suppress_alerts: suppress }),
       });
       if (res.ok) {
