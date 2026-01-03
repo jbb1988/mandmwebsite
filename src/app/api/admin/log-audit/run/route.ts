@@ -98,7 +98,9 @@ export async function POST(request: NextRequest) {
           continue;
         }
 
-        const logs = await response.json();
+        const data = await response.json();
+        // API returns { result: [...] } or direct array
+        const logs = Array.isArray(data) ? data : (data.result || []);
         totalLogsScanned += logs.length;
 
         for (const log of logs) {
@@ -144,7 +146,7 @@ export async function POST(request: NextRequest) {
         .from('log_audit_issues')
         .select('*')
         .eq('error_signature', signature)
-        .single();
+        .maybeSingle();
 
       if (existingIssue) {
         const newStatus = existingIssue.status === 'resolved' ? 'recurring' : existingIssue.status;
