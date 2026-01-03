@@ -82,122 +82,197 @@ export async function GET(request: Request) {
     let totalLogsScanned = 0;
     const logsPerService: Record<string, { scanned: number; errors: number }> = {};
 
-    // Map service names to Supabase log endpoint names
-    const serviceEndpointMap: Record<string, string> = {
-      'api': 'logs.edge.reports',
-      'edge-function': 'logs.edge.functions',
-      'auth': 'logs.auth.reports',
-      'postgres': 'logs.postgres.reports',
-    };
+    const timestampStart = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const timestampEnd = new Date().toISOString();
 
-    // Fetch logs from Management API - use service-specific endpoints
-    for (const service of SERVICES_TO_CHECK) {
-      try {
-        const endpoint = serviceEndpointMap[service] || 'logs.all';
-        const response = await fetch(
-          `https://api.supabase.com/v1/projects/${PROJECT_REF}/analytics/endpoints/${endpoint}?` +
-          new URLSearchParams({
-            iso_timestamp_start: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-            iso_timestamp_end: new Date().toISOString(),
-          }),
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-              'Content-Type': 'application/json',
-            },
+    // Query 1: Get HTTP errors from edge_logs using SQL with UNNEST
+    try {
+      console.log('Fetching HTTP errors from edge_logs using SQL query...');
+
+      const edgeErrorsSql = `
+        SELECT
+          timestamp,
+          event_message,
+          status_code,
+          r.method,
+          r.path
+        FROM edge_logs
+        CROSS JOIN UNNEST(metadata) AS m
+        CROSS JOIN UNNEST(m.request) AS r
+        CROSS JOIN UNNEST(m.response) AS resp
+        WHERE status_code >= 400
+        ORDER BY timestamp DESC
+        LIMIT 500
+      `;
+
+      const edgeParams = new URLSearchParams({
+        sql: edgeErrorsSql,
+        iso_timestamp_start: timestampStart,
+        iso_timestamp_end: timestampEnd,
+      });
+
+      const edgeResponse = await fetch(
+        `https://api.supabase.com/v1/projects/${PROJECT_REF}/analytics/endpoints/logs.all?${edgeParams}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (edgeResponse.ok) {
+        const edgeData = await edgeResponse.json();
+        const edgeLogs = edgeData.result || edgeData || [];
+
+        console.log(`Found ${edgeLogs.length} HTTP errors from edge_logs`);
+        totalLogsScanned += edgeLogs.length;
+
+        for (const log of edgeLogs) {
+          const statusCode = log.status_code;
+          const rawPath = normalizePath(log.path || '/unknown');
+          const method = log.method || 'UNKNOWN';
+          const errorPattern = extractErrorPattern(log.event_message);
+
+          // Determine service from path
+          let service = 'api';
+          if (log.path?.includes('/functions/v1/') || log.event_message?.includes('/functions/v1/')) {
+            service = 'edge-function';
+          } else if (log.path?.includes('/auth/') || log.event_message?.includes('auth')) {
+            service = 'auth';
           }
-        );
 
-        if (!response.ok) {
-          console.error(`Failed to fetch ${service} logs:`, response.status);
-          continue;
-        }
-
-        const data = await response.json();
-
-        // Handle different response formats from Supabase Management API
-        let logs: any[] = [];
-        if (Array.isArray(data)) {
-          logs = data;
-        } else if (data.result && Array.isArray(data.result)) {
-          logs = data.result;
-        } else if (data.data && Array.isArray(data.data)) {
-          logs = data.data;
-        } else {
-          console.error(`Unexpected log format for ${service}:`, JSON.stringify(data).substring(0, 500));
-          continue;
-        }
-
-        totalLogsScanned += logs.length;
-        logsPerService[service] = { scanned: logs.length, errors: 0 };
-
-        // Log first entry for debugging if we have logs but find no errors
-        if (logs.length > 0 && service === 'postgres') {
-          const sample = logs.find((l: any) => l.error_severity === 'ERROR');
-          if (sample) {
-            console.log(`Sample ${service} error:`, JSON.stringify(sample).substring(0, 300));
-          }
-        }
-
-        for (const log of logs) {
-          // Get status code from various possible locations
-          const statusCode = log.status_code ||
-            log.metadata?.response?.[0]?.status_code ||
-            log.response_status_code;
-          const errorSeverity = log.error_severity;
-
-          // Check for HTTP errors (status >= 400) OR postgres errors (error_severity = ERROR/FATAL/PANIC)
-          const isHttpError = statusCode && statusCode >= 400;
-          const isPostgresError = errorSeverity && ['ERROR', 'FATAL', 'PANIC'].includes(errorSeverity);
-
-          // Also check for edge function errors via execution_time_ms presence + status
-          const isEdgeFunctionError = service === 'edge-function' && log.status_code && log.status_code >= 400;
-
-          if (!isHttpError && !isPostgresError && !isEdgeFunctionError) continue;
-
-          // Count this error
+          logsPerService[service] = logsPerService[service] || { scanned: 0, errors: 0 };
+          logsPerService[service].scanned++;
           logsPerService[service].errors++;
 
-          // Extract path - for edge functions, try to get function name from event_message
-          let rawPath = log.path || log.metadata?.request?.[0]?.path;
-          if (!rawPath && service === 'edge-function' && log.event_message) {
-            // Extract function name from URLs like "https://xxx.supabase.co/functions/v1/function-name"
-            const funcMatch = log.event_message.match(/\/functions\/v1\/([a-z0-9-]+)/i);
-            if (funcMatch) {
-              rawPath = `/functions/v1/${funcMatch[1]}`;
-            }
-          }
-          if (!rawPath && isPostgresError) {
-            rawPath = '/postgres';
-          }
-          const path = normalizePath(rawPath || '/unknown');
-          const method = log.method || log.metadata?.request?.[0]?.method || (isPostgresError ? 'SQL' : 'UNKNOWN');
-          const errorPattern = extractErrorPattern(log.event_message);
-          const effectiveStatusCode = statusCode || (isPostgresError ? 500 : 0);
-          const signature = generateSignature(path, method, effectiveStatusCode, errorPattern);
+          const signature = generateSignature(rawPath, method, statusCode, errorPattern);
 
           if (errorGroups.has(signature)) {
             const group = errorGroups.get(signature)!;
             group.count++;
-            group.lastSeen = new Date(log.timestamp);
+            group.lastSeen = new Date(log.timestamp / 1000); // Convert microseconds to ms
+          } else {
+            errorGroups.set(signature, {
+              signature,
+              path: rawPath,
+              method,
+              statusCode,
+              errorPattern,
+              service,
+              count: 1,
+              firstSeen: new Date(log.timestamp / 1000),
+              lastSeen: new Date(log.timestamp / 1000),
+              sampleMessage: log.event_message?.substring(0, 1000) || '',
+            });
+          }
+        }
+      } else {
+        console.error('Failed to fetch edge errors:', edgeResponse.status, await edgeResponse.text());
+      }
+    } catch (edgeError) {
+      console.error('Error fetching edge errors:', edgeError);
+    }
+
+    // Query 2: Get Postgres errors
+    try {
+      console.log('Fetching Postgres errors...');
+
+      const pgErrorsSql = `
+        SELECT
+          timestamp,
+          event_message,
+          error_severity
+        FROM postgres_logs
+        WHERE error_severity IN ('ERROR', 'FATAL', 'PANIC')
+        ORDER BY timestamp DESC
+        LIMIT 200
+      `;
+
+      const pgParams = new URLSearchParams({
+        sql: pgErrorsSql,
+        iso_timestamp_start: timestampStart,
+        iso_timestamp_end: timestampEnd,
+      });
+
+      const pgResponse = await fetch(
+        `https://api.supabase.com/v1/projects/${PROJECT_REF}/analytics/endpoints/logs.all?${pgParams}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (pgResponse.ok) {
+        const pgData = await pgResponse.json();
+        const pgLogs = pgData.result || pgData || [];
+
+        console.log(`Found ${pgLogs.length} Postgres errors`);
+        totalLogsScanned += pgLogs.length;
+        logsPerService['postgres'] = { scanned: pgLogs.length, errors: pgLogs.length };
+
+        for (const log of pgLogs) {
+          const path = '/postgres';
+          const method = 'SQL';
+          const statusCode = 500;
+          const errorPattern = extractErrorPattern(log.event_message);
+          const signature = generateSignature(path, method, statusCode, errorPattern);
+
+          if (errorGroups.has(signature)) {
+            const group = errorGroups.get(signature)!;
+            group.count++;
+            group.lastSeen = new Date(log.timestamp / 1000);
           } else {
             errorGroups.set(signature, {
               signature,
               path,
               method,
-              statusCode: effectiveStatusCode,
+              statusCode,
               errorPattern,
-              service,
+              service: 'postgres',
               count: 1,
-              firstSeen: new Date(log.timestamp),
-              lastSeen: new Date(log.timestamp),
+              firstSeen: new Date(log.timestamp / 1000),
+              lastSeen: new Date(log.timestamp / 1000),
               sampleMessage: log.event_message?.substring(0, 1000) || '',
             });
           }
         }
-      } catch (serviceError) {
-        console.error(`Error processing ${service} logs:`, serviceError);
+      } else {
+        console.error('Failed to fetch Postgres errors:', pgResponse.status, await pgResponse.text());
       }
+    } catch (pgError) {
+      console.error('Error fetching Postgres errors:', pgError);
+    }
+
+    // Also fetch raw logs count for stats
+    try {
+      const response = await fetch(
+        `https://api.supabase.com/v1/projects/${PROJECT_REF}/analytics/endpoints/logs.all?` +
+        new URLSearchParams({
+          iso_timestamp_start: timestampStart,
+          iso_timestamp_end: timestampEnd,
+        }),
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        const logs = data.result || data || [];
+        // Add to total logs scanned for stats (SQL queries counted errors directly)
+        if (logs.length > totalLogsScanned) {
+          totalLogsScanned = logs.length;
+        }
+        console.log(`Total logs in time window: ${logs.length}`);
+      }
+    } catch (statsError) {
+      console.error('Error fetching stats:', statsError);
     }
 
     // Process errors against known issues
