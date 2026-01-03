@@ -645,6 +645,15 @@ function DashboardContent() {
   const [earningsLoading, setEarningsLoading] = useState(false);
   const [earningsFilter, setEarningsFilter] = useState<'all' | 'pending' | 'approved' | 'paid'>('all');
 
+  // Payment terms acknowledgment state
+  const [paymentAcknowledgments, setPaymentAcknowledgments] = useState({
+    paymentTerms: false,
+    paypalSetup: false,
+    taxForm: false,
+    allComplete: false,
+  });
+  const [acknowledgmentLoading, setAcknowledgmentLoading] = useState(false);
+
   // Check auth and verify magic link token if present
   useEffect(() => {
     const checkAuthAndVerifyToken = async () => {
@@ -757,6 +766,52 @@ function DashboardContent() {
 
     fetchMetrics();
   }, [partner?.email]);
+
+  // Fetch payment acknowledgments
+  useEffect(() => {
+    const fetchAcknowledgments = async () => {
+      if (!partner?.email) return;
+
+      try {
+        const response = await fetch('/api/partner/acknowledge-payment-terms');
+        const data = await response.json();
+        if (response.ok && data.acknowledgments) {
+          setPaymentAcknowledgments(data.acknowledgments);
+        }
+      } catch (err) {
+        console.error('Failed to fetch acknowledgments:', err);
+      }
+    };
+
+    fetchAcknowledgments();
+  }, [partner?.email]);
+
+  // Handle payment acknowledgment
+  const handleAcknowledgment = async (type: 'paymentTerms' | 'paypalSetup' | 'taxForm') => {
+    setAcknowledgmentLoading(true);
+    try {
+      const response = await fetch('/api/partner/acknowledge-payment-terms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          acknowledgments: { [type]: true }
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok && data.acknowledgments) {
+        setPaymentAcknowledgments(prev => ({
+          ...prev,
+          ...data.acknowledgments,
+          allComplete: data.acknowledgments.paymentTerms && data.acknowledgments.paypalSetup && data.acknowledgments.taxForm,
+        }));
+      }
+    } catch (err) {
+      console.error('Failed to save acknowledgment:', err);
+    } finally {
+      setAcknowledgmentLoading(false);
+    }
+  };
 
   // Logout handler
   const handleLogout = async () => {
@@ -1454,6 +1509,163 @@ function DashboardContent() {
                 </div>
               </Card>
             </div>
+
+            {/* Getting Paid Section - Payment Setup Guide */}
+            <Card variant="elevated" className={`p-6 border-2 ${paymentAcknowledgments.allComplete ? 'border-emerald-500/50 bg-gradient-to-br from-emerald-500/10 to-transparent' : 'border-orange-500/50 bg-gradient-to-br from-orange-500/10 to-transparent'}`}>
+              <div className="flex items-start gap-4">
+                <div className={`p-3 rounded-xl ${paymentAcknowledgments.allComplete ? 'bg-emerald-500/20' : 'bg-orange-500/20'}`}>
+                  <Wallet className={`w-6 h-6 ${paymentAcknowledgments.allComplete ? 'text-emerald-400' : 'text-orange-400'}`} />
+                </div>
+                <div className="flex-1">
+                  <h3 className={`text-lg font-bold mb-2 flex items-center gap-2 ${paymentAcknowledgments.allComplete ? 'text-emerald-400' : 'text-orange-400'}`}>
+                    {paymentAcknowledgments.allComplete ? '✅ Payment Setup Complete' : '⚠️ Action Required: Complete Payment Setup'}
+                  </h3>
+
+                  {paymentAcknowledgments.allComplete ? (
+                    <p className="text-sm text-white/70 mb-4">
+                      You&apos;ve confirmed your payment setup. Commissions will be paid to your PayPal automatically when they clear the NET-60 hold period and meet the $50 minimum.
+                    </p>
+                  ) : (
+                    <p className="text-sm text-white/70 mb-4">
+                      <span className="text-orange-300 font-semibold">You will NOT receive payouts until you complete these steps.</span> Please confirm each item below after completing it in your Tolt dashboard.
+                    </p>
+                  )}
+
+                  {/* Payout Details */}
+                  <div className="bg-white/5 rounded-lg p-4 mb-6">
+                    <h4 className="font-semibold text-sm mb-3 flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-blue-400" />
+                      Payment Terms Summary
+                    </h4>
+                    <div className="grid sm:grid-cols-3 gap-4 text-center">
+                      <div>
+                        <p className="text-xl font-bold text-white">PayPal Only</p>
+                        <p className="text-xs text-white/50">Payment method</p>
+                        <p className="text-xs text-white/40 mt-1">No bank transfers or Wise</p>
+                      </div>
+                      <div>
+                        <p className="text-xl font-bold text-white">NET-60</p>
+                        <p className="text-xs text-white/50">Payout timing</p>
+                        <p className="text-xs text-white/40 mt-1">60 days after month ends</p>
+                      </div>
+                      <div>
+                        <p className="text-xl font-bold text-white">$50 min</p>
+                        <p className="text-xs text-white/50">Payout threshold</p>
+                        <p className="text-xs text-white/40 mt-1">Earnings accumulate</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Example Timeline */}
+                  <div className="bg-blue-500/10 rounded-lg p-3 mb-6 border border-blue-500/20">
+                    <p className="text-xs text-blue-300">
+                      <span className="font-bold">Example:</span> Commission earned Jan 15 → January ends Jan 31 → Payout available ~March 31 (60 days after month end). Must meet $50 minimum.
+                    </p>
+                  </div>
+
+                  {/* Confirmation Checklist */}
+                  <div className="space-y-3 mb-6">
+                    <h4 className="font-semibold text-sm text-white/80">Complete these steps to receive payouts:</h4>
+
+                    {/* Step 1: Understand Payment Terms */}
+                    <div className={`rounded-lg p-4 border ${paymentAcknowledgments.paymentTerms ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-white/5 border-white/10'}`}>
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={paymentAcknowledgments.paymentTerms}
+                          disabled={paymentAcknowledgments.paymentTerms || acknowledgmentLoading}
+                          onChange={() => !paymentAcknowledgments.paymentTerms && handleAcknowledgment('paymentTerms')}
+                          className="mt-1 w-5 h-5 rounded border-2 border-white/30 bg-transparent checked:bg-emerald-500 checked:border-emerald-500 cursor-pointer"
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-sm">I understand the payment terms</span>
+                            {paymentAcknowledgments.paymentTerms && <Check className="w-4 h-4 text-emerald-400" />}
+                          </div>
+                          <p className="text-xs text-white/60 mt-1">
+                            PayPal only • NET-60 payout schedule • $50 minimum threshold • 10-15% commission rate
+                          </p>
+                        </div>
+                      </label>
+                    </div>
+
+                    {/* Step 2: PayPal Setup */}
+                    <div className={`rounded-lg p-4 border ${paymentAcknowledgments.paypalSetup ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-white/5 border-white/10'}`}>
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={paymentAcknowledgments.paypalSetup}
+                          disabled={paymentAcknowledgments.paypalSetup || acknowledgmentLoading}
+                          onChange={() => !paymentAcknowledgments.paypalSetup && handleAcknowledgment('paypalSetup')}
+                          className="mt-1 w-5 h-5 rounded border-2 border-white/30 bg-transparent checked:bg-emerald-500 checked:border-emerald-500 cursor-pointer"
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-sm">I have set up my PayPal email in Tolt</span>
+                            {paymentAcknowledgments.paypalSetup && <Check className="w-4 h-4 text-emerald-400" />}
+                          </div>
+                          <p className="text-xs text-white/60 mt-1">
+                            Go to <a href="https://mind-and-muscle.tolt.io" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">Tolt Dashboard</a> → Settings → Payment → Enter your PayPal email
+                          </p>
+                        </div>
+                      </label>
+                    </div>
+
+                    {/* Step 3: Tax Form */}
+                    <div className={`rounded-lg p-4 border ${paymentAcknowledgments.taxForm ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-white/5 border-white/10'}`}>
+                      <label className="flex items-start gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={paymentAcknowledgments.taxForm}
+                          disabled={paymentAcknowledgments.taxForm || acknowledgmentLoading}
+                          onChange={() => !paymentAcknowledgments.taxForm && handleAcknowledgment('taxForm')}
+                          className="mt-1 w-5 h-5 rounded border-2 border-white/30 bg-transparent checked:bg-emerald-500 checked:border-emerald-500 cursor-pointer"
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-sm">I have submitted my tax form</span>
+                            {paymentAcknowledgments.taxForm && <Check className="w-4 h-4 text-emerald-400" />}
+                          </div>
+                          <p className="text-xs text-white/60 mt-1">
+                            <span className="text-white">US Partners:</span> Submit W-9 form • <span className="text-white">International:</span> Submit W-8BEN form<br/>
+                            Download forms: <a href="https://www.irs.gov/pub/irs-pdf/fw9.pdf" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">W-9</a> | <a href="https://www.irs.gov/pub/irs-pdf/fw8ben.pdf" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">W-8BEN</a>
+                          </p>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Status Message */}
+                  {paymentAcknowledgments.allComplete ? (
+                    <div className="bg-emerald-500/10 rounded-lg p-4 border border-emerald-500/30">
+                      <p className="text-sm text-emerald-300 flex items-center gap-2">
+                        <Check className="w-5 h-5" />
+                        <span><strong>You&apos;re all set!</strong> Payouts will be sent automatically to your PayPal when commissions clear.</span>
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <a
+                        href="https://mind-and-muscle.tolt.io"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-semibold rounded-lg transition-colors"
+                      >
+                        Open Tolt Dashboard
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                      <p className="text-xs text-white/50 self-center">
+                        Complete all checkboxes above after setting up payment in Tolt
+                      </p>
+                    </div>
+                  )}
+
+                  <p className="text-xs text-white/40 mt-4">
+                    Questions? Email <a href="mailto:partners@mindandmuscle.ai" className="text-blue-400 hover:underline">partners@mindandmuscle.ai</a>
+                  </p>
+                </div>
+              </div>
+            </Card>
 
             {/* Performance Analytics Section */}
             <Card variant="elevated" className="p-6">

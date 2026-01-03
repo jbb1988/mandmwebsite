@@ -167,7 +167,7 @@ export default function PartnerProgramPage() {
     },
     {
       question: 'How do payouts work?',
-      answer: 'You earn 10% commission each time a referral pays for a subscription. Commissions are held for 60 days after payment clears (standard industry practice to protect against chargebacks), then paid automatically via PayPal. There\'s a $50 minimum threshold.'
+      answer: 'You earn 10% commission each time a referral pays for a subscription. Commissions are held for 60 days after payment clears (NET-60, standard industry practice). Payouts are sent automatically via PayPal only—you must set up your PayPal email in your Tolt dashboard to receive payments. There\'s a $50 minimum threshold. US partners need a W-9 on file; international partners need a W-8BEN.'
     },
     {
       question: 'Do I need to be a coach to join?',
