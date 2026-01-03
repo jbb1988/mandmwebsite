@@ -8,7 +8,7 @@ import {
   Users, Search, Filter, ChevronLeft, ChevronRight,
   Loader2, Mail, Calendar, Clock, Crown, User, X,
   FileDown, Smartphone, Gift, Plus, RefreshCw, Ban,
-  Activity, Target, Shield, Zap, Heart, TrendingUp
+  Activity, Target, Shield, Zap, Heart, TrendingUp, Trash2, ShieldCheck
 } from 'lucide-react';
 
 // Card component
@@ -53,6 +53,7 @@ interface DetailedUser extends UserProfile {
   last_sign_in_at: string | null;
   platform: string | null;
   device_name: string | null;
+  banned_until: string | null;
 }
 
 interface TrialGrant {
@@ -152,6 +153,7 @@ export default function UsersPage() {
   const [userActivity, setUserActivity] = useState<UserActivity | null>(null);
   const [healthDetails, setHealthDetails] = useState<HealthDetails | null>(null);
   const [loadingActivity, setLoadingActivity] = useState(false);
+  const [banLoading, setBanLoading] = useState(false);
 
   const fetchUsers = async (page = 1) => {
     setLoading(true);
@@ -308,6 +310,112 @@ export default function UsersPage() {
       console.error('Trial action failed:', error);
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const handleBanUser = async () => {
+    if (!selectedUser) return;
+    if (!confirm(`Are you sure you want to BAN ${selectedUser.email}? They will not be able to sign in or create a new account.`)) return;
+
+    setBanLoading(true);
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': getPassword() || adminPassword,
+        },
+        body: JSON.stringify({
+          action: 'ban-user',
+          userId: selectedUser.id,
+          userEmail: selectedUser.email,
+        }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        alert('User banned successfully');
+        setSelectedUser(null);
+        await fetchUsers(pagination.page);
+      } else {
+        alert(`Failed to ban user: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Ban user failed:', error);
+      alert('Failed to ban user');
+    } finally {
+      setBanLoading(false);
+    }
+  };
+
+  const handleUnbanUser = async () => {
+    if (!selectedUser) return;
+    if (!confirm(`Unban ${selectedUser.email}? They will be able to sign in again.`)) return;
+
+    setBanLoading(true);
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': getPassword() || adminPassword,
+        },
+        body: JSON.stringify({
+          action: 'unban-user',
+          userId: selectedUser.id,
+          userEmail: selectedUser.email,
+        }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        alert('User unbanned successfully');
+        await fetchUserDetails(selectedUser.id);
+        await fetchUsers(pagination.page);
+      } else {
+        alert(`Failed to unban user: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Unban user failed:', error);
+      alert('Failed to unban user');
+    } finally {
+      setBanLoading(false);
+    }
+  };
+
+  const handleDeleteUser = async () => {
+    if (!selectedUser) return;
+    if (!confirm(`Are you sure you want to DELETE ${selectedUser.email}? This action cannot be undone.`)) return;
+    if (!confirm(`FINAL WARNING: This will permanently delete the user and all their data. Type "DELETE" to confirm.`)) return;
+
+    setBanLoading(true);
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': getPassword() || adminPassword,
+        },
+        body: JSON.stringify({
+          action: 'delete-user',
+          userId: selectedUser.id,
+          userEmail: selectedUser.email,
+        }),
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        alert('User deleted successfully');
+        setSelectedUser(null);
+        await fetchUsers(pagination.page);
+      } else {
+        alert(`Failed to delete user: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Delete user failed:', error);
+      alert('Failed to delete user');
+    } finally {
+      setBanLoading(false);
     }
   };
 
@@ -1106,21 +1214,62 @@ export default function UsersPage() {
 
                   {/* Modal Footer */}
                   <div className="p-6 border-t border-white/10">
-                    <div className="flex justify-between">
-                      <a
-                        href={`mailto:${selectedUser.email}?subject=Your Mind %26 Muscle Account`}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg text-sm transition-colors"
-                      >
-                        <Mail className="w-4 h-4" />
-                        Email User
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                      <button
-                        onClick={() => setSelectedUser(null)}
-                        className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors"
-                      >
-                        Close
-                      </button>
+                    {/* Banned Alert Banner */}
+                    {detailedUser?.banned_until && new Date(detailedUser.banned_until) > new Date() && (
+                      <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-center gap-2">
+                        <Ban className="w-5 h-5 text-red-400" />
+                        <span className="text-red-400 text-sm font-medium">This user is currently BANNED</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between items-center">
+                      <div className="flex gap-2">
+                        <a
+                          href={`mailto:${selectedUser.email}?subject=Your Mind %26 Muscle Account`}
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-lg text-sm transition-colors"
+                        >
+                          <Mail className="w-4 h-4" />
+                          Email User
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+                      <div className="flex gap-2">
+                        {detailedUser?.banned_until && new Date(detailedUser.banned_until) > new Date() ? (
+                          <button
+                            onClick={handleUnbanUser}
+                            disabled={banLoading}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-lg text-sm transition-colors disabled:opacity-50"
+                            title="Approve and unban this user"
+                          >
+                            {banLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
+                            Approve & Unban
+                          </button>
+                        ) : (
+                          <button
+                            onClick={handleBanUser}
+                            disabled={banLoading}
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-orange-500/20 hover:bg-orange-500/30 text-orange-400 rounded-lg text-sm transition-colors disabled:opacity-50"
+                            title="Ban user from signing in"
+                          >
+                            {banLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Ban className="w-4 h-4" />}
+                            Ban
+                          </button>
+                        )}
+                        <button
+                          onClick={handleDeleteUser}
+                          disabled={banLoading}
+                          className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 rounded-lg text-sm transition-colors disabled:opacity-50"
+                          title="Permanently delete user"
+                        >
+                          {banLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
+                          Delete
+                        </button>
+                        <button
+                          onClick={() => setSelectedUser(null)}
+                          className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm transition-colors"
+                        >
+                          Close
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </Card>

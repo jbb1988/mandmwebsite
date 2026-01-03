@@ -250,6 +250,7 @@ export async function POST(request: NextRequest) {
           last_sign_in_at: lastSignInAt,
           platform: sessionData?.platform || null,
           device_name: sessionData?.device_name || null,
+          banned_until: (authData?.user as any)?.banned_until || null,
         },
         trialGrants: trialGrants || [],
         promoRedemptions: promoRedemptions || [],
@@ -441,6 +442,95 @@ export async function POST(request: NextRequest) {
       }
 
       return NextResponse.json({ success: true, message: 'User tier updated' });
+    }
+
+    if (action === 'ban-user') {
+      // Ban a user - uses the ban_user function we created
+      if (!userEmail) {
+        return NextResponse.json({ error: 'userEmail is required' }, { status: 400 });
+      }
+
+      const reason = `Banned by admin on ${new Date().toISOString()}`;
+
+      const { data, error } = await supabase.rpc('ban_user', {
+        user_email: userEmail,
+        ban_reason: reason,
+      });
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      // Log the action
+      const { ipAddress, userAgent } = getRequestInfo(request.headers);
+      await logAdminAction({
+        action: 'ban_user',
+        targetType: 'user',
+        targetId: userId,
+        targetEmail: userEmail,
+        details: { reason },
+        ipAddress,
+        userAgent,
+      });
+
+      return NextResponse.json({ success: true, message: data || 'User banned' });
+    }
+
+    if (action === 'unban-user') {
+      // Unban a user
+      if (!userEmail) {
+        return NextResponse.json({ error: 'userEmail is required' }, { status: 400 });
+      }
+
+      const { data, error } = await supabase.rpc('unban_user', {
+        user_email: userEmail,
+      });
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      // Log the action
+      const { ipAddress, userAgent } = getRequestInfo(request.headers);
+      await logAdminAction({
+        action: 'unban_user',
+        targetType: 'user',
+        targetId: userId,
+        targetEmail: userEmail,
+        details: {},
+        ipAddress,
+        userAgent,
+      });
+
+      return NextResponse.json({ success: true, message: data || 'User unbanned' });
+    }
+
+    if (action === 'delete-user') {
+      // Delete a user completely
+      if (!userId) {
+        return NextResponse.json({ error: 'userId is required' }, { status: 400 });
+      }
+
+      // Delete from auth.users (cascades to profiles)
+      const { error } = await supabase.auth.admin.deleteUser(userId);
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      // Log the action
+      const { ipAddress, userAgent } = getRequestInfo(request.headers);
+      await logAdminAction({
+        action: 'delete_user',
+        targetType: 'user',
+        targetId: userId,
+        targetEmail: userEmail,
+        details: {},
+        ipAddress,
+        userAgent,
+      });
+
+      return NextResponse.json({ success: true, message: 'User deleted' });
     }
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
