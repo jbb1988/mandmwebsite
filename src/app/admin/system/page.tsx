@@ -445,6 +445,62 @@ export default function SystemDashboardPage() {
   );
 }
 
+// ============ CRON SCHEDULE HELPERS ============
+// Calculate the maximum expected interval between runs from a cron schedule
+function getExpectedIntervalMs(schedule: string): number {
+  const parts = schedule.split(' ');
+  if (parts.length !== 5) return 24 * 60 * 60 * 1000; // Default to 24h if invalid
+
+  const [minute, hour, dayOfMonth, month, dayOfWeek] = parts;
+
+  // Check for minute-based intervals (e.g., */15 * * * *)
+  if (minute.startsWith('*/')) {
+    const interval = parseInt(minute.slice(2));
+    return interval * 60 * 1000; // Convert minutes to ms
+  }
+
+  // Check for hourly jobs (e.g., 0 * * * * or 30 * * * *)
+  if (hour === '*' && dayOfMonth === '*' && month === '*' && dayOfWeek === '*') {
+    return 60 * 60 * 1000; // 1 hour
+  }
+
+  // Check for daily jobs (e.g., 0 9 * * *)
+  if (dayOfMonth === '*' && month === '*' && dayOfWeek === '*') {
+    return 24 * 60 * 60 * 1000; // 24 hours
+  }
+
+  // Check for weekly jobs (specific day of week, e.g., 0 10 * * 1)
+  if (dayOfMonth === '*' && month === '*' && dayOfWeek !== '*') {
+    // Count how many days per week the job runs
+    const days = dayOfWeek.split(',').length;
+    // If runs on specific days like 1,3,5 (Mon,Wed,Fri), max interval is roughly 3 days
+    return Math.ceil(7 / days) * 24 * 60 * 60 * 1000;
+  }
+
+  // Check for monthly jobs (e.g., 0 7 1 * *)
+  if (dayOfMonth !== '*' && month === '*') {
+    return 32 * 24 * 60 * 60 * 1000; // ~1 month
+  }
+
+  // Default to 24 hours for unknown patterns
+  return 24 * 60 * 60 * 1000;
+}
+
+// Check if a job has missed its scheduled run
+function hasMissedScheduledRun(job: CronJob): boolean {
+  if (!job.active) return false;
+  if (!job.last_run) return true; // Never run = missed
+
+  const expectedInterval = getExpectedIntervalMs(job.schedule);
+  const lastRunTime = new Date(job.last_run).getTime();
+  const now = Date.now();
+
+  // Add a 50% buffer to account for timing variations
+  const maxAllowedGap = expectedInterval * 1.5;
+
+  return (now - lastRunTime) > maxAllowedGap;
+}
+
 // ============ CRON JOBS TAB ============
 function CronJobsTab({
   jobs,
@@ -463,19 +519,22 @@ function CronJobsTab({
   const [showFailingOnly, setShowFailingOnly] = useState(false);
 
   const failingJobs = jobs.filter(j => j.failed_24h > 0);
+  const missedJobs = jobs.filter(j => j.active && hasMissedScheduledRun(j));
+  const problemJobs = jobs.filter(j => j.failed_24h > 0 || (j.active && hasMissedScheduledRun(j)));
   const activeJobs = jobs.filter(j => j.active);
   const recentFailures = history.filter(h => h.status === 'failed').slice(0, 10);
 
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = job.jobname.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFailingFilter = !showFailingOnly || job.failed_24h > 0;
+    const hasProblems = job.failed_24h > 0 || (job.active && hasMissedScheduledRun(job));
+    const matchesFailingFilter = !showFailingOnly || hasProblems;
     return matchesSearch && matchesFailingFilter;
   });
 
   return (
     <div className="space-y-6">
       {/* Stats - Clickable */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <div onClick={() => setShowFailingOnly(false)} className="cursor-pointer">
           <StatCard label="Total Jobs" value={jobs.length} icon={Clock} />
         </div>
@@ -484,8 +543,9 @@ function CronJobsTab({
           onClick={() => setShowFailingOnly(!showFailingOnly)}
           className={`cursor-pointer rounded-xl transition-all ${showFailingOnly ? 'ring-2 ring-red-500' : ''}`}
         >
-          <StatCard label="Failing (24h) ←Click" value={failingJobs.length} icon={AlertTriangle} color={failingJobs.length > 0 ? 'red' : 'green'} />
+          <StatCard label="Problems ←Click" value={problemJobs.length} icon={AlertTriangle} color={problemJobs.length > 0 ? 'red' : 'green'} />
         </div>
+        <StatCard label="Missed Runs" value={missedJobs.length} icon={Timer} color={missedJobs.length > 0 ? 'red' : 'green'} />
         <StatCard label="Runs (24h)" value={history.length} icon={Activity} />
       </div>
 
@@ -493,10 +553,33 @@ function CronJobsTab({
       {showFailingOnly && (
         <div className="flex items-center gap-2 p-2 bg-red-500/10 border border-red-500/30 rounded-lg">
           <AlertTriangle className="w-4 h-4 text-red-400" />
-          <span className="text-red-400 text-sm">Showing only failing jobs</span>
+          <span className="text-red-400 text-sm">Showing jobs with problems (failed or missed scheduled runs)</span>
           <button onClick={() => setShowFailingOnly(false)} className="ml-auto text-white/60 hover:text-white text-sm">
             Clear filter
           </button>
+        </div>
+      )}
+
+      {/* Missed Jobs Alert - Shows prominently if there are missed scheduled runs */}
+      {missedJobs.length > 0 && (
+        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Timer className="w-5 h-5 text-red-400" />
+            <h3 className="text-red-400 font-semibold">Missed Scheduled Runs ({missedJobs.length})</h3>
+          </div>
+          <div className="space-y-2 max-h-40 overflow-y-auto">
+            {missedJobs.map((job) => (
+              <div key={job.jobid} className="bg-black/20 rounded-lg p-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-white font-medium">{job.jobname}</span>
+                  <span className="text-white/40 text-xs font-mono">{job.schedule}</span>
+                </div>
+                <p className="text-red-300/80 text-xs mt-1">
+                  Last run: {job.last_run ? new Date(job.last_run).toLocaleString() : 'Never'}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -531,15 +614,11 @@ function CronJobsTab({
       <div className="flex flex-wrap gap-4 text-xs text-white/60 bg-white/5 rounded-lg p-3">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-green-500" />
-          <span>Running successfully</span>
+          <span>Active & on schedule</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-red-500" />
-          <span>Has failures in 24h</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-yellow-500" />
-          <span>Active but no runs yet in 24h</span>
+          <span>Failed or missed scheduled run</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-gray-500" />
@@ -575,8 +654,8 @@ function CronJobsTab({
                 <div className={`w-2 h-2 rounded-full ${
                   !job.active ? 'bg-gray-500' :
                   job.failed_24h > 0 ? 'bg-red-500' :
-                  job.success_24h > 0 ? 'bg-green-500' :
-                  'bg-yellow-500'
+                  hasMissedScheduledRun(job) ? 'bg-red-500' :
+                  'bg-green-500'  // Active, no failures, not missed = OK (pg_cron may not track all successes)
                 }`} />
 
                 {/* Name */}

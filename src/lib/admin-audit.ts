@@ -19,6 +19,8 @@ export type AdminAction =
   | 'grant_discount'
   | 'update_user'
   | 'delete_user'
+  | 'ban_user'
+  | 'unban_user'
   | 'login'
   | 'logout';
 
