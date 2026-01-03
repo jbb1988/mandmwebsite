@@ -18,8 +18,6 @@ interface QueueConfig {
 const QUEUE_CONFIGS: QueueConfig[] = [
   { table: 'ai_generation_queue', statusColumn: 'status', statusType: 'text', timestampColumn: 'created_at', displayName: 'AI Generation Queue' },
   { table: 'event_notification_queue', statusColumn: 'processed', statusType: 'boolean', timestampColumn: 'created_at', displayName: 'Event Notifications' },
-  { table: 'fb_daily_outreach_queue', statusColumn: 'status', statusType: 'text', timestampColumn: 'posted_at', displayName: 'FB Outreach Queue' },
-  { table: 'x_daily_outreach_queue', statusColumn: 'status', statusType: 'text', timestampColumn: 'last_activity_date', displayName: 'X Outreach Queue' },
 ];
 
 export async function GET(request: NextRequest) {
@@ -93,29 +91,6 @@ export async function GET(request: NextRequest) {
         }
       })
     );
-
-    // Also get net._http_response queue (Supabase's internal HTTP queue)
-    try {
-      const { data: httpQueue } = await supabase.rpc('exec_sql', {
-        sql: `
-          SELECT
-            'net._http_response' as queue_name,
-            'HTTP Request Queue' as display_name,
-            COUNT(*) as total_items,
-            COUNT(*) FILTER (WHERE status_code IS NULL) as pending,
-            COUNT(*) FILTER (WHERE status_code >= 200 AND status_code < 300) as completed,
-            COUNT(*) FILTER (WHERE status_code >= 400 OR status_code IS NULL) as failed
-          FROM net._http_response
-          WHERE created > NOW() - INTERVAL '24 hours'
-        `
-      });
-
-      if (httpQueue?.[0]) {
-        queues.push(httpQueue[0]);
-      }
-    } catch {
-      // HTTP queue may not be accessible, ignore errors
-    }
 
     return NextResponse.json(queues);
   } catch (error) {
