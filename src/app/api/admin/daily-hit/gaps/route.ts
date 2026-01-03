@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { verifyAdmin } from '@/lib/admin-auth'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -7,6 +8,10 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 // GET - Detect content gaps
 export async function GET(request: NextRequest) {
+  if (!verifyAdmin(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const { searchParams } = new URL(request.url)
     const lookahead = parseInt(searchParams.get('lookahead') || '30')
@@ -106,6 +111,10 @@ export async function GET(request: NextRequest) {
 
 // POST - Create/update gap alerts or auto-generate content for critical gaps
 export async function POST(request: NextRequest) {
+  if (!verifyAdmin(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const { action, dayOfYear, alertId } = await request.json()
 

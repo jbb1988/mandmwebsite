@@ -127,7 +127,7 @@ interface HealthDetails {
 
 type ModalTab = 'profile' | 'trial' | 'app' | 'activity';
 
-const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
+const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus1018!';
 
 export default function UsersPage() {
   const { getPassword } = useAdminAuth();

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { verifyAdmin } from '@/lib/admin-auth'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -144,6 +145,10 @@ async function generateWithAI(content: string, style: keyof typeof IMAGE_STYLES 
 }
 
 export async function POST(request: NextRequest) {
+  if (!verifyAdmin(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const {
       title,
@@ -234,7 +239,11 @@ Based on this content, create a DALL-E image prompt that visually represents the
 }
 
 // GET - Return available styles and service info
-export async function GET() {
+export async function GET(request: NextRequest) {
+  if (!verifyAdmin(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const styles = Object.entries(IMAGE_STYLES).map(([key, value]) => ({
     key,
     name: value.name,

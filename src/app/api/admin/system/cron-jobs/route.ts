@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { verifyAdmin } from '@/lib/admin-auth';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -7,51 +8,12 @@ const supabase = createClient(
 );
 
 export async function GET(request: NextRequest) {
+  if (!verifyAdmin(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
-    // Get all cron jobs
-    const { data: jobs, error: jobsError } = await supabase.rpc('get_cron_jobs');
-
-    if (jobsError) {
-      // Fallback to direct query if RPC doesn't exist
-      const { data: jobsDirect, error: directError } = await supabase
-        .from('cron.job' as any)
-        .select('*');
-
-      if (directError) {
-        // Use raw SQL as last resort
-        const result = await fetch(
-          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/rpc/sql`,
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-              'apikey': process.env.SUPABASE_SERVICE_ROLE_KEY!,
-            },
-            body: JSON.stringify({
-              query: `
-                SELECT
-                  j.jobid,
-                  j.jobname,
-                  j.schedule,
-                  j.active,
-                  j.nodename,
-                  (SELECT COUNT(*) FROM cron.job_run_details WHERE jobid = j.jobid AND status = 'succeeded' AND start_time > NOW() - INTERVAL '24 hours') as success_24h,
-                  (SELECT COUNT(*) FROM cron.job_run_details WHERE jobid = j.jobid AND status = 'failed' AND start_time > NOW() - INTERVAL '24 hours') as failed_24h,
-                  (SELECT start_time FROM cron.job_run_details WHERE jobid = j.jobid ORDER BY start_time DESC LIMIT 1) as last_run,
-                  (SELECT status FROM cron.job_run_details WHERE jobid = j.jobid ORDER BY start_time DESC LIMIT 1) as last_status,
-                  (SELECT return_message FROM cron.job_run_details WHERE jobid = j.jobid ORDER BY start_time DESC LIMIT 1) as last_message,
-                  (SELECT AVG(EXTRACT(EPOCH FROM (end_time - start_time)) * 1000) FROM cron.job_run_details WHERE jobid = j.jobid AND start_time > NOW() - INTERVAL '7 days') as avg_duration_ms
-                FROM cron.job j
-                ORDER BY j.jobname
-              `
-            })
-          }
-        );
-      }
-    }
-
-    // Get cron jobs with stats using direct SQL
+    // Get cron jobs with stats using exec_sql RPC (only method that works)
     const { data: cronData, error: cronError } = await supabase.rpc('exec_sql', {
       sql: `
         SELECT
@@ -78,6 +40,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  if (!verifyAdmin(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { action, jobId } = await request.json();
 

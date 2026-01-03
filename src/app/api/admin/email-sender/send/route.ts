@@ -5,7 +5,7 @@ import { Resend } from 'resend';
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 const resendApiKey = process.env.RESEND_API_KEY!;
-const adminPassword = process.env.ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
+const adminPassword = process.env.ADMIN_DASHBOARD_PASSWORD || 'Brutus1018!';
 
 const resend = new Resend(resendApiKey);
 

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { verifyAdmin } from '@/lib/admin-auth'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -8,6 +9,10 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 // GET - List drafts, calendar view, or gap analysis
 export async function GET(request: NextRequest) {
+  if (!verifyAdmin(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { searchParams } = new URL(request.url)
   const view = searchParams.get('view') || 'drafts'
   const status = searchParams.get('status')
@@ -111,6 +116,10 @@ export async function GET(request: NextRequest) {
 
 // POST - Create new draft
 export async function POST(request: NextRequest) {
+  if (!verifyAdmin(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const body = await request.json()
 
@@ -195,6 +204,10 @@ export async function POST(request: NextRequest) {
 
 // PATCH - Update draft
 export async function PATCH(request: NextRequest) {
+  if (!verifyAdmin(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const body = await request.json()
     const { id, ...updates } = body
@@ -270,6 +283,10 @@ export async function PATCH(request: NextRequest) {
 
 // DELETE - Delete draft
 export async function DELETE(request: NextRequest) {
+  if (!verifyAdmin(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
 

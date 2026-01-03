@@ -1,17 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateAllStaticImages, SOCIAL_IMAGE_TEMPLATES } from '@/lib/social-image-generator';
+import { verifyAdmin } from '@/lib/admin-auth';
 
 // Admin endpoint to generate all static social images
 // This only needs to be run once (or when templates change)
 export async function POST(request: NextRequest) {
-  try {
-    // Check for admin auth header
-    const authHeader = request.headers.get('x-admin-key');
-    const adminKey = process.env.ADMIN_API_KEY;
+  if (!verifyAdmin(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
-    if (!adminKey || authHeader !== adminKey) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  try {
 
     const body = await request.json().catch(() => ({}));
     const { templateIds, formats } = body as {
@@ -49,7 +47,11 @@ export async function POST(request: NextRequest) {
 }
 
 // GET: Return list of templates and their static URLs
-export async function GET() {
+export async function GET(request: NextRequest) {
+  if (!verifyAdmin(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const templates = SOCIAL_IMAGE_TEMPLATES.map(t => ({
       id: t.id,

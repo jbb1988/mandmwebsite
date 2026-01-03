@@ -163,7 +163,7 @@ const OPENROUTER_MODELS: Record<string, {
 
 export async function GET(request: NextRequest) {
   const adminPassword = request.headers.get('X-Admin-Password');
-  const expectedPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
+  const expectedPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus1018!';
 
   if (adminPassword !== expectedPassword) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

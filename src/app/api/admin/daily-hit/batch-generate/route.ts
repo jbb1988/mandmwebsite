@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { verifyAdmin } from '@/lib/admin-auth'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -7,6 +8,10 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey)
 
 // POST - Start batch generation for multiple days
 export async function POST(request: NextRequest) {
+  if (!verifyAdmin(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const { targetDays, topicIds, autoSelectTopics } = await request.json()
 
@@ -268,6 +273,10 @@ Difficulty: ${topic.difficulty_level || 'intermediate'}`
 
 // GET - Get batch status and history
 export async function GET(request: NextRequest) {
+  if (!verifyAdmin(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const { searchParams } = new URL(request.url)
     const batchId = searchParams.get('batchId')

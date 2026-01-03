@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { verifyAdmin } from '@/lib/admin-auth'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -136,7 +137,11 @@ function isOpenRouterAvailable(): boolean {
 }
 
 // GET - Return available models
-export async function GET() {
+export async function GET(request: NextRequest) {
+  if (!verifyAdmin(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const hasOpenRouter = isOpenRouterAvailable()
 
   // All models available if OpenRouter is configured
@@ -171,6 +176,10 @@ export async function GET() {
 
 // POST - Generate content using AI based on topic or source material
 export async function POST(request: NextRequest) {
+  if (!verifyAdmin(request)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
     const { topicId, sourceContent, prompt, model } = await request.json()
 
