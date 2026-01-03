@@ -239,8 +239,8 @@ export async function POST(request: NextRequest) {
       // Fetch promo code redemptions for this user
       const { data: promoRedemptions } = await supabase
         .from('promo_code_redemptions')
-        .select('id, user_email, promo_code_id, redeemed_at, promo_codes(code, discount_percent, tier_duration_days)')
-        .eq('user_email', user.email)
+        .select('id, redeemed_by_email, promo_code_id, redeemed_at, promo_codes(code, discount_percent, tier_duration_days)')
+        .eq('redeemed_by_email', user.email)
         .order('redeemed_at', { ascending: false });
 
       return NextResponse.json({
