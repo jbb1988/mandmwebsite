@@ -107,7 +107,7 @@ export default function DownloadPage() {
               <FadeInWhenVisible delay={0.2} direction="up">
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-6">
                   <Link
-                    href="https://apps.apple.com/app/mind-muscle-baseball/id6737125498"
+                    href="https://apps.apple.com/us/app/mind-muscle/id6754098729"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group relative overflow-hidden"
@@ -126,7 +126,7 @@ export default function DownloadPage() {
                   </Link>
 
                   <Link
-                    href="https://play.google.com/store/apps/details?id=ai.mindandmuscle.app"
+                    href="https://play.google.com/store/apps/details?id=com.exceptionalhabit.mind_and_muscle"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group relative overflow-hidden"
@@ -370,7 +370,7 @@ export default function DownloadPage() {
             {/* Final CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href="https://apps.apple.com/app/mind-muscle-baseball/id6737125498"
+                href="https://apps.apple.com/us/app/mind-muscle/id6754098729"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group relative overflow-hidden"
@@ -386,7 +386,7 @@ export default function DownloadPage() {
               </Link>
 
               <Link
-                href="https://play.google.com/store/apps/details?id=ai.mindandmuscle.app"
+                href="https://play.google.com/store/apps/details?id=com.exceptionalhabit.mind_and_muscle"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="group relative overflow-hidden"
