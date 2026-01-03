@@ -80,6 +80,7 @@ export async function GET(request: Request) {
 
     const errorGroups = new Map<string, ErrorGroup>();
     let totalLogsScanned = 0;
+    const logsPerService: Record<string, { scanned: number; errors: number }> = {};
 
     // Map service names to Supabase log endpoint names
     const serviceEndpointMap: Record<string, string> = {
@@ -113,26 +114,63 @@ export async function GET(request: Request) {
         }
 
         const data = await response.json();
-        const logs = data.result || data || [];
 
-        if (!Array.isArray(logs)) {
-          console.error(`Unexpected log format for ${service}:`, typeof logs);
+        // Handle different response formats from Supabase Management API
+        let logs: any[] = [];
+        if (Array.isArray(data)) {
+          logs = data;
+        } else if (data.result && Array.isArray(data.result)) {
+          logs = data.result;
+        } else if (data.data && Array.isArray(data.data)) {
+          logs = data.data;
+        } else {
+          console.error(`Unexpected log format for ${service}:`, JSON.stringify(data).substring(0, 500));
           continue;
         }
 
         totalLogsScanned += logs.length;
+        logsPerService[service] = { scanned: logs.length, errors: 0 };
+
+        // Log first entry for debugging if we have logs but find no errors
+        if (logs.length > 0 && service === 'postgres') {
+          const sample = logs.find((l: any) => l.error_severity === 'ERROR');
+          if (sample) {
+            console.log(`Sample ${service} error:`, JSON.stringify(sample).substring(0, 300));
+          }
+        }
 
         for (const log of logs) {
-          const statusCode = log.status_code || log.metadata?.response?.[0]?.status_code;
+          // Get status code from various possible locations
+          const statusCode = log.status_code ||
+            log.metadata?.response?.[0]?.status_code ||
+            log.response_status_code;
           const errorSeverity = log.error_severity;
 
           // Check for HTTP errors (status >= 400) OR postgres errors (error_severity = ERROR/FATAL/PANIC)
           const isHttpError = statusCode && statusCode >= 400;
           const isPostgresError = errorSeverity && ['ERROR', 'FATAL', 'PANIC'].includes(errorSeverity);
 
-          if (!isHttpError && !isPostgresError) continue;
+          // Also check for edge function errors via execution_time_ms presence + status
+          const isEdgeFunctionError = service === 'edge-function' && log.status_code && log.status_code >= 400;
 
-          const path = normalizePath(log.path || log.metadata?.request?.[0]?.path || '/postgres');
+          if (!isHttpError && !isPostgresError && !isEdgeFunctionError) continue;
+
+          // Count this error
+          logsPerService[service].errors++;
+
+          // Extract path - for edge functions, try to get function name from event_message
+          let rawPath = log.path || log.metadata?.request?.[0]?.path;
+          if (!rawPath && service === 'edge-function' && log.event_message) {
+            // Extract function name from URLs like "https://xxx.supabase.co/functions/v1/function-name"
+            const funcMatch = log.event_message.match(/\/functions\/v1\/([a-z0-9-]+)/i);
+            if (funcMatch) {
+              rawPath = `/functions/v1/${funcMatch[1]}`;
+            }
+          }
+          if (!rawPath && isPostgresError) {
+            rawPath = '/postgres';
+          }
+          const path = normalizePath(rawPath || '/unknown');
           const method = log.method || log.metadata?.request?.[0]?.method || (isPostgresError ? 'SQL' : 'UNKNOWN');
           const errorPattern = extractErrorPattern(log.event_message);
           const effectiveStatusCode = statusCode || (isPostgresError ? 500 : 0);
@@ -290,7 +328,9 @@ export async function GET(request: Request) {
         .eq('id', auditRun.id);
     }
 
-    console.log(`Log Audit completed: ${totalLogsScanned} logs, ${errorGroups.size} errors, ${newIssues} new, ${recurringIssues} recurring`);
+    // Log per-service breakdown
+    console.log('Log Audit per-service breakdown:', JSON.stringify(logsPerService));
+    console.log(`Log Audit completed: ${totalLogsScanned} logs, ${errorGroups.size} unique errors, ${newIssues} new, ${recurringIssues} recurring`);
 
     return NextResponse.json({
       success: true,
@@ -300,6 +340,7 @@ export async function GET(request: Request) {
       new_issues: newIssues,
       recurring_issues: recurringIssues,
       alerts_sent: alertableIssues.length,
+      per_service: logsPerService,
     });
   } catch (error: any) {
     console.error('Log audit cron error:', error);
