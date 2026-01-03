@@ -9,15 +9,16 @@ const supabase = createClient(
 interface QueueConfig {
   table: string;
   statusColumn: string;
+  statusType: 'text' | 'boolean'; // 'text' for status strings, 'boolean' for processed flag
   timestampColumn: string;
   displayName: string;
 }
 
 const QUEUE_CONFIGS: QueueConfig[] = [
-  { table: 'ai_generation_queue', statusColumn: 'status', timestampColumn: 'created_at', displayName: 'AI Generation Queue' },
-  { table: 'event_notification_queue', statusColumn: 'status', timestampColumn: 'created_at', displayName: 'Event Notifications' },
-  { table: 'fb_daily_outreach_queue', statusColumn: 'status', timestampColumn: 'created_at', displayName: 'FB Outreach Queue' },
-  { table: 'x_daily_outreach_queue', statusColumn: 'status', timestampColumn: 'created_at', displayName: 'X Outreach Queue' },
+  { table: 'ai_generation_queue', statusColumn: 'status', statusType: 'text', timestampColumn: 'created_at', displayName: 'AI Generation Queue' },
+  { table: 'event_notification_queue', statusColumn: 'processed', statusType: 'boolean', timestampColumn: 'created_at', displayName: 'Event Notifications' },
+  { table: 'fb_daily_outreach_queue', statusColumn: 'status', statusType: 'text', timestampColumn: 'posted_at', displayName: 'FB Outreach Queue' },
+  { table: 'x_daily_outreach_queue', statusColumn: 'status', statusType: 'text', timestampColumn: 'last_activity_date', displayName: 'X Outreach Queue' },
 ];
 
 export async function GET(request: NextRequest) {
@@ -25,9 +26,26 @@ export async function GET(request: NextRequest) {
     const queues = await Promise.all(
       QUEUE_CONFIGS.map(async (config) => {
         try {
-          // Get queue stats
-          const { data: stats } = await supabase.rpc('exec_sql', {
-            sql: `
+          // Build SQL based on status type (text vs boolean)
+          let sql: string;
+          if (config.statusType === 'boolean') {
+            // For boolean 'processed' column
+            sql = `
+              SELECT
+                '${config.table}' as queue_name,
+                '${config.displayName}' as display_name,
+                COUNT(*) as total_items,
+                COUNT(*) FILTER (WHERE ${config.statusColumn} = false) as pending,
+                0 as processing,
+                COUNT(*) FILTER (WHERE ${config.statusColumn} = true) as completed,
+                0 as failed,
+                MIN(${config.timestampColumn}) FILTER (WHERE ${config.statusColumn} = false) as oldest_pending,
+                MAX(${config.timestampColumn}) as newest_item
+              FROM ${config.table}
+            `;
+          } else {
+            // For text status column
+            sql = `
               SELECT
                 '${config.table}' as queue_name,
                 '${config.displayName}' as display_name,
@@ -39,8 +57,11 @@ export async function GET(request: NextRequest) {
                 MIN(${config.timestampColumn}) FILTER (WHERE ${config.statusColumn} = 'pending') as oldest_pending,
                 MAX(${config.timestampColumn}) as newest_item
               FROM ${config.table}
-            `
-          });
+            `;
+          }
+
+          // Get queue stats
+          const { data: stats } = await supabase.rpc('exec_sql', { sql });
 
           // Get recent items
           const { data: recentItems } = await supabase
