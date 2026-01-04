@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import AdminGate from '@/components/AdminGate';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import {
   Video, CheckCircle2, XCircle, Trash2, Eye, RefreshCw,
   Filter, ChevronLeft, ChevronRight, Play, Clock, User,
@@ -287,6 +288,7 @@ function DrillCard({ drill, onAction, selected, onSelect }: {
 }
 
 function VaultModerationContent() {
+  const { getPassword } = useAdminAuth();
   const [drills, setDrills] = useState<Drill[]>([]);
   const [stats, setStats] = useState<Stats>({ total: 0, published: 0, pending: 0, private: 0 });
   const [pagination, setPagination] = useState<Pagination>({ page: 1, limit: 20, total: 0, totalPages: 0 });
@@ -312,7 +314,9 @@ function VaultModerationContent() {
       if (categoryFilter) params.set('category', categoryFilter);
       if (ageRangeFilter) params.set('ageRange', ageRangeFilter);
 
-      const response = await fetch(`/api/admin/vault?${params.toString()}`);
+      const response = await fetch(`/api/admin/vault?${params.toString()}`, {
+        headers: { 'X-Admin-Password': getPassword() },
+      });
       const data = await response.json();
 
       if (data.error) {
@@ -355,7 +359,10 @@ function VaultModerationContent() {
     try {
       const response = await fetch('/api/admin/vault', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': getPassword(),
+        },
         body: JSON.stringify({ action, drillIds: targetIds }),
       });
 
