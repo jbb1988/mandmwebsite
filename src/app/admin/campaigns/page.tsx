@@ -2,14 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import AdminGate from '@/components/AdminGate';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import {
   Mail, BarChart3, Users, Clock, Send, Eye, MousePointer,
   MessageSquare, ChevronDown, ChevronUp, ExternalLink, AlertCircle,
   CheckCircle2, XCircle, RefreshCw, Calendar, Bot, UserCheck,
   TrendingDown, ArrowRight, Lightbulb, X, Link2, Building2
 } from 'lucide-react';
-
-const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
 // Card component matching existing admin style
 function Card({ children, className = '', variant = 'default', glow = false }: {
@@ -241,6 +240,7 @@ interface ClicksData {
 }
 
 export default function CampaignsPage() {
+  const { getPassword } = useAdminAuth();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [summary, setSummary] = useState<Summary | null>(null);
   const [upcomingSends, setUpcomingSends] = useState<UpcomingSend[]>([]);
@@ -267,7 +267,7 @@ export default function CampaignsPage() {
     setError(null);
     try {
       const response = await fetch('/api/admin/campaigns', {
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await response.json();
 
@@ -291,7 +291,7 @@ export default function CampaignsPage() {
     try {
       const params = new URLSearchParams({ status });
       const response = await fetch(`/api/admin/campaigns/${campaignId}/contacts?${params}`, {
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await response.json();
       if (data.success) {
@@ -308,7 +308,7 @@ export default function CampaignsPage() {
     setClicksLoading(true);
     try {
       const response = await fetch(`/api/admin/campaigns/${campaignId}/clicks`, {
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await response.json();
       if (data.success) {
