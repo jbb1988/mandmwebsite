@@ -43,7 +43,7 @@ async function getDrillShareData(code: string): Promise<DrillShareData> {
       .from('drill_share_codes')
       .select('id, code, drill_id, is_active, expires_at')
       .eq('code', code)
-      .single();
+      .maybeSingle();
 
     if (codeError || !shareCode) {
       return { shareCode: null, drill: null, error: 'Invalid share link' };
@@ -64,7 +64,7 @@ async function getDrillShareData(code: string): Promise<DrillShareData> {
       .from('drills')
       .select('id, title, description, thumbnail_url, skill_category, age_range, owner_name, owner_avatar_url')
       .eq('id', shareCode.drill_id)
-      .single();
+      .maybeSingle();
 
     if (drillError || !drill) {
       return { shareCode, drill: null, error: 'Drill not found' };
