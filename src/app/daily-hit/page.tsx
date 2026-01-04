@@ -1,13 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
-import { Play, Pause, ArrowLeft } from 'lucide-react';
+import { Play, Pause } from 'lucide-react';
 import { FadeInWhenVisible, GradientTextReveal } from '@/components/animations';
-import { motion } from 'framer-motion';
 
 interface DailyHit {
   id: string;
@@ -88,30 +85,9 @@ export default function DailyHitPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0F1123]">
-      {/* Header */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0F1123]/80 backdrop-blur-xl border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-3 text-white/60 hover:text-white transition-colors">
-              <ArrowLeft className="w-5 h-5" />
-              <span className="text-sm font-medium">Back to Home</span>
-            </Link>
-            <Link href="/">
-              <Image
-                src="/assets/images/logo.png"
-                alt="Mind & Muscle"
-                width={120}
-                height={40}
-                className="h-8 w-auto"
-              />
-            </Link>
-          </div>
-        </div>
-      </header>
-
+    <div className="min-h-screen">
       {/* Main Content */}
-      <div className="pt-24 pb-16 px-4 sm:px-6 lg:px-8">
+      <div className="pt-8 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
           {/* Hero Section */}
           <FadeInWhenVisible delay={0} direction="up" className="text-center mb-12">
@@ -265,60 +241,8 @@ export default function DailyHitPage() {
             </LiquidGlass>
           </FadeInWhenVisible>
 
-          {/* App Download CTA */}
-          <FadeInWhenVisible delay={0.6} direction="up">
-            <div className="text-center">
-              <h3 className="text-2xl font-black text-white mb-4">Want the Full Experience?</h3>
-              <p className="text-gray-300 mb-6 max-w-lg mx-auto">
-                Track your streaks, get push notifications at 8 AM, and access the full library of mental training content.
-              </p>
-              <div className="flex flex-wrap justify-center gap-4">
-                <a
-                  href="https://apps.apple.com/app/mind-muscle-baseball/id6737125498"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-transform hover:scale-105"
-                >
-                  <Image
-                    src="/assets/images/app-store-badge.svg"
-                    alt="Download on the App Store"
-                    width={140}
-                    height={47}
-                    className="h-12 w-auto"
-                  />
-                </a>
-                <a
-                  href="https://play.google.com/store/apps/details?id=ai.mindandmuscle.app"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-transform hover:scale-105"
-                >
-                  <Image
-                    src="/assets/images/google-play-badge.png"
-                    alt="Get it on Google Play"
-                    width={140}
-                    height={47}
-                    className="h-12 w-auto"
-                  />
-                </a>
-              </div>
-            </div>
-          </FadeInWhenVisible>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="border-t border-white/5 py-8 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <p className="text-gray-400 text-sm">
-            <span className="text-neon-cortex-blue font-bold">Discipline the Mind.</span>{' '}
-            <span className="text-solar-surge-orange font-bold">Dominate the Game.</span>
-          </p>
-          <p className="text-gray-500 text-xs mt-2">
-            © 2026 Mind & Muscle Performance. All rights reserved.
-          </p>
-        </div>
-      </footer>
-    </main>
+    </div>
   );
 }
