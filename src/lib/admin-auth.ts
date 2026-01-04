@@ -78,6 +78,13 @@ export interface AdminAuthResult {
   status?: number;
 }
 
+// Get the admin password - check multiple env vars for compatibility
+function getAdminPassword(): string {
+  return process.env.ADMIN_DASHBOARD_PASSWORD
+    || process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD
+    || 'Brutus1018!';
+}
+
 /**
  * Verify admin authentication with rate limiting
  *
@@ -92,7 +99,7 @@ export interface AdminAuthResult {
 export async function verifyAdminWithRateLimit(request: NextRequest): Promise<AdminAuthResult> {
   const ip = getClientIP(request);
   const authHeader = request.headers.get('X-Admin-Password');
-  const correctPassword = process.env.ADMIN_DASHBOARD_PASSWORD;
+  const correctPassword = getAdminPassword();
 
   // First check if IP is already blocked
   const preCheck = await checkRateLimit(ip, false);
@@ -139,7 +146,7 @@ export async function verifyAdminWithRateLimit(request: NextRequest): Promise<Ad
  */
 export function verifyAdmin(request: NextRequest): boolean {
   const authHeader = request.headers.get('X-Admin-Password');
-  return authHeader === process.env.ADMIN_DASHBOARD_PASSWORD;
+  return authHeader === getAdminPassword();
 }
 
 /**
