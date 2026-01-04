@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import AdminGate from '@/components/AdminGate';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import {
   Calendar, Mic, FileText, Sparkles, Play, Pause, Check, X,
   ChevronLeft, ChevronRight, AlertCircle, RefreshCw, Trash2,
@@ -253,6 +254,14 @@ const MONTHS = [
 ];
 
 export default function DailyHitBuilderPage() {
+  const { getPassword } = useAdminAuth();
+
+  // Helper for authenticated fetch
+  const authHeaders = useCallback(() => ({
+    'Content-Type': 'application/json',
+    'X-Admin-Password': getPassword(),
+  }), [getPassword]);
+
   // State
   const [activeTab, setActiveTab] = useState<'calendar' | 'drafts' | 'create' | 'topics' | 'batch' | 'analytics' | 'distribution' | 'images'>('calendar');
   const [calendar, setCalendar] = useState<CalendarDay[]>([]);
@@ -348,7 +357,9 @@ export default function DailyHitBuilderPage() {
   // Fetch data
   const fetchCalendar = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/daily-hit?view=calendar');
+      const res = await fetch('/api/admin/daily-hit?view=calendar', {
+        headers: { 'X-Admin-Password': getPassword() },
+      });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setCalendar(data.calendar || []);
@@ -360,7 +371,9 @@ export default function DailyHitBuilderPage() {
 
   const fetchDrafts = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/daily-hit?view=drafts');
+      const res = await fetch('/api/admin/daily-hit?view=drafts', {
+        headers: { 'X-Admin-Password': getPassword() },
+      });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setDrafts(data.drafts || []);
@@ -371,7 +384,9 @@ export default function DailyHitBuilderPage() {
 
   const fetchTopics = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/daily-hit?view=topics');
+      const res = await fetch('/api/admin/daily-hit?view=topics', {
+        headers: { 'X-Admin-Password': getPassword() },
+      });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setTopics(data.topics || []);
@@ -433,7 +448,9 @@ export default function DailyHitBuilderPage() {
   // Enhancement #1 & #4: Fetch gaps and batches
   const fetchGaps = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/daily-hit/gaps?lookahead=30');
+      const res = await fetch('/api/admin/daily-hit/gaps?lookahead=30', {
+        headers: { 'X-Admin-Password': getPassword() },
+      });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setGaps(data.gaps || []);
@@ -445,7 +462,9 @@ export default function DailyHitBuilderPage() {
 
   const fetchBatches = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/daily-hit/batch-generate');
+      const res = await fetch('/api/admin/daily-hit/batch-generate', {
+        headers: { 'X-Admin-Password': getPassword() },
+      });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setBatches(data.batches || []);
@@ -457,10 +476,11 @@ export default function DailyHitBuilderPage() {
   // Enhancement #2: Fetch ratings
   const fetchRatings = useCallback(async () => {
     try {
+      const headers = { 'X-Admin-Password': getPassword() };
       const [summaryRes, topRes, dropRes] = await Promise.all([
-        fetch('/api/admin/daily-hit/ratings'),
-        fetch('/api/admin/daily-hit/ratings?view=top_performers'),
-        fetch('/api/admin/daily-hit/ratings?view=drop_offs'),
+        fetch('/api/admin/daily-hit/ratings', { headers }),
+        fetch('/api/admin/daily-hit/ratings?view=top_performers', { headers }),
+        fetch('/api/admin/daily-hit/ratings?view=drop_offs', { headers }),
       ]);
 
       const summaryData = await summaryRes.json();
@@ -479,7 +499,9 @@ export default function DailyHitBuilderPage() {
   const fetchCategoryBalance = useCallback(async () => {
     setIsLoadingCategoryBalance(true);
     try {
-      const res = await fetch('/api/admin/daily-hit/category-balance');
+      const res = await fetch('/api/admin/daily-hit/category-balance', {
+        headers: { 'X-Admin-Password': getPassword() },
+      });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setCategoryBalance(data);
@@ -493,7 +515,9 @@ export default function DailyHitBuilderPage() {
   // Enhancement #5: Fetch distribution
   const fetchDistribution = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/daily-hit/distribution');
+      const res = await fetch('/api/admin/daily-hit/distribution', {
+        headers: { 'X-Admin-Password': getPassword() },
+      });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setChannelStats(data.channelStats || []);
@@ -506,7 +530,9 @@ export default function DailyHitBuilderPage() {
   // Fetch available AI models
   const fetchModels = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/daily-hit/generate-content');
+      const res = await fetch('/api/admin/daily-hit/generate-content', {
+        headers: { 'X-Admin-Password': getPassword() },
+      });
       const data = await res.json();
       setAvailableModels(data.availableModels || []);
       setModelInfo(data.modelInfo || {});
@@ -524,7 +550,9 @@ export default function DailyHitBuilderPage() {
   const fetchContent = useCallback(async (dayOfYear: number) => {
     setIsLoadingContent(true);
     try {
-      const res = await fetch(`/api/admin/daily-hit?view=content&dayOfYear=${dayOfYear}`);
+      const res = await fetch(`/api/admin/daily-hit?view=content&dayOfYear=${dayOfYear}`, {
+        headers: { 'X-Admin-Password': getPassword() },
+      });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setSelectedContent(data.content || null);
@@ -571,7 +599,7 @@ export default function DailyHitBuilderPage() {
     try {
       const res = await fetch('/api/admin/daily-hit/generate-content', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
           topicId: selectedTopic?.id,
           sourceContent: sourceContent || undefined,
@@ -604,7 +632,7 @@ export default function DailyHitBuilderPage() {
     try {
       const res = await fetch('/api/admin/daily-hit', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
           title: createForm.title,
           pushText: createForm.pushText,
@@ -644,7 +672,7 @@ export default function DailyHitBuilderPage() {
     try {
       const res = await fetch('/api/admin/daily-hit', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
           id: draft.id,
           script_approved: true,
@@ -666,7 +694,7 @@ export default function DailyHitBuilderPage() {
     try {
       const res = await fetch('/api/admin/daily-hit', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
           id: draft.id,
           audio_approved: true,
@@ -697,7 +725,7 @@ export default function DailyHitBuilderPage() {
     try {
       const res = await fetch('/api/admin/daily-hit/publish', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
           draftId: draft.id,
           dayOfYear: draft.day_of_year,
@@ -719,7 +747,7 @@ export default function DailyHitBuilderPage() {
     try {
       const res = await fetch('/api/admin/daily-hit', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
           id: draft.id,
           audio_url: null,
@@ -747,7 +775,7 @@ export default function DailyHitBuilderPage() {
     try {
       const res = await fetch('/api/admin/daily-hit', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
           id: draftId,
           audio_url: editableAudioUrl || undefined,
@@ -784,7 +812,7 @@ export default function DailyHitBuilderPage() {
     try {
       const res = await fetch('/api/admin/daily-hit', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
           id: draftId,
           dayOfYear,
@@ -809,6 +837,7 @@ export default function DailyHitBuilderPage() {
     try {
       const res = await fetch(`/api/admin/daily-hit?id=${draftId}`, {
         method: 'DELETE',
+        headers: { 'X-Admin-Password': getPassword() },
       });
 
       const data = await res.json();
@@ -847,7 +876,7 @@ export default function DailyHitBuilderPage() {
     try {
       const res = await fetch('/api/admin/daily-hit', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
           id: editingDraft.id,
           title: createForm.title,
@@ -892,7 +921,7 @@ export default function DailyHitBuilderPage() {
     try {
       const res = await fetch('/api/admin/daily-hit/batch-generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
           targetDays: selectedGapsForBatch,
           autoSelectTopics: true,
@@ -949,7 +978,7 @@ export default function DailyHitBuilderPage() {
     try {
       const res = await fetch('/api/admin/daily-hit/generate-image-prompt', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders(),
         body: JSON.stringify({
           title: contentTitle,
           body: contentBody,
@@ -1005,6 +1034,7 @@ export default function DailyHitBuilderPage() {
 
       const res = await fetch('/api/admin/daily-hit/upload-image', {
         method: 'POST',
+        headers: { 'X-Admin-Password': getPassword() },
         body: formData,
       });
 
