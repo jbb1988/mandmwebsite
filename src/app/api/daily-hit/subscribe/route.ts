@@ -84,10 +84,10 @@ const getWelcomeEmailHtml = (unsubscribeToken: string, todayContent?: { title: s
         <p class="info-text">Get push notifications, track your streaks, and access the full library of mental training content in the app.</p>
         <div class="app-badges">
           <a href="https://apps.apple.com/app/mind-muscle-baseball/id6737125498">
-            <img src="https://api.mindandmuscle.ai/storage/v1/object/public/media-thumbnails/app-store-badge.png" alt="App Store" class="app-badge">
+            <img src="https://api.mindandmuscle.ai/storage/v1/object/public/media-thumbnails/App_Store_Badge.png" alt="App Store" class="app-badge">
           </a>
           <a href="https://play.google.com/store/apps/details?id=ai.mindandmuscle.app">
-            <img src="https://api.mindandmuscle.ai/storage/v1/object/public/media-thumbnails/google-play-badge.png" alt="Google Play" class="app-badge">
+            <img src="https://api.mindandmuscle.ai/storage/v1/object/public/media-thumbnails/google_play_badge.png" alt="Google Play" class="app-badge">
           </a>
         </div>
       </div>
