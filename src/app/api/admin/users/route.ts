@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
     try {
       const { data: authUsers } = await supabase.auth.admin.listUsers({ perPage: 1000 });
       authUserMap = new Map(
-        (authUsers?.users || []).map(u => [u.id, u.last_sign_in_at])
+        (authUsers?.users || []).map(u => [u.id, u.last_sign_in_at ?? null])
       );
     } catch (authError) {
       console.warn('Warning: Could not fetch auth users (GoTrue bug), last_sign_in_at will be unavailable:', authError);
