@@ -72,10 +72,17 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit;
 
     // Fetch last_sign_in_at from auth.users (Supabase tracks this automatically)
-    const { data: authUsers } = await supabase.auth.admin.listUsers({ perPage: 1000 });
-    const authUserMap = new Map(
-      (authUsers?.users || []).map(u => [u.id, u.last_sign_in_at])
-    );
+    // Wrapped in try/catch due to potential GoTrue bug with NULL email_change column
+    let authUserMap = new Map<string, string | null>();
+    try {
+      const { data: authUsers } = await supabase.auth.admin.listUsers({ perPage: 1000 });
+      authUserMap = new Map(
+        (authUsers?.users || []).map(u => [u.id, u.last_sign_in_at])
+      );
+    } catch (authError) {
+      console.warn('Warning: Could not fetch auth users (GoTrue bug), last_sign_in_at will be unavailable:', authError);
+      // Continue without last_sign_in_at data - page will still work
+    }
 
     // Build query
     let query = supabase
@@ -213,8 +220,16 @@ export async function POST(request: NextRequest) {
       }
 
       // Get last_sign_in_at from auth.users
-      const { data: authData } = await supabase.auth.admin.getUserById(userId);
-      const lastSignInAt = authData?.user?.last_sign_in_at || null;
+      // Wrapped in try/catch due to potential GoTrue bug with NULL email_change column
+      let lastSignInAt: string | null = null;
+      let bannedUntil: string | null = null;
+      try {
+        const { data: authData } = await supabase.auth.admin.getUserById(userId);
+        lastSignInAt = authData?.user?.last_sign_in_at || null;
+        bannedUntil = (authData?.user as any)?.banned_until || null;
+      } catch (authError) {
+        console.warn('Warning: Could not fetch auth user (GoTrue bug):', authError);
+      }
 
       // Fetch platform/device info from user_sessions
       const { data: sessionData, error: sessionError } = await supabase
@@ -250,7 +265,7 @@ export async function POST(request: NextRequest) {
           last_sign_in_at: lastSignInAt,
           platform: sessionData?.platform || null,
           device_name: sessionData?.device_name || null,
-          banned_until: (authData?.user as any)?.banned_until || null,
+          banned_until: bannedUntil,
         },
         trialGrants: trialGrants || [],
         promoRedemptions: promoRedemptions || [],
