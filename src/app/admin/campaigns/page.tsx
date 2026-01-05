@@ -7,7 +7,8 @@ import {
   Mail, BarChart3, Users, Clock, Send, Eye, MousePointer,
   MessageSquare, ChevronDown, ChevronUp, ExternalLink, AlertCircle,
   CheckCircle2, XCircle, RefreshCw, Calendar, Bot, UserCheck,
-  TrendingDown, ArrowRight, Lightbulb, X, Link2, Building2
+  TrendingDown, ArrowRight, Lightbulb, X, Link2, Building2,
+  Flame, ThumbsUp, ThumbsDown, Minus
 } from 'lucide-react';
 
 // Card component matching existing admin style
@@ -239,6 +240,44 @@ interface ClicksData {
   pagination: { page: number; limit: number; total: number; totalPages: number };
 }
 
+interface HotLeadsData {
+  stats: {
+    totalReplies: number;
+    positiveReplies: number;
+    neutralReplies: number;
+    negativeReplies: number;
+    totalBookings: number;
+    upcomingBookings: number;
+    highEngagementContacts: number;
+  };
+  replies: Array<{
+    id: string;
+    repliedAt: string;
+    sentiment: string;
+    replyPreview: string;
+    contact: { id: string; email: string; name: string; organization?: string; segment?: string };
+    campaign: { id: string; name: string; segment: string };
+  }>;
+  bookings: Array<{
+    id: string;
+    bookedAt: string;
+    scheduledAt: string;
+    eventName: string;
+    status: string;
+    contact: { email: string; name: string; organization?: string; segment?: string };
+    campaign?: { id: string; name: string; segment: string };
+  }>;
+  highEngagement: Array<{
+    id: string;
+    openCount: number;
+    lastActivityAt: string;
+    hasClicked: boolean;
+    contact: { id: string; email: string; name: string; organization?: string; segment?: string };
+    campaign: { id: string; name: string; segment: string };
+  }>;
+  timeframe: string;
+}
+
 export default function CampaignsPage() {
   const { getPassword } = useAdminAuth();
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
@@ -258,8 +297,13 @@ export default function CampaignsPage() {
   const [clicksLoading, setClicksLoading] = useState(false);
   const [contactsFilter, setContactsFilter] = useState('all');
 
+  // Hot Leads state
+  const [hotLeads, setHotLeads] = useState<HotLeadsData | null>(null);
+  const [hotLeadsLoading, setHotLeadsLoading] = useState(false);
+
   useEffect(() => {
     fetchCampaigns();
+    fetchHotLeads();
   }, []);
 
   async function fetchCampaigns() {
@@ -283,6 +327,23 @@ export default function CampaignsPage() {
       setError('Failed to connect to server');
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function fetchHotLeads() {
+    setHotLeadsLoading(true);
+    try {
+      const response = await fetch('/api/admin/campaigns/hot-leads?hours=48', {
+        headers: { 'X-Admin-Password': getPassword() },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setHotLeads(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch hot leads:', err);
+    } finally {
+      setHotLeadsLoading(false);
     }
   }
 
@@ -615,6 +676,169 @@ export default function CampaignsPage() {
                 </div>
               </Card>
             )}
+
+            {/* Hot Leads Section */}
+            <Card variant="elevated" className="mb-8 overflow-hidden" glow>
+              <div className="p-4 border-b border-white/10 flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <Flame className="w-5 h-5 text-orange-400" />
+                    Hot Leads
+                  </h2>
+                  <p className="text-white/50 text-sm mt-1">
+                    Recent replies, bookings & high-engagement contacts (last 48h)
+                  </p>
+                </div>
+                <button
+                  onClick={fetchHotLeads}
+                  disabled={hotLeadsLoading}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs text-white/70 hover:text-white transition-colors"
+                >
+                  <RefreshCw className={`w-3 h-3 ${hotLeadsLoading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </button>
+              </div>
+
+              {hotLeadsLoading && !hotLeads ? (
+                <div className="p-8 text-center">
+                  <RefreshCw className="w-6 h-6 text-white/30 animate-spin mx-auto mb-2" />
+                  <p className="text-white/50 text-sm">Loading hot leads...</p>
+                </div>
+              ) : hotLeads ? (
+                <div className="p-4">
+                  {/* Stats Row */}
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                    <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-center">
+                      <p className="text-xl font-bold text-emerald-400">{hotLeads.stats.positiveReplies}</p>
+                      <p className="text-xs text-white/50">Positive Replies</p>
+                    </div>
+                    <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-center">
+                      <p className="text-xl font-bold text-blue-400">{hotLeads.stats.totalBookings}</p>
+                      <p className="text-xs text-white/50">Calendly Bookings</p>
+                    </div>
+                    <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-center">
+                      <p className="text-xl font-bold text-orange-400">{hotLeads.stats.highEngagementContacts}</p>
+                      <p className="text-xs text-white/50">High Engagement</p>
+                    </div>
+                    <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-center">
+                      <p className="text-xl font-bold text-white">{hotLeads.stats.totalReplies}</p>
+                      <p className="text-xs text-white/50">Total Replies</p>
+                    </div>
+                  </div>
+
+                  {/* Content Grid */}
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {/* Recent Replies */}
+                    <div className="bg-white/[0.03] rounded-xl border border-white/5 overflow-hidden">
+                      <div className="p-3 border-b border-white/5 flex items-center gap-2">
+                        <MessageSquare className="w-4 h-4 text-emerald-400" />
+                        <h4 className="text-sm font-medium text-white">Recent Replies</h4>
+                      </div>
+                      <div className="max-h-64 overflow-y-auto">
+                        {hotLeads.replies.length === 0 ? (
+                          <p className="p-4 text-sm text-white/40 text-center">No replies in last 48h</p>
+                        ) : (
+                          hotLeads.replies.slice(0, 8).map((reply) => (
+                            <div key={reply.id} className="p-3 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
+                              <div className="flex items-start gap-2">
+                                {reply.sentiment === 'positive' && <ThumbsUp className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />}
+                                {reply.sentiment === 'negative' && <ThumbsDown className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />}
+                                {reply.sentiment === 'neutral' && <Minus className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" />}
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-sm text-white font-medium truncate">{reply.contact.name || reply.contact.email}</p>
+                                  {reply.contact.organization && (
+                                    <p className="text-xs text-white/40 truncate">{reply.contact.organization}</p>
+                                  )}
+                                  {reply.replyPreview && (
+                                    <p className="text-xs text-white/60 mt-1 line-clamp-2">{reply.replyPreview}</p>
+                                  )}
+                                  <p className="text-xs text-white/30 mt-1">{formatDate(reply.repliedAt)}</p>
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Recent Bookings */}
+                    <div className="bg-white/[0.03] rounded-xl border border-white/5 overflow-hidden">
+                      <div className="p-3 border-b border-white/5 flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-blue-400" />
+                        <h4 className="text-sm font-medium text-white">Calendly Bookings</h4>
+                      </div>
+                      <div className="max-h-64 overflow-y-auto">
+                        {hotLeads.bookings.length === 0 ? (
+                          <p className="p-4 text-sm text-white/40 text-center">No bookings in last 48h</p>
+                        ) : (
+                          hotLeads.bookings.slice(0, 8).map((booking) => (
+                            <div key={booking.id} className="p-3 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
+                              <div className="flex items-start gap-2">
+                                <CheckCircle2 className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-sm text-white font-medium truncate">{booking.contact.name || booking.contact.email}</p>
+                                  {booking.contact.organization && (
+                                    <p className="text-xs text-white/40 truncate">{booking.contact.organization}</p>
+                                  )}
+                                  <p className="text-xs text-blue-400 mt-1">{booking.eventName || 'Call Scheduled'}</p>
+                                  <p className="text-xs text-white/30 mt-1">Scheduled: {formatDate(booking.scheduledAt)}</p>
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+
+                    {/* High Engagement */}
+                    <div className="bg-white/[0.03] rounded-xl border border-white/5 overflow-hidden">
+                      <div className="p-3 border-b border-white/5 flex items-center gap-2">
+                        <Eye className="w-4 h-4 text-orange-400" />
+                        <h4 className="text-sm font-medium text-white">High Engagement (3+ Opens)</h4>
+                      </div>
+                      <div className="max-h-64 overflow-y-auto">
+                        {hotLeads.highEngagement.length === 0 ? (
+                          <p className="p-4 text-sm text-white/40 text-center">No high engagement contacts</p>
+                        ) : (
+                          hotLeads.highEngagement.slice(0, 8).map((contact) => (
+                            <div key={contact.id} className="p-3 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors">
+                              <div className="flex items-start gap-2">
+                                <Flame className="w-4 h-4 text-orange-400 flex-shrink-0 mt-0.5" />
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-sm text-white font-medium truncate">{contact.contact.name || contact.contact.email}</p>
+                                  {contact.contact.organization && (
+                                    <p className="text-xs text-white/40 truncate">{contact.contact.organization}</p>
+                                  )}
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <span className="text-xs text-orange-400">{contact.openCount} opens</span>
+                                    {contact.hasClicked && (
+                                      <span className="text-xs text-emerald-400">+ clicked</span>
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-white/30 mt-1">Last: {formatDate(contact.lastActivityAt)}</p>
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* No Activity Message */}
+                  {hotLeads.stats.totalReplies === 0 && hotLeads.stats.totalBookings === 0 && hotLeads.stats.highEngagementContacts === 0 && (
+                    <div className="mt-4 p-4 bg-white/5 rounded-xl text-center">
+                      <p className="text-white/50 text-sm">No hot leads activity in the last 48 hours</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="p-8 text-center">
+                  <AlertCircle className="w-6 h-6 text-white/30 mx-auto mb-2" />
+                  <p className="text-white/50 text-sm">Failed to load hot leads</p>
+                </div>
+              )}
+            </Card>
 
             {/* Campaigns Table */}
             <Card variant="default" className="mb-8 overflow-hidden">
