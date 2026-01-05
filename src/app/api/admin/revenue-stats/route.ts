@@ -25,6 +25,7 @@ interface RevenueCatOverview {
 // Fetch metrics from RevenueCat API v2 (if configured)
 async function fetchRevenueCatMetrics(): Promise<RevenueCatOverview | null> {
   if (!REVENUECAT_SECRET_KEY || !REVENUECAT_PROJECT_ID) {
+    console.log('RevenueCat not configured - missing API key or project ID');
     return null;
   }
 
@@ -40,7 +41,13 @@ async function fetchRevenueCatMetrics(): Promise<RevenueCatOverview | null> {
     );
 
     if (!response.ok) {
-      console.error('RevenueCat API error:', response.status, await response.text());
+      const errorText = await response.text().catch(() => 'Unknown error');
+      // Only log to console, don't throw - gracefully degrade
+      if (response.status === 401) {
+        console.warn('RevenueCat API authentication failed - check REVENUECAT_SECRET_API_KEY env var');
+      } else {
+        console.error(`RevenueCat API error ${response.status}:`, errorText);
+      }
       return null;
     }
 

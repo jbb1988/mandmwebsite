@@ -51,6 +51,10 @@ interface ToltClick {
 }
 
 async function fetchFromTolt(endpoint: string, params: Record<string, string> = {}) {
+  if (!TOLT_API_KEY) {
+    throw new Error('TOLT_API_KEY not configured');
+  }
+
   const url = new URL(`${TOLT_API_BASE}${endpoint}`);
   Object.entries(params).forEach(([key, value]) => url.searchParams.append(key, value));
 
@@ -62,6 +66,8 @@ async function fetchFromTolt(endpoint: string, params: Record<string, string> = 
   });
 
   if (!response.ok) {
+    const errorText = await response.text().catch(() => 'Unknown error');
+    console.error(`Tolt API error ${response.status} for ${endpoint}:`, errorText);
     throw new Error(`Tolt API error: ${response.status}`);
   }
 

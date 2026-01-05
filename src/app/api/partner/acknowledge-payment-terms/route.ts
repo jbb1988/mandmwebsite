@@ -1,20 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { cookies } from 'next/headers';
+import crypto from 'crypto';
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+// Must match the encryption key in verify-magic-link
+const ENCRYPTION_KEY = process.env.PARTNER_SESSION_SECRET || 'partner-session-secret-key-32ch';
+
+function decryptEmail(encrypted: string): string | null {
+  try {
+    const [ivHex, encryptedHex] = encrypted.split(':');
+    if (!ivHex || !encryptedHex) return null;
+    const iv = Buffer.from(ivHex, 'hex');
+    const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY.padEnd(32, '0').slice(0, 32)), iv);
+    let decrypted = decipher.update(encryptedHex, 'hex', 'utf8');
+    decrypted += decipher.final('utf8');
+    return decrypted;
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
-    // Get partner email from session cookie
-    const cookieStore = await cookies();
-    const partnerEmail = cookieStore.get('partner_email')?.value;
+    // Get partner email from encrypted session cookie
+    const sessionCookie = request.cookies.get('partner_session');
+
+    if (!sessionCookie?.value) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
+    const partnerEmail = decryptEmail(sessionCookie.value);
 
     if (!partnerEmail) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
     }
 
     const body = await request.json();
@@ -72,12 +94,17 @@ export async function POST(request: NextRequest) {
 // GET to check current acknowledgment status
 export async function GET(request: NextRequest) {
   try {
-    // Get partner email from session cookie
-    const cookieStore = await cookies();
-    const partnerEmail = cookieStore.get('partner_email')?.value;
+    // Get partner email from encrypted session cookie
+    const sessionCookie = request.cookies.get('partner_session');
+
+    if (!sessionCookie?.value) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
+    const partnerEmail = decryptEmail(sessionCookie.value);
 
     if (!partnerEmail) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+      return NextResponse.json({ error: 'Invalid session' }, { status: 401 });
     }
 
     const { data, error } = await supabase
