@@ -48,7 +48,7 @@ async function getTeamPreviewData(code: string): Promise<TeamPreviewData> {
     // Get team data
     const { data: team, error: teamError } = await supabase
       .from('teams')
-      .select('id, name, logo_url, type')
+      .select('id, name, avatar_url, type')
       .eq('id', joinCode.team_id)
       .maybeSingle();
 
@@ -66,7 +66,7 @@ async function getTeamPreviewData(code: string): Promise<TeamPreviewData> {
       team: {
         id: team.id,
         name: team.name,
-        logo_url: team.logo_url,
+        logo_url: team.avatar_url,
         type: team.type || 'baseball',
         member_count: memberCount || 0,
       },
