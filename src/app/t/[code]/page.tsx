@@ -54,8 +54,8 @@ async function getTeamPreviewData(code: string): Promise<TeamPreviewData> {
 
     return {
       team: {
-        id: data.team_id,
-        name: data.team_name,
+        id: data.team_id!,
+        name: data.team_name!,
         logo_url: data.avatar_url,
         type: data.team_type || 'baseball',
         member_count: data.member_count || 0,
