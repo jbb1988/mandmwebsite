@@ -28,47 +28,27 @@ interface TeamPreviewData {
 
 async function getTeamPreviewData(code: string): Promise<TeamPreviewData> {
   try {
-    // First get the join code to find the team
-    const { data: joinCode, error: codeError } = await supabase
-      .from('team_join_codes')
-      .select('id, code, team_id, is_active, expires_at')
-      .eq('code', code)
-      .eq('is_active', true)
-      .maybeSingle();
+    // Use RPC function to get team preview (bypasses RLS safely)
+    const { data, error } = await supabase
+      .rpc('get_team_preview_by_code', { p_code: code })
+      .single();
 
-    if (codeError || !joinCode) {
+    if (error || !data) {
       return { team: null, error: 'Invalid invite link' };
     }
 
-    // Check if expired
-    if (joinCode.expires_at && new Date(joinCode.expires_at) < new Date()) {
-      return { team: null, error: 'This invite link has expired' };
+    // Check if the result indicates an error
+    if (!data.is_valid) {
+      return { team: null, error: data.error_message || 'Invalid invite link' };
     }
-
-    // Get team data
-    const { data: team, error: teamError } = await supabase
-      .from('teams')
-      .select('id, name, avatar_url, type')
-      .eq('id', joinCode.team_id)
-      .maybeSingle();
-
-    if (teamError || !team) {
-      return { team: null, error: 'Team not found' };
-    }
-
-    // Get member count
-    const { count: memberCount } = await supabase
-      .from('team_memberships')
-      .select('*', { count: 'exact', head: true })
-      .eq('team_id', team.id);
 
     return {
       team: {
-        id: team.id,
-        name: team.name,
-        logo_url: team.avatar_url,
-        type: team.type || 'baseball',
-        member_count: memberCount || 0,
+        id: data.team_id,
+        name: data.team_name,
+        logo_url: data.avatar_url,
+        type: data.team_type || 'baseball',
+        member_count: data.member_count || 0,
       },
       error: null,
     };
