@@ -53,7 +53,7 @@ export default function FAQPage() {
         },
         {
           question: 'How do I create an account?',
-          answer: 'Download the app and tap "Sign Up". You\'ll choose your role (Athlete, Coach, or Parent), then create your account with email and password. Follow the onboarding prompts to set up your profile. If you have a team code, you can enter it during sign-up or later in Settings.'
+          answer: 'Download the app and tap "Sign Up". You\'ll choose your role (Athlete, Coach, or Parent), then create your account with email and password. Follow the onboarding prompts to set up your profile.\n\n<strong>Have a team invite link?</strong> Even easier - tap the link your coach sent you. If you don\'t have the app yet, it will guide you to download it first, then automatically join your team after signup.'
         },
         {
           question: 'What\'s the difference between the user roles?',
@@ -445,7 +445,7 @@ export default function FAQPage() {
       faqs: [
         {
           question: 'How do I join team chat?',
-          answer: 'When you redeem a team code, you\'re automatically added to your team\'s Chatter. Go to Chatter tab to see team messages. That dugout energy, 24/7. Build the brotherhood that separates great teams from good ones.'
+          answer: 'When you join a team (via invite link or code), you\'re automatically added to your team\'s Chatter. Go to Chatter tab to see team messages. That dugout energy, 24/7. Build the brotherhood that separates great teams from good ones.'
         },
         {
           question: 'How do I create an event?',
@@ -484,8 +484,8 @@ export default function FAQPage() {
           answer: 'A team code (format: TEAM-XXXX-XXXX-XXXX) is a reusable Premium access code for your team, organization, or program. One code works for all your athletes and coaches. Share it with your roster, and they get instant Premium access when they redeem it in the app.'
         },
         {
-          question: 'How do I redeem my team code?',
-          answer: 'New Users: During sign-up, you\'ll be prompted "Do you have a team code?" Enter it there and you\'ll get Premium access immediately.\n\nExisting Users: Go to More → Settings → Teams (or "Redeem Team Code"). Enter your team code and tap "Redeem". Your account upgrades to Premium instantly.\n\nDuring registration, you selected your role (Athlete/Coach/Parent). This determines if you consume a license seat.'
+          question: 'How do I join a team?',
+          answer: '<strong>Easy way (recommended):</strong> Your coach sends you a link like <code class="text-neon-cortex-blue">mindandmuscle.ai/t/TEAM-XXXX</code>. Tap the link → it opens in the app → tap "Join Team" → done! You\'re instantly connected with Premium access.\n\n<strong>Manual way (backup):</strong> Go to More → Settings → Teams → "Redeem Team Code". Enter your code (e.g., TEAM-XXXX-XXXX-XXXX) and tap "Redeem".\n\nBoth methods give you the same result - you\'ll be added to your team with Premium access instantly.'
         },
         {
           question: 'I lost my team code email - how do I get it?',

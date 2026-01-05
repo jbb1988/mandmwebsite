@@ -50,12 +50,17 @@ export default function AthleteGuidePage() {
   ];
 
   const troubleshooting = [
+    { issue: 'Team link not opening app?', solution: 'Tap "Open in App" button on the page' },
     { issue: 'Drill won\'t play?', solution: 'Check your internet connection' },
     { issue: 'Link doesn\'t work?', solution: 'May be expired - ask coach for new one' },
     { issue: 'Can\'t find assigned drill?', solution: 'Pull down to refresh For You tab' },
   ];
 
   const faqs: FAQ[] = [
+    {
+      question: 'How do I join my team?',
+      answer: 'Your coach will send you a team invite link (looks like mindandmuscle.ai/t/TEAM-XXXX). Tap the link → tap "Open in App" (or "Join Team" if you\'re already in the app) → done! You\'re now connected to your team with Pro access. If you don\'t have the app yet, the page shows download buttons first.'
+    },
     {
       question: 'What happens when my coach assigns a drill?',
       answer: 'You\'ll get a push notification instantly. The drill appears in your "For You" tab. Watch the full video (80%+), then tap "Mark Complete" when you\'ve practiced it.'

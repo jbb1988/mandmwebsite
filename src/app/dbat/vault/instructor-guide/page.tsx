@@ -53,15 +53,19 @@ export default function InstructorGuidePage() {
   ];
 
   const quickActions = [
+    { action: 'Invite athletes to team', how: 'Team Settings -> Members -> Share link' },
     { action: 'Assign a drill', how: 'Open drill -> Assign -> Select athletes' },
-    { action: 'Create share link', how: 'Open drill -> Share -> Generate' },
+    { action: 'Create drill share link', how: 'Open drill -> Share -> Generate' },
     { action: 'Check who\'s training', how: 'Dashboard -> Training Engagement' },
     { action: 'Message an athlete', how: 'Tap athlete card -> DM' },
     { action: 'Upload new drill', how: 'My Drills -> + button' },
-    { action: 'See drill stats', how: 'Open your drill -> view metrics' },
   ];
 
   const faqs: FAQ[] = [
+    {
+      question: 'How do I invite athletes to join my team?',
+      answer: 'The easiest way is to share your team invite link. Go to Team Settings → Members tab → tap Share. Send the link (mindandmuscle.ai/t/YOUR-CODE) via text, email, or group chat. Athletes tap the link, tap "Join Team", and they\'re in! No code entry needed. You can also share the code directly as a backup method.'
+    },
     {
       question: 'How do I know when an athlete practices?',
       answer: 'You\'ll receive a push notification when athletes submit practice videos. You can also check the Submissions tab on any drill to see who has practiced and who hasn\'t.'
@@ -72,7 +76,7 @@ export default function InstructorGuidePage() {
     },
     {
       question: 'What if an athlete doesn\'t have the app?',
-      answer: 'Athletes need the Mind & Muscle app to receive assignments. Share the download link (mindandmuscle.ai/download) with them. Once they sign up and join your team, they\'ll see any pending assignments.'
+      answer: 'Share your team invite link with them! They\'ll see a preview page with download buttons. After downloading and creating an account, they tap the link again (or tap "Open in App") and join your team instantly. Way easier than telling them a code to remember.'
     },
     {
       question: 'How do share links work?',

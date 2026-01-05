@@ -51,9 +51,9 @@ export default function PlaybookPage() {
   };
 
   const setupChecklist = [
-    { task: 'Receive your facility\'s team join code from Mind & Muscle', done: false },
-    { task: 'Post QR code poster at front desk (we\'ll provide branded version)', done: false },
-    { task: 'Send welcome email to athlete list (we\'ll provide template)', done: false },
+    { task: 'Receive your facility\'s team join link from Mind & Muscle (mindandmuscle.ai/t/YOUR-CODE)', done: false },
+    { task: 'Post QR code poster at front desk - athletes scan, tap "Join Team", done!', done: false },
+    { task: 'Send welcome email with join link (one tap to join - no code entry needed)', done: false },
     { task: 'Brief your instructors on The Vault workflow (15 min)', done: false },
     { task: 'Identify 2-3 instructors to be early adopters', done: false },
     { task: 'Complete kickoff call with Mind & Muscle rep', done: false },
@@ -71,7 +71,7 @@ export default function PlaybookPage() {
   const talkingPoints = [
     {
       question: 'When athletes ask: "What is this?"',
-      answer: 'It\'s a training app where we can assign you drills between lessons. You get a notification, watch the drill, then record yourself practicing it - the AI analyzes your swing or pitch. We can see who\'s putting in work. Scan the code, download it, enter our facility code. Takes 2 minutes.'
+      answer: 'It\'s a training app where we can assign you drills between lessons. You get a notification, watch the drill, then record yourself practicing it - the AI analyzes your swing or pitch. We can see who\'s putting in work. Just tap the link I send you, download the app if needed, and tap "Join Team". Takes 30 seconds.'
     },
     {
       question: 'When parents ask: "Do we have to pay for this?"',
