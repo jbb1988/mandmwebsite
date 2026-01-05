@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Users, AlertCircle, Star } from 'lucide-react';
@@ -75,10 +75,29 @@ function StarRating() {
 export default function TeamJoinClient({ code, team, error }: TeamJoinClientProps) {
   const customSchemeLink = `mindmuscle://t/${code}`;
   const [logoError, setLogoError] = useState(false);
+  const [attemptedOpen, setAttemptedOpen] = useState(false);
+
+  // Auto-open app on mobile devices
+  useEffect(() => {
+    // Only attempt on mobile devices and if we have a valid team
+    if (team && !error && typeof window !== 'undefined') {
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+      if (isMobile && !attemptedOpen) {
+        setAttemptedOpen(true);
+
+        // Small delay to let the page render first
+        const timer = setTimeout(() => {
+          window.location.href = customSchemeLink;
+        }, 100);
+
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [team, error, customSchemeLink, attemptedOpen]);
 
   const handleJoinTeam = () => {
     // Try to open app via custom URL scheme
-    // This works if the app is installed
     window.location.href = customSchemeLink;
   };
 
