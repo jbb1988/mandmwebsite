@@ -7,6 +7,7 @@ const supabase = createClient(
 );
 
 const TOLT_API_KEY = process.env.TOLT_API_KEY;
+const TOLT_PROGRAM_ID = process.env.TOLT_PROGRAM_ID;
 const TOLT_API_BASE = 'https://api.tolt.com/v1';
 
 interface ToltTransaction {
@@ -55,7 +56,13 @@ async function fetchFromTolt(endpoint: string, params: Record<string, string> = 
     throw new Error('TOLT_API_KEY not configured');
   }
 
+  if (!TOLT_PROGRAM_ID) {
+    throw new Error('TOLT_PROGRAM_ID not configured');
+  }
+
   const url = new URL(`${TOLT_API_BASE}${endpoint}`);
+  // program_id is required for all list endpoints
+  url.searchParams.append('program_id', TOLT_PROGRAM_ID);
   Object.entries(params).forEach(([key, value]) => url.searchParams.append(key, value));
 
   const response = await fetch(url.toString(), {
