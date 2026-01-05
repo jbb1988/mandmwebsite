@@ -3,8 +3,12 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { LiquidGlass } from '@/components/LiquidGlass';
-import { GradientTextReveal } from '@/components/animations';
+import {
+  FadeInWhenVisible,
+  StaggerChildren,
+  GradientTextReveal,
+  staggerItemVariants,
+} from '@/components/animations';
 import {
   Play,
   Bell,
@@ -19,7 +23,9 @@ import {
   HelpCircle,
   Smartphone,
   Eye,
-  Video
+  Video,
+  Sparkles,
+  Zap,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -86,10 +92,22 @@ export default function AthleteGuidePage() {
     }
   ];
 
+  const workflowSteps = [
+    { step: 'Coach assigns drill', icon: Bell, color: '#3B82F6' },
+    { step: 'You get push notification', icon: Smartphone, color: '#3B82F6' },
+    { step: 'Open "For You" tab', icon: Eye, color: '#F97316' },
+    { step: 'Watch the FULL video (80%+)', icon: Play, color: '#F97316' },
+    { step: 'Tap "Practice This"', icon: Video, color: '#22C55E' },
+    { step: 'Record yourself in Swing Lab or Pitch Lab', icon: Video, color: '#22C55E' },
+    { step: 'Get AI analysis of your technique', icon: CheckCircle2, color: '#A855F7' },
+    { step: 'Tap "Mark Complete"', icon: CheckCircle2, color: '#A855F7' },
+    { step: 'Coach sees your progress!', icon: CheckCircle2, color: '#22C55E' },
+  ];
+
   return (
-    <div className="min-h-screen pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative">
+    <div className="min-h-screen bg-[#0F1123]">
       {/* Logo Watermark */}
-      <div className="fixed inset-0 flex items-center justify-center opacity-[0.04] pointer-events-none z-0">
+      <div className="fixed inset-0 flex items-center justify-center opacity-[0.02] pointer-events-none z-0">
         <Image
           src="/assets/images/logo.png"
           alt=""
@@ -99,362 +117,457 @@ export default function AthleteGuidePage() {
         />
       </div>
 
-      {/* Back Link */}
-      <div className="max-w-7xl mx-auto mb-8">
-        <Link
-          href="/dbat/vault"
-          className="inline-flex items-center gap-2 text-neon-cortex-blue hover:text-neon-cortex-blue/80 transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Resources
-        </Link>
-      </div>
+      {/* Hero Section */}
+      <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        {/* Premium Background Layers */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#1A1F3A] via-[#0F1123] to-[#0F1123]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(14,165,233,0.15)_0%,transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(249,115,22,0.1)_0%,transparent_50%)]" />
 
-      {/* Header */}
-      <div className="max-w-7xl mx-auto text-center mb-16">
-        <div className="flex items-center justify-center gap-4 mb-6">
-          <Image
-            src="/assets/images/the_vault_icon.png"
-            alt="The Vault"
-            width={64}
-            height={64}
-            className="object-contain"
-          />
-        </div>
-        <GradientTextReveal
-          text="D-BAT Athlete Guide"
-          className="text-4xl sm:text-5xl md:text-6xl font-black mb-8 leading-relaxed"
-          gradientFrom="#0EA5E9"
-          gradientTo="#F97316"
-          delay={0.2}
-        />
-        <p className="text-xl sm:text-2xl text-gray-300 max-w-4xl mx-auto font-medium leading-relaxed">
-          How to use The Vault to watch drills, practice with AI analysis, and level up your game
-        </p>
-      </div>
+        <div className="max-w-5xl mx-auto relative z-10">
+          {/* Back Link */}
+          <FadeInWhenVisible delay={0} direction="down">
+            <Link
+              href="/dbat/vault"
+              className="inline-flex items-center gap-2 text-neon-cortex-blue hover:text-neon-cortex-blue/80 transition-colors mb-12 group"
+            >
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+              Back to Resources
+            </Link>
+          </FadeInWhenVisible>
 
-      {/* The Workflow */}
-      <div className="max-w-4xl mx-auto mb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <LiquidGlass variant="blue" rounded="2xl" className="p-8 md:p-12">
-            <h2 className="text-2xl font-black text-center mb-8">How It Works</h2>
-
-            <div className="space-y-4">
-              {[
-                { step: 'Coach assigns drill', icon: Bell, color: '#3B82F6' },
-                { step: 'You get push notification', icon: Smartphone, color: '#3B82F6' },
-                { step: 'Open "For You" tab', icon: Eye, color: '#F97316' },
-                { step: 'Watch the FULL video (80%+)', icon: Play, color: '#F97316' },
-                { step: 'Tap "Practice This"', icon: Video, color: '#22C55E' },
-                { step: 'Record yourself in Swing Lab or Pitch Lab', icon: Video, color: '#22C55E' },
-                { step: 'Get AI analysis of your technique', icon: CheckCircle2, color: '#A855F7' },
-                { step: 'Tap "Mark Complete"', icon: CheckCircle2, color: '#A855F7' },
-                { step: 'Coach sees your progress!', icon: CheckCircle2, color: '#22C55E' },
-              ].map((item, index) => (
-                <div key={index} className="flex items-center gap-4">
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{ backgroundColor: `${item.color}20`, border: `2px solid ${item.color}40` }}
-                  >
-                    <item.icon className="w-5 h-5" style={{ color: item.color }} />
-                  </div>
-                  <div className="flex-1 flex items-center gap-3">
-                    <span className="text-gray-300">{item.step}</span>
-                  </div>
-                  {index < 8 && (
-                    <div className="hidden sm:block w-4 text-gray-600">↓</div>
-                  )}
-                </div>
-              ))}
+          {/* Header */}
+          <FadeInWhenVisible delay={0.1} direction="up" className="text-center">
+            <div className="flex items-center justify-center gap-4 mb-8">
+              <div className="relative">
+                <div className="absolute inset-0 bg-neon-cortex-blue/30 blur-2xl rounded-full" />
+                <Image
+                  src="/assets/images/the_vault_icon.png"
+                  alt="The Vault"
+                  width={80}
+                  height={80}
+                  className="relative object-contain"
+                  style={{filter: 'drop-shadow(0 0 20px rgba(14,165,233,0.6))'}}
+                />
+              </div>
             </div>
-          </LiquidGlass>
-        </motion.div>
-      </div>
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-neon-cortex-blue/20 to-solar-surge-orange/20 border border-neon-cortex-blue/30 text-neon-cortex-blue text-sm font-bold mb-8 shadow-[0_0_30px_rgba(14,165,233,0.3)]">
+              <Sparkles className="w-4 h-4" style={{filter: 'drop-shadow(0 0 8px rgba(14,165,233,0.8))'}} />
+              FOR ATHLETES
+            </div>
+            <GradientTextReveal
+              text="D-BAT Athlete Guide"
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black mb-8"
+              gradientFrom="#0EA5E9"
+              gradientTo="#F97316"
+              delay={0.2}
+            />
+            <p className="text-xl sm:text-2xl text-white/70 max-w-3xl mx-auto font-medium leading-relaxed">
+              How to use The Vault to watch drills, practice with AI analysis, and level up your game
+            </p>
+          </FadeInWhenVisible>
+        </div>
+      </section>
+
+      {/* How It Works - Workflow */}
+      <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0F1123] via-[#1A1F3A]/50 to-[#0F1123]" />
+
+        <div className="max-w-4xl mx-auto relative z-10">
+          <FadeInWhenVisible delay={0} direction="up">
+            <div className="group relative">
+              {/* Outer Glow */}
+              <div className="absolute -inset-2 rounded-3xl blur-2xl opacity-60 bg-gradient-to-r from-neon-cortex-blue/30 to-solar-surge-orange/30 group-hover:opacity-80 transition-opacity duration-500" />
+
+              <div className="relative backdrop-blur-sm bg-white/[0.02] rounded-2xl border-2 border-neon-cortex-blue/40 p-8 md:p-12 shadow-[0_0_40px_rgba(14,165,233,0.2)]">
+                <h2 className="text-2xl sm:text-3xl font-black text-center mb-10 text-white">How It Works</h2>
+
+                <div className="space-y-4">
+                  {workflowSteps.map((item, index) => (
+                    <div key={index} className="flex items-center gap-4 group/step">
+                      <div
+                        className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover/step:scale-110"
+                        style={{ backgroundColor: `${item.color}20`, border: `2px solid ${item.color}40` }}
+                      >
+                        <item.icon
+                          className="w-5 h-5"
+                          style={{ color: item.color, filter: `drop-shadow(0 0 6px ${item.color})` }}
+                        />
+                      </div>
+                      <div className="flex-1 flex items-center gap-3">
+                        <span className="text-white/80">{item.step}</span>
+                      </div>
+                      {index < workflowSteps.length - 1 && (
+                        <div className="hidden sm:block w-4 text-white/30">|</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </FadeInWhenVisible>
+        </div>
+      </section>
 
       {/* Your Three Tabs */}
-      <div className="max-w-4xl mx-auto mb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <LiquidGlass variant="orange" rounded="2xl" className="p-8">
-            <h2 className="text-2xl font-black mb-6">Your Three Tabs</h2>
+      <section className="relative py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="absolute inset-0 bg-[#0F1123]" />
 
-            <div className="grid sm:grid-cols-3 gap-4">
-              {tabs.map((tab, index) => (
-                <div key={index} className="p-4 bg-white/5 rounded-xl border border-white/10">
-                  <div className="flex items-center gap-2 mb-2">
-                    <tab.icon className="w-5 h-5 text-solar-surge-orange" />
-                    <h3 className="font-bold text-solar-surge-orange">{tab.name}</h3>
-                  </div>
-                  <p className="text-sm text-gray-400 mb-2">{tab.description}</p>
-                  <p className="text-sm text-white font-medium">{tab.priority}</p>
-                </div>
-              ))}
+        <div className="max-w-4xl mx-auto relative z-10">
+          <FadeInWhenVisible delay={0} direction="up">
+            <div className="group relative">
+              <div className="absolute -inset-2 rounded-3xl blur-2xl opacity-40 bg-gradient-to-r from-solar-surge-orange/30 to-solar-surge-orange/10 group-hover:opacity-60 transition-opacity duration-500" />
+
+              <div className="relative backdrop-blur-sm bg-white/[0.02] rounded-2xl border-2 border-solar-surge-orange/40 p-8 shadow-[0_0_30px_rgba(249,115,22,0.15)]">
+                <h2 className="text-2xl font-black mb-8 text-solar-surge-orange">Your Three Tabs</h2>
+
+                <StaggerChildren staggerDelay={0.1} className="grid sm:grid-cols-3 gap-4">
+                  {tabs.map((tab, index) => (
+                    <motion.div
+                      key={index}
+                      variants={staggerItemVariants}
+                      className="group/tab p-5 bg-white/[0.03] hover:bg-white/[0.06] rounded-xl border border-white/10 hover:border-solar-surge-orange/40 transition-all duration-300"
+                    >
+                      <div className="flex items-center gap-2 mb-3">
+                        <tab.icon
+                          className="w-5 h-5 text-solar-surge-orange"
+                          style={{filter: 'drop-shadow(0 0 6px rgba(249,115,22,0.5))'}}
+                        />
+                        <h3 className="font-bold text-solar-surge-orange">{tab.name}</h3>
+                      </div>
+                      <p className="text-sm text-white/50 mb-2">{tab.description}</p>
+                      <p className="text-sm text-white font-medium">{tab.priority}</p>
+                    </motion.div>
+                  ))}
+                </StaggerChildren>
+              </div>
             </div>
-          </LiquidGlass>
-        </motion.div>
-      </div>
+          </FadeInWhenVisible>
+        </div>
+      </section>
 
       {/* Practice This Feature */}
-      <div className="max-w-4xl mx-auto mb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <LiquidGlass variant="blue" rounded="2xl" className="p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 rounded-xl bg-neon-cortex-blue/20">
-                <Video className="w-6 h-6 text-neon-cortex-blue" />
-              </div>
-              <h2 className="text-2xl font-black">The "Practice This" Button</h2>
-            </div>
+      <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0F1123] via-[#1A1F3A]/30 to-[#0F1123]" />
 
-            <p className="text-gray-400 mb-6">
-              This is where the magic happens. After watching any drill:
-            </p>
+        <div className="max-w-4xl mx-auto relative z-10">
+          <FadeInWhenVisible delay={0} direction="up">
+            <div className="group relative">
+              <div className="absolute -inset-2 rounded-3xl blur-2xl opacity-40 bg-neon-cortex-blue/30 group-hover:opacity-60 transition-opacity duration-500" />
 
-            <div className="grid sm:grid-cols-2 gap-4 mb-6">
-              {[
-                { step: 'Tap "Practice This" button', detail: 'Below the video player' },
-                { step: 'Swing Lab or Pitch Lab opens', detail: 'Based on drill type' },
-                { step: 'Record yourself doing the drill', detail: 'Camera guides you' },
-                { step: 'Get instant AI analysis', detail: 'See what to improve' },
-              ].map((item, i) => (
-                <div key={i} className="p-4 bg-white/5 rounded-xl">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="w-6 h-6 rounded-full bg-neon-cortex-blue/30 flex items-center justify-center text-xs font-bold">
-                      {i + 1}
-                    </div>
-                    <span className="font-semibold text-white">{item.step}</span>
+              <div className="relative backdrop-blur-sm bg-white/[0.02] rounded-2xl border-2 border-neon-cortex-blue/40 p-8 shadow-[0_0_30px_rgba(14,165,233,0.15)]">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 rounded-xl bg-neon-cortex-blue/20 border border-neon-cortex-blue/30">
+                    <Video
+                      className="w-6 h-6 text-neon-cortex-blue"
+                      style={{filter: 'drop-shadow(0 0 8px rgba(14,165,233,0.6))'}}
+                    />
                   </div>
-                  <p className="text-sm text-gray-400 ml-8">{item.detail}</p>
+                  <h2 className="text-2xl font-black text-white">The "Practice This" Button</h2>
                 </div>
-              ))}
-            </div>
 
-            <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-xl">
-              <p className="text-green-400 font-medium">
-                <CheckCircle2 className="w-5 h-5 inline mr-2" />
-                Coach can see you actually practiced — not just watched!
-              </p>
+                <p className="text-white/50 mb-8">
+                  This is where the magic happens. After watching any drill:
+                </p>
+
+                <StaggerChildren staggerDelay={0.1} className="grid sm:grid-cols-2 gap-4 mb-8">
+                  {[
+                    { step: 'Tap "Practice This" button', detail: 'Below the video player' },
+                    { step: 'Swing Lab or Pitch Lab opens', detail: 'Based on drill type' },
+                    { step: 'Record yourself doing the drill', detail: 'Camera guides you' },
+                    { step: 'Get instant AI analysis', detail: 'See what to improve' },
+                  ].map((item, i) => (
+                    <motion.div
+                      key={i}
+                      variants={staggerItemVariants}
+                      className="p-4 bg-white/[0.03] rounded-xl border border-white/10 hover:border-neon-cortex-blue/30 transition-colors"
+                    >
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-7 h-7 rounded-full bg-neon-cortex-blue/20 border border-neon-cortex-blue/30 flex items-center justify-center text-xs font-bold text-neon-cortex-blue">
+                          {i + 1}
+                        </div>
+                        <span className="font-semibold text-white">{item.step}</span>
+                      </div>
+                      <p className="text-sm text-white/50 ml-9">{item.detail}</p>
+                    </motion.div>
+                  ))}
+                </StaggerChildren>
+
+                <div className="p-4 bg-green-500/10 border-2 border-green-500/30 rounded-xl shadow-[0_0_20px_rgba(34,197,94,0.1)]">
+                  <p className="text-green-400 font-medium flex items-center gap-2">
+                    <CheckCircle2 className="w-5 h-5" style={{filter: 'drop-shadow(0 0 6px rgba(34,197,94,0.5))'}} />
+                    Coach can see you actually practiced - not just watched!
+                  </p>
+                </div>
+              </div>
             </div>
-          </LiquidGlass>
-        </motion.div>
-      </div>
+          </FadeInWhenVisible>
+        </div>
+      </section>
 
       {/* Free vs Pro */}
-      <div className="max-w-4xl mx-auto mb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <LiquidGlass variant="orange" rounded="2xl" className="p-8">
-            <h2 className="text-2xl font-black mb-6">Free vs Pro</h2>
+      <section className="relative py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="absolute inset-0 bg-[#0F1123]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(249,115,22,0.05)_0%,transparent_60%)]" />
 
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-white/10">
-                    <th className="text-left py-3 px-4 font-semibold">Feature</th>
-                    <th className="text-center py-3 px-4 font-semibold">
-                      <div className="flex items-center justify-center gap-2">
-                        <Lock className="w-4 h-4 text-gray-400" />
-                        Free
-                      </div>
-                    </th>
-                    <th className="text-center py-3 px-4 font-semibold">
-                      <div className="flex items-center justify-center gap-2 text-solar-surge-orange">
-                        <Unlock className="w-4 h-4" />
-                        Pro
-                      </div>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {proComparison.map((row, i) => (
-                    <tr key={i} className="border-b border-white/5">
-                      <td className="py-3 px-4 text-gray-300">{row.feature}</td>
-                      <td className="py-3 px-4 text-center text-gray-400">{row.free}</td>
-                      <td className="py-3 px-4 text-center text-solar-surge-orange font-medium">{row.pro}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        <div className="max-w-4xl mx-auto relative z-10">
+          <FadeInWhenVisible delay={0} direction="up">
+            <div className="group relative">
+              <div className="absolute -inset-2 rounded-3xl blur-2xl opacity-40 bg-solar-surge-orange/30 group-hover:opacity-60 transition-opacity duration-500" />
+
+              <div className="relative backdrop-blur-sm bg-white/[0.02] rounded-2xl border-2 border-solar-surge-orange/40 p-8 shadow-[0_0_30px_rgba(249,115,22,0.15)]">
+                <h2 className="text-2xl font-black mb-8 text-white">Free vs Pro</h2>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-white/10">
+                        <th className="text-left py-4 px-4 font-semibold text-white">Feature</th>
+                        <th className="text-center py-4 px-4 font-semibold">
+                          <div className="flex items-center justify-center gap-2 text-white/60">
+                            <Lock className="w-4 h-4" />
+                            Free
+                          </div>
+                        </th>
+                        <th className="text-center py-4 px-4 font-semibold">
+                          <div className="flex items-center justify-center gap-2 text-solar-surge-orange">
+                            <Unlock className="w-4 h-4" style={{filter: 'drop-shadow(0 0 6px rgba(249,115,22,0.5))'}} />
+                            Pro
+                          </div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {proComparison.map((row, i) => (
+                        <tr key={i} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
+                          <td className="py-4 px-4 text-white/80">{row.feature}</td>
+                          <td className="py-4 px-4 text-center text-white/50">{row.free}</td>
+                          <td className="py-4 px-4 text-center text-solar-surge-orange font-medium">{row.pro}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <p className="text-sm text-white/40 mt-6 text-center">
+                  *Free drill resets every Monday
+                </p>
+              </div>
             </div>
-
-            <p className="text-sm text-gray-400 mt-4 text-center">
-              *Free drill resets every Monday
-            </p>
-          </LiquidGlass>
-        </motion.div>
-      </div>
+          </FadeInWhenVisible>
+        </div>
+      </section>
 
       {/* Pro Tips */}
-      <div className="max-w-4xl mx-auto mb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <LiquidGlass variant="blue" rounded="2xl" className="p-8">
-            <h2 className="text-2xl font-black mb-6">Pro Tips</h2>
+      <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0F1123] via-[#1A1F3A]/30 to-[#0F1123]" />
 
-            <div className="space-y-3">
-              {proTips.map((item, i) => (
-                <div key={i} className="flex items-start gap-4 p-4 bg-white/5 rounded-xl">
-                  <CheckCircle2 className="w-5 h-5 text-neon-cortex-blue flex-shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-semibold text-white">{item.tip}</span>
-                    <span className="text-gray-400"> — {item.why}</span>
+        <div className="max-w-4xl mx-auto relative z-10">
+          <FadeInWhenVisible delay={0} direction="up">
+            <div className="group relative">
+              <div className="absolute -inset-2 rounded-3xl blur-2xl opacity-40 bg-neon-cortex-blue/30 group-hover:opacity-60 transition-opacity duration-500" />
+
+              <div className="relative backdrop-blur-sm bg-white/[0.02] rounded-2xl border-2 border-neon-cortex-blue/40 p-8 shadow-[0_0_30px_rgba(14,165,233,0.15)]">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 rounded-xl bg-neon-cortex-blue/20 border border-neon-cortex-blue/30">
+                    <Zap
+                      className="w-6 h-6 text-neon-cortex-blue"
+                      style={{filter: 'drop-shadow(0 0 8px rgba(14,165,233,0.6))'}}
+                    />
                   </div>
+                  <h2 className="text-2xl font-black text-white">Pro Tips</h2>
                 </div>
-              ))}
+
+                <StaggerChildren staggerDelay={0.08} className="space-y-3">
+                  {proTips.map((item, i) => (
+                    <motion.div
+                      key={i}
+                      variants={staggerItemVariants}
+                      className="flex items-start gap-4 p-4 bg-white/[0.03] rounded-xl border border-white/10 hover:border-neon-cortex-blue/30 transition-colors"
+                    >
+                      <CheckCircle2 className="w-5 h-5 text-neon-cortex-blue flex-shrink-0 mt-0.5" style={{filter: 'drop-shadow(0 0 6px rgba(14,165,233,0.5))'}} />
+                      <div>
+                        <span className="font-semibold text-white">{item.tip}</span>
+                        <span className="text-white/50"> - {item.why}</span>
+                      </div>
+                    </motion.div>
+                  ))}
+                </StaggerChildren>
+              </div>
             </div>
-          </LiquidGlass>
-        </motion.div>
-      </div>
+          </FadeInWhenVisible>
+        </div>
+      </section>
 
       {/* Claiming Shared Drills */}
-      <div className="max-w-4xl mx-auto mb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <LiquidGlass variant="orange" rounded="2xl" className="p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 rounded-xl bg-solar-surge-orange/20">
-                <Link2 className="w-6 h-6 text-solar-surge-orange" />
-              </div>
-              <h2 className="text-2xl font-black">Claiming a Shared Drill Link</h2>
-            </div>
+      <section className="relative py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="absolute inset-0 bg-[#0F1123]" />
 
-            <p className="text-gray-400 mb-6">Got a link from your coach?</p>
+        <div className="max-w-4xl mx-auto relative z-10">
+          <FadeInWhenVisible delay={0} direction="up">
+            <div className="group relative">
+              <div className="absolute -inset-2 rounded-3xl blur-2xl opacity-40 bg-solar-surge-orange/30 group-hover:opacity-60 transition-opacity duration-500" />
 
-            <div className="space-y-3">
-              {[
-                'Tap the link (opens in app)',
-                'Preview the drill info',
-                'Tap "Claim Drill"',
-                'Find it in your For You tab',
-              ].map((step, i) => (
-                <div key={i} className="flex items-center gap-4">
-                  <div className="w-8 h-8 rounded-full bg-solar-surge-orange/20 flex items-center justify-center text-solar-surge-orange font-bold">
-                    {i + 1}
+              <div className="relative backdrop-blur-sm bg-white/[0.02] rounded-2xl border-2 border-solar-surge-orange/40 p-8 shadow-[0_0_30px_rgba(249,115,22,0.15)]">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 rounded-xl bg-solar-surge-orange/20 border border-solar-surge-orange/30">
+                    <Link2
+                      className="w-6 h-6 text-solar-surge-orange"
+                      style={{filter: 'drop-shadow(0 0 8px rgba(249,115,22,0.6))'}}
+                    />
                   </div>
-                  <span className="text-gray-300">{step}</span>
+                  <h2 className="text-2xl font-black text-white">Claiming a Shared Drill Link</h2>
                 </div>
-              ))}
+
+                <p className="text-white/50 mb-8">Got a link from your coach?</p>
+
+                <StaggerChildren staggerDelay={0.1} className="space-y-3">
+                  {[
+                    'Tap the link (opens in app)',
+                    'Preview the drill info',
+                    'Tap "Claim Drill"',
+                    'Find it in your For You tab',
+                  ].map((step, i) => (
+                    <motion.div
+                      key={i}
+                      variants={staggerItemVariants}
+                      className="flex items-center gap-4 group/step"
+                    >
+                      <div className="w-10 h-10 rounded-full bg-solar-surge-orange/20 border-2 border-solar-surge-orange/40 flex items-center justify-center text-solar-surge-orange font-bold group-hover/step:scale-110 group-hover/step:bg-solar-surge-orange/30 transition-all">
+                        {i + 1}
+                      </div>
+                      <span className="text-white/80">{step}</span>
+                    </motion.div>
+                  ))}
+                </StaggerChildren>
+              </div>
             </div>
-          </LiquidGlass>
-        </motion.div>
-      </div>
+          </FadeInWhenVisible>
+        </div>
+      </section>
 
       {/* Troubleshooting */}
-      <div className="max-w-4xl mx-auto mb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <LiquidGlass variant="blue" rounded="2xl" className="p-8">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 rounded-xl bg-neon-cortex-blue/20">
-                <HelpCircle className="w-6 h-6 text-neon-cortex-blue" />
-              </div>
-              <h2 className="text-2xl font-black">Need Help?</h2>
-            </div>
+      <section className="relative py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0F1123] via-[#1A1F3A]/30 to-[#0F1123]" />
 
-            <div className="grid sm:grid-cols-2 gap-4">
-              {troubleshooting.map((item, i) => (
-                <div key={i} className="p-4 bg-white/5 rounded-xl">
-                  <p className="font-semibold text-white mb-1">{item.issue}</p>
-                  <p className="text-sm text-neon-cortex-blue">{item.solution}</p>
+        <div className="max-w-4xl mx-auto relative z-10">
+          <FadeInWhenVisible delay={0} direction="up">
+            <div className="group relative">
+              <div className="absolute -inset-2 rounded-3xl blur-2xl opacity-40 bg-neon-cortex-blue/30 group-hover:opacity-60 transition-opacity duration-500" />
+
+              <div className="relative backdrop-blur-sm bg-white/[0.02] rounded-2xl border-2 border-neon-cortex-blue/40 p-8 shadow-[0_0_30px_rgba(14,165,233,0.15)]">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 rounded-xl bg-neon-cortex-blue/20 border border-neon-cortex-blue/30">
+                    <HelpCircle
+                      className="w-6 h-6 text-neon-cortex-blue"
+                      style={{filter: 'drop-shadow(0 0 8px rgba(14,165,233,0.6))'}}
+                    />
+                  </div>
+                  <h2 className="text-2xl font-black text-white">Need Help?</h2>
                 </div>
-              ))}
+
+                <StaggerChildren staggerDelay={0.1} className="grid sm:grid-cols-2 gap-4">
+                  {troubleshooting.map((item, i) => (
+                    <motion.div
+                      key={i}
+                      variants={staggerItemVariants}
+                      className="p-4 bg-white/[0.03] rounded-xl border border-white/10 hover:border-neon-cortex-blue/30 transition-colors"
+                    >
+                      <p className="font-semibold text-white mb-1">{item.issue}</p>
+                      <p className="text-sm text-neon-cortex-blue">{item.solution}</p>
+                    </motion.div>
+                  ))}
+                </StaggerChildren>
+              </div>
             </div>
-          </LiquidGlass>
-        </motion.div>
-      </div>
+          </FadeInWhenVisible>
+        </div>
+      </section>
 
       {/* FAQ Section */}
-      <div className="max-w-4xl mx-auto mb-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-        >
-          <LiquidGlass variant="orange" rounded="2xl" className="p-8 md:p-12">
-            <h2 className="text-3xl font-black mb-8">Frequently Asked Questions</h2>
+      <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="absolute inset-0 bg-[#0F1123]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(249,115,22,0.05)_0%,transparent_60%)]" />
 
-            <div className="space-y-4">
-              {faqs.map((faq, index) => (
-                <div
-                  key={index}
-                  className="rounded-xl bg-white/5 border border-white/10 overflow-hidden"
-                >
-                  <button
-                    onClick={() => setExpandedFAQ(expandedFAQ === index ? null : index)}
-                    className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-white/5 transition-colors"
-                  >
-                    <span className="font-semibold pr-4">{faq.question}</span>
-                    <ChevronDown
-                      className={`w-5 h-5 flex-shrink-0 transition-transform ${expandedFAQ === index ? 'rotate-180' : ''}`}
-                    />
-                  </button>
-                  <AnimatePresence>
-                    {expandedFAQ === index && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
+        <div className="max-w-4xl mx-auto relative z-10">
+          <FadeInWhenVisible delay={0} direction="up">
+            <div className="group relative">
+              <div className="absolute -inset-2 rounded-3xl blur-2xl opacity-40 bg-solar-surge-orange/30 group-hover:opacity-60 transition-opacity duration-500" />
+
+              <div className="relative backdrop-blur-sm bg-white/[0.02] rounded-2xl border-2 border-solar-surge-orange/40 p-8 md:p-12 shadow-[0_0_30px_rgba(249,115,22,0.15)]">
+                <h2 className="text-3xl font-black mb-10 text-white">Frequently Asked Questions</h2>
+
+                <div className="space-y-4">
+                  {faqs.map((faq, index) => (
+                    <div
+                      key={index}
+                      className="rounded-xl bg-white/[0.03] border border-white/10 overflow-hidden hover:border-solar-surge-orange/30 transition-colors"
+                    >
+                      <button
+                        onClick={() => setExpandedFAQ(expandedFAQ === index ? null : index)}
+                        className="w-full px-6 py-4 flex items-center justify-between text-left hover:bg-white/[0.02] transition-colors"
                       >
-                        <div className="px-6 pb-4 text-text-secondary">
-                          {faq.answer}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                        <span className="font-semibold text-white pr-4">{faq.question}</span>
+                        <ChevronDown
+                          className={`w-5 h-5 text-solar-surge-orange flex-shrink-0 transition-transform duration-300 ${expandedFAQ === index ? 'rotate-180' : ''}`}
+                        />
+                      </button>
+                      <AnimatePresence>
+                        {expandedFAQ === index && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <div className="px-6 pb-4 text-white/60 leading-relaxed">
+                              {faq.answer}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
-          </LiquidGlass>
-        </motion.div>
-      </div>
+          </FadeInWhenVisible>
+        </div>
+      </section>
 
       {/* Bottom CTA */}
-      <div className="max-w-4xl mx-auto text-center">
-        <h2 className="text-3xl font-black mb-4">Ready to Train?</h2>
-        <p className="text-xl text-gray-400 mb-8">
-          The Vault. Professional drills. Your schedule. Let&apos;s go.
-        </p>
+      <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+        <div className="absolute inset-0 bg-[#0F1123]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(14,165,233,0.08)_0%,transparent_60%)]" />
 
-        <div className="flex flex-wrap justify-center gap-4">
-          <a
-            href="/download"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-lg bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange hover:opacity-90 transition-all"
-          >
-            Download the App
-            <ArrowRight className="w-5 h-5" />
-          </a>
-          <Link
-            href="/dbat/vault"
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-lg bg-white/10 border border-white/20 hover:bg-white/20 transition-all"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Back to Resources
-          </Link>
+        <div className="max-w-4xl mx-auto relative z-10 text-center">
+          <FadeInWhenVisible delay={0} direction="up">
+            <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">Ready to Train?</h2>
+            <p className="text-xl text-white/60 mb-10">
+              The Vault. Professional drills. Your schedule. Let&apos;s go.
+            </p>
+
+            <div className="flex flex-wrap justify-center gap-4">
+              <a
+                href="/download"
+                className="group relative inline-flex items-center gap-2 px-8 py-4 font-bold text-lg rounded-xl overflow-hidden transition-all duration-300 hover:scale-105"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange" />
+                <div className="absolute inset-0 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange opacity-0 group-hover:opacity-100 blur-xl transition-opacity" />
+                <span className="relative text-white">Download the App</span>
+                <ArrowRight className="relative w-5 h-5 text-white group-hover:translate-x-1 transition-transform" />
+              </a>
+              <Link
+                href="/dbat/vault"
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-lg bg-white/[0.05] border-2 border-white/20 hover:border-white/40 hover:bg-white/[0.08] transition-all duration-300 text-white"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                Back to Resources
+              </Link>
+            </div>
+          </FadeInWhenVisible>
         </div>
-      </div>
+      </section>
     </div>
   );
 }
