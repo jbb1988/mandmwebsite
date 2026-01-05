@@ -243,7 +243,7 @@ export default function DBatVaultPage() {
               {
                 title: 'The Vault',
                 description: 'Instructor-assigned drill library. Athletes receive push notifications when drills are assigned. Track who watched, who practiced.',
-                icon: '/assets/images/vault_icon.png',
+                icon: '/assets/images/the_vault_icon.png',
                 color: 'blue',
                 video: '/assets/videos/the_vault.mp4',
               },
