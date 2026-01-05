@@ -18,8 +18,6 @@ import {
   ArrowRight,
   Bookmark,
   Link2,
-  Lock,
-  Unlock,
   HelpCircle,
   Smartphone,
   Eye,
@@ -43,13 +41,6 @@ export default function AthleteGuidePage() {
     { name: 'Saved', description: 'Your bookmarked favorites', priority: 'Quick access', icon: Bookmark },
   ];
 
-  const proComparison = [
-    { feature: 'Watch drills', free: '1/week', pro: 'Unlimited' },
-    { feature: 'Preview length', free: '15 sec', pro: 'Full video' },
-    { feature: 'Coach assignments', free: 'Locked', pro: 'Full access' },
-    { feature: 'Practice This', free: 'Yes', pro: 'Yes' },
-  ];
-
   const proTips = [
     { tip: 'Check "For You" first', why: 'Coach assigned these for YOU' },
     { tip: 'Watch the whole video', why: 'You\'re not "viewed" until 80%' },
@@ -61,7 +52,6 @@ export default function AthleteGuidePage() {
   const troubleshooting = [
     { issue: 'Drill won\'t play?', solution: 'Check your internet connection' },
     { issue: 'Link doesn\'t work?', solution: 'May be expired - ask coach for new one' },
-    { issue: 'Locked drills?', solution: 'Upgrade to Pro or wait for weekly reset' },
     { issue: 'Can\'t find assigned drill?', solution: 'Pull down to refresh For You tab' },
   ];
 
@@ -76,11 +66,7 @@ export default function AthleteGuidePage() {
     },
     {
       question: 'How do I claim a shared drill link?',
-      answer: 'Tap the link your coach sent you (it opens in the app). Preview the drill info, then tap "Claim Drill." It will appear in your For You tab. Note: You need Pro access to claim shared drills.'
-    },
-    {
-      question: 'Why can\'t I see all drills?',
-      answer: 'Free users get 1 drill per week and 15-second previews. Pro users get unlimited access. Your weekly free drill resets every Monday.'
+      answer: 'Tap the link your coach sent you (it opens in the app). Preview the drill info, then tap "Claim Drill." It will appear in your For You tab.'
     },
     {
       question: 'Can I watch the same drill multiple times?',
@@ -299,59 +285,6 @@ export default function AthleteGuidePage() {
                     Coach can see you actually practiced - not just watched!
                   </p>
                 </div>
-              </div>
-            </div>
-          </FadeInWhenVisible>
-        </div>
-      </section>
-
-      {/* Free vs Pro */}
-      <section className="relative py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="absolute inset-0 bg-[#0F1123]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(249,115,22,0.05)_0%,transparent_60%)]" />
-
-        <div className="max-w-4xl mx-auto relative z-10">
-          <FadeInWhenVisible delay={0} direction="up">
-            <div className="group relative">
-              <div className="absolute -inset-2 rounded-3xl blur-2xl opacity-40 bg-solar-surge-orange/30 group-hover:opacity-60 transition-opacity duration-500" />
-
-              <div className="relative backdrop-blur-sm bg-white/[0.02] rounded-2xl border-2 border-solar-surge-orange/40 p-8 shadow-[0_0_30px_rgba(249,115,22,0.15)]">
-                <h2 className="text-2xl font-black mb-8 text-white">Free vs Pro</h2>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-white/10">
-                        <th className="text-left py-4 px-4 font-semibold text-white">Feature</th>
-                        <th className="text-center py-4 px-4 font-semibold">
-                          <div className="flex items-center justify-center gap-2 text-white/60">
-                            <Lock className="w-4 h-4" />
-                            Free
-                          </div>
-                        </th>
-                        <th className="text-center py-4 px-4 font-semibold">
-                          <div className="flex items-center justify-center gap-2 text-solar-surge-orange">
-                            <Unlock className="w-4 h-4" style={{filter: 'drop-shadow(0 0 6px rgba(249,115,22,0.5))'}} />
-                            Pro
-                          </div>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {proComparison.map((row, i) => (
-                        <tr key={i} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors">
-                          <td className="py-4 px-4 text-white/80">{row.feature}</td>
-                          <td className="py-4 px-4 text-center text-white/50">{row.free}</td>
-                          <td className="py-4 px-4 text-center text-solar-surge-orange font-medium">{row.pro}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-
-                <p className="text-sm text-white/40 mt-6 text-center">
-                  *Free drill resets every Monday
-                </p>
               </div>
             </div>
           </FadeInWhenVisible>
