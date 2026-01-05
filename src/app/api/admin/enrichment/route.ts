@@ -79,23 +79,63 @@ export async function GET(request: NextRequest) {
       stats = segmentStats;
     }
 
-    // Get contact counts per segment
-    const { data: contactStats, error: contactError } = await supabase
+    // Get contact counts per segment AND count of orgs with contacts, plus stage breakdown
+    const { data: contactStats } = await supabase
       .from('marketing_contacts')
-      .select('organization:marketing_organizations!inner(segment)')
+      .select('organization_id, stage, organization:marketing_organizations!inner(segment)')
       .not('email', 'is', null);
 
     const contactsBySegment = new Map<string, number>();
+    const orgsWithContactsBySegment = new Map<string, Set<string>>();
+    const stagesBySegment = new Map<string, Record<string, number>>();
+
     for (const contact of contactStats || []) {
       const segment = (contact.organization as any)?.segment || 'unknown';
+      const orgId = contact.organization_id;
+      const stage = (contact as any).stage || 'new';
+
+      // Count total contacts per segment
       contactsBySegment.set(segment, (contactsBySegment.get(segment) || 0) + 1);
+
+      // Track unique orgs with contacts per segment
+      if (!orgsWithContactsBySegment.has(segment)) {
+        orgsWithContactsBySegment.set(segment, new Set());
+      }
+      orgsWithContactsBySegment.get(segment)!.add(orgId);
+
+      // Track stage counts per segment
+      if (!stagesBySegment.has(segment)) {
+        stagesBySegment.set(segment, { new: 0, email_sent: 0, responded: 0, meeting: 0, won: 0, lost: 0 });
+      }
+      const segmentStages = stagesBySegment.get(segment)!;
+      segmentStages[stage] = (segmentStages[stage] || 0) + 1;
     }
 
-    // Add contact counts to stats
-    const enrichedStats = (stats || []).map((s: any) => ({
-      ...s,
-      contacts: contactsBySegment.get(s.segment) || 0,
-    }));
+    // Add contact counts to stats and calculate accurate coverage
+    const enrichedStats = (stats || []).map((s: any) => {
+      const contacts = contactsBySegment.get(s.segment) || 0;
+      const orgsWithContacts = orgsWithContactsBySegment.get(s.segment)?.size || 0;
+      const stages = stagesBySegment.get(s.segment) || { new: 0, email_sent: 0, responded: 0, meeting: 0, won: 0, lost: 0 };
+
+      // Calculate conversion metrics
+      const responseRate = stages.email_sent > 0 ? Math.round((stages.responded / stages.email_sent) * 100) : 0;
+      const meetingRate = stages.responded > 0 ? Math.round((stages.meeting / stages.responded) * 100) : 0;
+      const winRate = contacts > 0 ? Math.round((stages.won / contacts) * 100) : 0;
+
+      return {
+        ...s,
+        contacts,
+        orgsWithContacts,
+        // Coverage = % of orgs that have at least one contact
+        coverage: s.total > 0 ? Math.round((orgsWithContacts / s.total) * 100) : 0,
+        // Stage breakdown
+        stages,
+        // Conversion metrics
+        responseRate,
+        meetingRate,
+        winRate,
+      };
+    });
 
     // Get recent enrichment activity
     const { data: recentActivity, error: activityError } = await supabase
