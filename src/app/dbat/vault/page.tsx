@@ -33,7 +33,7 @@ export default function DBatVaultPage() {
     {
       title: 'Instructor Guide',
       description: 'How coaches use The Vault to assign drills, track engagement, and extend their coaching impact between sessions.',
-      href: '/dbat/instructor-guide',
+      href: '/dbat/vault/instructor-guide',
       icon: Award,
       color: 'orange',
       audience: 'For coaches & instructors',
@@ -41,7 +41,7 @@ export default function DBatVaultPage() {
     {
       title: 'Athlete Guide',
       description: 'Step-by-step workflow for athletes using The Vault, Swing Lab, and Pitch Lab to accelerate their development.',
-      href: '/dbat/athlete-guide',
+      href: '/dbat/vault/athlete-guide',
       icon: Users,
       color: 'blue',
       audience: 'For athletes',
@@ -49,7 +49,7 @@ export default function DBatVaultPage() {
     {
       title: 'Parent Guide',
       description: 'What parents can see, understanding engagement metrics, and how to support without micromanaging.',
-      href: '/dbat/parent-guide',
+      href: '/dbat/vault/parent-guide',
       icon: Heart,
       color: 'orange',
       audience: 'For parents',
@@ -57,7 +57,7 @@ export default function DBatVaultPage() {
     {
       title: 'Pilot Playbook',
       description: 'Setup checklist, materials, talking points, metrics tracking, and success criteria for facility managers.',
-      href: '/dbat/playbook',
+      href: '/dbat/vault/playbook',
       icon: Building2,
       color: 'blue',
       audience: 'For facility managers',

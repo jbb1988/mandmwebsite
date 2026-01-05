@@ -178,11 +178,11 @@ export default function PlaybookPage() {
 
             <div className="mt-6 pt-6 border-t border-white/10 text-center">
               <Link
-                href="/dbat"
+                href="/dbat/vault"
                 className="text-neon-cortex-blue hover:text-neon-cortex-blue/80 text-sm"
               >
                 <ArrowLeft className="w-4 h-4 inline mr-1" />
-                Back to D-BAT Partnership
+                Back to Resources
               </Link>
             </div>
           </LiquidGlass>
@@ -208,11 +208,11 @@ export default function PlaybookPage() {
       {/* Back Link */}
       <div className="max-w-7xl mx-auto mb-8 flex items-center justify-between">
         <Link
-          href="/dbat"
+          href="/dbat/vault"
           className="inline-flex items-center gap-2 text-neon-cortex-blue hover:text-neon-cortex-blue/80 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to D-BAT Partnership
+          Back to Resources
         </Link>
         <div className="flex items-center gap-2 text-green-400 text-sm">
           <Unlock className="w-4 h-4" />
@@ -534,21 +534,21 @@ export default function PlaybookPage() {
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           <Link
-            href="/dbat/instructor-guide"
+            href="/dbat/vault/instructor-guide"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold bg-white/10 border border-white/20 hover:bg-white/20 transition-all"
           >
             Instructor Guide
             <ArrowRight className="w-4 h-4" />
           </Link>
           <Link
-            href="/dbat/athlete-guide"
+            href="/dbat/vault/athlete-guide"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold bg-white/10 border border-white/20 hover:bg-white/20 transition-all"
           >
             Athlete Guide
             <ArrowRight className="w-4 h-4" />
           </Link>
           <Link
-            href="/dbat/parent-guide"
+            href="/dbat/vault/parent-guide"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold bg-white/10 border border-white/20 hover:bg-white/20 transition-all"
           >
             Parent Guide

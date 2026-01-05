@@ -102,11 +102,11 @@ export default function AthleteGuidePage() {
       {/* Back Link */}
       <div className="max-w-7xl mx-auto mb-8">
         <Link
-          href="/dbat"
+          href="/dbat/vault"
           className="inline-flex items-center gap-2 text-neon-cortex-blue hover:text-neon-cortex-blue/80 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to D-BAT Partnership
+          Back to Resources
         </Link>
       </div>
 
@@ -447,11 +447,11 @@ export default function AthleteGuidePage() {
             <ArrowRight className="w-5 h-5" />
           </a>
           <Link
-            href="/dbat"
+            href="/dbat/vault"
             className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-lg bg-white/10 border border-white/20 hover:bg-white/20 transition-all"
           >
             <ArrowLeft className="w-5 h-5" />
-            Back to D-BAT
+            Back to Resources
           </Link>
         </div>
       </div>
