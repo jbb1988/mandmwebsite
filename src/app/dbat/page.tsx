@@ -892,7 +892,7 @@ export default function DBatPartnerPage() {
                 </div>
 
                 <p className="text-white/40 text-sm mt-6">
-                  Or email directly: <a href="mailto:jeff@mindandmuscle.ai" className="text-white/60 hover:text-white underline">jeff@mindandmuscle.ai</a>
+                  Or email directly: <a href="mailto:partnerships@mindandmuscle.ai" className="text-white/60 hover:text-white underline">partnerships@mindandmuscle.ai</a>
                 </p>
               </div>
             </div>

@@ -425,10 +425,10 @@ export default function DBatVaultPage() {
                 <ArrowRight className="relative w-4 h-4 text-white group-hover:translate-x-1 transition-transform" />
               </Link>
               <a
-                href="mailto:jeff@mindandmuscle.ai"
+                href="mailto:partnerships@mindandmuscle.ai"
                 className="text-white/50 hover:text-white text-sm transition-colors"
               >
-                Questions? jeff@mindandmuscle.ai
+                Questions? partnerships@mindandmuscle.ai
               </a>
             </div>
           </FadeInWhenVisible>

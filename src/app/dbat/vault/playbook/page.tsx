@@ -659,8 +659,8 @@ export default function PlaybookPage() {
                   </div>
                   <div className="p-5 bg-white/[0.03] rounded-xl border border-white/10 hover:border-solar-surge-orange/30 transition-colors">
                     <h3 className="font-bold text-white mb-2">Urgent Issues</h3>
-                    <p className="text-solar-surge-orange mb-2">jeff@mindandmuscle.ai</p>
-                    <p className="text-sm text-white/50">Response: Within 2 hours (business hours)</p>
+                    <p className="text-solar-surge-orange mb-2">support@mindandmuscle.ai</p>
+                    <p className="text-sm text-white/50">Mark as urgent - Response: Within 2 hours (business hours)</p>
                   </div>
                 </div>
               </div>
