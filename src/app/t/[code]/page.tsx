@@ -26,12 +26,22 @@ interface TeamPreviewData {
   error: string | null;
 }
 
+interface TeamPreviewRpcResponse {
+  is_valid: boolean;
+  error_message: string | null;
+  team_id: string | null;
+  team_name: string | null;
+  avatar_url: string | null;
+  team_type: string | null;
+  member_count: number | null;
+}
+
 async function getTeamPreviewData(code: string): Promise<TeamPreviewData> {
   try {
     // Use RPC function to get team preview (bypasses RLS safely)
     const { data, error } = await supabase
       .rpc('get_team_preview_by_code', { p_code: code })
-      .single();
+      .single<TeamPreviewRpcResponse>();
 
     if (error || !data) {
       return { team: null, error: 'Invalid invite link' };
