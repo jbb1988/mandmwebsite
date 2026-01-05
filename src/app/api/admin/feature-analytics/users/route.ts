@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
         .from('user_health_scores')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       // Calculate segment
       const featuresUsed = engagement?.filter(e => e.total_opens > 0).length || 0;
