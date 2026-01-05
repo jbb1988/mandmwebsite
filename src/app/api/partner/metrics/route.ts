@@ -197,17 +197,9 @@ export async function POST(request: NextRequest) {
       const uniqueCustomers = new Set(transactions.map((t: ToltTransaction) => t.customer_id));
       totalReferrals = uniqueCustomers.size;
 
-      // Fetch clicks
-      try {
-        const clicksData = await fetchFromTolt('/clicks', {
-          partner_id: partner.tolt_partner_id,
-        });
-        const clicks: ToltClick[] = clicksData.data || clicksData || [];
-        totalClicks = clicks.length;
-      } catch (clicksError) {
-        console.error('Error fetching clicks from Tolt:', clicksError);
-        // Don't fail - clicks are nice-to-have
-      }
+      // Note: Tolt API doesn't have a /clicks endpoint
+      // Click tracking would need to be done via Tolt dashboard or webhooks
+      totalClicks = 0;
 
     } catch (toltError) {
       console.error('Error fetching from Tolt:', toltError);
