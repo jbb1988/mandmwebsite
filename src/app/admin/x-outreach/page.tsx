@@ -381,6 +381,7 @@ export default function XOutreachPage() {
                         formatFollowers={formatFollowers}
                         getStatusColor={getStatusColor}
                         onTrialGranted={() => fetchTargets()}
+                        getPassword={getPassword}
                       />
                     ))}
                   </div>
@@ -553,6 +554,7 @@ function TargetCard({
   formatFollowers,
   getStatusColor,
   onTrialGranted,
+  getPassword,
 }: {
   target: XTarget;
   onUpdateStatus: (status: string) => void;
@@ -562,6 +564,7 @@ function TargetCard({
   formatFollowers: (count: number | null) => string;
   getStatusColor: (status: string) => string;
   onTrialGranted: () => void;
+  getPassword: () => string;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [trialEmail, setTrialEmail] = useState(target.contact_email || '');
@@ -779,6 +782,7 @@ function TargetCard({
 
 // Templates Tab Component
 function TemplatesTab() {
+  const { getPassword } = useAdminAuth();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
