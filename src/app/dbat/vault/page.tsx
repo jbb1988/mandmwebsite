@@ -99,9 +99,9 @@ export default function DBatVaultPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#0F1123]">
+    <div className="min-h-screen bg-[#0F1123] pt-20">
       {/* Header */}
-      <div className="sticky top-0 z-50 bg-[#0F1123]/90 backdrop-blur-lg border-b border-white/10">
+      <div className="sticky top-20 z-40 bg-[#0F1123]/90 backdrop-blur-lg border-b border-white/10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <Link
@@ -126,7 +126,7 @@ export default function DBatVaultPage() {
       </div>
 
       {/* Hero Section - Premium with dramatic gradients */}
-      <section className="relative pt-40 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative pt-16 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Premium Background Layers */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#1A1F3A] via-[#0F1123] to-[#1A1F3A]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.6)_100%)]" />

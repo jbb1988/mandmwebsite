@@ -153,7 +153,7 @@ export default function DBatPartnerPage() {
   return (
     <div className="min-h-screen">
       {/* Section 1: Hero - ROI First */}
-      <section className="relative pt-24 pb-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative pt-32 pb-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-neon-cortex-blue/20 via-[#0F1123] to-transparent" />
 
         <div className="max-w-6xl mx-auto relative z-10">
