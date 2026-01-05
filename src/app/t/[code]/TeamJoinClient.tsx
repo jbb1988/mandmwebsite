@@ -75,29 +75,30 @@ function StarRating() {
 export default function TeamJoinClient({ code, team, error }: TeamJoinClientProps) {
   const customSchemeLink = `mindmuscle://t/${code}`;
   const [logoError, setLogoError] = useState(false);
-  const [attemptedOpen, setAttemptedOpen] = useState(false);
+  const [showOpenPrompt, setShowOpenPrompt] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Auto-open app on mobile devices
+  // Check if mobile and show prompt
   useEffect(() => {
-    // Only attempt on mobile devices and if we have a valid team
     if (team && !error && typeof window !== 'undefined') {
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-      if (isMobile && !attemptedOpen) {
-        setAttemptedOpen(true);
-
-        // Small delay to let the page render first
-        const timer = setTimeout(() => {
-          window.location.href = customSchemeLink;
-        }, 100);
-
-        return () => clearTimeout(timer);
+      const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      setIsMobile(mobile);
+      if (mobile) {
+        setShowOpenPrompt(true);
       }
     }
-  }, [team, error, customSchemeLink, attemptedOpen]);
+  }, [team, error]);
+
+  const handleOpenApp = () => {
+    setShowOpenPrompt(false);
+    window.location.href = customSchemeLink;
+  };
+
+  const handleStayOnWeb = () => {
+    setShowOpenPrompt(false);
+  };
 
   const handleJoinTeam = () => {
-    // Try to open app via custom URL scheme
     window.location.href = customSchemeLink;
   };
 
@@ -160,6 +161,54 @@ export default function TeamJoinClient({ code, team, error }: TeamJoinClientProp
   return (
     <div className="min-h-screen relative">
       <Background />
+
+      {/* Open in App Prompt - shown on mobile */}
+      {showOpenPrompt && isMobile && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#0a1628] border-2 border-neon-cortex-blue/50 rounded-2xl p-6 max-w-sm w-full shadow-[0_0_50px_rgba(14,165,233,0.4)]">
+            {/* Team Logo */}
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden border-3 border-neon-cortex-blue/50 bg-white/5">
+              {team.logo_url && !logoError ? (
+                <Image
+                  src={team.logo_url}
+                  alt={team.name}
+                  width={80}
+                  height={80}
+                  unoptimized
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-2xl font-black text-neon-cortex-blue">
+                    {team.name.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            <h2 className="text-xl font-black text-white text-center mb-2">
+              Open in Mind & Muscle?
+            </h2>
+            <p className="text-gray-400 text-center text-sm mb-6">
+              Join <span className="text-white font-semibold">{team.name}</span> in the app
+            </p>
+
+            <button
+              onClick={handleOpenApp}
+              className="w-full py-4 bg-neon-cortex-blue rounded-xl font-black text-lg text-white hover:bg-neon-cortex-blue/90 transition-all shadow-[0_0_30px_rgba(14,165,233,0.4)] mb-3"
+            >
+              Open App
+            </button>
+
+            <button
+              onClick={handleStayOnWeb}
+              className="w-full py-3 bg-white/5 border border-white/20 rounded-xl font-medium text-white/70 hover:bg-white/10 transition-all"
+            >
+              Stay on this page
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="relative z-10 pt-28 pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-xl mx-auto">
