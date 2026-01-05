@@ -371,7 +371,7 @@ export default function InstructorGuidePage() {
                 </div>
 
                 <p className="text-white/50 mb-8">
-                  Find this in: <span className="text-neon-cortex-blue font-semibold">Coach Dashboard -> Training Engagement</span>
+                  Find this in: <span className="text-neon-cortex-blue font-semibold">Coach Dashboard → Training Engagement</span>
                 </p>
 
                 <h3 className="font-bold text-lg mb-4 text-white">Color Codes</h3>
