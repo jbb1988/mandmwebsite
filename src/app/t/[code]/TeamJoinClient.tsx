@@ -73,11 +73,13 @@ function StarRating() {
 }
 
 export default function TeamJoinClient({ code, team, error }: TeamJoinClientProps) {
-  const appLink = `mindmuscle://t/${code}`;
+  const customSchemeLink = `mindmuscle://t/${code}`;
   const [logoError, setLogoError] = useState(false);
 
   const handleJoinTeam = () => {
-    window.location.href = appLink;
+    // Try to open app via custom URL scheme
+    // This works if the app is installed
+    window.location.href = customSchemeLink;
   };
 
   // Background component
