@@ -72,11 +72,11 @@ export default function PlaybookPage() {
   const talkingPoints = [
     {
       question: 'When athletes ask: "What is this?"',
-      answer: 'It\'s a free training app where we can assign you drills between lessons. You get a notification, watch the drill, then record yourself practicing it - the AI analyzes your swing or pitch. We can see who\'s putting in work. Scan the code, download it, enter our team code. Takes 2 minutes.'
+      answer: 'It\'s a training app where we can assign you drills between lessons. You get a notification, watch the drill, then record yourself practicing it - the AI analyzes your swing or pitch. We can see who\'s putting in work. Scan the code, download it, enter our facility code. Takes 2 minutes.'
     },
     {
       question: 'When parents ask: "Do we have to pay for this?"',
-      answer: 'No, it\'s free during our pilot. After that, there\'s a free version with 8 features. If your athlete wants the full thing, it\'s $9.99/month - but that\'s totally optional.'
+      answer: 'The Vault and AI analysis tools require a Pro subscription ($79/6 months). Athletes get full access to assigned drills, AI swing analysis, and all training features. It\'s a fraction of one lesson cost and covers half the season.'
     },
     {
       question: 'When parents ask: "Does this replace lessons?"',
