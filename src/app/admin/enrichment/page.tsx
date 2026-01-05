@@ -65,8 +65,7 @@ interface Contact {
     name: string;
     segment: string;
     website: string | null;
-    city: string | null;
-    state: string | null;
+    address: string | null;
   };
 }
 
@@ -1143,9 +1142,9 @@ Mind & Muscle</p>`);
                     {selectedContact.organization?.name}
                     <ChevronRight className="w-4 h-4 opacity-50" />
                   </button>
-                  {selectedContact.organization?.city && (
+                  {selectedContact.organization?.address && (
                     <p className="text-sm text-white/40">
-                      {selectedContact.organization.city}, {selectedContact.organization.state}
+                      {selectedContact.organization.address}
                     </p>
                   )}
                 </div>

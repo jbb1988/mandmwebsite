@@ -53,8 +53,7 @@ export async function GET(request: NextRequest) {
           name,
           segment,
           website,
-          city,
-          state
+          address
         )
       `, { count: 'exact' })
       .not('email', 'is', null);

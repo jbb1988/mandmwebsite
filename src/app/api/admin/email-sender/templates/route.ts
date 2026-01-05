@@ -16,14 +16,13 @@ export async function GET(request: NextRequest) {
 
   try {
     // Fetch admin email templates
-    // First check if there's a dedicated admin_email_templates table
     const { data: templates, error } = await supabase
       .from('marketing_email_templates')
-      .select('id, name, subject, body_html, segment')
+      .select('id, name, subject_line, body_template, segment')
       .order('name');
 
     if (error) {
-      // Table might not exist, return empty templates
+      // Table might not exist or error, return default templates
       console.error('Error fetching templates:', error);
       return NextResponse.json({
         success: true,
@@ -35,8 +34,8 @@ export async function GET(request: NextRequest) {
     const formattedTemplates = templates.map(t => ({
       id: t.id,
       name: t.name || `Template ${t.id}`,
-      subject: t.subject || '',
-      body: t.body_html || '',
+      subject: t.subject_line || '',
+      body: t.body_template || '',
       category: t.segment || 'general',
     }));
 

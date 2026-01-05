@@ -121,7 +121,7 @@ function personalizeEmail(
     last_name: string;
     email: string;
     title?: string | null;
-    organization?: { name: string; city?: string | null; state?: string | null } | null;
+    organization?: { name: string; address?: string | null } | null;
   }
 ): string {
   let result = text;
@@ -134,8 +134,7 @@ function personalizeEmail(
   result = result.replace(/\{\{title\}\}/gi, contact.title || '');
   result = result.replace(/\{\{org_name\}\}/gi, contact.organization?.name || 'your organization');
   result = result.replace(/\{\{organization\}\}/gi, contact.organization?.name || 'your organization');
-  result = result.replace(/\{\{city\}\}/gi, contact.organization?.city || '');
-  result = result.replace(/\{\{state\}\}/gi, contact.organization?.state || '');
+  result = result.replace(/\{\{address\}\}/gi, contact.organization?.address || '');
 
   return result;
 }
@@ -165,8 +164,7 @@ export async function POST(request: NextRequest) {
         title,
         organization:marketing_organizations(
           name,
-          city,
-          state
+          address
         )
       `)
       .eq('id', contactId)
@@ -249,8 +247,7 @@ export async function PUT(request: NextRequest) {
         title,
         organization:marketing_organizations(
           name,
-          city,
-          state
+          address
         )
       `)
       .in('id', contactIds);
