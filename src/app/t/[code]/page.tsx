@@ -58,7 +58,7 @@ async function getTeamPreviewData(code: string): Promise<TeamPreviewData> {
 
     // Get member count
     const { count: memberCount } = await supabase
-      .from('team_members')
+      .from('team_memberships')
       .select('*', { count: 'exact', head: true })
       .eq('team_id', team.id);
 

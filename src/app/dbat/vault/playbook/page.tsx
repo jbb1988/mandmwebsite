@@ -51,22 +51,21 @@ export default function PlaybookPage() {
   };
 
   const setupChecklist = [
-    { task: 'Upgrade facility account to Pro tier', done: false },
-    { task: 'Create facility team in Chatter', done: false },
-    { task: 'Generate team join code (30-day expiration)', done: false },
-    { task: 'Create QR code poster with facility branding', done: false },
-    { task: 'Prepare athlete onboarding email template', done: false },
-    { task: 'Brief instructors on The Vault workflow', done: false },
-    { task: 'Schedule kickoff call', done: false },
-    { task: 'Schedule weekly check-in cadence', done: false },
+    { task: 'Receive your facility\'s team join code from Mind & Muscle', done: false },
+    { task: 'Post QR code poster at front desk (we\'ll provide branded version)', done: false },
+    { task: 'Send welcome email to athlete list (we\'ll provide template)', done: false },
+    { task: 'Brief your instructors on The Vault workflow (15 min)', done: false },
+    { task: 'Identify 2-3 instructors to be early adopters', done: false },
+    { task: 'Complete kickoff call with Mind & Muscle rep', done: false },
+    { task: 'Confirm weekly check-in time (Fridays, 10 min)', done: false },
   ];
 
   const materials = [
-    { item: 'QR Code Poster (PDF)', description: 'Print-ready, facility-branded, scannable from 3+ feet' },
-    { item: 'Athlete Welcome Email', description: 'Template for facility to send to athlete list' },
-    { item: 'Parent FAQ One-Pager', description: 'Print and have at front desk' },
-    { item: 'Instructor Briefing Card', description: 'One-page guide for instructors' },
-    { item: 'Table Tent / Counter Card', description: 'For front desk and instructor tables' },
+    { item: 'QR Code Poster', description: 'We\'ll customize with your facility branding - just print and post' },
+    { item: 'Athlete Welcome Email', description: 'Ready-to-send email template - just paste and send to your list' },
+    { item: 'Parent FAQ One-Pager', description: 'Print copies for front desk when parents ask questions' },
+    { item: 'Instructor Quick Guide', description: 'One-page summary for your instructors' },
+    { item: 'Table Tent Cards', description: 'For front desk and lesson stations' },
   ];
 
   const talkingPoints = [
@@ -88,48 +87,45 @@ export default function PlaybookPage() {
     },
     {
       question: 'When asked: "Why are you doing this?"',
-      answer: 'I want to see if it helps our athletes improve faster between sessions. If it works, we\'ll keep using it. If not, no harm done. We\'re one of the first D-BATs to try it.'
+      answer: 'We want to see if it helps our athletes improve faster between sessions. If it works, we\'ll keep using it. We\'re one of the first D-BATs to try it - gives our athletes an edge.'
     },
   ];
 
   const metrics = [
-    { metric: 'Athletes Onboarded', target: '50+', measure: 'Team member count' },
-    { metric: 'Weekly Active Users', target: '35+ (70%)', measure: 'Activity in last 7 days' },
-    { metric: 'Vault Drills Assigned', target: '100+', measure: 'Drills assigned by instructors' },
-    { metric: 'Drill Completion Rate', target: '60%+', measure: 'Completions / Assignments' },
-    { metric: 'Practice Recordings', target: '50+', measure: 'Swing Lab / Pitch Lab from drills' },
-    { metric: 'Parent Dashboard Links', target: '20+', measure: 'Parent accounts linked' },
-    { metric: 'NPS/Satisfaction', target: '4.5/5', measure: 'End-of-pilot survey' },
+    { metric: 'Athletes Onboarded', target: '50+', measure: 'We\'ll share in weekly check-in' },
+    { metric: 'Weekly Active Users', target: '35+ (70%)', measure: 'Athletes using the app weekly' },
+    { metric: 'Drills Assigned', target: '100+', measure: 'Total drills your instructors assign' },
+    { metric: 'Drill Completion Rate', target: '60%+', measure: 'Athletes completing assignments' },
+    { metric: 'Practice Recordings', target: '50+', measure: 'Athletes recording their swings/pitches' },
+    { metric: 'Parent Accounts', target: '20+', measure: 'Parents tracking their kid\'s progress' },
+    { metric: 'Satisfaction', target: '4.5/5', measure: 'End-of-pilot survey' },
   ];
 
   const weeklyAgenda = [
-    { week: 'Week 1', focus: 'Onboarding status, initial reactions, technical issues, adjustments needed' },
-    { week: 'Week 2-3', focus: 'Engagement update, feedback themes, instructor involvement, parent perception' },
-    { week: 'Week 4', focus: 'Results review, qualitative assessment, next steps, case study permission' },
+    { week: 'Week 1', focus: 'How many athletes signed up, early reactions, any tech issues, what\'s working' },
+    { week: 'Week 2-3', focus: 'Engagement numbers, what feedback you\'re hearing, which instructors are most active' },
+    { week: 'Week 4', focus: 'Results review, deciding whether to continue, success stories worth sharing' },
   ];
 
   const successCriteria = {
     minimum: [
-      '30+ athletes onboarded',
-      '20+ weekly active users (65%)',
-      '3+ features used per user',
-      '0 unresolved major issues',
-      'Partner says "would recommend"',
+      '30+ athletes using the app',
+      'Most athletes engaging weekly',
+      'No major tech issues unresolved',
+      'You\'d recommend it to another GM',
     ],
     target: [
-      '50+ athletes onboarded',
-      '35+ weekly active users (70%)',
-      '4+ features used per user',
-      '15+ parent dashboard links',
-      'At least 1 instructor actively using The Vault',
-      'Partner says "definitely continuing"',
+      '50+ athletes using the app',
+      '70% engaging weekly',
+      '15+ parents tracking progress',
+      'At least 1 instructor actively assigning drills',
+      'You want to continue after pilot',
     ],
     exceptional: [
-      '70+ athletes onboarded',
-      '50+ weekly active users (70%+)',
-      '5+ unsolicited parent praise instances',
-      'Athletes asking "what happens after pilot?"',
-      'Partner willing to refer other D-BATs',
+      '70+ athletes using the app',
+      'Parents praising it unprompted',
+      'Athletes asking "what happens after the pilot?"',
+      'You\'d refer other D-BAT locations',
     ],
   };
 
@@ -257,7 +253,7 @@ export default function PlaybookPage() {
       </div>
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative pt-40 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Premium Background Layers */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#1A1F3A] via-[#0F1123] to-[#0F1123]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(249,115,22,0.15)_0%,transparent_50%)]" />
@@ -548,7 +544,7 @@ export default function PlaybookPage() {
 
                     <div className="mb-8 p-5 bg-white/[0.03] rounded-xl border border-white/10">
                       <p className="text-white/80">
-                        <strong className="text-solar-surge-orange">Cadence:</strong> Every Friday, 10 minutes, Phone or video call
+                        <strong className="text-solar-surge-orange">Your weekly call with Mind & Muscle:</strong> Fridays, 10 minutes, phone or video
                       </p>
                     </div>
 

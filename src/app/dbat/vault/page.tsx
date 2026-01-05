@@ -126,7 +126,7 @@ export default function DBatVaultPage() {
       </div>
 
       {/* Hero Section - Premium with dramatic gradients */}
-      <section className="relative pt-20 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative pt-40 pb-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
         {/* Premium Background Layers */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#1A1F3A] via-[#0F1123] to-[#1A1F3A]" />
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.6)_100%)]" />
