@@ -152,6 +152,24 @@ export default function EnrichmentPage() {
   const [orgContacts, setOrgContacts] = useState<Contact[]>([]);
   const [orgLoading, setOrgLoading] = useState(false);
 
+  // Add Organization Modal State
+  const [showAddOrgModal, setShowAddOrgModal] = useState(false);
+  const [newOrgName, setNewOrgName] = useState('');
+  const [newOrgWebsite, setNewOrgWebsite] = useState('');
+  const [newOrgSegment, setNewOrgSegment] = useState('facility');
+  const [newOrgAddress, setNewOrgAddress] = useState('');
+  const [savingOrg, setSavingOrg] = useState(false);
+
+  // Add Contact Modal State
+  const [showAddContactModal, setShowAddContactModal] = useState(false);
+  const [newContactEmail, setNewContactEmail] = useState('');
+  const [newContactFirstName, setNewContactFirstName] = useState('');
+  const [newContactLastName, setNewContactLastName] = useState('');
+  const [newContactTitle, setNewContactTitle] = useState('');
+  const [newContactOrgId, setNewContactOrgId] = useState('');
+  const [savingContact, setSavingContact] = useState(false);
+  const [orgOptions, setOrgOptions] = useState<{ id: string; name: string }[]>([]);
+
   const fetchStats = async () => {
     try {
       const response = await fetch('/api/admin/enrichment', {
@@ -358,6 +376,126 @@ export default function EnrichmentPage() {
     }
   };
 
+  // Create new organization
+  const createOrganization = async () => {
+    if (!newOrgName || !newOrgSegment) {
+      setToast({ message: 'Name and segment are required', type: 'error' });
+      return;
+    }
+    setSavingOrg(true);
+    try {
+      const response = await fetch('/api/admin/enrichment/organizations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': getPassword(),
+        },
+        body: JSON.stringify({
+          name: newOrgName,
+          website: newOrgWebsite || null,
+          segment: newOrgSegment,
+          address: newOrgAddress || null,
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setToast({ message: data.message || 'Organization created', type: 'success' });
+        setShowAddOrgModal(false);
+        setNewOrgName('');
+        setNewOrgWebsite('');
+        setNewOrgSegment('facility');
+        setNewOrgAddress('');
+        // Refresh stats to show new pending org
+        await fetchStats();
+      } else {
+        setToast({ message: data.message || 'Failed to create organization', type: 'error' });
+      }
+    } catch (error) {
+      setToast({ message: 'Failed to create organization', type: 'error' });
+    } finally {
+      setSavingOrg(false);
+    }
+  };
+
+  // Fetch organizations for dropdown
+  const fetchOrgOptions = async (segment?: string) => {
+    try {
+      const params = new URLSearchParams();
+      if (segment && segment !== 'all') params.set('segment', segment);
+      params.set('limit', '100');
+      const response = await fetch(`/api/admin/enrichment/organizations?${params}`, {
+        headers: { 'X-Admin-Password': getPassword() },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setOrgOptions(data.organizations || []);
+      }
+    } catch (error) {
+      console.error('Error fetching org options:', error);
+    }
+  };
+
+  // Create new contact
+  const createContact = async () => {
+    if (!newContactEmail || !newContactOrgId) {
+      setToast({ message: 'Email and organization are required', type: 'error' });
+      return;
+    }
+    setSavingContact(true);
+    try {
+      // Generate source tag: manual_{segment}_{month}{year}
+      const now = new Date();
+      const monthNames = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+      const sourceTag = `manual_${expandedSegment || 'unknown'}_${monthNames[now.getMonth()]}${now.getFullYear()}`;
+
+      const response = await fetch('/api/admin/enrichment/manual', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': getPassword(),
+        },
+        body: JSON.stringify({
+          organization_id: newContactOrgId,
+          email: newContactEmail,
+          first_name: newContactFirstName || null,
+          last_name: newContactLastName || null,
+          role: newContactTitle || 'Contact',
+          source: sourceTag,
+          create_contact: true,
+        }),
+      });
+      const data = await response.json();
+      if (data.success) {
+        setToast({ message: data.message || 'Contact created', type: 'success' });
+        setShowAddContactModal(false);
+        setNewContactEmail('');
+        setNewContactFirstName('');
+        setNewContactLastName('');
+        setNewContactTitle('');
+        setNewContactOrgId('');
+        // Refresh contacts if segment is expanded
+        if (expandedSegment) {
+          fetchContacts(expandedSegment, stageFilter, searchQuery, 0);
+        }
+        await fetchStats();
+      } else {
+        setToast({ message: data.message || 'Failed to create contact', type: 'error' });
+      }
+    } catch (error) {
+      setToast({ message: 'Failed to create contact', type: 'error' });
+    } finally {
+      setSavingContact(false);
+    }
+  };
+
+  // Open add contact modal
+  const openAddContactModal = () => {
+    if (expandedSegment) {
+      fetchOrgOptions(expandedSegment);
+    }
+    setShowAddContactModal(true);
+  };
+
   // Calculate days difference for follow-up
   const getFollowUpStatus = (followUpDate: string | null) => {
     if (!followUpDate) return null;
@@ -539,9 +677,18 @@ Mind & Muscle</p>`);
         <div className="max-w-6xl mx-auto space-y-8">
 
           {/* Header */}
-          <div className="text-center">
-            <h1 className="text-4xl font-bold mb-2">Lead Enrichment</h1>
-            <p className="text-white/50">Find and manage B2B contacts for sales outreach</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Lead Enrichment</h1>
+              <p className="text-white/50">Find and manage B2B contacts for sales outreach</p>
+            </div>
+            <button
+              onClick={() => setShowAddOrgModal(true)}
+              className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 rounded-xl font-medium transition-all shadow-lg"
+            >
+              <Building2 className="w-5 h-5" />
+              Add Organization
+            </button>
           </div>
 
           {/* Stats Row */}
@@ -901,6 +1048,13 @@ Mind & Muscle</p>`);
                           <Download className="w-4 h-4" />
                           Export CSV
                         </button>
+                        <button
+                          onClick={openAddContactModal}
+                          className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 rounded-xl text-sm font-medium transition-all"
+                        >
+                          <Users className="w-4 h-4" />
+                          Add Contact
+                        </button>
                       </div>
 
                       {/* Contact List */}
@@ -938,13 +1092,24 @@ Mind & Muscle</p>`);
                                     </div>
 
                                     <div className="min-w-0 flex-1">
-                                      <div className="flex items-center gap-2">
+                                      <div className="flex items-center gap-2 flex-wrap">
                                         <p className="font-medium truncate">
                                           {contact.first_name} {contact.last_name}
                                         </p>
                                         {contact.title && (
                                           <span className="text-xs text-white/40 truncate">
                                             {contact.title}
+                                          </span>
+                                        )}
+                                        {contact.source && (
+                                          <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                            contact.source.startsWith('manual')
+                                              ? 'bg-blue-500/20 text-blue-400'
+                                              : contact.source.startsWith('auto_')
+                                              ? 'bg-emerald-500/20 text-emerald-400'
+                                              : 'bg-white/10 text-white/50'
+                                          }`}>
+                                            {contact.source.replace(/_/g, ' ')}
                                           </span>
                                         )}
                                       </div>
@@ -1578,6 +1743,216 @@ Mind & Muscle</p>`);
             >
               Close
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Add Organization Modal */}
+      {showAddOrgModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={() => setShowAddOrgModal(false)}>
+          <div className="bg-[#0F1123] border border-white/10 rounded-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <h3 className="text-xl font-bold">Add Organization</h3>
+                <p className="text-white/50 text-sm mt-1">Add a new organization to enrich</p>
+              </div>
+              <button
+                onClick={() => setShowAddOrgModal(false)}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-white/50" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-white/50 mb-2 block">Name *</label>
+                <input
+                  type="text"
+                  value={newOrgName}
+                  onChange={(e) => setNewOrgName(e.target.value)}
+                  placeholder="Organization name..."
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm text-white/50 mb-2 block">Website</label>
+                <input
+                  type="text"
+                  value={newOrgWebsite}
+                  onChange={(e) => setNewOrgWebsite(e.target.value)}
+                  placeholder="https://example.com"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50"
+                />
+                <p className="text-xs text-white/40 mt-1">Required for email enrichment</p>
+              </div>
+
+              <div>
+                <label className="text-sm text-white/50 mb-2 block">Segment *</label>
+                <select
+                  value={newOrgSegment}
+                  onChange={(e) => setNewOrgSegment(e.target.value)}
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-emerald-500/50"
+                >
+                  {Object.entries(SEGMENT_NAMES).map(([key, name]) => (
+                    <option key={key} value={key} className="bg-[#0F1123]">{name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-sm text-white/50 mb-2 block">Address</label>
+                <input
+                  type="text"
+                  value={newOrgAddress}
+                  onChange={(e) => setNewOrgAddress(e.target.value)}
+                  placeholder="City, State"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-emerald-500/50"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 mt-6">
+              <button
+                onClick={() => setShowAddOrgModal(false)}
+                className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-xl font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={createOrganization}
+                disabled={savingOrg || !newOrgName}
+                className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {savingOrg ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Building2 className="w-4 h-4" />
+                    Create Organization
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Contact Modal */}
+      {showAddContactModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={() => setShowAddContactModal(false)}>
+          <div className="bg-[#0F1123] border border-white/10 rounded-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <div className="flex items-start justify-between mb-6">
+              <div>
+                <h3 className="text-xl font-bold">Add Contact</h3>
+                <p className="text-white/50 text-sm mt-1">Add a contact to an organization</p>
+              </div>
+              <button
+                onClick={() => setShowAddContactModal(false)}
+                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-white/50" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm text-white/50 mb-2 block">Organization *</label>
+                <select
+                  value={newContactOrgId}
+                  onChange={(e) => setNewContactOrgId(e.target.value)}
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-blue-500/50"
+                >
+                  <option value="" className="bg-[#0F1123]">Select organization...</option>
+                  {orgOptions.map((org) => (
+                    <option key={org.id} value={org.id} className="bg-[#0F1123]">{org.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="text-sm text-white/50 mb-2 block">Email *</label>
+                <input
+                  type="email"
+                  value={newContactEmail}
+                  onChange={(e) => setNewContactEmail(e.target.value)}
+                  placeholder="contact@example.com"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-blue-500/50"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm text-white/50 mb-2 block">First Name</label>
+                  <input
+                    type="text"
+                    value={newContactFirstName}
+                    onChange={(e) => setNewContactFirstName(e.target.value)}
+                    placeholder="John"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-blue-500/50"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm text-white/50 mb-2 block">Last Name</label>
+                  <input
+                    type="text"
+                    value={newContactLastName}
+                    onChange={(e) => setNewContactLastName(e.target.value)}
+                    placeholder="Smith"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-blue-500/50"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm text-white/50 mb-2 block">Title / Role</label>
+                <input
+                  type="text"
+                  value={newContactTitle}
+                  onChange={(e) => setNewContactTitle(e.target.value)}
+                  placeholder="Owner, Manager, Coach..."
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:outline-none focus:border-blue-500/50"
+                />
+              </div>
+
+              {/* Source Tag Preview */}
+              <div className="p-3 bg-white/5 rounded-xl">
+                <p className="text-xs text-white/40 mb-1">Source Tag (for campaign tracking)</p>
+                <code className="text-sm text-blue-400">
+                  manual_{expandedSegment || 'unknown'}_{new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }).toLowerCase().replace(' ', '')}
+                </code>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 mt-6">
+              <button
+                onClick={() => setShowAddContactModal(false)}
+                className="px-4 py-2 bg-white/5 hover:bg-white/10 rounded-xl font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={createContact}
+                disabled={savingContact || !newContactEmail || !newContactOrgId}
+                className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {savingContact ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  <>
+                    <Users className="w-4 h-4" />
+                    Create Contact
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}

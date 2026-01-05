@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { organization_id, email, first_name, last_name, role, create_contact = true } = body;
+    const { organization_id, email, first_name, last_name, role, source, create_contact = true } = body;
 
     if (!organization_id || !email) {
       return NextResponse.json(
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
             first_name: first_name || null,
             last_name: last_name || null,
             role: role || 'Contact',
-            source: 'manual_entry',
+            source: source || 'manual_entry',
             email_deliverable: true,
           })
           .select('id')

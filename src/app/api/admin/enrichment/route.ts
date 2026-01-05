@@ -123,7 +123,15 @@ export async function GET(request: NextRequest) {
       const winRate = contacts > 0 ? Math.round((stages.won / contacts) * 100) : 0;
 
       return {
-        ...s,
+        segment: s.segment,
+        total: s.total || 0,
+        pending: s.pending || 0,
+        processing: s.processing || 0,
+        completed: s.completed || 0,
+        failed: s.failed || 0,
+        skipped: s.skipped || 0,
+        has_website: s.has_website || 0,
+        emails_found: s.emails_found || 0,
         contacts,
         orgsWithContacts,
         // Coverage = % of orgs that have at least one contact
