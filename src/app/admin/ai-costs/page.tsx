@@ -422,8 +422,6 @@ const FEATURE_COLORS: Record<string, string> = {
 
 const CHART_COLORS = ['#06b6d4', '#a855f7', '#f97316', '#10b981', '#fbbf24', '#3b82f6', '#ec4899'];
 
-const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || '';
-
 export default function AICostsPage() {
   const { getPassword } = useAdminAuth();
   const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -515,16 +513,16 @@ export default function AICostsPage() {
     try {
       const [mainRes, projRes, finRes, modelRes] = await Promise.all([
         fetch(`/api/admin/ai-costs?timeRange=${timeRange}`, {
-          headers: { 'X-Admin-Password': getPassword() || adminPassword }
+          headers: { 'X-Admin-Password': getPassword() }
         }),
         fetch('/api/admin/ai-costs/projections', {
-          headers: { 'X-Admin-Password': getPassword() || adminPassword }
+          headers: { 'X-Admin-Password': getPassword() }
         }),
         fetch('/api/admin/ai-costs/financial-analytics', {
-          headers: { 'X-Admin-Password': getPassword() || adminPassword }
+          headers: { 'X-Admin-Password': getPassword() }
         }),
         fetch('/api/admin/ai-costs/model-analysis', {
-          headers: { 'X-Admin-Password': getPassword() || adminPassword }
+          headers: { 'X-Admin-Password': getPassword() }
         })
       ]);
 
@@ -561,7 +559,7 @@ export default function AICostsPage() {
     setUserLoading(true);
     try {
       const res = await fetch(`/api/admin/ai-costs/users?userId=${userId}`, {
-        headers: { 'X-Admin-Password': getPassword() || adminPassword }
+        headers: { 'X-Admin-Password': getPassword() }
       });
       if (!res.ok) throw new Error('Failed to fetch user details');
       const data = await res.json();
@@ -584,7 +582,7 @@ export default function AICostsPage() {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': getPassword() || adminPassword
+          'X-Admin-Password': getPassword()
         },
         body: JSON.stringify(editingOpsCost)
       });
@@ -603,7 +601,7 @@ export default function AICostsPage() {
     try {
       const res = await fetch(`/api/admin/ai-costs/operational-costs?id=${id}`, {
         method: 'DELETE',
-        headers: { 'X-Admin-Password': getPassword() || adminPassword }
+        headers: { 'X-Admin-Password': getPassword() }
       });
       if (!res.ok) throw new Error('Failed to delete operational cost');
       fetchData(); // Refresh data

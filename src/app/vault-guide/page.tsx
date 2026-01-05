@@ -51,7 +51,7 @@ export default function VaultGuidePage() {
       description: 'Upload instructional videos to teach specific skills to your athletes.',
       icon: <Upload className="w-8 h-8" />,
       details: [
-        'Open The Vault and go to "My Drills" tab',
+        'Open The Vault and go to "Uploads" tab',
         'Tap the + button to create a new drill',
         'Record or upload a video demonstrating the technique',
         'Add a title, description, and select the skill category',
@@ -75,7 +75,7 @@ export default function VaultGuidePage() {
             'Select athletes from your team roster',
             'Add optional instructions or notes',
             'Athletes receive a push notification',
-            'The drill appears in their "For You" tab'
+            'The drill appears in their "Assigned" tab'
           ]
         },
         {
@@ -97,7 +97,7 @@ export default function VaultGuidePage() {
       description: 'Athletes watch your drill, then record themselves practicing.',
       icon: <PlayCircle className="w-8 h-8" />,
       details: [
-        'Athlete opens The Vault → "For You" tab',
+        'Athlete opens The Vault → "Assigned" tab',
         'Watches your instructional video',
         'Taps "Practice This" button',
         'Opens Swing Lab or Pitch Lab with drill context',

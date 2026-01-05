@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AdminGate from '@/components/AdminGate';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import {
   Users, DollarSign, CheckCircle, Clock, Crown, RefreshCw, Copy, UserPlus, List,
   Mail, Info, ExternalLink, Search, ToggleLeft, ToggleRight, ChevronDown, ChevronUp,
@@ -66,11 +67,10 @@ interface Stats {
 }
 
 export default function AdminFinderFeesPage() {
+  const { getPassword } = useAdminAuth();
   const [activeTab, setActiveTab] = useState<Tab>('enable');
   const [showCheatSheet, setShowCheatSheet] = useState(true);
   const [stats, setStats] = useState<Stats>({ totalPartners: 0, pendingPayments: 0, totalPaidOut: 0, thisMonthFees: 0 });
-  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
-  // Note: adminPassword is still used for API calls
 
   // Fetch stats on mount
   useEffect(() => {
@@ -81,13 +81,13 @@ export default function AdminFinderFeesPage() {
     try {
       // Fetch partners count
       const partnersRes = await fetch('/api/admin/finder-fees/partners', {
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const partnersData = await partnersRes.json();
 
       // Fetch transactions for payment stats
       const txRes = await fetch('/api/admin/finder-fees/transactions?status=all', {
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const txData = await txRes.json();
 
@@ -402,6 +402,7 @@ export default function AdminFinderFeesPage() {
 }
 
 function EnablePartnerTab({ onSuccess }: { onSuccess: () => void }) {
+  const { getPassword } = useAdminAuth();
   const [formData, setFormData] = useState({
     partnerCode: '',
     partnerEmail: '',
@@ -410,7 +411,6 @@ function EnablePartnerTab({ onSuccess }: { onSuccess: () => void }) {
   });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ success: boolean; message: string; finderLink?: string; emailSent?: boolean } | null>(null);
-  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -422,7 +422,7 @@ function EnablePartnerTab({ onSuccess }: { onSuccess: () => void }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify(formData),
       });
@@ -581,19 +581,19 @@ function EnablePartnerTab({ onSuccess }: { onSuccess: () => void }) {
 }
 
 function PartnersTab() {
+  const { getPassword } = useAdminAuth();
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [sendingEmail, setSendingEmail] = useState<string | null>(null);
   const [togglingPartner, setTogglingPartner] = useState<string | null>(null);
-  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   const fetchPartners = async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ search });
       const response = await fetch(`/api/admin/finder-fees/partners?${params}`, {
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await response.json();
       if (data.partners) {
@@ -617,7 +617,7 @@ function PartnersTab() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({
           partnerCode: partner.partner_code,
@@ -646,7 +646,7 @@ function PartnersTab() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({
           partnerId: partner.id,
@@ -780,6 +780,7 @@ function PartnersTab() {
 }
 
 function TransactionsTab({ onStatusChange }: { onStatusChange: () => void }) {
+  const { getPassword } = useAdminAuth();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
@@ -793,7 +794,6 @@ function TransactionsTab({ onStatusChange }: { onStatusChange: () => void }) {
     totalPages: 1,
     totalCount: 0,
   });
-  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   const fetchTransactions = async () => {
     setLoading(true);
@@ -805,7 +805,7 @@ function TransactionsTab({ onStatusChange }: { onStatusChange: () => void }) {
       });
 
       const response = await fetch(`/api/admin/finder-fees/transactions?${params}`, {
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
 
       const data = await response.json();
@@ -831,7 +831,7 @@ function TransactionsTab({ onStatusChange }: { onStatusChange: () => void }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({
           transactionId,
@@ -1031,10 +1031,10 @@ function TransactionsTab({ onStatusChange }: { onStatusChange: () => void }) {
 }
 
 function ManualAttributionTab({ onSuccess }: { onSuccess: () => void }) {
+  const { getPassword } = useAdminAuth();
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loadingPartners, setLoadingPartners] = useState(false);
   const [partnerSearch, setPartnerSearch] = useState('');
-  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   // Finder Fee Form State
   const [finderFeeForm, setFinderFeeForm] = useState({
@@ -1052,7 +1052,7 @@ function ManualAttributionTab({ onSuccess }: { onSuccess: () => void }) {
       setLoadingPartners(true);
       try {
         const response = await fetch('/api/admin/finder-fees/partners', {
-          headers: { 'X-Admin-Password': adminPassword },
+          headers: { 'X-Admin-Password': getPassword() },
         });
         const data = await response.json();
         if (data.partners) {
@@ -1094,7 +1094,7 @@ function ManualAttributionTab({ onSuccess }: { onSuccess: () => void }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify(finderFeeForm),
       });

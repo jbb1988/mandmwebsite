@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import AdminGate from '@/components/AdminGate';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import { Card, StatCard, TabButton } from '@/components/admin/shared';
 import {
   BarChart3, Plus, Search, Users, MessageCircle,
@@ -79,9 +80,8 @@ const CATEGORIES = [
   { value: 'brand', label: 'Brand' },
 ];
 
-const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
-
 export default function XOutreachPage() {
+  const { getPassword } = useAdminAuth();
   const [activeTab, setActiveTab] = useState<'pipeline' | 'add' | 'templates'>('pipeline');
   const [targets, setTargets] = useState<XTarget[]>([]);
   const [stats, setStats] = useState<Stats>({
@@ -121,7 +121,7 @@ export default function XOutreachPage() {
       if (searchQuery) params.append('search', searchQuery);
 
       const res = await fetch(`/api/admin/x-outreach/targets?${params}`, {
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await res.json();
       if (data.success) {
@@ -135,7 +135,7 @@ export default function XOutreachPage() {
   const fetchStats = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/x-outreach/stats', {
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await res.json();
       if (data.success) {
@@ -158,7 +158,7 @@ export default function XOutreachPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({
           ...newTarget,
@@ -195,7 +195,7 @@ export default function XOutreachPage() {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({ id: targetId, ...updates }),
       });
@@ -222,7 +222,7 @@ export default function XOutreachPage() {
     try {
       const res = await fetch(`/api/admin/x-outreach/targets?id=${targetId}`, {
         method: 'DELETE',
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await res.json();
 
@@ -584,7 +584,7 @@ function TargetCard({
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            'X-Admin-Password': adminPassword,
+            'X-Admin-Password': getPassword(),
           },
           body: JSON.stringify({ id: target.id, contact_email: trialEmail }),
         });
@@ -595,7 +595,7 @@ function TargetCard({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({
           email: trialEmail,
@@ -789,7 +789,7 @@ function TemplatesTab() {
       setLoading(true);
       try {
         const response = await fetch('/api/admin/x-outreach/templates', {
-          headers: { 'X-Admin-Password': adminPassword },
+          headers: { 'X-Admin-Password': getPassword() },
         });
         const data = await response.json();
         if (data.templates) setTemplates(data.templates);

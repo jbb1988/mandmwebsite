@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import AdminGate from '@/components/AdminGate';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import RevenueDashboard from '@/components/admin/RevenueDashboard';
 import Link from 'next/link';
 import {
@@ -155,9 +156,8 @@ interface Stats {
   weekOutreach: number;
 }
 
-const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
-
 export default function AdminHubPage() {
+  const { getPassword } = useAdminAuth();
   const [stats, setStats] = useState<Stats>({
     fbGroups: 0,
     xTargets: 0,
@@ -173,13 +173,13 @@ export default function AdminHubPage() {
     try {
       // Fetch FB outreach stats
       const fbRes = await fetch('/api/admin/fb-outreach/stats', {
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const fbData = await fbRes.json();
 
       // Fetch X targets count
       const xRes = await fetch('/api/admin/x-outreach/stats', {
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const xData = await xRes.json();
 
@@ -334,7 +334,7 @@ export default function AdminHubPage() {
                   <div className="space-y-2 text-xs">
                     <div className="flex justify-between">
                       <span className="text-white/40">Admin</span>
-                      <code className="text-cyan-400">Brutus7862!</code>
+                      <code className="text-cyan-400">Brutus1018!</code>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-white/40">Finder Fee</span>

@@ -2,12 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import AdminGate from '@/components/AdminGate';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import {
   Database, Zap, CheckCircle2, XCircle, Clock, RefreshCw,
   Users, Mail, Building2, AlertCircle
 } from 'lucide-react';
-
-const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
 interface SegmentStat {
   segment: string;
@@ -71,6 +70,7 @@ const SEGMENT_COLORS: Record<string, string> = {
 };
 
 export default function EnrichmentPage() {
+  const { getPassword } = useAdminAuth();
   const [stats, setStats] = useState<SegmentStat[]>([]);
   const [loading, setLoading] = useState(true);
   const [scraping, setScraping] = useState<string | null>(null);
@@ -82,7 +82,7 @@ export default function EnrichmentPage() {
   const fetchStats = async () => {
     try {
       const response = await fetch('/api/admin/enrichment', {
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await response.json();
       if (data.success) {
@@ -108,7 +108,7 @@ export default function EnrichmentPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({
           segment,
@@ -136,7 +136,7 @@ export default function EnrichmentPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({
           organization_id: manualMode.orgId,

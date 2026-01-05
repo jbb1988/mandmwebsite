@@ -127,8 +127,6 @@ interface HealthDetails {
 
 type ModalTab = 'profile' | 'trial' | 'app' | 'activity';
 
-const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus1018!';
-
 export default function UsersPage() {
   const { getPassword } = useAdminAuth();
   const [users, setUsers] = useState<UserProfile[]>([]);
@@ -167,7 +165,7 @@ export default function UsersPage() {
       });
 
       const res = await fetch(`/api/admin/users?${params}`, {
-        headers: { 'X-Admin-Password': getPassword() || adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await res.json();
 
@@ -190,7 +188,7 @@ export default function UsersPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': getPassword() || adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({ action: 'get-details', userId }),
       });
@@ -212,7 +210,7 @@ export default function UsersPage() {
     setLoadingActivity(true);
     try {
       const res = await fetch(`/api/admin/feature-analytics/users?userId=${userId}`, {
-        headers: { 'X-Admin-Password': getPassword() || adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await res.json();
 
@@ -274,7 +272,7 @@ export default function UsersPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': getPassword() || adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({
           action,
@@ -323,7 +321,7 @@ export default function UsersPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': getPassword() || adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({
           action: 'ban-user',
@@ -358,7 +356,7 @@ export default function UsersPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': getPassword() || adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({
           action: 'unban-user',
@@ -394,7 +392,7 @@ export default function UsersPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': getPassword() || adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({
           action: 'delete-user',

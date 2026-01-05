@@ -145,7 +145,7 @@ export default function FAQPage() {
         },
         {
           question: 'Can I save favorite drills?',
-          answer: 'Yes! Tap the heart icon on any drill to add it to your favorites. Access your saved drills anytime from the My Drills tab. Build your personal drill library organized by your training focus areas.'
+          answer: 'Yes! Tap the heart icon on any drill to add it to your favorites. Access your saved drills anytime from the Saved tab. Build your personal drill library organized by your training focus areas.'
         },
         {
           question: 'Can I upload my own drills?',

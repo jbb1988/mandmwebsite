@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import AdminGate from '@/components/AdminGate';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import { Card, StatCard, TabButton } from '@/components/admin/shared';
 import {
   Users, Plus, RefreshCw, Search, MapPin, ExternalLink, MessageCircle,
@@ -240,14 +241,14 @@ function Button({
 }
 
 export default function AdminFBOutreachPage() {
+  const { getPassword } = useAdminAuth();
   const [activeTab, setActiveTab] = useState<Tab>('pipeline');
   const [stats, setStats] = useState<Stats>({ total: 0, byStatus: {} as Record<OutreachStatus, number>, byState: {} });
-  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   const fetchStats = async () => {
     try {
       const response = await fetch('/api/admin/fb-outreach/stats', {
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await response.json();
       if (data.stats) {
@@ -392,6 +393,7 @@ export default function AdminFBOutreachPage() {
 }
 
 function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
+  const { getPassword } = useAdminAuth();
   const [formData, setFormData] = useState({
     page_name: '',
     page_url: '',
@@ -406,7 +408,6 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
   const [admins, setAdmins] = useState([{ name: '', profile_url: '', email: '' }]);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
-  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   const addAdmin = () => setAdmins([...admins, { name: '', profile_url: '', email: '' }]);
   const removeAdmin = (index: number) => {
@@ -428,7 +429,7 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({
           ...formData,
@@ -642,6 +643,7 @@ function AddPageTab({ onSuccess }: { onSuccess: () => void }) {
 }
 
 function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
+  const { getPassword } = useAdminAuth();
   const [pages, setPages] = useState<FBPage[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({ state: 'all', status: 'all', search: '' });
@@ -656,13 +658,12 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
   const [editingPageNotes, setEditingPageNotes] = useState<string | null>(null);
   const [pageNotesValue, setPageNotesValue] = useState('');
   const [savingPageNotes, setSavingPageNotes] = useState(false);
-  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   // Fetch DM templates for quick access in Pipeline view
   const fetchTemplates = async () => {
     try {
       const response = await fetch('/api/admin/fb-outreach/templates', {
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await response.json();
       if (data.templates) {
@@ -683,7 +684,7 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
       if (filters.search) params.set('search', filters.search);
 
       const response = await fetch(`/api/admin/fb-outreach/pages?${params}`, {
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await response.json();
       if (data.pages) setPages(data.pages);
@@ -705,7 +706,7 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
 
       await fetch('/api/admin/fb-outreach/pages', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': getPassword() },
         body: JSON.stringify(updates),
       });
       fetchPages();
@@ -719,7 +720,7 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
     try {
       await fetch('/api/admin/fb-outreach/pages', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': getPassword() },
         body: JSON.stringify({ id, ...updates }),
       });
       fetchPages();
@@ -734,7 +735,7 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
     try {
       await fetch('/api/admin/fb-outreach/pages', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': getPassword() },
         body: JSON.stringify({ id: pageId, notes: pageNotesValue }),
       });
       setEditingPageNotes(null);
@@ -752,7 +753,7 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
     try {
       await fetch(`/api/admin/fb-outreach/pages?id=${id}`, {
         method: 'DELETE',
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       fetchPages();
       onUpdate();
@@ -770,7 +771,7 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
       const ids = Array.from(selectedPages);
       await fetch(`/api/admin/fb-outreach/pages?ids=${ids.join(',')}`, {
         method: 'DELETE',
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       setSelectedPages(new Set());
       fetchPages();
@@ -808,7 +809,7 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
     try {
       await fetch('/api/admin/fb-outreach/admins', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': getPassword() },
         body: JSON.stringify({
           admin_id: editingAdmin.admin.id,
           admin_email: adminForm.email || null,
@@ -827,7 +828,7 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
     try {
       await fetch('/api/admin/fb-outreach/admins', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': getPassword() },
         body: JSON.stringify({
           page_id: pageId,
           admin_name: newAdminForm.name.trim(),
@@ -849,7 +850,7 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
     try {
       await fetch(`/api/admin/fb-outreach/admins?admin_id=${adminId}`, {
         method: 'DELETE',
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       fetchPages();
       onUpdate();
@@ -1396,12 +1397,12 @@ function PipelineTab({ onUpdate }: { onUpdate: () => void }) {
 }
 
 function FollowUpTab({ onUpdate }: { onUpdate: () => void }) {
+  const { getPassword } = useAdminAuth();
   const [pages, setPages] = useState<FBPage[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'urgent' | 'due'>('all');
   const [responseModal, setResponseModal] = useState<{ admin: FBPageAdmin; page: FBPage } | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   const FOLLOW_UP_TEMPLATES = {
     first_follow_up: `Hey {name}! Just following up on my message from a few days ago. Would love to share Mind & Muscle with your group - it's been helping teams simplify their communication (replaces GroupMe + scheduling apps). Let me know if you'd be open to a quick post!`,
@@ -1413,7 +1414,7 @@ function FollowUpTab({ onUpdate }: { onUpdate: () => void }) {
     setLoading(true);
     try {
       const response = await fetch('/api/admin/fb-outreach/pages?status=dm_sent', {
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await response.json();
       if (data.pages) {
@@ -1456,7 +1457,7 @@ function FollowUpTab({ onUpdate }: { onUpdate: () => void }) {
 
       await fetch('/api/admin/fb-outreach/admins', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': getPassword() },
         body: JSON.stringify({
           admin_id: admin.id,
           response_type: responseType,
@@ -1652,17 +1653,17 @@ function FollowUpTab({ onUpdate }: { onUpdate: () => void }) {
 }
 
 function PartnersTab({ onUpdate }: { onUpdate: () => void }) {
+  const { getPassword } = useAdminAuth();
   const [pages, setPages] = useState<FBPage[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingPartner, setEditingPartner] = useState<string | null>(null);
   const [partnerForm, setPartnerForm] = useState({ qr_url: '', referral_link: '', landing_page: '' });
-  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   const fetchPartners = async () => {
     setLoading(true);
     try {
       const response = await fetch('/api/admin/fb-outreach/pages?status=approved', {
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await response.json();
       if (data.pages) setPages(data.pages);
@@ -1679,7 +1680,7 @@ function PartnersTab({ onUpdate }: { onUpdate: () => void }) {
     try {
       await fetch('/api/admin/fb-outreach/pages', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': getPassword() },
         body: JSON.stringify({
           id: pageId,
           partner_qr_code_url: partnerForm.qr_url || null,
@@ -2041,6 +2042,7 @@ function AdminCard({
   onTrialGranted: () => void;
   onAdminUpdated?: () => void;
 }) {
+  const { getPassword } = useAdminAuth();
   const [expanded, setExpanded] = useState(false);
   const [showTemplateModal, setShowTemplateModal] = useState(false);
   const [showDateEditor, setShowDateEditor] = useState(false);
@@ -2053,7 +2055,6 @@ function AdminCard({
   const [notes, setNotes] = useState(admin.response_notes || '');
   const [selectedTemplateForDate, setSelectedTemplateForDate] = useState(admin.template_used || '');
   const [savingDates, setSavingDates] = useState(false);
-  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   // Calculate follow-up date and urgency
   const dmSentDaysAgo = admin.dm_sent_at ? daysSince(admin.dm_sent_at) : null;
@@ -2078,7 +2079,7 @@ function AdminCard({
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({
           admin_id: admin.id,
@@ -2135,7 +2136,7 @@ function AdminCard({
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify(updates),
       });
@@ -2145,7 +2146,7 @@ function AdminCard({
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            'X-Admin-Password': adminPassword,
+            'X-Admin-Password': getPassword(),
           },
           body: JSON.stringify({
             id: pageId,
@@ -2175,7 +2176,7 @@ function AdminCard({
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({
           admin_id: admin.id,
@@ -2190,7 +2191,7 @@ function AdminCard({
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({
           id: pageId,
@@ -2222,7 +2223,7 @@ function AdminCard({
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
-            'X-Admin-Password': adminPassword,
+            'X-Admin-Password': getPassword(),
           },
           body: JSON.stringify({ admin_id: admin.id, admin_email: trialEmail }),
         });
@@ -2233,7 +2234,7 @@ function AdminCard({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({
           email: trialEmail,
@@ -2605,9 +2606,9 @@ function TrialGrantSection({
   email: string;
   onTrialGranted: () => void;
 }) {
+  const { getPassword } = useAdminAuth();
   const [grantingTrial, setGrantingTrial] = useState(false);
   const [trialMessage, setTrialMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
-  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   const handleGrantTrial = async () => {
     if (!email.trim()) {
@@ -2623,7 +2624,7 @@ function TrialGrantSection({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({
           email: email,
@@ -2754,6 +2755,7 @@ interface TemplateStatsData {
 }
 
 function TemplatesTab() {
+  const { getPassword } = useAdminAuth();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -2763,7 +2765,6 @@ function TemplatesTab() {
   const [showTips, setShowTips] = useState(false);
   const [showStats, setShowStats] = useState(true);
   const [templateStats, setTemplateStats] = useState<TemplateStatsData | null>(null);
-  const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
   useEffect(() => {
     const fetchTemplates = async () => {
@@ -2771,10 +2772,10 @@ function TemplatesTab() {
       try {
         const [templatesRes, statsRes] = await Promise.all([
           fetch('/api/admin/fb-outreach/templates', {
-            headers: { 'X-Admin-Password': adminPassword },
+            headers: { 'X-Admin-Password': getPassword() },
           }),
           fetch('/api/admin/fb-outreach/template-stats', {
-            headers: { 'X-Admin-Password': adminPassword },
+            headers: { 'X-Admin-Password': getPassword() },
           }),
         ]);
         const templatesData = await templatesRes.json();

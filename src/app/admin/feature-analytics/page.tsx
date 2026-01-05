@@ -169,8 +169,6 @@ interface LabActivityStats {
   analyses_this_week: number;
 }
 
-const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || '';
-
 export default function FeatureAnalyticsPage() {
   const { getPassword } = useAdminAuth();
   const [loading, setLoading] = useState(true);
@@ -222,7 +220,7 @@ export default function FeatureAnalyticsPage() {
       });
 
       const res = await fetch(`/api/admin/feature-analytics?${params}`, {
-        headers: { 'X-Admin-Password': getPassword() || adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await res.json();
 
@@ -250,7 +248,7 @@ export default function FeatureAnalyticsPage() {
       });
 
       const res = await fetch(`/api/admin/feature-analytics/users?${params}`, {
-        headers: { 'X-Admin-Password': getPassword() || adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await res.json();
 
@@ -273,7 +271,7 @@ export default function FeatureAnalyticsPage() {
       });
 
       const res = await fetch(`/api/admin/feature-analytics/users?${params}`, {
-        headers: { 'X-Admin-Password': getPassword() || adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await res.json();
 
@@ -291,7 +289,7 @@ export default function FeatureAnalyticsPage() {
     setDrillDownLoading(true);
     try {
       const res = await fetch(`/api/admin/feature-analytics/users?userId=${userId}`, {
-        headers: { 'X-Admin-Password': getPassword() || adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await res.json();
 
@@ -313,7 +311,7 @@ export default function FeatureAnalyticsPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': getPassword() || adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({ action: 'recalculate-health-scores' }),
       });
@@ -335,7 +333,7 @@ export default function FeatureAnalyticsPage() {
     setInsightsLoading(true);
     try {
       const res = await fetch('/api/admin/feature-analytics/insights', {
-        headers: { 'X-Admin-Password': getPassword() || adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await res.json();
 
@@ -360,7 +358,7 @@ export default function FeatureAnalyticsPage() {
       });
 
       const res = await fetch(`/api/admin/feature-analytics/lab-activity?${params}`, {
-        headers: { 'X-Admin-Password': getPassword() || adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await res.json();
 
@@ -409,7 +407,7 @@ export default function FeatureAnalyticsPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': getPassword() || adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({
           action: 'grant-trial-extension',
@@ -442,7 +440,7 @@ export default function FeatureAnalyticsPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': getPassword() || adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({
           action: 'export-csv',

@@ -2,14 +2,13 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import AdminGate from '@/components/AdminGate';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import {
   Mail, Send, Users, User, Search, ChevronDown, Check,
   AlertCircle, RefreshCw, X, Eye, FileText, Sparkles,
   Clock, CheckCircle2, Building2, Filter
 } from 'lucide-react';
 import { EMAIL_ALIASES, type EmailAlias } from '@/config/emailAliases';
-
-const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
 
 // Card component
 function Card({ children, className = '', variant = 'default' }: {
@@ -68,6 +67,7 @@ const USER_SEGMENTS: { id: UserSegment; label: string; description: string }[] =
 ];
 
 export default function EmailSenderPage() {
+  const { getPassword } = useAdminAuth();
   // Form state
   const [mode, setMode] = useState<SendMode>('individual');
   const [selectedAlias, setSelectedAlias] = useState<EmailAlias>(EMAIL_ALIASES[0]);
@@ -127,7 +127,7 @@ export default function EmailSenderPage() {
     setTemplatesLoading(true);
     try {
       const response = await fetch('/api/admin/email-sender/templates', {
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await response.json();
       if (data.success) {
@@ -144,7 +144,7 @@ export default function EmailSenderPage() {
     setSearchLoading(true);
     try {
       const response = await fetch(`/api/admin/email-sender/search-users?q=${encodeURIComponent(query)}`, {
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await response.json();
       if (data.success) {
@@ -160,7 +160,7 @@ export default function EmailSenderPage() {
   async function fetchSegmentCount(segment: UserSegment) {
     try {
       const response = await fetch(`/api/admin/email-sender/segment-count?segment=${segment}`, {
-        headers: { 'X-Admin-Password': adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await response.json();
       if (data.success) {
@@ -219,7 +219,7 @@ export default function EmailSenderPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({
           from: selectedAlias.email,

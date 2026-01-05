@@ -114,8 +114,6 @@ const reactionTypeConfig = {
   ]},
 };
 
-const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
-
 export default function AnnouncementsPage() {
   const { getPassword } = useAdminAuth();
   const [announcements, setAnnouncements] = useState<SystemAnnouncement[]>([]);
@@ -149,7 +147,7 @@ export default function AnnouncementsPage() {
     setLoading(true);
     try {
       const res = await fetch('/api/admin/announcements', {
-        headers: { 'X-Admin-Password': getPassword() || adminPassword },
+        headers: { 'X-Admin-Password': getPassword() },
       });
       const data = await res.json();
 
@@ -212,7 +210,7 @@ export default function AnnouncementsPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': getPassword() || adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({ action: 'search-users', query: userSearchQuery }),
       });
@@ -272,7 +270,7 @@ export default function AnnouncementsPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': getPassword() || adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify(payload),
       });
@@ -297,7 +295,7 @@ export default function AnnouncementsPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': getPassword() || adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({ action: 'toggle', id }),
       });
@@ -322,7 +320,7 @@ export default function AnnouncementsPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': getPassword() || adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({ action: 'delete', id }),
       });
@@ -355,7 +353,7 @@ export default function AnnouncementsPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': getPassword() || adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({ action: 'get-reactions', announcement_id: announcementId }),
       });

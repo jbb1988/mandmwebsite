@@ -2,14 +2,14 @@
 
 import { useState } from 'react';
 import AdminGate from '@/components/AdminGate';
+import { useAdminAuth } from '@/context/AdminAuthContext';
 import {
   Handshake, AlertCircle, CheckCircle2, ExternalLink,
   Search, Users, FileText, ArrowRight, Info
 } from 'lucide-react';
 
-const adminPassword = process.env.NEXT_PUBLIC_ADMIN_DASHBOARD_PASSWORD || 'Brutus7862!';
-
 export default function PartnerAttributionPage() {
+  const { getPassword } = useAdminAuth();
   const [referralCode, setReferralCode] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
   const [amount, setAmount] = useState('');
@@ -26,7 +26,7 @@ export default function PartnerAttributionPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Admin-Password': adminPassword,
+          'X-Admin-Password': getPassword(),
         },
         body: JSON.stringify({
           referralCode: referralCode.trim().toUpperCase(),
