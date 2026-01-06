@@ -634,7 +634,7 @@ async function sendStandalonePush(
     notification_sound: string;
   }
 ): Promise<{ sent_count: number }> {
-  const { title, body, target_audience, target_user_ids } = options;
+  const { title, body, target_audience, target_user_ids, notification_sound } = options;
 
   // Build query for target users with FCM tokens
   let usersQuery = supabase
@@ -689,6 +689,7 @@ async function sendStandalonePush(
           userId: user.id,
           title,
           body,
+          sound: notification_sound, // Admin-selected sound override
           data: {
             type: 'admin_push',
             action: 'open_dashboard',
