@@ -397,8 +397,20 @@ export async function GET(request: NextRequest) {
       .slice(0, 15);
 
     // ===== DAILY ACTIVES =====
-    const todayStart = new Date(now);
-    todayStart.setHours(0, 0, 0, 0);
+    // Use Eastern timezone for "today" calculations
+    const easternFormatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'America/New_York',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+
+    // Get today's date string in Eastern timezone, then create a Date at midnight Eastern
+    const easternDateStr = easternFormatter.format(now);
+    const [month, day, year] = easternDateStr.split('/');
+    // Adjust for DST if needed (check if we're in EDT)
+    const isDST = now.toLocaleString('en-US', { timeZone: 'America/New_York', timeZoneName: 'short' }).includes('EDT');
+    const todayStart = new Date(`${year}-${month}-${day}T00:00:00${isDST ? '-04:00' : '-05:00'}`);
 
     const yesterdayStart = new Date(todayStart);
     yesterdayStart.setDate(yesterdayStart.getDate() - 1);
