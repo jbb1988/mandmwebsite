@@ -8,6 +8,8 @@
           "/share/*",
           "/d/*",
           "/t/*",
+          "/daily-hit",
+          "/daily-hit/",
           "/settings",
           "/settings/",
           "/dugout-talk",

@@ -1,9 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 import { LiquidGlass } from '@/components/LiquidGlass';
 import { LiquidButton } from '@/components/LiquidButton';
-import { Play, Pause } from 'lucide-react';
+import { Play, Pause, Star } from 'lucide-react';
 import { FadeInWhenVisible, GradientTextReveal } from '@/components/animations';
 
 interface DailyHit {
@@ -27,6 +29,30 @@ export default function DailyHitPage() {
   const [email, setEmail] = useState('');
   const [subscribeStatus, setSubscribeStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [subscribeMessage, setSubscribeMessage] = useState('');
+  const [showOpenPrompt, setShowOpenPrompt] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  const customSchemeLink = 'mindmuscle://media-hub';
+
+  // Check if mobile and show prompt
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      setIsMobile(mobile);
+      if (mobile) {
+        setShowOpenPrompt(true);
+      }
+    }
+  }, []);
+
+  const handleOpenApp = () => {
+    setShowOpenPrompt(false);
+    window.location.href = customSchemeLink;
+  };
+
+  const handleStayOnWeb = () => {
+    setShowOpenPrompt(false);
+  };
 
   useEffect(() => {
     async function fetchDailyHit() {
@@ -86,6 +112,68 @@ export default function DailyHitPage() {
 
   return (
     <div className="min-h-screen">
+      {/* Open in App Prompt - shown on mobile */}
+      {showOpenPrompt && isMobile && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#0a1628] border-2 border-solar-surge-orange/50 rounded-2xl p-6 max-w-sm w-full shadow-[0_0_50px_rgba(249,115,22,0.4)]">
+            {/* Logo */}
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden border-3 border-solar-surge-orange/50 bg-white/5 flex items-center justify-center">
+              <Image
+                src="https://api.mindandmuscle.ai/storage/v1/object/public/media-thumbnails/New%20MM%20Logo-transparent%20(1).png"
+                alt="Mind & Muscle"
+                width={60}
+                height={60}
+                className="object-contain"
+              />
+            </div>
+
+            <h2 className="text-xl font-black text-white text-center mb-2">
+              Open in Mind & Muscle?
+            </h2>
+            <p className="text-gray-400 text-center text-sm mb-6">
+              Get your Daily Hit in the app
+            </p>
+
+            <button
+              onClick={handleOpenApp}
+              className="w-full py-4 bg-solar-surge-orange rounded-xl font-black text-lg text-white hover:bg-solar-surge-orange/90 transition-all shadow-[0_0_30px_rgba(249,115,22,0.4)] mb-3"
+            >
+              Open App
+            </button>
+
+            <button
+              onClick={handleStayOnWeb}
+              className="w-full py-3 bg-white/5 border border-white/20 rounded-xl font-medium text-white/70 hover:bg-white/10 transition-all"
+            >
+              Stay on this page
+            </button>
+
+            {/* Download links */}
+            <div className="mt-6 pt-4 border-t border-white/10">
+              <p className="text-center text-gray-500 text-xs mb-3">Don&apos;t have the app?</p>
+              <div className="flex gap-2 justify-center">
+                <Link
+                  href="https://apps.apple.com/app/mind-muscle-baseball/id6737125498"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 bg-white/10 hover:bg-white/15 rounded-lg border border-white/20 text-white text-xs font-medium transition-all"
+                >
+                  App Store
+                </Link>
+                <Link
+                  href="https://play.google.com/store/apps/details?id=ai.mindandmuscle.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 bg-white/10 hover:bg-white/15 rounded-lg border border-white/20 text-white text-xs font-medium transition-all"
+                >
+                  Google Play
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <div className="pt-32 pb-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
