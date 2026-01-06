@@ -101,13 +101,13 @@ export default function InstructorGuidePage() {
   ];
 
   const loopSteps = [
-    { step: 'You assign drill', icon: UserPlus },
-    { step: 'Athlete notified', icon: Bell },
-    { step: 'Watches drill', icon: Eye },
-    { step: 'Taps "Practice This"', icon: ArrowRight },
-    { step: 'Records in Swing/Pitch Lab', icon: Upload },
-    { step: 'AI analyzes technique', icon: BarChart3 },
-    { step: 'You see results', icon: CheckCircle2 },
+    { step: 'You assign drill', icon: UserPlus, color: 'orange', number: 1 },
+    { step: 'Athlete gets notified', icon: Bell, color: 'blue', number: 2 },
+    { step: 'Watches your drill', icon: Eye, color: 'blue', number: 3 },
+    { step: 'Taps "Practice This"', icon: Zap, color: 'blue', number: 4 },
+    { step: 'Records in Lab', icon: Upload, color: 'blue', number: 5 },
+    { step: 'AI analyzes', icon: Sparkles, color: 'purple', number: 6 },
+    { step: 'You see results', icon: CheckCircle2, color: 'orange', number: 7 },
   ];
 
   return (
@@ -176,45 +176,145 @@ export default function InstructorGuidePage() {
       </section>
 
       {/* The Complete Loop - Premium Section */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0F1123] via-[#1A1F3A]/50 to-[#0F1123]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(14,165,233,0.08)_0%,transparent_70%)]" />
 
-        <div className="max-w-4xl mx-auto relative z-10">
-          <FadeInWhenVisible delay={0} direction="up">
-            <div className="group relative">
-              {/* Outer Glow */}
-              <div className="absolute -inset-2 rounded-3xl blur-2xl opacity-60 bg-gradient-to-r from-neon-cortex-blue/30 to-solar-surge-orange/30 group-hover:opacity-80 transition-opacity duration-500" />
+        <div className="max-w-6xl mx-auto relative z-10">
+          <FadeInWhenVisible delay={0} direction="up" className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-solar-surge-orange/20 to-neon-cortex-blue/20 border border-solar-surge-orange/30 text-solar-surge-orange text-sm font-bold mb-6 shadow-[0_0_30px_rgba(249,115,22,0.2)]">
+              <Zap className="w-4 h-4" style={{filter: 'drop-shadow(0 0 8px rgba(249,115,22,0.8))'}} />
+              THE COMPLETE TRAINING LOOP
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white mb-4">
+              From Assignment to <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange">Accountability</span>
+            </h2>
+            <p className="text-lg text-white/60 max-w-2xl mx-auto">
+              No more &quot;did you practice?&quot; — you&apos;ll <span className="text-neon-cortex-blue font-bold">SEE</span> who did.
+            </p>
+          </FadeInWhenVisible>
 
-              <div className="relative backdrop-blur-sm bg-white/[0.02] rounded-2xl border-2 border-neon-cortex-blue/40 p-8 md:p-12 shadow-[0_0_40px_rgba(14,165,233,0.2)]">
-                <h2 className="text-2xl sm:text-3xl font-black text-center mb-10 text-neon-cortex-blue">
-                  The Complete Loop
-                </h2>
+          {/* Desktop Loop Visualization */}
+          <div className="hidden lg:block">
+            <FadeInWhenVisible delay={0.1} direction="up">
+              <div className="relative">
+                {/* Connecting Line */}
+                <div className="absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-solar-surge-orange via-neon-cortex-blue via-60% to-solar-surge-orange transform -translate-y-1/2 opacity-30 rounded-full" />
+                <div className="absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-solar-surge-orange via-neon-cortex-blue via-60% to-solar-surge-orange transform -translate-y-1/2 blur-lg opacity-50" />
 
-                <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-2 text-sm md:text-base">
-                  {loopSteps.map((item, index) => (
-                    <React.Fragment key={index}>
-                      <div className="flex flex-col items-center text-center group/step">
-                        <div className="relative">
-                          <div className="absolute inset-0 bg-neon-cortex-blue/30 blur-xl rounded-full opacity-0 group-hover/step:opacity-100 transition-opacity" />
-                          <div className="relative w-14 h-14 rounded-full bg-neon-cortex-blue/20 border-2 border-neon-cortex-blue/40 flex items-center justify-center mb-3 group-hover/step:border-neon-cortex-blue group-hover/step:scale-110 transition-all duration-300">
+                <div className="grid grid-cols-7 gap-4">
+                  {loopSteps.map((item, index) => {
+                    const isOrange = item.color === 'orange';
+                    const isPurple = item.color === 'purple';
+                    const colorClasses = isOrange
+                      ? 'from-solar-surge-orange to-orange-600 border-solar-surge-orange/60 shadow-[0_0_40px_rgba(249,115,22,0.4)]'
+                      : isPurple
+                      ? 'from-purple-500 to-purple-700 border-purple-500/60 shadow-[0_0_40px_rgba(168,85,247,0.4)]'
+                      : 'from-neon-cortex-blue to-cyan-600 border-neon-cortex-blue/60 shadow-[0_0_40px_rgba(14,165,233,0.4)]';
+                    const glowColor = isOrange
+                      ? 'rgba(249,115,22,0.6)'
+                      : isPurple
+                      ? 'rgba(168,85,247,0.6)'
+                      : 'rgba(14,165,233,0.6)';
+
+                    return (
+                      <div key={index} className="flex flex-col items-center text-center group">
+                        {/* Step Number */}
+                        <div className="text-xs font-bold text-white/40 mb-3">STEP {item.number}</div>
+
+                        {/* Icon Container */}
+                        <div className="relative mb-4">
+                          <div className={`absolute inset-0 bg-gradient-to-br ${colorClasses} blur-2xl opacity-50 group-hover:opacity-80 transition-opacity duration-500 rounded-full scale-150`} />
+                          <div className={`relative w-20 h-20 rounded-2xl bg-gradient-to-br ${colorClasses} border-2 flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
                             <item.icon
-                              className="w-6 h-6 text-neon-cortex-blue"
-                              style={{filter: 'drop-shadow(0 0 8px rgba(14,165,233,0.6))'}}
+                              className="w-9 h-9 text-white"
+                              style={{filter: `drop-shadow(0 0 12px ${glowColor})`}}
                             />
                           </div>
                         </div>
-                        <span className="text-white/80 max-w-[100px] text-sm">{item.step}</span>
-                      </div>
-                      {index < loopSteps.length - 1 && (
-                        <ArrowRight className="hidden md:block w-5 h-5 text-neon-cortex-blue/60 flex-shrink-0" />
-                      )}
-                    </React.Fragment>
-                  ))}
-                </div>
 
-                <p className="text-center text-white/50 mt-10 text-sm">
-                  No more &quot;did you practice?&quot; - you&apos;ll SEE who did.
-                </p>
+                        {/* Step Label */}
+                        <span className="text-white font-bold text-sm leading-tight">{item.step}</span>
+
+                        {/* Role Indicator */}
+                        <span className={`text-xs mt-2 px-2 py-1 rounded-full ${
+                          isOrange ? 'bg-solar-surge-orange/20 text-solar-surge-orange' :
+                          isPurple ? 'bg-purple-500/20 text-purple-400' :
+                          'bg-neon-cortex-blue/20 text-neon-cortex-blue'
+                        }`}>
+                          {isOrange ? 'You' : isPurple ? 'AI' : 'Athlete'}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </FadeInWhenVisible>
+          </div>
+
+          {/* Mobile Loop Visualization */}
+          <div className="lg:hidden">
+            <StaggerChildren staggerDelay={0.1} className="space-y-4">
+              {loopSteps.map((item, index) => {
+                const isOrange = item.color === 'orange';
+                const isPurple = item.color === 'purple';
+                const borderColor = isOrange
+                  ? 'border-solar-surge-orange/40 hover:border-solar-surge-orange'
+                  : isPurple
+                  ? 'border-purple-500/40 hover:border-purple-500'
+                  : 'border-neon-cortex-blue/40 hover:border-neon-cortex-blue';
+                const bgGlow = isOrange
+                  ? 'from-solar-surge-orange/20'
+                  : isPurple
+                  ? 'from-purple-500/20'
+                  : 'from-neon-cortex-blue/20';
+                const iconBg = isOrange
+                  ? 'bg-solar-surge-orange/20 text-solar-surge-orange'
+                  : isPurple
+                  ? 'bg-purple-500/20 text-purple-400'
+                  : 'bg-neon-cortex-blue/20 text-neon-cortex-blue';
+
+                return (
+                  <motion.div
+                    key={index}
+                    variants={staggerItemVariants}
+                    className={`flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r ${bgGlow} to-transparent border-2 ${borderColor} transition-all duration-300`}
+                  >
+                    <div className="flex-shrink-0 text-2xl font-black text-white/20">{item.number}</div>
+                    <div className={`flex-shrink-0 w-12 h-12 rounded-xl ${iconBg} flex items-center justify-center`}>
+                      <item.icon className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-white font-bold">{item.step}</span>
+                      <span className={`block text-xs mt-1 ${
+                        isOrange ? 'text-solar-surge-orange' : isPurple ? 'text-purple-400' : 'text-neon-cortex-blue'
+                      }`}>
+                        {isOrange ? 'Your action' : isPurple ? 'AI-powered' : 'Athlete action'}
+                      </span>
+                    </div>
+                    {index < loopSteps.length - 1 && (
+                      <ArrowRight className="w-5 h-5 text-white/30 rotate-90 lg:rotate-0" />
+                    )}
+                  </motion.div>
+                );
+              })}
+            </StaggerChildren>
+          </div>
+
+          {/* Legend */}
+          <FadeInWhenVisible delay={0.3} direction="up">
+            <div className="flex flex-wrap justify-center gap-6 mt-12 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-solar-surge-orange shadow-[0_0_10px_rgba(249,115,22,0.6)]" />
+                <span className="text-white/60">Your Actions</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-neon-cortex-blue shadow-[0_0_10px_rgba(14,165,233,0.6)]" />
+                <span className="text-white/60">Athlete Actions</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.6)]" />
+                <span className="text-white/60">AI-Powered</span>
               </div>
             </div>
           </FadeInWhenVisible>
