@@ -545,18 +545,27 @@ async function sendAnnouncementPush(
     return { sent_count: 0 };
   }
 
-  // Send push to each user
+  // Send push to each user via direct HTTP call to edge function
   let sentCount = 0;
   const pushTitle = announcement.push_title || announcement.title;
   const pushBody = announcement.message.substring(0, 100) + (announcement.message.length > 100 ? '...' : '');
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
   for (const user of users) {
     if (!user.fcm_token) continue;
 
     try {
-      // Call the FCM edge function
-      const { error: fcmError } = await supabase.functions.invoke('send-fcm-notification', {
-        body: {
+      console.log(`[Announcement Push] Sending to user ${user.email} (${user.id})`);
+
+      // Call the FCM edge function directly via HTTP
+      const response = await fetch(`${supabaseUrl}/functions/v1/send-fcm-notification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${serviceRoleKey}`,
+        },
+        body: JSON.stringify({
           userId: user.id,
           title: pushTitle,
           body: pushBody,
@@ -564,9 +573,13 @@ async function sendAnnouncementPush(
             type: 'announcement',
             announcementId: announcementId,
           },
-          sound: announcement.notification_sound !== 'default' ? announcement.notification_sound : undefined,
-        },
+        }),
       });
+
+      const result = await response.json();
+      console.log(`[Announcement Push] Response for ${user.email}:`, result);
+
+      const fcmError = !response.ok ? result.error : null;
 
       // Record delivery attempt
       await supabase
@@ -576,10 +589,10 @@ async function sendAnnouncementPush(
           user_id: user.id,
           fcm_token: user.fcm_token,
           sent_at: new Date().toISOString(),
-          error: fcmError ? fcmError.message : null,
+          error: fcmError || null,
         }, { onConflict: 'announcement_id,user_id' });
 
-      if (!fcmError) {
+      if (response.ok && result.success) {
         sentCount++;
       }
     } catch (e) {
@@ -621,7 +634,7 @@ async function sendStandalonePush(
     notification_sound: string;
   }
 ): Promise<{ sent_count: number }> {
-  const { title, body, target_audience, target_user_ids, notification_sound } = options;
+  const { title, body, target_audience, target_user_ids } = options;
 
   // Build query for target users with FCM tokens
   let usersQuery = supabase
@@ -654,28 +667,41 @@ async function sendStandalonePush(
     return { sent_count: 0 };
   }
 
-  // Send push to each user
+  // Send push to each user via direct HTTP call to edge function
+  // This is more reliable than supabase.functions.invoke from Next.js
   let sentCount = 0;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
 
   for (const user of users) {
     if (!user.fcm_token) continue;
 
     try {
-      const { error: fcmError } = await supabase.functions.invoke('send-fcm-notification', {
-        body: {
+      console.log(`[Standalone Push] Sending to user ${user.email} (${user.id})`);
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/send-fcm-notification`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${serviceRoleKey}`,
+        },
+        body: JSON.stringify({
           userId: user.id,
           title,
           body,
           data: {
             type: 'standalone_push',
           },
-        },
+        }),
       });
 
-      if (!fcmError) {
+      const result = await response.json();
+      console.log(`[Standalone Push] Response for ${user.email}:`, result);
+
+      if (response.ok && result.success) {
         sentCount++;
       } else {
-        console.error(`[Standalone Push] FCM error for user ${user.id}:`, fcmError);
+        console.error(`[Standalone Push] FCM error for user ${user.id}:`, result.error || result);
       }
     } catch (e) {
       console.error(`[Standalone Push] Failed to send to user ${user.id}:`, e);
