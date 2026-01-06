@@ -6,7 +6,8 @@ import { useAdminAuth } from '@/context/AdminAuthContext';
 import {
   Megaphone, Plus, Trash2, Power, PowerOff, Edit2, X,
   Loader2, Search, Info, AlertTriangle, CheckCircle, Sparkles,
-  Users, Clock, Calendar, MessageCircle, ChevronDown, ChevronUp
+  Users, Clock, Calendar, MessageCircle, ChevronDown, ChevronUp,
+  Bell, Volume2, Send, Play, BellOff
 } from 'lucide-react';
 
 function Card({ children, className = '', variant = 'default' }: {
@@ -41,11 +42,38 @@ interface SystemAnnouncement {
   starts_at: string | null;
   created_by: string | null;
   reaction_type: 'none' | 'general' | 'usefulness' | 'bug_fix' | 'content';
+  // Push notification fields
+  send_push: boolean;
+  push_title: string | null;
+  push_scheduled_at: string | null;
+  push_sent_at: string | null;
+  push_sent_count: number;
+  notification_sound: string;
+  play_banner_sound: boolean;
 }
 
 interface ReactionStats {
   total: number;
   by_reaction: Record<string, number>;
+}
+
+interface DeliveryStats {
+  total: number;
+  delivered: number;
+  opened: number;
+  failed: number;
+  delivery_rate: number;
+  open_rate: number;
+}
+
+interface DeliveryRecord {
+  id: string;
+  user_id: string;
+  sent_at: string;
+  delivered_at: string | null;
+  opened_at: string | null;
+  error: string | null;
+  profiles: { email: string; name: string | null } | null;
 }
 
 interface ReactionResponse {
@@ -114,6 +142,18 @@ const reactionTypeConfig = {
   ]},
 };
 
+const notificationSoundOptions = [
+  { id: 'default', label: 'System Default', description: 'Uses device default' },
+  { id: 'bat_crack', label: 'Bat Crack', description: 'Classic wood bat hit' },
+  { id: 'boom_swish', label: 'Boom Swish', description: 'Powerful swing sound', popular: true },
+  { id: 'crowd_roar', label: 'Crowd Roar', description: 'Stadium celebration' },
+  { id: 'organ', label: 'Ballpark Organ', description: 'Classic stadium organ' },
+  { id: 'whoosh', label: 'Whoosh', description: 'Fast swing through air' },
+  { id: 'strike', label: 'Strike!', description: "Umpire's call" },
+  { id: 'safe', label: 'Safe!', description: 'You made it celebration' },
+  { id: 'none', label: 'Silent', description: 'No sound' },
+];
+
 export default function AnnouncementsPage() {
   const { getPassword } = useAdminAuth();
   const [announcements, setAnnouncements] = useState<SystemAnnouncement[]>([]);
@@ -137,11 +177,26 @@ export default function AnnouncementsPage() {
   const [searchingUsers, setSearchingUsers] = useState(false);
   const [formReactionType, setFormReactionType] = useState<SystemAnnouncement['reaction_type']>('none');
 
+  // Push notification form state
+  const [formSendPush, setFormSendPush] = useState(false);
+  const [formPushTitle, setFormPushTitle] = useState('');
+  const [formPushScheduled, setFormPushScheduled] = useState(false);
+  const [formPushScheduledAt, setFormPushScheduledAt] = useState('');
+  const [formNotificationSound, setFormNotificationSound] = useState('default');
+  const [formPlayBannerSound, setFormPlayBannerSound] = useState(false);
+  const [sendingPush, setSendingPush] = useState<string | null>(null);
+
   // Reaction viewing state
   const [expandedReactions, setExpandedReactions] = useState<string | null>(null);
   const [reactionStats, setReactionStats] = useState<Record<string, ReactionStats>>({});
   const [reactionResponses, setReactionResponses] = useState<Record<string, ReactionResponse[]>>({});
   const [loadingReactions, setLoadingReactions] = useState<string | null>(null);
+
+  // Delivery report viewing state
+  const [expandedDelivery, setExpandedDelivery] = useState<string | null>(null);
+  const [deliveryStats, setDeliveryStats] = useState<Record<string, DeliveryStats>>({});
+  const [deliveryRecords, setDeliveryRecords] = useState<Record<string, DeliveryRecord[]>>({});
+  const [loadingDelivery, setLoadingDelivery] = useState<string | null>(null);
 
   const fetchAnnouncements = async () => {
     setLoading(true);
@@ -180,6 +235,13 @@ export default function AnnouncementsPage() {
     setUserSearchResults([]);
     setEditingAnnouncement(null);
     setFormReactionType('none');
+    // Reset push notification fields
+    setFormSendPush(false);
+    setFormPushTitle('');
+    setFormPushScheduled(false);
+    setFormPushScheduledAt('');
+    setFormNotificationSound('default');
+    setFormPlayBannerSound(false);
   };
 
   const openCreateModal = () => {
@@ -197,6 +259,13 @@ export default function AnnouncementsPage() {
     setFormExpiresAt(announcement.expires_at ? announcement.expires_at.slice(0, 16) : '');
     setFormStartsAt(announcement.starts_at ? announcement.starts_at.slice(0, 16) : '');
     setFormReactionType(announcement.reaction_type || 'none');
+    // Push notification fields
+    setFormSendPush(announcement.send_push || false);
+    setFormPushTitle(announcement.push_title || '');
+    setFormPushScheduled(!!announcement.push_scheduled_at);
+    setFormPushScheduledAt(announcement.push_scheduled_at ? announcement.push_scheduled_at.slice(0, 16) : '');
+    setFormNotificationSound(announcement.notification_sound || 'default');
+    setFormPlayBannerSound(announcement.play_banner_sound || false);
     // For target users, we would need to fetch user details - simplified for now
     setFormTargetUsers([]);
     setShowModal(true);
@@ -253,6 +322,12 @@ export default function AnnouncementsPage() {
         starts_at: formStartsAt || null,
         created_by: 'Admin',
         reaction_type: formReactionType,
+        // Push notification fields
+        send_push: formSendPush,
+        push_title: formPushTitle || null,
+        push_scheduled_at: formSendPush && formPushScheduled && formPushScheduledAt ? formPushScheduledAt : null,
+        notification_sound: formNotificationSound,
+        play_banner_sound: formPlayBannerSound,
       };
 
       if (editingAnnouncement) {
@@ -346,6 +421,35 @@ export default function AnnouncementsPage() {
     });
   };
 
+  const handleSendPush = async (id: string) => {
+    if (!confirm('Send push notification to all targeted users now?')) return;
+
+    setSendingPush(id);
+    try {
+      const res = await fetch('/api/admin/announcements', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': getPassword(),
+        },
+        body: JSON.stringify({ action: 'send-push', id }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        alert(`Push notification sent to ${data.sent_count} users!`);
+        fetchAnnouncements();
+      } else {
+        alert(`Failed to send push: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Failed to send push:', error);
+      alert('Failed to send push notification');
+    } finally {
+      setSendingPush(null);
+    }
+  };
+
   const fetchReactions = async (announcementId: string) => {
     setLoadingReactions(announcementId);
     try {
@@ -392,6 +496,45 @@ export default function AnnouncementsPage() {
     if (!config || !('options' in config)) return value;
     const option = config.options?.find(o => o.value === value);
     return option ? `${option.emoji} ${option.label}` : value;
+  };
+
+  const fetchDeliveryReport = async (announcementId: string) => {
+    setLoadingDelivery(announcementId);
+    try {
+      const res = await fetch('/api/admin/announcements', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': getPassword(),
+        },
+        body: JSON.stringify({ action: 'get-delivery-report', announcement_id: announcementId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setDeliveryStats(prev => ({ ...prev, [announcementId]: data.stats }));
+        setDeliveryRecords(prev => ({ ...prev, [announcementId]: data.deliveries }));
+      }
+    } catch (error) {
+      console.error('Failed to fetch delivery report:', error);
+    } finally {
+      setLoadingDelivery(null);
+    }
+  };
+
+  const toggleDeliveryReport = async (announcementId: string) => {
+    if (expandedDelivery === announcementId) {
+      setExpandedDelivery(null);
+    } else {
+      setExpandedDelivery(announcementId);
+      // Close reactions if open
+      if (expandedReactions === announcementId) {
+        setExpandedReactions(null);
+      }
+      // Fetch delivery report if not already loaded
+      if (!deliveryStats[announcementId]) {
+        await fetchDeliveryReport(announcementId);
+      }
+    }
   };
 
   return (
@@ -503,6 +646,37 @@ export default function AnnouncementsPage() {
                                 {reactionTypeConfig[announcement.reaction_type]?.label || announcement.reaction_type}
                               </span>
                             )}
+                            {/* Push notification badges - clickable to view delivery report */}
+                            {announcement.push_sent_at && (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); toggleDeliveryReport(announcement.id); }}
+                                className={`px-2 py-0.5 rounded text-xs font-medium flex items-center gap-1 transition-colors ${
+                                  expandedDelivery === announcement.id
+                                    ? 'bg-green-500/30 text-green-300 ring-1 ring-green-400/50'
+                                    : 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
+                                }`}
+                              >
+                                <Bell className="w-3 h-3" />
+                                Pushed to {announcement.push_sent_count}
+                                {expandedDelivery === announcement.id ? (
+                                  <ChevronUp className="w-3 h-3" />
+                                ) : (
+                                  <ChevronDown className="w-3 h-3" />
+                                )}
+                              </button>
+                            )}
+                            {announcement.send_push && announcement.push_scheduled_at && !announcement.push_sent_at && (
+                              <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-400 text-xs font-medium flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                Push: {formatDate(announcement.push_scheduled_at)}
+                              </span>
+                            )}
+                            {announcement.play_banner_sound && (
+                              <span className="px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 text-xs font-medium flex items-center gap-1">
+                                <Volume2 className="w-3 h-3" />
+                                {notificationSoundOptions.find(s => s.id === announcement.notification_sound)?.label || 'Sound'}
+                              </span>
+                            )}
                           </div>
                           <p className="text-white/60 text-sm mb-2 line-clamp-2">{announcement.message}</p>
                           <div className="flex flex-wrap gap-3 text-xs text-white/40">
@@ -533,6 +707,21 @@ export default function AnnouncementsPage() {
 
                         {/* Actions */}
                         <div className="flex items-center gap-2">
+                          {/* Send Push Button */}
+                          {announcement.active && !announcement.push_sent_at && (
+                            <button
+                              onClick={() => handleSendPush(announcement.id)}
+                              disabled={sendingPush === announcement.id}
+                              className="p-2 rounded-lg bg-orange-500/20 text-orange-400 hover:bg-orange-500/30 transition-colors"
+                              title="Send Push Notification"
+                            >
+                              {sendingPush === announcement.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Send className="w-4 h-4" />
+                              )}
+                            </button>
+                          )}
                           {announcement.reaction_type && announcement.reaction_type !== 'none' && (
                             <button
                               onClick={() => toggleReactions(announcement.id)}
@@ -651,6 +840,103 @@ export default function AnnouncementsPage() {
                           ) : (
                             <div className="text-center py-4 text-white/40 text-sm">
                               Failed to load reactions
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Expanded Delivery Report Section */}
+                      {expandedDelivery === announcement.id && (
+                        <div className="mt-4 pt-4 border-t border-white/10">
+                          {loadingDelivery === announcement.id ? (
+                            <div className="flex items-center justify-center py-4">
+                              <Loader2 className="w-5 h-5 animate-spin text-green-400" />
+                            </div>
+                          ) : deliveryStats[announcement.id] ? (
+                            <div className="space-y-4">
+                              {/* Stats Summary */}
+                              <div className="flex items-center gap-2 mb-3">
+                                <Bell className="w-5 h-5 text-green-400" />
+                                <h4 className="font-semibold text-green-400">Push Notification Report</h4>
+                              </div>
+                              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                                <div className="px-3 py-2 bg-white/5 rounded-lg">
+                                  <div className="text-lg font-bold text-white">{deliveryStats[announcement.id].total}</div>
+                                  <div className="text-xs text-white/50">Total Sent</div>
+                                </div>
+                                <div className="px-3 py-2 bg-green-500/10 rounded-lg border border-green-500/20">
+                                  <div className="text-lg font-bold text-green-400">
+                                    {deliveryStats[announcement.id].delivery_rate}%
+                                  </div>
+                                  <div className="text-xs text-white/50">Delivery Rate</div>
+                                </div>
+                                <div className="px-3 py-2 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                                  <div className="text-lg font-bold text-blue-400">
+                                    {deliveryStats[announcement.id].open_rate}%
+                                  </div>
+                                  <div className="text-xs text-white/50">Open Rate</div>
+                                </div>
+                                <div className="px-3 py-2 bg-red-500/10 rounded-lg border border-red-500/20">
+                                  <div className="text-lg font-bold text-red-400">{deliveryStats[announcement.id].failed}</div>
+                                  <div className="text-xs text-white/50">Failed</div>
+                                </div>
+                              </div>
+
+                              {/* Individual Deliveries */}
+                              {deliveryRecords[announcement.id]?.length > 0 && (
+                                <div>
+                                  <div className="text-sm font-medium text-white/70 mb-2">Delivery Details</div>
+                                  <div className="max-h-48 overflow-y-auto space-y-2">
+                                    {deliveryRecords[announcement.id].map((record) => (
+                                      <div
+                                        key={record.id}
+                                        className="flex items-center justify-between px-3 py-2 bg-white/5 rounded-lg text-sm"
+                                      >
+                                        <div className="flex items-center gap-3">
+                                          <span className="text-white/90">
+                                            {record.profiles?.name || record.profiles?.email || record.user_id.slice(0, 8) + '...'}
+                                          </span>
+                                          {record.profiles?.name && (
+                                            <span className="text-white/40 text-xs">{record.profiles.email}</span>
+                                          )}
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          {record.error ? (
+                                            <span className="px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs">
+                                              Failed
+                                            </span>
+                                          ) : record.opened_at ? (
+                                            <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs">
+                                              Opened
+                                            </span>
+                                          ) : record.delivered_at ? (
+                                            <span className="px-2 py-1 bg-green-500/20 text-green-400 rounded text-xs">
+                                              Delivered
+                                            </span>
+                                          ) : (
+                                            <span className="px-2 py-1 bg-amber-500/20 text-amber-400 rounded text-xs">
+                                              Sent
+                                            </span>
+                                          )}
+                                          <span className="text-white/30 text-xs">
+                                            {formatDate(record.sent_at)}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
+                              {deliveryStats[announcement.id].total === 0 && (
+                                <div className="text-center py-4 text-white/40 text-sm">
+                                  No delivery records yet
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="text-center py-4 text-white/40 text-sm">
+                              Failed to load delivery report
                             </div>
                           )}
                         </div>
@@ -861,6 +1147,126 @@ export default function AnnouncementsPage() {
                         className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-purple-500 focus:outline-none"
                       />
                       <p className="text-xs text-white/40 mt-1">Auto-hide after date</p>
+                    </div>
+                  </div>
+
+                  {/* Notification Settings */}
+                  <div className="border border-orange-500/30 rounded-xl p-4 bg-orange-500/5">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Bell className="w-5 h-5 text-orange-400" />
+                      <h3 className="font-semibold text-orange-400">Notification Settings</h3>
+                    </div>
+
+                    <div className="space-y-4">
+                      {/* Toggle Options */}
+                      <div className="flex flex-wrap gap-4">
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={formPlayBannerSound}
+                            onChange={(e) => setFormPlayBannerSound(e.target.checked)}
+                            className="w-4 h-4 rounded bg-white/10 border-white/20 text-orange-500 focus:ring-orange-500"
+                          />
+                          <span className="text-sm text-white/80">Play sound when banner appears (in-app)</span>
+                        </label>
+
+                        <label className="flex items-center gap-2 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={formSendPush}
+                            onChange={(e) => setFormSendPush(e.target.checked)}
+                            className="w-4 h-4 rounded bg-white/10 border-white/20 text-orange-500 focus:ring-orange-500"
+                          />
+                          <span className="text-sm text-white/80">Also send as push notification</span>
+                        </label>
+                      </div>
+
+                      {/* Push Notification Options */}
+                      {formSendPush && (
+                        <div className="bg-white/5 rounded-lg p-4 space-y-4">
+                          <div>
+                            <label className="block text-sm font-medium text-white/70 mb-2">
+                              Push Title (Optional)
+                            </label>
+                            <input
+                              type="text"
+                              value={formPushTitle}
+                              onChange={(e) => setFormPushTitle(e.target.value)}
+                              placeholder={formTitle || "Uses announcement title if empty"}
+                              className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-orange-500 focus:outline-none"
+                            />
+                          </div>
+
+                          <div className="flex items-center gap-4">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="radio"
+                                name="pushSchedule"
+                                checked={!formPushScheduled}
+                                onChange={() => setFormPushScheduled(false)}
+                                className="w-4 h-4 bg-white/10 border-white/20 text-orange-500 focus:ring-orange-500"
+                              />
+                              <span className="text-sm text-white/80">Send immediately</span>
+                            </label>
+
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="radio"
+                                name="pushSchedule"
+                                checked={formPushScheduled}
+                                onChange={() => setFormPushScheduled(true)}
+                                className="w-4 h-4 bg-white/10 border-white/20 text-orange-500 focus:ring-orange-500"
+                              />
+                              <span className="text-sm text-white/80">Schedule for later</span>
+                            </label>
+                          </div>
+
+                          {formPushScheduled && (
+                            <div>
+                              <label className="block text-sm font-medium text-white/70 mb-2">
+                                Send Push At
+                              </label>
+                              <input
+                                type="datetime-local"
+                                value={formPushScheduledAt}
+                                onChange={(e) => setFormPushScheduledAt(e.target.value)}
+                                className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-orange-500 focus:outline-none"
+                              />
+                            </div>
+                          )}
+
+                          {!formPushScheduled && (
+                            <div className="flex items-center gap-2 text-amber-400 text-sm">
+                              <AlertTriangle className="w-4 h-4" />
+                              Push will be sent immediately when you create/save this announcement
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Sound Selection */}
+                      {(formPlayBannerSound || formSendPush) && (
+                        <div>
+                          <label className="block text-sm font-medium text-white/70 mb-2">
+                            <Volume2 className="w-4 h-4 inline mr-1" />
+                            Notification Sound
+                          </label>
+                          <select
+                            value={formNotificationSound}
+                            onChange={(e) => setFormNotificationSound(e.target.value)}
+                            className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-orange-500 focus:outline-none"
+                          >
+                            {notificationSoundOptions.map((sound) => (
+                              <option key={sound.id} value={sound.id}>
+                                {sound.label} {sound.popular ? '(Popular)' : ''} - {sound.description}
+                              </option>
+                            ))}
+                          </select>
+                          <p className="text-xs text-white/40 mt-1">
+                            {formSendPush && "For push: uses user's preference if 'System Default' selected"}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </div>
 

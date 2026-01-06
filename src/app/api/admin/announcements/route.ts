@@ -24,6 +24,14 @@ interface SystemAnnouncement {
   starts_at: string | null;
   created_by: string | null;
   reaction_type: 'none' | 'general' | 'usefulness' | 'bug_fix' | 'content';
+  // Push notification fields
+  send_push: boolean;
+  push_title: string | null;
+  push_scheduled_at: string | null;
+  push_sent_at: string | null;
+  push_sent_count: number;
+  notification_sound: string;
+  play_banner_sound: boolean;
 }
 
 interface AnnouncementReaction {
@@ -118,7 +126,11 @@ export async function POST(request: NextRequest) {
 
     // CREATE announcement
     if (action === 'create') {
-      const { title, message, type, priority, target_audience, target_user_ids, expires_at, starts_at, created_by, reaction_type } = body;
+      const {
+        title, message, type, priority, target_audience, target_user_ids,
+        expires_at, starts_at, created_by, reaction_type,
+        send_push, push_title, push_scheduled_at, notification_sound, play_banner_sound
+      } = body;
 
       if (!title || !message) {
         return NextResponse.json({ error: 'Title and message are required' }, { status: 400 });
@@ -138,6 +150,12 @@ export async function POST(request: NextRequest) {
           starts_at: starts_at || null,
           created_by: created_by || 'Admin',
           reaction_type: reaction_type || 'none',
+          // Push notification fields
+          send_push: send_push || false,
+          push_title: push_title || null,
+          push_scheduled_at: push_scheduled_at || null,
+          notification_sound: notification_sound || 'default',
+          play_banner_sound: play_banner_sound || false,
         })
         .select()
         .single();
@@ -146,12 +164,27 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
 
+      // If send_push is enabled and no schedule, trigger push now
+      if (send_push && !push_scheduled_at && data) {
+        try {
+          const pushResult = await sendAnnouncementPush(supabase, data.id);
+          console.log('[Announcements API] Push sent:', pushResult);
+        } catch (pushError) {
+          console.error('[Announcements API] Failed to send push:', pushError);
+          // Don't fail the whole request, just log it
+        }
+      }
+
       return NextResponse.json({ success: true, announcement: data, message: 'Announcement created' });
     }
 
     // UPDATE announcement
     if (action === 'update') {
-      const { id, title, message, type, priority, target_audience, target_user_ids, expires_at, starts_at, active, reaction_type } = body;
+      const {
+        id, title, message, type, priority, target_audience, target_user_ids,
+        expires_at, starts_at, active, reaction_type,
+        send_push, push_title, push_scheduled_at, notification_sound, play_banner_sound
+      } = body;
 
       if (!id) {
         return NextResponse.json({ error: 'Announcement ID is required' }, { status: 400 });
@@ -168,6 +201,12 @@ export async function POST(request: NextRequest) {
       if (starts_at !== undefined) updateData.starts_at = starts_at;
       if (active !== undefined) updateData.active = active;
       if (reaction_type !== undefined) updateData.reaction_type = reaction_type;
+      // Push notification fields
+      if (send_push !== undefined) updateData.send_push = send_push;
+      if (push_title !== undefined) updateData.push_title = push_title;
+      if (push_scheduled_at !== undefined) updateData.push_scheduled_at = push_scheduled_at;
+      if (notification_sound !== undefined) updateData.notification_sound = notification_sound;
+      if (play_banner_sound !== undefined) updateData.play_banner_sound = play_banner_sound;
 
       const { data, error } = await supabase
         .from('system_announcements')
@@ -347,9 +386,195 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // SEND PUSH manually for an existing announcement
+    if (action === 'send-push') {
+      const { id } = body;
+
+      if (!id) {
+        return NextResponse.json({ error: 'Announcement ID is required' }, { status: 400 });
+      }
+
+      try {
+        const result = await sendAnnouncementPush(supabase, id);
+        return NextResponse.json({
+          success: true,
+          sent_count: result.sent_count,
+          message: `Push notification sent to ${result.sent_count} users`,
+        });
+      } catch (pushError) {
+        console.error('[Announcements API] Failed to send push:', pushError);
+        return NextResponse.json({
+          error: (pushError as Error).message || 'Failed to send push notification'
+        }, { status: 500 });
+      }
+    }
+
+    // GET DELIVERY REPORT for push notifications
+    if (action === 'get-delivery-report') {
+      const { announcement_id, page = 1, limit = 50 } = body;
+
+      if (!announcement_id) {
+        return NextResponse.json({ error: 'Announcement ID is required' }, { status: 400 });
+      }
+
+      const offset = (page - 1) * limit;
+      const { data: deliveries, error, count } = await supabase
+        .from('announcement_push_deliveries')
+        .select('*, profiles:user_id(email, name)', { count: 'exact' })
+        .eq('announcement_id', announcement_id)
+        .order('sent_at', { ascending: false })
+        .range(offset, offset + limit - 1);
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      // Calculate stats
+      const total = count || 0;
+      const delivered = deliveries?.filter(d => d.delivered_at).length || 0;
+      const opened = deliveries?.filter(d => d.opened_at).length || 0;
+      const failed = deliveries?.filter(d => d.error).length || 0;
+
+      return NextResponse.json({
+        success: true,
+        deliveries: deliveries || [],
+        stats: {
+          total,
+          delivered,
+          opened,
+          failed,
+          delivery_rate: total > 0 ? Math.round((delivered / total) * 100) : 0,
+          open_rate: total > 0 ? Math.round((opened / total) * 100) : 0,
+        },
+        pagination: {
+          page,
+          limit,
+          total,
+          total_pages: Math.ceil(total / limit),
+        },
+      });
+    }
+
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
     console.error('Error in announcement management:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
+}
+
+// Helper function to send push notifications for an announcement
+async function sendAnnouncementPush(
+  supabase: ReturnType<typeof createClient>,
+  announcementId: string
+): Promise<{ sent_count: number }> {
+  // Get the announcement
+  const { data: announcement, error: fetchError } = await supabase
+    .from('system_announcements')
+    .select('*')
+    .eq('id', announcementId)
+    .single();
+
+  if (fetchError || !announcement) {
+    throw new Error('Announcement not found');
+  }
+
+  // Build query for target users with FCM tokens
+  let usersQuery = supabase
+    .from('profiles')
+    .select('id, email, fcm_token, subscription_tier')
+    .not('fcm_token', 'is', null);
+
+  // Apply targeting
+  if (announcement.target_user_ids && announcement.target_user_ids.length > 0) {
+    usersQuery = usersQuery.in('id', announcement.target_user_ids);
+  } else if (announcement.target_audience !== 'all') {
+    // Map audience to subscription tiers
+    const audienceMap: Record<string, string[]> = {
+      free: ['free', 'trial', null as unknown as string],
+      premium: ['pro', 'premium', 'annual'],
+      coach: ['coach', 'team'],
+    };
+    const tiers = audienceMap[announcement.target_audience] || [];
+    if (tiers.length > 0) {
+      usersQuery = usersQuery.in('subscription_tier', tiers);
+    }
+  }
+
+  const { data: users, error: usersError } = await usersQuery;
+
+  if (usersError) {
+    throw new Error(`Failed to fetch users: ${usersError.message}`);
+  }
+
+  if (!users || users.length === 0) {
+    // No users to notify, just mark as sent with 0 count
+    await supabase
+      .from('system_announcements')
+      .update({ push_sent_at: new Date().toISOString(), push_sent_count: 0 })
+      .eq('id', announcementId);
+    return { sent_count: 0 };
+  }
+
+  // Send push to each user
+  let sentCount = 0;
+  const pushTitle = announcement.push_title || announcement.title;
+  const pushBody = announcement.message.substring(0, 100) + (announcement.message.length > 100 ? '...' : '');
+
+  for (const user of users) {
+    if (!user.fcm_token) continue;
+
+    try {
+      // Call the FCM edge function
+      const { error: fcmError } = await supabase.functions.invoke('send-fcm-notification', {
+        body: {
+          user_id: user.id,
+          title: pushTitle,
+          body: pushBody,
+          data: {
+            type: 'announcement',
+            announcementId: announcementId,
+          },
+          sound: announcement.notification_sound !== 'default' ? announcement.notification_sound : undefined,
+        },
+      });
+
+      // Record delivery attempt
+      await supabase
+        .from('announcement_push_deliveries')
+        .upsert({
+          announcement_id: announcementId,
+          user_id: user.id,
+          fcm_token: user.fcm_token,
+          sent_at: new Date().toISOString(),
+          error: fcmError ? fcmError.message : null,
+        }, { onConflict: 'announcement_id,user_id' });
+
+      if (!fcmError) {
+        sentCount++;
+      }
+    } catch (e) {
+      console.error(`[Push] Failed to send to user ${user.id}:`, e);
+      // Record failed delivery
+      await supabase
+        .from('announcement_push_deliveries')
+        .upsert({
+          announcement_id: announcementId,
+          user_id: user.id,
+          fcm_token: user.fcm_token,
+          sent_at: new Date().toISOString(),
+          error: (e as Error).message,
+        }, { onConflict: 'announcement_id,user_id' });
+    }
+  }
+
+  // Update announcement with push stats
+  await supabase
+    .from('system_announcements')
+    .update({
+      push_sent_at: new Date().toISOString(),
+      push_sent_count: sentCount,
+    })
+    .eq('id', announcementId);
+
+  return { sent_count: sentCount };
 }
