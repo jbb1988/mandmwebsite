@@ -463,8 +463,9 @@ export async function POST(request: NextRequest) {
 }
 
 // Helper function to send push notifications for an announcement
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function sendAnnouncementPush(
-  supabase: ReturnType<typeof createClient>,
+  supabase: any,
   announcementId: string
 ): Promise<{ sent_count: number }> {
   // Get the announcement
