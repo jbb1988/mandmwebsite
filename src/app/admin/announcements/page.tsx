@@ -198,6 +198,15 @@ export default function AnnouncementsPage() {
   const [deliveryRecords, setDeliveryRecords] = useState<Record<string, DeliveryRecord[]>>({});
   const [loadingDelivery, setLoadingDelivery] = useState<string | null>(null);
 
+  // Quick Push state
+  const [showQuickPush, setShowQuickPush] = useState(false);
+  const [quickPushTitle, setQuickPushTitle] = useState('');
+  const [quickPushBody, setQuickPushBody] = useState('');
+  const [quickPushAudience, setQuickPushAudience] = useState<SystemAnnouncement['target_audience']>('all');
+  const [quickPushSound, setQuickPushSound] = useState('default');
+  const [quickPushSending, setQuickPushSending] = useState(false);
+  const [quickPushResult, setQuickPushResult] = useState<{ success: boolean; message: string } | null>(null);
+
   const fetchAnnouncements = async () => {
     setLoading(true);
     try {
@@ -537,6 +546,60 @@ export default function AnnouncementsPage() {
     }
   };
 
+  const handleQuickPush = async () => {
+    if (!quickPushTitle.trim() || !quickPushBody.trim()) {
+      setQuickPushResult({ success: false, message: 'Title and body are required' });
+      return;
+    }
+
+    setQuickPushSending(true);
+    setQuickPushResult(null);
+
+    try {
+      const res = await fetch('/api/admin/announcements', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': getPassword(),
+        },
+        body: JSON.stringify({
+          action: 'send-standalone-push',
+          title: quickPushTitle,
+          body: quickPushBody,
+          target_audience: quickPushAudience,
+          notification_sound: quickPushSound,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setQuickPushResult({
+          success: true,
+          message: `Push notification sent to ${data.sent_count} users!`,
+        });
+        // Reset form after success
+        setQuickPushTitle('');
+        setQuickPushBody('');
+        setQuickPushAudience('all');
+        setQuickPushSound('default');
+      } else {
+        setQuickPushResult({
+          success: false,
+          message: data.error || 'Failed to send push notification',
+        });
+      }
+    } catch (error) {
+      console.error('Failed to send quick push:', error);
+      setQuickPushResult({
+        success: false,
+        message: 'Network error - failed to send push notification',
+      });
+    } finally {
+      setQuickPushSending(false);
+    }
+  };
+
   return (
     <AdminGate>
       <div className="min-h-screen bg-gradient-to-br from-[#0A0B14] via-[#0F1123] to-[#0A0B14] text-white">
@@ -588,6 +651,126 @@ export default function AnnouncementsPage() {
               </Card>
             </div>
           )}
+
+          {/* Quick Push Section */}
+          <Card variant="bordered" className="mb-8 border-orange-500/30 bg-gradient-to-br from-orange-500/5 to-transparent">
+            <button
+              onClick={() => setShowQuickPush(!showQuickPush)}
+              className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors rounded-xl"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500/20 to-orange-600/30 flex items-center justify-center">
+                  <Send className="w-5 h-5 text-orange-400" />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-semibold text-orange-400">Quick Push Notification</h3>
+                  <p className="text-white/50 text-sm">Send a push notification without creating an announcement</p>
+                </div>
+              </div>
+              {showQuickPush ? (
+                <ChevronUp className="w-5 h-5 text-white/50" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-white/50" />
+              )}
+            </button>
+
+            {showQuickPush && (
+              <div className="px-4 pb-4 space-y-4">
+                <div className="border-t border-white/10 pt-4">
+                  {/* Title */}
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-white/70 mb-2">Push Title</label>
+                    <input
+                      type="text"
+                      value={quickPushTitle}
+                      onChange={(e) => setQuickPushTitle(e.target.value)}
+                      className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-orange-500 focus:outline-none"
+                      placeholder="e.g., New drills available!"
+                    />
+                  </div>
+
+                  {/* Body */}
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-white/70 mb-2">Message</label>
+                    <textarea
+                      value={quickPushBody}
+                      onChange={(e) => setQuickPushBody(e.target.value)}
+                      rows={2}
+                      className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-orange-500 focus:outline-none resize-none"
+                      placeholder="Short message for the push notification..."
+                    />
+                  </div>
+
+                  {/* Audience and Sound Row */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-white/70 mb-2">Target Audience</label>
+                      <select
+                        value={quickPushAudience}
+                        onChange={(e) => setQuickPushAudience(e.target.value as SystemAnnouncement['target_audience'])}
+                        className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-orange-500 focus:outline-none"
+                      >
+                        <option value="all">Everyone</option>
+                        <option value="free">Free Users Only</option>
+                        <option value="premium">Premium Users Only</option>
+                        <option value="coach">Coaches Only</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-white/70 mb-2">Notification Sound</label>
+                      <select
+                        value={quickPushSound}
+                        onChange={(e) => setQuickPushSound(e.target.value)}
+                        className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-orange-500 focus:outline-none"
+                      >
+                        {notificationSoundOptions.map((sound) => (
+                          <option key={sound.id} value={sound.id}>
+                            {sound.label} {sound.popular ? '(Popular)' : ''}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Result message */}
+                  {quickPushResult && (
+                    <div className={`mb-4 p-3 rounded-lg flex items-center gap-2 ${
+                      quickPushResult.success
+                        ? 'bg-green-500/20 border border-green-500/30 text-green-400'
+                        : 'bg-red-500/20 border border-red-500/30 text-red-400'
+                    }`}>
+                      {quickPushResult.success ? (
+                        <CheckCircle className="w-4 h-4" />
+                      ) : (
+                        <AlertTriangle className="w-4 h-4" />
+                      )}
+                      {quickPushResult.message}
+                    </div>
+                  )}
+
+                  {/* Send Button */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-white/40 text-sm">
+                      <BellOff className="w-4 h-4" />
+                      <span>No in-app announcement - push only</span>
+                    </div>
+                    <button
+                      onClick={handleQuickPush}
+                      disabled={quickPushSending || !quickPushTitle.trim() || !quickPushBody.trim()}
+                      className="flex items-center gap-2 px-5 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 rounded-lg font-medium transition-all disabled:opacity-50"
+                    >
+                      {quickPushSending ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Send className="w-4 h-4" />
+                      )}
+                      Send Push Now
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </Card>
 
           {/* Announcements List */}
           <Card variant="elevated" className="overflow-hidden">
