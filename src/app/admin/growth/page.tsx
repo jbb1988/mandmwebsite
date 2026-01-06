@@ -25,6 +25,9 @@ import {
   X,
   ExternalLink,
   Info,
+  Activity,
+  ArrowUpRight,
+  ArrowDownRight,
 } from 'lucide-react';
 
 interface CohortData {
@@ -88,6 +91,25 @@ interface QuickWin {
   score: number;
 }
 
+interface DailyActiveUser {
+  id: string;
+  name: string;
+  email: string;
+  tier: string;
+  lastActive: string;
+  featuresUsed: string[];
+  totalActions: number;
+}
+
+interface DailyActivesData {
+  today: number;
+  yesterday: number;
+  thisWeek: number;
+  thisMonth: number;
+  trend: { date: string; count: number }[];
+  todayUsers: DailyActiveUser[];
+}
+
 interface GrowthMetrics {
   cohorts: CohortData[];
   funnel: FunnelData;
@@ -95,6 +117,7 @@ interface GrowthMetrics {
   userHealth: UserHealthData;
   churnRiskUsers: ChurnRiskUser[];
   quickWins: QuickWin[];
+  dailyActives: DailyActivesData;
   generatedAt: string;
   // Drill-down data
   userLists?: {
@@ -129,6 +152,7 @@ export default function GrowthCommandCenter() {
   const [metrics, setMetrics] = useState<GrowthMetrics | null>(null);
   const [loading, setLoading] = useState(true);
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    dailyActives: true,
     cohorts: true,
     funnel: true,
     ltv: true,
@@ -298,6 +322,182 @@ export default function GrowthCommandCenter() {
                 </p>
               </button>
             </div>
+
+            {/* Daily Actives Section */}
+            {metrics.dailyActives && (
+              <div className="bg-[#0F1123] border border-white/10 rounded-2xl overflow-hidden">
+                <button
+                  onClick={() => toggleSection('dailyActives')}
+                  className="w-full flex items-center justify-between p-5 hover:bg-white/5 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-green-500/20 rounded-xl">
+                      <Activity className="w-5 h-5 text-green-400" />
+                    </div>
+                    <div className="text-left">
+                      <h2 className="text-lg font-semibold text-white">Daily Actives</h2>
+                      <p className="text-xs text-white/40">Users active today and recent trends</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <span className="text-2xl font-bold text-green-400">{metrics.dailyActives.today}</span>
+                      <span className="text-sm text-white/50 ml-2">today</span>
+                    </div>
+                    {expandedSections.dailyActives ? (
+                      <ChevronUp className="w-5 h-5 text-white/40" />
+                    ) : (
+                      <ChevronDown className="w-5 h-5 text-white/40" />
+                    )}
+                  </div>
+                </button>
+
+                {expandedSections.dailyActives && (
+                  <div className="p-5 pt-0">
+                    {/* DAU/WAU/MAU Stats */}
+                    <div className="grid grid-cols-4 gap-4 mb-5">
+                      <div className="bg-gradient-to-br from-green-500/20 to-green-500/5 rounded-xl p-4 border border-green-500/30">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs text-white/50">Today</span>
+                          {metrics.dailyActives.yesterday > 0 && (
+                            <span className={`text-xs flex items-center gap-0.5 ${
+                              metrics.dailyActives.today >= metrics.dailyActives.yesterday
+                                ? 'text-green-400'
+                                : 'text-red-400'
+                            }`}>
+                              {metrics.dailyActives.today >= metrics.dailyActives.yesterday ? (
+                                <ArrowUpRight className="w-3 h-3" />
+                              ) : (
+                                <ArrowDownRight className="w-3 h-3" />
+                              )}
+                              {Math.abs(Math.round(((metrics.dailyActives.today - metrics.dailyActives.yesterday) / metrics.dailyActives.yesterday) * 100))}%
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-3xl font-bold text-green-400">{metrics.dailyActives.today}</p>
+                        <p className="text-xs text-white/30 mt-1">DAU</p>
+                      </div>
+
+                      <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                        <span className="text-xs text-white/50">Yesterday</span>
+                        <p className="text-3xl font-bold text-white mt-1">{metrics.dailyActives.yesterday}</p>
+                        <p className="text-xs text-white/30 mt-1">DAU</p>
+                      </div>
+
+                      <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                        <span className="text-xs text-white/50">This Week</span>
+                        <p className="text-3xl font-bold text-white mt-1">{metrics.dailyActives.thisWeek}</p>
+                        <p className="text-xs text-white/30 mt-1">WAU (7d)</p>
+                      </div>
+
+                      <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                        <span className="text-xs text-white/50">This Month</span>
+                        <p className="text-3xl font-bold text-white mt-1">{metrics.dailyActives.thisMonth}</p>
+                        <p className="text-xs text-white/30 mt-1">MAU (30d)</p>
+                      </div>
+                    </div>
+
+                    {/* 30-Day DAU Trend Chart */}
+                    <div className="mb-5">
+                      <h3 className="text-sm font-medium text-white/70 mb-3">30-Day DAU Trend</h3>
+                      <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                        <div className="flex items-end justify-between h-24 gap-1">
+                          {metrics.dailyActives.trend.map((day, i) => {
+                            const maxCount = Math.max(...metrics.dailyActives.trend.map(d => d.count), 1);
+                            const height = (day.count / maxCount) * 100;
+                            const isToday = i === metrics.dailyActives.trend.length - 1;
+                            return (
+                              <div
+                                key={day.date}
+                                className="flex-1 group relative"
+                              >
+                                <div
+                                  className={`rounded-t transition-all ${
+                                    isToday ? 'bg-green-500' : 'bg-white/20 hover:bg-white/30'
+                                  }`}
+                                  style={{ height: `${Math.max(height, 4)}%` }}
+                                />
+                                {/* Tooltip */}
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                                  <div className="bg-[#1B1F39] border border-white/20 rounded-lg px-2 py-1 text-xs whitespace-nowrap">
+                                    <p className="text-white font-medium">{day.count} users</p>
+                                    <p className="text-white/50">{new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                        <div className="flex justify-between mt-2 text-xs text-white/30">
+                          <span>{new Date(metrics.dailyActives.trend[0]?.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                          <span>Today</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Today's Active Users List */}
+                    <div>
+                      <h3 className="text-sm font-medium text-white/70 mb-3">
+                        Active Today ({metrics.dailyActives.todayUsers.length} users)
+                      </h3>
+                      <div className="max-h-64 overflow-y-auto space-y-2">
+                        {metrics.dailyActives.todayUsers.length === 0 ? (
+                          <p className="text-center text-white/40 py-6">No active users yet today</p>
+                        ) : (
+                          metrics.dailyActives.todayUsers.map((user) => (
+                            <div
+                              key={user.id}
+                              className="flex items-center justify-between bg-white/5 rounded-xl p-3 border border-white/10 hover:bg-white/10 transition-colors"
+                            >
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center gap-2">
+                                  <p className="text-sm font-medium text-white truncate">{user.name}</p>
+                                  <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                    user.tier === 'pro'
+                                      ? 'bg-emerald-500/20 text-emerald-400'
+                                      : user.tier === 'trial'
+                                      ? 'bg-cyan-500/20 text-cyan-400'
+                                      : 'bg-white/10 text-white/50'
+                                  }`}>
+                                    {user.tier}
+                                  </span>
+                                </div>
+                                <p className="text-xs text-white/50 truncate">{user.email}</p>
+                              </div>
+                              <div className="flex items-center gap-3 ml-3">
+                                <div className="text-right hidden sm:block">
+                                  <p className="text-xs text-white/60">
+                                    {user.featuresUsed.slice(0, 2).join(', ')}
+                                    {user.featuresUsed.length > 2 && ` +${user.featuresUsed.length - 2}`}
+                                  </p>
+                                  <p className="text-xs text-white/30">
+                                    {user.totalActions} actions
+                                  </p>
+                                </div>
+                                <span className="text-xs text-green-400 bg-green-500/10 px-2 py-1 rounded">
+                                  {new Date(user.lastActive).toLocaleTimeString('en-US', {
+                                    hour: 'numeric',
+                                    minute: '2-digit',
+                                    hour12: true
+                                  })}
+                                </span>
+                                <a
+                                  href={`/admin/users?search=${encodeURIComponent(user.email)}`}
+                                  className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+                                  title="View user"
+                                >
+                                  <ExternalLink className="w-4 h-4 text-white/50" />
+                                </a>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Conversion Funnel */}
             <div className="bg-[#0F1123] border border-white/10 rounded-2xl overflow-hidden">

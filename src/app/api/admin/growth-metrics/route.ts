@@ -396,6 +396,110 @@ export async function GET(request: NextRequest) {
       .sort((a, b) => b.score - a.score)
       .slice(0, 15);
 
+    // ===== DAILY ACTIVES =====
+    const todayStart = new Date(now);
+    todayStart.setHours(0, 0, 0, 0);
+
+    const yesterdayStart = new Date(todayStart);
+    yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+
+    const weekStart = new Date(todayStart);
+    weekStart.setDate(weekStart.getDate() - 7);
+
+    const monthStart = new Date(todayStart);
+    monthStart.setDate(monthStart.getDate() - 30);
+
+    // Get all activity events for the last 30 days for trend
+    const { data: recentActivity } = await supabase
+      .from('user_feature_engagement')
+      .select('user_id, feature_name, total_opens, last_used_at')
+      .gte('last_used_at', monthStart.toISOString());
+
+    // Calculate DAU/WAU/MAU
+    const todayActiveIds = new Set<string>();
+    const yesterdayActiveIds = new Set<string>();
+    const weekActiveIds = new Set<string>();
+    const monthActiveIds = new Set<string>();
+    const dailyCounts: Record<string, Set<string>> = {};
+
+    // Track what features each user used today
+    const todayUserFeatures: Record<string, { features: Set<string>; actions: number; lastActive: Date }> = {};
+
+    (recentActivity || []).forEach(a => {
+      if (!a.last_used_at) return;
+      const activityDate = new Date(a.last_used_at);
+      const dateKey = activityDate.toISOString().split('T')[0];
+
+      // Track daily counts for trend
+      if (!dailyCounts[dateKey]) dailyCounts[dateKey] = new Set();
+      dailyCounts[dateKey].add(a.user_id);
+
+      // Classify by time period
+      if (activityDate >= todayStart) {
+        todayActiveIds.add(a.user_id);
+        // Track features for today's users
+        if (!todayUserFeatures[a.user_id]) {
+          todayUserFeatures[a.user_id] = { features: new Set(), actions: 0, lastActive: activityDate };
+        }
+        todayUserFeatures[a.user_id].features.add(a.feature_name);
+        todayUserFeatures[a.user_id].actions += a.total_opens || 1;
+        if (activityDate > todayUserFeatures[a.user_id].lastActive) {
+          todayUserFeatures[a.user_id].lastActive = activityDate;
+        }
+      }
+      if (activityDate >= yesterdayStart && activityDate < todayStart) {
+        yesterdayActiveIds.add(a.user_id);
+      }
+      if (activityDate >= weekStart) {
+        weekActiveIds.add(a.user_id);
+      }
+      if (activityDate >= monthStart) {
+        monthActiveIds.add(a.user_id);
+      }
+    });
+
+    // Build 30-day trend data
+    const trendData: { date: string; count: number }[] = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(todayStart);
+      d.setDate(d.getDate() - i);
+      const dateKey = d.toISOString().split('T')[0];
+      trendData.push({
+        date: dateKey,
+        count: dailyCounts[dateKey]?.size || 0,
+      });
+    }
+
+    // Get user details for today's active users
+    const todayUserIds = Array.from(todayActiveIds);
+    let todayUsers: { id: string; name: string; email: string; tier: string; lastActive: string; featuresUsed: string[]; totalActions: number }[] = [];
+
+    if (todayUserIds.length > 0) {
+      const { data: todayProfiles } = await supabase
+        .from('profiles')
+        .select('id, name, email, tier')
+        .in('id', todayUserIds.slice(0, 100)); // Limit to 100 for performance
+
+      todayUsers = (todayProfiles || []).map(p => ({
+        id: p.id,
+        name: p.name || 'Unknown',
+        email: p.email,
+        tier: p.tier || 'free',
+        lastActive: todayUserFeatures[p.id]?.lastActive?.toISOString() || '',
+        featuresUsed: Array.from(todayUserFeatures[p.id]?.features || []),
+        totalActions: todayUserFeatures[p.id]?.actions || 0,
+      })).sort((a, b) => new Date(b.lastActive).getTime() - new Date(a.lastActive).getTime());
+    }
+
+    const dailyActives = {
+      today: todayActiveIds.size,
+      yesterday: yesterdayActiveIds.size,
+      thisWeek: weekActiveIds.size,
+      thisMonth: monthActiveIds.size,
+      trend: trendData,
+      todayUsers,
+    };
+
     return NextResponse.json({
       success: true,
       cohorts: cohortData,
@@ -409,6 +513,7 @@ export async function GET(request: NextRequest) {
       userHealth,
       churnRiskUsers,
       quickWins,
+      dailyActives,
       generatedAt: now.toISOString(),
     });
   } catch (error) {
