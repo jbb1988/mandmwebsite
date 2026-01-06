@@ -651,17 +651,15 @@ export default function PlaybookPage() {
                   <h2 className="text-2xl font-black text-white">Support & Contact</h2>
                 </div>
 
-                <div className="grid sm:grid-cols-2 gap-6">
-                  <div className="p-5 bg-white/[0.03] rounded-xl border border-white/10 hover:border-solar-surge-orange/30 transition-colors">
-                    <h3 className="font-bold text-white mb-2">Technical Issues</h3>
-                    <p className="text-solar-surge-orange mb-2">support@mindandmuscle.ai</p>
-                    <p className="text-sm text-white/50">Response: Within 24 hours</p>
-                  </div>
-                  <div className="p-5 bg-white/[0.03] rounded-xl border border-white/10 hover:border-solar-surge-orange/30 transition-colors">
-                    <h3 className="font-bold text-white mb-2">Urgent Issues</h3>
-                    <p className="text-solar-surge-orange mb-2">support@mindandmuscle.ai</p>
-                    <p className="text-sm text-white/50">Mark as urgent - Response: Within 2 hours (business hours)</p>
-                  </div>
+                <div className="p-6 bg-white/[0.03] rounded-xl border border-white/10 hover:border-solar-surge-orange/30 transition-colors text-center">
+                  <h3 className="font-bold text-white mb-3">General Support</h3>
+                  <a
+                    href="mailto:support@mindandmuscle.ai"
+                    className="text-xl text-solar-surge-orange hover:text-solar-surge-orange/80 transition-colors"
+                  >
+                    support@mindandmuscle.ai
+                  </a>
+                  <p className="text-sm text-white/50 mt-3">We typically respond within 24 hours</p>
                 </div>
               </div>
             </div>
