@@ -206,6 +206,10 @@ export default function AnnouncementsPage() {
   const [quickPushSound, setQuickPushSound] = useState('default');
   const [quickPushSending, setQuickPushSending] = useState(false);
   const [quickPushResult, setQuickPushResult] = useState<{ success: boolean; message: string } | null>(null);
+  const [quickPushTargetUsers, setQuickPushTargetUsers] = useState<UserSearchResult[]>([]);
+  const [quickPushUserSearch, setQuickPushUserSearch] = useState('');
+  const [quickPushSearchResults, setQuickPushSearchResults] = useState<UserSearchResult[]>([]);
+  const [quickPushSearching, setQuickPushSearching] = useState(false);
 
   const fetchAnnouncements = async () => {
     setLoading(true);
@@ -546,6 +550,41 @@ export default function AnnouncementsPage() {
     }
   };
 
+  const handleQuickPushUserSearch = async () => {
+    if (quickPushUserSearch.length < 2) return;
+    setQuickPushSearching(true);
+    try {
+      const res = await fetch('/api/admin/announcements', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': getPassword(),
+        },
+        body: JSON.stringify({ action: 'search-users', query: quickPushUserSearch }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setQuickPushSearchResults(data.users);
+      }
+    } catch (error) {
+      console.error('Failed to search users:', error);
+    } finally {
+      setQuickPushSearching(false);
+    }
+  };
+
+  const addQuickPushTargetUser = (user: UserSearchResult) => {
+    if (!quickPushTargetUsers.find(u => u.id === user.id)) {
+      setQuickPushTargetUsers([...quickPushTargetUsers, user]);
+    }
+    setQuickPushSearchResults([]);
+    setQuickPushUserSearch('');
+  };
+
+  const removeQuickPushTargetUser = (userId: string) => {
+    setQuickPushTargetUsers(quickPushTargetUsers.filter(u => u.id !== userId));
+  };
+
   const handleQuickPush = async () => {
     if (!quickPushTitle.trim() || !quickPushBody.trim()) {
       setQuickPushResult({ success: false, message: 'Title and body are required' });
@@ -567,6 +606,7 @@ export default function AnnouncementsPage() {
           title: quickPushTitle,
           body: quickPushBody,
           target_audience: quickPushAudience,
+          target_user_ids: quickPushTargetUsers.length > 0 ? quickPushTargetUsers.map(u => u.id) : null,
           notification_sound: quickPushSound,
         }),
       });
@@ -583,6 +623,7 @@ export default function AnnouncementsPage() {
         setQuickPushBody('');
         setQuickPushAudience('all');
         setQuickPushSound('default');
+        setQuickPushTargetUsers([]);
       } else {
         setQuickPushResult({
           success: false,
@@ -701,14 +742,87 @@ export default function AnnouncementsPage() {
                     />
                   </div>
 
+                  {/* Target Specific Users */}
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-white/70 mb-2">
+                      Target Specific Users (Optional)
+                    </label>
+                    <p className="text-xs text-white/40 mb-2">
+                      Add specific users to send push only to them (overrides audience setting)
+                    </p>
+
+                    {/* User Search */}
+                    <div className="flex gap-2 mb-2">
+                      <input
+                        type="text"
+                        value={quickPushUserSearch}
+                        onChange={(e) => setQuickPushUserSearch(e.target.value)}
+                        placeholder="Search by email or name..."
+                        className="flex-1 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-orange-500 focus:outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleQuickPushUserSearch}
+                        disabled={quickPushSearching || quickPushUserSearch.length < 2}
+                        className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        {quickPushSearching ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+                      </button>
+                    </div>
+
+                    {/* Search Results */}
+                    {quickPushSearchResults.length > 0 && (
+                      <div className="bg-white/5 rounded-lg p-2 mb-2 space-y-1">
+                        {quickPushSearchResults.map((user) => (
+                          <button
+                            key={user.id}
+                            type="button"
+                            onClick={() => addQuickPushTargetUser(user)}
+                            className="w-full flex items-center justify-between px-3 py-2 rounded hover:bg-white/10 transition-colors text-left"
+                          >
+                            <div>
+                              <div className="text-sm">{user.name || 'No name'}</div>
+                              <div className="text-xs text-white/50">{user.email}</div>
+                            </div>
+                            <Plus className="w-4 h-4 text-green-400" />
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Selected Users */}
+                    {quickPushTargetUsers.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-2">
+                        {quickPushTargetUsers.map((user) => (
+                          <div
+                            key={user.id}
+                            className="flex items-center gap-2 px-3 py-1 bg-orange-500/20 border border-orange-500/30 rounded-full text-sm"
+                          >
+                            <span>{user.email}</span>
+                            <button
+                              type="button"
+                              onClick={() => removeQuickPushTargetUser(user.id)}
+                              className="text-red-400 hover:text-red-300"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
                   {/* Audience and Sound Row */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="block text-sm font-medium text-white/70 mb-2">Target Audience</label>
+                      <label className="block text-sm font-medium text-white/70 mb-2">
+                        Target Audience {quickPushTargetUsers.length > 0 && <span className="text-orange-400">(Overridden by specific users)</span>}
+                      </label>
                       <select
                         value={quickPushAudience}
                         onChange={(e) => setQuickPushAudience(e.target.value as SystemAnnouncement['target_audience'])}
-                        className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-orange-500 focus:outline-none"
+                        disabled={quickPushTargetUsers.length > 0}
+                        className="w-full px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-orange-500 focus:outline-none disabled:opacity-50"
                       >
                         <option value="all">Everyone</option>
                         <option value="free">Free Users Only</option>
