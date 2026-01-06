@@ -24,6 +24,10 @@ import {
   Video,
   Sparkles,
   Zap,
+  MousePointer2,
+  Camera,
+  BarChart3,
+  ChevronRight,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -84,15 +88,13 @@ export default function AthleteGuidePage() {
   ];
 
   const workflowSteps = [
-    { step: 'Coach assigns drill', icon: Bell, color: '#3B82F6' },
-    { step: 'You get push notification', icon: Smartphone, color: '#3B82F6' },
-    { step: 'Open "For You" tab', icon: Eye, color: '#F97316' },
-    { step: 'Watch the FULL video (80%+)', icon: Play, color: '#F97316' },
-    { step: 'Tap "Practice This"', icon: Video, color: '#22C55E' },
-    { step: 'Record yourself in Swing Lab or Pitch Lab', icon: Video, color: '#22C55E' },
-    { step: 'Get AI analysis of your technique', icon: CheckCircle2, color: '#A855F7' },
-    { step: 'Tap "Mark Complete"', icon: CheckCircle2, color: '#A855F7' },
-    { step: 'Coach sees your progress!', icon: CheckCircle2, color: '#22C55E' },
+    { step: 'Coach assigns', icon: Bell, color: 'blue', role: 'Coach', number: 1 },
+    { step: 'You get notified', icon: Smartphone, color: 'blue', role: 'You', number: 2 },
+    { step: 'Watch drill', icon: Play, color: 'orange', role: 'You', number: 3 },
+    { step: 'Tap Practice This', icon: Zap, color: 'orange', role: 'You', number: 4 },
+    { step: 'Record yourself', icon: Video, color: 'green', role: 'You', number: 5 },
+    { step: 'AI analyzes', icon: Sparkles, color: 'purple', role: 'AI', number: 6 },
+    { step: 'Mark complete', icon: CheckCircle2, color: 'green', role: 'You', number: 7 },
   ];
 
   return (
@@ -160,40 +162,162 @@ export default function AthleteGuidePage() {
         </div>
       </section>
 
-      {/* How It Works - Workflow */}
-      <section className="relative py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      {/* How It Works - Premium Flow Visualization */}
+      <section className="relative py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-b from-[#0F1123] via-[#1A1F3A]/50 to-[#0F1123]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(14,165,233,0.08)_0%,transparent_70%)]" />
 
-        <div className="max-w-4xl mx-auto relative z-10">
-          <FadeInWhenVisible delay={0} direction="up">
-            <div className="group relative">
-              {/* Outer Glow */}
-              <div className="absolute -inset-2 rounded-3xl blur-2xl opacity-60 bg-gradient-to-r from-neon-cortex-blue/30 to-solar-surge-orange/30 group-hover:opacity-80 transition-opacity duration-500" />
+        <div className="max-w-6xl mx-auto relative z-10">
+          <FadeInWhenVisible delay={0} direction="up" className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-neon-cortex-blue/20 to-solar-surge-orange/20 border border-neon-cortex-blue/30 text-neon-cortex-blue text-sm font-bold mb-6 shadow-[0_0_30px_rgba(14,165,233,0.2)]">
+              <Zap className="w-4 h-4" style={{filter: 'drop-shadow(0 0 8px rgba(14,165,233,0.8))'}} />
+              YOUR TRAINING WORKFLOW
+            </div>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white mb-4">
+              From <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-cortex-blue to-green-400">Assignment</span> to <span className="text-transparent bg-clip-text bg-gradient-to-r from-solar-surge-orange to-yellow-400">Mastery</span>
+            </h2>
+            <p className="text-lg text-white/60 max-w-2xl mx-auto">
+              7 simple steps to level up your training
+            </p>
+          </FadeInWhenVisible>
 
-              <div className="relative backdrop-blur-sm bg-white/[0.02] rounded-2xl border-2 border-neon-cortex-blue/40 p-8 md:p-12 shadow-[0_0_40px_rgba(14,165,233,0.2)]">
-                <h2 className="text-2xl sm:text-3xl font-black text-center mb-10 text-white">How It Works</h2>
+          {/* Desktop Flow Visualization */}
+          <div className="hidden lg:block">
+            <FadeInWhenVisible delay={0.1} direction="up">
+              <div className="relative">
+                {/* Connecting Line */}
+                <div className="absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-neon-cortex-blue via-solar-surge-orange via-50% to-green-500 transform -translate-y-1/2 opacity-30 rounded-full" />
+                <div className="absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-neon-cortex-blue via-solar-surge-orange via-50% to-green-500 transform -translate-y-1/2 blur-lg opacity-50" />
 
-                <div className="space-y-4">
-                  {workflowSteps.map((item, index) => (
-                    <div key={index} className="flex items-center gap-4 group/step">
-                      <div
-                        className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-300 group-hover/step:scale-110"
-                        style={{ backgroundColor: `${item.color}20`, border: `2px solid ${item.color}40` }}
-                      >
-                        <item.icon
-                          className="w-5 h-5"
-                          style={{ color: item.color, filter: `drop-shadow(0 0 6px ${item.color})` }}
-                        />
+                <div className="grid grid-cols-7 gap-4">
+                  {workflowSteps.map((item, index) => {
+                    const isBlue = item.color === 'blue';
+                    const isOrange = item.color === 'orange';
+                    const isGreen = item.color === 'green';
+                    const isPurple = item.color === 'purple';
+                    const colorClasses = isBlue
+                      ? 'from-neon-cortex-blue to-cyan-600 border-neon-cortex-blue/60 shadow-[0_0_40px_rgba(14,165,233,0.4)]'
+                      : isOrange
+                      ? 'from-solar-surge-orange to-orange-600 border-solar-surge-orange/60 shadow-[0_0_40px_rgba(249,115,22,0.4)]'
+                      : isGreen
+                      ? 'from-green-500 to-emerald-600 border-green-500/60 shadow-[0_0_40px_rgba(34,197,94,0.4)]'
+                      : 'from-purple-500 to-purple-700 border-purple-500/60 shadow-[0_0_40px_rgba(168,85,247,0.4)]';
+                    const glowColor = isBlue
+                      ? 'rgba(14,165,233,0.6)'
+                      : isOrange
+                      ? 'rgba(249,115,22,0.6)'
+                      : isGreen
+                      ? 'rgba(34,197,94,0.6)'
+                      : 'rgba(168,85,247,0.6)';
+
+                    return (
+                      <div key={index} className="flex flex-col items-center text-center group">
+                        {/* Step Number */}
+                        <div className="text-xs font-bold text-white/40 mb-3">STEP {item.number}</div>
+
+                        {/* Icon Container */}
+                        <div className="relative mb-4">
+                          <div className={`absolute inset-0 bg-gradient-to-br ${colorClasses} blur-2xl opacity-50 group-hover:opacity-80 transition-opacity duration-500 rounded-full scale-150`} />
+                          <div className={`relative w-20 h-20 rounded-2xl bg-gradient-to-br ${colorClasses} border-2 flex items-center justify-center transform group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
+                            <item.icon
+                              className="w-9 h-9 text-white"
+                              style={{filter: `drop-shadow(0 0 12px ${glowColor})`}}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Step Label */}
+                        <span className="text-white font-bold text-sm leading-tight">{item.step}</span>
+
+                        {/* Role Indicator */}
+                        <span className={`text-xs mt-2 px-2 py-1 rounded-full ${
+                          isBlue ? 'bg-neon-cortex-blue/20 text-neon-cortex-blue' :
+                          isOrange ? 'bg-solar-surge-orange/20 text-solar-surge-orange' :
+                          isGreen ? 'bg-green-500/20 text-green-400' :
+                          'bg-purple-500/20 text-purple-400'
+                        }`}>
+                          {item.role}
+                        </span>
                       </div>
-                      <div className="flex-1 flex items-center gap-3">
-                        <span className="text-white/80">{item.step}</span>
-                      </div>
-                      {index < workflowSteps.length - 1 && (
-                        <div className="hidden sm:block w-4 text-white/30">|</div>
-                      )}
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
+              </div>
+            </FadeInWhenVisible>
+          </div>
+
+          {/* Mobile Flow Visualization */}
+          <div className="lg:hidden">
+            <StaggerChildren staggerDelay={0.1} className="space-y-4">
+              {workflowSteps.map((item, index) => {
+                const isBlue = item.color === 'blue';
+                const isOrange = item.color === 'orange';
+                const isGreen = item.color === 'green';
+                const isPurple = item.color === 'purple';
+                const borderColor = isBlue
+                  ? 'border-neon-cortex-blue/40 hover:border-neon-cortex-blue'
+                  : isOrange
+                  ? 'border-solar-surge-orange/40 hover:border-solar-surge-orange'
+                  : isGreen
+                  ? 'border-green-500/40 hover:border-green-500'
+                  : 'border-purple-500/40 hover:border-purple-500';
+                const bgGlow = isBlue
+                  ? 'from-neon-cortex-blue/20'
+                  : isOrange
+                  ? 'from-solar-surge-orange/20'
+                  : isGreen
+                  ? 'from-green-500/20'
+                  : 'from-purple-500/20';
+                const iconBg = isBlue
+                  ? 'bg-neon-cortex-blue/20 text-neon-cortex-blue'
+                  : isOrange
+                  ? 'bg-solar-surge-orange/20 text-solar-surge-orange'
+                  : isGreen
+                  ? 'bg-green-500/20 text-green-400'
+                  : 'bg-purple-500/20 text-purple-400';
+
+                return (
+                  <motion.div
+                    key={index}
+                    variants={staggerItemVariants}
+                    className={`flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r ${bgGlow} to-transparent border-2 ${borderColor} transition-all duration-300`}
+                  >
+                    <div className="flex-shrink-0 text-2xl font-black text-white/20">{item.number}</div>
+                    <div className={`flex-shrink-0 w-12 h-12 rounded-xl ${iconBg} flex items-center justify-center`}>
+                      <item.icon className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1">
+                      <span className="text-white font-bold">{item.step}</span>
+                      <span className={`block text-xs mt-1 ${
+                        isBlue ? 'text-neon-cortex-blue' : isOrange ? 'text-solar-surge-orange' : isGreen ? 'text-green-400' : 'text-purple-400'
+                      }`}>
+                        {item.role}
+                      </span>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </StaggerChildren>
+          </div>
+
+          {/* Legend */}
+          <FadeInWhenVisible delay={0.3} direction="up">
+            <div className="flex flex-wrap justify-center gap-6 mt-12 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-neon-cortex-blue shadow-[0_0_10px_rgba(14,165,233,0.6)]" />
+                <span className="text-white/60">Notification</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-solar-surge-orange shadow-[0_0_10px_rgba(249,115,22,0.6)]" />
+                <span className="text-white/60">Watch & Practice</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.6)]" />
+                <span className="text-white/60">Record & Complete</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full bg-purple-500 shadow-[0_0_10px_rgba(168,85,247,0.6)]" />
+                <span className="text-white/60">AI-Powered</span>
               </div>
             </div>
           </FadeInWhenVisible>
@@ -257,29 +381,112 @@ export default function AthleteGuidePage() {
                   <h2 className="text-2xl font-black text-white">The "Practice This" Button</h2>
                 </div>
 
-                <p className="text-white/50 mb-8">
+                <p className="text-white/50 mb-10">
                   This is where the magic happens. After watching any drill:
                 </p>
 
-                <StaggerChildren staggerDelay={0.1} className="grid sm:grid-cols-2 gap-4 mb-8">
+                {/* Desktop: Horizontal Flow with Arrows */}
+                <div className="hidden md:block mb-10">
+                  <div className="flex items-center justify-between">
+                    {[
+                      { step: 'Tap "Practice This"', detail: 'Below the video', icon: MousePointer2, color: '#38BDF8' },
+                      { step: 'Lab Opens', detail: 'Swing or Pitch', icon: Video, color: '#0EA5E9' },
+                      { step: 'Record Yourself', detail: 'Camera guides you', icon: Camera, color: '#0284C7' },
+                      { step: 'AI Analysis', detail: 'Instant feedback', icon: BarChart3, color: '#0369A1' },
+                    ].map((item, i, arr) => (
+                      <div key={i} className="flex items-center">
+                        <div className="flex flex-col items-center text-center group">
+                          {/* Icon Container with Glow */}
+                          <div className="relative mb-4">
+                            <div
+                              className="absolute inset-0 blur-xl opacity-50 group-hover:opacity-80 transition-opacity duration-300 rounded-full scale-150"
+                              style={{ backgroundColor: item.color }}
+                            />
+                            <div
+                              className="relative w-16 h-16 rounded-2xl flex items-center justify-center transform group-hover:scale-110 transition-all duration-300"
+                              style={{
+                                background: `linear-gradient(135deg, ${item.color}40, ${item.color}20)`,
+                                border: `2px solid ${item.color}60`,
+                                boxShadow: `0 0 25px ${item.color}30`
+                              }}
+                            >
+                              <item.icon
+                                className="w-7 h-7"
+                                style={{
+                                  color: item.color,
+                                  filter: `drop-shadow(0 0 8px ${item.color})`
+                                }}
+                              />
+                              {/* Step Number Badge */}
+                              <div
+                                className="absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                                style={{
+                                  backgroundColor: item.color,
+                                  boxShadow: `0 0 12px ${item.color}`
+                                }}
+                              >
+                                {i + 1}
+                              </div>
+                            </div>
+                          </div>
+                          <span className="text-white font-bold text-sm">{item.step}</span>
+                          <span className="text-white/50 text-xs mt-1">{item.detail}</span>
+                        </div>
+                        {/* Arrow Connector */}
+                        {i < arr.length - 1 && (
+                          <div className="mx-4 flex items-center">
+                            <div className="w-12 h-0.5 bg-gradient-to-r from-neon-cortex-blue/60 to-neon-cortex-blue/30" />
+                            <ChevronRight className="w-5 h-5 text-neon-cortex-blue/60 -ml-1" />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Mobile: Vertical Flow */}
+                <StaggerChildren staggerDelay={0.1} className="md:hidden space-y-4 mb-8">
                   {[
-                    { step: 'Tap "Practice This" button', detail: 'Below the video player' },
-                    { step: 'Swing Lab or Pitch Lab opens', detail: 'Based on drill type' },
-                    { step: 'Record yourself doing the drill', detail: 'Camera guides you' },
-                    { step: 'Get instant AI analysis', detail: 'See what to improve' },
+                    { step: 'Tap "Practice This"', detail: 'Below the video player', icon: MousePointer2, color: '#38BDF8' },
+                    { step: 'Lab Opens', detail: 'Swing Lab or Pitch Lab', icon: Video, color: '#0EA5E9' },
+                    { step: 'Record Yourself', detail: 'Camera guides you', icon: Camera, color: '#0284C7' },
+                    { step: 'AI Analysis', detail: 'See what to improve', icon: BarChart3, color: '#0369A1' },
                   ].map((item, i) => (
                     <motion.div
                       key={i}
                       variants={staggerItemVariants}
-                      className="p-4 bg-white/[0.03] rounded-xl border border-white/10 hover:border-neon-cortex-blue/30 transition-colors"
+                      className="group flex items-center gap-4 p-4 rounded-xl bg-white/[0.03] border-2 transition-all duration-300 hover:scale-[1.02]"
+                      style={{ borderColor: `${item.color}30` }}
                     >
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-7 h-7 rounded-full bg-neon-cortex-blue/20 border border-neon-cortex-blue/30 flex items-center justify-center text-xs font-bold text-neon-cortex-blue">
+                      {/* Icon with glow */}
+                      <div className="relative flex-shrink-0">
+                        <div
+                          className="absolute inset-0 blur-lg opacity-40 group-hover:opacity-60 transition-opacity"
+                          style={{ backgroundColor: item.color }}
+                        />
+                        <div
+                          className="relative w-12 h-12 rounded-xl flex items-center justify-center"
+                          style={{
+                            background: `linear-gradient(135deg, ${item.color}30, ${item.color}10)`,
+                            border: `1px solid ${item.color}40`
+                          }}
+                        >
+                          <item.icon
+                            className="w-6 h-6"
+                            style={{ color: item.color, filter: `drop-shadow(0 0 6px ${item.color})` }}
+                          />
+                        </div>
+                        <div
+                          className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                          style={{ backgroundColor: item.color, boxShadow: `0 0 8px ${item.color}` }}
+                        >
                           {i + 1}
                         </div>
-                        <span className="font-semibold text-white">{item.step}</span>
                       </div>
-                      <p className="text-sm text-white/50 ml-9">{item.detail}</p>
+                      <div>
+                        <span className="font-bold text-white">{item.step}</span>
+                        <span className="block text-sm text-white/50">{item.detail}</span>
+                      </div>
                     </motion.div>
                   ))}
                 </StaggerChildren>

@@ -24,6 +24,12 @@ import {
   ThumbsUp,
   ThumbsDown,
   Sparkles,
+  ClipboardList,
+  Clock,
+  Activity,
+  Target,
+  Percent,
+  ListChecks,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -36,17 +42,17 @@ export default function ParentGuidePage() {
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
 
   const whatYouCanSee = [
-    { info: 'Assigned drills', where: 'Athlete\'s training tab' },
-    { info: 'Completion status', where: 'Each drill shows Pending/Complete' },
-    { info: 'Progress metrics', where: 'Summary at top of screen' },
-    { info: 'Last activity', where: 'When they last trained' },
+    { info: 'Assigned drills', where: 'Athlete\'s training tab', icon: ClipboardList, color: '#F97316', badge: 'Live' },
+    { info: 'Completion status', where: 'Each drill shows Pending/Complete', icon: CheckCircle2, color: '#22C55E', badge: 'Real-time' },
+    { info: 'Progress metrics', where: 'Summary at top of screen', icon: TrendingUp, color: '#3B82F6', badge: 'Historical' },
+    { info: 'Last activity', where: 'When they last trained', icon: Clock, color: '#A855F7', badge: 'Timestamp' },
   ];
 
   const keyMetrics = [
-    { metric: 'Total Assigned', meaning: 'Drills coach has given them' },
-    { metric: 'Completed', meaning: 'Drills they\'ve finished' },
-    { metric: 'Pending', meaning: 'Drills still to do' },
-    { metric: 'Completion %', meaning: 'Completed / Assigned' },
+    { metric: 'Total Assigned', meaning: 'Drills coach has given them', icon: ListChecks, color: '#F97316', number: 1 },
+    { metric: 'Completed', meaning: 'Drills they\'ve finished', icon: CheckCircle2, color: '#22C55E', number: 2 },
+    { metric: 'Pending', meaning: 'Drills still to do', icon: Activity, color: '#EAB308', number: 3 },
+    { metric: 'Completion %', meaning: 'Completed / Assigned', icon: Target, color: '#3B82F6', number: 4 },
   ];
 
   const statusColors = [
@@ -252,17 +258,69 @@ export default function ParentGuidePage() {
 
                 <p className="text-white/50 mb-8">When linked to your athlete&apos;s account:</p>
 
-                <StaggerChildren staggerDelay={0.1} className="grid sm:grid-cols-2 gap-4">
-                  {whatYouCanSee.map((item, i) => (
-                    <motion.div
-                      key={i}
-                      variants={staggerItemVariants}
-                      className="p-4 bg-white/[0.03] rounded-xl border border-white/10 hover:border-solar-surge-orange/40 transition-colors"
-                    >
-                      <p className="font-semibold text-white mb-1">{item.info}</p>
-                      <p className="text-sm text-solar-surge-orange">{item.where}</p>
-                    </motion.div>
-                  ))}
+                <StaggerChildren staggerDelay={0.1} className="grid sm:grid-cols-2 gap-5">
+                  {whatYouCanSee.map((item, i) => {
+                    const Icon = item.icon;
+                    return (
+                      <motion.div
+                        key={i}
+                        variants={staggerItemVariants}
+                        className="group relative p-5 bg-white/[0.03] rounded-xl border-2 border-white/10 hover:border-opacity-60 transition-all duration-300 hover:scale-[1.02]"
+                        style={{
+                          borderColor: `${item.color}30`,
+                        }}
+                      >
+                        {/* Hover glow */}
+                        <div
+                          className="absolute inset-0 rounded-xl blur-xl opacity-0 group-hover:opacity-30 transition-opacity duration-300"
+                          style={{ backgroundColor: item.color }}
+                        />
+
+                        <div className="relative flex items-start gap-4">
+                          {/* Icon container with glow */}
+                          <div className="relative flex-shrink-0">
+                            <div
+                              className="absolute inset-0 blur-xl opacity-40 group-hover:opacity-60 transition-opacity"
+                              style={{ backgroundColor: item.color }}
+                            />
+                            <div
+                              className="relative w-14 h-14 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110"
+                              style={{
+                                background: `linear-gradient(135deg, ${item.color}30, ${item.color}10)`,
+                                border: `1px solid ${item.color}40`,
+                                boxShadow: `0 0 20px ${item.color}20`
+                              }}
+                            >
+                              <Icon
+                                className="w-7 h-7 transition-transform duration-300 group-hover:scale-110"
+                                style={{
+                                  color: item.color,
+                                  filter: `drop-shadow(0 0 8px ${item.color})`
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="font-bold text-white">{item.info}</p>
+                              <span
+                                className="px-2 py-0.5 text-xs font-semibold rounded-full"
+                                style={{
+                                  backgroundColor: `${item.color}20`,
+                                  color: item.color,
+                                  border: `1px solid ${item.color}30`
+                                }}
+                              >
+                                {item.badge}
+                              </span>
+                            </div>
+                            <p className="text-sm text-white/60">{item.where}</p>
+                          </div>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
                 </StaggerChildren>
               </div>
             </div>
@@ -290,21 +348,66 @@ export default function ParentGuidePage() {
                   <h2 className="text-2xl font-black text-white">Understanding the Metrics</h2>
                 </div>
 
-                <h3 className="font-bold text-lg mb-4 text-white">Key Numbers</h3>
-                <StaggerChildren staggerDelay={0.08} className="grid sm:grid-cols-2 gap-3 mb-10">
-                  {keyMetrics.map((item, i) => (
-                    <motion.div
-                      key={i}
-                      variants={staggerItemVariants}
-                      className="flex items-center gap-3 p-4 bg-white/[0.03] rounded-xl border border-white/10 hover:border-neon-cortex-blue/30 transition-colors"
-                    >
-                      <CheckCircle2 className="w-5 h-5 text-neon-cortex-blue flex-shrink-0" style={{filter: 'drop-shadow(0 0 6px rgba(14,165,233,0.5))'}} />
-                      <div>
-                        <span className="font-semibold text-white">{item.metric}</span>
-                        <span className="text-white/50"> - {item.meaning}</span>
-                      </div>
-                    </motion.div>
-                  ))}
+                <h3 className="font-bold text-lg mb-6 text-white">Key Numbers</h3>
+                <StaggerChildren staggerDelay={0.08} className="grid sm:grid-cols-2 gap-4 mb-10">
+                  {keyMetrics.map((item, i) => {
+                    const Icon = item.icon;
+                    return (
+                      <motion.div
+                        key={i}
+                        variants={staggerItemVariants}
+                        className="group relative flex items-center gap-4 p-4 bg-white/[0.03] rounded-xl border-2 transition-all duration-300 hover:scale-[1.02]"
+                        style={{
+                          borderColor: `${item.color}30`,
+                        }}
+                      >
+                        {/* Hover glow */}
+                        <div
+                          className="absolute inset-0 rounded-xl blur-xl opacity-0 group-hover:opacity-20 transition-opacity duration-300"
+                          style={{ backgroundColor: item.color }}
+                        />
+
+                        {/* Icon with number badge */}
+                        <div className="relative flex-shrink-0">
+                          <div
+                            className="absolute inset-0 blur-lg opacity-40 group-hover:opacity-60 transition-opacity"
+                            style={{ backgroundColor: item.color }}
+                          />
+                          <div
+                            className="relative w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-110"
+                            style={{
+                              background: `linear-gradient(135deg, ${item.color}30, ${item.color}10)`,
+                              border: `1px solid ${item.color}40`,
+                              boxShadow: `0 0 15px ${item.color}20`
+                            }}
+                          >
+                            <Icon
+                              className="w-6 h-6"
+                              style={{
+                                color: item.color,
+                                filter: `drop-shadow(0 0 6px ${item.color})`
+                              }}
+                            />
+                          </div>
+                          {/* Number badge */}
+                          <div
+                            className="absolute -top-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                            style={{
+                              backgroundColor: item.color,
+                              boxShadow: `0 0 10px ${item.color}`
+                            }}
+                          >
+                            {item.number}
+                          </div>
+                        </div>
+
+                        <div className="relative flex-1">
+                          <span className="font-bold text-white block">{item.metric}</span>
+                          <span className="text-sm text-white/50">{item.meaning}</span>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
                 </StaggerChildren>
 
                 <h3 className="font-bold text-lg mb-4 text-white">Status Colors</h3>

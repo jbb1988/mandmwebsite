@@ -27,6 +27,7 @@ import {
   AlertCircle,
   Sparkles,
   Zap,
+  Bookmark,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -39,10 +40,10 @@ export default function InstructorGuidePage() {
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
 
   const tabs = [
-    { name: 'For You', description: 'Drills assigned to you', use: 'Your own training' },
-    { name: 'Explore', description: 'Master Library', use: 'Find drills to assign' },
-    { name: 'Saved', description: 'Your bookmarks', use: 'Quick access to favorites' },
-    { name: 'My Drills', description: 'Drills you uploaded', use: 'Manage your content' },
+    { name: 'For You', description: 'Drills assigned to you', use: 'Your training', icon: Bell, color: '#3B82F6' },
+    { name: 'Explore', description: 'Master Library', use: 'Find & assign', icon: Eye, color: '#F97316' },
+    { name: 'Saved', description: 'Your bookmarks', use: 'Quick access', icon: Bookmark, color: '#22C55E' },
+    { name: 'My Drills', description: 'Drills you uploaded', use: 'Manage content', icon: Upload, color: '#A855F7' },
   ];
 
   const engagementColors = [
@@ -331,20 +332,86 @@ export default function InstructorGuidePage() {
               <div className="absolute -inset-2 rounded-3xl blur-2xl opacity-40 bg-gradient-to-r from-solar-surge-orange/30 to-solar-surge-orange/10 group-hover:opacity-60 transition-opacity duration-500" />
 
               <div className="relative backdrop-blur-sm bg-white/[0.02] rounded-2xl border-2 border-solar-surge-orange/40 p-8 shadow-[0_0_30px_rgba(249,115,22,0.15)]">
-                <h2 className="text-2xl font-black mb-8 text-solar-surge-orange">Your Four Tabs in The Vault</h2>
+                <h2 className="text-2xl font-black mb-10 text-solar-surge-orange">Your Four Tabs in The Vault</h2>
 
-                <StaggerChildren staggerDelay={0.1} className="grid sm:grid-cols-2 gap-4">
-                  {tabs.map((tab, index) => (
-                    <motion.div
-                      key={index}
-                      variants={staggerItemVariants}
-                      className="group/tab p-5 bg-white/[0.03] hover:bg-white/[0.06] rounded-xl border border-white/10 hover:border-solar-surge-orange/40 transition-all duration-300"
-                    >
-                      <h3 className="font-bold text-solar-surge-orange mb-2">{tab.name}</h3>
-                      <p className="text-sm text-white/50 mb-2">{tab.description}</p>
-                      <p className="text-sm text-white/70">Use for: {tab.use}</p>
-                    </motion.div>
-                  ))}
+                <StaggerChildren staggerDelay={0.1} className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                  {tabs.map((tab, index) => {
+                    const Icon = tab.icon;
+                    return (
+                      <motion.div
+                        key={index}
+                        variants={staggerItemVariants}
+                        className="group/tab relative p-5 bg-white/[0.03] rounded-2xl border-2 transition-all duration-300 hover:scale-[1.03]"
+                        style={{
+                          borderColor: `${tab.color}30`,
+                        }}
+                      >
+                        {/* Hover glow */}
+                        <div
+                          className="absolute inset-0 rounded-2xl blur-xl opacity-0 group-hover/tab:opacity-30 transition-opacity duration-300"
+                          style={{ backgroundColor: tab.color }}
+                        />
+
+                        {/* Tab-style top bar */}
+                        <div
+                          className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-1 rounded-b-full"
+                          style={{
+                            backgroundColor: tab.color,
+                            boxShadow: `0 0 15px ${tab.color}`
+                          }}
+                        />
+
+                        <div className="relative flex flex-col items-center text-center pt-2">
+                          {/* Icon Container */}
+                          <div className="relative mb-4">
+                            <div
+                              className="absolute inset-0 blur-xl opacity-50 group-hover/tab:opacity-80 transition-opacity duration-300 rounded-full scale-150"
+                              style={{ backgroundColor: tab.color }}
+                            />
+                            <div
+                              className="relative w-14 h-14 rounded-xl flex items-center justify-center transform group-hover/tab:scale-110 group-hover/tab:rotate-3 transition-all duration-300"
+                              style={{
+                                background: `linear-gradient(135deg, ${tab.color}40, ${tab.color}15)`,
+                                border: `2px solid ${tab.color}50`,
+                                boxShadow: `0 0 20px ${tab.color}30`
+                              }}
+                            >
+                              <Icon
+                                className="w-7 h-7"
+                                style={{
+                                  color: tab.color,
+                                  filter: `drop-shadow(0 0 8px ${tab.color})`
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Tab Name */}
+                          <h3
+                            className="font-bold text-lg mb-1"
+                            style={{ color: tab.color }}
+                          >
+                            {tab.name}
+                          </h3>
+
+                          {/* Description */}
+                          <p className="text-sm text-white/50 mb-3">{tab.description}</p>
+
+                          {/* Use Badge */}
+                          <span
+                            className="px-3 py-1 text-xs font-semibold rounded-full"
+                            style={{
+                              backgroundColor: `${tab.color}20`,
+                              color: tab.color,
+                              border: `1px solid ${tab.color}30`
+                            }}
+                          >
+                            {tab.use}
+                          </span>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
                 </StaggerChildren>
               </div>
             </div>
