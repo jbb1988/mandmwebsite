@@ -455,6 +455,35 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // SEND STANDALONE PUSH (no announcement, just push notification)
+    if (action === 'send-standalone-push') {
+      const { title, body: pushBody, target_audience, target_user_ids, notification_sound } = body;
+
+      if (!title || !pushBody) {
+        return NextResponse.json({ error: 'Title and body are required' }, { status: 400 });
+      }
+
+      try {
+        const result = await sendStandalonePush(supabase, {
+          title,
+          body: pushBody,
+          target_audience: target_audience || 'all',
+          target_user_ids: target_user_ids || null,
+          notification_sound: notification_sound || 'default',
+        });
+        return NextResponse.json({
+          success: true,
+          sent_count: result.sent_count,
+          message: `Push notification sent to ${result.sent_count} users`,
+        });
+      } catch (pushError) {
+        console.error('[Announcements API] Failed to send standalone push:', pushError);
+        return NextResponse.json({
+          error: (pushError as Error).message || 'Failed to send push notification'
+        }, { status: 500 });
+      }
+    }
+
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   } catch (error) {
     console.error('Error in announcement management:', error);
@@ -577,5 +606,82 @@ async function sendAnnouncementPush(
     })
     .eq('id', announcementId);
 
+  return { sent_count: sentCount };
+}
+
+// Helper function to send standalone push notifications (no announcement)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function sendStandalonePush(
+  supabase: any,
+  options: {
+    title: string;
+    body: string;
+    target_audience: 'all' | 'free' | 'premium' | 'coach';
+    target_user_ids: string[] | null;
+    notification_sound: string;
+  }
+): Promise<{ sent_count: number }> {
+  const { title, body, target_audience, target_user_ids, notification_sound } = options;
+
+  // Build query for target users with FCM tokens
+  let usersQuery = supabase
+    .from('profiles')
+    .select('id, email, fcm_token, subscription_tier')
+    .not('fcm_token', 'is', null);
+
+  // Apply targeting
+  if (target_user_ids && target_user_ids.length > 0) {
+    usersQuery = usersQuery.in('id', target_user_ids);
+  } else if (target_audience !== 'all') {
+    const audienceMap: Record<string, string[]> = {
+      free: ['free', 'trial'],
+      premium: ['pro', 'premium', 'annual'],
+      coach: ['coach', 'team'],
+    };
+    const tiers = audienceMap[target_audience] || [];
+    if (tiers.length > 0) {
+      usersQuery = usersQuery.in('subscription_tier', tiers);
+    }
+  }
+
+  const { data: users, error: usersError } = await usersQuery;
+
+  if (usersError) {
+    throw new Error(`Failed to fetch users: ${usersError.message}`);
+  }
+
+  if (!users || users.length === 0) {
+    return { sent_count: 0 };
+  }
+
+  // Send push to each user
+  let sentCount = 0;
+
+  for (const user of users) {
+    if (!user.fcm_token) continue;
+
+    try {
+      const { error: fcmError } = await supabase.functions.invoke('send-fcm-notification', {
+        body: {
+          userId: user.id,
+          title,
+          body,
+          data: {
+            type: 'standalone_push',
+          },
+        },
+      });
+
+      if (!fcmError) {
+        sentCount++;
+      } else {
+        console.error(`[Standalone Push] FCM error for user ${user.id}:`, fcmError);
+      }
+    } catch (e) {
+      console.error(`[Standalone Push] Failed to send to user ${user.id}:`, e);
+    }
+  }
+
+  console.log(`[Standalone Push] Sent ${sentCount}/${users.length} push notifications`);
   return { sent_count: sentCount };
 }
