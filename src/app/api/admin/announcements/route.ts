@@ -690,7 +690,9 @@ async function sendStandalonePush(
           title,
           body,
           data: {
-            type: 'standalone_push',
+            type: 'admin_push',
+            action: 'open_dashboard',
+            timestamp: new Date().toISOString(),
           },
         }),
       });
