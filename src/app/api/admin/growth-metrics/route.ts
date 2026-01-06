@@ -422,8 +422,13 @@ export async function GET(request: NextRequest) {
     const monthActiveIds = new Set<string>();
     const dailyCounts: Record<string, Set<string>> = {};
 
-    // Track what features each user used today
-    const todayUserFeatures: Record<string, { features: Set<string>; actions: number; lastActive: Date }> = {};
+    // Track what features each user used for each time period
+    const userFeaturesByPeriod: Record<string, Record<string, { features: Set<string>; actions: number; lastActive: Date }>> = {
+      today: {},
+      yesterday: {},
+      week: {},
+      month: {},
+    };
 
     (recentActivity || []).forEach(a => {
       if (!a.last_used_at) return;
@@ -434,27 +439,34 @@ export async function GET(request: NextRequest) {
       if (!dailyCounts[dateKey]) dailyCounts[dateKey] = new Set();
       dailyCounts[dateKey].add(a.user_id);
 
+      // Helper to track user features for a period
+      const trackUser = (period: string, userId: string) => {
+        if (!userFeaturesByPeriod[period][userId]) {
+          userFeaturesByPeriod[period][userId] = { features: new Set(), actions: 0, lastActive: activityDate };
+        }
+        userFeaturesByPeriod[period][userId].features.add(a.feature_name);
+        userFeaturesByPeriod[period][userId].actions += a.total_opens || 1;
+        if (activityDate > userFeaturesByPeriod[period][userId].lastActive) {
+          userFeaturesByPeriod[period][userId].lastActive = activityDate;
+        }
+      };
+
       // Classify by time period
       if (activityDate >= todayStart) {
         todayActiveIds.add(a.user_id);
-        // Track features for today's users
-        if (!todayUserFeatures[a.user_id]) {
-          todayUserFeatures[a.user_id] = { features: new Set(), actions: 0, lastActive: activityDate };
-        }
-        todayUserFeatures[a.user_id].features.add(a.feature_name);
-        todayUserFeatures[a.user_id].actions += a.total_opens || 1;
-        if (activityDate > todayUserFeatures[a.user_id].lastActive) {
-          todayUserFeatures[a.user_id].lastActive = activityDate;
-        }
+        trackUser('today', a.user_id);
       }
       if (activityDate >= yesterdayStart && activityDate < todayStart) {
         yesterdayActiveIds.add(a.user_id);
+        trackUser('yesterday', a.user_id);
       }
       if (activityDate >= weekStart) {
         weekActiveIds.add(a.user_id);
+        trackUser('week', a.user_id);
       }
       if (activityDate >= monthStart) {
         monthActiveIds.add(a.user_id);
+        trackUser('month', a.user_id);
       }
     });
 
@@ -470,26 +482,37 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Get user details for today's active users
-    const todayUserIds = Array.from(todayActiveIds);
-    let todayUsers: { id: string; name: string; email: string; tier: string; lastActive: string; featuresUsed: string[]; totalActions: number }[] = [];
+    // Helper to get user details for a time period
+    const getUsersForPeriod = async (
+      userIds: Set<string>,
+      period: string
+    ): Promise<{ id: string; name: string; email: string; tier: string; lastActive: string; featuresUsed: string[]; totalActions: number }[]> => {
+      const ids = Array.from(userIds).slice(0, 100); // Limit to 100 for performance
+      if (ids.length === 0) return [];
 
-    if (todayUserIds.length > 0) {
-      const { data: todayProfiles } = await supabase
+      const { data: profiles } = await supabase
         .from('profiles')
         .select('id, name, email, tier')
-        .in('id', todayUserIds.slice(0, 100)); // Limit to 100 for performance
+        .in('id', ids);
 
-      todayUsers = (todayProfiles || []).map(p => ({
+      return (profiles || []).map(p => ({
         id: p.id,
         name: p.name || 'Unknown',
         email: p.email,
         tier: p.tier || 'free',
-        lastActive: todayUserFeatures[p.id]?.lastActive?.toISOString() || '',
-        featuresUsed: Array.from(todayUserFeatures[p.id]?.features || []),
-        totalActions: todayUserFeatures[p.id]?.actions || 0,
+        lastActive: userFeaturesByPeriod[period][p.id]?.lastActive?.toISOString() || '',
+        featuresUsed: Array.from(userFeaturesByPeriod[period][p.id]?.features || []),
+        totalActions: userFeaturesByPeriod[period][p.id]?.actions || 0,
       })).sort((a, b) => new Date(b.lastActive).getTime() - new Date(a.lastActive).getTime());
-    }
+    };
+
+    // Get user details for all periods in parallel
+    const [todayUsers, yesterdayUsers, weekUsers, monthUsers] = await Promise.all([
+      getUsersForPeriod(todayActiveIds, 'today'),
+      getUsersForPeriod(yesterdayActiveIds, 'yesterday'),
+      getUsersForPeriod(weekActiveIds, 'week'),
+      getUsersForPeriod(monthActiveIds, 'month'),
+    ]);
 
     const dailyActives = {
       today: todayActiveIds.size,
@@ -498,6 +521,9 @@ export async function GET(request: NextRequest) {
       thisMonth: monthActiveIds.size,
       trend: trendData,
       todayUsers,
+      yesterdayUsers,
+      weekUsers,
+      monthUsers,
     };
 
     return NextResponse.json({

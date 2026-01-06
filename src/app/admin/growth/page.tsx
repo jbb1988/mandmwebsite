@@ -108,7 +108,12 @@ interface DailyActivesData {
   thisMonth: number;
   trend: { date: string; count: number }[];
   todayUsers: DailyActiveUser[];
+  yesterdayUsers: DailyActiveUser[];
+  weekUsers: DailyActiveUser[];
+  monthUsers: DailyActiveUser[];
 }
+
+type ActivePeriod = 'today' | 'yesterday' | 'week' | 'month';
 
 interface GrowthMetrics {
   cohorts: CohortData[];
@@ -160,6 +165,7 @@ export default function GrowthCommandCenter() {
     churn: true,
     quickWins: true,
   });
+  const [activePeriod, setActivePeriod] = useState<ActivePeriod>('today');
   const [drillDown, setDrillDown] = useState<{
     type: DrillDownType;
     title: string;
@@ -354,9 +360,16 @@ export default function GrowthCommandCenter() {
 
                 {expandedSections.dailyActives && (
                   <div className="p-5 pt-0">
-                    {/* DAU/WAU/MAU Stats */}
+                    {/* DAU/WAU/MAU Stats - Clickable Cards */}
                     <div className="grid grid-cols-4 gap-4 mb-5">
-                      <div className="bg-gradient-to-br from-green-500/20 to-green-500/5 rounded-xl p-4 border border-green-500/30">
+                      <button
+                        onClick={() => setActivePeriod('today')}
+                        className={`text-left rounded-xl p-4 border transition-all ${
+                          activePeriod === 'today'
+                            ? 'bg-gradient-to-br from-green-500/20 to-green-500/5 border-green-500/50 ring-2 ring-green-500/30'
+                            : 'bg-white/5 border-white/10 hover:border-white/20'
+                        }`}
+                      >
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-xs text-white/50">Today</span>
                           {metrics.dailyActives.yesterday > 0 && (
@@ -374,27 +387,56 @@ export default function GrowthCommandCenter() {
                             </span>
                           )}
                         </div>
-                        <p className="text-3xl font-bold text-green-400">{metrics.dailyActives.today}</p>
+                        <p className={`text-3xl font-bold ${activePeriod === 'today' ? 'text-green-400' : 'text-white'}`}>
+                          {metrics.dailyActives.today}
+                        </p>
                         <p className="text-xs text-white/30 mt-1">DAU</p>
-                      </div>
+                      </button>
 
-                      <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                      <button
+                        onClick={() => setActivePeriod('yesterday')}
+                        className={`text-left rounded-xl p-4 border transition-all ${
+                          activePeriod === 'yesterday'
+                            ? 'bg-gradient-to-br from-blue-500/20 to-blue-500/5 border-blue-500/50 ring-2 ring-blue-500/30'
+                            : 'bg-white/5 border-white/10 hover:border-white/20'
+                        }`}
+                      >
                         <span className="text-xs text-white/50">Yesterday</span>
-                        <p className="text-3xl font-bold text-white mt-1">{metrics.dailyActives.yesterday}</p>
+                        <p className={`text-3xl font-bold mt-1 ${activePeriod === 'yesterday' ? 'text-blue-400' : 'text-white'}`}>
+                          {metrics.dailyActives.yesterday}
+                        </p>
                         <p className="text-xs text-white/30 mt-1">DAU</p>
-                      </div>
+                      </button>
 
-                      <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                      <button
+                        onClick={() => setActivePeriod('week')}
+                        className={`text-left rounded-xl p-4 border transition-all ${
+                          activePeriod === 'week'
+                            ? 'bg-gradient-to-br from-purple-500/20 to-purple-500/5 border-purple-500/50 ring-2 ring-purple-500/30'
+                            : 'bg-white/5 border-white/10 hover:border-white/20'
+                        }`}
+                      >
                         <span className="text-xs text-white/50">This Week</span>
-                        <p className="text-3xl font-bold text-white mt-1">{metrics.dailyActives.thisWeek}</p>
+                        <p className={`text-3xl font-bold mt-1 ${activePeriod === 'week' ? 'text-purple-400' : 'text-white'}`}>
+                          {metrics.dailyActives.thisWeek}
+                        </p>
                         <p className="text-xs text-white/30 mt-1">WAU (7d)</p>
-                      </div>
+                      </button>
 
-                      <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+                      <button
+                        onClick={() => setActivePeriod('month')}
+                        className={`text-left rounded-xl p-4 border transition-all ${
+                          activePeriod === 'month'
+                            ? 'bg-gradient-to-br from-orange-500/20 to-orange-500/5 border-orange-500/50 ring-2 ring-orange-500/30'
+                            : 'bg-white/5 border-white/10 hover:border-white/20'
+                        }`}
+                      >
                         <span className="text-xs text-white/50">This Month</span>
-                        <p className="text-3xl font-bold text-white mt-1">{metrics.dailyActives.thisMonth}</p>
+                        <p className={`text-3xl font-bold mt-1 ${activePeriod === 'month' ? 'text-orange-400' : 'text-white'}`}>
+                          {metrics.dailyActives.thisMonth}
+                        </p>
                         <p className="text-xs text-white/30 mt-1">MAU (30d)</p>
-                      </div>
+                      </button>
                     </div>
 
                     {/* 30-Day DAU Trend Chart */}
@@ -435,64 +477,110 @@ export default function GrowthCommandCenter() {
                       </div>
                     </div>
 
-                    {/* Today's Active Users List */}
+                    {/* Active Users List - Dynamic based on selected period */}
                     <div>
-                      <h3 className="text-sm font-medium text-white/70 mb-3">
-                        Active Today ({metrics.dailyActives.todayUsers.length} users)
-                      </h3>
-                      <div className="max-h-64 overflow-y-auto space-y-2">
-                        {metrics.dailyActives.todayUsers.length === 0 ? (
-                          <p className="text-center text-white/40 py-6">No active users yet today</p>
-                        ) : (
-                          metrics.dailyActives.todayUsers.map((user) => (
-                            <div
-                              key={user.id}
-                              className="flex items-center justify-between bg-white/5 rounded-xl p-3 border border-white/10 hover:bg-white/10 transition-colors"
-                            >
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-2">
-                                  <p className="text-sm font-medium text-white truncate">{user.name}</p>
-                                  <span className={`text-xs px-2 py-0.5 rounded-full ${
-                                    user.tier === 'pro'
-                                      ? 'bg-emerald-500/20 text-emerald-400'
-                                      : user.tier === 'trial'
-                                      ? 'bg-cyan-500/20 text-cyan-400'
-                                      : 'bg-white/10 text-white/50'
-                                  }`}>
-                                    {user.tier}
-                                  </span>
-                                </div>
-                                <p className="text-xs text-white/50 truncate">{user.email}</p>
-                              </div>
-                              <div className="flex items-center gap-3 ml-3">
-                                <div className="text-right hidden sm:block">
-                                  <p className="text-xs text-white/60">
-                                    {user.featuresUsed.slice(0, 2).join(', ')}
-                                    {user.featuresUsed.length > 2 && ` +${user.featuresUsed.length - 2}`}
-                                  </p>
-                                  <p className="text-xs text-white/30">
-                                    {user.totalActions} actions
-                                  </p>
-                                </div>
-                                <span className="text-xs text-green-400 bg-green-500/10 px-2 py-1 rounded">
-                                  {new Date(user.lastActive).toLocaleTimeString('en-US', {
-                                    hour: 'numeric',
-                                    minute: '2-digit',
-                                    hour12: true
-                                  })}
-                                </span>
-                                <a
-                                  href={`/admin/users?search=${encodeURIComponent(user.email)}`}
-                                  className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
-                                  title="View user"
-                                >
-                                  <ExternalLink className="w-4 h-4 text-white/50" />
-                                </a>
-                              </div>
+                      {(() => {
+                        const periodConfig = {
+                          today: {
+                            label: 'Active Today',
+                            users: metrics.dailyActives.todayUsers,
+                            emptyMessage: 'No active users yet today',
+                            color: 'green',
+                          },
+                          yesterday: {
+                            label: 'Active Yesterday',
+                            users: metrics.dailyActives.yesterdayUsers,
+                            emptyMessage: 'No users were active yesterday',
+                            color: 'blue',
+                          },
+                          week: {
+                            label: 'Active This Week',
+                            users: metrics.dailyActives.weekUsers,
+                            emptyMessage: 'No users active this week',
+                            color: 'purple',
+                          },
+                          month: {
+                            label: 'Active This Month',
+                            users: metrics.dailyActives.monthUsers,
+                            emptyMessage: 'No users active this month',
+                            color: 'orange',
+                          },
+                        };
+                        const config = periodConfig[activePeriod];
+                        const colorClasses = {
+                          green: 'text-green-400 bg-green-500/10',
+                          blue: 'text-blue-400 bg-blue-500/10',
+                          purple: 'text-purple-400 bg-purple-500/10',
+                          orange: 'text-orange-400 bg-orange-500/10',
+                        };
+
+                        return (
+                          <>
+                            <h3 className="text-sm font-medium text-white/70 mb-3">
+                              {config.label} ({config.users?.length || 0} users)
+                            </h3>
+                            <div className="max-h-64 overflow-y-auto space-y-2">
+                              {!config.users || config.users.length === 0 ? (
+                                <p className="text-center text-white/40 py-6">{config.emptyMessage}</p>
+                              ) : (
+                                config.users.map((user) => (
+                                  <div
+                                    key={user.id}
+                                    className="flex items-center justify-between bg-white/5 rounded-xl p-3 border border-white/10 hover:bg-white/10 transition-colors"
+                                  >
+                                    <div className="min-w-0 flex-1">
+                                      <div className="flex items-center gap-2">
+                                        <p className="text-sm font-medium text-white truncate">{user.name}</p>
+                                        <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                          user.tier === 'pro'
+                                            ? 'bg-emerald-500/20 text-emerald-400'
+                                            : user.tier === 'trial'
+                                            ? 'bg-cyan-500/20 text-cyan-400'
+                                            : 'bg-white/10 text-white/50'
+                                        }`}>
+                                          {user.tier}
+                                        </span>
+                                      </div>
+                                      <p className="text-xs text-white/50 truncate">{user.email}</p>
+                                    </div>
+                                    <div className="flex items-center gap-3 ml-3">
+                                      <div className="text-right hidden sm:block">
+                                        <p className="text-xs text-white/60">
+                                          {user.featuresUsed.slice(0, 2).join(', ')}
+                                          {user.featuresUsed.length > 2 && ` +${user.featuresUsed.length - 2}`}
+                                        </p>
+                                        <p className="text-xs text-white/30">
+                                          {user.totalActions} actions
+                                        </p>
+                                      </div>
+                                      <span className={`text-xs px-2 py-1 rounded ${colorClasses[config.color as keyof typeof colorClasses]}`}>
+                                        {activePeriod === 'today' || activePeriod === 'yesterday'
+                                          ? new Date(user.lastActive).toLocaleTimeString('en-US', {
+                                              hour: 'numeric',
+                                              minute: '2-digit',
+                                              hour12: true
+                                            })
+                                          : new Date(user.lastActive).toLocaleDateString('en-US', {
+                                              month: 'short',
+                                              day: 'numeric'
+                                            })
+                                        }
+                                      </span>
+                                      <a
+                                        href={`/admin/users?search=${encodeURIComponent(user.email)}`}
+                                        className="p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+                                        title="View user"
+                                      >
+                                        <ExternalLink className="w-4 h-4 text-white/50" />
+                                      </a>
+                                    </div>
+                                  </div>
+                                ))
+                              )}
                             </div>
-                          ))
-                        )}
-                      </div>
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                 )}
