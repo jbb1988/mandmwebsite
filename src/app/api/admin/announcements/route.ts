@@ -557,7 +557,7 @@ async function sendAnnouncementPush(
       // Call the FCM edge function
       const { error: fcmError } = await supabase.functions.invoke('send-fcm-notification', {
         body: {
-          user_id: user.id,
+          userId: user.id,
           title: pushTitle,
           body: pushBody,
           data: {
