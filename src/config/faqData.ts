@@ -26,7 +26,7 @@ export const TOP_FAQS = [
   },
   {
     question: 'How do parents connect with their athlete?',
-    answer: 'Parents link to their athlete by entering their child\'s email address in the app. The athlete receives a connection request and can approve it. This is independent of teams—the connection stays active even if your athlete changes teams.',
+    answer: 'Parents link to their athlete by entering their child\'s email address in the app. The athlete receives a connection request and can approve it. Once linked, parents automatically see all Goals, Weekly Reports, and assigned Drills—no manual sharing needed. This is independent of teams—the connection stays active even if your athlete changes teams.',
   },
   {
     question: 'What devices are supported?',

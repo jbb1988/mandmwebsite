@@ -40,24 +40,69 @@ function getGitHubHeaders(): HeadersInit {
   return headers;
 }
 
-// Get the latest git tags from GitHub
-async function fetchLatestTags(): Promise<{ latest: string | null, previous: string | null }> {
+interface VersionHistoryEntry {
+  version: string;
+  commitSha: string;
+  date: string;
+  message: string;
+}
+
+// Get version history from pubspec.yaml changes
+async function fetchVersionHistory(): Promise<VersionHistoryEntry[]> {
   const headers = getGitHubHeaders();
+
+  // Get commits that modified pubspec.yaml
   const response = await fetch(
-    `https://api.github.com/repos/${GITHUB_REPO}/tags?per_page=10`,
+    `https://api.github.com/repos/${GITHUB_REPO}/commits?path=pubspec.yaml&per_page=30`,
     { headers }
   );
 
   if (!response.ok) {
-    console.error('Failed to fetch tags:', response.status);
-    return { latest: null, previous: null };
+    console.error('Failed to fetch pubspec commits:', response.status);
+    return [];
   }
 
-  const tags = await response.json();
-  return {
-    latest: tags[0]?.name || null,
-    previous: tags[1]?.name || null,
-  };
+  const commits = await response.json();
+  const versions: VersionHistoryEntry[] = [];
+  const seenVersions = new Set<string>();
+
+  // For each commit, get the pubspec.yaml content and extract version
+  for (const commit of commits) {
+    try {
+      const fileResponse = await fetch(
+        `https://api.github.com/repos/${GITHUB_REPO}/contents/pubspec.yaml?ref=${commit.sha}`,
+        { headers }
+      );
+
+      if (!fileResponse.ok) continue;
+
+      const fileData = await fileResponse.json();
+      const content = Buffer.from(fileData.content, 'base64').toString('utf-8');
+
+      // Extract version line: "version: 1.2.0+58"
+      const versionMatch = content.match(/^version:\s*(.+)$/m);
+      if (versionMatch) {
+        const fullVersion = versionMatch[1].trim();
+        // Extract just the version part (before +)
+        const version = fullVersion.split('+')[0];
+
+        // Only add if we haven't seen this version
+        if (!seenVersions.has(version)) {
+          seenVersions.add(version);
+          versions.push({
+            version,
+            commitSha: commit.sha,
+            date: commit.commit.author.date,
+            message: commit.commit.message.split('\n')[0],
+          });
+        }
+      }
+    } catch (e) {
+      console.error('Error fetching pubspec for commit:', commit.sha, e);
+    }
+  }
+
+  return versions;
 }
 
 // Fetch commits between two refs (tags or SHAs)
@@ -179,28 +224,18 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { action } = body;
 
-    // GET-TAGS: Get available git tags
-    if (action === 'get-tags') {
+    // GET-VERSION-HISTORY: Get version history from pubspec.yaml
+    if (action === 'get-version-history') {
       try {
-        const headers = getGitHubHeaders();
-        const response = await fetch(
-          `https://api.github.com/repos/${GITHUB_REPO}/tags?per_page=20`,
-          { headers }
-        );
-
-        if (!response.ok) {
-          throw new Error(`GitHub API error: ${response.status}`);
-        }
-
-        const tags = await response.json();
+        const versions = await fetchVersionHistory();
         return NextResponse.json({
           success: true,
-          tags: tags.map((t: any) => t.name),
+          versions,
         });
       } catch (error) {
-        console.error('Failed to fetch tags:', error);
+        console.error('Failed to fetch version history:', error);
         return NextResponse.json({
-          error: 'Failed to fetch tags from GitHub',
+          error: 'Failed to fetch version history from GitHub',
         }, { status: 500 });
       }
     }
@@ -239,7 +274,7 @@ export async function POST(request: NextRequest) {
 
     // CREATE: Auto-fetch from GitHub and create release
     if (action === 'create') {
-      const { version, fromTag } = body;
+      const { version, fromCommit } = body;
 
       if (!version) {
         return NextResponse.json({ error: 'Version is required' }, { status: 400 });
@@ -248,30 +283,30 @@ export async function POST(request: NextRequest) {
       let raw_notes: string;
       let commit_count: number;
       let commit_sha: string;
-      let usedFromTag: string | null = null;
 
       try {
-        // Strategy: Use tags to get commits
-        // 1. If fromTag provided, use it as the base
-        // 2. Otherwise, find the previous tag automatically
+        // Strategy: Use version commits from pubspec.yaml
+        // 1. If fromCommit provided, use it as the base
+        // 2. Otherwise, find the previous version automatically
 
-        let baseTag = fromTag;
+        let baseCommit = fromCommit;
 
-        if (!baseTag) {
-          // Get the last two tags to find the previous one
-          const { previous } = await fetchLatestTags();
-          baseTag = previous;
+        if (!baseCommit) {
+          // Get version history and use the second entry (previous version)
+          const versions = await fetchVersionHistory();
+          if (versions.length > 1) {
+            baseCommit = versions[1].commitSha;
+          }
         }
 
-        if (baseTag) {
-          // Fetch commits between the base tag and HEAD
-          const { commits, count, latestSha } = await fetchCommitsBetweenRefs(baseTag, 'HEAD');
+        if (baseCommit) {
+          // Fetch commits between the base commit and HEAD
+          const { commits, count, latestSha } = await fetchCommitsBetweenRefs(baseCommit, 'HEAD');
           raw_notes = commits.join('\n') || 'No new commits found';
           commit_count = count;
           commit_sha = latestSha;
-          usedFromTag = baseTag;
         } else {
-          // No previous tag found, get recent commits (last 2 weeks)
+          // No previous version found, get recent commits (last 2 weeks)
           const twoWeeksAgo = new Date();
           twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
           const { commits, count, latestSha } = await fetchGitHubCommits(twoWeeksAgo.toISOString());

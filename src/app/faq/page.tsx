@@ -376,8 +376,8 @@ export default function FAQPage() {
           answer: 'Each goal has a progress tracker. Log updates as you hit milestones (completed workouts, measurable improvements, game stats). Goals AI analyzes your progress and provides coaching feedback. You\'ll see visual progress bars and trend charts showing your trajectory toward the goal.'
         },
         {
-          question: 'Can I share goals with my coach or parent?',
-          answer: 'Yes! Athletes can choose to share their goals with their coach and/or parent for accountability and feedback. This is optional—you control who sees your goals.'
+          question: 'Can my coach or parent see my goals?',
+          answer: 'Yes! Goals are automatically visible to:\n\n• Coaches: When you share a goal with your coach, they can track your progress.\n• Parents: When a parent is linked to your account, they automatically see all your goals and reports. No manual sharing needed—the link grants access.'
         },
         {
           question: 'What happens when I complete a goal?',
@@ -469,7 +469,7 @@ export default function FAQPage() {
         },
         {
           question: 'How do parents link to their athlete?',
-          answer: 'Parents connect to their athlete by entering their child\'s email address in the app. Go to Parent Dashboard → tap "Link Athlete" and enter the email your child used to create their Mind & Muscle account. Your child will receive a request and can approve or deny the connection. Once approved, you\'ll see their shared Goals and Reports. This is independent of team membership—the link stays active even if your athlete changes teams!'
+          answer: 'Parents connect to their athlete by entering their child\'s email address in the app. Go to Parent Dashboard → tap "Link Athlete" and enter the email your child used to create their Mind & Muscle account. Your child will receive a request and can approve or deny the connection. Once approved, you automatically see ALL their Goals, Weekly Reports, and assigned Drills—no manual sharing needed! This is independent of team membership—the link stays active even if your athlete changes teams.'
         }
       ]
     },

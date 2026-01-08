@@ -70,9 +70,9 @@ export default function ReleasesPage() {
   // Create modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newVersion, setNewVersion] = useState('');
-  const [fromTag, setFromTag] = useState('');
-  const [availableTags, setAvailableTags] = useState<string[]>([]);
-  const [loadingTags, setLoadingTags] = useState(false);
+  const [fromCommit, setFromCommit] = useState('');
+  const [availableVersions, setAvailableVersions] = useState<{version: string, commitSha: string, date: string}[]>([]);
+  const [loadingVersions, setLoadingVersions] = useState(false);
   const [creating, setCreating] = useState(false);
 
   const fetchReleases = async () => {
@@ -99,8 +99,8 @@ export default function ReleasesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchTags = async () => {
-    setLoadingTags(true);
+  const fetchVersionHistory = async () => {
+    setLoadingVersions(true);
     try {
       const res = await fetch('/api/admin/releases', {
         method: 'POST',
@@ -108,28 +108,28 @@ export default function ReleasesPage() {
           'Content-Type': 'application/json',
           'X-Admin-Password': getPassword(),
         },
-        body: JSON.stringify({ action: 'get-tags' }),
+        body: JSON.stringify({ action: 'get-version-history' }),
       });
       const data = await res.json();
       if (data.success) {
-        setAvailableTags(data.tags || []);
-        // Auto-select the second tag (previous release) as default
-        if (data.tags?.length > 1) {
-          setFromTag(data.tags[1]);
+        setAvailableVersions(data.versions || []);
+        // Auto-select the second version (previous release) as default
+        if (data.versions?.length > 1) {
+          setFromCommit(data.versions[1].commitSha);
         }
       }
     } catch (error) {
-      console.error('Failed to fetch tags:', error);
+      console.error('Failed to fetch version history:', error);
     } finally {
-      setLoadingTags(false);
+      setLoadingVersions(false);
     }
   };
 
   const openCreateModal = () => {
     setShowCreateModal(true);
     setNewVersion('');
-    setFromTag('');
-    fetchTags();
+    setFromCommit('');
+    fetchVersionHistory();
   };
 
   const handleCreate = async () => {
@@ -150,7 +150,7 @@ export default function ReleasesPage() {
         body: JSON.stringify({
           action: 'create',
           version: newVersion.replace(/^v/, ''),
-          fromTag: fromTag || undefined,
+          fromCommit: fromCommit || undefined,
         }),
       });
 
@@ -666,27 +666,33 @@ export default function ReleasesPage() {
 
                   <div>
                     <label className="block text-sm font-medium text-white/70 mb-2">
-                      Get commits since tag
+                      Get commits since version
                     </label>
-                    {loadingTags ? (
+                    {loadingVersions ? (
                       <div className="flex items-center gap-2 text-white/50 text-sm py-3">
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        Loading tags...
+                        Loading version history...
+                      </div>
+                    ) : availableVersions.length === 0 ? (
+                      <div className="text-white/50 text-sm py-3">
+                        No version history found in pubspec.yaml
                       </div>
                     ) : (
                       <select
-                        value={fromTag}
-                        onChange={(e) => setFromTag(e.target.value)}
+                        value={fromCommit}
+                        onChange={(e) => setFromCommit(e.target.value)}
                         className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:border-emerald-500 focus:outline-none"
                       >
-                        <option value="">Auto-detect (previous tag)</option>
-                        {availableTags.map((tag) => (
-                          <option key={tag} value={tag}>{tag}</option>
+                        <option value="">Auto-detect (previous version)</option>
+                        {availableVersions.map((v) => (
+                          <option key={v.commitSha} value={v.commitSha}>
+                            v{v.version} - {new Date(v.date).toLocaleDateString()}
+                          </option>
                         ))}
                       </select>
                     )}
                     <p className="text-xs text-white/40 mt-1">
-                      Commits between this tag and HEAD will be fetched
+                      Commits between this version and now will be fetched
                     </p>
                   </div>
 
