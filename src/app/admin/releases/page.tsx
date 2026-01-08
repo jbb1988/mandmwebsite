@@ -6,7 +6,7 @@ import { useAdminAuth } from '@/context/AdminAuthContext';
 import {
   Package, Sparkles, Check, Copy, Trash2, RefreshCw,
   Loader2, FileText, GitCommit, Calendar, CheckCircle,
-  Clock, Edit2, X, ChevronDown, ChevronUp
+  Clock, Edit2, X, ChevronDown, ChevronUp, Plus
 } from 'lucide-react';
 
 function Card({ children, className = '', variant = 'default' }: {
@@ -67,6 +67,12 @@ export default function ReleasesPage() {
   const [editingNotes, setEditingNotes] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
+  // Create modal state
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [newVersion, setNewVersion] = useState('');
+  const [newNotes, setNewNotes] = useState('');
+  const [creating, setCreating] = useState(false);
+
   const fetchReleases = async () => {
     setLoading(true);
     try {
@@ -90,6 +96,48 @@ export default function ReleasesPage() {
     fetchReleases();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const handleCreate = async () => {
+    if (!newVersion.trim() || !newNotes.trim()) {
+      alert('Version and notes are required');
+      return;
+    }
+
+    setCreating(true);
+    try {
+      const res = await fetch('/api/admin/releases', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': getPassword(),
+        },
+        body: JSON.stringify({
+          action: 'create',
+          version: newVersion.replace(/^v/, ''), // Strip leading 'v' if present
+          raw_notes: newNotes,
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setShowCreateModal(false);
+        setNewVersion('');
+        setNewNotes('');
+        fetchReleases();
+
+        // Auto-polish the new release
+        if (data.release?.id) {
+          handlePolish(data.release.id);
+        }
+      } else {
+        alert(data.error || 'Failed to create release');
+      }
+    } catch (error) {
+      console.error('Failed to create:', error);
+    } finally {
+      setCreating(false);
+    }
+  };
 
   const handlePolish = async (id: string) => {
     setActionLoading(id);
@@ -224,13 +272,22 @@ export default function ReleasesPage() {
                 <p className="text-white/50 text-sm">Manage app store release notes</p>
               </div>
             </div>
-            <button
-              onClick={fetchReleases}
-              className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg font-medium transition-all"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              Refresh
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 rounded-lg font-medium transition-all"
+              >
+                <Plus className="w-4 h-4" />
+                New Release
+              </button>
+              <button
+                onClick={fetchReleases}
+                className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg font-medium transition-all"
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </button>
+            </div>
           </div>
 
           {/* Stats Cards */}
@@ -511,15 +568,15 @@ export default function ReleasesPage() {
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-full bg-yellow-500/20 text-yellow-400 flex items-center justify-center flex-shrink-0 font-bold">1</div>
                 <div>
-                  <div className="font-medium text-white/90">Push a Tag</div>
-                  <div className="text-white/50">e.g., git tag v1.2.3 && git push --tags</div>
+                  <div className="font-medium text-white/90">New Release</div>
+                  <div className="text-white/50">Click button or push a git tag</div>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center flex-shrink-0 font-bold">2</div>
                 <div>
-                  <div className="font-medium text-white/90">Auto-Parsed</div>
-                  <div className="text-white/50">GitHub Action extracts commits</div>
+                  <div className="font-medium text-white/90">Enter Notes</div>
+                  <div className="text-white/50">Paste your changes or commits</div>
                 </div>
               </div>
               <div className="flex items-start gap-3">
@@ -539,6 +596,85 @@ export default function ReleasesPage() {
             </div>
           </Card>
         </div>
+
+        {/* Create Release Modal */}
+        {showCreateModal && (
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+            <Card variant="elevated" className="w-full max-w-lg">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold flex items-center gap-2">
+                    <Plus className="w-5 h-5 text-emerald-400" />
+                    New Release
+                  </h2>
+                  <button
+                    onClick={() => setShowCreateModal(false)}
+                    className="p-2 rounded-lg hover:bg-white/10 transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-2">
+                      Version Number
+                    </label>
+                    <input
+                      type="text"
+                      value={newVersion}
+                      onChange={(e) => setNewVersion(e.target.value)}
+                      placeholder="1.2.3"
+                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-emerald-500 focus:outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-2">
+                      What changed? (raw notes, commits, bullet points)
+                    </label>
+                    <textarea
+                      value={newNotes}
+                      onChange={(e) => setNewNotes(e.target.value)}
+                      rows={8}
+                      placeholder="- Fixed login bug&#10;- Added dark mode&#10;- Improved performance&#10;- Updated player screen UI"
+                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-emerald-500 focus:outline-none resize-none"
+                    />
+                    <p className="text-xs text-white/40 mt-2">
+                      AI will transform these into polished app store notes
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3 pt-4">
+                    <button
+                      onClick={() => setShowCreateModal(false)}
+                      className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-lg font-medium transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleCreate}
+                      disabled={creating || !newVersion.trim() || !newNotes.trim()}
+                      className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                    >
+                      {creating ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Creating...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-4 h-4" />
+                          Create & Polish
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        )}
       </div>
     </AdminGate>
   );
