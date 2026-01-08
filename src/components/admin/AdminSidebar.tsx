@@ -27,6 +27,8 @@ import {
   Database,
   Video,
   Send,
+  BookOpen,
+  Package,
 } from 'lucide-react';
 import { useAdminAuth } from '@/context/AdminAuthContext';
 import CommandSearch from './CommandSearch';
@@ -80,6 +82,7 @@ const NAV_SECTIONS: NavSection[] = [
       { id: 'email-sender', name: 'Email Sender', href: '/admin/email-sender', icon: Send },
       { id: 'announcements', name: 'Announcements', href: '/admin/announcements', icon: Megaphone },
       { id: 'templates', name: 'Templates', href: '/admin/templates', icon: Mail },
+      { id: 'email-catalog', name: 'Email Catalog', href: '/admin/email-catalog', icon: BookOpen },
       { id: 'promos', name: 'Promos', href: '/admin/promo-codes', icon: Tag },
       { id: 'banners', name: 'Banners', href: '/admin/banner-generator', icon: Image },
     ],
@@ -100,6 +103,7 @@ const NAV_SECTIONS: NavSection[] = [
     icon: '⚙️',
     items: [
       { id: 'monitor', name: 'Monitor', href: '/admin/system', icon: Settings, shortcut: 'M' },
+      { id: 'releases', name: 'Releases', href: '/admin/releases', icon: Package },
     ],
   },
 ];
