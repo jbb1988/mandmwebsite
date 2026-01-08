@@ -70,7 +70,6 @@ export default function ReleasesPage() {
   // Create modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newVersion, setNewVersion] = useState('');
-  const [newNotes, setNewNotes] = useState('');
   const [creating, setCreating] = useState(false);
 
   const fetchReleases = async () => {
@@ -98,13 +97,14 @@ export default function ReleasesPage() {
   }, []);
 
   const handleCreate = async () => {
-    if (!newVersion.trim() || !newNotes.trim()) {
-      alert('Version and notes are required');
+    if (!newVersion.trim()) {
+      alert('Version is required');
       return;
     }
 
     setCreating(true);
     try {
+      // Create release - API will auto-fetch commits from GitHub
       const res = await fetch('/api/admin/releases', {
         method: 'POST',
         headers: {
@@ -113,8 +113,7 @@ export default function ReleasesPage() {
         },
         body: JSON.stringify({
           action: 'create',
-          version: newVersion.replace(/^v/, ''), // Strip leading 'v' if present
-          raw_notes: newNotes,
+          version: newVersion.replace(/^v/, ''),
         }),
       });
 
@@ -122,7 +121,6 @@ export default function ReleasesPage() {
       if (data.success) {
         setShowCreateModal(false);
         setNewVersion('');
-        setNewNotes('');
         fetchReleases();
 
         // Auto-polish the new release
@@ -600,7 +598,7 @@ export default function ReleasesPage() {
         {/* Create Release Modal */}
         {showCreateModal && (
           <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-            <Card variant="elevated" className="w-full max-w-lg">
+            <Card variant="elevated" className="w-full max-w-md">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-bold flex items-center gap-2">
@@ -625,27 +623,23 @@ export default function ReleasesPage() {
                       value={newVersion}
                       onChange={(e) => setNewVersion(e.target.value)}
                       placeholder="1.2.3"
-                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-emerald-500 focus:outline-none"
+                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-emerald-500 focus:outline-none text-lg"
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-white/70 mb-2">
-                      What changed? (raw notes, commits, bullet points)
-                    </label>
-                    <textarea
-                      value={newNotes}
-                      onChange={(e) => setNewNotes(e.target.value)}
-                      rows={8}
-                      placeholder="- Fixed login bug&#10;- Added dark mode&#10;- Improved performance&#10;- Updated player screen UI"
-                      className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-emerald-500 focus:outline-none resize-none"
-                    />
-                    <p className="text-xs text-white/40 mt-2">
-                      AI will transform these into polished app store notes
-                    </p>
+                  <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <GitCommit className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm text-blue-300 font-medium">Auto-fetches from GitHub</p>
+                        <p className="text-xs text-white/50 mt-1">
+                          Commits since last published release will be pulled automatically and polished by AI
+                        </p>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="flex gap-3 pt-4">
+                  <div className="flex gap-3 pt-2">
                     <button
                       onClick={() => setShowCreateModal(false)}
                       className="flex-1 py-3 bg-white/5 hover:bg-white/10 rounded-lg font-medium transition-colors"
@@ -654,18 +648,18 @@ export default function ReleasesPage() {
                     </button>
                     <button
                       onClick={handleCreate}
-                      disabled={creating || !newVersion.trim() || !newNotes.trim()}
+                      disabled={creating || !newVersion.trim()}
                       className="flex-1 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                     >
                       {creating ? (
                         <>
                           <Loader2 className="w-4 h-4 animate-spin" />
-                          Creating...
+                          Fetching & Polishing...
                         </>
                       ) : (
                         <>
                           <Sparkles className="w-4 h-4" />
-                          Create & Polish
+                          Create Release
                         </>
                       )}
                     </button>

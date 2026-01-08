@@ -25,6 +25,49 @@ interface AppRelease {
   created_by: string;
 }
 
+const GITHUB_REPO = 'jbb1988/mind-muscle';
+
+// Fetch commits from GitHub API
+async function fetchGitHubCommits(since?: string): Promise<{ commits: string[], count: number, latestSha: string }> {
+  const token = process.env.GITHUB_TOKEN;
+  const headers: HeadersInit = {
+    'Accept': 'application/vnd.github.v3+json',
+    'User-Agent': 'MindMuscle-Admin',
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  // Build URL with optional since parameter
+  let url = `https://api.github.com/repos/${GITHUB_REPO}/commits?per_page=100`;
+  if (since) {
+    url += `&since=${since}`;
+  }
+
+  const response = await fetch(url, { headers });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('GitHub API error:', response.status, errorText);
+    throw new Error(`GitHub API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  // Extract commit messages, skip merge commits
+  const commits = data
+    .filter((c: any) => !c.commit.message.startsWith('Merge'))
+    .map((c: any) => `- ${c.commit.message.split('\n')[0]}`)
+    .slice(0, 50); // Limit to 50 commits
+
+  return {
+    commits,
+    count: commits.length,
+    latestSha: data[0]?.sha || '',
+  };
+}
+
 // GET: List all releases
 export async function GET(request: NextRequest) {
   if (!verifyAdmin(request)) {
@@ -82,6 +125,94 @@ export async function POST(request: NextRequest) {
     const supabase = getSupabaseClient();
     const body = await request.json();
     const { action } = body;
+
+    // FETCH-COMMITS: Get commits from GitHub since last release
+    if (action === 'fetch-commits') {
+      // Get the last published release to find the cutoff
+      const { data: lastRelease } = await supabase
+        .from('app_releases')
+        .select('published_at, created_at')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      const sinceDate = lastRelease?.published_at || lastRelease?.created_at;
+
+      try {
+        const { commits, count, latestSha } = await fetchGitHubCommits(sinceDate);
+
+        return NextResponse.json({
+          success: true,
+          commits: commits.join('\n'),
+          count,
+          latestSha,
+          since: sinceDate,
+        });
+      } catch (error) {
+        console.error('Failed to fetch commits:', error);
+        return NextResponse.json({
+          error: 'Failed to fetch commits from GitHub. Make sure GITHUB_TOKEN is set.',
+          details: error instanceof Error ? error.message : 'Unknown error'
+        }, { status: 500 });
+      }
+    }
+
+    // CREATE: Auto-fetch from GitHub and create release
+    if (action === 'create') {
+      const { version } = body;
+
+      if (!version) {
+        return NextResponse.json({ error: 'Version is required' }, { status: 400 });
+      }
+
+      // Get the last published release to find the cutoff
+      const { data: lastRelease } = await supabase
+        .from('app_releases')
+        .select('published_at, created_at')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      const sinceDate = lastRelease?.published_at || lastRelease?.created_at;
+
+      let raw_notes: string;
+      let commit_count: number;
+      let commit_sha: string;
+
+      try {
+        const { commits, count, latestSha } = await fetchGitHubCommits(sinceDate);
+        raw_notes = commits.join('\n') || 'No new commits found';
+        commit_count = count;
+        commit_sha = latestSha;
+      } catch (error) {
+        console.error('GitHub fetch failed, using placeholder:', error);
+        raw_notes = 'Failed to fetch commits from GitHub';
+        commit_count = 0;
+        commit_sha = '';
+      }
+
+      const { data, error } = await supabase
+        .from('app_releases')
+        .insert({
+          version: version.replace(/^v/, ''),
+          raw_notes,
+          commit_count,
+          commit_sha,
+          platform: 'both',
+          status: 'draft',
+          created_by: 'admin',
+        })
+        .select()
+        .single();
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 });
+      }
+
+      return NextResponse.json({ success: true, release: data });
+    }
 
     // POLISH: Trigger AI polishing for a release
     if (action === 'polish') {
@@ -182,33 +313,6 @@ export async function POST(request: NextRequest) {
       }
 
       return NextResponse.json({ success: true, message: 'Release deleted' });
-    }
-
-    // CREATE: Manual release creation
-    if (action === 'create') {
-      const { version, raw_notes, platform } = body;
-
-      if (!version || !raw_notes) {
-        return NextResponse.json({ error: 'Version and raw_notes are required' }, { status: 400 });
-      }
-
-      const { data, error } = await supabase
-        .from('app_releases')
-        .insert({
-          version,
-          raw_notes,
-          platform: platform || 'both',
-          status: 'draft',
-          created_by: 'admin',
-        })
-        .select()
-        .single();
-
-      if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-      }
-
-      return NextResponse.json({ success: true, release: data });
     }
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
