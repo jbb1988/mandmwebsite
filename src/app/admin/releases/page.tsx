@@ -451,7 +451,7 @@ export default function ReleasesPage() {
                               <GitCommit className="w-4 h-4" />
                               Raw Commits
                             </div>
-                            <pre className="bg-white/5 rounded-lg p-4 text-sm text-white/60 overflow-x-auto whitespace-pre-wrap">
+                            <pre className="bg-white/5 rounded-lg p-4 text-sm text-white/60 whitespace-pre-wrap break-words max-h-[300px] overflow-y-auto">
                               {release.raw_notes}
                             </pre>
                           </div>
@@ -479,8 +479,8 @@ export default function ReleasesPage() {
                                 <textarea
                                   value={editingNotes}
                                   onChange={(e) => setEditingNotes(e.target.value)}
-                                  rows={6}
-                                  className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-emerald-500 focus:outline-none resize-none"
+                                  rows={12}
+                                  className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/30 focus:border-emerald-500 focus:outline-none resize-y min-h-[200px]"
                                 />
                                 <div className="flex justify-end gap-2">
                                   <button
@@ -504,8 +504,8 @@ export default function ReleasesPage() {
                                 </div>
                               </div>
                             ) : release.polished_notes ? (
-                              <div className="bg-gradient-to-br from-emerald-500/10 to-blue-500/10 border border-emerald-500/20 rounded-lg p-4">
-                                <pre className="text-sm text-white/80 whitespace-pre-wrap">{release.polished_notes}</pre>
+                              <div className="bg-gradient-to-br from-emerald-500/10 to-blue-500/10 border border-emerald-500/20 rounded-lg p-4 max-h-[500px] overflow-y-auto">
+                                <pre className="text-sm text-white/80 whitespace-pre-wrap break-words">{release.polished_notes}</pre>
                               </div>
                             ) : (
                               <div className="bg-white/5 rounded-lg p-4 text-center">
