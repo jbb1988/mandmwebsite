@@ -171,7 +171,7 @@ export async function POST(request: NextRequest) {
         features_used: '5',
         last_feature: 'Swing Lab',
         streak_count: '12',
-        app_url: 'https://mindandmuscle.ai/app',
+        app_url: 'https://mindandmuscle.ai/download',
         partner_link: 'https://mindandmuscle.ai/partner-program?ref=sample',
         current_year: new Date().getFullYear().toString(),
       };

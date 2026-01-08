@@ -70,6 +70,9 @@ export default function ReleasesPage() {
   // Create modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newVersion, setNewVersion] = useState('');
+  const [fromTag, setFromTag] = useState('');
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [loadingTags, setLoadingTags] = useState(false);
   const [creating, setCreating] = useState(false);
 
   const fetchReleases = async () => {
@@ -96,6 +99,39 @@ export default function ReleasesPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const fetchTags = async () => {
+    setLoadingTags(true);
+    try {
+      const res = await fetch('/api/admin/releases', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Admin-Password': getPassword(),
+        },
+        body: JSON.stringify({ action: 'get-tags' }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setAvailableTags(data.tags || []);
+        // Auto-select the second tag (previous release) as default
+        if (data.tags?.length > 1) {
+          setFromTag(data.tags[1]);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch tags:', error);
+    } finally {
+      setLoadingTags(false);
+    }
+  };
+
+  const openCreateModal = () => {
+    setShowCreateModal(true);
+    setNewVersion('');
+    setFromTag('');
+    fetchTags();
+  };
+
   const handleCreate = async () => {
     if (!newVersion.trim()) {
       alert('Version is required');
@@ -114,6 +150,7 @@ export default function ReleasesPage() {
         body: JSON.stringify({
           action: 'create',
           version: newVersion.replace(/^v/, ''),
+          fromTag: fromTag || undefined,
         }),
       });
 
@@ -272,7 +309,7 @@ export default function ReleasesPage() {
             </div>
             <div className="flex gap-2">
               <button
-                onClick={() => setShowCreateModal(true)}
+                onClick={openCreateModal}
                 className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 rounded-lg font-medium transition-all"
               >
                 <Plus className="w-4 h-4" />
@@ -627,16 +664,30 @@ export default function ReleasesPage() {
                     />
                   </div>
 
-                  <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
-                    <div className="flex items-start gap-3">
-                      <GitCommit className="w-5 h-5 text-blue-400 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-sm text-blue-300 font-medium">Auto-fetches from GitHub</p>
-                        <p className="text-xs text-white/50 mt-1">
-                          Commits since last published release will be pulled automatically and polished by AI
-                        </p>
+                  <div>
+                    <label className="block text-sm font-medium text-white/70 mb-2">
+                      Get commits since tag
+                    </label>
+                    {loadingTags ? (
+                      <div className="flex items-center gap-2 text-white/50 text-sm py-3">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Loading tags...
                       </div>
-                    </div>
+                    ) : (
+                      <select
+                        value={fromTag}
+                        onChange={(e) => setFromTag(e.target.value)}
+                        className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:border-emerald-500 focus:outline-none"
+                      >
+                        <option value="">Auto-detect (previous tag)</option>
+                        {availableTags.map((tag) => (
+                          <option key={tag} value={tag}>{tag}</option>
+                        ))}
+                      </select>
+                    )}
+                    <p className="text-xs text-white/40 mt-1">
+                      Commits between this tag and HEAD will be fetched
+                    </p>
                   </div>
 
                   <div className="flex gap-3 pt-2">

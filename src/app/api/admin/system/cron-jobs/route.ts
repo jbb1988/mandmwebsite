@@ -13,17 +13,27 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    // Get cron jobs with stats using exec_sql RPC (optimized with CTEs)
+    // Get cron jobs with FULL stats (24h AND lifetime) for health monitoring
     const { data: cronData, error: cronError } = await supabase.rpc('exec_sql', {
       sql: `
-        WITH run_stats AS (
+        WITH run_stats_24h AS (
           SELECT
             jobid,
-            COUNT(*) FILTER (WHERE status = 'succeeded' AND start_time > NOW() - INTERVAL '24 hours') as success_24h,
-            COUNT(*) FILTER (WHERE status = 'failed' AND start_time > NOW() - INTERVAL '24 hours') as failed_24h,
+            COUNT(*) FILTER (WHERE status = 'succeeded') as success_24h,
+            COUNT(*) FILTER (WHERE status = 'failed') as failed_24h,
             ROUND(AVG(EXTRACT(EPOCH FROM (end_time - start_time)) * 1000) FILTER (WHERE end_time IS NOT NULL))::int as avg_duration_ms
           FROM cron.job_run_details
-          WHERE start_time > NOW() - INTERVAL '7 days'
+          WHERE start_time > NOW() - INTERVAL '24 hours'
+          GROUP BY jobid
+        ),
+        run_stats_lifetime AS (
+          SELECT
+            jobid,
+            COUNT(*) as total_runs_ever,
+            COUNT(*) FILTER (WHERE status = 'succeeded') as total_success_ever,
+            COUNT(*) FILTER (WHERE status = 'failed') as total_failed_ever,
+            MIN(start_time) as first_run_at
+          FROM cron.job_run_details
           GROUP BY jobid
         ),
         last_runs AS (
@@ -40,16 +50,36 @@ export async function GET(request: NextRequest) {
           j.jobname,
           j.schedule,
           j.active,
-          COALESCE(rs.success_24h, 0)::int as success_24h,
-          COALESCE(rs.failed_24h, 0)::int as failed_24h,
+          COALESCE(rs24.success_24h, 0)::int as success_24h,
+          COALESCE(rs24.failed_24h, 0)::int as failed_24h,
+          COALESCE(rsl.total_runs_ever, 0)::int as total_runs_ever,
+          COALESCE(rsl.total_success_ever, 0)::int as total_success_ever,
+          COALESCE(rsl.total_failed_ever, 0)::int as total_failed_ever,
+          rsl.first_run_at,
           lr.last_run,
           lr.last_status,
           lr.last_message,
-          rs.avg_duration_ms
+          rs24.avg_duration_ms,
+          CASE
+            WHEN NOT j.active THEN 'disabled'
+            WHEN rsl.total_runs_ever IS NULL OR rsl.total_runs_ever = 0 THEN 'never_run'
+            WHEN COALESCE(rs24.failed_24h, 0) > 0 THEN 'has_failures'
+            WHEN lr.last_status = 'failed' THEN 'last_failed'
+            ELSE 'healthy'
+          END as health_status
         FROM cron.job j
-        LEFT JOIN run_stats rs ON rs.jobid = j.jobid
+        LEFT JOIN run_stats_24h rs24 ON rs24.jobid = j.jobid
+        LEFT JOIN run_stats_lifetime rsl ON rsl.jobid = j.jobid
         LEFT JOIN last_runs lr ON lr.jobid = j.jobid
-        ORDER BY j.jobname
+        ORDER BY
+          CASE
+            WHEN NOT j.active THEN 4
+            WHEN rsl.total_runs_ever IS NULL OR rsl.total_runs_ever = 0 THEN 1
+            WHEN COALESCE(rs24.failed_24h, 0) > 0 THEN 2
+            WHEN lr.last_status = 'failed' THEN 3
+            ELSE 5
+          END,
+          j.jobname
       `
     });
 

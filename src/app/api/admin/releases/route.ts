@@ -27,17 +27,70 @@ interface AppRelease {
 
 const GITHUB_REPO = 'jbb1988/mind-muscle';
 
-// Fetch commits from GitHub API
-async function fetchGitHubCommits(since?: string): Promise<{ commits: string[], count: number, latestSha: string }> {
+// Get GitHub API headers
+function getGitHubHeaders(): HeadersInit {
   const token = process.env.GITHUB_TOKEN;
   const headers: HeadersInit = {
     'Accept': 'application/vnd.github.v3+json',
     'User-Agent': 'MindMuscle-Admin',
   };
-
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
+  return headers;
+}
+
+// Get the latest git tags from GitHub
+async function fetchLatestTags(): Promise<{ latest: string | null, previous: string | null }> {
+  const headers = getGitHubHeaders();
+  const response = await fetch(
+    `https://api.github.com/repos/${GITHUB_REPO}/tags?per_page=10`,
+    { headers }
+  );
+
+  if (!response.ok) {
+    console.error('Failed to fetch tags:', response.status);
+    return { latest: null, previous: null };
+  }
+
+  const tags = await response.json();
+  return {
+    latest: tags[0]?.name || null,
+    previous: tags[1]?.name || null,
+  };
+}
+
+// Fetch commits between two refs (tags or SHAs)
+async function fetchCommitsBetweenRefs(base: string, head: string = 'HEAD'): Promise<{ commits: string[], count: number, latestSha: string }> {
+  const headers = getGitHubHeaders();
+  const url = `https://api.github.com/repos/${GITHUB_REPO}/compare/${base}...${head}`;
+
+  const response = await fetch(url, { headers });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('GitHub compare API error:', response.status, errorText);
+    throw new Error(`GitHub API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+
+  // Extract commit messages, skip merge commits
+  const commits = (data.commits || [])
+    .filter((c: any) => !c.commit.message.startsWith('Merge'))
+    .map((c: any) => `- ${c.commit.message.split('\n')[0]}`)
+    .slice(0, 50);
+
+  return {
+    commits,
+    count: commits.length,
+    latestSha: data.commits?.[data.commits.length - 1]?.sha || '',
+  };
+}
+
+// Fetch commits from GitHub API (fallback with since date)
+async function fetchGitHubCommits(since?: string): Promise<{ commits: string[], count: number, latestSha: string }> {
+  const headers = getGitHubHeaders();
 
   // Build URL with optional since parameter
   let url = `https://api.github.com/repos/${GITHUB_REPO}/commits?per_page=100`;
@@ -126,6 +179,32 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { action } = body;
 
+    // GET-TAGS: Get available git tags
+    if (action === 'get-tags') {
+      try {
+        const headers = getGitHubHeaders();
+        const response = await fetch(
+          `https://api.github.com/repos/${GITHUB_REPO}/tags?per_page=20`,
+          { headers }
+        );
+
+        if (!response.ok) {
+          throw new Error(`GitHub API error: ${response.status}`);
+        }
+
+        const tags = await response.json();
+        return NextResponse.json({
+          success: true,
+          tags: tags.map((t: any) => t.name),
+        });
+      } catch (error) {
+        console.error('Failed to fetch tags:', error);
+        return NextResponse.json({
+          error: 'Failed to fetch tags from GitHub',
+        }, { status: 500 });
+      }
+    }
+
     // FETCH-COMMITS: Get commits from GitHub since last release
     if (action === 'fetch-commits') {
       // Get the last published release to find the cutoff
@@ -160,32 +239,46 @@ export async function POST(request: NextRequest) {
 
     // CREATE: Auto-fetch from GitHub and create release
     if (action === 'create') {
-      const { version } = body;
+      const { version, fromTag } = body;
 
       if (!version) {
         return NextResponse.json({ error: 'Version is required' }, { status: 400 });
       }
 
-      // Get the last published release to find the cutoff
-      const { data: lastRelease } = await supabase
-        .from('app_releases')
-        .select('published_at, created_at')
-        .eq('status', 'published')
-        .order('published_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      const sinceDate = lastRelease?.published_at || lastRelease?.created_at;
-
       let raw_notes: string;
       let commit_count: number;
       let commit_sha: string;
+      let usedFromTag: string | null = null;
 
       try {
-        const { commits, count, latestSha } = await fetchGitHubCommits(sinceDate);
-        raw_notes = commits.join('\n') || 'No new commits found';
-        commit_count = count;
-        commit_sha = latestSha;
+        // Strategy: Use tags to get commits
+        // 1. If fromTag provided, use it as the base
+        // 2. Otherwise, find the previous tag automatically
+
+        let baseTag = fromTag;
+
+        if (!baseTag) {
+          // Get the last two tags to find the previous one
+          const { previous } = await fetchLatestTags();
+          baseTag = previous;
+        }
+
+        if (baseTag) {
+          // Fetch commits between the base tag and HEAD
+          const { commits, count, latestSha } = await fetchCommitsBetweenRefs(baseTag, 'HEAD');
+          raw_notes = commits.join('\n') || 'No new commits found';
+          commit_count = count;
+          commit_sha = latestSha;
+          usedFromTag = baseTag;
+        } else {
+          // No previous tag found, get recent commits (last 2 weeks)
+          const twoWeeksAgo = new Date();
+          twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+          const { commits, count, latestSha } = await fetchGitHubCommits(twoWeeksAgo.toISOString());
+          raw_notes = commits.join('\n') || 'No new commits found';
+          commit_count = count;
+          commit_sha = latestSha;
+        }
       } catch (error) {
         console.error('GitHub fetch failed, using placeholder:', error);
         raw_notes = 'Failed to fetch commits from GitHub';

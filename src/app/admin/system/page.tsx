@@ -20,10 +20,15 @@ interface CronJob {
   active: boolean;
   success_24h: number;
   failed_24h: number;
+  total_runs_ever: number;
+  total_success_ever: number;
+  total_failed_ever: number;
+  first_run_at: string | null;
   last_run: string | null;
   last_status: string | null;
   last_message: string | null;
   avg_duration_ms: number | null;
+  health_status: 'healthy' | 'never_run' | 'has_failures' | 'last_failed' | 'disabled';
 }
 
 interface EdgeFunction {
@@ -517,6 +522,15 @@ function hasMissedScheduledRun(job: CronJob): boolean {
   return (now - lastRunTime) > maxAllowedGap;
 }
 
+// ============ HEALTH STATUS CONFIG ============
+const HEALTH_STATUS_CONFIG = {
+  healthy: { label: 'Healthy', color: 'bg-green-500/20 text-green-400', dot: 'bg-green-500', icon: '🟢' },
+  never_run: { label: 'Never Run', color: 'bg-red-500/20 text-red-400', dot: 'bg-red-500', icon: '🔴' },
+  has_failures: { label: 'Has Failures', color: 'bg-yellow-500/20 text-yellow-400', dot: 'bg-yellow-500', icon: '🟡' },
+  last_failed: { label: 'Last Failed', color: 'bg-orange-500/20 text-orange-400', dot: 'bg-orange-500', icon: '🟠' },
+  disabled: { label: 'Disabled', color: 'bg-gray-500/20 text-gray-400', dot: 'bg-gray-500', icon: '⚫' },
+};
+
 // ============ CRON JOBS TAB ============
 function CronJobsTab({
   jobs,
@@ -532,66 +546,75 @@ function CronJobsTab({
   setSearchQuery: (q: string) => void;
 }) {
   const [expandedJob, setExpandedJob] = useState<number | null>(null);
-  const [showFailingOnly, setShowFailingOnly] = useState(false);
+  const [filterStatus, setFilterStatus] = useState<string>('all');
 
-  const failingJobs = jobs.filter(j => j.failed_24h > 0);
-  const missedJobs = jobs.filter(j => j.active && hasMissedScheduledRun(j));
-  const problemJobs = jobs.filter(j => j.failed_24h > 0 || (j.active && hasMissedScheduledRun(j)));
+  // Health status counts
+  const healthCounts = {
+    healthy: jobs.filter(j => j.health_status === 'healthy').length,
+    never_run: jobs.filter(j => j.health_status === 'never_run').length,
+    has_failures: jobs.filter(j => j.health_status === 'has_failures').length,
+    last_failed: jobs.filter(j => j.health_status === 'last_failed').length,
+    disabled: jobs.filter(j => j.health_status === 'disabled').length,
+  };
+  const problemCount = healthCounts.never_run + healthCounts.has_failures + healthCounts.last_failed;
   const activeJobs = jobs.filter(j => j.active);
   const recentFailures = history.filter(h => h.status === 'failed').slice(0, 10);
 
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = job.jobname.toLowerCase().includes(searchQuery.toLowerCase());
-    const hasProblems = job.failed_24h > 0 || (job.active && hasMissedScheduledRun(job));
-    const matchesFailingFilter = !showFailingOnly || hasProblems;
-    return matchesSearch && matchesFailingFilter;
+    const matchesStatusFilter = filterStatus === 'all' || job.health_status === filterStatus;
+    return matchesSearch && matchesStatusFilter;
   });
 
   return (
     <div className="space-y-6">
-      {/* Stats - Clickable */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <div onClick={() => setShowFailingOnly(false)} className="cursor-pointer">
+      {/* Health Status Overview */}
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+        <div onClick={() => setFilterStatus('all')} className={`cursor-pointer rounded-xl transition-all ${filterStatus === 'all' ? 'ring-2 ring-cyan-500' : ''}`}>
           <StatCard label="Total Jobs" value={jobs.length} icon={Clock} />
         </div>
-        <StatCard label="Active" value={activeJobs.length} icon={Play} color="green" />
-        <div
-          onClick={() => setShowFailingOnly(!showFailingOnly)}
-          className={`cursor-pointer rounded-xl transition-all ${showFailingOnly ? 'ring-2 ring-red-500' : ''}`}
-        >
-          <StatCard label="Problems ←Click" value={problemJobs.length} icon={AlertTriangle} color={problemJobs.length > 0 ? 'red' : 'green'} />
+        <div onClick={() => setFilterStatus('healthy')} className={`cursor-pointer rounded-xl transition-all ${filterStatus === 'healthy' ? 'ring-2 ring-green-500' : ''}`}>
+          <StatCard label="🟢 Healthy" value={healthCounts.healthy} icon={CheckCircle2} color="green" />
         </div>
-        <StatCard label="Missed Runs" value={missedJobs.length} icon={Timer} color={missedJobs.length > 0 ? 'red' : 'green'} />
+        <div onClick={() => setFilterStatus('never_run')} className={`cursor-pointer rounded-xl transition-all ${filterStatus === 'never_run' ? 'ring-2 ring-red-500' : ''}`}>
+          <StatCard label="🔴 Never Run" value={healthCounts.never_run} icon={AlertTriangle} color={healthCounts.never_run > 0 ? 'red' : 'green'} />
+        </div>
+        <div onClick={() => setFilterStatus('has_failures')} className={`cursor-pointer rounded-xl transition-all ${filterStatus === 'has_failures' ? 'ring-2 ring-yellow-500' : ''}`}>
+          <StatCard label="🟡 Failures" value={healthCounts.has_failures} icon={XCircle} color={healthCounts.has_failures > 0 ? 'yellow' : 'green'} />
+        </div>
+        <div onClick={() => setFilterStatus('disabled')} className={`cursor-pointer rounded-xl transition-all ${filterStatus === 'disabled' ? 'ring-2 ring-gray-500' : ''}`}>
+          <StatCard label="⚫ Disabled" value={healthCounts.disabled} icon={Pause} color="gray" />
+        </div>
         <StatCard label="Runs (24h)" value={history.length} icon={Activity} />
       </div>
 
       {/* Filter indicator */}
-      {showFailingOnly && (
-        <div className="flex items-center gap-2 p-2 bg-red-500/10 border border-red-500/30 rounded-lg">
-          <AlertTriangle className="w-4 h-4 text-red-400" />
-          <span className="text-red-400 text-sm">Showing jobs with problems (failed or missed scheduled runs)</span>
-          <button onClick={() => setShowFailingOnly(false)} className="ml-auto text-white/60 hover:text-white text-sm">
-            Clear filter
+      {filterStatus !== 'all' && (
+        <div className={`flex items-center gap-2 p-2 ${HEALTH_STATUS_CONFIG[filterStatus as keyof typeof HEALTH_STATUS_CONFIG]?.color || 'bg-white/10'} border border-white/20 rounded-lg`}>
+          <span className="text-sm">Showing: {HEALTH_STATUS_CONFIG[filterStatus as keyof typeof HEALTH_STATUS_CONFIG]?.label || filterStatus}</span>
+          <button onClick={() => setFilterStatus('all')} className="ml-auto text-white/60 hover:text-white text-sm underline">
+            Show all
           </button>
         </div>
       )}
 
-      {/* Missed Jobs Alert - Shows prominently if there are missed scheduled runs */}
-      {missedJobs.length > 0 && (
+      {/* Never Run Alert - Critical issue */}
+      {healthCounts.never_run > 0 && filterStatus === 'all' && (
         <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4">
           <div className="flex items-center gap-2 mb-3">
-            <Timer className="w-5 h-5 text-red-400" />
-            <h3 className="text-red-400 font-semibold">Missed Scheduled Runs ({missedJobs.length})</h3>
+            <AlertTriangle className="w-5 h-5 text-red-400" />
+            <h3 className="text-red-400 font-semibold">🔴 Jobs That Have NEVER Run ({healthCounts.never_run})</h3>
           </div>
+          <p className="text-red-300/80 text-sm mb-3">These cron jobs exist but have never executed. This may indicate a configuration issue.</p>
           <div className="space-y-2 max-h-40 overflow-y-auto">
-            {missedJobs.map((job) => (
+            {jobs.filter(j => j.health_status === 'never_run').map((job) => (
               <div key={job.jobid} className="bg-black/20 rounded-lg p-3">
                 <div className="flex items-center justify-between">
                   <span className="text-white font-medium">{job.jobname}</span>
                   <span className="text-white/40 text-xs font-mono">{job.schedule}</span>
                 </div>
                 <p className="text-red-300/80 text-xs mt-1">
-                  Last run: {job.last_run ? new Date(job.last_run).toLocaleString() : 'Never'}
+                  Status: {job.active ? 'Active but never executed' : 'Disabled'}
                 </p>
               </div>
             ))}
@@ -626,19 +649,27 @@ function CronJobsTab({
         </div>
       )}
 
-      {/* Legend for status colors */}
+      {/* Legend for health status */}
       <div className="flex flex-wrap gap-4 text-xs text-white/60 bg-white/5 rounded-lg p-3">
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-green-500" />
-          <span>Active & on schedule</span>
+          <span>🟢</span>
+          <span>Healthy - Running normally</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-red-500" />
-          <span>Failed or missed scheduled run</span>
+          <span>🔴</span>
+          <span>Never Run - Has never executed</span>
         </div>
         <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-gray-500" />
-          <span>Disabled/Inactive</span>
+          <span>🟡</span>
+          <span>Has Failures - Failed in last 24h</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span>🟠</span>
+          <span>Last Failed - Most recent run failed</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span>⚫</span>
+          <span>Disabled - Job is inactive</span>
         </div>
       </div>
 
@@ -656,34 +687,41 @@ function CronJobsTab({
 
       {/* Jobs List */}
       <div className="space-y-2">
-        {filteredJobs.map((job) => (
+        {filteredJobs.map((job) => {
+          const healthConfig = HEALTH_STATUS_CONFIG[job.health_status] || HEALTH_STATUS_CONFIG.healthy;
+          return (
           <div
             key={job.jobid}
-            className="bg-white/5 border border-white/10 rounded-xl overflow-hidden"
+            className={`bg-white/5 border rounded-xl overflow-hidden ${
+              job.health_status === 'never_run' ? 'border-red-500/30' :
+              job.health_status === 'has_failures' ? 'border-yellow-500/30' :
+              job.health_status === 'last_failed' ? 'border-orange-500/30' :
+              'border-white/10'
+            }`}
           >
             <div
               className="p-4 cursor-pointer hover:bg-white/5 transition-colors"
               onClick={() => setExpandedJob(expandedJob === job.jobid ? null : job.jobid)}
             >
               <div className="flex items-center gap-4">
-                {/* Status indicator */}
-                <div className={`w-2 h-2 rounded-full ${
-                  !job.active ? 'bg-gray-500' :
-                  job.failed_24h > 0 ? 'bg-red-500' :
-                  hasMissedScheduledRun(job) ? 'bg-red-500' :
-                  'bg-green-500'  // Active, no failures, not missed = OK (pg_cron may not track all successes)
-                }`} />
+                {/* Health Status Badge */}
+                <span className={`px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1 ${healthConfig.color}`}>
+                  {healthConfig.icon} {healthConfig.label}
+                </span>
 
                 {/* Name */}
                 <span className="text-white font-medium flex-1">{job.jobname}</span>
 
                 {/* Schedule */}
-                <span className="text-white/40 text-sm font-mono">{job.schedule}</span>
+                <span className="text-white/40 text-sm font-mono hidden md:block">{job.schedule}</span>
 
-                {/* Stats */}
-                <div className="flex items-center gap-4 text-sm">
-                  <span className="text-green-400">{job.success_24h} ✓</span>
-                  <span className={job.failed_24h > 0 ? 'text-red-400' : 'text-white/40'}>
+                {/* Lifetime Stats */}
+                <div className="flex items-center gap-3 text-xs">
+                  <span className="text-white/40" title="Total runs ever">
+                    {job.total_runs_ever} runs
+                  </span>
+                  <span className="text-green-400" title="24h success">{job.success_24h} ✓</span>
+                  <span className={job.failed_24h > 0 ? 'text-red-400' : 'text-white/40'} title="24h failures">
                     {job.failed_24h} ✗
                   </span>
                 </div>
@@ -711,16 +749,20 @@ function CronJobsTab({
 
             {expandedJob === job.jobid && (
               <div className="border-t border-white/10 p-4 bg-white/[0.02]">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+                  <div>
+                    <p className="text-white/40 mb-1">Schedule</p>
+                    <p className="text-white font-mono text-xs">{job.schedule}</p>
+                  </div>
                   <div>
                     <p className="text-white/40 mb-1">Last Run</p>
-                    <p className="text-white">
+                    <p className="text-white text-xs">
                       {job.last_run ? new Date(job.last_run).toLocaleString() : 'Never'}
                     </p>
                   </div>
                   <div>
                     <p className="text-white/40 mb-1">Last Status</p>
-                    <p className={job.last_status === 'succeeded' ? 'text-green-400' : 'text-red-400'}>
+                    <p className={job.last_status === 'succeeded' ? 'text-green-400' : job.last_status === 'failed' ? 'text-red-400' : 'text-white/60'}>
                       {job.last_status || 'N/A'}
                     </p>
                   </div>
@@ -735,15 +777,39 @@ function CronJobsTab({
                     <p className="text-white font-mono">{job.jobid}</p>
                   </div>
                 </div>
+
+                {/* Lifetime Stats Row */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mt-4 pt-4 border-t border-white/10">
+                  <div>
+                    <p className="text-white/40 mb-1">Total Runs (All Time)</p>
+                    <p className="text-white font-bold">{job.total_runs_ever}</p>
+                  </div>
+                  <div>
+                    <p className="text-white/40 mb-1">Total Success</p>
+                    <p className="text-green-400">{job.total_success_ever}</p>
+                  </div>
+                  <div>
+                    <p className="text-white/40 mb-1">Total Failed</p>
+                    <p className={job.total_failed_ever > 0 ? 'text-red-400' : 'text-white/60'}>{job.total_failed_ever}</p>
+                  </div>
+                  <div>
+                    <p className="text-white/40 mb-1">First Run</p>
+                    <p className="text-white text-xs">
+                      {job.first_run_at ? new Date(job.first_run_at).toLocaleDateString() : 'Never'}
+                    </p>
+                  </div>
+                </div>
+
                 {job.last_message && job.last_status === 'failed' && (
                   <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
+                    <p className="text-white/40 text-xs mb-1">Last Error Message</p>
                     <p className="text-red-400 text-sm font-mono break-all">{job.last_message}</p>
                   </div>
                 )}
               </div>
             )}
           </div>
-        ))}
+        )})}
       </div>
 
       {/* Recent History */}

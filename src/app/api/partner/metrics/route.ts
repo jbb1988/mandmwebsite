@@ -122,7 +122,7 @@ export async function POST(request: NextRequest) {
       .from('partner_metrics_cache')
       .select('*')
       .eq('partner_email', email.toLowerCase().trim())
-      .single();
+      .maybeSingle();
 
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
     if (cachedMetrics && new Date(cachedMetrics.updated_at) > fiveMinutesAgo) {
