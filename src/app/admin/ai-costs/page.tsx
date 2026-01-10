@@ -473,6 +473,8 @@ export default function AICostsPage() {
   const [priceTier, setPriceTier] = useState<'base' | 'tier2' | 'tier3' | 'tier4'>('base');
 
   // Use API data for pricing tiers, with fallback
+  // Note: 'monthly' = upfront price / 6 (MRR equivalent for upfront customers)
+  // Actual monthly billing: $15.99, $14.39, $13.59, $12.79 per seat/month
   const PRICING_TIERS = projections?.pricingTiers || {
     base: { label: '1-11 seats', price: 79.00, monthly: 13.17 },
     tier2: { label: '12-120 seats (10% off)', price: 71.10, monthly: 11.85 },

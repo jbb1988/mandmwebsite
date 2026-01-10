@@ -175,7 +175,9 @@ export async function GET(request: NextRequest) {
     const heavyUser6Mo = heavyUserMonthly * 6;
     const heavyUserAnnual = heavyUserMonthly * 12;
 
-    // Pricing tiers (per 6 months)
+    // Pricing tiers (per 6 months) - UPFRONT pricing
+    // Note: 'monthly' = upfront price / 6 (MRR equivalent for upfront customers)
+    // Actual monthly billing option: $15.99, $14.39, $13.59, $12.79 per seat/month
     const pricingTiers = {
       base: { label: '1-11 seats', price: 79.00, monthly: 13.17 },
       tier2: { label: '12-120 seats (10% off)', price: 71.10, monthly: 11.85 },

@@ -94,7 +94,7 @@ export default function ParentGuidePage() {
   const costComparison = [
     { option: 'Private Lesson', cost: '$50-100/hour', access: '1 hour' },
     { option: 'Weekly Lessons (4x)', cost: '$200-400/month', access: '4 hours' },
-    { option: 'Mind & Muscle Pro', cost: '~$10/month', access: '24/7 unlimited', highlight: true },
+    { option: 'Mind & Muscle Pro', cost: '$15.99/mo or $79.99/6mo', access: '24/7 unlimited', highlight: true },
   ];
 
   const faqs: FAQ[] = [
