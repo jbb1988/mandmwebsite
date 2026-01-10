@@ -2101,7 +2101,7 @@ export default function HomePage() {
                           <div className="text-4xl sm:text-5xl font-black text-white line-through decoration-red-500 decoration-4 drop-shadow-[0_0_12px_rgba(239,68,68,0.4)]">
                             $1,100
                           </div>
-                          <div className="text-xs text-gray-400 mt-1">per 6 months</div>
+                          <div className="text-xs text-gray-400 mt-1">per year</div>
                         </div>
                       </div>
                     </div>
@@ -2215,13 +2215,22 @@ export default function HomePage() {
                         <div className="text-right">
                           <div className="relative">
                             <div className="absolute inset-0 bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange blur-3xl opacity-80 animate-pulse" />
-                            <div className="relative flex items-center gap-3">
-                              <div className="text-5xl sm:text-6xl font-black bg-gradient-to-r from-neon-cortex-blue via-mind-primary to-solar-surge-orange bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(14,165,233,0.8)]">
-                                $79
+                            <div className="relative space-y-1">
+                              <div className="flex items-baseline justify-end gap-2">
+                                <span className="text-4xl sm:text-5xl font-black bg-gradient-to-r from-neon-cortex-blue via-mind-primary to-solar-surge-orange bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(14,165,233,0.8)]">
+                                  $15.99
+                                </span>
+                                <span className="text-lg text-text-secondary">/mo</span>
+                              </div>
+                              <div className="flex items-baseline justify-end gap-2">
+                                <span className="text-2xl font-bold text-neon-cortex-green">
+                                  $79.99
+                                </span>
+                                <span className="text-sm text-text-secondary">/6mo</span>
+                                <span className="text-xs bg-neon-cortex-green/20 text-neon-cortex-green px-2 py-0.5 rounded-full font-bold">Save 17%</span>
                               </div>
                             </div>
                           </div>
-                          <div className="text-xs text-text-secondary mt-1 font-semibold">per 6 months</div>
                         </div>
                       </div>
                     </div>
@@ -2300,9 +2309,9 @@ export default function HomePage() {
                             <span className="text-neon-cortex-blue mt-1 font-black">✓</span>
                             <div>
                               <div className="flex items-center gap-2">
-                                <span className="font-black text-white text-xl">$79 per 6 months</span>
+                                <span className="font-black text-white text-xl">$15.99/mo or $79.99/6mo</span>
                               </div>
-                              <div className="text-xs text-text-secondary">Individual License</div>
+                              <div className="text-xs text-text-secondary">Individual License • Save 17% with upfront</div>
                             </div>
                           </li>
                         </ul>
@@ -2328,7 +2337,8 @@ export default function HomePage() {
                     <div className="bg-gradient-to-r from-neon-cortex-blue/20 to-solar-surge-orange/20 border-2 border-neon-cortex-blue/40 rounded-xl px-6 py-3 mb-3 inline-block">
                       <div className="flex items-center gap-3 mb-1">
                         <span className="text-white font-bold">Individual Pro:</span>
-                        <span className="text-3xl font-black bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">$79 per 6 months</span>
+                        <span className="text-2xl font-black bg-gradient-to-r from-neon-cortex-blue to-solar-surge-orange bg-clip-text text-transparent">$15.99/mo</span>
+                        <span className="text-lg text-neon-cortex-green font-bold">or $79.99/6mo (Save 17%)</span>
                       </div>
                     </div>
 
@@ -2430,10 +2440,13 @@ export default function HomePage() {
                 <h3 className="text-4xl md:text-5xl font-black">Pro</h3>
                 <div className="flex flex-col items-end">
                   <div className="flex items-baseline gap-2">
-                    <div className="text-5xl md:text-6xl font-black text-solar-surge-orange drop-shadow-[0_0_24px_rgba(249,115,22,0.6)]">$79</div>
-                    <div className="text-xl md:text-2xl text-text-secondary font-semibold">/6 months</div>
+                    <div className="text-4xl md:text-5xl font-black text-solar-surge-orange drop-shadow-[0_0_24px_rgba(249,115,22,0.6)]">$15.99</div>
+                    <div className="text-lg md:text-xl text-text-secondary font-semibold">/mo</div>
                   </div>
-                  <div className="text-sm text-text-secondary mt-1">Individual License</div>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-lg font-bold text-neon-cortex-green">$79.99/6mo</span>
+                    <span className="text-xs bg-neon-cortex-green/20 text-neon-cortex-green px-2 py-0.5 rounded-full font-bold">Save 17%</span>
+                  </div>
                 </div>
               </div>
               <p className="text-center text-gray-400 italic text-sm mb-4">This is how serious athletes train.</p>
@@ -2454,7 +2467,7 @@ export default function HomePage() {
                   <span className="px-2 py-1 bg-white/5 rounded-lg border border-white/10">AI Coach</span>
                 </div>
                 <p className="text-center text-gray-500 text-xs">Buying separately? <span className="line-through">$300+</span> for 6 months</p>
-                <p className="text-center text-green-400 font-bold text-sm mt-1">Mind & Muscle: $79 — everything integrated</p>
+                <p className="text-center text-green-400 font-bold text-sm mt-1">Mind & Muscle: $15.99/mo or $79.99/6mo — everything integrated</p>
               </div>
 
               {/* Team Licensing Callout */}
@@ -2464,7 +2477,7 @@ export default function HomePage() {
                   <span className="font-bold text-neon-cortex-blue">Team of 12+?</span>
                 </div>
                 <p className="text-sm text-text-secondary mb-2">
-                  Save up to 20% with team licensing — as low as $63.20/seat per 6 months
+                  Volume discounts up to 20% off — as low as $12.79/seat/mo or $63.20/seat upfront
                 </p>
                 <Link
                   href="/team-licensing"

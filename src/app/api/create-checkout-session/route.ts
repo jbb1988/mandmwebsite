@@ -186,18 +186,19 @@ export async function POST(request: NextRequest) {
         pricePerSeat = baseMonthlyPrice;
       }
     } else {
-      // Upfront billing: 6-month pricing at $79.99/seat with volume discounts
-      const basePrice = 79.99;
+      // Upfront billing: 6-month pricing with volume discounts (based on $79 team rate)
+      const basePrice = 79.99; // Individual price
+      const teamBasePrice = 79.00; // Team discount base
 
       if (seatCount >= 200) {
         discountPercentage = 20;
-        pricePerSeat = 63.99; // $79.99 × 0.80
+        pricePerSeat = 63.20; // $79 × 0.80
       } else if (seatCount >= 121) {
         discountPercentage = 15;
-        pricePerSeat = 67.99; // $79.99 × 0.85
+        pricePerSeat = 67.15; // $79 × 0.85
       } else if (seatCount >= 12) {
         discountPercentage = 10;
-        pricePerSeat = 71.99; // $79.99 × 0.90
+        pricePerSeat = 71.10; // $79 × 0.90
       } else {
         // 1-11 users: no discount
         discountPercentage = 0;

@@ -1338,7 +1338,7 @@ function TeamLicensingContent() {
             Team licenses reduce per-athlete cost as your roster grows — while maintaining a consistent development standard.
           </p>
           <p className="text-sm text-text-secondary/70 max-w-3xl mx-auto mt-4">
-            1-11 users: $79/seat • 12-119 users: 10% off • 120-199 users: 15% off • 200+ users: 20% off
+            Monthly: $15.99/mo • Upfront: $79.99/6mo (Save 17%) • Volume discounts: 10-20% off for teams of 12+
           </p>
         </div>
 
@@ -1391,10 +1391,13 @@ function TeamLicensingContent() {
               <h3 className="text-4xl md:text-5xl font-black">Pro</h3>
               <div className="flex flex-col items-end">
                 <div className="flex items-baseline gap-2">
-                  <div className="text-5xl md:text-6xl font-black text-solar-surge-orange drop-shadow-[0_0_24px_rgba(249,115,22,0.6)]">$79</div>
-                  <div className="text-xl md:text-2xl text-text-secondary font-semibold">/6 months</div>
+                  <div className="text-4xl md:text-5xl font-black text-solar-surge-orange drop-shadow-[0_0_24px_rgba(249,115,22,0.6)]">$15.99</div>
+                  <div className="text-lg md:text-xl text-text-secondary font-semibold">/mo</div>
                 </div>
-                <div className="text-sm text-text-secondary mt-1">Individual License</div>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-lg font-bold text-neon-cortex-green">$79.99/6mo</span>
+                  <span className="text-xs bg-neon-cortex-green/20 text-neon-cortex-green px-2 py-0.5 rounded-full font-bold">Save 17%</span>
+                </div>
               </div>
             </div>
 
@@ -1402,29 +1405,38 @@ function TeamLicensingContent() {
             <div className="mb-6 p-4 rounded-xl bg-gradient-to-br from-neon-cortex-blue/20 via-solar-surge-orange/10 to-transparent border-2 border-neon-cortex-blue/40">
               <div className="flex items-center gap-2 mb-2">
                 <TrendingUp className="w-5 h-5 text-neon-cortex-blue" />
-                <span className="font-bold text-neon-cortex-blue">Team Discount Pricing:</span>
+                <span className="font-bold text-neon-cortex-blue">Team Pricing (per seat):</span>
               </div>
-              <div className="space-y-1 text-sm">
-                <div className="flex justify-between items-center">
-                  <span className="text-text-secondary">1-11 seats:</span>
-                  <span className="font-bold text-white">$79/seat</span>
+              <div className="space-y-2 text-sm">
+                <div className="grid grid-cols-3 gap-2 text-xs text-text-secondary border-b border-white/10 pb-2">
+                  <span></span>
+                  <span className="text-center">Monthly</span>
+                  <span className="text-center text-neon-cortex-green">Upfront (Save 17%)</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-text-secondary">12-119 seats:</span>
-                  <span className="font-bold text-neon-cortex-green">$71.10/seat (10% off)</span>
+                <div className="grid grid-cols-3 gap-2 items-center">
+                  <span className="text-text-secondary">Individual:</span>
+                  <span className="text-center text-white">$15.99/mo</span>
+                  <span className="text-center font-bold text-neon-cortex-green">$79.99</span>
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-text-secondary">120-199 seats:</span>
-                  <span className="font-bold text-neon-cortex-green">$67.15/seat (15% off)</span>
+                <div className="grid grid-cols-3 gap-2 items-center">
+                  <span className="text-text-secondary">12-120 seats:</span>
+                  <span className="text-center text-white">$14.39/mo</span>
+                  <span className="text-center font-bold text-neon-cortex-green">$71.10</span>
                 </div>
-                <div className="flex justify-between items-center">
+                <div className="grid grid-cols-3 gap-2 items-center">
+                  <span className="text-text-secondary">121-199 seats:</span>
+                  <span className="text-center text-white">$13.59/mo</span>
+                  <span className="text-center font-bold text-neon-cortex-green">$67.15</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 items-center">
                   <span className="text-text-secondary">200+ seats:</span>
-                  <span className="font-bold text-neon-cortex-green">$63.20/seat (20% off)</span>
+                  <span className="text-center text-white">$12.79/mo</span>
+                  <span className="text-center font-bold text-neon-cortex-green">$63.20</span>
                 </div>
               </div>
               <div className="mt-3 pt-3 border-t border-white/10">
                 <p className="text-xs text-text-secondary">
-                  💡 Use the calculator above to see your team's exact pricing
+                  💡 Monthly requires 6-month commitment. Upfront = one payment for 6 months.
                 </p>
               </div>
             </div>
