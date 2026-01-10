@@ -75,7 +75,7 @@ export default function PlaybookPage() {
     },
     {
       question: 'When parents ask: "Do we have to pay for this?"',
-      answer: 'The Vault and AI analysis tools require a Pro subscription ($79/6 months). Athletes get full access to assigned drills, AI swing analysis, and all training features. It\'s a fraction of one lesson cost and covers half the season.'
+      answer: 'The Vault and AI analysis tools require a Pro subscription—$15.99/month or $79.99/6 months (save 17%). Athletes get full access to assigned drills, AI swing analysis, and all training features. It\'s a fraction of one lesson cost and covers half the season.'
     },
     {
       question: 'When parents ask: "Does this replace lessons?"',

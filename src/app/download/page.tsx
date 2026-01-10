@@ -203,9 +203,9 @@ export default function DownloadPage() {
             <div className="text-center">
               <p className="text-gray-500 text-sm mb-2">Buying separately? <span className="line-through text-gray-600">$300+</span> for 6 months</p>
               <p className="text-green-400 font-black text-2xl">
-                Mind & Muscle: <span className="text-white">$79</span> — everything integrated
+                Mind & Muscle: <span className="text-white">$15.99/mo</span> or <span className="text-white">$79.99/6mo</span> — everything integrated
               </p>
-              <p className="text-gray-400 text-sm mt-1">That&apos;s $13.17/month — less than ONE hitting lesson</p>
+              <p className="text-gray-400 text-sm mt-1">Save 17% with upfront payment — less than ONE hitting lesson</p>
             </div>
           </div>
         </FadeInWhenVisible>

@@ -89,7 +89,7 @@ export const PAGE_SEO: Record<string, PageSEO> = {
 
   'team-licensing': {
     title: 'Team Licensing | Volume Discounts for Baseball & Softball Teams - Mind & Muscle',
-    description: 'Team licensing for baseball and softball organizations. Volume discounts from $79 to $63.20 per seat (6-month licensing). Give your entire team access to AI mental training, strength coaching, and game IQ development.',
+    description: 'Team licensing for baseball and softball organizations. Pay monthly ($12.79-$14.39/seat/mo) or upfront ($63.20-$71.10/seat) and save 17%. Give your entire team access to AI mental training, strength coaching, and game IQ development.',
     keywords: [
       'team training software',
       'baseball team management app',
@@ -101,7 +101,7 @@ export const PAGE_SEO: Record<string, PageSEO> = {
       'team volume discounts',
     ],
     ogTitle: 'Team Licensing | Train Your Entire Team with Mind & Muscle',
-    ogDescription: 'Volume discounts for baseball and softball teams. $79-$63.20 per seat. AI coaches for every player on your roster.',
+    ogDescription: 'Volume discounts for baseball and softball teams. Monthly or upfront pricing. As low as $12.79/seat/mo. AI coaches for every player.',
     ogImage: `${SITE_CONFIG.url}/assets/images/og-image.png`,
   },
 

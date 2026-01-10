@@ -1199,13 +1199,13 @@ function TeamLicensingContent() {
 
             <div className="space-y-3 mb-8">
               {[
-                { app: 'Team communication platform', cost: '$600/yr' },
-                { app: 'Mental performance training', cost: '$360/yr' },
-                { app: 'Video swing analysis', cost: '$600/yr' },
-                { app: 'Strength & conditioning', cost: '$240/yr' },
-                { app: 'Nutrition planning', cost: '$360/yr' },
-                { app: 'Baseball IQ development', cost: '$300/yr' },
-                { app: 'Goal tracking system', cost: '$180/yr' },
+                { app: 'Team communication platform', cost: '$50/mo' },
+                { app: 'Mental performance training', cost: '$30/mo' },
+                { app: 'Video swing analysis', cost: '$50/mo' },
+                { app: 'Strength & conditioning', cost: '$20/mo' },
+                { app: 'Nutrition planning', cost: '$30/mo' },
+                { app: 'Baseball IQ development', cost: '$25/mo' },
+                { app: 'Goal tracking system', cost: '$15/mo' },
               ].map((item, i) => (
                 <div key={i} className="flex items-start justify-between gap-4 p-3 rounded-lg bg-red-500/5 border border-red-500/20">
                   <div className="flex items-start gap-2">

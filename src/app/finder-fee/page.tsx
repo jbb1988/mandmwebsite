@@ -218,9 +218,9 @@ export default function FinderFeePage() {
                   Pricing transparency
                 </h3>
                 <ul className="text-gray-400 space-y-2">
-                  <li className="flex items-center gap-2"><Clock className="w-4 h-4 text-blue-400" /> 6-month license: $6,715 (unlimited users)</li>
-                  <li className="flex items-center gap-2"><Clock className="w-4 h-4 text-blue-400" /> Annual license: $13,430 (save $6,715)</li>
-                  <li className="flex items-center gap-2"><Building2 className="w-4 h-4 text-purple-400" /> Enterprise: Custom pricing for 200+ athletes</li>
+                  <li className="flex items-center gap-2"><Clock className="w-4 h-4 text-blue-400" /> Per seat pricing: $63.20-$71.10 upfront (6mo)</li>
+                  <li className="flex items-center gap-2"><Clock className="w-4 h-4 text-blue-400" /> Monthly option: $12.79-$14.39/seat/mo (6mo commitment)</li>
+                  <li className="flex items-center gap-2"><Building2 className="w-4 h-4 text-purple-400" /> Volume discounts: 10-20% off for 12+ seats</li>
                 </ul>
               </LiquidGlass>
             </div>

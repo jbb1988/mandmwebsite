@@ -10,7 +10,7 @@ export const TOP_FAQS = [
   },
   {
     question: 'What makes Mind & Muscle different from other baseball apps?',
-    answer: 'Mind & Muscle replaces 10+ separate apps with one integrated platform built exclusively for baseball and softball. Team chat, video analysis, drills, mental training, nutrition, goals, game IQ, arm care, sound engineering, AI coaching—all connected by a single AI that learns how you train. Plus, we\'re the ONLY app with AI arm health monitoring for pitchers—analysis that typically costs $200/session at biomechanics labs. All for $13.17/month.',
+    answer: 'Mind & Muscle replaces 10+ separate apps with one integrated platform built exclusively for baseball and softball. Team chat, video analysis, drills, mental training, nutrition, goals, game IQ, arm care, sound engineering, AI coaching—all connected by a single AI that learns how you train. Plus, we\'re the ONLY app with AI arm health monitoring for pitchers—analysis that typically costs $200/session at biomechanics labs. All for $15.99/month or $79.99/6mo (save 17%).',
   },
   {
     question: 'Why use Mind & Muscle instead of a team chat app?',
@@ -34,7 +34,7 @@ export const TOP_FAQS = [
   },
   {
     question: 'How much does Mind & Muscle cost?',
-    answer: 'Individual subscription: $79.99 for 6 months, or $15.99/month with a 6-month commitment. Team licensing with volume discounts: Pay upfront and save 17% ($71.99-$63.99/seat) or pay monthly ($14.39-$12.79/seat/month) with a 6-month commitment. Perfect for seasonal sports!',
+    answer: 'Individual subscription: $79.99 for 6 months, or $15.99/month with a 6-month commitment. Team licensing with volume discounts: Pay upfront and save 17% ($71.10-$63.20/seat) or pay monthly ($14.39-$12.79/seat/month) with a 6-month commitment. Perfect for seasonal sports!',
   },
   {
     question: 'What is included in Premium access?',
