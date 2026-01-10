@@ -34,7 +34,7 @@ export const TOP_FAQS = [
   },
   {
     question: 'How much does Mind & Muscle cost?',
-    answer: 'Individual subscription: $79 for 6 months. Team licensing with volume discounts: $71.10 (12-119 seats), $67.15 (120-199 seats), $63.20 (200+ seats) per seat for 6 months. Perfect for seasonal sports!',
+    answer: 'Individual subscription: $79.99 for 6 months, or $15.99/month with a 6-month commitment. Team licensing with volume discounts: Pay upfront and save 17% ($71.99-$63.99/seat) or pay monthly ($14.39-$12.79/seat/month) with a 6-month commitment. Perfect for seasonal sports!',
   },
   {
     question: 'What is included in Premium access?',
@@ -42,7 +42,7 @@ export const TOP_FAQS = [
   },
   {
     question: 'Can I cancel anytime?',
-    answer: 'Yes, you can cancel anytime by emailing support@mindandmuscle.ai. Your team keeps Premium access until the end of your paid period. We offer a 30-day money-back guarantee for new customers.',
+    answer: 'Individual subscriptions can be cancelled anytime through your app store settings. For team licensing, the 6-month commitment period must complete before cancellation. Your team keeps Premium access until the end of your paid period. We offer a 30-day money-back guarantee for new customers. Contact support@mindandmuscle.ai for assistance.',
   },
   {
     question: 'How do I get support?',

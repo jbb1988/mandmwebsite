@@ -78,10 +78,14 @@ export const partnerApplicationSchema = z.object({
   turnstileToken: z.string().min(1, 'CAPTCHA verification required'),
 });
 
+// Billing type enum for checkout
+export const billingTypeSchema = z.enum(['upfront', 'monthly']).default('upfront');
+
 // Checkout session schema
 export const checkoutSessionSchema = z.object({
   seatCount: seatCountSchema,
   email: emailSchema,
+  billingType: billingTypeSchema, // 'upfront' or 'monthly'
   testMode: z.boolean().optional(),
   toltReferral: z.string().max(100).trim().optional(),
   finderCode: z.string().max(100).trim().optional(),

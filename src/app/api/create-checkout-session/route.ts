@@ -90,12 +90,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { 
-      seatCount, 
-      email, 
-      testMode, 
-      toltReferral, 
-      finderCode, 
+    const {
+      seatCount,
+      email,
+      billingType,
+      testMode,
+      toltReferral,
+      finderCode,
       promoCode,
       utmSource,
       utmMedium,
@@ -105,6 +106,8 @@ export async function POST(request: NextRequest) {
       numberOfTeams,
       seatsPerTeam,
     } = validationResult.data;
+
+    const isMonthlyBilling = billingType === 'monthly';
 
     // Validate promo code if provided
     let promoDiscount = 0;
@@ -164,31 +167,72 @@ export async function POST(request: NextRequest) {
       // Test mode: $1.00 total (not per seat)
       pricePerSeat = 1.00 / seatCount; // Divide $1 by seat count
       discountPercentage = 0;
-    } else {
-      // Production mode: 6-month pricing at $79/seat
-      const basePrice = 79;
+    } else if (isMonthlyBilling) {
+      // Monthly billing: $15.99/mo base with volume discounts
+      const baseMonthlyPrice = 15.99;
 
       if (seatCount >= 200) {
         discountPercentage = 20;
-        pricePerSeat = 63.20; // $79 - 20%
-      } else if (seatCount >= 120) {
+        pricePerSeat = 12.79; // $15.99 × 0.80
+      } else if (seatCount >= 121) {
         discountPercentage = 15;
-        pricePerSeat = 67.15; // $79 - 15%
+        pricePerSeat = 13.59; // $15.99 × 0.85
       } else if (seatCount >= 12) {
         discountPercentage = 10;
-        pricePerSeat = 71.10; // $79 - 10%
+        pricePerSeat = 14.39; // $15.99 × 0.90
       } else {
         // 1-11 users: no discount
         discountPercentage = 0;
-        pricePerSeat = 79.00;
+        pricePerSeat = baseMonthlyPrice;
+      }
+    } else {
+      // Upfront billing: 6-month pricing at $79.99/seat with volume discounts
+      const basePrice = 79.99;
+
+      if (seatCount >= 200) {
+        discountPercentage = 20;
+        pricePerSeat = 63.99; // $79.99 × 0.80
+      } else if (seatCount >= 121) {
+        discountPercentage = 15;
+        pricePerSeat = 67.99; // $79.99 × 0.85
+      } else if (seatCount >= 12) {
+        discountPercentage = 10;
+        pricePerSeat = 71.99; // $79.99 × 0.90
+      } else {
+        // 1-11 users: no discount
+        discountPercentage = 0;
+        pricePerSeat = basePrice;
       }
     }
 
     const totalAmount = Math.round(pricePerSeat * seatCount * 100); // Convert to cents
 
+    // For monthly billing, calculate cancel_at date (6 months from now)
+    // This enforces the 6-month commitment
+    const cancelAt = isMonthlyBilling
+      ? Math.floor(Date.now() / 1000) + (6 * 30 * 24 * 60 * 60) // ~6 months in seconds
+      : undefined;
+
     // Generate unique coach and team codes
     const coachCode = generateCoachCode();
     const teamCode = generateTeamCode();
+
+    // Build product name and description based on billing type
+    const getProductName = () => {
+      if (testMode) return `[TEST] Mind and Muscle Team License`;
+      if (isMonthlyBilling) {
+        return `Mind and Muscle Team License - Monthly${discountPercentage > 0 ? ` (${discountPercentage}% discount)` : ''}`;
+      }
+      return `Mind and Muscle Team License - 6 Months${discountPercentage > 0 ? ` (${discountPercentage}% discount)` : ''}`;
+    };
+
+    const getProductDescription = () => {
+      if (testMode) return `TEST: ${seatCount} seats at $${pricePerSeat.toFixed(2)}/seat`;
+      if (isMonthlyBilling) {
+        return `Monthly team license for ${seatCount} seats at $${pricePerSeat.toFixed(2)}/seat/month (6-month commitment) - Unlock Premium for your entire team with AI-powered training, advanced analytics, and personalized coaching.`;
+      }
+      return `6-month seasonal team license for ${seatCount} seats at $${pricePerSeat.toFixed(2)}/seat - Unlock Premium for your entire team with AI-powered training, advanced analytics, and personalized coaching.`;
+    };
 
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
@@ -198,19 +242,14 @@ export async function POST(request: NextRequest) {
           price_data: {
             currency: 'usd',
             product_data: {
-              name: testMode
-                ? `[TEST] Mind and Muscle Team License`
-                : `Mind and Muscle Team License - 6 Months${discountPercentage > 0 ? ` (${discountPercentage}% discount)` : ''}`,
-              description: testMode
-                ? `TEST: ${seatCount} seats at $${pricePerSeat.toFixed(2)}/seat`
-                : `6-month seasonal team license for ${seatCount} seats at $${pricePerSeat.toFixed(2)}/seat - Unlock Premium for your entire team with AI-powered training, advanced analytics, and personalized coaching.`,
+              name: getProductName(),
+              description: getProductDescription(),
               images: ['https://mindandmuscle.ai/assets/images/logo.png'],
             },
             unit_amount: Math.round(pricePerSeat * 100), // Price per seat in cents
-            recurring: {
-              interval: 'month',
-              interval_count: 6,
-            },
+            recurring: isMonthlyBilling
+              ? { interval: 'month', interval_count: 1 } // Monthly billing
+              : { interval: 'month', interval_count: 6 }, // 6-month upfront billing
           },
           quantity: seatCount,
         },
@@ -225,7 +264,9 @@ export async function POST(request: NextRequest) {
       },
       custom_text: {
         submit: {
-          message: 'Your team will receive Premium access immediately after purchase.',
+          message: isMonthlyBilling
+            ? 'Your team will receive Premium access immediately. You\'re committing to 6 monthly payments.'
+            : 'Your team will receive Premium access immediately after purchase.',
         },
         terms_of_service_acceptance: {
           message: 'I agree to the [Terms of Service](https://mindandmuscle.ai/support#terms) and [Privacy Policy](https://mindandmuscle.ai/support#privacy)',
@@ -241,6 +282,7 @@ export async function POST(request: NextRequest) {
       ...(stripeCouponId && { discounts: [{ coupon: stripeCouponId }] }),
       metadata: {
         seat_count: seatCount.toString(),
+        billing_type: billingType,
         discount_percentage: discountPercentage.toString(),
         price_per_seat: pricePerSeat.toString(),
         coach_code: coachCode,
@@ -252,16 +294,17 @@ export async function POST(request: NextRequest) {
         ...(utmSource && { utm_source: utmSource }),
         ...(utmMedium && { utm_medium: utmMedium }),
         ...(utmCampaign && { utm_campaign: utmCampaign }),
-      ...(isMultiTeamOrg && {
-        is_multi_team_org: 'true',
-        organization_name: organizationName,
-        number_of_teams: numberOfTeams?.toString() || '0',
-        seats_per_team: seatsPerTeam ? JSON.stringify(seatsPerTeam) : '',
-      }),
+        ...(isMultiTeamOrg && {
+          is_multi_team_org: 'true',
+          organization_name: organizationName,
+          number_of_teams: numberOfTeams?.toString() || '0',
+          seats_per_team: seatsPerTeam ? JSON.stringify(seatsPerTeam) : '',
+        }),
       },
       subscription_data: {
         metadata: {
           seat_count: seatCount.toString(),
+          billing_type: billingType,
           discount_percentage: discountPercentage.toString(),
           price_per_seat: pricePerSeat.toString(),
           coach_code: coachCode,
@@ -274,6 +317,9 @@ export async function POST(request: NextRequest) {
           ...(utmMedium && { utm_medium: utmMedium }),
           ...(utmCampaign && { utm_campaign: utmCampaign }),
         },
+        // For monthly billing, set cancel_at to enforce 6-month commitment
+        // The subscription will automatically end after 6 months
+        ...(cancelAt && { cancel_at: cancelAt }),
       },
     });
 

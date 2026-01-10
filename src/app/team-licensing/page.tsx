@@ -45,6 +45,9 @@ function TeamLicensingContent() {
   const [numberOfTeams, setNumberOfTeams] = useState(2);
   const [seatsPerTeam, setSeatsPerTeam] = useState<number[]>([0, 0]); // Array of seats for each team
 
+  // Billing type: 'upfront' (6-month) or 'monthly' (pay monthly with 6-month commitment)
+  const [billingType, setBillingType] = useState<'upfront' | 'monthly'>('monthly');
+
   // Sync teamMode with isMultiTeamOrg for backwards compatibility
   useEffect(() => {
     if (teamMode === 'multi') {
@@ -76,45 +79,60 @@ function TeamLicensingContent() {
     }
   }, [searchParams]);
 
-  // Calculate pricing based on seat count
-  const calculatePricing = (seats: number) => {
-    // 6-month pricing
-    const basePrice = 79; // 6-month price
-    const originalPrice = 79; // No "original" price for 6-month
+  // Calculate pricing based on seat count and billing type
+  const calculatePricing = (seats: number, billing: 'upfront' | 'monthly') => {
+    // Base prices
+    const upfrontBasePrice = 79.99; // 6-month upfront price
+    const monthlyBasePrice = 15.99; // Monthly price
+    const isMonthly = billing === 'monthly';
+
     let volumeDiscount = 0;
     let volumeDiscountLabel = '';
 
     if (seats >= 200) {
       volumeDiscount = 0.20;
       volumeDiscountLabel = '20% League Discount';
-    } else if (seats >= 120) {
+    } else if (seats >= 121) {
       volumeDiscount = 0.15;
       volumeDiscountLabel = '15% Organization Discount';
     } else if (seats >= 12) {
       volumeDiscount = 0.10;
       volumeDiscountLabel = '10% Team Discount';
     }
-    // 1-11 users: no discount (stays at $79)
 
-    // Apply volume discount first
-    const priceAfterVolumeDiscount = basePrice * (1 - volumeDiscount);
-    
+    // Apply volume discount
+    const priceAfterVolumeDiscount = isMonthly
+      ? monthlyBasePrice * (1 - volumeDiscount)
+      : upfrontBasePrice * (1 - volumeDiscount);
+
     // Apply promo code discount on top of volume discount if valid
     const promoDiscount = promoValidation?.valid ? (promoValidation.discount_percent || 0) / 100 : 0;
     const pricePerSeat = priceAfterVolumeDiscount * (1 - promoDiscount);
-    
-    const totalPrice = pricePerSeat * seats;
+
+    // For monthly, show per-month price; for upfront, show 6-month total per seat
+    const totalPrice = isMonthly
+      ? pricePerSeat * seats // Monthly total (per month)
+      : pricePerSeat * seats; // Upfront total (6 months)
+
+    // Calculate 6-month totals for comparison
+    const monthlyTotal6Months = (monthlyBasePrice * (1 - volumeDiscount)) * seats * 6;
+    const upfrontTotal = (upfrontBasePrice * (1 - volumeDiscount)) * seats;
+
+    // Savings from choosing upfront over monthly
+    const upfrontSavingsPercent = Math.round(((monthlyTotal6Months - upfrontTotal) / monthlyTotal6Months) * 100);
+    const upfrontSavingsAmount = monthlyTotal6Months - upfrontTotal;
+
     const totalBeforePromo = priceAfterVolumeDiscount * seats;
-    const individualTotal = basePrice * seats;
-    const volumeSavings = individualTotal - totalBeforePromo;
+    const baseTotal = isMonthly ? monthlyBasePrice * seats : upfrontBasePrice * seats;
+    const volumeSavings = baseTotal - totalBeforePromo;
     const promoSavings = totalBeforePromo - totalPrice;
-    const totalSavings = individualTotal - totalPrice;
+    const totalSavings = baseTotal - totalPrice;
 
     return {
       pricePerSeat: pricePerSeat.toFixed(2),
       totalPrice: totalPrice.toFixed(2),
       totalBeforePromo: totalBeforePromo.toFixed(2),
-      individualTotal: individualTotal.toFixed(2),
+      individualTotal: baseTotal.toFixed(2),
       savings: totalSavings.toFixed(2),
       volumeSavings: volumeSavings.toFixed(2),
       promoSavings: promoSavings.toFixed(2),
@@ -122,10 +140,15 @@ function TeamLicensingContent() {
       discountPercent: Math.round(volumeDiscount * 100),
       promoDiscountPercent: Math.round(promoDiscount * 100),
       hasPromo: promoValidation?.valid || false,
+      isMonthly,
+      upfrontSavingsPercent,
+      upfrontSavingsAmount: upfrontSavingsAmount.toFixed(2),
+      monthlyTotal6Months: monthlyTotal6Months.toFixed(2),
+      upfrontTotal: upfrontTotal.toFixed(2),
     };
   };
 
-  const pricing = calculatePricing(seatCount);
+  const pricing = calculatePricing(seatCount, billingType);
 
   const handleValidatePromo = async () => {
     if (!promoCode.trim()) {
@@ -243,6 +266,7 @@ function TeamLicensingContent() {
         body: JSON.stringify({
           seatCount,
           email,
+          billingType,
           ...(toltReferral && { toltReferral }),
           ...(finderCode && { finderCode }),
           ...(promoValidation?.valid && promoCode && { promoCode: promoCode.toUpperCase() }),
@@ -870,13 +894,62 @@ function TeamLicensingContent() {
                 )}
               </div>
 
+              {/* Payment Option Toggle */}
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-sm font-semibold text-starlight-white">Payment Option</span>
+                  {billingType === 'upfront' && (
+                    <span className="text-xs font-bold text-neon-cortex-green bg-neon-cortex-green/20 px-2 py-1 rounded-full">
+                      Save {pricing.upfrontSavingsPercent}%
+                    </span>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={() => setBillingType('monthly')}
+                    className={`p-4 rounded-xl border-2 transition-all ${
+                      billingType === 'monthly'
+                        ? 'border-solar-surge-orange bg-solar-surge-orange/20 shadow-[0_0_20px_rgba(249,115,22,0.3)]'
+                        : 'border-white/20 bg-white/5 hover:border-white/40'
+                    }`}
+                  >
+                    <div className="text-left">
+                      <div className="text-sm font-semibold text-starlight-white mb-1">Monthly</div>
+                      <div className="text-xs text-text-secondary">6-month commitment</div>
+                      <div className="text-lg font-bold text-solar-surge-orange mt-2">
+                        ${calculatePricing(seatCount, 'monthly').pricePerSeat}/mo
+                      </div>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => setBillingType('upfront')}
+                    className={`p-4 rounded-xl border-2 transition-all relative ${
+                      billingType === 'upfront'
+                        ? 'border-neon-cortex-green bg-neon-cortex-green/20 shadow-[0_0_20px_rgba(34,197,94,0.3)]'
+                        : 'border-white/20 bg-white/5 hover:border-white/40'
+                    }`}
+                  >
+                    <div className="absolute -top-2 -right-2 bg-neon-cortex-green text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                      BEST VALUE
+                    </div>
+                    <div className="text-left">
+                      <div className="text-sm font-semibold text-starlight-white mb-1">Pay Upfront</div>
+                      <div className="text-xs text-text-secondary">One payment for 6 months</div>
+                      <div className="text-lg font-bold text-neon-cortex-green mt-2">
+                        ${calculatePricing(seatCount, 'upfront').pricePerSeat}/seat
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
               {/* Pricing Breakdown - Cleaner Design */}
               <div className="space-y-6 mb-8">
                   <div className="flex items-baseline justify-between">
                     <span className="text-xl font-semibold">Per User:</span>
                     <div className="flex items-baseline gap-2">
                       <span className="text-5xl font-black text-solar-surge-orange drop-shadow-[0_0_24px_rgba(249,115,22,0.6)]">${pricing.pricePerSeat}</span>
-                      <span className="text-xl text-text-secondary">/6 months</span>
+                      <span className="text-xl text-text-secondary">{pricing.isMonthly ? '/month' : '/6 months'}</span>
                     </div>
                   </div>
 
@@ -890,13 +963,27 @@ function TeamLicensingContent() {
 
                   <div>
                     <div className="flex items-baseline justify-between mb-2">
-                      <span className="text-2xl font-bold">Total:</span>
+                      <span className="text-2xl font-bold">{pricing.isMonthly ? 'Monthly Total:' : 'Total:'}</span>
                       <span className="text-6xl font-black text-solar-surge-orange drop-shadow-[0_0_32px_rgba(249,115,22,0.6)]">${pricing.totalPrice}</span>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm text-text-secondary">for {seatCount} users for 6 months</p>
+                      <p className="text-sm text-text-secondary">
+                        {pricing.isMonthly
+                          ? `${seatCount} users × $${pricing.pricePerSeat}/mo × 6 months = $${pricing.monthlyTotal6Months} total`
+                          : `for ${seatCount} users for 6 months`
+                        }
+                      </p>
                     </div>
                   </div>
+
+                {/* Show savings comparison for monthly billing */}
+                {pricing.isMonthly && Number(pricing.upfrontSavingsAmount) > 0 && (
+                  <div className="bg-neon-cortex-green/10 rounded-lg p-3 border border-neon-cortex-green/30">
+                    <p className="text-sm text-neon-cortex-green font-semibold">
+                      💡 Switch to upfront and save ${pricing.upfrontSavingsAmount} ({pricing.upfrontSavingsPercent}% off)
+                    </p>
+                  </div>
+                )}
 
                 <div className="pt-4 border-t border-white/20">
                   <p className="text-sm text-text-secondary mb-1">
